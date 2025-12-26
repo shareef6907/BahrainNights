@@ -1,0 +1,105 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700;800;900&family=IBM+Plex+Sans+Arabic:wght@400;500;700&display=swap');
+@import "tailwindcss";
+
+@theme {
+  /* Colors */
+  --color-night-black: #0A0A0F;
+  --color-midnight-blue: #1A1A2E;
+  --color-soft-white: #F8F9FA;
+  --color-electric-gold: #FFD700;
+  --color-royal-purple: #6B46C1;
+  --color-neon-cyan: #00F5FF;
+
+  /* Light Mode Colors */
+  --color-pearl-white: #FFFFFF;
+  --color-cloud-gray: #F7F8FA;
+  --color-slate-text: #1A202C;
+  --color-warm-gold: #C4A052;
+  --color-cool-blue: #4A5FE8;
+
+  /* Fonts */
+  --font-inter: 'Inter', ui-sans-serif, system-ui, sans-serif;
+  --font-arabic: 'IBM Plex Sans Arabic', sans-serif;
+}
+
+:root {
+  --background: var(--color-night-black);
+  --foreground: var(--color-soft-white);
+
+  /* Gradients */
+  --gradient-hero: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  --gradient-card: linear-gradient(135deg, rgba(102, 126, 234, 0.1) 0%, rgba(118, 75, 162, 0.1) 100%);
+  --gradient-cta: linear-gradient(135deg, #FFD700 0%, #FFA500 100%);
+
+  /* Glass Morphism */
+  --glass-bg: rgba(255, 255, 255, 0.05);
+  --glass-border: rgba(255, 255, 255, 0.1);
+  --glass-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.37);
+
+  --radius-xl: 1rem;
+  --radius-2xl: 1.5rem;
+}
+
+[data-theme='light'] {
+  --background: var(--color-pearl-white);
+  --foreground: var(--color-slate-text);
+}
+
+@layer base {
+  * {
+    border-color: var(--glass-border);
+  }
+
+  body {
+    background-color: var(--background);
+    color: var(--foreground);
+    font-family: var(--font-inter);
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    scroll-behavior: smooth;
+    overflow-x: hidden;
+  }
+
+  h1,
+  h2,
+  h3,
+  h4,
+  h5,
+  h6 {
+    font-weight: 700;
+    letter-spacing: -0.03em;
+  }
+}
+
+@layer utilities {
+  .glass {
+    background: var(--glass-bg);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    border: 1px solid var(--glass-border);
+    box-shadow: var(--glass-shadow);
+  }
+
+  .text-gradient {
+    background-clip: text;
+    -webkit-background-clip: text;
+    color: transparent;
+    background-image: var(--gradient-hero);
+  }
+
+  .animate-float {
+    animation: float 6s ease-in-out infinite;
+  }
+
+  @keyframes float {
+
+    0%,
+    100% {
+      transform: translateY(0);
+    }
+
+    50% {
+      transform: translateY(-10px);
+    }
+  }
+}
