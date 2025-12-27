@@ -1,10 +1,11 @@
 import { NextRequest, NextResponse } from 'next/server';
 import {
-  mockUsers,
-  hashPassword,
-  verifyResetToken,
-  invalidateResetToken,
+  verifyDbPasswordResetToken,
+  useDbPasswordResetToken,
+  updateUserPassword,
+  sendPasswordChangedEmail,
 } from '@/lib/auth';
+import { getUserById } from '@/lib/db/users';
 import { resetPasswordSchema } from '@/lib/validations/auth';
 
 export async function POST(request: NextRequest) {
@@ -28,35 +29,32 @@ export async function POST(request: NextRequest) {
 
     const { token, password } = result.data;
 
-    // Verify reset token
-    const email = verifyResetToken(token);
-    if (!email) {
+    // Verify reset token from database
+    const userId = await verifyDbPasswordResetToken(token);
+    if (!userId) {
       return NextResponse.json(
         { error: 'Invalid or expired reset token' },
         { status: 400 }
       );
     }
 
-    // Find user
-    const userIndex = mockUsers.findIndex(
-      (u) => u.email.toLowerCase() === email.toLowerCase()
-    );
-
-    if (userIndex === -1) {
+    // Find user in database
+    const user = await getUserById(userId);
+    if (!user) {
       return NextResponse.json(
         { error: 'User not found' },
         { status: 404 }
       );
     }
 
-    // Hash new password
-    const newPasswordHash = await hashPassword(password);
+    // Update user password in database
+    await updateUserPassword(userId, password);
 
-    // Update user password (in production, update in database)
-    mockUsers[userIndex].passwordHash = newPasswordHash;
+    // Mark token as used
+    await useDbPasswordResetToken(token);
 
-    // Invalidate reset token
-    invalidateResetToken(token);
+    // Send confirmation email
+    sendPasswordChangedEmail(user.email);
 
     return NextResponse.json(
       {
@@ -87,8 +85,8 @@ export async function GET(request: NextRequest) {
       );
     }
 
-    const email = verifyResetToken(token);
-    if (!email) {
+    const userId = await verifyDbPasswordResetToken(token);
+    if (!userId) {
       return NextResponse.json(
         { valid: false, error: 'Invalid or expired reset token' },
         { status: 400 }

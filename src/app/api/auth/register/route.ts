@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { hashPassword, generateToken, setAuthCookie, mockUsers } from '@/lib/auth';
-import { registerStep1Schema, registerStep2Schema, registerStep3Schema } from '@/lib/validations/auth';
+import { generateToken, setAuthCookie, getUserByEmailFromDb, sendWelcomeEmail } from '@/lib/auth';
+import { createUser } from '@/lib/db/users';
+import { createVenue } from '@/lib/db/venues';
 import { z } from 'zod';
 
 // Combined registration schema
@@ -43,9 +44,7 @@ export async function POST(request: NextRequest) {
     const data = result.data;
 
     // Check if email already exists
-    const existingUser = mockUsers.find(
-      (u) => u.email.toLowerCase() === data.email.toLowerCase()
-    );
+    const existingUser = await getUserByEmailFromDb(data.email);
     if (existingUser) {
       return NextResponse.json(
         { error: 'An account with this email already exists' },
@@ -53,33 +52,36 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Hash password
-    const passwordHash = await hashPassword(data.password);
+    // Create new user in database
+    const newUser = await createUser({
+      email: data.email,
+      password: data.password,
+      role: 'venue_owner',
+    });
 
-    // Create new user (in production, this would save to database)
-    const newUser = {
-      id: `user_${Date.now()}`,
-      email: data.email.toLowerCase(),
-      passwordHash,
-      role: 'venue_owner' as const,
-      venue: {
-        id: `venue_${Date.now()}`,
-        name: data.venueName,
-        slug: data.venueName.toLowerCase().replace(/\s+/g, '-'),
-        status: 'pending' as const,
-        type: data.venueType,
-        phone: data.phone,
-        website: data.website || '',
-        instagram: data.instagram || '',
-        area: data.area,
-        address: data.address,
-        googleMapsLink: data.googleMapsLink || '',
-      },
-      createdAt: new Date().toISOString(),
-    };
+    // Generate venue slug
+    const venueSlug = data.venueName
+      .toLowerCase()
+      .replace(/[^a-z0-9]+/g, '-')
+      .replace(/(^-|-$)/g, '');
 
-    // Add to mock users (in production, save to database)
-    mockUsers.push(newUser);
+    // Create venue in database
+    const newVenue = await createVenue({
+      owner_id: newUser.id,
+      name: data.venueName,
+      slug: venueSlug,
+      category: data.venueType,
+      phone: data.phone,
+      website: data.website || null,
+      instagram: data.instagram || null,
+      area: data.area,
+      address: data.address,
+      google_maps_url: data.googleMapsLink || null,
+      status: 'pending',
+    });
+
+    // Send welcome email
+    sendWelcomeEmail(newUser.email, newVenue.name);
 
     // Generate JWT token
     const token = await generateToken({
@@ -87,12 +89,12 @@ export async function POST(request: NextRequest) {
       email: newUser.email,
       role: newUser.role,
       venue: {
-        id: newUser.venue.id,
-        name: newUser.venue.name,
-        slug: newUser.venue.slug,
-        status: newUser.venue.status,
+        id: newVenue.id,
+        name: newVenue.name,
+        slug: newVenue.slug,
+        status: newVenue.status,
       },
-      createdAt: newUser.createdAt,
+      createdAt: newUser.created_at,
     });
 
     // Create response
@@ -105,10 +107,10 @@ export async function POST(request: NextRequest) {
           email: newUser.email,
           role: newUser.role,
           venue: {
-            id: newUser.venue.id,
-            name: newUser.venue.name,
-            slug: newUser.venue.slug,
-            status: newUser.venue.status,
+            id: newVenue.id,
+            name: newVenue.name,
+            slug: newVenue.slug,
+            status: newVenue.status,
           },
         },
       },
@@ -121,6 +123,15 @@ export async function POST(request: NextRequest) {
     return response;
   } catch (error) {
     console.error('Registration error:', error);
+
+    // Handle specific database errors
+    if (error instanceof Error && error.message === 'Email already exists') {
+      return NextResponse.json(
+        { error: 'An account with this email already exists' },
+        { status: 409 }
+      );
+    }
+
     return NextResponse.json(
       { error: 'An unexpected error occurred. Please try again.' },
       { status: 500 }

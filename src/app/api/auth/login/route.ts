@@ -1,12 +1,13 @@
 import { NextRequest, NextResponse } from 'next/server';
 import {
-  verifyPassword,
   generateToken,
   setAuthCookie,
-  mockUsers,
   checkLoginRateLimit,
   recordLoginAttempt,
+  verifyUserPassword,
+  recordUserLogin,
 } from '@/lib/auth';
+import { getVenueByOwnerId } from '@/lib/db/venues';
 import { loginSchema } from '@/lib/validations/auth';
 
 export async function POST(request: NextRequest) {
@@ -37,22 +38,10 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Find user
-    const user = mockUsers.find(
-      (u) => u.email.toLowerCase() === email.toLowerCase()
-    );
+    // Verify user credentials with database
+    const user = await verifyUserPassword(email, password);
 
     if (!user) {
-      recordLoginAttempt(email, false);
-      return NextResponse.json(
-        { error: 'Invalid email or password' },
-        { status: 401 }
-      );
-    }
-
-    // Verify password
-    const isValidPassword = await verifyPassword(password, user.passwordHash);
-    if (!isValidPassword) {
       recordLoginAttempt(email, false);
       const remainingAttempts = checkLoginRateLimit(email).remainingAttempts;
       return NextResponse.json(
@@ -64,8 +53,31 @@ export async function POST(request: NextRequest) {
       );
     }
 
+    // Check if user is active
+    if (user.status !== 'active') {
+      return NextResponse.json(
+        { error: 'Your account has been suspended. Please contact support.' },
+        { status: 403 }
+      );
+    }
+
     // Record successful login
     recordLoginAttempt(email, true);
+    await recordUserLogin(user.id);
+
+    // Get venue if user is venue owner
+    let venue: { id: string; name: string; slug: string; status: 'pending' | 'approved' | 'rejected' | 'suspended' } | undefined;
+    if (user.role === 'venue_owner') {
+      const dbVenue = await getVenueByOwnerId(user.id);
+      if (dbVenue) {
+        venue = {
+          id: dbVenue.id,
+          name: dbVenue.name,
+          slug: dbVenue.slug,
+          status: dbVenue.status,
+        };
+      }
+    }
 
     // Generate JWT token
     const tokenExpiry = rememberMe ? '30d' : '7d';
@@ -74,15 +86,8 @@ export async function POST(request: NextRequest) {
         id: user.id,
         email: user.email,
         role: user.role,
-        venue: user.venue
-          ? {
-              id: user.venue.id,
-              name: user.venue.name,
-              slug: user.venue.slug,
-              status: user.venue.status,
-            }
-          : undefined,
-        createdAt: user.createdAt,
+        venue,
+        createdAt: user.created_at,
       },
       tokenExpiry
     );
@@ -92,14 +97,7 @@ export async function POST(request: NextRequest) {
       id: user.id,
       email: user.email,
       role: user.role,
-      venue: user.venue
-        ? {
-            id: user.venue.id,
-            name: user.venue.name,
-            slug: user.venue.slug,
-            status: user.venue.status,
-          }
-        : undefined,
+      venue,
     };
 
     // Create response

@@ -2,6 +2,18 @@ import bcrypt from 'bcryptjs';
 import { SignJWT, jwtVerify } from 'jose';
 import { cookies } from 'next/headers';
 import { NextResponse } from 'next/server';
+import {
+  getUserByEmail as dbGetUserByEmail,
+  getUserById as dbGetUserById,
+  verifyPassword as dbVerifyPassword,
+  createPasswordResetToken,
+  verifyPasswordResetToken,
+  usePasswordResetToken,
+  updatePassword as dbUpdatePassword,
+  updateLastLogin,
+} from '@/lib/db/users';
+import { getVenueByOwnerId } from '@/lib/db/venues';
+import type { User as DbUser, Venue as DbVenue } from '@/types/database';
 
 // Types
 export interface User {
@@ -12,7 +24,7 @@ export interface User {
     id: string;
     name: string;
     slug: string;
-    status: 'pending' | 'approved' | 'rejected';
+    status: 'pending' | 'approved' | 'rejected' | 'suspended';
   };
   createdAt: string;
 }
@@ -155,10 +167,111 @@ export async function getCurrentUser(): Promise<User | null> {
   const payload = await verifyToken(token);
   if (!payload) return null;
 
-  // In a real app, fetch user from database here
-  // For now, we'll use mock data
-  const user = getMockUserById(payload.userId);
-  return user;
+  try {
+    // Fetch user from database
+    const dbUser = await dbGetUserById(payload.userId);
+    if (!dbUser) return null;
+
+    // Get venue if user is a venue owner
+    let venue: User['venue'] | undefined;
+    if (dbUser.role === 'venue_owner') {
+      const dbVenue = await getVenueByOwnerId(dbUser.id);
+      if (dbVenue) {
+        venue = {
+          id: dbVenue.id,
+          name: dbVenue.name,
+          slug: dbVenue.slug,
+          status: dbVenue.status,
+        };
+      }
+    }
+
+    return {
+      id: dbUser.id,
+      email: dbUser.email,
+      role: dbUser.role,
+      venue,
+      createdAt: dbUser.created_at,
+    };
+  } catch (error) {
+    console.error('Error fetching current user:', error);
+    return null;
+  }
+}
+
+// Database-integrated user functions
+export async function getUserByEmailFromDb(email: string): Promise<DbUser | null> {
+  try {
+    return await dbGetUserByEmail(email);
+  } catch (error) {
+    console.error('Error getting user by email:', error);
+    return null;
+  }
+}
+
+export async function getUserByIdFromDb(id: string): Promise<User | null> {
+  try {
+    const dbUser = await dbGetUserById(id);
+    if (!dbUser) return null;
+
+    let venue: User['venue'] | undefined;
+    if (dbUser.role === 'venue_owner') {
+      const dbVenue = await getVenueByOwnerId(dbUser.id);
+      if (dbVenue) {
+        venue = {
+          id: dbVenue.id,
+          name: dbVenue.name,
+          slug: dbVenue.slug,
+          status: dbVenue.status,
+        };
+      }
+    }
+
+    return {
+      id: dbUser.id,
+      email: dbUser.email,
+      role: dbUser.role,
+      venue,
+      createdAt: dbUser.created_at,
+    };
+  } catch (error) {
+    console.error('Error getting user by id:', error);
+    return null;
+  }
+}
+
+export async function verifyUserPassword(email: string, password: string): Promise<DbUser | null> {
+  try {
+    return await dbVerifyPassword(email, password);
+  } catch (error) {
+    console.error('Error verifying password:', error);
+    return null;
+  }
+}
+
+export async function recordUserLogin(userId: string): Promise<void> {
+  try {
+    await updateLastLogin(userId);
+  } catch (error) {
+    console.error('Error recording login:', error);
+  }
+}
+
+// Password reset using database
+export async function createDbPasswordResetToken(userId: string): Promise<string> {
+  return await createPasswordResetToken(userId);
+}
+
+export async function verifyDbPasswordResetToken(token: string): Promise<string | null> {
+  return await verifyPasswordResetToken(token);
+}
+
+export async function useDbPasswordResetToken(token: string): Promise<void> {
+  return await usePasswordResetToken(token);
+}
+
+export async function updateUserPassword(userId: string, newPassword: string): Promise<void> {
+  return await dbUpdatePassword(userId, newPassword);
 }
 
 // Reset token utilities

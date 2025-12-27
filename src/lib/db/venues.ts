@@ -1,0 +1,315 @@
+import { getAdminClient } from '@/lib/supabase/server';
+import type { Venue, VenueInsert, VenueUpdate, VenueWithEvents } from '@/types/database';
+
+export interface VenueFilters {
+  status?: Venue['status'] | 'all';
+  category?: string;
+  area?: string;
+  featured?: boolean;
+  search?: string;
+  limit?: number;
+  offset?: number;
+}
+
+// Get all venues with optional filters
+export async function getVenues(filters: VenueFilters = {}): Promise<Venue[]> {
+  const supabase = getAdminClient();
+
+  let query = supabase
+    .from('venues')
+    .select('*')
+    .order('created_at', { ascending: false });
+
+  // Apply filters
+  if (filters.status && filters.status !== 'all') {
+    query = query.eq('status', filters.status);
+  }
+
+  if (filters.category) {
+    query = query.eq('category', filters.category);
+  }
+
+  if (filters.area) {
+    query = query.eq('area', filters.area);
+  }
+
+  if (filters.featured !== undefined) {
+    query = query.eq('is_featured', filters.featured);
+  }
+
+  if (filters.search) {
+    query = query.or(`name.ilike.%${filters.search}%,description.ilike.%${filters.search}%`);
+  }
+
+  if (filters.limit) {
+    query = query.limit(filters.limit);
+  }
+
+  if (filters.offset) {
+    query = query.range(filters.offset, filters.offset + (filters.limit || 10) - 1);
+  }
+
+  const { data, error } = await query;
+
+  if (error) {
+    console.error('Error fetching venues:', error);
+    throw new Error('Failed to fetch venues');
+  }
+
+  return (data || []) as Venue[];
+}
+
+// Get approved venues only (for public pages)
+export async function getApprovedVenues(filters: Omit<VenueFilters, 'status'> = {}): Promise<Venue[]> {
+  return getVenues({ ...filters, status: 'approved' });
+}
+
+// Get pending venues (for admin)
+export async function getPendingVenues(): Promise<Venue[]> {
+  return getVenues({ status: 'pending' });
+}
+
+// Get venue by slug
+export async function getVenueBySlug(slug: string): Promise<Venue | null> {
+  const supabase = getAdminClient();
+
+  const { data, error } = await supabase
+    .from('venues')
+    .select('*')
+    .eq('slug', slug)
+    .single();
+
+  if (error) {
+    if (error.code === 'PGRST116') {
+      return null; // Not found
+    }
+    console.error('Error fetching venue by slug:', error);
+    throw new Error('Failed to fetch venue');
+  }
+
+  return data as Venue;
+}
+
+// Get venue by ID
+export async function getVenueById(id: string): Promise<Venue | null> {
+  const supabase = getAdminClient();
+
+  const { data, error } = await supabase
+    .from('venues')
+    .select('*')
+    .eq('id', id)
+    .single();
+
+  if (error) {
+    if (error.code === 'PGRST116') {
+      return null;
+    }
+    console.error('Error fetching venue by ID:', error);
+    throw new Error('Failed to fetch venue');
+  }
+
+  return data as Venue;
+}
+
+// Get venue by owner ID
+export async function getVenueByOwnerId(ownerId: string): Promise<Venue | null> {
+  const supabase = getAdminClient();
+
+  const { data, error } = await supabase
+    .from('venues')
+    .select('*')
+    .eq('owner_id', ownerId)
+    .single();
+
+  if (error) {
+    if (error.code === 'PGRST116') {
+      return null;
+    }
+    console.error('Error fetching venue by owner:', error);
+    throw new Error('Failed to fetch venue');
+  }
+
+  return data as Venue;
+}
+
+// Get venue with events
+export async function getVenueWithEvents(slug: string): Promise<VenueWithEvents | null> {
+  const supabase = getAdminClient();
+
+  const { data, error } = await supabase
+    .from('venues')
+    .select(`
+      *,
+      events (*)
+    `)
+    .eq('slug', slug)
+    .single();
+
+  if (error) {
+    if (error.code === 'PGRST116') {
+      return null;
+    }
+    console.error('Error fetching venue with events:', error);
+    throw new Error('Failed to fetch venue');
+  }
+
+  return data as VenueWithEvents;
+}
+
+// Create venue
+export async function createVenue(venue: VenueInsert): Promise<Venue> {
+  const supabase = getAdminClient();
+
+  const { data, error } = await supabase
+    .from('venues')
+    .insert(venue as any)
+    .select()
+    .single();
+
+  if (error) {
+    console.error('Error creating venue:', error);
+    throw new Error('Failed to create venue');
+  }
+
+  return data as Venue;
+}
+
+// Update venue
+export async function updateVenue(id: string, updates: VenueUpdate): Promise<Venue> {
+  const supabase = getAdminClient();
+
+  const { data, error } = await (supabase as any)
+    .from('venues')
+    .update(updates)
+    .eq('id', id)
+    .select()
+    .single();
+
+  if (error) {
+    console.error('Error updating venue:', error);
+    throw new Error('Failed to update venue');
+  }
+
+  return data as Venue;
+}
+
+// Delete venue
+export async function deleteVenue(id: string): Promise<void> {
+  const supabase = getAdminClient();
+
+  const { error } = await supabase
+    .from('venues')
+    .delete()
+    .eq('id', id);
+
+  if (error) {
+    console.error('Error deleting venue:', error);
+    throw new Error('Failed to delete venue');
+  }
+}
+
+// Approve venue
+export async function approveVenue(id: string): Promise<Venue> {
+  return updateVenue(id, {
+    status: 'approved',
+    approved_at: new Date().toISOString(),
+    rejection_reason: null,
+  });
+}
+
+// Reject venue
+export async function rejectVenue(id: string, reason: string): Promise<Venue> {
+  return updateVenue(id, {
+    status: 'rejected',
+    rejection_reason: reason,
+  });
+}
+
+// Suspend venue
+export async function suspendVenue(id: string): Promise<Venue> {
+  return updateVenue(id, {
+    status: 'suspended',
+  });
+}
+
+// Increment view count
+export async function incrementVenueViews(id: string): Promise<void> {
+  const supabase = getAdminClient();
+
+  const { error } = await (supabase.rpc as any)('increment_venue_views', { venue_id: id });
+
+  if (error) {
+    // Fallback to manual increment
+    const venue = await getVenueById(id);
+    if (venue) {
+      await updateVenue(id, { view_count: venue.view_count + 1 });
+    }
+  }
+}
+
+// Get venue categories
+export async function getVenueCategories(): Promise<string[]> {
+  const supabase = getAdminClient();
+
+  const { data, error } = await supabase
+    .from('venues')
+    .select('category')
+    .eq('status', 'approved');
+
+  if (error) {
+    console.error('Error fetching categories:', error);
+    return [];
+  }
+
+  const venues = (data || []) as { category: string }[];
+  const categories = [...new Set(venues.map(v => v.category))];
+  return categories;
+}
+
+// Get venue areas
+export async function getVenueAreas(): Promise<string[]> {
+  const supabase = getAdminClient();
+
+  const { data, error } = await supabase
+    .from('venues')
+    .select('area')
+    .eq('status', 'approved');
+
+  if (error) {
+    console.error('Error fetching areas:', error);
+    return [];
+  }
+
+  const venues = (data || []) as { area: string }[];
+  const areas = [...new Set(venues.map(v => v.area))];
+  return areas;
+}
+
+// Count venues by status
+export async function countVenuesByStatus(): Promise<Record<string, number>> {
+  const supabase = getAdminClient();
+
+  const { data, error } = await supabase
+    .from('venues')
+    .select('status');
+
+  if (error) {
+    console.error('Error counting venues:', error);
+    return {};
+  }
+
+  const venues = (data || []) as { status: string }[];
+  const counts: Record<string, number> = {
+    total: venues.length,
+    pending: 0,
+    approved: 0,
+    rejected: 0,
+    suspended: 0,
+  };
+
+  venues.forEach(v => {
+    counts[v.status] = (counts[v.status] || 0) + 1;
+  });
+
+  return counts;
+}

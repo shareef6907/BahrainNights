@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { getQuickSuggestions, popularSearches } from '@/lib/searchData';
+import { getSearchSuggestions, getPopularSearches } from '@/lib/db/search';
 
 export async function GET(request: NextRequest) {
   try {
@@ -7,6 +7,9 @@ export async function GET(request: NextRequest) {
     const query = searchParams.get('q') || '';
     const limitParam = searchParams.get('limit');
     const limit = limitParam ? parseInt(limitParam, 10) : 8;
+
+    // Get popular searches for empty/short queries
+    const popularSearches = await getPopularSearches(limit);
 
     // If no query, return popular searches
     if (!query.trim()) {
@@ -32,8 +35,8 @@ export async function GET(request: NextRequest) {
       );
     }
 
-    // Get quick suggestions
-    const suggestions = getQuickSuggestions(query, limit);
+    // Get quick suggestions from database
+    const suggestions = await getSearchSuggestions(query, limit);
 
     return NextResponse.json(
       {

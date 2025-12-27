@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { verifyToken, mockUsers } from '@/lib/auth';
+import { verifyToken, getUserByIdFromDb } from '@/lib/auth';
 import { cookies } from 'next/headers';
 
 export async function GET(request: NextRequest) {
@@ -25,7 +25,7 @@ export async function GET(request: NextRequest) {
     }
 
     // Get fresh user data from database
-    const user = mockUsers.find((u) => u.id === payload.userId);
+    const user = await getUserByIdFromDb(payload.userId);
     if (!user) {
       return NextResponse.json(
         { error: 'User not found' },

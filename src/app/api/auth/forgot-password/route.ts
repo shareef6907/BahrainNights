@@ -1,10 +1,9 @@
 import { NextRequest, NextResponse } from 'next/server';
 import {
-  mockUsers,
-  generateResetToken,
-  storeResetToken,
   checkResetRateLimit,
   sendPasswordResetEmail,
+  getUserByEmailFromDb,
+  createDbPasswordResetToken,
 } from '@/lib/auth';
 import { forgotPasswordSchema } from '@/lib/validations/auth';
 
@@ -35,10 +34,8 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Find user
-    const user = mockUsers.find(
-      (u) => u.email.toLowerCase() === email.toLowerCase()
-    );
+    // Find user in database
+    const user = await getUserByEmailFromDb(email);
 
     // Always return success even if user not found (security best practice)
     // This prevents email enumeration attacks
@@ -54,15 +51,12 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Generate reset token
-    const resetToken = generateResetToken();
-
-    // Store reset token (in production, save to database with expiry)
-    storeResetToken(user.email, resetToken);
+    // Generate reset token and store in database
+    const resetToken = await createDbPasswordResetToken(user.id);
 
     // Send password reset email
     const resetUrl = `${process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:3000'}/reset-password?token=${resetToken}`;
-    await sendPasswordResetEmail(user.email, resetUrl);
+    sendPasswordResetEmail(user.email, resetUrl);
 
     return NextResponse.json(
       {
