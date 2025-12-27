@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { MapPin, Clock, Star, ChevronRight, ChevronDown, Menu, X, Globe, Sparkles, Plus } from 'lucide-react';
 import GlobalSearch from '@/components/search/GlobalSearch';
+import { SponsorsSection } from '@/components/sponsors';
 
 // Animation variants - optimized for speed
 const fadeIn = {
@@ -638,6 +639,9 @@ export default function BahrainNightsHomepage() {
         </div>
       </section>
 
+      {/* Sponsors Section */}
+      <SponsorsSection />
+
       {/* Footer */}
       <footer className="border-t border-white/10 px-4 py-16">
         <div className="max-w-7xl mx-auto">
@@ -660,16 +664,16 @@ export default function BahrainNightsHomepage() {
               </div>
             </div>
             {[
-              { title: 'Events', links: ["Today's Events", 'This Weekend', 'Concerts', 'Full Calendar'] },
-              { title: 'Dining', links: ['Restaurants', 'Cafes', 'Nightlife', 'View All'] },
-              { title: 'For Businesses', links: ['List Your Event', 'Advertise', 'Partner With Us', 'Contact'] }
+              { title: 'Events', links: [{ name: "Today's Events", href: '/events/today' }, { name: 'This Weekend', href: '/events/weekend' }, { name: 'Concerts', href: '/events/concerts' }, { name: 'Full Calendar', href: '/calendar' }] },
+              { title: 'Dining', links: [{ name: 'Restaurants', href: '/places?category=restaurants' }, { name: 'Cafes', href: '/places?category=cafes' }, { name: 'Nightlife', href: '/places?category=nightclubs' }, { name: 'View All', href: '/places' }] },
+              { title: 'For Businesses', links: [{ name: 'List Your Event', href: '/list-event' }, { name: 'Advertise', href: '/advertise' }, { name: 'Become a Sponsor', href: '/sponsors' }, { name: 'Contact', href: '/contact' }] }
             ].map(section => (
               <div key={section.title}>
                 <h4 className="font-bold text-lg mb-4">{section.title}</h4>
                 <ul className="space-y-3 text-gray-400">
                   {section.links.map(link => (
-                    <li key={link} className="hover:text-white hover:translate-x-1 transition-all duration-200">
-                      <a href="#">{link}</a>
+                    <li key={link.name} className="hover:text-white hover:translate-x-1 transition-all duration-200">
+                      <a href={link.href}>{link.name}</a>
                     </li>
                   ))}
                 </ul>
