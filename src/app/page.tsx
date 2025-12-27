@@ -2,7 +2,8 @@
 
 import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Search, MapPin, Clock, Star, ChevronRight, ChevronDown, Menu, X, Globe, Sparkles, Plus } from 'lucide-react';
+import { MapPin, Clock, Star, ChevronRight, ChevronDown, Menu, X, Globe, Sparkles, Plus } from 'lucide-react';
+import GlobalSearch from '@/components/search/GlobalSearch';
 
 // Animation variants - optimized for speed
 const fadeIn = {
@@ -264,6 +265,7 @@ export default function BahrainNightsHomepage() {
 
             {/* Right Side Actions */}
             <div className="hidden lg:flex items-center space-x-4">
+              <GlobalSearch variant="navbar" />
               <button className="flex items-center space-x-1 text-gray-300 hover:text-white transition-colors px-3 py-2 rounded-lg hover:bg-white/5">
                 <Globe className="w-4 h-4" />
                 <span>AR</span>
@@ -420,27 +422,24 @@ export default function BahrainNightsHomepage() {
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.3, delay: 0.15 }}
           >
-            <div className="relative group">
-              <Search className="absolute left-6 top-1/2 transform -translate-y-1/2 text-gray-400 w-6 h-6" />
-              <input
-                type="text"
-                placeholder="What are you looking for tonight?"
-                className="w-full pl-16 pr-6 py-6 bg-white/10 backdrop-blur-xl border-2 border-white/20 rounded-2xl text-white text-lg placeholder-gray-400 focus:outline-none focus:border-yellow-400/50 focus:shadow-xl focus:shadow-yellow-400/10 transition-all duration-200"
-              />
-            </div>
+            <GlobalSearch
+              variant="hero"
+              placeholder="What are you looking for tonight?"
+            />
 
             {/* Quick Filters */}
             <motion.div className="flex flex-wrap justify-center gap-3 mt-8" variants={stagger} initial="hidden" animate="visible">
               {quickFilters.map(filter => (
-                <motion.button
+                <motion.a
                   key={filter}
+                  href={`/search?q=${encodeURIComponent(filter.replace(/^[^\s]+\s/, ''))}`}
                   className="px-6 py-3 bg-white/5 backdrop-blur-sm border border-white/10 rounded-full hover:bg-white/10 hover:border-yellow-400/50 transition-all duration-200 text-sm font-medium"
                   variants={fadeIn}
                   whileHover={{ scale: 1.02 }}
                   whileTap={{ scale: 0.98 }}
                 >
                   {filter}
-                </motion.button>
+                </motion.a>
               ))}
             </motion.div>
           </motion.div>
