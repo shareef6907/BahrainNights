@@ -1,7 +1,8 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
-import { Search, Calendar, MapPin, Clock, Star, ChevronRight, Menu, X, Globe } from 'lucide-react';
+import { motion, AnimatePresence } from 'framer-motion';
+import { Search, MapPin, Clock, Star, ChevronRight, Menu, X, Globe, Sparkles } from 'lucide-react';
 
 const BahrainNightsHomepage = () => {
   const [scrollY, setScrollY] = useState(0);
@@ -14,14 +15,6 @@ const BahrainNightsHomepage = () => {
     const handleScroll = () => setScrollY(window.scrollY);
     window.addEventListener('scroll', handleScroll);
     return () => window.removeEventListener('scroll', handleScroll);
-  }, []);
-
-  // Auto-advance slider
-  useEffect(() => {
-    const timer = setInterval(() => {
-      setCurrentSlide((prev) => (prev + 1) % adSlides.length);
-    }, 5000);
-    return () => clearInterval(timer);
   }, []);
 
   // Sample data
@@ -51,6 +44,14 @@ const BahrainNightsHomepage = () => {
       gradient: "from-orange-600/40 to-red-600/40"
     }
   ];
+
+  // Auto-advance slider
+  useEffect(() => {
+    const timer = setInterval(() => {
+      setCurrentSlide((prev) => (prev + 1) % adSlides.length);
+    }, 5000);
+    return () => clearInterval(timer);
+  }, [adSlides.length]);
 
   const categories = [
     { icon: "🎭", name: "Cultural", count: 47, color: "from-purple-500 to-pink-500" },
@@ -103,326 +104,625 @@ const BahrainNightsHomepage = () => {
     { title: "The Matrix 5", rating: 8.5, image: "https://images.unsplash.com/photo-1485846234645-a62644f84728?w=300&h=450&fit=crop" }
   ];
 
+  // Animation variants
+  const fadeInUp = {
+    hidden: { opacity: 0, y: 60 },
+    visible: { opacity: 1, y: 0, transition: { duration: 0.6, ease: "easeOut" } }
+  };
+
+  const staggerContainer = {
+    hidden: { opacity: 0 },
+    visible: {
+      opacity: 1,
+      transition: { staggerChildren: 0.1, delayChildren: 0.2 }
+    }
+  };
+
+  const cardVariant = {
+    hidden: { opacity: 0, y: 40, scale: 0.95 },
+    visible: { opacity: 1, y: 0, scale: 1, transition: { duration: 0.5, ease: "easeOut" } }
+  };
+
   return (
-    <div className="bg-gradient-to-b from-slate-950 via-slate-900 to-slate-950 text-white min-h-screen">
+    <div className="bg-gradient-to-b from-slate-950 via-slate-900 to-slate-950 text-white min-h-screen overflow-x-hidden">
+      {/* Floating Particles Background */}
+      <div className="fixed inset-0 pointer-events-none overflow-hidden">
+        {[...Array(20)].map((_, i) => (
+          <motion.div
+            key={i}
+            className="absolute w-1 h-1 bg-yellow-400/30 rounded-full"
+            initial={{
+              x: Math.random() * (typeof window !== 'undefined' ? window.innerWidth : 1000),
+              y: Math.random() * (typeof window !== 'undefined' ? window.innerHeight : 1000)
+            }}
+            animate={{
+              y: [null, -20, 20],
+              opacity: [0.2, 0.5, 0.2],
+            }}
+            transition={{
+              duration: 3 + Math.random() * 2,
+              repeat: Infinity,
+              repeatType: "reverse",
+              delay: Math.random() * 2
+            }}
+          />
+        ))}
+      </div>
+
       {/* Navigation */}
-      <nav className={`fixed top-0 w-full z-50 transition-all duration-300 ${scrollY > 50 ? 'bg-slate-950/80 backdrop-blur-xl border-b border-white/10' : ''}`}>
+      <motion.nav
+        initial={{ y: -100 }}
+        animate={{ y: 0 }}
+        transition={{ duration: 0.6, ease: "easeOut" }}
+        className={`fixed top-0 w-full z-50 transition-all duration-500 ${scrollY > 50 ? 'bg-slate-950/80 backdrop-blur-xl border-b border-white/10 shadow-2xl' : ''}`}
+      >
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex items-center justify-between h-20">
             {/* Logo */}
-            <div className="flex items-center space-x-2">
-              <div className="text-3xl font-black bg-gradient-to-r from-yellow-400 to-orange-500 bg-clip-text text-transparent">
+            <motion.div
+              className="flex items-center space-x-2"
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.95 }}
+            >
+              <div className="text-3xl font-black bg-gradient-to-r from-yellow-400 via-orange-500 to-pink-500 bg-clip-text text-transparent animate-gradient bg-[length:200%_auto]">
                 BahrainNights
               </div>
-              <span className="text-xs text-gray-400 mt-2">AI-Powered</span>
-            </div>
+              <motion.span
+                className="text-xs text-yellow-400 mt-2 flex items-center gap-1"
+                animate={{ opacity: [0.5, 1, 0.5] }}
+                transition={{ duration: 2, repeat: Infinity }}
+              >
+                <Sparkles className="w-3 h-3" />
+                AI-Powered
+              </motion.span>
+            </motion.div>
 
             {/* Desktop Menu */}
             <div className="hidden md:flex items-center space-x-8">
-              <a href="#events" className="text-gray-300 hover:text-white transition-colors">Events</a>
-              <a href="#venues" className="text-gray-300 hover:text-white transition-colors">Venues</a>
-              <a href="#cinema" className="text-gray-300 hover:text-white transition-colors">Cinema</a>
-              <a href="#calendar" className="text-gray-300 hover:text-white transition-colors">Calendar</a>
-              <button
+              {['Events', 'Venues', 'Cinema', 'Calendar'].map((item, i) => (
+                <motion.a
+                  key={item}
+                  href={`#${item.toLowerCase()}`}
+                  className="text-gray-300 hover:text-white transition-colors relative group"
+                  initial={{ opacity: 0, y: -20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: 0.1 * i }}
+                  whileHover={{ y: -2 }}
+                >
+                  {item}
+                  <span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-gradient-to-r from-yellow-400 to-orange-500 group-hover:w-full transition-all duration-300" />
+                </motion.a>
+              ))}
+              <motion.button
                 onClick={() => setLanguage(language === 'en' ? 'ar' : 'en')}
                 className="flex items-center space-x-1 text-gray-300 hover:text-white transition-colors"
+                whileHover={{ scale: 1.1, rotate: 5 }}
+                whileTap={{ scale: 0.9 }}
               >
                 <Globe className="w-4 h-4" />
                 <span>{language === 'en' ? 'AR' : 'EN'}</span>
-              </button>
-              <button className="bg-gradient-to-r from-yellow-400 to-orange-500 text-black px-6 py-2 rounded-full font-semibold hover:shadow-lg hover:shadow-yellow-500/50 transition-all">
+              </motion.button>
+              <motion.button
+                className="bg-gradient-to-r from-yellow-400 via-orange-500 to-pink-500 text-black px-6 py-2 rounded-full font-semibold shadow-lg shadow-orange-500/25"
+                whileHover={{ scale: 1.05, boxShadow: "0 20px 40px rgba(251, 146, 60, 0.4)" }}
+                whileTap={{ scale: 0.95 }}
+              >
                 List Your Event
-              </button>
+              </motion.button>
             </div>
 
             {/* Mobile Menu Button */}
-            <button
+            <motion.button
               className="md:hidden text-white"
               onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+              whileTap={{ scale: 0.9 }}
             >
               {mobileMenuOpen ? <X /> : <Menu />}
-            </button>
+            </motion.button>
           </div>
         </div>
 
         {/* Mobile Menu */}
-        {mobileMenuOpen && (
-          <div className="md:hidden bg-slate-900 border-t border-white/10">
-            <div className="px-4 py-4 space-y-3">
-              <a href="#events" className="block text-gray-300 hover:text-white">Events</a>
-              <a href="#venues" className="block text-gray-300 hover:text-white">Venues</a>
-              <a href="#cinema" className="block text-gray-300 hover:text-white">Cinema</a>
-              <a href="#calendar" className="block text-gray-300 hover:text-white">Calendar</a>
-              <button className="w-full bg-gradient-to-r from-yellow-400 to-orange-500 text-black px-6 py-2 rounded-full font-semibold">
-                List Your Event
-              </button>
-            </div>
-          </div>
-        )}
-      </nav>
+        <AnimatePresence>
+          {mobileMenuOpen && (
+            <motion.div
+              className="md:hidden bg-slate-900/95 backdrop-blur-xl border-t border-white/10"
+              initial={{ opacity: 0, height: 0 }}
+              animate={{ opacity: 1, height: "auto" }}
+              exit={{ opacity: 0, height: 0 }}
+              transition={{ duration: 0.3 }}
+            >
+              <div className="px-4 py-4 space-y-3">
+                {['Events', 'Venues', 'Cinema', 'Calendar'].map((item, i) => (
+                  <motion.a
+                    key={item}
+                    href={`#${item.toLowerCase()}`}
+                    className="block text-gray-300 hover:text-white py-2"
+                    initial={{ opacity: 0, x: -20 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    transition={{ delay: 0.1 * i }}
+                  >
+                    {item}
+                  </motion.a>
+                ))}
+                <motion.button
+                  className="w-full bg-gradient-to-r from-yellow-400 to-orange-500 text-black px-6 py-3 rounded-full font-semibold"
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: 0.4 }}
+                >
+                  List Your Event
+                </motion.button>
+              </div>
+            </motion.div>
+          )}
+        </AnimatePresence>
+      </motion.nav>
 
       {/* Hero Section */}
       <section className="relative pt-32 pb-20 px-4 overflow-hidden">
         {/* Animated Background */}
         <div className="absolute inset-0 overflow-hidden">
-          <div className="absolute -top-1/2 -left-1/2 w-full h-full bg-gradient-to-br from-purple-600/20 via-transparent to-transparent rounded-full blur-3xl animate-pulse" />
-          <div className="absolute -bottom-1/2 -right-1/2 w-full h-full bg-gradient-to-tl from-cyan-600/20 via-transparent to-transparent rounded-full blur-3xl animate-pulse delay-1000" />
+          <motion.div
+            className="absolute -top-1/2 -left-1/2 w-full h-full bg-gradient-to-br from-purple-600/30 via-transparent to-transparent rounded-full blur-3xl"
+            animate={{
+              scale: [1, 1.2, 1],
+              rotate: [0, 90, 0],
+              opacity: [0.3, 0.5, 0.3]
+            }}
+            transition={{ duration: 10, repeat: Infinity, ease: "easeInOut" }}
+          />
+          <motion.div
+            className="absolute -bottom-1/2 -right-1/2 w-full h-full bg-gradient-to-tl from-cyan-600/30 via-transparent to-transparent rounded-full blur-3xl"
+            animate={{
+              scale: [1.2, 1, 1.2],
+              rotate: [0, -90, 0],
+              opacity: [0.3, 0.5, 0.3]
+            }}
+            transition={{ duration: 10, repeat: Infinity, ease: "easeInOut", delay: 1 }}
+          />
+          <motion.div
+            className="absolute top-1/4 right-1/4 w-96 h-96 bg-gradient-to-br from-yellow-500/20 to-orange-500/20 rounded-full blur-3xl"
+            animate={{
+              scale: [1, 1.3, 1],
+              opacity: [0.2, 0.4, 0.2]
+            }}
+            transition={{ duration: 8, repeat: Infinity, ease: "easeInOut", delay: 2 }}
+          />
         </div>
 
         <div className="relative max-w-7xl mx-auto text-center">
-          <div className="inline-block mb-4 px-4 py-2 bg-white/5 backdrop-blur-sm rounded-full border border-white/10">
-            <span className="text-sm text-gray-300">🇧🇭 Supporting Local Businesses • Always Free</span>
-          </div>
-
-          <h1 className="text-5xl md:text-7xl font-black mb-6 leading-tight">
-            <span className="bg-gradient-to-r from-yellow-400 via-orange-500 to-pink-500 bg-clip-text text-transparent">
-              Discover Bahrain's
+          <motion.div
+            className="inline-block mb-6 px-6 py-3 bg-white/5 backdrop-blur-sm rounded-full border border-white/10"
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.6 }}
+            whileHover={{ scale: 1.05, borderColor: "rgba(251, 191, 36, 0.5)" }}
+          >
+            <span className="text-sm text-gray-300 flex items-center gap-2">
+              <span className="text-xl">🇧🇭</span>
+              Supporting Local Businesses
+              <span className="text-yellow-400">•</span>
+              Always Free
             </span>
-            <br />
-            <span className="text-white">Best Experiences</span>
-          </h1>
+          </motion.div>
 
-          <p className="text-xl text-gray-400 mb-8 max-w-2xl mx-auto">
-            AI-powered • Always updated • 1,247 events • 847 venues
-          </p>
+          <motion.h1
+            className="text-5xl md:text-7xl lg:text-8xl font-black mb-6 leading-tight"
+            initial={{ opacity: 0, y: 40 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.8, delay: 0.2 }}
+          >
+            <motion.span
+              className="bg-gradient-to-r from-yellow-400 via-orange-500 to-pink-500 bg-clip-text text-transparent inline-block"
+              animate={{ backgroundPosition: ["0%", "100%", "0%"] }}
+              transition={{ duration: 5, repeat: Infinity, ease: "linear" }}
+              style={{ backgroundSize: "200% auto" }}
+            >
+              Discover Bahrain&apos;s
+            </motion.span>
+            <br />
+            <motion.span
+              className="text-white inline-block"
+              initial={{ opacity: 0, scale: 0.8 }}
+              animate={{ opacity: 1, scale: 1 }}
+              transition={{ duration: 0.6, delay: 0.5 }}
+            >
+              Best Experiences
+            </motion.span>
+          </motion.h1>
+
+          <motion.p
+            className="text-xl md:text-2xl text-gray-400 mb-10 max-w-2xl mx-auto"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ duration: 0.6, delay: 0.6 }}
+          >
+            <span className="text-yellow-400">AI-powered</span> • Always updated •
+            <span className="text-white font-semibold"> 1,247 events</span> •
+            <span className="text-white font-semibold"> 847 venues</span>
+          </motion.p>
 
           {/* Search Bar */}
-          <div className={`max-w-2xl mx-auto transition-all duration-300 ${searchFocused ? 'scale-105' : ''}`}>
-            <div className="relative">
-              <Search className="absolute left-6 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
+          <motion.div
+            className="max-w-2xl mx-auto"
+            initial={{ opacity: 0, y: 40 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.6, delay: 0.8 }}
+          >
+            <motion.div
+              className="relative"
+              animate={{ scale: searchFocused ? 1.02 : 1 }}
+              transition={{ duration: 0.3 }}
+            >
+              <Search className="absolute left-6 top-1/2 transform -translate-y-1/2 text-gray-400 w-6 h-6" />
               <input
                 type="text"
                 placeholder="What are you looking for tonight?"
                 onFocus={() => setSearchFocused(true)}
                 onBlur={() => setSearchFocused(false)}
-                className="w-full pl-14 pr-6 py-5 bg-white/10 backdrop-blur-xl border border-white/20 rounded-2xl text-white placeholder-gray-400 focus:outline-none focus:border-yellow-400/50 focus:shadow-lg focus:shadow-yellow-400/20 transition-all"
+                className="w-full pl-16 pr-6 py-6 bg-white/10 backdrop-blur-xl border-2 border-white/20 rounded-2xl text-white text-lg placeholder-gray-400 focus:outline-none focus:border-yellow-400/50 focus:shadow-2xl focus:shadow-yellow-400/20 transition-all duration-300"
               />
-            </div>
+              <motion.div
+                className="absolute inset-0 rounded-2xl pointer-events-none"
+                animate={{
+                  boxShadow: searchFocused
+                    ? "0 0 40px rgba(251, 191, 36, 0.3)"
+                    : "0 0 0px rgba(251, 191, 36, 0)"
+                }}
+                transition={{ duration: 0.3 }}
+              />
+            </motion.div>
 
             {/* Quick Filters */}
-            <div className="flex flex-wrap justify-center gap-3 mt-6">
+            <motion.div
+              className="flex flex-wrap justify-center gap-3 mt-8"
+              variants={staggerContainer}
+              initial="hidden"
+              animate="visible"
+            >
               {['🎭 Culture', '🍽️ Dining', '🎵 Music', '🌙 Nightlife', '👨‍👩‍👧‍👦 Family'].map((filter) => (
-                <button
+                <motion.button
                   key={filter}
-                  className="px-5 py-2 bg-white/5 backdrop-blur-sm border border-white/10 rounded-full hover:bg-white/10 hover:border-yellow-400/50 transition-all text-sm"
+                  className="px-6 py-3 bg-white/5 backdrop-blur-sm border border-white/10 rounded-full hover:bg-white/10 hover:border-yellow-400/50 transition-all text-sm font-medium"
+                  variants={cardVariant}
+                  whileHover={{ scale: 1.05, y: -2, borderColor: "rgba(251, 191, 36, 0.5)" }}
+                  whileTap={{ scale: 0.95 }}
                 >
                   {filter}
-                </button>
+                </motion.button>
               ))}
-            </div>
-          </div>
+            </motion.div>
+          </motion.div>
         </div>
       </section>
 
       {/* Premium Ad Slider */}
-      <section className="px-4 mb-20">
+      <section className="px-4 mb-24">
         <div className="max-w-7xl mx-auto">
-          <div className="relative h-[400px] md:h-[500px] rounded-3xl overflow-hidden group">
-            {adSlides.map((slide, index) => (
-              <div
-                key={slide.id}
-                className={`absolute inset-0 transition-opacity duration-1000 ${index === currentSlide ? 'opacity-100' : 'opacity-0'}`}
-              >
-                <img
-                  src={slide.image}
-                  alt={slide.title}
-                  className="w-full h-full object-cover"
-                />
-                <div className={`absolute inset-0 bg-gradient-to-r ${slide.gradient}`} />
+          <motion.div
+            className="relative h-[400px] md:h-[500px] rounded-3xl overflow-hidden"
+            initial={{ opacity: 0, scale: 0.95 }}
+            whileInView={{ opacity: 1, scale: 1 }}
+            viewport={{ once: true }}
+            transition={{ duration: 0.8 }}
+          >
+            <AnimatePresence mode="wait">
+              {adSlides.map((slide, index) => (
+                index === currentSlide && (
+                  <motion.div
+                    key={slide.id}
+                    className="absolute inset-0"
+                    initial={{ opacity: 0, scale: 1.1 }}
+                    animate={{ opacity: 1, scale: 1 }}
+                    exit={{ opacity: 0, scale: 0.95 }}
+                    transition={{ duration: 0.7 }}
+                  >
+                    <motion.img
+                      src={slide.image}
+                      alt={slide.title}
+                      className="w-full h-full object-cover"
+                      animate={{ scale: [1, 1.05] }}
+                      transition={{ duration: 10, ease: "linear" }}
+                    />
+                    <div className={`absolute inset-0 bg-gradient-to-r ${slide.gradient}`} />
+                    <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent" />
 
-                <div className="absolute inset-0 flex items-center justify-center text-center p-8">
-                  <div className="max-w-3xl">
-                    <h2 className="text-4xl md:text-6xl font-black mb-4 text-white drop-shadow-2xl">
-                      {slide.title}
-                    </h2>
-                    <p className="text-xl md:text-2xl text-white/90 mb-8 drop-shadow-lg">
-                      {slide.subtitle}
-                    </p>
-                    <button className="bg-white text-black px-8 py-4 rounded-full font-bold text-lg hover:scale-105 hover:shadow-2xl transition-all">
-                      {slide.cta}
-                    </button>
-                  </div>
-                </div>
-              </div>
-            ))}
+                    <div className="absolute inset-0 flex items-center justify-center text-center p-8">
+                      <div className="max-w-3xl">
+                        <motion.h2
+                          className="text-4xl md:text-6xl lg:text-7xl font-black mb-4 text-white drop-shadow-2xl"
+                          initial={{ opacity: 0, y: 30 }}
+                          animate={{ opacity: 1, y: 0 }}
+                          transition={{ delay: 0.2 }}
+                        >
+                          {slide.title}
+                        </motion.h2>
+                        <motion.p
+                          className="text-xl md:text-2xl text-white/90 mb-8 drop-shadow-lg"
+                          initial={{ opacity: 0, y: 20 }}
+                          animate={{ opacity: 1, y: 0 }}
+                          transition={{ delay: 0.4 }}
+                        >
+                          {slide.subtitle}
+                        </motion.p>
+                        <motion.button
+                          className="bg-white text-black px-10 py-4 rounded-full font-bold text-lg shadow-2xl"
+                          initial={{ opacity: 0, scale: 0.8 }}
+                          animate={{ opacity: 1, scale: 1 }}
+                          transition={{ delay: 0.6 }}
+                          whileHover={{ scale: 1.05, boxShadow: "0 25px 50px rgba(0,0,0,0.3)" }}
+                          whileTap={{ scale: 0.95 }}
+                        >
+                          {slide.cta}
+                        </motion.button>
+                      </div>
+                    </div>
+                  </motion.div>
+                )
+              ))}
+            </AnimatePresence>
 
             {/* Slider Navigation */}
-            <div className="absolute bottom-6 left-1/2 transform -translate-x-1/2 flex space-x-2">
+            <div className="absolute bottom-6 left-1/2 transform -translate-x-1/2 flex space-x-3">
               {adSlides.map((_, index) => (
-                <button
+                <motion.button
                   key={index}
                   onClick={() => setCurrentSlide(index)}
-                  className={`w-2 h-2 rounded-full transition-all ${index === currentSlide ? 'bg-white w-8' : 'bg-white/50'}`}
+                  className={`h-2 rounded-full transition-all ${index === currentSlide ? 'bg-white' : 'bg-white/50'}`}
+                  animate={{ width: index === currentSlide ? 32 : 8 }}
+                  whileHover={{ scale: 1.2 }}
                 />
               ))}
             </div>
-          </div>
+          </motion.div>
         </div>
       </section>
 
       {/* Happening Today */}
-      <section className="px-4 mb-20">
+      <section className="px-4 mb-24">
         <div className="max-w-7xl mx-auto">
-          <div className="flex items-center justify-between mb-8">
-            <h2 className="text-3xl md:text-4xl font-bold">
-              🔥 Happening Today
-            </h2>
-            <button className="text-yellow-400 hover:text-yellow-300 flex items-center space-x-2 transition-colors">
-              <span>View All</span>
-              <ChevronRight className="w-5 h-5" />
-            </button>
-          </div>
-
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-            {todayEvents.map((event) => (
-              <div
-                key={event.id}
-                className="group relative bg-white/5 backdrop-blur-sm border border-white/10 rounded-2xl overflow-hidden hover:scale-105 hover:border-yellow-400/50 hover:shadow-xl hover:shadow-yellow-400/20 transition-all cursor-pointer"
+          <motion.div
+            className="flex items-center justify-between mb-10"
+            initial="hidden"
+            whileInView="visible"
+            viewport={{ once: true }}
+            variants={fadeInUp}
+          >
+            <h2 className="text-3xl md:text-5xl font-bold flex items-center gap-3">
+              <motion.span
+                animate={{ rotate: [0, 10, -10, 0] }}
+                transition={{ duration: 0.5, repeat: Infinity, repeatDelay: 2 }}
               >
-                <div className="relative h-64 overflow-hidden">
-                  <img
+                🔥
+              </motion.span>
+              Happening Today
+            </h2>
+            <motion.button
+              className="text-yellow-400 hover:text-yellow-300 flex items-center space-x-2 transition-colors group"
+              whileHover={{ x: 5 }}
+            >
+              <span className="font-medium">View All</span>
+              <ChevronRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
+            </motion.button>
+          </motion.div>
+
+          <motion.div
+            className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6"
+            variants={staggerContainer}
+            initial="hidden"
+            whileInView="visible"
+            viewport={{ once: true }}
+          >
+            {todayEvents.map((event) => (
+              <motion.div
+                key={event.id}
+                className="group relative bg-white/5 backdrop-blur-sm border border-white/10 rounded-2xl overflow-hidden cursor-pointer"
+                variants={cardVariant}
+                whileHover={{ y: -8, borderColor: "rgba(251, 191, 36, 0.5)" }}
+              >
+                <div className="relative h-72 overflow-hidden">
+                  <motion.img
                     src={event.image}
                     alt={event.title}
-                    className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
+                    className="w-full h-full object-cover"
+                    whileHover={{ scale: 1.1 }}
+                    transition={{ duration: 0.6 }}
                   />
-                  <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent" />
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/30 to-transparent" />
 
-                  <div className="absolute top-4 right-4 px-3 py-1 bg-yellow-400 text-black text-xs font-bold rounded-full">
+                  <motion.div
+                    className="absolute top-4 right-4 px-4 py-1.5 bg-yellow-400 text-black text-xs font-bold rounded-full"
+                    whileHover={{ scale: 1.1 }}
+                  >
                     {event.category}
-                  </div>
+                  </motion.div>
 
                   <div className="absolute bottom-0 left-0 right-0 p-6">
-                    <h3 className="text-xl font-bold mb-2">{event.title}</h3>
+                    <h3 className="text-2xl font-bold mb-3">{event.title}</h3>
                     <div className="flex items-center justify-between text-sm text-gray-300">
-                      <div className="flex items-center space-x-1">
-                        <MapPin className="w-4 h-4" />
+                      <div className="flex items-center space-x-2">
+                        <MapPin className="w-4 h-4 text-yellow-400" />
                         <span>{event.venue}</span>
                       </div>
-                      <div className="flex items-center space-x-1">
-                        <Clock className="w-4 h-4" />
+                      <div className="flex items-center space-x-2">
+                        <Clock className="w-4 h-4 text-yellow-400" />
                         <span>{event.time}</span>
                       </div>
                     </div>
                   </div>
                 </div>
-              </div>
+              </motion.div>
             ))}
-          </div>
+          </motion.div>
         </div>
       </section>
 
       {/* Cinema Section */}
-      <section className="px-4 mb-20">
+      <section className="px-4 mb-24">
         <div className="max-w-7xl mx-auto">
-          <div className="flex items-center justify-between mb-8">
-            <h2 className="text-3xl md:text-4xl font-bold">
+          <motion.div
+            className="flex items-center justify-between mb-10"
+            initial="hidden"
+            whileInView="visible"
+            viewport={{ once: true }}
+            variants={fadeInUp}
+          >
+            <h2 className="text-3xl md:text-5xl font-bold">
               🎬 Now Showing in Cinemas
             </h2>
-            <button className="text-yellow-400 hover:text-yellow-300 flex items-center space-x-2 transition-colors">
-              <span>All Movies</span>
-              <ChevronRight className="w-5 h-5" />
-            </button>
-          </div>
+            <motion.button
+              className="text-yellow-400 hover:text-yellow-300 flex items-center space-x-2 transition-colors group"
+              whileHover={{ x: 5 }}
+            >
+              <span className="font-medium">All Movies</span>
+              <ChevronRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
+            </motion.button>
+          </motion.div>
 
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
+          <motion.div
+            className="grid grid-cols-2 md:grid-cols-4 gap-6"
+            variants={staggerContainer}
+            initial="hidden"
+            whileInView="visible"
+            viewport={{ once: true }}
+          >
             {movies.map((movie, index) => (
-              <div
+              <motion.div
                 key={index}
-                className="group relative rounded-2xl overflow-hidden cursor-pointer hover:scale-105 transition-transform"
+                className="group relative rounded-2xl overflow-hidden cursor-pointer"
+                variants={cardVariant}
+                whileHover={{ y: -8 }}
               >
-                <img
+                <motion.img
                   src={movie.image}
                   alt={movie.title}
-                  className="w-full h-[400px] object-cover"
+                  className="w-full h-[450px] object-cover"
+                  whileHover={{ scale: 1.05 }}
+                  transition={{ duration: 0.6 }}
                 />
-                <div className="absolute inset-0 bg-gradient-to-t from-black via-transparent opacity-0 group-hover:opacity-100 transition-opacity">
-                  <div className="absolute bottom-0 left-0 right-0 p-4">
-                    <h3 className="font-bold mb-2">{movie.title}</h3>
-                    <div className="flex items-center space-x-1 text-yellow-400">
-                      <Star className="w-4 h-4 fill-current" />
-                      <span>{movie.rating}</span>
+                <motion.div
+                  className="absolute inset-0 bg-gradient-to-t from-black via-black/50 to-transparent"
+                  initial={{ opacity: 0 }}
+                  whileHover={{ opacity: 1 }}
+                  transition={{ duration: 0.3 }}
+                >
+                  <div className="absolute bottom-0 left-0 right-0 p-6">
+                    <h3 className="font-bold text-xl mb-2">{movie.title}</h3>
+                    <div className="flex items-center space-x-2 text-yellow-400">
+                      <Star className="w-5 h-5 fill-current" />
+                      <span className="text-lg font-semibold">{movie.rating}</span>
                     </div>
                   </div>
-                </div>
-              </div>
+                </motion.div>
+              </motion.div>
             ))}
-          </div>
+          </motion.div>
         </div>
       </section>
 
       {/* Categories Grid */}
-      <section className="px-4 mb-20">
+      <section className="px-4 mb-24">
         <div className="max-w-7xl mx-auto">
-          <h2 className="text-3xl md:text-4xl font-bold mb-8">
+          <motion.h2
+            className="text-3xl md:text-5xl font-bold mb-10"
+            initial="hidden"
+            whileInView="visible"
+            viewport={{ once: true }}
+            variants={fadeInUp}
+          >
             Explore by Category
-          </h2>
+          </motion.h2>
 
-          <div className="grid grid-cols-2 md:grid-cols-3 gap-6">
+          <motion.div
+            className="grid grid-cols-2 md:grid-cols-3 gap-6"
+            variants={staggerContainer}
+            initial="hidden"
+            whileInView="visible"
+            viewport={{ once: true }}
+          >
             {categories.map((category) => (
-              <div
+              <motion.div
                 key={category.name}
-                className="group relative bg-white/5 backdrop-blur-sm border border-white/10 rounded-2xl p-8 hover:scale-105 hover:border-yellow-400/50 transition-all cursor-pointer overflow-hidden"
+                className="group relative bg-white/5 backdrop-blur-sm border border-white/10 rounded-2xl p-8 cursor-pointer overflow-hidden"
+                variants={cardVariant}
+                whileHover={{ y: -8, borderColor: "rgba(251, 191, 36, 0.5)" }}
               >
-                <div className={`absolute inset-0 bg-gradient-to-br ${category.color} opacity-0 group-hover:opacity-10 transition-opacity`} />
+                <motion.div
+                  className={`absolute inset-0 bg-gradient-to-br ${category.color} opacity-0 group-hover:opacity-20 transition-opacity duration-500`}
+                />
 
                 <div className="relative">
-                  <div className="text-5xl mb-4">{category.icon}</div>
+                  <motion.div
+                    className="text-6xl mb-4"
+                    whileHover={{ scale: 1.2, rotate: [0, -10, 10, 0] }}
+                    transition={{ duration: 0.3 }}
+                  >
+                    {category.icon}
+                  </motion.div>
                   <h3 className="text-2xl font-bold mb-2">{category.name}</h3>
                   <p className="text-gray-400">{category.count} events</p>
                 </div>
-              </div>
+              </motion.div>
             ))}
-          </div>
+          </motion.div>
         </div>
       </section>
 
       {/* Footer */}
-      <footer className="border-t border-white/10 px-4 py-12">
+      <motion.footer
+        className="border-t border-white/10 px-4 py-16"
+        initial={{ opacity: 0 }}
+        whileInView={{ opacity: 1 }}
+        viewport={{ once: true }}
+        transition={{ duration: 0.8 }}
+      >
         <div className="max-w-7xl mx-auto">
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-8 mb-8">
+          <div className="grid grid-cols-1 md:grid-cols-4 gap-10 mb-10">
             <div>
-              <div className="text-2xl font-black bg-gradient-to-r from-yellow-400 to-orange-500 bg-clip-text text-transparent mb-4">
+              <motion.div
+                className="text-3xl font-black bg-gradient-to-r from-yellow-400 via-orange-500 to-pink-500 bg-clip-text text-transparent mb-4"
+                whileHover={{ scale: 1.05 }}
+              >
                 BahrainNights
-              </div>
-              <p className="text-gray-400 text-sm">
-                Supporting Bahrain's local businesses. Every voice matters.
+              </motion.div>
+              <p className="text-gray-400">
+                Supporting Bahrain&apos;s local businesses. Every voice matters.
               </p>
             </div>
 
-            <div>
-              <h4 className="font-bold mb-4">Explore</h4>
-              <ul className="space-y-2 text-gray-400 text-sm">
-                <li><a href="#" className="hover:text-white transition-colors">Events</a></li>
-                <li><a href="#" className="hover:text-white transition-colors">Venues</a></li>
-                <li><a href="#" className="hover:text-white transition-colors">Cinema</a></li>
-                <li><a href="#" className="hover:text-white transition-colors">Calendar</a></li>
-              </ul>
-            </div>
-
-            <div>
-              <h4 className="font-bold mb-4">For Businesses</h4>
-              <ul className="space-y-2 text-gray-400 text-sm">
-                <li><a href="#" className="hover:text-white transition-colors">List Your Event</a></li>
-                <li><a href="#" className="hover:text-white transition-colors">Advertise</a></li>
-                <li><a href="#" className="hover:text-white transition-colors">Contact Us</a></li>
-              </ul>
-            </div>
-
-            <div>
-              <h4 className="font-bold mb-4">Connect</h4>
-              <ul className="space-y-2 text-gray-400 text-sm">
-                <li><a href="#" className="hover:text-white transition-colors">Instagram</a></li>
-                <li><a href="#" className="hover:text-white transition-colors">Facebook</a></li>
-                <li><a href="#" className="hover:text-white transition-colors">Twitter</a></li>
-              </ul>
-            </div>
+            {[
+              { title: 'Explore', links: ['Events', 'Venues', 'Cinema', 'Calendar'] },
+              { title: 'For Businesses', links: ['List Your Event', 'Advertise', 'Contact Us'] },
+              { title: 'Connect', links: ['Instagram', 'Facebook', 'Twitter'] }
+            ].map((section) => (
+              <div key={section.title}>
+                <h4 className="font-bold text-lg mb-4">{section.title}</h4>
+                <ul className="space-y-3 text-gray-400">
+                  {section.links.map((link) => (
+                    <motion.li key={link} whileHover={{ x: 5, color: "#fff" }}>
+                      <a href="#" className="hover:text-white transition-colors">{link}</a>
+                    </motion.li>
+                  ))}
+                </ul>
+              </div>
+            ))}
           </div>
 
-          <div className="pt-8 border-t border-white/10 text-center text-gray-400 text-sm">
-            <p>© 2025 BahrainNights.com • Powered by AI • Made with ❤️ in Bahrain</p>
+          <div className="pt-10 border-t border-white/10 text-center text-gray-400">
+            <p className="flex items-center justify-center gap-2">
+              © 2025 BahrainNights.com • Powered by AI • Made with
+              <motion.span
+                animate={{ scale: [1, 1.2, 1] }}
+                transition={{ duration: 1, repeat: Infinity }}
+              >
+                ❤️
+              </motion.span>
+              in Bahrain
+            </p>
           </div>
         </div>
-      </footer>
+      </motion.footer>
     </div>
   );
 };
