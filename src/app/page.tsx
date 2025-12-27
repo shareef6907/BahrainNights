@@ -1,8 +1,8 @@
 'use client';
 
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Search, MapPin, Clock, Star, ChevronRight, Menu, X, Globe, Sparkles } from 'lucide-react';
+import { Search, MapPin, Clock, Star, ChevronRight, ChevronDown, Menu, X, Globe, Sparkles, Plus } from 'lucide-react';
 
 // Animation variants - optimized for speed
 const fadeIn = {
@@ -19,8 +19,103 @@ const cardHover = {
   transition: { duration: 0.2 }
 };
 
+const dropdownVariants = {
+  hidden: { opacity: 0, y: -10, scale: 0.95 },
+  visible: {
+    opacity: 1,
+    y: 0,
+    scale: 1,
+    transition: { duration: 0.2, ease: "easeOut" as const }
+  },
+  exit: {
+    opacity: 0,
+    y: -10,
+    scale: 0.95,
+    transition: { duration: 0.15 }
+  }
+};
+
+const accordionVariants = {
+  hidden: { height: 0, opacity: 0 },
+  visible: {
+    height: "auto",
+    opacity: 1,
+    transition: { duration: 0.3, ease: "easeOut" as const }
+  },
+  exit: {
+    height: 0,
+    opacity: 0,
+    transition: { duration: 0.2 }
+  }
+};
+
+// Navigation menu data
+const menuItems = [
+  {
+    name: 'Events',
+    icon: '🎭',
+    href: '/events',
+    dropdown: [
+      { name: "Today's Events", icon: '📅', href: '/events/today' },
+      { name: 'This Weekend', icon: '🗓️', href: '/events/weekend' },
+      { name: 'Concerts & Live Music', icon: '🎵', href: '/events/concerts' },
+      { name: 'Family & Kids', icon: '👨‍👩‍👧‍👦', href: '/events/family' },
+      { name: 'Cultural & Arts', icon: '🎨', href: '/events/cultural' },
+      { name: 'Sports', icon: '⚽', href: '/events/sports' },
+      { name: 'Full Calendar', icon: '📆', href: '/events/calendar' },
+    ]
+  },
+  {
+    name: 'Dining & Nightlife',
+    icon: '🍽️',
+    href: '/dining',
+    dropdown: [
+      { name: 'Restaurants', icon: '🍴', href: '/dining/restaurants' },
+      { name: 'Cafes & Coffee Shops', icon: '☕', href: '/dining/cafes' },
+      { name: 'Lounges & Bars', icon: '🍸', href: '/dining/lounges' },
+      { name: 'Nightclubs', icon: '🎶', href: '/dining/nightclubs' },
+      { name: 'Beach & Pool Clubs', icon: '🏖️', href: '/dining/beach-clubs' },
+      { name: 'View All Places', icon: '📍', href: '/dining/all' },
+    ]
+  },
+  {
+    name: 'Cinema',
+    icon: '🎬',
+    href: '/cinema',
+    dropdown: [
+      { name: 'Now Showing', icon: '🎞️', href: '/cinema/now-showing' },
+      { name: 'Coming Soon', icon: '🔜', href: '/cinema/coming-soon' },
+    ]
+  },
+  {
+    name: 'Offers',
+    icon: '🏷️',
+    href: '/offers',
+    dropdown: [
+      { name: 'Ladies Nights', icon: '👠', href: '/offers/ladies-nights' },
+      { name: 'Brunches', icon: '🥂', href: '/offers/brunches' },
+      { name: 'Happy Hours', icon: '🍻', href: '/offers/happy-hours' },
+      { name: 'Special Deals', icon: '💎', href: '/offers/deals' },
+    ]
+  },
+  {
+    name: 'Explore',
+    icon: '🧭',
+    href: '/explore',
+    dropdown: [
+      { name: 'Hotels & Staycations', icon: '🏨', href: '/explore/hotels' },
+      { name: 'Spas & Wellness', icon: '💆', href: '/explore/spas' },
+      { name: 'Shopping & Markets', icon: '🛍️', href: '/explore/shopping' },
+      { name: 'Tours & Experiences', icon: '🗺️', href: '/explore/tours' },
+      { name: 'Community Events', icon: '🤝', href: '/explore/community' },
+    ]
+  }
+];
+
 export default function BahrainNightsHomepage() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [activeDropdown, setActiveDropdown] = useState<string | null>(null);
+  const [mobileAccordion, setMobileAccordion] = useState<string | null>(null);
   const [currentSlide, setCurrentSlide] = useState(0);
   const [isScrolled, setIsScrolled] = useState(false);
 
@@ -40,6 +135,13 @@ export default function BahrainNightsHomepage() {
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
 
+  // Close dropdown when clicking outside
+  useEffect(() => {
+    const handleClickOutside = () => setActiveDropdown(null);
+    document.addEventListener('click', handleClickOutside);
+    return () => document.removeEventListener('click', handleClickOutside);
+  }, []);
+
   // Data
   const adSlides = [
     { id: 1, title: "New Year's Eve at The Ritz", subtitle: "Ring in 2026 with elegance", cta: "Book Now", image: "https://images.unsplash.com/photo-1514525253161-7a46d19cd819?w=1920&h=600&fit=crop", gradient: "from-purple-600/40 to-pink-600/40" },
@@ -47,13 +149,13 @@ export default function BahrainNightsHomepage() {
     { id: 3, title: "Bahrain Food Festival", subtitle: "50+ Local Vendors • Jan 15-20", cta: "Get Tickets", image: "https://images.unsplash.com/photo-1555939594-58d7cb561ad1?w=1920&h=600&fit=crop", gradient: "from-orange-600/40 to-red-600/40" }
   ];
 
+  // Updated categories to match main menu
   const categories = [
-    { icon: "🎭", name: "Cultural", count: 47, color: "from-purple-500 to-pink-500" },
-    { icon: "🍽️", name: "Dining", count: 123, color: "from-orange-500 to-red-500" },
-    { icon: "🎵", name: "Live Music", count: 12, color: "from-blue-500 to-cyan-500" },
-    { icon: "🌙", name: "Nightlife", count: 89, color: "from-indigo-500 to-purple-500" },
-    { icon: "👨‍👩‍👧‍👦", name: "Family", count: 34, color: "from-green-500 to-emerald-500" },
-    { icon: "⚽", name: "Sports", count: 8, color: "from-red-500 to-orange-500" }
+    { icon: "🎭", name: "Events", description: "Concerts, shows & more", count: 156, color: "from-purple-500 to-pink-500", href: "/events" },
+    { icon: "🍽️", name: "Dining & Nightlife", description: "Restaurants & clubs", count: 284, color: "from-orange-500 to-red-500", href: "/dining" },
+    { icon: "🎬", name: "Cinema", description: "Movies & showtimes", count: 42, color: "from-blue-500 to-cyan-500", href: "/cinema" },
+    { icon: "🏷️", name: "Offers", description: "Deals & promotions", count: 89, color: "from-green-500 to-emerald-500", href: "/offers" },
+    { icon: "🧭", name: "Explore", description: "Hotels, spas & more", count: 127, color: "from-indigo-500 to-purple-500", href: "/explore" }
   ];
 
   const todayEvents = [
@@ -76,8 +178,7 @@ export default function BahrainNightsHomepage() {
     return () => clearInterval(timer);
   }, [adSlides.length]);
 
-  const navItems = ['Events', 'Venues', 'Cinema', 'Calendar'];
-  const quickFilters = ['🎭 Culture', '🍽️ Dining', '🎵 Music', '🌙 Nightlife', '👨‍👩‍👧‍👦 Family'];
+  const quickFilters = ['🎭 Events', '🍽️ Dining', '🎬 Cinema', '🏷️ Offers', '🧭 Explore'];
 
   return (
     <div className="bg-gradient-to-b from-slate-950 via-slate-900 to-slate-950 text-white min-h-screen">
@@ -88,57 +189,183 @@ export default function BahrainNightsHomepage() {
       </div>
 
       {/* Navigation */}
-      <nav className={`fixed top-0 w-full z-50 transition-all duration-300 ${isScrolled ? 'bg-slate-950/90 backdrop-blur-xl border-b border-white/10' : ''}`}>
+      <nav className={`fixed top-0 w-full z-50 transition-all duration-300 ${isScrolled ? 'bg-slate-950/95 backdrop-blur-xl border-b border-white/10 shadow-xl shadow-black/20' : ''}`}>
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex items-center justify-between h-20">
-            <div className="flex items-center space-x-2">
-              <span className="text-3xl font-black bg-gradient-to-r from-yellow-400 via-orange-500 to-pink-500 bg-clip-text text-transparent">
-                BahrainNights
-              </span>
-              <span className="text-xs text-yellow-400 mt-2 flex items-center gap-1">
-                <Sparkles className="w-3 h-3" />
-                AI-Powered
-              </span>
+            {/* Logo */}
+            <div className="flex items-center space-x-2 flex-shrink-0">
+              <a href="/" className="flex items-center space-x-2">
+                <span className="text-2xl lg:text-3xl font-black bg-gradient-to-r from-yellow-400 via-orange-500 to-pink-500 bg-clip-text text-transparent">
+                  BahrainNights
+                </span>
+                <span className="hidden sm:flex text-xs text-yellow-400 mt-2 items-center gap-1">
+                  <Sparkles className="w-3 h-3" />
+                  AI-Powered
+                </span>
+              </a>
             </div>
 
-            <div className="hidden md:flex items-center space-x-8">
-              {navItems.map(item => (
-                <a key={item} href={`#${item.toLowerCase()}`} className="text-gray-300 hover:text-white transition-colors relative group">
-                  {item}
-                  <span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-gradient-to-r from-yellow-400 to-orange-500 group-hover:w-full transition-all duration-200" />
-                </a>
+            {/* Desktop Navigation */}
+            <div className="hidden lg:flex items-center space-x-1">
+              {menuItems.map((item) => (
+                <div
+                  key={item.name}
+                  className="relative"
+                  onMouseEnter={() => setActiveDropdown(item.name)}
+                  onMouseLeave={() => setActiveDropdown(null)}
+                >
+                  <button
+                    className={`flex items-center space-x-1.5 px-4 py-2.5 rounded-lg text-gray-300 hover:text-white hover:bg-white/5 transition-all duration-200 group ${activeDropdown === item.name ? 'text-white bg-white/5' : ''}`}
+                    onClick={(e) => e.stopPropagation()}
+                  >
+                    <span className="text-lg">{item.icon}</span>
+                    <span className="font-medium">{item.name}</span>
+                    <ChevronDown className={`w-4 h-4 transition-transform duration-200 ${activeDropdown === item.name ? 'rotate-180' : ''}`} />
+                  </button>
+
+                  {/* Desktop Dropdown */}
+                  <AnimatePresence>
+                    {activeDropdown === item.name && (
+                      <motion.div
+                        className="absolute top-full left-0 mt-2 w-64 bg-slate-900/98 backdrop-blur-xl border border-white/10 rounded-2xl shadow-2xl shadow-black/50 overflow-hidden"
+                        variants={dropdownVariants}
+                        initial="hidden"
+                        animate="visible"
+                        exit="exit"
+                      >
+                        <div className="py-2">
+                          {item.dropdown.map((subItem, index) => (
+                            <a
+                              key={subItem.name}
+                              href={subItem.href}
+                              className="flex items-center space-x-3 px-4 py-3 hover:bg-white/5 transition-colors group"
+                              style={{ animationDelay: `${index * 30}ms` }}
+                            >
+                              <span className="text-xl group-hover:scale-110 transition-transform duration-200">{subItem.icon}</span>
+                              <span className="text-gray-300 group-hover:text-white transition-colors">{subItem.name}</span>
+                            </a>
+                          ))}
+                        </div>
+                        <div className="border-t border-white/10 p-3">
+                          <a
+                            href={item.href}
+                            className="flex items-center justify-center space-x-2 py-2 text-yellow-400 hover:text-yellow-300 font-medium transition-colors"
+                          >
+                            <span>View All {item.name}</span>
+                            <ChevronRight className="w-4 h-4" />
+                          </a>
+                        </div>
+                      </motion.div>
+                    )}
+                  </AnimatePresence>
+                </div>
               ))}
-              <button className="flex items-center space-x-1 text-gray-300 hover:text-white transition-colors">
+            </div>
+
+            {/* Right Side Actions */}
+            <div className="hidden lg:flex items-center space-x-4">
+              <button className="flex items-center space-x-1 text-gray-300 hover:text-white transition-colors px-3 py-2 rounded-lg hover:bg-white/5">
                 <Globe className="w-4 h-4" />
                 <span>AR</span>
               </button>
-              <button className="bg-gradient-to-r from-yellow-400 via-orange-500 to-pink-500 text-black px-6 py-2 rounded-full font-semibold hover:shadow-lg hover:shadow-orange-500/25 transition-shadow">
-                List Your Event
-              </button>
+              <a
+                href="/list-event"
+                className="flex items-center space-x-2 bg-gradient-to-r from-yellow-400 via-orange-500 to-pink-500 text-black px-5 py-2.5 rounded-full font-semibold hover:shadow-lg hover:shadow-orange-500/25 hover:scale-105 transition-all duration-200"
+              >
+                <Plus className="w-4 h-4" />
+                <span>List Your Event</span>
+              </a>
             </div>
 
-            <button className="md:hidden text-white" onClick={() => setMobileMenuOpen(!mobileMenuOpen)}>
-              {mobileMenuOpen ? <X /> : <Menu />}
+            {/* Mobile Menu Button */}
+            <button
+              className="lg:hidden text-white p-2 hover:bg-white/5 rounded-lg transition-colors"
+              onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+            >
+              {mobileMenuOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
             </button>
           </div>
         </div>
 
+        {/* Mobile Menu */}
         <AnimatePresence>
           {mobileMenuOpen && (
             <motion.div
-              className="md:hidden bg-slate-900/95 backdrop-blur-xl border-t border-white/10"
+              className="lg:hidden bg-slate-900/98 backdrop-blur-xl border-t border-white/10 max-h-[calc(100vh-5rem)] overflow-y-auto"
               initial={{ opacity: 0, height: 0 }}
               animate={{ opacity: 1, height: "auto" }}
               exit={{ opacity: 0, height: 0 }}
-              transition={{ duration: 0.2 }}
+              transition={{ duration: 0.3 }}
             >
-              <div className="px-4 py-4 space-y-3">
-                {navItems.map(item => (
-                  <a key={item} href={`#${item.toLowerCase()}`} className="block text-gray-300 hover:text-white py-2">{item}</a>
+              <div className="px-4 py-4 space-y-1">
+                {menuItems.map((item) => (
+                  <div key={item.name} className="border-b border-white/5 last:border-0">
+                    {/* Accordion Header */}
+                    <button
+                      onClick={() => setMobileAccordion(mobileAccordion === item.name ? null : item.name)}
+                      className="w-full flex items-center justify-between py-4 text-left"
+                    >
+                      <div className="flex items-center space-x-3">
+                        <span className="text-2xl">{item.icon}</span>
+                        <span className="text-lg font-medium text-white">{item.name}</span>
+                      </div>
+                      <ChevronDown
+                        className={`w-5 h-5 text-gray-400 transition-transform duration-300 ${mobileAccordion === item.name ? 'rotate-180 text-yellow-400' : ''}`}
+                      />
+                    </button>
+
+                    {/* Accordion Content */}
+                    <AnimatePresence>
+                      {mobileAccordion === item.name && (
+                        <motion.div
+                          variants={accordionVariants}
+                          initial="hidden"
+                          animate="visible"
+                          exit="exit"
+                          className="overflow-hidden"
+                        >
+                          <div className="pb-4 pl-4 space-y-1">
+                            {item.dropdown.map((subItem) => (
+                              <a
+                                key={subItem.name}
+                                href={subItem.href}
+                                className="flex items-center space-x-3 py-3 px-4 rounded-xl hover:bg-white/5 transition-colors"
+                                onClick={() => setMobileMenuOpen(false)}
+                              >
+                                <span className="text-xl">{subItem.icon}</span>
+                                <span className="text-gray-300">{subItem.name}</span>
+                              </a>
+                            ))}
+                            <a
+                              href={item.href}
+                              className="flex items-center space-x-2 py-3 px-4 text-yellow-400 font-medium"
+                              onClick={() => setMobileMenuOpen(false)}
+                            >
+                              <span>View All</span>
+                              <ChevronRight className="w-4 h-4" />
+                            </a>
+                          </div>
+                        </motion.div>
+                      )}
+                    </AnimatePresence>
+                  </div>
                 ))}
-                <button className="w-full bg-gradient-to-r from-yellow-400 to-orange-500 text-black px-6 py-3 rounded-full font-semibold">
-                  List Your Event
-                </button>
+
+                {/* Mobile Language & CTA */}
+                <div className="pt-4 space-y-3">
+                  <button className="w-full flex items-center justify-center space-x-2 py-3 text-gray-300 hover:text-white border border-white/10 rounded-xl hover:bg-white/5 transition-colors">
+                    <Globe className="w-5 h-5" />
+                    <span>العربية</span>
+                  </button>
+                  <a
+                    href="/list-event"
+                    className="w-full flex items-center justify-center space-x-2 bg-gradient-to-r from-yellow-400 via-orange-500 to-pink-500 text-black px-6 py-4 rounded-xl font-semibold"
+                    onClick={() => setMobileMenuOpen(false)}
+                  >
+                    <Plus className="w-5 h-5" />
+                    <span>List Your Event</span>
+                  </a>
+                </div>
               </div>
             </motion.div>
           )}
@@ -278,10 +505,10 @@ export default function BahrainNightsHomepage() {
             <h2 className="text-3xl md:text-5xl font-bold flex items-center gap-3">
               🔥 Happening Today
             </h2>
-            <button className="text-yellow-400 hover:text-yellow-300 flex items-center space-x-2 transition-colors group">
+            <a href="/events/today" className="text-yellow-400 hover:text-yellow-300 flex items-center space-x-2 transition-colors group">
               <span className="font-medium">View All</span>
               <ChevronRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
-            </button>
+            </a>
           </motion.div>
 
           <motion.div
@@ -335,10 +562,10 @@ export default function BahrainNightsHomepage() {
             variants={fadeIn}
           >
             <h2 className="text-3xl md:text-5xl font-bold">🎬 Now Showing in Cinemas</h2>
-            <button className="text-yellow-400 hover:text-yellow-300 flex items-center space-x-2 transition-colors group">
+            <a href="/cinema/now-showing" className="text-yellow-400 hover:text-yellow-300 flex items-center space-x-2 transition-colors group">
               <span className="font-medium">All Movies</span>
               <ChevronRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
-            </button>
+            </a>
           </motion.div>
 
           <motion.div
@@ -371,7 +598,7 @@ export default function BahrainNightsHomepage() {
         </div>
       </section>
 
-      {/* Categories Grid */}
+      {/* Categories Grid - Updated to match main menu */}
       <section className="px-4 mb-24">
         <div className="max-w-7xl mx-auto">
           <motion.h2
@@ -385,26 +612,28 @@ export default function BahrainNightsHomepage() {
           </motion.h2>
 
           <motion.div
-            className="grid grid-cols-2 md:grid-cols-3 gap-6"
+            className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-6"
             variants={stagger}
             initial="hidden"
             whileInView="visible"
             viewport={{ once: true, margin: "-100px" }}
           >
             {categories.map(category => (
-              <motion.div
+              <motion.a
                 key={category.name}
-                className="group relative bg-white/5 backdrop-blur-sm border border-white/10 rounded-2xl p-8 cursor-pointer overflow-hidden hover:border-yellow-400/50 transition-colors"
+                href={category.href}
+                className="group relative bg-white/5 backdrop-blur-sm border border-white/10 rounded-2xl p-6 cursor-pointer overflow-hidden hover:border-yellow-400/50 transition-all duration-300"
                 variants={fadeIn}
                 whileHover={cardHover}
               >
-                <div className={`absolute inset-0 bg-gradient-to-br ${category.color} opacity-0 group-hover:opacity-20 transition-opacity duration-200`} />
-                <div className="relative">
-                  <div className="text-6xl mb-4 group-hover:scale-110 transition-transform duration-200">{category.icon}</div>
-                  <h3 className="text-2xl font-bold mb-2">{category.name}</h3>
-                  <p className="text-gray-400">{category.count} events</p>
+                <div className={`absolute inset-0 bg-gradient-to-br ${category.color} opacity-0 group-hover:opacity-20 transition-opacity duration-300`} />
+                <div className="relative text-center">
+                  <div className="text-5xl mb-4 group-hover:scale-110 transition-transform duration-200">{category.icon}</div>
+                  <h3 className="text-xl font-bold mb-1">{category.name}</h3>
+                  <p className="text-sm text-gray-400 mb-2">{category.description}</p>
+                  <p className="text-yellow-400 font-semibold">{category.count} listings</p>
                 </div>
-              </motion.div>
+              </motion.a>
             ))}
           </motion.div>
         </div>
@@ -413,17 +642,28 @@ export default function BahrainNightsHomepage() {
       {/* Footer */}
       <footer className="border-t border-white/10 px-4 py-16">
         <div className="max-w-7xl mx-auto">
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-10 mb-10">
-            <div>
+          <div className="grid grid-cols-1 md:grid-cols-5 gap-10 mb-10">
+            <div className="md:col-span-2">
               <div className="text-3xl font-black bg-gradient-to-r from-yellow-400 via-orange-500 to-pink-500 bg-clip-text text-transparent mb-4">
                 BahrainNights
               </div>
-              <p className="text-gray-400">Supporting Bahrain&apos;s local businesses. Every voice matters.</p>
+              <p className="text-gray-400 mb-6">Bahrain&apos;s first AI-powered guide to events, dining, and culture. Always updated, always alive.</p>
+              <div className="flex space-x-4">
+                <a href="#" className="w-10 h-10 bg-white/5 rounded-full flex items-center justify-center hover:bg-white/10 transition-colors">
+                  <span className="text-xl">📸</span>
+                </a>
+                <a href="#" className="w-10 h-10 bg-white/5 rounded-full flex items-center justify-center hover:bg-white/10 transition-colors">
+                  <span className="text-xl">👤</span>
+                </a>
+                <a href="#" className="w-10 h-10 bg-white/5 rounded-full flex items-center justify-center hover:bg-white/10 transition-colors">
+                  <span className="text-xl">🐦</span>
+                </a>
+              </div>
             </div>
             {[
-              { title: 'Explore', links: ['Events', 'Venues', 'Cinema', 'Calendar'] },
-              { title: 'For Businesses', links: ['List Your Event', 'Advertise', 'Contact Us'] },
-              { title: 'Connect', links: ['Instagram', 'Facebook', 'Twitter'] }
+              { title: 'Events', links: ["Today's Events", 'This Weekend', 'Concerts', 'Full Calendar'] },
+              { title: 'Dining', links: ['Restaurants', 'Cafes', 'Nightlife', 'View All'] },
+              { title: 'For Businesses', links: ['List Your Event', 'Advertise', 'Partner With Us', 'Contact'] }
             ].map(section => (
               <div key={section.title}>
                 <h4 className="font-bold text-lg mb-4">{section.title}</h4>
