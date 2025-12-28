@@ -6,7 +6,6 @@ import Image from 'next/image';
 import { motion } from 'framer-motion';
 import {
   Search,
-  RefreshCw,
   Film,
   Calendar,
   Star,
@@ -21,6 +20,8 @@ import {
   Timer,
   Globe,
   Building2,
+  Trash2,
+  Info,
 } from 'lucide-react';
 
 interface Movie {
@@ -104,8 +105,8 @@ function getPosterUrl(posterPath: string | null): string {
 export default function AdminCinemaPage() {
   const [movies, setMovies] = useState<Movie[]>([]);
   const [loading, setLoading] = useState(true);
-  const [syncing, setSyncing] = useState(false);
-  const [syncResult, setSyncResult] = useState<{ success: boolean; message: string } | null>(null);
+  const [cleaning, setCleaning] = useState(false);
+  const [cleanResult, setCleanResult] = useState<{ success: boolean; message: string; deleted?: number } | null>(null);
   const [status, setStatus] = useState<AgentStatus | null>(null);
   const [scrapeStatus, setScrapeStatus] = useState<ScrapeStatus | null>(null);
   const [activeTab, setActiveTab] = useState<MovieTab>('all');
@@ -148,35 +149,40 @@ export default function AdminCinemaPage() {
     fetchData();
   }, []);
 
-  // Sync with TMDB
-  const handleSync = async () => {
-    try {
-      setSyncing(true);
-      setSyncResult(null);
+  // Clean database - remove movies not found in Bahrain cinemas
+  const handleCleanDatabase = async () => {
+    if (!confirm('This will delete all movies that are not currently showing in any Bahrain cinema (scraped_from is empty). Continue?')) {
+      return;
+    }
 
-      const res = await fetch('/api/agents/cinema/run', { method: 'POST' });
+    try {
+      setCleaning(true);
+      setCleanResult(null);
+
+      const res = await fetch('/api/cinema/cleanup', { method: 'POST' });
       const data = await res.json();
 
       if (data.success) {
-        setSyncResult({
+        setCleanResult({
           success: true,
-          message: `Synced ${data.summary.found} movies. Added: ${data.summary.added}, Updated: ${data.summary.updated}`,
+          message: `Cleaned up database. Deleted ${data.deleted} old movies.`,
+          deleted: data.deleted,
         });
         // Refresh data
         await fetchData();
       } else {
-        setSyncResult({
+        setCleanResult({
           success: false,
-          message: data.error || 'Sync failed',
+          message: data.error || 'Cleanup failed',
         });
       }
     } catch (error) {
-      setSyncResult({
+      setCleanResult({
         success: false,
-        message: 'Failed to sync with TMDB',
+        message: 'Failed to clean database',
       });
     } finally {
-      setSyncing(false);
+      setCleaning(false);
     }
   };
 
@@ -260,7 +266,7 @@ export default function AdminCinemaPage() {
         <div>
           <h1 className="text-2xl font-bold text-white">Cinema Manager</h1>
           <p className="text-gray-400 mt-1">
-            Sync movies from TMDB. Cinema scraping runs automatically via GitHub Actions.
+            Movies sync automatically every 6 hours from Bahrain cinema websites.
           </p>
         </div>
 
@@ -275,33 +281,50 @@ export default function AdminCinemaPage() {
             View Scraper Logs
           </a>
           <button
-            onClick={handleSync}
-            disabled={syncing}
-            className="flex items-center gap-2 px-4 py-2.5 bg-gradient-to-r from-cyan-500 to-blue-500 text-white rounded-xl hover:opacity-90 transition-opacity disabled:opacity-50"
+            onClick={handleCleanDatabase}
+            disabled={cleaning}
+            className="flex items-center gap-2 px-4 py-2.5 bg-gradient-to-r from-red-500 to-orange-500 text-white rounded-xl hover:opacity-90 transition-opacity disabled:opacity-50"
           >
-            {syncing ? (
+            {cleaning ? (
               <Loader2 className="w-4 h-4 animate-spin" />
             ) : (
-              <RefreshCw className="w-4 h-4" />
+              <Trash2 className="w-4 h-4" />
             )}
-            {syncing ? 'Syncing...' : 'Sync TMDB'}
+            {cleaning ? 'Cleaning...' : 'Clean Database'}
           </button>
         </div>
       </motion.div>
 
-      {/* Results */}
-      {syncResult && (
+      {/* Auto-sync Info Note */}
+      <motion.div
+        initial={{ opacity: 0, y: -10 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ delay: 0.05 }}
+        className="p-4 rounded-xl bg-blue-500/10 border border-blue-500/20 flex items-start gap-3"
+      >
+        <Info className="w-5 h-5 text-blue-400 flex-shrink-0 mt-0.5" />
+        <div>
+          <p className="text-blue-400 font-medium">Fully Automated System</p>
+          <p className="text-blue-300/70 text-sm mt-1">
+            Cinema data syncs automatically every 6 hours from Bahrain cinema websites (Cineco, VOX, Cinepolis, Mukta).
+            No manual intervention needed. Use &quot;Clean Database&quot; to remove old movies not showing in any Bahrain cinema.
+          </p>
+        </div>
+      </motion.div>
+
+      {/* Cleanup Results */}
+      {cleanResult && (
         <motion.div
           initial={{ opacity: 0, y: -10 }}
           animate={{ opacity: 1, y: 0 }}
           className={`p-4 rounded-xl ${
-            syncResult.success
+            cleanResult.success
               ? 'bg-green-500/10 border border-green-500/20'
               : 'bg-red-500/10 border border-red-500/20'
           }`}
         >
-          <p className={syncResult.success ? 'text-green-400' : 'text-red-400'}>
-            {syncResult.message}
+          <p className={cleanResult.success ? 'text-green-400' : 'text-red-400'}>
+            {cleanResult.message}
           </p>
         </motion.div>
       )}
@@ -352,20 +375,6 @@ export default function AdminCinemaPage() {
 
         <div className="bg-white/5 border border-white/10 rounded-2xl p-4">
           <div className="flex items-center gap-3">
-            <div className="p-2 bg-yellow-500/20 rounded-lg">
-              <Timer className="w-5 h-5 text-yellow-400" />
-            </div>
-            <div>
-              <p className="text-sm font-medium text-white">
-                {status?.latest_run ? timeSince(status.latest_run.completed_at) : 'Never'}
-              </p>
-              <p className="text-xs text-gray-400">Last TMDB Sync</p>
-            </div>
-          </div>
-        </div>
-
-        <div className="bg-white/5 border border-white/10 rounded-2xl p-4">
-          <div className="flex items-center gap-3">
             <div className="p-2 bg-purple-500/20 rounded-lg">
               <Globe className="w-5 h-5 text-purple-400" />
             </div>
@@ -373,7 +382,19 @@ export default function AdminCinemaPage() {
               <p className="text-sm font-medium text-white">
                 {scrapeStatus?.lastScrape ? timeSince(scrapeStatus.lastScrape.completed_at) : 'Never'}
               </p>
-              <p className="text-xs text-gray-400">Last Scrape</p>
+              <p className="text-xs text-gray-400">Last Auto-Sync</p>
+            </div>
+          </div>
+        </div>
+
+        <div className="bg-white/5 border border-white/10 rounded-2xl p-4">
+          <div className="flex items-center gap-3">
+            <div className="p-2 bg-yellow-500/20 rounded-lg">
+              <Timer className="w-5 h-5 text-yellow-400" />
+            </div>
+            <div>
+              <p className="text-sm font-medium text-white">Every 6h</p>
+              <p className="text-xs text-gray-400">Sync Schedule</p>
             </div>
           </div>
         </div>
@@ -503,18 +524,9 @@ export default function AdminCinemaPage() {
             <h3 className="text-lg font-medium text-white mb-2">No movies found</h3>
             <p className="text-gray-400 mb-4">
               {movies.length === 0
-                ? 'Click "Sync TMDB" to fetch movies, then "Scrape Cinemas" to detect now showing'
+                ? 'Movies will appear automatically after the next scheduled sync from Bahrain cinemas'
                 : 'Try adjusting your search'}
             </p>
-            {movies.length === 0 && (
-              <button
-                onClick={handleSync}
-                disabled={syncing}
-                className="px-4 py-2 bg-cyan-500 text-white rounded-lg hover:bg-cyan-600 transition-colors"
-              >
-                Sync Now
-              </button>
-            )}
           </div>
         ) : (
           <>
