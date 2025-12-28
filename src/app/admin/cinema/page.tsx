@@ -76,11 +76,15 @@ interface ScrapeStatus {
     items_found: number;
     items_updated: number;
     duration_ms: number;
+    agent_type?: string;
     metadata?: {
       scrapeResults?: { cinema: string; moviesFound: number }[];
+      cinemas?: { name: string; count: number }[];
       matchedCount?: number;
       unmatchedCount?: number;
       unmatchedTitles?: string[];
+      usedFallback?: boolean;
+      usedTMDBFallback?: boolean;
     };
   } | null;
   nowShowingCount: number;
@@ -93,9 +97,7 @@ export default function AdminCinemaPage() {
   const [movies, setMovies] = useState<Movie[]>([]);
   const [loading, setLoading] = useState(true);
   const [syncing, setSyncing] = useState(false);
-  const [scraping, setScraping] = useState(false);
   const [syncResult, setSyncResult] = useState<{ success: boolean; message: string } | null>(null);
-  const [scrapeResult, setScrapeResult] = useState<{ success: boolean; message: string } | null>(null);
   const [status, setStatus] = useState<AgentStatus | null>(null);
   const [scrapeStatus, setScrapeStatus] = useState<ScrapeStatus | null>(null);
   const [activeTab, setActiveTab] = useState<MovieTab>('all');
@@ -114,8 +116,8 @@ export default function AdminCinemaPage() {
         setStatus(statusData);
       }
 
-      // Fetch scrape status
-      const scrapeStatusRes = await fetch('/api/agents/cinema/scrape');
+      // Fetch GitHub Actions scrape status from agent_logs
+      const scrapeStatusRes = await fetch('/api/agents/cinema/scrape-status');
       if (scrapeStatusRes.ok) {
         const scrapeData = await scrapeStatusRes.json();
         setScrapeStatus(scrapeData);
@@ -167,38 +169,6 @@ export default function AdminCinemaPage() {
       });
     } finally {
       setSyncing(false);
-    }
-  };
-
-  // Scrape cinema websites
-  const handleScrape = async () => {
-    try {
-      setScraping(true);
-      setScrapeResult(null);
-
-      const res = await fetch('/api/agents/cinema/scrape', { method: 'POST' });
-      const data = await res.json();
-
-      if (data.success) {
-        setScrapeResult({
-          success: true,
-          message: data.message || `Scraped ${data.summary?.totalScraped || 0} movies, matched ${data.summary?.matchedCount || 0}`,
-        });
-        // Refresh data
-        await fetchData();
-      } else {
-        setScrapeResult({
-          success: false,
-          message: data.error || 'Scrape failed',
-        });
-      }
-    } catch (error) {
-      setScrapeResult({
-        success: false,
-        message: 'Failed to scrape cinema websites',
-      });
-    } finally {
-      setScraping(false);
     }
   };
 
@@ -282,23 +252,20 @@ export default function AdminCinemaPage() {
         <div>
           <h1 className="text-2xl font-bold text-white">Cinema Manager</h1>
           <p className="text-gray-400 mt-1">
-            Sync movies from TMDB and scrape Bahrain cinemas
+            Sync movies from TMDB. Cinema scraping runs automatically via GitHub Actions.
           </p>
         </div>
 
         <div className="flex gap-3">
-          <button
-            onClick={handleScrape}
-            disabled={scraping}
-            className="flex items-center gap-2 px-4 py-2.5 bg-gradient-to-r from-purple-500 to-pink-500 text-white rounded-xl hover:opacity-90 transition-opacity disabled:opacity-50"
+          <a
+            href="https://github.com/shareef6907/BahrainNights/actions/workflows/cinema-scraper.yml"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="flex items-center gap-2 px-4 py-2.5 bg-gradient-to-r from-purple-500 to-pink-500 text-white rounded-xl hover:opacity-90 transition-opacity"
           >
-            {scraping ? (
-              <Loader2 className="w-4 h-4 animate-spin" />
-            ) : (
-              <Globe className="w-4 h-4" />
-            )}
-            {scraping ? 'Scraping...' : 'Scrape Cinemas'}
-          </button>
+            <Globe className="w-4 h-4" />
+            View Scraper Logs
+          </a>
           <button
             onClick={handleSync}
             disabled={syncing}
@@ -331,21 +298,6 @@ export default function AdminCinemaPage() {
         </motion.div>
       )}
 
-      {scrapeResult && (
-        <motion.div
-          initial={{ opacity: 0, y: -10 }}
-          animate={{ opacity: 1, y: 0 }}
-          className={`p-4 rounded-xl ${
-            scrapeResult.success
-              ? 'bg-purple-500/10 border border-purple-500/20'
-              : 'bg-red-500/10 border border-red-500/20'
-          }`}
-        >
-          <p className={scrapeResult.success ? 'text-purple-400' : 'text-red-400'}>
-            {scrapeResult.message}
-          </p>
-        </motion.div>
-      )}
 
       {/* Stats Cards */}
       <motion.div
@@ -420,7 +372,7 @@ export default function AdminCinemaPage() {
       </motion.div>
 
       {/* Scrape Status Details */}
-      {scrapeStatus?.lastScrape?.metadata?.scrapeResults && (
+      {scrapeStatus?.lastScrape && (
         <motion.div
           initial={{ opacity: 0, y: 10 }}
           animate={{ opacity: 1, y: 0 }}
@@ -429,39 +381,50 @@ export default function AdminCinemaPage() {
         >
           <h3 className="text-sm font-medium text-white mb-3 flex items-center gap-2">
             <Building2 className="w-4 h-4 text-purple-400" />
-            Last Scrape Results
+            Last GitHub Actions Scrape
+            {(scrapeStatus.lastScrape.metadata?.usedFallback || scrapeStatus.lastScrape.metadata?.usedTMDBFallback) && (
+              <span className="px-2 py-0.5 text-xs bg-yellow-500/20 text-yellow-400 rounded ml-2">
+                Used TMDB Fallback
+              </span>
+            )}
           </h3>
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
-            {scrapeStatus.lastScrape.metadata.scrapeResults.map((result) => (
-              <div
-                key={result.cinema}
-                className="bg-white/5 rounded-lg p-3 text-center"
-              >
-                <p className="text-lg font-bold text-white">{result.moviesFound}</p>
-                <p className="text-xs text-gray-400">{result.cinema}</p>
-              </div>
-            ))}
-          </div>
-          {scrapeStatus.lastScrape.metadata.unmatchedTitles &&
-           scrapeStatus.lastScrape.metadata.unmatchedTitles.length > 0 && (
-            <div className="mt-4 pt-4 border-t border-white/10">
-              <p className="text-xs text-gray-400 mb-2">
-                Unmatched titles ({scrapeStatus.lastScrape.metadata.unmatchedCount || 0}):
-              </p>
-              <div className="flex flex-wrap gap-2">
-                {scrapeStatus.lastScrape.metadata.unmatchedTitles.slice(0, 10).map((title, i) => (
-                  <span key={i} className="px-2 py-1 text-xs bg-red-500/10 text-red-400 rounded">
-                    {title}
-                  </span>
-                ))}
-                {(scrapeStatus.lastScrape.metadata.unmatchedCount || 0) > 10 && (
-                  <span className="px-2 py-1 text-xs bg-white/5 text-gray-400 rounded">
-                    +{(scrapeStatus.lastScrape.metadata.unmatchedCount || 0) - 10} more
-                  </span>
-                )}
-              </div>
+
+          {/* Cinema results from GitHub Actions */}
+          {scrapeStatus.lastScrape.metadata?.cinemas && scrapeStatus.lastScrape.metadata.cinemas.length > 0 && (
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-4">
+              {scrapeStatus.lastScrape.metadata.cinemas.map((result) => (
+                <div
+                  key={result.name}
+                  className="bg-white/5 rounded-lg p-3 text-center"
+                >
+                  <p className="text-lg font-bold text-white">{result.count}</p>
+                  <p className="text-xs text-gray-400">{result.name}</p>
+                </div>
+              ))}
             </div>
           )}
+
+          {/* Summary stats */}
+          <div className="flex flex-wrap gap-4 text-sm">
+            <div className="flex items-center gap-2">
+              <span className="text-gray-400">Status:</span>
+              <span className={scrapeStatus.lastScrape.status === 'completed' ? 'text-green-400' : 'text-red-400'}>
+                {scrapeStatus.lastScrape.status}
+              </span>
+            </div>
+            <div className="flex items-center gap-2">
+              <span className="text-gray-400">Found:</span>
+              <span className="text-white">{scrapeStatus.lastScrape.items_found} titles</span>
+            </div>
+            <div className="flex items-center gap-2">
+              <span className="text-gray-400">Matched:</span>
+              <span className="text-white">{scrapeStatus.lastScrape.items_updated} movies</span>
+            </div>
+          </div>
+
+          <p className="text-xs text-gray-500 mt-3">
+            Scrapes automatically every 6 hours via GitHub Actions. You can also manually trigger from the Actions tab.
+          </p>
         </motion.div>
       )}
 
