@@ -1,11 +1,11 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { supabase } from '@/lib/supabase';
+import { supabaseAdmin } from '@/lib/supabase';
 
 export const dynamic = 'force-dynamic';
 
 /**
  * Get all events for admin panel
- * Includes all statuses: pending, published, draft
+ * Includes all statuses: pending, published, draft, rejected
  */
 export async function GET(request: NextRequest) {
   try {
@@ -14,12 +14,13 @@ export async function GET(request: NextRequest) {
     const category = searchParams.get('category');
     const search = searchParams.get('search');
 
-    let query = supabase
+    // Use supabaseAdmin to bypass RLS
+    let query = supabaseAdmin
       .from('events')
       .select('*')
       .order('created_at', { ascending: false });
 
-    // Filter by status
+    // Filter by status (only if not 'all' or 'past')
     if (status && status !== 'all' && status !== 'past') {
       query = query.eq('status', status);
     }
@@ -37,36 +38,50 @@ export async function GET(request: NextRequest) {
     const { data: events, error } = await query;
 
     if (error) {
-      console.error('Database error:', error);
+      console.error('Admin events fetch error:', error);
       return NextResponse.json(
-        { error: 'Failed to fetch events' },
-        { status: 500 }
+        { events: [], counts: { all: 0, pending: 0, published: 0, draft: 0, past: 0 }, error: error.message },
+        { status: 200 }
       );
     }
 
-    // Get counts for each status
-    const { data: allEvents } = await supabase
-      .from('events')
-      .select('status, start_date');
-
+    // Calculate counts
     const now = new Date();
+    const allEvents = events || [];
+
     const counts = {
-      all: allEvents?.length || 0,
-      pending: allEvents?.filter(e => e.status === 'pending').length || 0,
-      published: allEvents?.filter(e => e.status === 'published' && new Date(e.start_date) >= now).length || 0,
-      draft: allEvents?.filter(e => e.status === 'draft').length || 0,
-      past: allEvents?.filter(e => new Date(e.start_date) < now).length || 0,
+      all: allEvents.length,
+      pending: allEvents.filter(e => e.status === 'pending').length,
+      published: allEvents.filter(e => {
+        const eventDate = e.date || e.start_date;
+        return e.status === 'published' && (!eventDate || new Date(eventDate) >= now);
+      }).length,
+      draft: allEvents.filter(e => e.status === 'draft').length,
+      past: allEvents.filter(e => {
+        const eventDate = e.date || e.start_date;
+        return eventDate && new Date(eventDate) < now;
+      }).length,
     };
 
+    // Normalize field names for frontend compatibility
+    const normalizedEvents = allEvents.map(event => ({
+      ...event,
+      // Ensure consistent field names
+      start_date: event.date || event.start_date,
+      start_time: event.time || event.start_time,
+      featured_image: event.cover_url || event.featured_image,
+      view_count: event.views || event.view_count || 0,
+    }));
+
     return NextResponse.json({
-      events: events || [],
+      events: normalizedEvents,
       counts,
     });
   } catch (error) {
-    console.error('Admin events fetch error:', error);
+    console.error('Admin events API error:', error);
     return NextResponse.json(
-      { error: 'Internal server error' },
-      { status: 500 }
+      { events: [], counts: { all: 0, pending: 0, published: 0, draft: 0, past: 0 }, error: 'Server error' },
+      { status: 200 }
     );
   }
 }

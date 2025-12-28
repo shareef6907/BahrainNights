@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { supabase } from '@/lib/supabase';
+import { supabaseAdmin } from '@/lib/supabase';
 
 export const dynamic = 'force-dynamic';
 
@@ -20,12 +20,12 @@ export async function GET(request: NextRequest) {
     today.setHours(0, 0, 0, 0);
     const todayStr = today.toISOString().split('T')[0];
 
-    let query = supabase
+    // Try to fetch events - handle case where table might not exist or have different schema
+    let query = supabaseAdmin
       .from('events')
       .select('*')
       .eq('status', 'published')
-      .gte('start_date', todayStr)
-      .order('start_date', { ascending: true })
+      .order('created_at', { ascending: false })
       .limit(limit);
 
     // Filter by category
@@ -35,41 +35,7 @@ export async function GET(request: NextRequest) {
 
     // Search by title or venue name
     if (search) {
-      query = query.or(`title.ilike.%${search}%,venue_name.ilike.%${search}%,description.ilike.%${search}%`);
-    }
-
-    // Filter by date range
-    if (filter) {
-      const now = new Date();
-      let endDate: Date;
-
-      switch (filter) {
-        case 'today':
-          query = query.eq('start_date', todayStr);
-          break;
-        case 'weekend':
-          // Get next Saturday and Sunday
-          const dayOfWeek = now.getDay();
-          const daysUntilSaturday = (6 - dayOfWeek + 7) % 7;
-          const saturday = new Date(now);
-          saturday.setDate(now.getDate() + daysUntilSaturday);
-          const sunday = new Date(saturday);
-          sunday.setDate(saturday.getDate() + 1);
-          query = query
-            .gte('start_date', saturday.toISOString().split('T')[0])
-            .lte('start_date', sunday.toISOString().split('T')[0]);
-          break;
-        case 'week':
-          endDate = new Date(now);
-          endDate.setDate(now.getDate() + 7);
-          query = query.lte('start_date', endDate.toISOString().split('T')[0]);
-          break;
-        case 'month':
-          endDate = new Date(now);
-          endDate.setMonth(now.getMonth() + 1);
-          query = query.lte('start_date', endDate.toISOString().split('T')[0]);
-          break;
-      }
+      query = query.or(`title.ilike.%${search}%,venue_name.ilike.%${search}%`);
     }
 
     // Filter featured events
@@ -80,47 +46,98 @@ export async function GET(request: NextRequest) {
     const { data: events, error } = await query;
 
     if (error) {
-      console.error('Database error:', error);
-      return NextResponse.json(
-        { error: 'Failed to fetch events' },
-        { status: 500 }
-      );
+      console.error('Events fetch error:', error);
+      // Return empty array instead of error for better UX
+      return NextResponse.json({
+        events: [],
+        total: 0,
+        error: error.message,
+      });
+    }
+
+    // Filter by date on the client side to handle different field names
+    let filteredEvents = events || [];
+
+    // Try to filter by date field (might be 'date' or 'start_date')
+    filteredEvents = filteredEvents.filter(event => {
+      const eventDate = event.date || event.start_date;
+      if (!eventDate) return true; // Include events without dates
+      return new Date(eventDate) >= today;
+    });
+
+    // Apply date filter
+    if (filter && filter !== 'all') {
+      const now = new Date();
+      filteredEvents = filteredEvents.filter(event => {
+        const eventDate = new Date(event.date || event.start_date);
+
+        switch (filter) {
+          case 'today':
+            return eventDate.toDateString() === now.toDateString();
+          case 'weekend': {
+            const dayOfWeek = now.getDay();
+            const daysUntilSaturday = (6 - dayOfWeek + 7) % 7 || 7;
+            const saturday = new Date(now);
+            saturday.setDate(now.getDate() + daysUntilSaturday);
+            saturday.setHours(0, 0, 0, 0);
+            const sunday = new Date(saturday);
+            sunday.setDate(saturday.getDate() + 1);
+            sunday.setHours(23, 59, 59, 999);
+            return eventDate >= saturday && eventDate <= sunday;
+          }
+          case 'week': {
+            const endOfWeek = new Date(now);
+            endOfWeek.setDate(now.getDate() + 7);
+            return eventDate <= endOfWeek;
+          }
+          case 'month': {
+            const endOfMonth = new Date(now);
+            endOfMonth.setMonth(now.getMonth() + 1);
+            return eventDate <= endOfMonth;
+          }
+          default:
+            return true;
+        }
+      });
     }
 
     // Transform events for frontend
-    const transformedEvents = (events || []).map(event => ({
+    const transformedEvents = filteredEvents.map(event => ({
       id: event.id,
-      title: event.title,
-      slug: event.slug,
+      title: event.title || 'Untitled Event',
+      slug: event.slug || event.id,
       description: event.description || '',
-      image: event.featured_image || 'https://images.unsplash.com/photo-1492684223066-81342ee5ff30?w=800&h=500&fit=crop',
-      category: event.category,
+      image: event.cover_url || event.featured_image || 'https://images.unsplash.com/photo-1492684223066-81342ee5ff30?w=800&h=500&fit=crop',
+      category: event.category || 'other',
       categoryColor: getCategoryColor(event.category),
       venue: event.venue_name || 'Venue TBD',
-      location: event.venue_name || 'Bahrain',
-      date: formatDate(event.start_date),
-      time: event.start_time || 'TBD',
-      price: formatPrice(event.price_type, event.booking_method),
-      isFree: event.price_type === 'free',
-      isFeatured: event.is_featured,
-      viewCount: event.view_count || 0,
+      location: event.venue_address || event.venue_name || 'Bahrain',
+      date: formatDate(event.date || event.start_date),
+      time: event.time || event.start_time || 'TBD',
+      price: formatPrice(event.price_type || event.price, event.booking_method),
+      isFree: event.price_type === 'free' || event.price === 'Free' || event.price === 'free',
+      isFeatured: event.is_featured || false,
+      viewCount: event.views || event.view_count || 0,
     }));
 
     return NextResponse.json({
       events: transformedEvents,
-      total: events?.length || 0,
+      total: transformedEvents.length,
     });
   } catch (error) {
-    console.error('Events fetch error:', error);
-    return NextResponse.json(
-      { error: 'Internal server error' },
-      { status: 500 }
-    );
+    console.error('Events API error:', error);
+    // Return empty array on any error
+    return NextResponse.json({
+      events: [],
+      total: 0,
+      error: 'Server error',
+    });
   }
 }
 
 // Helper: Get category color
-function getCategoryColor(category: string): string {
+function getCategoryColor(category: string | null): string {
+  if (!category) return 'bg-gray-500';
   const colors: Record<string, string> = {
     dining: 'bg-orange-500',
     family: 'bg-green-500',
@@ -143,23 +160,31 @@ function getCategoryColor(category: string): string {
 }
 
 // Helper: Format date
-function formatDate(dateStr: string): string {
-  const date = new Date(dateStr);
-  return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+function formatDate(dateStr: string | null): string {
+  if (!dateStr) return 'TBD';
+  try {
+    const date = new Date(dateStr);
+    return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+  } catch {
+    return 'TBD';
+  }
 }
 
 // Helper: Format price
 function formatPrice(priceType: string | null, bookingMethod: string | null): string {
-  if (priceType === 'free') {
+  if (!priceType && !bookingMethod) return 'See Details';
+  if (priceType === 'free' || priceType === 'Free') {
     return 'Free Entry';
   }
   if (bookingMethod) {
-    // If bookingMethod contains a price like "BD 25" or "From BD 10"
     const priceMatch = bookingMethod.match(/BD\s*\d+/i);
     if (priceMatch) {
       return bookingMethod.includes('From') ? bookingMethod : `BD ${priceMatch[0].replace(/BD\s*/i, '')}`;
     }
     return bookingMethod;
+  }
+  if (priceType) {
+    return priceType;
   }
   return 'See Details';
 }

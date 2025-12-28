@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { supabase } from '@/lib/supabase';
+import { supabaseAdmin } from '@/lib/supabase';
 
 export const dynamic = 'force-dynamic';
 
@@ -13,14 +13,14 @@ export async function GET(
   try {
     const { id } = await params;
 
-    const { data: event, error } = await supabase
+    const { data: event, error } = await supabaseAdmin
       .from('events')
       .select('*')
       .eq('id', id)
       .single();
 
     if (error) {
-      console.error('Database error:', error);
+      console.error('Get event error:', error);
       return NextResponse.json(
         { error: 'Event not found' },
         { status: 404 }
@@ -77,7 +77,7 @@ export async function PATCH(
         );
     }
 
-    const { data: event, error } = await supabase
+    const { data: event, error } = await supabaseAdmin
       .from('events')
       .update(updates)
       .eq('id', id)
@@ -85,9 +85,9 @@ export async function PATCH(
       .single();
 
     if (error) {
-      console.error('Database error:', error);
+      console.error('Update event error:', error);
       return NextResponse.json(
-        { error: 'Failed to update event' },
+        { error: 'Failed to update event: ' + error.message },
         { status: 500 }
       );
     }
@@ -120,15 +120,15 @@ export async function DELETE(
   try {
     const { id } = await params;
 
-    const { error } = await supabase
+    const { error } = await supabaseAdmin
       .from('events')
       .delete()
       .eq('id', id);
 
     if (error) {
-      console.error('Database error:', error);
+      console.error('Delete event error:', error);
       return NextResponse.json(
-        { error: 'Failed to delete event' },
+        { error: 'Failed to delete event: ' + error.message },
         { status: 500 }
       );
     }

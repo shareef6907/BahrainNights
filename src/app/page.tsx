@@ -2,9 +2,13 @@
 
 import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { MapPin, Clock, Star, ChevronRight, ChevronDown, Menu, X, Globe, Sparkles, Plus } from 'lucide-react';
+import { MapPin, Clock, Star, ChevronRight, ChevronDown, Menu, X, Globe, Sparkles, Plus, Play } from 'lucide-react';
 import GlobalSearch from '@/components/search/GlobalSearch';
 import { SponsorsSection } from '@/components/sponsors';
+import MovieModal from '@/components/cinema/MovieModal';
+import TrailerModal from '@/components/cinema/TrailerModal';
+import { Movie } from '@/components/cinema/MovieCard';
+import LanguageSwitcher from '@/components/LanguageSwitcher';
 
 // Animation variants - optimized for speed
 const fadeIn = {
@@ -114,13 +118,67 @@ const menuItems = [
   }
 ];
 
-// Movie type for the cinema section
+// Movie type for the cinema section (full data for modal)
 interface HomepageMovie {
   id: string;
   title: string;
-  poster_url: string | null;
-  tmdb_rating: number | null;
   slug: string;
+  poster_url: string | null;
+  backdrop_url: string | null;
+  tmdb_rating: number | null;
+  genre: string[];
+  duration_minutes: number | null;
+  language: string | null;
+  release_date: string | null;
+  is_now_showing: boolean;
+  synopsis: string | null;
+  trailer_url: string | null;
+  movie_cast: string[];
+  scraped_from: string[];
+}
+
+// Helper to convert homepage movie data to Movie format for modal
+function convertToMovieFormat(movie: HomepageMovie): Movie {
+  const durationMins = movie.duration_minutes || 0;
+  const hours = Math.floor(durationMins / 60);
+  const mins = durationMins % 60;
+  const durationStr = hours > 0 ? `${hours}h ${mins}min` : durationMins > 0 ? `${mins}min` : 'N/A';
+
+  // Handle poster URL
+  const getPosterUrl = (url: string | null): string => {
+    if (!url) return '/images/movie-placeholder.jpg';
+    if (url.startsWith('http')) return url;
+    return `https://image.tmdb.org/t/p/w500${url}`;
+  };
+
+  // Handle backdrop URL
+  const getBackdropUrl = (url: string | null): string => {
+    if (!url) return '/images/backdrop-placeholder.jpg';
+    if (url.startsWith('http')) return url;
+    return `https://image.tmdb.org/t/p/w1280${url}`;
+  };
+
+  return {
+    id: movie.id,
+    title: movie.title,
+    slug: movie.slug,
+    poster: getPosterUrl(movie.poster_url),
+    backdrop: getBackdropUrl(movie.backdrop_url),
+    rating: movie.tmdb_rating || 0,
+    genres: movie.genre || [],
+    duration: durationStr,
+    language: movie.language || 'English',
+    releaseDate: movie.release_date ? new Date(movie.release_date).toLocaleDateString('en-US', {
+      month: 'short',
+      day: 'numeric',
+      year: 'numeric',
+    }) : undefined,
+    isNowShowing: movie.is_now_showing,
+    synopsis: movie.synopsis || '',
+    trailerUrl: movie.trailer_url || '',
+    cast: movie.movie_cast || [],
+    scrapedFrom: movie.scraped_from || [],
+  };
 }
 
 export default function BahrainNightsHomepage() {
@@ -132,6 +190,23 @@ export default function BahrainNightsHomepage() {
   const [movies, setMovies] = useState<HomepageMovie[]>([]);
   const [moviesLoading, setMoviesLoading] = useState(true);
   const [stats, setStats] = useState({ events: 0, venues: 0, cinema: 0, offers: 0, explore: 0 });
+
+  // Movie modal states
+  const [selectedMovie, setSelectedMovie] = useState<Movie | null>(null);
+  const [isMovieModalOpen, setIsMovieModalOpen] = useState(false);
+  const [trailerMovie, setTrailerMovie] = useState<Movie | null>(null);
+  const [isTrailerModalOpen, setIsTrailerModalOpen] = useState(false);
+
+  const handleMovieClick = (movie: HomepageMovie) => {
+    const convertedMovie = convertToMovieFormat(movie);
+    setSelectedMovie(convertedMovie);
+    setIsMovieModalOpen(true);
+  };
+
+  const handleTrailerClick = (movie: Movie) => {
+    setTrailerMovie(movie);
+    setIsTrailerModalOpen(true);
+  };
 
   // Optimized scroll handler with throttling
   useEffect(() => {
@@ -308,10 +383,7 @@ export default function BahrainNightsHomepage() {
             {/* Right Side Actions */}
             <div className="hidden lg:flex items-center space-x-4">
               <GlobalSearch variant="navbar" />
-              <button className="flex items-center space-x-1 text-gray-300 hover:text-white transition-colors px-3 py-2 rounded-lg hover:bg-white/5">
-                <Globe className="w-4 h-4" />
-                <span>AR</span>
-              </button>
+              <LanguageSwitcher variant="desktop" />
               <a
                 href="/list-event"
                 className="flex items-center space-x-2 bg-gradient-to-r from-yellow-400 via-orange-500 to-pink-500 text-black px-5 py-2.5 rounded-full font-semibold hover:shadow-lg hover:shadow-orange-500/25 hover:scale-105 transition-all duration-200"
@@ -397,10 +469,7 @@ export default function BahrainNightsHomepage() {
 
                 {/* Mobile Language & CTA */}
                 <div className="pt-4 space-y-3">
-                  <button className="w-full flex items-center justify-center space-x-2 py-3 text-gray-300 hover:text-white border border-white/10 rounded-xl hover:bg-white/5 transition-colors">
-                    <Globe className="w-5 h-5" />
-                    <span>العربية</span>
-                  </button>
+                  <LanguageSwitcher variant="mobile" />
                   <a
                     href="/list-event"
                     className="w-full flex items-center justify-center space-x-2 bg-gradient-to-r from-yellow-400 via-orange-500 to-pink-500 text-black px-6 py-4 rounded-xl font-semibold"
@@ -625,15 +694,15 @@ export default function BahrainNightsHomepage() {
               ))
             ) : movies.length > 0 ? (
               movies.map((movie) => (
-                <motion.a
+                <motion.div
                   key={movie.id}
-                  href="/cinema"
+                  onClick={() => handleMovieClick(movie)}
                   className="group relative rounded-2xl overflow-hidden cursor-pointer block"
                   variants={fadeIn}
                   whileHover={cardHover}
                 >
                   <img
-                    src={movie.poster_url || 'https://images.unsplash.com/photo-1489599849927-2ee91cede3ba?w=300&h=450&fit=crop'}
+                    src={movie.poster_url?.startsWith('http') ? movie.poster_url : movie.poster_url ? `https://image.tmdb.org/t/p/w500${movie.poster_url}` : 'https://images.unsplash.com/photo-1489599849927-2ee91cede3ba?w=300&h=450&fit=crop'}
                     alt={movie.title}
                     className="w-full h-[450px] object-cover group-hover:scale-105 transition-transform duration-300"
                   />
@@ -646,9 +715,22 @@ export default function BahrainNightsHomepage() {
                           <span className="text-lg font-semibold">{movie.tmdb_rating.toFixed(1)}</span>
                         </div>
                       )}
+                      {/* Play trailer button */}
+                      {movie.trailer_url && (
+                        <button
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            handleTrailerClick(convertToMovieFormat(movie));
+                          }}
+                          className="mt-3 flex items-center gap-2 px-4 py-2 bg-yellow-400 text-black rounded-full font-medium hover:bg-yellow-300 transition-colors"
+                        >
+                          <Play className="w-4 h-4 fill-current" />
+                          Watch Trailer
+                        </button>
+                      )}
                     </div>
                   </div>
-                </motion.a>
+                </motion.div>
               ))
             ) : (
               // No movies fallback
@@ -750,6 +832,27 @@ export default function BahrainNightsHomepage() {
           </div>
         </div>
       </footer>
+
+      {/* Movie Detail Modal */}
+      <MovieModal
+        movie={selectedMovie}
+        isOpen={isMovieModalOpen}
+        onClose={() => setIsMovieModalOpen(false)}
+        onTrailerClick={() => {
+          if (selectedMovie) {
+            setTrailerMovie(selectedMovie);
+            setIsTrailerModalOpen(true);
+          }
+        }}
+      />
+
+      {/* Trailer Modal */}
+      <TrailerModal
+        isOpen={isTrailerModalOpen}
+        onClose={() => setIsTrailerModalOpen(false)}
+        title={trailerMovie?.title || ''}
+        trailerUrl={trailerMovie?.trailerUrl || ''}
+      />
     </div>
   );
 }

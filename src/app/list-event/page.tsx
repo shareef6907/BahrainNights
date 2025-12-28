@@ -5,6 +5,15 @@ import { motion } from 'framer-motion';
 import { Calendar, MapPin, Send, CheckCircle, Sparkles, Upload, X, Loader2, ImageIcon } from 'lucide-react';
 import Link from 'next/link';
 import { compressImage, validateImage, createPreviewUrl, revokePreviewUrl } from '@/lib/image-compress';
+import VenueSearch from '@/components/forms/VenueSearch';
+
+interface VenueDetails {
+  name: string;
+  address: string;
+  lat: number;
+  lng: number;
+  placeId: string;
+}
 
 export default function ListEventPage() {
   const [formSubmitted, setFormSubmitted] = useState(false);
@@ -14,6 +23,15 @@ export default function ListEventPage() {
   const [coverPreview, setCoverPreview] = useState<string | null>(null);
   const [uploadProgress, setUploadProgress] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
+
+  // Venue details from Google Places
+  const [venueDetails, setVenueDetails] = useState<VenueDetails>({
+    name: '',
+    address: '',
+    lat: 0,
+    lng: 0,
+    placeId: '',
+  });
 
   const [formData, setFormData] = useState({
     eventName: '',
@@ -115,7 +133,11 @@ export default function ListEventPage() {
         body: JSON.stringify({
           title: formData.eventName,
           category: formData.category,
-          venueName: formData.venueName,
+          venueName: venueDetails.name || formData.venueName,
+          venueAddress: venueDetails.address || null,
+          venueLat: venueDetails.lat || null,
+          venueLng: venueDetails.lng || null,
+          venuePlaceId: venueDetails.placeId || null,
           date: formData.date,
           time: formData.time,
           price: formData.price,
@@ -323,21 +345,22 @@ export default function ListEventPage() {
                 <MapPin className="w-5 h-5 text-yellow-400" />
                 Venue & Time
               </h3>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div className="space-y-4">
+                {/* Venue Search - Full Width */}
                 <div>
                   <label className="block text-sm font-medium text-gray-300 mb-2">
-                    Venue Name *
+                    Venue *
                   </label>
-                  <input
-                    type="text"
-                    name="venueName"
-                    value={formData.venueName}
-                    onChange={handleChange}
-                    required
-                    className="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-xl text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-yellow-500/50"
-                    placeholder="Where is it happening?"
+                  <VenueSearch
+                    onSelect={(venue) => {
+                      setVenueDetails(venue);
+                      setFormData(prev => ({ ...prev, venueName: venue.name }));
+                    }}
+                    defaultValue={formData.venueName}
                   />
                 </div>
+
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                 <div>
                   <label className="block text-sm font-medium text-gray-300 mb-2">
                     Price
@@ -377,6 +400,7 @@ export default function ListEventPage() {
                     required
                     className="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-xl text-white focus:outline-none focus:ring-2 focus:ring-yellow-500/50"
                   />
+                </div>
                 </div>
               </div>
             </div>

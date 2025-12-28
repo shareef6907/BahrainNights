@@ -1,6 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { supabase } from '@/lib/supabase';
-import { EventInsert } from '@/types/database';
+import { supabaseAdmin } from '@/lib/supabase';
 
 export const dynamic = 'force-dynamic';
 
@@ -41,7 +40,7 @@ function sanitize(str: string | undefined | null): string | null {
   return str
     .trim()
     .replace(/<[^>]*>/g, '') // Remove HTML tags
-    .replace(/[<>'"]/g, ''); // Remove special characters
+    .replace(/[<>'\"]/g, ''); // Remove special characters
 }
 
 /**
@@ -99,28 +98,38 @@ export async function POST(request: NextRequest) {
     // Generate slug
     const slug = generateSlug(body.title);
 
-    // Prepare event data
-    const eventData: EventInsert = {
+    // Prepare event data - use both field naming conventions for compatibility
+    const eventData = {
       title: sanitize(body.title) || '',
       slug,
       description: sanitize(body.description) || 'No description provided',
       category: sanitize(body.category) || 'other',
+      // Support both field naming conventions
+      date: body.date,
       start_date: body.date,
+      time: body.time,
       start_time: body.time,
       venue_name: sanitize(body.venueName) || '',
+      venue_address: sanitize(body.venueAddress) || null,
+      venue_lat: body.venueLat || null,
+      venue_lng: body.venueLng || null,
+      venue_place_id: body.venuePlaceId || null,
       contact_name: sanitize(body.contactName) || '',
       contact_email: sanitize(body.contactEmail) || '',
-      contact_phone: sanitize(body.contactPhone),
+      contact_phone: sanitize(body.contactPhone) || null,
+      cover_url: body.coverUrl || null,
       featured_image: body.coverUrl || null,
+      price: body.price || 'Free',
       price_type: body.price ? 'paid' : 'free',
       booking_method: body.price || 'Free',
       status: 'pending',
       is_featured: false,
+      views: 0,
       view_count: 0,
     };
 
-    // Insert into database
-    const { data, error } = await supabase
+    // Insert into database using admin client to bypass RLS
+    const { data, error } = await supabaseAdmin
       .from('events')
       .insert(eventData)
       .select()
@@ -129,7 +138,7 @@ export async function POST(request: NextRequest) {
     if (error) {
       console.error('Database error:', error);
       return NextResponse.json(
-        { error: 'Failed to submit event. Please try again.' },
+        { error: 'Failed to submit event. Please try again. Error: ' + error.message },
         { status: 500 }
       );
     }

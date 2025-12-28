@@ -1,0 +1,130 @@
+{
+  "nav": {
+    "events": "Events",
+    "dining": "Dining & Nightlife",
+    "cinema": "Cinema",
+    "offers": "Offers",
+    "explore": "Explore",
+    "listEvent": "List Your Event",
+    "search": "Search"
+  },
+  "events": {
+    "title": "Events",
+    "today": "Today's Events",
+    "weekend": "This Weekend",
+    "concerts": "Concerts & Live Music",
+    "family": "Family & Kids",
+    "cultural": "Cultural & Arts",
+    "sports": "Sports",
+    "calendar": "Full Calendar",
+    "viewAll": "View All Events"
+  },
+  "dining": {
+    "title": "Dining & Nightlife",
+    "restaurants": "Restaurants",
+    "cafes": "Cafes & Coffee Shops",
+    "lounges": "Lounges & Bars",
+    "nightclubs": "Nightclubs",
+    "beachClubs": "Beach & Pool Clubs",
+    "viewAll": "View All Places"
+  },
+  "cinema": {
+    "title": "Cinema",
+    "nowShowing": "Now Showing",
+    "comingSoon": "Coming Soon",
+    "viewAll": "All Movies",
+    "bookTickets": "Book Tickets",
+    "watchTrailer": "Watch Trailer"
+  },
+  "offers": {
+    "title": "Offers",
+    "ladiesNights": "Ladies Nights",
+    "brunches": "Brunches",
+    "happyHours": "Happy Hours",
+    "specialDeals": "Special Deals"
+  },
+  "explore": {
+    "title": "Explore",
+    "hotels": "Hotels & Staycations",
+    "spas": "Spas & Wellness",
+    "shopping": "Shopping & Markets",
+    "tours": "Tours & Experiences",
+    "community": "Community Events"
+  },
+  "home": {
+    "tagline": "Your Nightlife. Our Spotlight.",
+    "supportingLocal": "Supporting Local Businesses",
+    "alwaysFree": "Always Free",
+    "aiPowered": "AI-Powered",
+    "discover": "Discover Bahrain's",
+    "bestExperiences": "Best Experiences",
+    "searchPlaceholder": "What are you looking for tonight?",
+    "happeningToday": "Happening Today",
+    "nowShowing": "Now Showing in Cinemas",
+    "exploreByCategory": "Explore by Category",
+    "listings": "listings",
+    "comingSoonText": "Coming soon"
+  },
+  "listEvent": {
+    "title": "List Your Event",
+    "subtitle": "Reach thousands of people in Bahrain. Free promotion for all local businesses.",
+    "freeForAll": "100% Free for All Businesses",
+    "coverImage": "Event Cover Image",
+    "coverImageHelp": "Upload an eye-catching cover image. Recommended size: 1200x630px. Max 10MB.",
+    "dragDrop": "Drag & drop or click to upload",
+    "eventDetails": "Event Details",
+    "eventName": "Event Name",
+    "category": "Category",
+    "venueTime": "Venue & Time",
+    "venue": "Venue",
+    "price": "Price",
+    "date": "Date",
+    "time": "Time",
+    "description": "Event Description",
+    "contactInfo": "Contact Information",
+    "yourName": "Your Name",
+    "email": "Email",
+    "phone": "Phone",
+    "submit": "Submit Event for Review",
+    "reviewTime": "Events are typically reviewed within 24 hours",
+    "submitted": "Event Submitted!",
+    "submittedMessage": "Thank you for submitting your event. Our team will review it and get back to you within 24 hours.",
+    "backToHome": "Back to Home"
+  },
+  "common": {
+    "viewAll": "View All",
+    "learnMore": "Learn More",
+    "bookNow": "Book Now",
+    "free": "Free",
+    "loading": "Loading...",
+    "error": "Something went wrong",
+    "tryAgain": "Try Again",
+    "close": "Close",
+    "submit": "Submit",
+    "cancel": "Cancel",
+    "save": "Save",
+    "delete": "Delete",
+    "edit": "Edit",
+    "search": "Search",
+    "filter": "Filter",
+    "sort": "Sort",
+    "all": "All",
+    "today": "Today",
+    "tomorrow": "Tomorrow",
+    "thisWeek": "This Week",
+    "thisWeekend": "This Weekend"
+  },
+  "footer": {
+    "tagline": "Bahrain's first AI-powered guide to events, dining, and culture. Always updated, always alive.",
+    "forBusinesses": "For Businesses",
+    "advertise": "Advertise",
+    "becomeSponsor": "Become a Sponsor",
+    "contact": "Contact",
+    "copyright": "© 2025 BahrainNights.com • Powered by AI • Made with love in Bahrain"
+  },
+  "language": {
+    "en": "English",
+    "ar": "العربية",
+    "switchTo": "Switch to"
+  }
+}
