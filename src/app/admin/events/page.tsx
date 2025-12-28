@@ -1,9 +1,9 @@
 'use client';
 
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
-import { motion } from 'framer-motion';
+import { motion, AnimatePresence } from 'framer-motion';
 import {
   Search,
   MoreVertical,
@@ -16,13 +16,18 @@ import {
   Star,
   StarOff,
   ChevronDown,
-  ArrowUpDown,
   Loader2,
   RefreshCw,
   ImageIcon,
   Mail,
   Phone,
   User,
+  MapPin,
+  Clock,
+  Tag,
+  DollarSign,
+  ExternalLink,
+  X,
 } from 'lucide-react';
 
 interface Event {
@@ -33,14 +38,22 @@ interface Event {
   category: string;
   start_date: string;
   start_time: string | null;
+  end_date: string | null;
+  end_time: string | null;
   venue_name: string | null;
+  venue_address: string | null;
   contact_name: string | null;
   contact_email: string | null;
   contact_phone: string | null;
   featured_image: string | null;
+  cover_url: string | null;
   status: string;
   is_featured: boolean;
   view_count: number;
+  views: number;
+  price: string | null;
+  booking_url: string | null;
+  booking_link: string | null;
   created_at: string;
 }
 
@@ -52,6 +65,480 @@ interface StatusCounts {
   published: number;
   draft: number;
   past: number;
+}
+
+// Toast notification component
+function Toast({ message, type, onClose }: { message: string; type: 'success' | 'error'; onClose: () => void }) {
+  useEffect(() => {
+    const timer = setTimeout(onClose, 3000);
+    return () => clearTimeout(timer);
+  }, [onClose]);
+
+  return (
+    <motion.div
+      initial={{ opacity: 0, y: 50 }}
+      animate={{ opacity: 1, y: 0 }}
+      exit={{ opacity: 0, y: 50 }}
+      className={`fixed bottom-4 right-4 z-[100] px-6 py-3 rounded-xl shadow-lg ${
+        type === 'success' ? 'bg-green-500 text-white' : 'bg-red-500 text-white'
+      }`}
+    >
+      <div className="flex items-center gap-2">
+        {type === 'success' ? <CheckCircle className="w-5 h-5" /> : <XCircle className="w-5 h-5" />}
+        <span className="font-medium">{message}</span>
+      </div>
+    </motion.div>
+  );
+}
+
+// Event Details Modal
+function EventDetailsModal({ event, onClose }: { event: Event; onClose: () => void }) {
+  const imageUrl = event.cover_url || event.featured_image;
+  const bookingUrl = event.booking_url || event.booking_link;
+
+  return (
+    <motion.div
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      exit={{ opacity: 0 }}
+      className="fixed inset-0 z-[60] flex items-center justify-center p-4 bg-black/70 backdrop-blur-sm"
+      onClick={onClose}
+    >
+      <motion.div
+        initial={{ scale: 0.9, opacity: 0 }}
+        animate={{ scale: 1, opacity: 1 }}
+        exit={{ scale: 0.9, opacity: 0 }}
+        className="bg-[#1A1A2E] border border-white/10 rounded-2xl max-w-2xl w-full max-h-[90vh] overflow-y-auto"
+        onClick={(e) => e.stopPropagation()}
+      >
+        {/* Header with image */}
+        <div className="relative">
+          {imageUrl ? (
+            <div className="relative h-48 w-full">
+              <Image
+                src={imageUrl}
+                alt={event.title}
+                fill
+                className="object-cover rounded-t-2xl"
+              />
+              <div className="absolute inset-0 bg-gradient-to-t from-[#1A1A2E] via-transparent to-transparent" />
+            </div>
+          ) : (
+            <div className="h-32 bg-gradient-to-r from-purple-500/20 to-cyan-500/20 rounded-t-2xl flex items-center justify-center">
+              <ImageIcon className="w-12 h-12 text-gray-500" />
+            </div>
+          )}
+          <button
+            onClick={onClose}
+            className="absolute top-4 right-4 p-2 bg-black/50 hover:bg-black/70 rounded-full text-white transition-colors"
+          >
+            <X className="w-5 h-5" />
+          </button>
+        </div>
+
+        {/* Content */}
+        <div className="p-6 space-y-6">
+          {/* Title and Status */}
+          <div className="flex items-start justify-between gap-4">
+            <h2 className="text-2xl font-bold text-white">{event.title}</h2>
+            <span className={`px-3 py-1 text-sm font-medium rounded-full ${
+              event.status === 'published' ? 'bg-green-500/20 text-green-400' :
+              event.status === 'pending' ? 'bg-orange-500/20 text-orange-400' :
+              event.status === 'rejected' ? 'bg-red-500/20 text-red-400' :
+              'bg-gray-500/20 text-gray-400'
+            }`}>
+              {event.status.charAt(0).toUpperCase() + event.status.slice(1)}
+            </span>
+          </div>
+
+          {/* Description */}
+          {event.description && (
+            <div>
+              <h3 className="text-sm font-medium text-gray-400 mb-2">Description</h3>
+              <p className="text-gray-300">{event.description}</p>
+            </div>
+          )}
+
+          {/* Details Grid */}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            {/* Category */}
+            <div className="flex items-center gap-3 p-3 bg-white/5 rounded-xl">
+              <Tag className="w-5 h-5 text-cyan-400" />
+              <div>
+                <p className="text-xs text-gray-500">Category</p>
+                <p className="text-white">{event.category.charAt(0).toUpperCase() + event.category.slice(1)}</p>
+              </div>
+            </div>
+
+            {/* Date */}
+            <div className="flex items-center gap-3 p-3 bg-white/5 rounded-xl">
+              <Calendar className="w-5 h-5 text-cyan-400" />
+              <div>
+                <p className="text-xs text-gray-500">Date</p>
+                <p className="text-white">
+                  {new Date(event.start_date).toLocaleDateString('en-US', {
+                    weekday: 'long',
+                    year: 'numeric',
+                    month: 'long',
+                    day: 'numeric'
+                  })}
+                </p>
+              </div>
+            </div>
+
+            {/* Time */}
+            <div className="flex items-center gap-3 p-3 bg-white/5 rounded-xl">
+              <Clock className="w-5 h-5 text-cyan-400" />
+              <div>
+                <p className="text-xs text-gray-500">Time</p>
+                <p className="text-white">{event.start_time || 'Not specified'}</p>
+              </div>
+            </div>
+
+            {/* Venue */}
+            <div className="flex items-center gap-3 p-3 bg-white/5 rounded-xl">
+              <MapPin className="w-5 h-5 text-cyan-400" />
+              <div>
+                <p className="text-xs text-gray-500">Venue</p>
+                <p className="text-white">{event.venue_name || 'Not specified'}</p>
+                {event.venue_address && (
+                  <p className="text-xs text-gray-400">{event.venue_address}</p>
+                )}
+              </div>
+            </div>
+
+            {/* Price */}
+            <div className="flex items-center gap-3 p-3 bg-white/5 rounded-xl">
+              <DollarSign className="w-5 h-5 text-cyan-400" />
+              <div>
+                <p className="text-xs text-gray-500">Price</p>
+                <p className="text-white">{event.price || 'Free'}</p>
+              </div>
+            </div>
+
+            {/* Views */}
+            <div className="flex items-center gap-3 p-3 bg-white/5 rounded-xl">
+              <Eye className="w-5 h-5 text-cyan-400" />
+              <div>
+                <p className="text-xs text-gray-500">Views</p>
+                <p className="text-white">{(event.views || event.view_count || 0).toLocaleString()}</p>
+              </div>
+            </div>
+          </div>
+
+          {/* Booking Link */}
+          {bookingUrl && (
+            <div className="p-3 bg-white/5 rounded-xl">
+              <p className="text-xs text-gray-500 mb-2">Booking Link</p>
+              <a
+                href={bookingUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="flex items-center gap-2 text-cyan-400 hover:text-cyan-300"
+              >
+                <ExternalLink className="w-4 h-4" />
+                {bookingUrl}
+              </a>
+            </div>
+          )}
+
+          {/* Contact Information */}
+          <div className="border-t border-white/10 pt-6">
+            <h3 className="text-sm font-medium text-gray-400 mb-4">Contact Information</h3>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+              <div className="flex items-center gap-3">
+                <User className="w-5 h-5 text-cyan-400" />
+                <div>
+                  <p className="text-xs text-gray-500">Name</p>
+                  <p className="text-white">{event.contact_name || 'Not provided'}</p>
+                </div>
+              </div>
+              <div className="flex items-center gap-3">
+                <Mail className="w-5 h-5 text-cyan-400" />
+                <div>
+                  <p className="text-xs text-gray-500">Email</p>
+                  {event.contact_email ? (
+                    <a href={`mailto:${event.contact_email}`} className="text-cyan-400 hover:underline">
+                      {event.contact_email}
+                    </a>
+                  ) : (
+                    <p className="text-gray-400">Not provided</p>
+                  )}
+                </div>
+              </div>
+              <div className="flex items-center gap-3">
+                <Phone className="w-5 h-5 text-cyan-400" />
+                <div>
+                  <p className="text-xs text-gray-500">Phone</p>
+                  {event.contact_phone ? (
+                    <a href={`tel:${event.contact_phone}`} className="text-cyan-400 hover:underline">
+                      {event.contact_phone}
+                    </a>
+                  ) : (
+                    <p className="text-gray-400">Not provided</p>
+                  )}
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* Metadata */}
+          <div className="border-t border-white/10 pt-4 flex items-center justify-between text-xs text-gray-500">
+            <span>Created: {new Date(event.created_at).toLocaleDateString()}</span>
+            <span>ID: {event.id.slice(0, 8)}...</span>
+          </div>
+        </div>
+      </motion.div>
+    </motion.div>
+  );
+}
+
+// Rejection Reason Modal
+function RejectModal({
+  event,
+  onConfirm,
+  onCancel,
+  loading
+}: {
+  event: Event;
+  onConfirm: (reason: string) => void;
+  onCancel: () => void;
+  loading: boolean;
+}) {
+  const [reason, setReason] = useState('');
+
+  return (
+    <motion.div
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      exit={{ opacity: 0 }}
+      className="fixed inset-0 z-[60] flex items-center justify-center p-4 bg-black/70 backdrop-blur-sm"
+      onClick={onCancel}
+    >
+      <motion.div
+        initial={{ scale: 0.9, opacity: 0 }}
+        animate={{ scale: 1, opacity: 1 }}
+        exit={{ scale: 0.9, opacity: 0 }}
+        className="bg-[#1A1A2E] border border-white/10 rounded-2xl max-w-md w-full p-6"
+        onClick={(e) => e.stopPropagation()}
+      >
+        <h2 className="text-xl font-bold text-white mb-2">Reject Event</h2>
+        <p className="text-gray-400 mb-4">
+          Rejecting: <span className="text-white">{event.title}</span>
+        </p>
+
+        <div className="mb-4">
+          <label className="block text-sm text-gray-400 mb-2">
+            Rejection Reason (optional)
+          </label>
+          <textarea
+            value={reason}
+            onChange={(e) => setReason(e.target.value)}
+            placeholder="Enter reason for rejection..."
+            className="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-xl text-white placeholder:text-gray-500 focus:outline-none focus:border-red-500/50 resize-none"
+            rows={3}
+          />
+        </div>
+
+        <div className="flex gap-3">
+          <button
+            onClick={onCancel}
+            disabled={loading}
+            className="flex-1 px-4 py-2.5 bg-white/10 text-white rounded-xl hover:bg-white/20 transition-colors disabled:opacity-50"
+          >
+            Cancel
+          </button>
+          <button
+            onClick={() => onConfirm(reason)}
+            disabled={loading}
+            className="flex-1 px-4 py-2.5 bg-red-500 text-white rounded-xl hover:bg-red-600 transition-colors disabled:opacity-50 flex items-center justify-center gap-2"
+          >
+            {loading ? (
+              <Loader2 className="w-4 h-4 animate-spin" />
+            ) : (
+              <XCircle className="w-4 h-4" />
+            )}
+            Reject
+          </button>
+        </div>
+      </motion.div>
+    </motion.div>
+  );
+}
+
+// Dropdown Menu Component with Portal
+function ActionDropdown({
+  event,
+  onAction,
+  onDelete,
+  onViewDetails,
+  onReject,
+  loading,
+  onClose,
+}: {
+  event: Event;
+  onAction: (action: string) => void;
+  onDelete: () => void;
+  onViewDetails: () => void;
+  onReject: () => void;
+  loading: boolean;
+  onClose: () => void;
+}) {
+  const buttonRef = useRef<HTMLButtonElement>(null);
+  const [position, setPosition] = useState({ top: 0, left: 0 });
+
+  useEffect(() => {
+    if (buttonRef.current) {
+      const rect = buttonRef.current.getBoundingClientRect();
+      setPosition({
+        top: rect.bottom + 8,
+        left: rect.right - 192, // 192px = 12rem (w-48)
+      });
+    }
+  }, []);
+
+  const isPast = new Date(event.start_date) < new Date();
+
+  return (
+    <>
+      {/* Invisible button for positioning reference */}
+      <button ref={buttonRef} className="sr-only" />
+
+      {/* Backdrop */}
+      <div
+        className="fixed inset-0 z-[55]"
+        onClick={onClose}
+      />
+
+      {/* Dropdown - Fixed Position */}
+      <div
+        className="fixed w-48 bg-[#1A1A2E] border border-white/10 rounded-xl shadow-2xl z-[56] py-1"
+        style={{ top: position.top, left: Math.max(8, position.left) }}
+      >
+        {/* View Details */}
+        <button
+          onClick={() => {
+            onViewDetails();
+            onClose();
+          }}
+          className="w-full flex items-center gap-2 px-4 py-2 text-sm text-gray-300 hover:text-white hover:bg-white/5"
+        >
+          <Eye className="w-4 h-4" />
+          View Details
+        </button>
+
+        {/* View Public Page */}
+        <Link
+          href={`/events/${event.slug}`}
+          target="_blank"
+          className="flex items-center gap-2 px-4 py-2 text-sm text-gray-300 hover:text-white hover:bg-white/5"
+          onClick={onClose}
+        >
+          <ExternalLink className="w-4 h-4" />
+          View Public Page
+        </Link>
+
+        <div className="my-1 border-t border-white/10" />
+
+        {/* Pending Event Actions */}
+        {event.status === 'pending' && !isPast && (
+          <>
+            <button
+              onClick={() => {
+                onAction('approve');
+                onClose();
+              }}
+              disabled={loading}
+              className="w-full flex items-center gap-2 px-4 py-2 text-sm text-green-400 hover:bg-green-500/10 disabled:opacity-50"
+            >
+              <CheckCircle className="w-4 h-4" />
+              Approve & Publish
+            </button>
+            <button
+              onClick={() => {
+                onReject();
+                onClose();
+              }}
+              disabled={loading}
+              className="w-full flex items-center gap-2 px-4 py-2 text-sm text-red-400 hover:bg-red-500/10 disabled:opacity-50"
+            >
+              <XCircle className="w-4 h-4" />
+              Reject Event
+            </button>
+          </>
+        )}
+
+        {/* Published Event Actions */}
+        {event.status === 'published' && !isPast && (
+          <button
+            onClick={() => {
+              onAction('draft');
+              onClose();
+            }}
+            disabled={loading}
+            className="w-full flex items-center gap-2 px-4 py-2 text-sm text-gray-300 hover:text-white hover:bg-white/5 disabled:opacity-50"
+          >
+            <Edit className="w-4 h-4" />
+            Unpublish (Draft)
+          </button>
+        )}
+
+        {/* Draft Event Actions */}
+        {event.status === 'draft' && !isPast && (
+          <button
+            onClick={() => {
+              onAction('approve');
+              onClose();
+            }}
+            disabled={loading}
+            className="w-full flex items-center gap-2 px-4 py-2 text-sm text-green-400 hover:bg-green-500/10 disabled:opacity-50"
+          >
+            <CheckCircle className="w-4 h-4" />
+            Publish
+          </button>
+        )}
+
+        {/* Feature Toggle */}
+        {!isPast && (
+          <button
+            onClick={() => {
+              onAction(event.is_featured ? 'unfeature' : 'feature');
+              onClose();
+            }}
+            disabled={loading}
+            className="w-full flex items-center gap-2 px-4 py-2 text-sm text-gray-300 hover:text-white hover:bg-white/5 disabled:opacity-50"
+          >
+            {event.is_featured ? (
+              <>
+                <StarOff className="w-4 h-4" />
+                Remove Featured
+              </>
+            ) : (
+              <>
+                <Star className="w-4 h-4" />
+                Mark Featured
+              </>
+            )}
+          </button>
+        )}
+
+        <div className="my-1 border-t border-white/10" />
+
+        {/* Delete */}
+        <button
+          onClick={() => {
+            onDelete();
+            onClose();
+          }}
+          disabled={loading}
+          className="w-full flex items-center gap-2 px-4 py-2 text-sm text-red-400 hover:bg-red-500/10 disabled:opacity-50"
+        >
+          <Trash2 className="w-4 h-4" />
+          Delete
+        </button>
+      </div>
+    </>
+  );
 }
 
 export default function AdminEventsPage() {
@@ -69,7 +556,10 @@ export default function AdminEventsPage() {
   const [openActionMenu, setOpenActionMenu] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
   const [actionLoading, setActionLoading] = useState<string | null>(null);
-  const [expandedEvent, setExpandedEvent] = useState<string | null>(null);
+  const [selectedEvent, setSelectedEvent] = useState<Event | null>(null);
+  const [rejectingEvent, setRejectingEvent] = useState<Event | null>(null);
+  const [toast, setToast] = useState<{ message: string; type: 'success' | 'error' } | null>(null);
+  const menuButtonRefs = useRef<{ [key: string]: HTMLButtonElement | null }>({});
 
   const categories = [
     'all',
@@ -87,6 +577,10 @@ export default function AdminEventsPage() {
     'community',
     'other',
   ];
+
+  const showToast = (message: string, type: 'success' | 'error') => {
+    setToast({ message, type });
+  };
 
   const fetchEvents = useCallback(async () => {
     setLoading(true);
@@ -110,9 +604,11 @@ export default function AdminEventsPage() {
         setStatusCounts(data.counts);
       } else {
         console.error('Failed to fetch events:', data.error);
+        showToast('Failed to fetch events', 'error');
       }
     } catch (error) {
       console.error('Error fetching events:', error);
+      showToast('Failed to fetch events', 'error');
     } finally {
       setLoading(false);
     }
@@ -136,30 +632,48 @@ export default function AdminEventsPage() {
     return !isPast;
   });
 
-  const handleAction = async (eventId: string, action: string) => {
+  const handleAction = async (eventId: string, action: string, rejectionReason?: string) => {
     setActionLoading(eventId);
     setOpenActionMenu(null);
 
     try {
+      const body: Record<string, unknown> = { action };
+      if (rejectionReason) {
+        body.rejection_reason = rejectionReason;
+      }
+
       const response = await fetch(`/api/admin/events/${eventId}`, {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ action }),
+        body: JSON.stringify(body),
       });
 
       const data = await response.json();
 
       if (response.ok) {
-        // Refresh events list
         await fetchEvents();
+
+        // Show success toast
+        if (action === 'approve') {
+          showToast('Event approved and published!', 'success');
+        } else if (action === 'reject') {
+          showToast('Event rejected', 'success');
+        } else if (action === 'feature') {
+          showToast('Event marked as featured', 'success');
+        } else if (action === 'unfeature') {
+          showToast('Event removed from featured', 'success');
+        } else if (action === 'draft') {
+          showToast('Event unpublished', 'success');
+        }
       } else {
-        alert(data.error || 'Action failed');
+        showToast(data.error || 'Action failed', 'error');
       }
     } catch (error) {
       console.error('Action error:', error);
-      alert('Action failed. Please try again.');
+      showToast('Action failed. Please try again.', 'error');
     } finally {
       setActionLoading(null);
+      setRejectingEvent(null);
     }
   };
 
@@ -178,13 +692,14 @@ export default function AdminEventsPage() {
 
       if (response.ok) {
         await fetchEvents();
+        showToast('Event deleted successfully', 'success');
       } else {
         const data = await response.json();
-        alert(data.error || 'Delete failed');
+        showToast(data.error || 'Delete failed', 'error');
       }
     } catch (error) {
       console.error('Delete error:', error);
-      alert('Delete failed. Please try again.');
+      showToast('Delete failed. Please try again.', 'error');
     } finally {
       setActionLoading(null);
     }
@@ -235,6 +750,39 @@ export default function AdminEventsPage() {
 
   return (
     <div className="space-y-6">
+      {/* Toast Notifications */}
+      <AnimatePresence>
+        {toast && (
+          <Toast
+            message={toast.message}
+            type={toast.type}
+            onClose={() => setToast(null)}
+          />
+        )}
+      </AnimatePresence>
+
+      {/* Event Details Modal */}
+      <AnimatePresence>
+        {selectedEvent && (
+          <EventDetailsModal
+            event={selectedEvent}
+            onClose={() => setSelectedEvent(null)}
+          />
+        )}
+      </AnimatePresence>
+
+      {/* Reject Modal */}
+      <AnimatePresence>
+        {rejectingEvent && (
+          <RejectModal
+            event={rejectingEvent}
+            onConfirm={(reason) => handleAction(rejectingEvent.id, 'reject', reason)}
+            onCancel={() => setRejectingEvent(null)}
+            loading={actionLoading === rejectingEvent.id}
+          />
+        )}
+      </AnimatePresence>
+
       {/* Header */}
       <motion.div
         initial={{ opacity: 0, y: -10 }}
@@ -339,7 +887,7 @@ export default function AdminEventsPage() {
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.2 }}
-          className="bg-white/5 backdrop-blur-sm border border-white/10 rounded-2xl overflow-hidden"
+          className="bg-white/5 backdrop-blur-sm border border-white/10 rounded-2xl"
         >
           {/* Desktop Table */}
           <div className="hidden md:block overflow-x-auto">
@@ -358,206 +906,99 @@ export default function AdminEventsPage() {
               </thead>
               <tbody>
                 {filteredEvents.map((event) => (
-                  <>
-                    <tr
-                      key={event.id}
-                      className={`border-b border-white/5 hover:bg-white/5 transition-colors ${
-                        actionLoading === event.id ? 'opacity-50' : ''
-                      }`}
-                    >
-                      <td className="p-4">
-                        <div className="flex items-center gap-3">
-                          {event.featured_image ? (
-                            <div className="relative w-12 h-12 rounded-lg overflow-hidden bg-white/10">
-                              <Image
-                                src={event.featured_image}
-                                alt={event.title}
-                                fill
-                                className="object-cover"
-                              />
-                            </div>
-                          ) : (
-                            <div className="w-12 h-12 rounded-lg bg-white/10 flex items-center justify-center">
-                              <ImageIcon className="w-5 h-5 text-gray-500" />
-                            </div>
-                          )}
-                          <div>
-                            <span className="font-medium text-white block">{event.title}</span>
-                            {event.contact_email && (
-                              <button
-                                onClick={() => setExpandedEvent(expandedEvent === event.id ? null : event.id)}
-                                className="text-xs text-cyan-400 hover:text-cyan-300"
-                              >
-                                View contact info
-                              </button>
-                            )}
+                  <tr
+                    key={event.id}
+                    className={`border-b border-white/5 hover:bg-white/5 transition-colors cursor-pointer ${
+                      actionLoading === event.id ? 'opacity-50' : ''
+                    }`}
+                    onClick={() => setSelectedEvent(event)}
+                  >
+                    <td className="p-4">
+                      <div className="flex items-center gap-3">
+                        {event.featured_image || event.cover_url ? (
+                          <div className="relative w-12 h-12 rounded-lg overflow-hidden bg-white/10">
+                            <Image
+                              src={event.cover_url || event.featured_image || ''}
+                              alt={event.title}
+                              fill
+                              className="object-cover"
+                            />
                           </div>
-                        </div>
-                      </td>
-                      <td className="p-4">
-                        <span className="text-gray-300">{event.venue_name || 'Not specified'}</span>
-                      </td>
-                      <td className="p-4 text-gray-300">
-                        {new Date(event.start_date).toLocaleDateString()}
-                        {event.start_time && (
-                          <span className="text-gray-500 ml-1">
-                            @ {event.start_time}
-                          </span>
+                        ) : (
+                          <div className="w-12 h-12 rounded-lg bg-white/10 flex items-center justify-center">
+                            <ImageIcon className="w-5 h-5 text-gray-500" />
+                          </div>
                         )}
-                      </td>
-                      <td className="p-4 text-gray-300">{formatCategory(event.category)}</td>
-                      <td className="p-4">{getStatusBadge(event.status, event.start_date)}</td>
-                      <td className="p-4 text-gray-300">{event.view_count?.toLocaleString() || 0}</td>
-                      <td className="p-4">
-                        <button
-                          onClick={() => handleAction(event.id, event.is_featured ? 'unfeature' : 'feature')}
-                          disabled={actionLoading === event.id}
-                          className={`p-1 rounded ${
-                            event.is_featured
-                              ? 'text-yellow-400 hover:text-yellow-300'
-                              : 'text-gray-500 hover:text-gray-400'
-                          }`}
-                        >
-                          {event.is_featured ? <Star className="w-5 h-5 fill-current" /> : <StarOff className="w-5 h-5" />}
-                        </button>
-                      </td>
-                      <td className="p-4">
-                        <div className="relative">
-                          <button
-                            onClick={() =>
-                              setOpenActionMenu(openActionMenu === event.id ? null : event.id)
-                            }
-                            disabled={actionLoading === event.id}
-                            className="p-2 hover:bg-white/10 rounded-lg transition-colors"
-                          >
-                            {actionLoading === event.id ? (
-                              <Loader2 className="w-4 h-4 text-cyan-400 animate-spin" />
-                            ) : (
-                              <MoreVertical className="w-4 h-4 text-gray-400" />
-                            )}
-                          </button>
-
-                          {openActionMenu === event.id && (
-                            <>
-                              <div
-                                className="fixed inset-0 z-40"
-                                onClick={() => setOpenActionMenu(null)}
-                              />
-                              <div className="absolute right-0 mt-1 w-48 bg-[#1A1A2E] border border-white/10 rounded-xl shadow-xl z-50 py-1">
-                                <Link
-                                  href={`/events/${event.slug}`}
-                                  target="_blank"
-                                  className="flex items-center gap-2 px-4 py-2 text-sm text-gray-300 hover:text-white hover:bg-white/5"
-                                >
-                                  <Eye className="w-4 h-4" />
-                                  View Public Page
-                                </Link>
-                                {event.status === 'pending' && (
-                                  <>
-                                    <button
-                                      onClick={() => handleAction(event.id, 'approve')}
-                                      className="w-full flex items-center gap-2 px-4 py-2 text-sm text-green-400 hover:bg-green-500/10"
-                                    >
-                                      <CheckCircle className="w-4 h-4" />
-                                      Approve & Publish
-                                    </button>
-                                    <button
-                                      onClick={() => handleAction(event.id, 'reject')}
-                                      className="w-full flex items-center gap-2 px-4 py-2 text-sm text-red-400 hover:bg-red-500/10"
-                                    >
-                                      <XCircle className="w-4 h-4" />
-                                      Reject Event
-                                    </button>
-                                  </>
-                                )}
-                                {event.status === 'published' && (
-                                  <button
-                                    onClick={() => handleAction(event.id, 'draft')}
-                                    className="w-full flex items-center gap-2 px-4 py-2 text-sm text-gray-300 hover:text-white hover:bg-white/5"
-                                  >
-                                    <Edit className="w-4 h-4" />
-                                    Unpublish (Draft)
-                                  </button>
-                                )}
-                                {event.status === 'draft' && (
-                                  <button
-                                    onClick={() => handleAction(event.id, 'approve')}
-                                    className="w-full flex items-center gap-2 px-4 py-2 text-sm text-green-400 hover:bg-green-500/10"
-                                  >
-                                    <CheckCircle className="w-4 h-4" />
-                                    Publish
-                                  </button>
-                                )}
-                                <button
-                                  onClick={() =>
-                                    handleAction(event.id, event.is_featured ? 'unfeature' : 'feature')
-                                  }
-                                  className="w-full flex items-center gap-2 px-4 py-2 text-sm text-gray-300 hover:text-white hover:bg-white/5"
-                                >
-                                  {event.is_featured ? (
-                                    <>
-                                      <StarOff className="w-4 h-4" />
-                                      Remove Featured
-                                    </>
-                                  ) : (
-                                    <>
-                                      <Star className="w-4 h-4" />
-                                      Mark Featured
-                                    </>
-                                  )}
-                                </button>
-                                <div className="my-1 border-t border-white/10" />
-                                <button
-                                  onClick={() => handleDelete(event.id)}
-                                  className="w-full flex items-center gap-2 px-4 py-2 text-sm text-red-400 hover:bg-red-500/10"
-                                >
-                                  <Trash2 className="w-4 h-4" />
-                                  Delete
-                                </button>
-                              </div>
-                            </>
+                        <div>
+                          <span className="font-medium text-white block">{event.title}</span>
+                          {event.contact_email && (
+                            <span className="text-xs text-gray-500">{event.contact_email}</span>
                           )}
                         </div>
-                      </td>
-                    </tr>
-                    {/* Expanded contact info row */}
-                    {expandedEvent === event.id && (
-                      <tr className="bg-white/5">
-                        <td colSpan={8} className="p-4">
-                          <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-sm">
-                            <div className="flex items-center gap-2 text-gray-300">
-                              <User className="w-4 h-4 text-cyan-400" />
-                              <span className="text-gray-500">Contact:</span>
-                              {event.contact_name || 'Not provided'}
-                            </div>
-                            <div className="flex items-center gap-2 text-gray-300">
-                              <Mail className="w-4 h-4 text-cyan-400" />
-                              <span className="text-gray-500">Email:</span>
-                              <a href={`mailto:${event.contact_email}`} className="text-cyan-400 hover:underline">
-                                {event.contact_email}
-                              </a>
-                            </div>
-                            <div className="flex items-center gap-2 text-gray-300">
-                              <Phone className="w-4 h-4 text-cyan-400" />
-                              <span className="text-gray-500">Phone:</span>
-                              {event.contact_phone ? (
-                                <a href={`tel:${event.contact_phone}`} className="text-cyan-400 hover:underline">
-                                  {event.contact_phone}
-                                </a>
-                              ) : (
-                                'Not provided'
-                              )}
-                            </div>
-                          </div>
-                          {event.description && (
-                            <div className="mt-3 pt-3 border-t border-white/10">
-                              <p className="text-gray-400 text-sm line-clamp-3">{event.description}</p>
-                            </div>
+                      </div>
+                    </td>
+                    <td className="p-4">
+                      <span className="text-gray-300">{event.venue_name || 'Not specified'}</span>
+                    </td>
+                    <td className="p-4 text-gray-300">
+                      {new Date(event.start_date).toLocaleDateString()}
+                      {event.start_time && (
+                        <span className="text-gray-500 ml-1">
+                          @ {event.start_time}
+                        </span>
+                      )}
+                    </td>
+                    <td className="p-4 text-gray-300">{formatCategory(event.category)}</td>
+                    <td className="p-4">{getStatusBadge(event.status, event.start_date)}</td>
+                    <td className="p-4 text-gray-300">{(event.views || event.view_count || 0).toLocaleString()}</td>
+                    <td className="p-4">
+                      <button
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          handleAction(event.id, event.is_featured ? 'unfeature' : 'feature');
+                        }}
+                        disabled={actionLoading === event.id}
+                        className={`p-1 rounded ${
+                          event.is_featured
+                            ? 'text-yellow-400 hover:text-yellow-300'
+                            : 'text-gray-500 hover:text-gray-400'
+                        }`}
+                      >
+                        {event.is_featured ? <Star className="w-5 h-5 fill-current" /> : <StarOff className="w-5 h-5" />}
+                      </button>
+                    </td>
+                    <td className="p-4">
+                      <div className="relative">
+                        <button
+                          ref={(el) => { menuButtonRefs.current[event.id] = el; }}
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            setOpenActionMenu(openActionMenu === event.id ? null : event.id);
+                          }}
+                          disabled={actionLoading === event.id}
+                          className="p-2 hover:bg-white/10 rounded-lg transition-colors"
+                        >
+                          {actionLoading === event.id ? (
+                            <Loader2 className="w-4 h-4 text-cyan-400 animate-spin" />
+                          ) : (
+                            <MoreVertical className="w-4 h-4 text-gray-400" />
                           )}
-                        </td>
-                      </tr>
-                    )}
-                  </>
+                        </button>
+
+                        {openActionMenu === event.id && (
+                          <ActionDropdown
+                            event={event}
+                            onAction={(action) => handleAction(event.id, action)}
+                            onDelete={() => handleDelete(event.id)}
+                            onViewDetails={() => setSelectedEvent(event)}
+                            onReject={() => setRejectingEvent(event)}
+                            loading={actionLoading === event.id}
+                            onClose={() => setOpenActionMenu(null)}
+                          />
+                        )}
+                      </div>
+                    </td>
+                  </tr>
                 ))}
               </tbody>
             </table>
@@ -566,12 +1007,16 @@ export default function AdminEventsPage() {
           {/* Mobile Cards */}
           <div className="md:hidden divide-y divide-white/10">
             {filteredEvents.map((event) => (
-              <div key={event.id} className={`p-4 ${actionLoading === event.id ? 'opacity-50' : ''}`}>
+              <div
+                key={event.id}
+                className={`p-4 cursor-pointer hover:bg-white/5 ${actionLoading === event.id ? 'opacity-50' : ''}`}
+                onClick={() => setSelectedEvent(event)}
+              >
                 <div className="flex items-start gap-3">
-                  {event.featured_image ? (
+                  {event.featured_image || event.cover_url ? (
                     <div className="relative w-16 h-16 rounded-lg overflow-hidden bg-white/10 flex-shrink-0">
                       <Image
-                        src={event.featured_image}
+                        src={event.cover_url || event.featured_image || ''}
                         alt={event.title}
                         fill
                         className="object-cover"
@@ -592,7 +1037,7 @@ export default function AdminEventsPage() {
                     </div>
                     <div className="mt-2 text-xs text-gray-500">
                       <p>{new Date(event.start_date).toLocaleDateString()} • {formatCategory(event.category)}</p>
-                      <p className="mt-1">{event.view_count?.toLocaleString() || 0} views</p>
+                      <p className="mt-1">{(event.views || event.view_count || 0).toLocaleString()} views</p>
                     </div>
                     {event.contact_email && (
                       <div className="mt-2 p-2 bg-white/5 rounded-lg text-xs">
@@ -600,14 +1045,13 @@ export default function AdminEventsPage() {
                         <p className="text-cyan-400">{event.contact_email}</p>
                       </div>
                     )}
-                    <div className="mt-3 flex flex-wrap gap-2">
-                      <Link
-                        href={`/events/${event.slug}`}
-                        target="_blank"
+                    <div className="mt-3 flex flex-wrap gap-2" onClick={(e) => e.stopPropagation()}>
+                      <button
+                        onClick={() => setSelectedEvent(event)}
                         className="px-3 py-1.5 text-xs bg-white/10 text-white rounded-lg"
                       >
-                        View
-                      </Link>
+                        View Details
+                      </button>
                       {event.status === 'pending' && (
                         <>
                           <button
@@ -618,7 +1062,7 @@ export default function AdminEventsPage() {
                             {actionLoading === event.id ? 'Loading...' : 'Approve'}
                           </button>
                           <button
-                            onClick={() => handleAction(event.id, 'reject')}
+                            onClick={() => setRejectingEvent(event)}
                             disabled={actionLoading === event.id}
                             className="px-3 py-1.5 text-xs bg-red-500/20 text-red-400 rounded-lg disabled:opacity-50"
                           >
