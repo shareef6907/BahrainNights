@@ -65,7 +65,7 @@ async function processMovie(
       trailer_key: getTrailerKey(details.videos),
       language: getLanguageName(details.original_language),
       director: getDirector(details.credits),
-      cast: getCast(details.credits, 10),
+      movie_cast: getCast(details.credits, 10),
       tmdb_rating: details.vote_average || null,
       is_now_showing: isNowShowing,
       is_coming_soon: isComingSoon,
