@@ -26,7 +26,7 @@ interface TokenPayload {
 async function verifyToken(token: string): Promise<TokenPayload | null> {
   try {
     const secret = new TextEncoder().encode(
-      process.env.JWT_SECRET || 'default-secret-key-change-in-production'
+      process.env.JWT_SECRET || 'default-secret-change-in-production-min-32-chars!'
     );
     const { payload } = await jwtVerify(token, secret);
     return payload as unknown as TokenPayload;
