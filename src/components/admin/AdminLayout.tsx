@@ -19,7 +19,6 @@ const pageTitles: Record<string, string> = {
   '/admin/venues': 'Manage Venues',
   '/admin/events': 'Manage Events',
   '/admin/cinema': 'Cinema Manager',
-  '/admin/cinema/showtimes': 'Manage Showtimes',
   '/admin/sponsors': 'Sponsors Manager',
   '/admin/sponsors/new': 'Add New Sponsor',
   '/admin/sponsors/inquiries': 'Sponsor Inquiries',
@@ -56,7 +55,7 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
     }
 
     // Check for cinema movie detail page
-    if (pathname.match(/^\/admin\/cinema\/[^/]+$/) && !pathname.includes('showtimes')) {
+    if (pathname.match(/^\/admin\/cinema\/[^/]+$/)) {
       return 'Movie Details';
     }
 

@@ -27,7 +27,7 @@ interface DBMovie {
   trailer_key: string;
   language: string;
   director: string;
-  cast: string[];
+  movie_cast: string[];
   tmdb_rating: number;
   is_now_showing: boolean;
   is_coming_soon: boolean;
@@ -58,30 +58,9 @@ function convertToMovieFormat(dbMovie: DBMovie): Movie {
     isNowShowing: dbMovie.is_now_showing,
     synopsis: dbMovie.synopsis || '',
     trailerUrl: dbMovie.trailer_url || '',
-    cast: dbMovie.cast || [],
+    cast: dbMovie.movie_cast || [],
   };
 }
-
-// Generate dates for the next 7 days
-const generateDates = () => {
-  const dates = [];
-  const today = new Date();
-
-  for (let i = 0; i < 7; i++) {
-    const date = new Date(today);
-    date.setDate(today.getDate() + i);
-
-    dates.push({
-      date: date.toISOString().split('T')[0],
-      dayName: date.toLocaleDateString('en-US', { weekday: 'short' }),
-      dayNumber: date.getDate().toString(),
-      month: date.toLocaleDateString('en-US', { month: 'short' }),
-      isToday: i === 0
-    });
-  }
-
-  return dates;
-};
 
 // Filter options
 const defaultCinemas = [
@@ -111,22 +90,6 @@ const languages = [
   { value: 'hindi', label: 'Hindi' },
 ];
 
-interface Cinema {
-  id: string;
-  name: string;
-  slug: string;
-  location: string;
-  booking_url: string;
-}
-
-interface Showtime {
-  id: string;
-  showtime: string;
-  format: string;
-  language: string;
-  cinema: Cinema;
-}
-
 export default function CinemaPage() {
   const [activeTab, setActiveTab] = useState<'now-showing' | 'coming-soon'>('now-showing');
   const [searchQuery, setSearchQuery] = useState('');
@@ -144,10 +107,7 @@ export default function CinemaPage() {
   const [nowShowingMovies, setNowShowingMovies] = useState<Movie[]>([]);
   const [comingSoonMovies, setComingSoonMovies] = useState<Movie[]>([]);
   const [cinemas, setCinemas] = useState(defaultCinemas);
-  const [showtimes, setShowtimes] = useState<Showtime[]>([]);
   const [loading, setLoading] = useState(true);
-
-  const dates = generateDates();
 
   // Fetch movies and cinemas
   useEffect(() => {
@@ -169,10 +129,14 @@ export default function CinemaPage() {
           setComingSoonMovies((data.movies || []).map(convertToMovieFormat));
         }
 
-        // Fetch cinemas
+        // Fetch cinemas for filter dropdown
         const cinemasRes = await fetch('/api/cinema/cinemas');
         if (cinemasRes.ok) {
           const data = await cinemasRes.json();
+          interface Cinema {
+            id: string;
+            name: string;
+          }
           const cinemaOptions = [
             { value: 'all', label: 'All Cinemas' },
             ...(data.cinemas || []).map((c: Cinema) => ({
@@ -191,61 +155,6 @@ export default function CinemaPage() {
 
     fetchData();
   }, []);
-
-  // Fetch showtimes when a movie is selected
-  useEffect(() => {
-    const fetchShowtimes = async () => {
-      if (!selectedMovie) return;
-
-      try {
-        const res = await fetch(`/api/cinema/showtimes?movie_id=${selectedMovie.id}`);
-        if (res.ok) {
-          const data = await res.json();
-          setShowtimes(data.showtimes || []);
-        }
-      } catch (error) {
-        console.error('Failed to fetch showtimes:', error);
-      }
-    };
-
-    if (isMovieModalOpen && selectedMovie) {
-      fetchShowtimes();
-    }
-  }, [selectedMovie, isMovieModalOpen]);
-
-  // Convert showtimes to the format expected by MovieModal
-  const formattedShowtimes = useMemo(() => {
-    const grouped: Record<string, {
-      cinemaName: string;
-      cinemaLogo: string;
-      location: string;
-      showtimes: { time: string; format: string; bookingUrl: string }[];
-    }> = {};
-
-    showtimes.forEach((st) => {
-      const key = st.cinema?.id || 'unknown';
-      if (!grouped[key]) {
-        grouped[key] = {
-          cinemaName: st.cinema?.name || 'Unknown Cinema',
-          cinemaLogo: '',
-          location: st.cinema?.location || '',
-          showtimes: [],
-        };
-      }
-
-      grouped[key].showtimes.push({
-        time: new Date(st.showtime).toLocaleTimeString('en-US', {
-          hour: 'numeric',
-          minute: '2-digit',
-          hour12: true,
-        }),
-        format: st.format || '2D',
-        bookingUrl: st.cinema?.booking_url || '#',
-      });
-    });
-
-    return Object.values(grouped);
-  }, [showtimes]);
 
   // Filter and sort movies
   const filteredMovies = useMemo(() => {
@@ -311,7 +220,7 @@ export default function CinemaPage() {
             '@context': 'https://schema.org',
             '@type': 'WebPage',
             name: 'Cinema in Bahrain - Now Showing Movies | BahrainNights',
-            description: 'Find movies now showing in Bahrain cinemas. Check showtimes at Cineco, VOX, and Novo Cinemas. Watch trailers and book tickets online.',
+            description: 'Find movies now showing in Bahrain cinemas. Check what\'s playing at Cineco, VOX, Cinépolis, and Mukta A2 Cinemas. Watch trailers and book tickets online.',
             url: 'https://bahrainnights.com/cinema'
           })
         }}
@@ -336,7 +245,7 @@ export default function CinemaPage() {
                 </h1>
               </div>
               <p className="text-xl text-gray-400">
-                Find showtimes, watch trailers, and book tickets
+                Find movies, watch trailers, and book tickets at Bahrain cinemas
               </p>
             </motion.div>
 
@@ -474,7 +383,6 @@ export default function CinemaPage() {
           isOpen={isMovieModalOpen}
           onClose={() => {
             setIsMovieModalOpen(false);
-            setShowtimes([]);
           }}
           onTrailerClick={() => {
             if (selectedMovie) {
@@ -482,8 +390,6 @@ export default function CinemaPage() {
               setIsTrailerModalOpen(true);
             }
           }}
-          showtimes={formattedShowtimes}
-          dates={dates}
         />
 
         {/* Trailer Modal */}

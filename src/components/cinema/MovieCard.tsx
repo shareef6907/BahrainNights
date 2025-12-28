@@ -45,6 +45,7 @@ export default function MovieCard({ movie, index = 0, onMovieClick, onTrailerCli
           fill
           className="object-cover group-hover:scale-105 transition-transform duration-500"
           sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 25vw"
+          unoptimized
         />
 
         {/* Rating Badge */}
@@ -81,7 +82,7 @@ export default function MovieCard({ movie, index = 0, onMovieClick, onTrailerCli
             <Play className="w-6 h-6 fill-current" />
           </motion.button>
 
-          {/* View Showtimes Button */}
+          {/* Book Tickets Button */}
           <button
             className="px-4 py-2 bg-white/20 backdrop-blur-sm border border-white/30 rounded-full text-white text-sm font-medium hover:bg-white/30 transition-colors"
             onClick={(e) => {
@@ -89,7 +90,7 @@ export default function MovieCard({ movie, index = 0, onMovieClick, onTrailerCli
               onMovieClick(movie);
             }}
           >
-            View Showtimes
+            Book Tickets
           </button>
         </div>
       </div>

@@ -51,6 +51,7 @@ export default function FeaturedMovie({ movies, onTrailerClick, onMovieClick }: 
             className="object-cover"
             priority
             sizes="100vw"
+            unoptimized
           />
         </motion.div>
       </AnimatePresence>
@@ -79,6 +80,7 @@ export default function FeaturedMovie({ movies, onTrailerClick, onMovieClick }: 
                   fill
                   className="object-cover"
                   sizes="250px"
+                  unoptimized
                 />
               </motion.div>
             </AnimatePresence>
@@ -163,7 +165,7 @@ export default function FeaturedMovie({ movies, onTrailerClick, onMovieClick }: 
                     whileHover={{ scale: 1.02 }}
                     whileTap={{ scale: 0.98 }}
                   >
-                    View Showtimes
+                    Book Tickets
                   </motion.button>
                 </div>
               </motion.div>

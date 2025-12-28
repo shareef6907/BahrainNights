@@ -1,32 +1,60 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { X, Star, Clock, Play, ExternalLink, MapPin } from 'lucide-react';
+import { X, Star, Clock, Play, ExternalLink, Ticket } from 'lucide-react';
 import Image from 'next/image';
 import { Movie } from './MovieCard';
-import DateSelector from './DateSelector';
 
-interface Showtime {
-  time: string;
-  format: string;
-  bookingUrl: string;
-}
-
-interface CinemaShowtimes {
-  cinemaName: string;
-  cinemaLogo?: string;
-  location: string;
-  showtimes: Showtime[];
-}
+// Bahrain cinema booking URLs
+const BAHRAIN_CINEMAS = [
+  {
+    id: 'cineco',
+    name: 'Cineco',
+    logo: '/images/cinemas/cineco.png',
+    locations: ['Seef Mall', 'Saar Mall', 'Oasis Mall', 'Wadi Al Sail'],
+    bookingUrl: 'https://www.cineco.com.bh',
+    color: 'from-red-500/20 to-red-600/20',
+    borderColor: 'border-red-500/30',
+    hoverColor: 'hover:border-red-400',
+  },
+  {
+    id: 'vox',
+    name: 'VOX Cinemas',
+    logo: '/images/cinemas/vox.png',
+    locations: ['City Centre', 'The Avenues'],
+    bookingUrl: 'https://voxcinemas.com/bahrain',
+    color: 'from-purple-500/20 to-purple-600/20',
+    borderColor: 'border-purple-500/30',
+    hoverColor: 'hover:border-purple-400',
+  },
+  {
+    id: 'cinepolis',
+    name: 'Cinépolis',
+    logo: '/images/cinemas/cinepolis.png',
+    locations: ['Wadi Al Sail'],
+    bookingUrl: 'https://cinepolisbahrain.com',
+    color: 'from-blue-500/20 to-blue-600/20',
+    borderColor: 'border-blue-500/30',
+    hoverColor: 'hover:border-blue-400',
+  },
+  {
+    id: 'mukta',
+    name: 'Mukta A2 Cinemas',
+    logo: '/images/cinemas/mukta.png',
+    locations: ['Juffair'],
+    bookingUrl: 'https://www.muktaa2.com/bahrain',
+    color: 'from-amber-500/20 to-amber-600/20',
+    borderColor: 'border-amber-500/30',
+    hoverColor: 'hover:border-amber-400',
+  },
+];
 
 interface MovieModalProps {
   movie: Movie | null;
   isOpen: boolean;
   onClose: () => void;
   onTrailerClick: () => void;
-  showtimes: CinemaShowtimes[];
-  dates: { date: string; dayName: string; dayNumber: string; month: string; isToday: boolean }[];
 }
 
 export default function MovieModal({
@@ -34,11 +62,7 @@ export default function MovieModal({
   isOpen,
   onClose,
   onTrailerClick,
-  showtimes,
-  dates
 }: MovieModalProps) {
-  const [selectedDate, setSelectedDate] = useState(dates[0]?.date || '');
-
   useEffect(() => {
     if (isOpen) {
       document.body.style.overflow = 'hidden';
@@ -59,19 +83,6 @@ export default function MovieModal({
   }, [onClose]);
 
   if (!movie) return null;
-
-  const formatBadgeColor = (format: string) => {
-    switch (format.toLowerCase()) {
-      case 'imax':
-        return 'bg-blue-500 text-white';
-      case 'vip':
-        return 'bg-purple-500 text-white';
-      case '3d':
-        return 'bg-green-500 text-white';
-      default:
-        return 'bg-white/10 text-gray-300';
-    }
-  };
 
   return (
     <AnimatePresence>
@@ -110,6 +121,7 @@ export default function MovieModal({
                     fill
                     className="object-cover"
                     sizes="100vw"
+                    unoptimized
                   />
                   <div className="absolute inset-0 bg-gradient-to-t from-slate-900 via-slate-900/50 to-transparent" />
 
@@ -133,6 +145,7 @@ export default function MovieModal({
                         fill
                         className="object-cover"
                         sizes="180px"
+                        unoptimized
                       />
                     </div>
 
@@ -168,13 +181,15 @@ export default function MovieModal({
                       </div>
 
                       {/* Trailer Button */}
-                      <button
-                        onClick={onTrailerClick}
-                        className="flex items-center gap-2 mx-auto md:mx-0 px-5 py-2.5 bg-white/10 border border-white/20 rounded-xl text-white hover:bg-white/20 transition-colors"
-                      >
-                        <Play className="w-5 h-5 fill-current" />
-                        Watch Trailer
-                      </button>
+                      {movie.trailerUrl && (
+                        <button
+                          onClick={onTrailerClick}
+                          className="flex items-center gap-2 mx-auto md:mx-0 px-5 py-2.5 bg-white/10 border border-white/20 rounded-xl text-white hover:bg-white/20 transition-colors"
+                        >
+                          <Play className="w-5 h-5 fill-current" />
+                          Watch Trailer
+                        </button>
+                      )}
                     </div>
                   </div>
 
@@ -192,71 +207,53 @@ export default function MovieModal({
                     </div>
                   )}
 
-                  {/* Showtimes Section */}
+                  {/* Book Tickets Section - Now Showing */}
                   {movie.isNowShowing && (
                     <div className="mt-6">
-                      <h3 className="text-xl font-bold text-white mb-4">Showtimes</h3>
-
-                      {/* Date Selector */}
-                      <div className="mb-6">
-                        <DateSelector
-                          dates={dates}
-                          selectedDate={selectedDate}
-                          onDateSelect={setSelectedDate}
-                        />
+                      <div className="flex items-center gap-2 mb-4">
+                        <Ticket className="w-6 h-6 text-yellow-400" />
+                        <h3 className="text-xl font-bold text-white">Book Tickets</h3>
                       </div>
 
-                      {/* Cinemas */}
-                      <div className="space-y-4">
-                        {showtimes.map((cinema) => (
-                          <div
-                            key={cinema.cinemaName}
-                            className="p-4 bg-white/5 border border-white/10 rounded-xl"
+                      <p className="text-gray-400 mb-4">
+                        Select a cinema to book your tickets for {movie.title}
+                      </p>
+
+                      {/* Cinema Grid */}
+                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                        {BAHRAIN_CINEMAS.map((cinema) => (
+                          <a
+                            key={cinema.id}
+                            href={cinema.bookingUrl}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className={`group p-4 bg-gradient-to-br ${cinema.color} border ${cinema.borderColor} ${cinema.hoverColor} rounded-xl transition-all hover:scale-[1.02] hover:shadow-lg`}
                           >
-                            <div className="flex items-center gap-3 mb-3">
-                              {cinema.cinemaLogo && (
-                                <div className="w-10 h-10 bg-white rounded-lg flex items-center justify-center overflow-hidden">
-                                  <Image
-                                    src={cinema.cinemaLogo}
-                                    alt={cinema.cinemaName}
-                                    width={32}
-                                    height={32}
-                                    className="object-contain"
-                                  />
-                                </div>
-                              )}
-                              <div>
-                                <h4 className="font-bold text-white">{cinema.cinemaName}</h4>
-                                <div className="flex items-center gap-1 text-sm text-gray-400">
-                                  <MapPin className="w-3.5 h-3.5" />
-                                  <span>{cinema.location}</span>
-                                </div>
+                            <div className="flex items-center gap-4">
+                              {/* Cinema Logo Placeholder */}
+                              <div className="w-14 h-14 bg-white/10 rounded-xl flex items-center justify-center flex-shrink-0">
+                                <span className="text-2xl font-bold text-white">
+                                  {cinema.name.charAt(0)}
+                                </span>
+                              </div>
+
+                              <div className="flex-1 min-w-0">
+                                <h4 className="font-bold text-white text-lg truncate">
+                                  {cinema.name}
+                                </h4>
+                                <p className="text-sm text-gray-400 truncate">
+                                  {cinema.locations.join(' • ')}
+                                </p>
+                              </div>
+
+                              <div className="flex items-center gap-2 px-4 py-2 bg-white/10 rounded-lg group-hover:bg-yellow-400 group-hover:text-black transition-all">
+                                <span className="font-medium text-white group-hover:text-black">
+                                  Book Now
+                                </span>
+                                <ExternalLink className="w-4 h-4 text-white group-hover:text-black" />
                               </div>
                             </div>
-
-                            {/* Showtimes */}
-                            <div className="flex flex-wrap gap-2">
-                              {cinema.showtimes.map((showtime, idx) => (
-                                <a
-                                  key={idx}
-                                  href={showtime.bookingUrl}
-                                  target="_blank"
-                                  rel="noopener noreferrer"
-                                  className="group flex items-center gap-2 px-4 py-2 bg-white/5 border border-white/10 rounded-lg hover:bg-yellow-400/10 hover:border-yellow-400/50 transition-all"
-                                >
-                                  <span className="text-white font-medium group-hover:text-yellow-400">
-                                    {showtime.time}
-                                  </span>
-                                  {showtime.format !== 'Standard' && (
-                                    <span className={`px-2 py-0.5 text-xs font-bold rounded ${formatBadgeColor(showtime.format)}`}>
-                                      {showtime.format}
-                                    </span>
-                                  )}
-                                  <ExternalLink className="w-3.5 h-3.5 text-gray-500 opacity-0 group-hover:opacity-100 transition-opacity" />
-                                </a>
-                              ))}
-                            </div>
-                          </div>
+                          </a>
                         ))}
                       </div>
                     </div>
