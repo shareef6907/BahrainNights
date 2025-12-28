@@ -9,6 +9,12 @@ if (!process.env.SUPABASE_URL || !process.env.SUPABASE_SERVICE_ROLE_KEY) {
   process.exit(1);
 }
 
+// TMDB API Key (optional but recommended)
+const TMDB_API_KEY = process.env.TMDB_API_KEY;
+if (!TMDB_API_KEY) {
+  console.warn('WARNING: TMDB_API_KEY not set. Auto-add feature will be disabled.');
+}
+
 // Initialize Supabase client
 const supabase = createClient(
   process.env.SUPABASE_URL,
@@ -108,7 +114,7 @@ const SKIP_TITLES = [
   'restaurants',
   'discover movies',
   'whats on',
-  'what\'s on',
+  "what's on",
   'book now',
   'buy tickets',
   'view all',
@@ -173,7 +179,7 @@ function shouldSkipTitle(title) {
   if (cleaned.length < 3) return true;
 
   // In skip list
-  if (SKIP_TITLES.some(skip => cleaned === skip || cleaned.includes(skip))) return true;
+  if (SKIP_TITLES.some((skip) => cleaned === skip || cleaned.includes(skip))) return true;
 
   // Only numbers
   if (/^\d+$/.test(cleaned)) return true;
@@ -245,6 +251,218 @@ function matchMovies(scrapedTitles, dbMovies) {
     unmatched,
   };
 }
+
+// ============================================================
+// TMDB AUTO-ADD FUNCTIONS
+// ============================================================
+
+// Search TMDB for a movie title
+async function searchTMDB(title) {
+  if (!TMDB_API_KEY) return null;
+
+  const cleanedTitle = cleanTitle(title);
+  if (cleanedTitle.length < 3) return null;
+
+  // Search with current year and previous year
+  const currentYear = new Date().getFullYear();
+  const url = `https://api.themoviedb.org/3/search/movie?api_key=${TMDB_API_KEY}&query=${encodeURIComponent(cleanedTitle)}&primary_release_year=${currentYear}`;
+
+  try {
+    const response = await fetch(url);
+    const data = await response.json();
+
+    if (data.results && data.results.length > 0) {
+      // Return the first result with a valid release date
+      const validResult = data.results.find(
+        (r) => r.release_date && r.poster_path && r.vote_count > 0
+      );
+      if (validResult) return validResult;
+
+      // If no valid result with current year, try previous year
+      const prevYearUrl = `https://api.themoviedb.org/3/search/movie?api_key=${TMDB_API_KEY}&query=${encodeURIComponent(cleanedTitle)}&primary_release_year=${currentYear - 1}`;
+      const prevResponse = await fetch(prevYearUrl);
+      const prevData = await prevResponse.json();
+
+      if (prevData.results && prevData.results.length > 0) {
+        const prevValidResult = prevData.results.find(
+          (r) => r.release_date && r.poster_path && r.vote_count > 0
+        );
+        if (prevValidResult) return prevValidResult;
+      }
+
+      // Return first result from any year if nothing else
+      const anyUrl = `https://api.themoviedb.org/3/search/movie?api_key=${TMDB_API_KEY}&query=${encodeURIComponent(cleanedTitle)}`;
+      const anyResponse = await fetch(anyUrl);
+      const anyData = await anyResponse.json();
+
+      if (anyData.results && anyData.results.length > 0) {
+        // Only return if it's a recent movie (2023+)
+        const recentResult = anyData.results.find((r) => {
+          if (!r.release_date) return false;
+          const year = parseInt(r.release_date.substring(0, 4));
+          return year >= 2023 && r.poster_path;
+        });
+        return recentResult || null;
+      }
+    }
+  } catch (error) {
+    console.error(`  TMDB search failed for "${title}":`, error.message);
+  }
+  return null;
+}
+
+// Get full movie details from TMDB
+async function getTMDBDetails(tmdbId) {
+  if (!TMDB_API_KEY) return null;
+
+  const url = `https://api.themoviedb.org/3/movie/${tmdbId}?api_key=${TMDB_API_KEY}&append_to_response=credits,videos`;
+
+  try {
+    const response = await fetch(url);
+    const data = await response.json();
+    return data;
+  } catch (error) {
+    console.error(`  Failed to get TMDB details for ${tmdbId}:`, error.message);
+    return null;
+  }
+}
+
+// Generate URL-friendly slug from title
+function generateSlug(title) {
+  return title
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, '-')
+    .replace(/^-|-$/g, '')
+    .substring(0, 100);
+}
+
+// Auto-add missing movies from TMDB
+async function autoAddFromTMDB(unmatchedTitles, existingTmdbIds) {
+  if (!TMDB_API_KEY) {
+    console.log('\nTMDB_API_KEY not set - skipping auto-add');
+    return [];
+  }
+
+  console.log('\n' + '='.repeat(50));
+  console.log('AUTO-ADDING MISSING MOVIES FROM TMDB');
+  console.log('='.repeat(50));
+
+  const added = [];
+  const processedTitles = new Set();
+  const maxToProcess = 50; // Limit to avoid rate limits
+  let processed = 0;
+
+  for (const title of unmatchedTitles) {
+    if (processed >= maxToProcess) {
+      console.log(`\nReached limit of ${maxToProcess} movies to process`);
+      break;
+    }
+
+    const cleaned = cleanTitle(title);
+
+    // Skip if already processed similar title
+    if (processedTitles.has(cleaned)) continue;
+    processedTitles.add(cleaned);
+
+    // Skip very short or generic titles
+    if (cleaned.length < 4) {
+      console.log(`  SKIP (too short): "${title}"`);
+      continue;
+    }
+
+    // Skip if it looks like a generic title
+    if (shouldSkipTitle(title)) {
+      console.log(`  SKIP (generic): "${title}"`);
+      continue;
+    }
+
+    console.log(`\n  Searching TMDB for: "${title}"`);
+    const tmdbMovie = await searchTMDB(title);
+
+    if (!tmdbMovie) {
+      console.log(`    NOT FOUND on TMDB`);
+      processed++;
+      // Rate limit: wait 100ms between requests
+      await new Promise((r) => setTimeout(r, 100));
+      continue;
+    }
+
+    // Skip if we already have this movie
+    if (existingTmdbIds.has(tmdbMovie.id)) {
+      console.log(`    ALREADY EXISTS: ${tmdbMovie.title} (TMDB: ${tmdbMovie.id})`);
+      continue;
+    }
+
+    console.log(`    FOUND: "${tmdbMovie.title}" (${tmdbMovie.release_date}) - TMDB ID: ${tmdbMovie.id}`);
+
+    // Get full movie details
+    const details = await getTMDBDetails(tmdbMovie.id);
+
+    // Create slug
+    const slug = generateSlug(tmdbMovie.title);
+
+    // Check if slug already exists
+    const { data: existingSlug } = await supabase
+      .from('movies')
+      .select('id')
+      .eq('slug', slug)
+      .single();
+
+    const finalSlug = existingSlug ? `${slug}-${tmdbMovie.id}` : slug;
+
+    // Insert into database
+    const movieData = {
+      tmdb_id: tmdbMovie.id,
+      title: tmdbMovie.title,
+      slug: finalSlug,
+      overview: tmdbMovie.overview || '',
+      poster_path: tmdbMovie.poster_path,
+      backdrop_path: tmdbMovie.backdrop_path,
+      release_date: tmdbMovie.release_date,
+      tmdb_rating: tmdbMovie.vote_average,
+      popularity: tmdbMovie.popularity,
+      genres: details?.genres?.map((g) => g.name) || [],
+      runtime: details?.runtime || null,
+      language: tmdbMovie.original_language,
+      is_now_showing: true,
+      is_coming_soon: false,
+    };
+
+    const { error } = await supabase.from('movies').insert(movieData);
+
+    if (error) {
+      console.log(`    FAILED TO ADD: ${error.message}`);
+    } else {
+      console.log(`    ADDED TO DATABASE!`);
+      added.push({
+        title: tmdbMovie.title,
+        tmdb_id: tmdbMovie.id,
+        release_date: tmdbMovie.release_date,
+      });
+      existingTmdbIds.add(tmdbMovie.id);
+    }
+
+    processed++;
+
+    // Rate limit: wait 250ms between requests
+    await new Promise((r) => setTimeout(r, 250));
+  }
+
+  console.log(`\n${'='.repeat(50)}`);
+  console.log(`AUTO-ADD COMPLETE: Added ${added.length} new movies from TMDB`);
+  console.log('='.repeat(50));
+
+  if (added.length > 0) {
+    console.log('\nNewly added movies:');
+    added.forEach((m) => console.log(`  - ${m.title} (${m.release_date})`));
+  }
+
+  return added;
+}
+
+// ============================================================
+// SCRAPING FUNCTIONS
+// ============================================================
 
 // Scrape a single cinema
 async function scrapeCinema(browser, cinema) {
@@ -400,10 +618,14 @@ async function scrapeCinema(browser, cinema) {
   };
 }
 
+// ============================================================
+// MAIN MATCHING AND UPDATE FUNCTION
+// ============================================================
+
 // Match scraped movies with database and update
 async function matchAndUpdateMovies(scrapedResults) {
   console.log('\n' + '='.repeat(50));
-  console.log('Matching movies with database...');
+  console.log('MATCHING MOVIES WITH DATABASE');
   console.log('='.repeat(50));
 
   // Get all movies from database - only get recent movies (released in last 2 years)
@@ -422,29 +644,43 @@ async function matchAndUpdateMovies(scrapedResults) {
     return { matchedCount: 0, error: error.message };
   }
 
-  if (!dbMovies || dbMovies.length === 0) {
-    console.log('No recent movies in database to match against');
-    return { matchedCount: 0, error: 'No recent movies in database' };
-  }
+  console.log(`Database has ${dbMovies?.length || 0} recent movies (released since ${twoYearsAgoStr})`);
 
-  console.log(`Database has ${dbMovies.length} recent movies (released since ${twoYearsAgoStr})`);
+  // Build set of existing TMDB IDs
+  const existingTmdbIds = new Set((dbMovies || []).filter((m) => m.tmdb_id).map((m) => m.tmdb_id));
+  console.log(`Existing TMDB IDs in database: ${existingTmdbIds.size}`);
 
   // Collect all scraped titles (unique)
   const allScrapedTitles = [...new Set(scrapedResults.flatMap((r) => r.movies))];
   console.log(`Total unique scraped titles: ${allScrapedTitles.length}`);
 
   // Match using STRICT matching
-  const { matched, unmatched } = matchMovies(allScrapedTitles, dbMovies);
+  const { matched, unmatched } = matchMovies(allScrapedTitles, dbMovies || []);
 
   console.log(`\n${'='.repeat(50)}`);
-  console.log(`MATCHING RESULTS: ${matched.length} movies matched`);
-  console.log(`${'='.repeat(50)}`);
+  console.log(`INITIAL MATCHING: ${matched.length} movies matched, ${unmatched.length} unmatched`);
+  console.log('='.repeat(50));
 
-  // Update database
+  // ============================================================
+  // AUTO-ADD MISSING MOVIES FROM TMDB
+  // ============================================================
+  let addedMovies = [];
+  if (unmatched.length > 0 && TMDB_API_KEY) {
+    addedMovies = await autoAddFromTMDB(unmatched, existingTmdbIds);
+  }
+
+  // ============================================================
+  // UPDATE DATABASE WITH NOW SHOWING STATUS
+  // ============================================================
   const now = new Date().toISOString();
+  const totalMatched = matched.length + addedMovies.length;
 
-  if (matched.length >= 3) {
-    console.log('\nUpdating database with matched movies...');
+  console.log('\n' + '='.repeat(50));
+  console.log('UPDATING NOW SHOWING STATUS');
+  console.log('='.repeat(50));
+
+  if (totalMatched >= 3) {
+    console.log(`\nUpdating database: ${matched.length} matched + ${addedMovies.length} auto-added = ${totalMatched} total`);
 
     // First, reset all movies to not showing
     const { error: resetError } = await supabase
@@ -462,9 +698,7 @@ async function matchAndUpdateMovies(scrapedResults) {
     for (const id of matchedIds) {
       const { error: updateError } = await supabase
         .from('movies')
-        .update({
-          is_now_showing: true,
-        })
+        .update({ is_now_showing: true })
         .eq('id', id);
 
       if (updateError) {
@@ -472,7 +706,9 @@ async function matchAndUpdateMovies(scrapedResults) {
       }
     }
 
-    console.log(`Successfully updated ${matchedIds.length} movies as "Now Showing"`);
+    // Auto-added movies are already set as is_now_showing: true during insert
+
+    console.log(`Successfully updated ${totalMatched} movies as "Now Showing"`);
   } else {
     console.log('\nToo few matches. Using TMDB fallback...');
 
@@ -506,17 +742,16 @@ async function matchAndUpdateMovies(scrapedResults) {
       const recentIds = recentMovies.map((m) => m.id);
 
       for (const id of recentIds) {
-        await supabase
-          .from('movies')
-          .update({ is_now_showing: true })
-          .eq('id', id);
+        await supabase.from('movies').update({ is_now_showing: true }).eq('id', id);
       }
 
       console.log(`Set ${recentIds.length} movies as "Now Showing" via fallback`);
     }
   }
 
-  // Log results to agent_logs
+  // ============================================================
+  // LOG RESULTS
+  // ============================================================
   try {
     await supabase.from('agent_logs').insert({
       agent_type: 'cinema_scraper_github',
@@ -524,7 +759,7 @@ async function matchAndUpdateMovies(scrapedResults) {
       completed_at: new Date().toISOString(),
       status: 'completed',
       items_found: allScrapedTitles.length,
-      items_updated: matched.length,
+      items_updated: totalMatched,
       error_count: 0,
       metadata: {
         cinemas: scrapedResults.map((r) => ({
@@ -533,13 +768,21 @@ async function matchAndUpdateMovies(scrapedResults) {
         })),
         matchedCount: matched.length,
         unmatchedCount: unmatched.length,
-        usedFallback: matched.length < 3,
+        autoAddedCount: addedMovies.length,
+        usedFallback: totalMatched < 3,
         matchedMovies: matched.map((m) => ({
           scraped: m.scraped,
           matched: m.movie.title,
           type: m.matchType,
         })),
-        unmatchedTitles: unmatched.slice(0, 20),
+        autoAddedMovies: addedMovies.map((m) => ({
+          title: m.title,
+          tmdb_id: m.tmdb_id,
+          release_date: m.release_date,
+        })),
+        unmatchedTitles: unmatched
+          .filter((t) => !addedMovies.some((a) => cleanTitle(a.title) === cleanTitle(t)))
+          .slice(0, 20),
       },
     });
     console.log('\nLogged results to agent_logs');
@@ -549,18 +792,25 @@ async function matchAndUpdateMovies(scrapedResults) {
 
   return {
     matchedCount: matched.length,
+    autoAddedCount: addedMovies.length,
+    totalNowShowing: totalMatched,
     totalScraped: allScrapedTitles.length,
     matched,
+    addedMovies,
     unmatched,
   };
 }
 
-// Main function
+// ============================================================
+// MAIN FUNCTION
+// ============================================================
+
 async function main() {
   console.log('='.repeat(50));
-  console.log('Cinema Scraper - GitHub Actions');
+  console.log('CINEMA SCRAPER - GitHub Actions');
   console.log(`Started at: ${new Date().toISOString()}`);
   console.log('='.repeat(50));
+  console.log(`TMDB Auto-Add: ${TMDB_API_KEY ? 'ENABLED' : 'DISABLED'}`);
 
   // Launch browser
   const browser = await puppeteer.launch({
@@ -591,7 +841,9 @@ async function main() {
     console.log('FINAL RESULTS');
     console.log('='.repeat(50));
     console.log(`Total scraped: ${matchResult.totalScraped}`);
-    console.log(`Matched to database: ${matchResult.matchedCount}`);
+    console.log(`Matched to existing: ${matchResult.matchedCount}`);
+    console.log(`Auto-added from TMDB: ${matchResult.autoAddedCount}`);
+    console.log(`Total now showing: ${matchResult.totalNowShowing}`);
     console.log(`Completed at: ${new Date().toISOString()}`);
   } catch (error) {
     console.error('Fatal error:', error);
