@@ -19,6 +19,7 @@ export interface Movie {
   synopsis: string;
   trailerUrl: string;
   cast?: string[];
+  scrapedFrom?: string[]; // Which cinemas have this movie: ['cineco', 'vox', 'mukta', 'cinepolis']
 }
 
 interface MovieCardProps {

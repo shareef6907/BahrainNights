@@ -219,42 +219,49 @@ export default function MovieModal({
                         Select a cinema to book your tickets for {movie.title}
                       </p>
 
-                      {/* Cinema Grid */}
+                      {/* Cinema Grid - Filter based on scraped_from */}
                       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                        {BAHRAIN_CINEMAS.map((cinema) => (
-                          <a
-                            key={cinema.id}
-                            href={cinema.bookingUrl}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className={`group p-4 bg-gradient-to-br ${cinema.color} border ${cinema.borderColor} ${cinema.hoverColor} rounded-xl transition-all hover:scale-[1.02] hover:shadow-lg`}
-                          >
-                            <div className="flex items-center gap-4">
-                              {/* Cinema Logo Placeholder */}
-                              <div className="w-14 h-14 bg-white/10 rounded-xl flex items-center justify-center flex-shrink-0">
-                                <span className="text-2xl font-bold text-white">
-                                  {cinema.name.charAt(0)}
-                                </span>
-                              </div>
+                        {(() => {
+                          // Filter cinemas based on scraped_from, or show all if empty/undefined
+                          const availableCinemas = movie.scrapedFrom && movie.scrapedFrom.length > 0
+                            ? BAHRAIN_CINEMAS.filter((cinema) => movie.scrapedFrom?.includes(cinema.id))
+                            : BAHRAIN_CINEMAS; // Fallback: show all cinemas
 
-                              <div className="flex-1 min-w-0">
-                                <h4 className="font-bold text-white text-lg truncate">
-                                  {cinema.name}
-                                </h4>
-                                <p className="text-sm text-gray-400 truncate">
-                                  {cinema.locations.join(' • ')}
-                                </p>
-                              </div>
+                          return availableCinemas.map((cinema) => (
+                            <a
+                              key={cinema.id}
+                              href={cinema.bookingUrl}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className={`group p-4 bg-gradient-to-br ${cinema.color} border ${cinema.borderColor} ${cinema.hoverColor} rounded-xl transition-all hover:scale-[1.02] hover:shadow-lg`}
+                            >
+                              <div className="flex items-center gap-4">
+                                {/* Cinema Logo Placeholder */}
+                                <div className="w-14 h-14 bg-white/10 rounded-xl flex items-center justify-center flex-shrink-0">
+                                  <span className="text-2xl font-bold text-white">
+                                    {cinema.name.charAt(0)}
+                                  </span>
+                                </div>
 
-                              <div className="flex items-center gap-2 px-4 py-2 bg-white/10 rounded-lg group-hover:bg-yellow-400 group-hover:text-black transition-all">
-                                <span className="font-medium text-white group-hover:text-black">
-                                  Book Now
-                                </span>
-                                <ExternalLink className="w-4 h-4 text-white group-hover:text-black" />
+                                <div className="flex-1 min-w-0">
+                                  <h4 className="font-bold text-white text-lg truncate">
+                                    {cinema.name}
+                                  </h4>
+                                  <p className="text-sm text-gray-400 truncate">
+                                    {cinema.locations.join(' • ')}
+                                  </p>
+                                </div>
+
+                                <div className="flex items-center gap-2 px-4 py-2 bg-white/10 rounded-lg group-hover:bg-yellow-400 group-hover:text-black transition-all">
+                                  <span className="font-medium text-white group-hover:text-black">
+                                    Book Now
+                                  </span>
+                                  <ExternalLink className="w-4 h-4 text-white group-hover:text-black" />
+                                </div>
                               </div>
-                            </div>
-                          </a>
-                        ))}
+                            </a>
+                          ));
+                        })()}
                       </div>
                     </div>
                   )}

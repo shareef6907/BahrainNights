@@ -31,6 +31,7 @@ interface DBMovie {
   tmdb_rating: number;
   is_now_showing: boolean;
   is_coming_soon: boolean;
+  scraped_from: string[]; // Which cinemas have this movie: ['cineco', 'vox', 'mukta', 'cinepolis']
 }
 
 // Helper to construct full TMDB image URLs
@@ -74,6 +75,7 @@ function convertToMovieFormat(dbMovie: DBMovie): Movie {
     synopsis: dbMovie.synopsis || '',
     trailerUrl: dbMovie.trailer_url || '',
     cast: dbMovie.movie_cast || [],
+    scrapedFrom: dbMovie.scraped_from || [],
   };
 }
 

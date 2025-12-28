@@ -337,7 +337,7 @@ function generateSlug(title) {
 }
 
 // Auto-add missing movies from TMDB
-async function autoAddFromTMDB(unmatchedTitles, existingTmdbIds) {
+async function autoAddFromTMDB(unmatchedTitles, existingTmdbIds, titleToCinemas) {
   if (!TMDB_API_KEY) {
     console.log('\nTMDB_API_KEY not set - skipping auto-add');
     return [];
@@ -410,6 +410,10 @@ async function autoAddFromTMDB(unmatchedTitles, existingTmdbIds) {
 
     const finalSlug = existingSlug ? `${slug}-${tmdbMovie.id}` : slug;
 
+    // Get cinema sources for this title
+    const cinemaSources = titleToCinemas?.get(cleaned);
+    const scrapedFrom = cinemaSources ? [...cinemaSources] : [];
+
     // Insert into database - use EXACT column names from movies table
     const movieData = {
       tmdb_id: tmdbMovie.id,
@@ -425,6 +429,7 @@ async function autoAddFromTMDB(unmatchedTitles, existingTmdbIds) {
       language: tmdbMovie.original_language,
       is_now_showing: true,
       is_coming_soon: false,
+      scraped_from: scrapedFrom,
     };
 
     const { error } = await supabase.from('movies').insert(movieData);
@@ -432,11 +437,12 @@ async function autoAddFromTMDB(unmatchedTitles, existingTmdbIds) {
     if (error) {
       console.log(`    FAILED TO ADD: ${error.message}`);
     } else {
-      console.log(`    ADDED TO DATABASE!`);
+      console.log(`    ADDED TO DATABASE! Cinemas: [${scrapedFrom.join(', ')}]`);
       added.push({
         title: tmdbMovie.title,
         tmdb_id: tmdbMovie.id,
         release_date: tmdbMovie.release_date,
+        scraped_from: scrapedFrom,
       });
       existingTmdbIds.add(tmdbMovie.id);
     }
@@ -453,7 +459,7 @@ async function autoAddFromTMDB(unmatchedTitles, existingTmdbIds) {
 
   if (added.length > 0) {
     console.log('\nNewly added movies:');
-    added.forEach((m) => console.log(`  - ${m.title} (${m.release_date})`));
+    added.forEach((m) => console.log(`  - ${m.title} (${m.release_date}) -> [${m.scraped_from.join(', ')}]`));
   }
 
   return added;
@@ -621,6 +627,14 @@ async function scrapeCinema(browser, cinema) {
 // MAIN MATCHING AND UPDATE FUNCTION
 // ============================================================
 
+// Cinema name mapping for scraped_from column
+const CINEMA_KEY_MAP = {
+  'Cineco': 'cineco',
+  'VOX': 'vox',
+  'Cinepolis': 'cinepolis',
+  'Mukta': 'mukta',
+};
+
 // Match scraped movies with database and update
 async function matchAndUpdateMovies(scrapedResults) {
   console.log('\n' + '='.repeat(50));
@@ -649,12 +663,52 @@ async function matchAndUpdateMovies(scrapedResults) {
   const existingTmdbIds = new Set((dbMovies || []).filter((m) => m.tmdb_id).map((m) => m.tmdb_id));
   console.log(`Existing TMDB IDs in database: ${existingTmdbIds.size}`);
 
+  // ============================================================
+  // BUILD MOVIE -> CINEMAS MAP (Track which cinema has each movie)
+  // ============================================================
+  console.log('\n' + '='.repeat(50));
+  console.log('BUILDING MOVIE -> CINEMA MAP');
+  console.log('='.repeat(50));
+
+  const movieCinemaMap = new Map(); // movie_id -> Set of cinema keys
+  const titleToCinemas = new Map(); // cleaned_title -> Set of cinema keys
+
+  // Process each cinema's results to build title->cinema mapping
+  for (const result of scrapedResults) {
+    const cinemaKey = CINEMA_KEY_MAP[result.cinema] || result.cinema.toLowerCase();
+    console.log(`\nProcessing ${result.cinema} (${result.movies.length} titles) -> key: ${cinemaKey}`);
+
+    for (const title of result.movies) {
+      if (shouldSkipTitle(title)) continue;
+
+      const cleaned = cleanTitle(title);
+      if (!titleToCinemas.has(cleaned)) {
+        titleToCinemas.set(cleaned, new Set());
+      }
+      titleToCinemas.get(cleaned).add(cinemaKey);
+    }
+  }
+
+  console.log(`Built title->cinema map with ${titleToCinemas.size} unique titles`);
+
   // Collect all scraped titles (unique)
   const allScrapedTitles = [...new Set(scrapedResults.flatMap((r) => r.movies))];
   console.log(`Total unique scraped titles: ${allScrapedTitles.length}`);
 
   // Match using STRICT matching
   const { matched, unmatched } = matchMovies(allScrapedTitles, dbMovies || []);
+
+  // Build movie_id -> cinemas map from matched results
+  for (const match of matched) {
+    const cleanedScraped = cleanTitle(match.scraped);
+    const cinemas = titleToCinemas.get(cleanedScraped);
+    if (cinemas) {
+      if (!movieCinemaMap.has(match.movie.id)) {
+        movieCinemaMap.set(match.movie.id, new Set());
+      }
+      cinemas.forEach((c) => movieCinemaMap.get(match.movie.id).add(c));
+    }
+  }
 
   console.log(`\n${'='.repeat(50)}`);
   console.log(`INITIAL MATCHING: ${matched.length} movies matched, ${unmatched.length} unmatched`);
@@ -665,54 +719,61 @@ async function matchAndUpdateMovies(scrapedResults) {
   // ============================================================
   let addedMovies = [];
   if (unmatched.length > 0 && TMDB_API_KEY) {
-    addedMovies = await autoAddFromTMDB(unmatched, existingTmdbIds);
+    // Pass titleToCinemas so auto-add can track cinema sources
+    addedMovies = await autoAddFromTMDB(unmatched, existingTmdbIds, titleToCinemas);
   }
 
   // ============================================================
-  // UPDATE DATABASE WITH NOW SHOWING STATUS
+  // UPDATE DATABASE WITH NOW SHOWING STATUS AND SCRAPED_FROM
   // ============================================================
   const now = new Date().toISOString();
   const totalMatched = matched.length + addedMovies.length;
 
   console.log('\n' + '='.repeat(50));
-  console.log('UPDATING NOW SHOWING STATUS');
+  console.log('UPDATING NOW SHOWING STATUS & CINEMA SOURCES');
   console.log('='.repeat(50));
 
-  // ALWAYS reset ALL movies to not showing first
+  // ALWAYS reset ALL movies to not showing first and clear scraped_from
   // This ensures only verified movies from Bahrain cinemas are marked as showing
   console.log('\nResetting ALL movies to not showing...');
   const { error: resetError } = await supabase
     .from('movies')
-    .update({ is_now_showing: false })
+    .update({ is_now_showing: false, scraped_from: [] })
     .neq('id', '00000000-0000-0000-0000-000000000000');
 
   if (resetError) {
     console.error('Error resetting movies:', resetError);
   } else {
-    console.log('All movies reset to is_now_showing: false');
+    console.log('All movies reset to is_now_showing: false, scraped_from: []');
   }
 
   // Only mark movies that are VERIFIED from Bahrain cinema websites
   if (totalMatched > 0) {
     console.log(`\nMarking ${matched.length} matched + ${addedMovies.length} auto-added = ${totalMatched} movies as "Now Showing"`);
 
-    // Set matched movies as now showing
-    const matchedIds = matched.map((m) => m.movie.id);
+    // Set matched movies as now showing WITH cinema sources
+    for (const match of matched) {
+      const cinemas = movieCinemaMap.get(match.movie.id);
+      const scrapedFrom = cinemas ? [...cinemas] : [];
 
-    for (const id of matchedIds) {
       const { error: updateError } = await supabase
         .from('movies')
-        .update({ is_now_showing: true })
-        .eq('id', id);
+        .update({
+          is_now_showing: true,
+          scraped_from: scrapedFrom,
+        })
+        .eq('id', match.movie.id);
 
       if (updateError) {
-        console.error(`Error updating movie ${id}:`, updateError);
+        console.error(`Error updating movie ${match.movie.id}:`, updateError);
+      } else {
+        console.log(`  Updated: ${match.movie.title} -> cinemas: [${scrapedFrom.join(', ')}]`);
       }
     }
 
-    // Auto-added movies are already set as is_now_showing: true during insert
+    // Auto-added movies already have scraped_from set during insert
 
-    console.log(`Successfully updated ${totalMatched} movies as "Now Showing"`);
+    console.log(`Successfully updated ${totalMatched} movies as "Now Showing" with cinema sources`);
   } else {
     console.log('\nNo movies matched from Bahrain cinemas - all movies set to not showing');
     console.log('This is correct - we only show movies verified from actual cinema websites');
