@@ -1,9 +1,9 @@
 'use client';
 
-import { useState, useEffect, Suspense } from 'react';
+import { useState, useEffect, Suspense, useCallback } from 'react';
 import { useSearchParams } from 'next/navigation';
 import { motion } from 'framer-motion';
-import { Search, Calendar, MapPin, Clock, Filter, Grid3X3, List, ChevronRight } from 'lucide-react';
+import { Search, Calendar, MapPin, Clock, Filter, Grid3X3, List, ChevronRight, RefreshCw } from 'lucide-react';
 import Link from 'next/link';
 import Image from 'next/image';
 
@@ -22,116 +22,28 @@ interface Event {
   time: string;
   price: string;
   isFree: boolean;
+  isFeatured?: boolean;
 }
-
-// Sample events data (placeholder until database is populated)
-const sampleEvents: Event[] = [
-  {
-    id: '1',
-    title: 'Ragheb Alama Live in Concert',
-    slug: 'ragheb-alama-live-concert-2025',
-    description: 'Lebanese superstar Ragheb Alama returns to Bahrain for an unforgettable night',
-    image: 'https://images.unsplash.com/photo-1540039155733-5bb30b53aa14?w=800&h=500&fit=crop',
-    category: 'Concerts',
-    categoryColor: 'bg-purple-500',
-    venue: 'Al Dana Amphitheatre',
-    location: 'Bahrain Bay',
-    date: 'Jan 10',
-    time: '8:00 PM',
-    price: 'From BD 25',
-    isFree: false,
-  },
-  {
-    id: '2',
-    title: 'Jazz Night at Cafe Lilou',
-    slug: 'jazz-night-cafe-lilou',
-    description: 'Live jazz performance with international artists',
-    image: 'https://images.unsplash.com/photo-1511735111819-9a3f7709049c?w=800&h=500&fit=crop',
-    category: 'Live Music',
-    categoryColor: 'bg-blue-500',
-    venue: 'Cafe Lilou',
-    location: 'Adliya',
-    date: 'Jan 12',
-    time: '8:00 PM',
-    price: 'Free Entry',
-    isFree: true,
-  },
-  {
-    id: '3',
-    title: 'Family Fun Day at Wahooo!',
-    slug: 'family-fun-day-wahooo',
-    description: 'A day of water park fun for the whole family',
-    image: 'https://images.unsplash.com/photo-1526401485004-46910ecc8e51?w=800&h=500&fit=crop',
-    category: 'Family',
-    categoryColor: 'bg-green-500',
-    venue: 'Wahooo! Waterpark',
-    location: 'Seef Mall',
-    date: 'Jan 13',
-    time: '10:00 AM',
-    price: 'BD 15',
-    isFree: false,
-  },
-  {
-    id: '4',
-    title: 'Art Exhibition: Modern Bahrain',
-    slug: 'art-exhibition-modern-bahrain',
-    description: 'Contemporary art showcase featuring local Bahraini artists',
-    image: 'https://images.unsplash.com/photo-1536924940846-227afb31e2a5?w=800&h=500&fit=crop',
-    category: 'Cultural',
-    categoryColor: 'bg-pink-500',
-    venue: 'Bahrain National Museum',
-    location: 'Manama',
-    date: 'Jan 15',
-    time: '6:00 PM',
-    price: 'Free Entry',
-    isFree: true,
-  },
-  {
-    id: '5',
-    title: 'Football Match: Bahrain vs UAE',
-    slug: 'football-bahrain-vs-uae',
-    description: 'Gulf Cup qualifier match',
-    image: 'https://images.unsplash.com/photo-1574629810360-7efbbe195018?w=800&h=500&fit=crop',
-    category: 'Sports',
-    categoryColor: 'bg-red-500',
-    venue: 'Bahrain National Stadium',
-    location: 'Riffa',
-    date: 'Jan 18',
-    time: '7:00 PM',
-    price: 'BD 5',
-    isFree: false,
-  },
-  {
-    id: '6',
-    title: 'Ladies Night at The Orangery',
-    slug: 'ladies-night-orangery',
-    description: 'Complimentary drinks and live DJ for ladies',
-    image: 'https://images.unsplash.com/photo-1566417713940-fe7c737a9ef2?w=800&h=500&fit=crop',
-    category: 'Nightlife',
-    categoryColor: 'bg-indigo-500',
-    venue: 'The Orangery',
-    location: 'Adliya',
-    date: 'Jan 11',
-    time: '9:00 PM',
-    price: 'Free Entry',
-    isFree: true,
-  },
-];
 
 // Category filters
 const categories = [
   { id: 'all', name: 'All Events', icon: '🎭' },
-  { id: 'concerts', name: 'Concerts & Live Music', icon: '🎵' },
+  { id: 'music', name: 'Music & Concerts', icon: '🎵' },
+  { id: 'dining', name: 'Dining & Food', icon: '🍽️' },
   { id: 'family', name: 'Family & Kids', icon: '👨‍👩‍👧‍👦' },
-  { id: 'cultural', name: 'Cultural & Arts', icon: '🎨' },
-  { id: 'sports', name: 'Sports', icon: '⚽' },
+  { id: 'arts', name: 'Arts & Culture', icon: '🎨' },
+  { id: 'sports', name: 'Sports & Fitness', icon: '⚽' },
   { id: 'nightlife', name: 'Nightlife', icon: '🌙' },
+  { id: 'business', name: 'Business', icon: '💼' },
+  { id: 'wellness', name: 'Wellness', icon: '🧘' },
+  { id: 'shopping', name: 'Shopping', icon: '🛍️' },
+  { id: 'community', name: 'Community', icon: '🤝' },
 ];
 
 // Time filters
 const timeFilters = [
   { id: 'all', name: 'All Dates' },
-  { id: 'today', name: "Today's Events" },
+  { id: 'today', name: "Today" },
   { id: 'weekend', name: 'This Weekend' },
   { id: 'week', name: 'This Week' },
   { id: 'month', name: 'This Month' },
@@ -145,8 +57,43 @@ function EventsPageContent() {
   const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
   const [events, setEvents] = useState<Event[]>([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
-  // Get filter from URL params
+  // Fetch events from API
+  const fetchEvents = useCallback(async () => {
+    setLoading(true);
+    setError(null);
+
+    try {
+      const params = new URLSearchParams();
+
+      if (selectedCategory !== 'all') {
+        params.set('category', selectedCategory);
+      }
+      if (selectedTime !== 'all') {
+        params.set('filter', selectedTime);
+      }
+      if (searchQuery) {
+        params.set('search', searchQuery);
+      }
+
+      const response = await fetch(`/api/events?${params.toString()}`);
+      const data = await response.json();
+
+      if (response.ok) {
+        setEvents(data.events || []);
+      } else {
+        setError(data.error || 'Failed to fetch events');
+      }
+    } catch (err) {
+      console.error('Error fetching events:', err);
+      setError('Failed to load events. Please try again.');
+    } finally {
+      setLoading(false);
+    }
+  }, [selectedCategory, selectedTime, searchQuery]);
+
+  // Get filter from URL params on initial load
   useEffect(() => {
     const filter = searchParams?.get('filter');
     const category = searchParams?.get('category');
@@ -157,25 +104,23 @@ function EventsPageContent() {
     if (category) {
       setSelectedCategory(category);
     }
-
-    // Simulate loading events (replace with actual API call when available)
-    setLoading(true);
-    setTimeout(() => {
-      setEvents(sampleEvents);
-      setLoading(false);
-    }, 500);
   }, [searchParams]);
 
-  // Filter events based on search and filters
-  const filteredEvents = events.filter(event => {
-    const matchesSearch = event.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      event.venue.toLowerCase().includes(searchQuery.toLowerCase());
+  // Fetch events when filters change
+  useEffect(() => {
+    fetchEvents();
+  }, [fetchEvents]);
 
-    const matchesCategory = selectedCategory === 'all' ||
-      event.category.toLowerCase().includes(selectedCategory.toLowerCase());
+  // Debounced search
+  useEffect(() => {
+    const timeoutId = setTimeout(() => {
+      if (searchQuery !== '') {
+        fetchEvents();
+      }
+    }, 500);
 
-    return matchesSearch && matchesCategory;
-  });
+    return () => clearTimeout(timeoutId);
+  }, [searchQuery]);
 
   return (
     <div className="min-h-screen bg-slate-950">
@@ -283,6 +228,16 @@ function EventsPageContent() {
                   <ChevronRight className="w-4 h-4" />
                 </Link>
               </div>
+
+              {/* List Your Event CTA */}
+              <div className="mt-4 pt-4 border-t border-white/10">
+                <Link
+                  href="/list-event"
+                  className="block w-full text-center px-4 py-3 bg-gradient-to-r from-cyan-500 to-blue-500 text-white font-semibold rounded-xl hover:shadow-lg hover:shadow-cyan-500/25 transition-all"
+                >
+                  List Your Event
+                </Link>
+              </div>
             </div>
           </div>
 
@@ -290,9 +245,18 @@ function EventsPageContent() {
           <div className="flex-1">
             {/* Header */}
             <div className="flex items-center justify-between mb-6">
-              <p className="text-gray-400">
-                {loading ? 'Loading...' : `${filteredEvents.length} events found`}
-              </p>
+              <div className="flex items-center gap-4">
+                <p className="text-gray-400">
+                  {loading ? 'Loading...' : `${events.length} events found`}
+                </p>
+                <button
+                  onClick={fetchEvents}
+                  disabled={loading}
+                  className="text-cyan-400 hover:text-cyan-300 disabled:opacity-50"
+                >
+                  <RefreshCw className={`w-4 h-4 ${loading ? 'animate-spin' : ''}`} />
+                </button>
+              </div>
               <div className="flex items-center gap-2">
                 <button
                   onClick={() => setViewMode('grid')}
@@ -313,6 +277,19 @@ function EventsPageContent() {
               </div>
             </div>
 
+            {/* Error State */}
+            {error && (
+              <div className="bg-red-500/10 border border-red-500/30 rounded-xl p-4 mb-6">
+                <p className="text-red-400">{error}</p>
+                <button
+                  onClick={fetchEvents}
+                  className="mt-2 text-sm text-red-300 hover:text-red-200 underline"
+                >
+                  Try again
+                </button>
+              </div>
+            )}
+
             {/* Loading State */}
             {loading ? (
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
@@ -326,7 +303,7 @@ function EventsPageContent() {
                   </div>
                 ))}
               </div>
-            ) : filteredEvents.length > 0 ? (
+            ) : events.length > 0 ? (
               <motion.div
                 className={`grid gap-6 ${
                   viewMode === 'grid'
@@ -339,7 +316,7 @@ function EventsPageContent() {
                   visible: { transition: { staggerChildren: 0.05 } }
                 }}
               >
-                {filteredEvents.map((event, index) => (
+                {events.map((event) => (
                   <motion.div
                     key={event.id}
                     variants={{
@@ -360,12 +337,17 @@ function EventsPageContent() {
                             sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
                           />
                           <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent" />
-                          <div className={`absolute top-3 left-3 px-3 py-1 ${event.categoryColor} text-white text-xs font-bold rounded-full`}>
+                          <div className={`absolute top-3 left-3 px-3 py-1 ${event.categoryColor} text-white text-xs font-bold rounded-full capitalize`}>
                             {event.category}
                           </div>
                           <div className="absolute top-3 right-3 px-3 py-1 bg-black/70 text-white text-xs rounded-full">
                             {event.date}
                           </div>
+                          {event.isFeatured && (
+                            <div className="absolute bottom-3 left-3 px-2 py-1 bg-yellow-500 text-black text-xs font-bold rounded-full">
+                              ⭐ Featured
+                            </div>
+                          )}
                         </div>
                         <div className="p-4">
                           <h3 className="text-lg font-bold text-white group-hover:text-yellow-400 transition-colors line-clamp-2 mb-2">
@@ -402,12 +384,27 @@ function EventsPageContent() {
                     ? 'Try adjusting your search or filters'
                     : 'Check back soon for upcoming events!'}
                 </p>
-                <Link
-                  href="/events"
-                  className="inline-flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-purple-500 to-pink-500 text-white font-semibold rounded-xl hover:shadow-lg transition-all"
-                >
-                  View All Events
-                </Link>
+                {(searchQuery || selectedCategory !== 'all' || selectedTime !== 'all') && (
+                  <button
+                    onClick={() => {
+                      setSearchQuery('');
+                      setSelectedCategory('all');
+                      setSelectedTime('all');
+                    }}
+                    className="inline-flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-purple-500 to-pink-500 text-white font-semibold rounded-xl hover:shadow-lg transition-all"
+                  >
+                    Clear Filters
+                  </button>
+                )}
+                <div className="mt-8">
+                  <p className="text-gray-500 mb-4">Have an event to share?</p>
+                  <Link
+                    href="/list-event"
+                    className="inline-flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-cyan-500 to-blue-500 text-white font-semibold rounded-xl hover:shadow-lg transition-all"
+                  >
+                    List Your Event Free
+                  </Link>
+                </div>
               </div>
             )}
           </div>

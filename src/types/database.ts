@@ -189,6 +189,10 @@ export interface Database {
           age_restriction: string | null;
           dress_code: string | null;
           special_instructions: string | null;
+          venue_name: string | null;
+          contact_name: string | null;
+          contact_email: string | null;
+          contact_phone: string | null;
           status: 'draft' | 'pending' | 'published' | 'rejected' | 'cancelled';
           rejection_reason: string | null;
           is_featured: boolean;
@@ -225,6 +229,10 @@ export interface Database {
           age_restriction?: string | null;
           dress_code?: string | null;
           special_instructions?: string | null;
+          venue_name?: string | null;
+          contact_name?: string | null;
+          contact_email?: string | null;
+          contact_phone?: string | null;
           status?: 'draft' | 'pending' | 'published' | 'rejected' | 'cancelled';
           rejection_reason?: string | null;
           is_featured?: boolean;
@@ -261,6 +269,10 @@ export interface Database {
           age_restriction?: string | null;
           dress_code?: string | null;
           special_instructions?: string | null;
+          venue_name?: string | null;
+          contact_name?: string | null;
+          contact_email?: string | null;
+          contact_phone?: string | null;
           status?: 'draft' | 'pending' | 'published' | 'rejected' | 'cancelled';
           rejection_reason?: string | null;
           is_featured?: boolean;

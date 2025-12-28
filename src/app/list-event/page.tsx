@@ -1,12 +1,20 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useRef } from 'react';
 import { motion } from 'framer-motion';
-import { Calendar, MapPin, Clock, DollarSign, Image as ImageIcon, Send, CheckCircle, Sparkles } from 'lucide-react';
+import { Calendar, MapPin, Send, CheckCircle, Sparkles, Upload, X, Loader2, ImageIcon } from 'lucide-react';
 import Link from 'next/link';
+import { compressImage, validateImage, createPreviewUrl, revokePreviewUrl } from '@/lib/image-compress';
 
 export default function ListEventPage() {
   const [formSubmitted, setFormSubmitted] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const [coverFile, setCoverFile] = useState<File | null>(null);
+  const [coverPreview, setCoverPreview] = useState<string | null>(null);
+  const [uploadProgress, setUploadProgress] = useState<string | null>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
+
   const [formData, setFormData] = useState({
     eventName: '',
     venueName: '',
@@ -20,10 +28,119 @@ export default function ListEventPage() {
     contactPhone: '',
   });
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      handleFile(file);
+    }
+  };
+
+  const handleDrop = (e: React.DragEvent) => {
     e.preventDefault();
-    // Simulate form submission
-    setFormSubmitted(true);
+    const file = e.dataTransfer.files?.[0];
+    if (file) {
+      handleFile(file);
+    }
+  };
+
+  const handleFile = (file: File) => {
+    setError(null);
+
+    // Validate the image
+    const validation = validateImage(file, 10);
+    if (!validation.valid) {
+      setError(validation.error || 'Invalid image');
+      return;
+    }
+
+    // Clean up old preview URL
+    if (coverPreview) {
+      revokePreviewUrl(coverPreview);
+    }
+
+    setCoverFile(file);
+    setCoverPreview(createPreviewUrl(file));
+  };
+
+  const removeCover = () => {
+    if (coverPreview) {
+      revokePreviewUrl(coverPreview);
+    }
+    setCoverFile(null);
+    setCoverPreview(null);
+    if (fileInputRef.current) {
+      fileInputRef.current.value = '';
+    }
+  };
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setError(null);
+
+    // Validate cover image
+    if (!coverFile) {
+      setError('Please upload a cover image for your event');
+      return;
+    }
+
+    setIsSubmitting(true);
+
+    try {
+      // Step 1: Compress and upload cover image
+      setUploadProgress('Compressing image...');
+      const compressedBlob = await compressImage(coverFile, { maxSizeKB: 600 });
+
+      setUploadProgress('Uploading image...');
+      const uploadFormData = new FormData();
+      uploadFormData.append('file', compressedBlob, 'cover.jpg');
+      uploadFormData.append('entityId', `pending-${Date.now()}`);
+
+      const uploadRes = await fetch('/api/upload/public', {
+        method: 'POST',
+        body: uploadFormData,
+      });
+
+      if (!uploadRes.ok) {
+        const uploadError = await uploadRes.json();
+        throw new Error(uploadError.error || 'Failed to upload image');
+      }
+
+      const { url: coverUrl } = await uploadRes.json();
+
+      // Step 2: Submit event data
+      setUploadProgress('Submitting event...');
+      const eventRes = await fetch('/api/events/submit', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          title: formData.eventName,
+          category: formData.category,
+          venueName: formData.venueName,
+          date: formData.date,
+          time: formData.time,
+          price: formData.price,
+          description: formData.description,
+          contactName: formData.contactName,
+          contactEmail: formData.contactEmail,
+          contactPhone: formData.contactPhone,
+          coverUrl,
+        }),
+      });
+
+      if (!eventRes.ok) {
+        const eventError = await eventRes.json();
+        throw new Error(eventError.error || 'Failed to submit event');
+      }
+
+      // Success!
+      setFormSubmitted(true);
+    } catch (err) {
+      console.error('Submission error:', err);
+      setError(err instanceof Error ? err.message : 'Failed to submit event. Please try again.');
+    } finally {
+      setIsSubmitting(false);
+      setUploadProgress(null);
+    }
   };
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
@@ -95,7 +212,65 @@ export default function ListEventPage() {
           transition={{ delay: 0.1 }}
           className="bg-white/5 backdrop-blur-sm border border-white/10 rounded-3xl p-8"
         >
+          {/* Error Message */}
+          {error && (
+            <div className="mb-6 p-4 bg-red-500/10 border border-red-500/20 rounded-xl text-red-400">
+              {error}
+            </div>
+          )}
+
           <form onSubmit={handleSubmit} className="space-y-6">
+            {/* Cover Image Upload */}
+            <div>
+              <h3 className="text-xl font-semibold text-white mb-4 flex items-center gap-2">
+                <ImageIcon className="w-5 h-5 text-yellow-400" />
+                Event Cover Image *
+              </h3>
+              <p className="text-gray-400 text-sm mb-4">
+                Upload an eye-catching cover image. Recommended size: 1200x630px. Max 10MB.
+              </p>
+
+              {coverPreview ? (
+                <div className="relative">
+                  <img
+                    src={coverPreview}
+                    alt="Cover preview"
+                    className="w-full h-48 object-cover rounded-xl"
+                  />
+                  <button
+                    type="button"
+                    onClick={removeCover}
+                    className="absolute top-2 right-2 p-2 bg-red-500 text-white rounded-full hover:bg-red-600 transition-colors"
+                  >
+                    <X className="w-4 h-4" />
+                  </button>
+                </div>
+              ) : (
+                <div
+                  className="border-2 border-dashed border-white/20 rounded-xl p-8 text-center cursor-pointer hover:border-yellow-500/50 transition-colors"
+                  onClick={() => fileInputRef.current?.click()}
+                  onDrop={handleDrop}
+                  onDragOver={(e) => e.preventDefault()}
+                  onDragEnter={(e) => e.preventDefault()}
+                >
+                  <input
+                    ref={fileInputRef}
+                    type="file"
+                    accept="image/jpeg,image/png,image/webp,image/gif"
+                    className="hidden"
+                    onChange={handleFileSelect}
+                  />
+                  <Upload className="w-12 h-12 text-gray-500 mx-auto mb-4" />
+                  <p className="text-gray-400 mb-2">
+                    Drag & drop or click to upload
+                  </p>
+                  <p className="text-gray-500 text-sm">
+                    JPG, PNG, WebP, or GIF (max 10MB)
+                  </p>
+                </div>
+              )}
+            </div>
+
             {/* Event Details */}
             <div>
               <h3 className="text-xl font-semibold text-white mb-4 flex items-center gap-2">
@@ -186,6 +361,7 @@ export default function ListEventPage() {
                     value={formData.date}
                     onChange={handleChange}
                     required
+                    min={new Date().toISOString().split('T')[0]}
                     className="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-xl text-white focus:outline-none focus:ring-2 focus:ring-yellow-500/50"
                   />
                 </div>
@@ -275,10 +451,20 @@ export default function ListEventPage() {
             <div className="pt-4">
               <button
                 type="submit"
-                className="w-full flex items-center justify-center gap-2 px-6 py-4 bg-gradient-to-r from-yellow-400 via-orange-500 to-pink-500 text-black font-bold rounded-xl hover:shadow-lg hover:shadow-orange-500/25 transition-all"
+                disabled={isSubmitting}
+                className="w-full flex items-center justify-center gap-2 px-6 py-4 bg-gradient-to-r from-yellow-400 via-orange-500 to-pink-500 text-black font-bold rounded-xl hover:shadow-lg hover:shadow-orange-500/25 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
               >
-                <Send className="w-5 h-5" />
-                Submit Event for Review
+                {isSubmitting ? (
+                  <>
+                    <Loader2 className="w-5 h-5 animate-spin" />
+                    {uploadProgress || 'Submitting...'}
+                  </>
+                ) : (
+                  <>
+                    <Send className="w-5 h-5" />
+                    Submit Event for Review
+                  </>
+                )}
               </button>
               <p className="text-center text-sm text-gray-500 mt-4">
                 Events are typically reviewed within 24 hours
