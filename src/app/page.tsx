@@ -214,7 +214,14 @@ export default function BahrainNightsHomepage() {
     return () => clearInterval(timer);
   }, [adSlides.length]);
 
-  const quickFilters = ['🎭 Events', '🍽️ Dining', '🎬 Cinema', '🏷️ Offers', '🧭 Explore'];
+  // Quick filter buttons with direct page links (not search)
+  const quickFilters = [
+    { label: '🎭 Events', href: '/events' },
+    { label: '🍽️ Dining', href: '/places' },
+    { label: '🎬 Cinema', href: '/cinema' },
+    { label: '🏷️ Offers', href: '/offers' },
+    { label: '🧭 Explore', href: '/explore' },
+  ];
 
   return (
     <div className="bg-gradient-to-b from-slate-950 via-slate-900 to-slate-950 text-white min-h-screen">
@@ -466,14 +473,14 @@ export default function BahrainNightsHomepage() {
             <motion.div className="flex flex-wrap justify-center gap-3 mt-8" variants={stagger} initial="hidden" animate="visible">
               {quickFilters.map(filter => (
                 <motion.a
-                  key={filter}
-                  href={`/search?q=${encodeURIComponent(filter.replace(/^[^\s]+\s/, ''))}`}
+                  key={filter.label}
+                  href={filter.href}
                   className="px-6 py-3 bg-white/5 backdrop-blur-sm border border-white/10 rounded-full hover:bg-white/10 hover:border-yellow-400/50 transition-all duration-200 text-sm font-medium"
                   variants={fadeIn}
                   whileHover={{ scale: 1.02 }}
                   whileTap={{ scale: 0.98 }}
                 >
-                  {filter}
+                  {filter.label}
                 </motion.a>
               ))}
             </motion.div>
@@ -620,7 +627,7 @@ export default function BahrainNightsHomepage() {
               movies.map((movie) => (
                 <motion.a
                   key={movie.id}
-                  href={`/cinema/${movie.slug}`}
+                  href="/cinema"
                   className="group relative rounded-2xl overflow-hidden cursor-pointer block"
                   variants={fadeIn}
                   whileHover={cardHover}

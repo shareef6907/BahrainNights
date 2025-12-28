@@ -1088,6 +1088,112 @@ async function matchAndUpdateMovies(scrapedResults) {
 }
 
 // ============================================================
+// AUTOMATED DATABASE CLEANUP
+// ============================================================
+
+async function automatedCleanup() {
+  console.log('\n' + '='.repeat(50));
+  console.log('AUTOMATED DATABASE CLEANUP');
+  console.log('='.repeat(50));
+
+  const results = {
+    fixedComingSoon: 0,
+    deletedOrphaned: 0,
+    fixedComingSoonTitles: [],
+    deletedOrphanedTitles: [],
+  };
+
+  // Helper to check if scraped_from is empty
+  const hasNoCinemaSources = (scrapedFrom) => {
+    return !scrapedFrom ||
+           (Array.isArray(scrapedFrom) && scrapedFrom.length === 0);
+  };
+
+  // ============================================================
+  // STEP 1: Fix Coming Soon movies with no cinema sources
+  // ============================================================
+  console.log('\nStep 1: Fixing Coming Soon movies with no cinema sources...');
+
+  const { data: comingSoonMovies, error: fetchComingSoonError } = await supabase
+    .from('movies')
+    .select('id, title, scraped_from')
+    .eq('is_coming_soon', true);
+
+  if (fetchComingSoonError) {
+    console.error('Error fetching coming soon movies:', fetchComingSoonError);
+  } else {
+    const orphanedComingSoon = (comingSoonMovies || []).filter(movie =>
+      hasNoCinemaSources(movie.scraped_from)
+    );
+
+    if (orphanedComingSoon.length > 0) {
+      const idsToFix = orphanedComingSoon.map(m => m.id);
+
+      const { error: fixError } = await supabase
+        .from('movies')
+        .update({ is_coming_soon: false })
+        .in('id', idsToFix);
+
+      if (fixError) {
+        console.error('Error fixing coming soon movies:', fixError);
+      } else {
+        results.fixedComingSoon = orphanedComingSoon.length;
+        results.fixedComingSoonTitles = orphanedComingSoon.map(m => m.title);
+        console.log(`Fixed ${orphanedComingSoon.length} Coming Soon movies (no Bahrain cinema sources):`);
+        orphanedComingSoon.forEach(m => console.log(`  - ${m.title}`));
+      }
+    } else {
+      console.log('No orphaned Coming Soon movies found.');
+    }
+  }
+
+  // ============================================================
+  // STEP 2: Delete orphaned movies
+  // ============================================================
+  console.log('\nStep 2: Deleting orphaned movies...');
+
+  const { data: moviesToDelete, error: fetchError } = await supabase
+    .from('movies')
+    .select('id, title, scraped_from')
+    .eq('is_now_showing', false)
+    .eq('is_coming_soon', false);
+
+  if (fetchError) {
+    console.error('Error fetching movies to delete:', fetchError);
+  } else {
+    const filteredMovies = (moviesToDelete || []).filter(movie =>
+      hasNoCinemaSources(movie.scraped_from)
+    );
+
+    if (filteredMovies.length > 0) {
+      const idsToDelete = filteredMovies.map(m => m.id);
+
+      const { error: deleteError } = await supabase
+        .from('movies')
+        .delete()
+        .in('id', idsToDelete);
+
+      if (deleteError) {
+        console.error('Error deleting movies:', deleteError);
+      } else {
+        results.deletedOrphaned = filteredMovies.length;
+        results.deletedOrphanedTitles = filteredMovies.map(m => m.title);
+        console.log(`Deleted ${filteredMovies.length} orphaned movies (not in any Bahrain cinema):`);
+        filteredMovies.forEach(m => console.log(`  - ${m.title}`));
+      }
+    } else {
+      console.log('No orphaned movies to delete.');
+    }
+  }
+
+  console.log('\n=== CLEANUP COMPLETE ===');
+  console.log(`Fixed Coming Soon: ${results.fixedComingSoon}`);
+  console.log(`Deleted Orphaned: ${results.deletedOrphaned}`);
+
+  return results;
+}
+
+// ============================================================
 // MAIN FUNCTION
 // ============================================================
 
@@ -1126,6 +1232,9 @@ async function main() {
     // Update existing movies with missing poster/trailer data
     const updateResult = await updateMoviesWithMissingData();
 
+    // Run automated cleanup after scraping and updating
+    const cleanupResult = await automatedCleanup();
+
     console.log('\n' + '='.repeat(50));
     console.log('FINAL RESULTS');
     console.log('='.repeat(50));
@@ -1134,6 +1243,8 @@ async function main() {
     console.log(`Auto-added from TMDB: ${matchResult.autoAddedCount}`);
     console.log(`Total now showing: ${matchResult.totalNowShowing}`);
     console.log(`Movies updated with missing data: ${updateResult.updated}`);
+    console.log(`Cleanup - Fixed Coming Soon: ${cleanupResult.fixedComingSoon}`);
+    console.log(`Cleanup - Deleted Orphaned: ${cleanupResult.deletedOrphaned}`);
     console.log(`Completed at: ${new Date().toISOString()}`);
   } catch (error) {
     console.error('Fatal error:', error);

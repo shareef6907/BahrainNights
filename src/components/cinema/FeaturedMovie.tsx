@@ -149,15 +149,18 @@ export default function FeaturedMovie({ movies, onTrailerClick, onMovieClick }: 
 
                 {/* Buttons */}
                 <div className="flex flex-wrap gap-3">
-                  <motion.button
-                    onClick={() => onTrailerClick(movie)}
-                    className="flex items-center gap-2 px-6 py-3 bg-white/10 backdrop-blur-sm border border-white/20 rounded-xl text-white font-medium hover:bg-white/20 transition-colors"
-                    whileHover={{ scale: 1.02 }}
-                    whileTap={{ scale: 0.98 }}
-                  >
-                    <Play className="w-5 h-5 fill-current" />
-                    Watch Trailer
-                  </motion.button>
+                  {/* Watch Trailer Button - Only show if trailer exists */}
+                  {movie.trailerUrl && (
+                    <motion.button
+                      onClick={() => onTrailerClick(movie)}
+                      className="flex items-center gap-2 px-6 py-3 bg-white/10 backdrop-blur-sm border border-white/20 rounded-xl text-white font-medium hover:bg-white/20 transition-colors"
+                      whileHover={{ scale: 1.02 }}
+                      whileTap={{ scale: 0.98 }}
+                    >
+                      <Play className="w-5 h-5 fill-current" />
+                      Watch Trailer
+                    </motion.button>
+                  )}
 
                   <motion.button
                     onClick={() => onMovieClick(movie)}

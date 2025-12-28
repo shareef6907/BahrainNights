@@ -106,7 +106,7 @@ export default function AdminCinemaPage() {
   const [movies, setMovies] = useState<Movie[]>([]);
   const [loading, setLoading] = useState(true);
   const [cleaning, setCleaning] = useState(false);
-  const [cleanResult, setCleanResult] = useState<{ success: boolean; message: string; deleted?: number } | null>(null);
+  const [cleanResult, setCleanResult] = useState<{ success: boolean; message: string; fixedComingSoon?: number; deleted?: number } | null>(null);
   const [status, setStatus] = useState<AgentStatus | null>(null);
   const [scrapeStatus, setScrapeStatus] = useState<ScrapeStatus | null>(null);
   const [activeTab, setActiveTab] = useState<MovieTab>('all');
@@ -149,9 +149,9 @@ export default function AdminCinemaPage() {
     fetchData();
   }, []);
 
-  // Clean database - remove movies not found in Bahrain cinemas
+  // Clean database - fix Coming Soon movies and remove orphaned movies
   const handleCleanDatabase = async () => {
-    if (!confirm('This will delete all movies that are not currently showing in any Bahrain cinema (scraped_from is empty). Continue?')) {
+    if (!confirm('This will:\n1. Fix Coming Soon movies with no Bahrain cinema sources\n2. Delete orphaned movies not in any Bahrain cinema\n\nContinue?')) {
       return;
     }
 
@@ -163,9 +163,21 @@ export default function AdminCinemaPage() {
       const data = await res.json();
 
       if (data.success) {
+        const parts = [];
+        if (data.fixedComingSoon > 0) {
+          parts.push(`Fixed ${data.fixedComingSoon} Coming Soon movies`);
+        }
+        if (data.deleted > 0) {
+          parts.push(`Deleted ${data.deleted} orphaned movies`);
+        }
+        const message = parts.length > 0
+          ? `Cleaned up database. ${parts.join(', ')}.`
+          : 'Database is already clean - no changes needed.';
+
         setCleanResult({
           success: true,
-          message: `Cleaned up database. Deleted ${data.deleted} old movies.`,
+          message,
+          fixedComingSoon: data.fixedComingSoon,
           deleted: data.deleted,
         });
         // Refresh data

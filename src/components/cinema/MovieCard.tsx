@@ -70,18 +70,20 @@ export default function MovieCard({ movie, index = 0, onMovieClick, onTrailerCli
 
         {/* Hover Overlay */}
         <div className="absolute inset-0 bg-gradient-to-t from-black via-black/50 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex flex-col items-center justify-center gap-3">
-          {/* Play Trailer Button */}
-          <motion.button
-            className="p-4 bg-yellow-400 rounded-full text-black shadow-lg"
-            whileHover={{ scale: 1.1 }}
-            whileTap={{ scale: 0.95 }}
-            onClick={(e) => {
-              e.stopPropagation();
-              onTrailerClick(movie);
-            }}
-          >
-            <Play className="w-6 h-6 fill-current" />
-          </motion.button>
+          {/* Play Trailer Button - Only show if trailer exists */}
+          {movie.trailerUrl && (
+            <motion.button
+              className="p-4 bg-yellow-400 rounded-full text-black shadow-lg"
+              whileHover={{ scale: 1.1 }}
+              whileTap={{ scale: 0.95 }}
+              onClick={(e) => {
+                e.stopPropagation();
+                onTrailerClick(movie);
+              }}
+            >
+              <Play className="w-6 h-6 fill-current" />
+            </motion.button>
+          )}
 
           {/* Book Tickets Button */}
           <button
