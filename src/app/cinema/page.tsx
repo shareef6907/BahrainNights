@@ -1,6 +1,7 @@
 'use client';
 
-import { useState, useMemo, useEffect } from 'react';
+import { useState, useMemo, useEffect, Suspense } from 'react';
+import { useSearchParams } from 'next/navigation';
 import { motion } from 'framer-motion';
 import { Search, Film, Loader2 } from 'lucide-react';
 import FeaturedMovie from '@/components/cinema/FeaturedMovie';
@@ -107,8 +108,14 @@ const languages = [
   { value: 'hindi', label: 'Hindi' },
 ];
 
-export default function CinemaPage() {
-  const [activeTab, setActiveTab] = useState<'now-showing' | 'coming-soon'>('now-showing');
+function CinemaPageContent() {
+  const searchParams = useSearchParams();
+  const filterParam = searchParams?.get('filter') ?? null;
+
+  // Set initial tab based on URL parameter
+  const initialTab = filterParam === 'coming-soon' ? 'coming-soon' : 'now-showing';
+
+  const [activeTab, setActiveTab] = useState<'now-showing' | 'coming-soon'>(initialTab);
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedCinema, setSelectedCinema] = useState('all');
   const [selectedGenre, setSelectedGenre] = useState('all');
@@ -125,6 +132,15 @@ export default function CinemaPage() {
   const [comingSoonMovies, setComingSoonMovies] = useState<Movie[]>([]);
   const [cinemas, setCinemas] = useState(defaultCinemas);
   const [loading, setLoading] = useState(true);
+
+  // Update tab when URL parameter changes
+  useEffect(() => {
+    if (filterParam === 'coming-soon') {
+      setActiveTab('coming-soon');
+    } else if (filterParam === 'now-showing') {
+      setActiveTab('now-showing');
+    }
+  }, [filterParam]);
 
   // Fetch movies and cinemas
   useEffect(() => {
@@ -418,5 +434,27 @@ export default function CinemaPage() {
         />
       </div>
     </>
+  );
+}
+
+// Loading fallback for Suspense
+function CinemaPageLoading() {
+  return (
+    <div className="min-h-screen bg-gradient-to-b from-slate-950 via-slate-900 to-slate-950">
+      <div className="flex items-center justify-center min-h-[60vh]">
+        <div className="text-center">
+          <Loader2 className="w-12 h-12 text-yellow-400 animate-spin mx-auto mb-4" />
+          <p className="text-gray-400">Loading movies...</p>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+export default function CinemaPage() {
+  return (
+    <Suspense fallback={<CinemaPageLoading />}>
+      <CinemaPageContent />
+    </Suspense>
   );
 }

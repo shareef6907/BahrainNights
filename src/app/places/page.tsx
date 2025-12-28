@@ -1,8 +1,9 @@
 'use client';
 
-import { useState, useMemo, useEffect } from 'react';
+import { useState, useMemo, useEffect, Suspense } from 'react';
+import { useSearchParams } from 'next/navigation';
 import { motion } from 'framer-motion';
-import { Search, MapIcon, Grid3X3, X } from 'lucide-react';
+import { Search, MapIcon, Grid3X3, X, Loader2 } from 'lucide-react';
 import PlaceCategoryTabs, { PlaceCategory } from '@/components/places/PlaceCategoryTabs';
 import PlaceFilters, { PlaceFiltersState } from '@/components/places/PlaceFilters';
 import PlaceGrid from '@/components/places/PlaceGrid';
@@ -544,16 +545,40 @@ const tonightOffers = [
   },
 ];
 
-export default function PlacesPage() {
-  const [searchQuery, setSearchQuery] = useState('');
-  const [selectedCategory, setSelectedCategory] = useState<PlaceCategory>('all');
+function PlacesPageContent() {
+  const searchParams = useSearchParams();
+
+  // Read initial values from URL parameters
+  const categoryParam = searchParams?.get('category') as PlaceCategory | null;
+  const areaParam = searchParams?.get('area') ?? null;
+  const priceParam = searchParams?.get('price') ?? null;
+  const queryParam = searchParams?.get('q') ?? null;
+
+  const [searchQuery, setSearchQuery] = useState(queryParam || '');
+  const [selectedCategory, setSelectedCategory] = useState<PlaceCategory>(categoryParam || 'all');
   const [viewMode, setViewMode] = useState<'grid' | 'map'>('grid');
   const [filters, setFilters] = useState<PlaceFiltersState>({
-    area: 'all',
-    priceRange: 'all',
+    area: areaParam || 'all',
+    priceRange: priceParam || 'all',
     features: [],
     sortBy: 'recommended',
   });
+
+  // Update state when URL params change
+  useEffect(() => {
+    if (categoryParam) {
+      setSelectedCategory(categoryParam);
+    }
+    if (areaParam) {
+      setFilters(prev => ({ ...prev, area: areaParam }));
+    }
+    if (priceParam) {
+      setFilters(prev => ({ ...prev, priceRange: priceParam }));
+    }
+    if (queryParam) {
+      setSearchQuery(queryParam);
+    }
+  }, [categoryParam, areaParam, priceParam, queryParam]);
 
   // Calculate category counts
   const categoryCounts = useMemo(() => {
@@ -861,5 +886,27 @@ export default function PlacesPage() {
         />
       </div>
     </>
+  );
+}
+
+// Loading fallback for Suspense
+function PlacesPageLoading() {
+  return (
+    <div className="min-h-screen bg-gradient-to-b from-slate-950 via-slate-900 to-slate-950">
+      <div className="flex items-center justify-center min-h-[60vh]">
+        <div className="text-center">
+          <Loader2 className="w-12 h-12 text-yellow-400 animate-spin mx-auto mb-4" />
+          <p className="text-gray-400">Loading places...</p>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+export default function PlacesPage() {
+  return (
+    <Suspense fallback={<PlacesPageLoading />}>
+      <PlacesPageContent />
+    </Suspense>
   );
 }

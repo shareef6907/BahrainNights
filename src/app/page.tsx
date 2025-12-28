@@ -58,26 +58,26 @@ const menuItems = [
     icon: '🎭',
     href: '/events',
     dropdown: [
-      { name: "Today's Events", icon: '📅', href: '/events/today' },
-      { name: 'This Weekend', icon: '🗓️', href: '/events/weekend' },
-      { name: 'Concerts & Live Music', icon: '🎵', href: '/events/concerts' },
-      { name: 'Family & Kids', icon: '👨‍👩‍👧‍👦', href: '/events/family' },
-      { name: 'Cultural & Arts', icon: '🎨', href: '/events/cultural' },
-      { name: 'Sports', icon: '⚽', href: '/events/sports' },
+      { name: "Today's Events", icon: '📅', href: '/events?filter=today' },
+      { name: 'This Weekend', icon: '🗓️', href: '/events?filter=weekend' },
+      { name: 'Concerts & Live Music', icon: '🎵', href: '/events?category=concerts' },
+      { name: 'Family & Kids', icon: '👨‍👩‍👧‍👦', href: '/events?category=family' },
+      { name: 'Cultural & Arts', icon: '🎨', href: '/events?category=cultural' },
+      { name: 'Sports', icon: '⚽', href: '/events?category=sports' },
       { name: 'Full Calendar', icon: '📆', href: '/events/calendar' },
     ]
   },
   {
     name: 'Dining & Nightlife',
     icon: '🍽️',
-    href: '/dining',
+    href: '/places',
     dropdown: [
-      { name: 'Restaurants', icon: '🍴', href: '/dining/restaurants' },
-      { name: 'Cafes & Coffee Shops', icon: '☕', href: '/dining/cafes' },
-      { name: 'Lounges & Bars', icon: '🍸', href: '/dining/lounges' },
-      { name: 'Nightclubs', icon: '🎶', href: '/dining/nightclubs' },
-      { name: 'Beach & Pool Clubs', icon: '🏖️', href: '/dining/beach-clubs' },
-      { name: 'View All Places', icon: '📍', href: '/dining/all' },
+      { name: 'Restaurants', icon: '🍴', href: '/places?category=restaurant' },
+      { name: 'Cafes & Coffee Shops', icon: '☕', href: '/places?category=cafe' },
+      { name: 'Lounges & Bars', icon: '🍸', href: '/places?category=lounge' },
+      { name: 'Nightclubs', icon: '🎶', href: '/places?category=nightclub' },
+      { name: 'Beach & Pool Clubs', icon: '🏖️', href: '/places?category=beach-club' },
+      { name: 'View All Places', icon: '📍', href: '/places' },
     ]
   },
   {
@@ -85,8 +85,8 @@ const menuItems = [
     icon: '🎬',
     href: '/cinema',
     dropdown: [
-      { name: 'Now Showing', icon: '🎞️', href: '/cinema/now-showing' },
-      { name: 'Coming Soon', icon: '🔜', href: '/cinema/coming-soon' },
+      { name: 'Now Showing', icon: '🎞️', href: '/cinema?filter=now-showing' },
+      { name: 'Coming Soon', icon: '🔜', href: '/cinema?filter=coming-soon' },
     ]
   },
   {
@@ -94,10 +94,10 @@ const menuItems = [
     icon: '🏷️',
     href: '/offers',
     dropdown: [
-      { name: 'Ladies Nights', icon: '👠', href: '/offers/ladies-nights' },
-      { name: 'Brunches', icon: '🥂', href: '/offers/brunches' },
-      { name: 'Happy Hours', icon: '🍻', href: '/offers/happy-hours' },
-      { name: 'Special Deals', icon: '💎', href: '/offers/deals' },
+      { name: 'Ladies Nights', icon: '👠', href: '/offers?type=ladies-night' },
+      { name: 'Brunches', icon: '🥂', href: '/offers?type=brunch' },
+      { name: 'Happy Hours', icon: '🍻', href: '/offers?type=happy-hour' },
+      { name: 'Special Deals', icon: '💎', href: '/offers?type=special' },
     ]
   },
   {
@@ -105,14 +105,23 @@ const menuItems = [
     icon: '🧭',
     href: '/explore',
     dropdown: [
-      { name: 'Hotels & Staycations', icon: '🏨', href: '/explore/hotels' },
-      { name: 'Spas & Wellness', icon: '💆', href: '/explore/spas' },
-      { name: 'Shopping & Markets', icon: '🛍️', href: '/explore/shopping' },
-      { name: 'Tours & Experiences', icon: '🗺️', href: '/explore/tours' },
-      { name: 'Community Events', icon: '🤝', href: '/explore/community' },
+      { name: 'Hotels & Staycations', icon: '🏨', href: '/explore?category=hotels' },
+      { name: 'Spas & Wellness', icon: '💆', href: '/explore?category=spas' },
+      { name: 'Shopping & Markets', icon: '🛍️', href: '/explore?category=shopping' },
+      { name: 'Tours & Experiences', icon: '🗺️', href: '/explore?category=tours' },
+      { name: 'Community Events', icon: '🤝', href: '/explore?category=community' },
     ]
   }
 ];
+
+// Movie type for the cinema section
+interface HomepageMovie {
+  id: string;
+  title: string;
+  poster_url: string | null;
+  tmdb_rating: number | null;
+  slug: string;
+}
 
 export default function BahrainNightsHomepage() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
@@ -120,6 +129,9 @@ export default function BahrainNightsHomepage() {
   const [mobileAccordion, setMobileAccordion] = useState<string | null>(null);
   const [currentSlide, setCurrentSlide] = useState(0);
   const [isScrolled, setIsScrolled] = useState(false);
+  const [movies, setMovies] = useState<HomepageMovie[]>([]);
+  const [moviesLoading, setMoviesLoading] = useState(true);
+  const [stats, setStats] = useState({ events: 0, venues: 0, cinema: 0, offers: 0, explore: 0 });
 
   // Optimized scroll handler with throttling
   useEffect(() => {
@@ -144,6 +156,34 @@ export default function BahrainNightsHomepage() {
     return () => document.removeEventListener('click', handleClickOutside);
   }, []);
 
+  // Fetch now showing movies and stats
+  useEffect(() => {
+    async function fetchData() {
+      try {
+        // Fetch movies and stats in parallel
+        const [moviesResponse, statsResponse] = await Promise.all([
+          fetch('/api/cinema/movies?status=now_showing&limit=4'),
+          fetch('/api/public/stats'),
+        ]);
+
+        if (moviesResponse.ok) {
+          const data = await moviesResponse.json();
+          setMovies(data.movies || []);
+        }
+
+        if (statsResponse.ok) {
+          const statsData = await statsResponse.json();
+          setStats(statsData);
+        }
+      } catch (error) {
+        console.error('Error fetching data:', error);
+      } finally {
+        setMoviesLoading(false);
+      }
+    }
+    fetchData();
+  }, []);
+
   // Data
   const adSlides = [
     { id: 1, title: "New Year's Eve at The Ritz", subtitle: "Ring in 2026 with elegance", cta: "Book Now", image: "https://images.unsplash.com/photo-1514525253161-7a46d19cd819?w=1920&h=600&fit=crop", gradient: "from-purple-600/40 to-pink-600/40" },
@@ -151,13 +191,13 @@ export default function BahrainNightsHomepage() {
     { id: 3, title: "Bahrain Food Festival", subtitle: "50+ Local Vendors • Jan 15-20", cta: "Get Tickets", image: "https://images.unsplash.com/photo-1555939594-58d7cb561ad1?w=1920&h=600&fit=crop", gradient: "from-orange-600/40 to-red-600/40" }
   ];
 
-  // Updated categories to match main menu
+  // Categories with real counts from API
   const categories = [
-    { icon: "🎭", name: "Events", description: "Concerts, shows & more", count: 156, color: "from-purple-500 to-pink-500", href: "/events" },
-    { icon: "🍽️", name: "Dining & Nightlife", description: "Restaurants & clubs", count: 284, color: "from-orange-500 to-red-500", href: "/dining" },
-    { icon: "🎬", name: "Cinema", description: "Movies & showtimes", count: 42, color: "from-blue-500 to-cyan-500", href: "/cinema" },
-    { icon: "🏷️", name: "Offers", description: "Deals & promotions", count: 89, color: "from-green-500 to-emerald-500", href: "/offers" },
-    { icon: "🧭", name: "Explore", description: "Hotels, spas & more", count: 127, color: "from-indigo-500 to-purple-500", href: "/explore" }
+    { icon: "🎭", name: "Events", description: "Concerts, shows & more", count: stats.events, color: "from-purple-500 to-pink-500", href: "/events" },
+    { icon: "🍽️", name: "Dining & Nightlife", description: "Restaurants & clubs", count: stats.venues, color: "from-orange-500 to-red-500", href: "/places" },
+    { icon: "🎬", name: "Cinema", description: "Movies & showtimes", count: stats.cinema, color: "from-blue-500 to-cyan-500", href: "/cinema" },
+    { icon: "🏷️", name: "Offers", description: "Deals & promotions", count: stats.offers, color: "from-green-500 to-emerald-500", href: "/offers" },
+    { icon: "🧭", name: "Explore", description: "Hotels, spas & more", count: stats.explore, color: "from-indigo-500 to-purple-500", href: "/explore" }
   ];
 
   const todayEvents = [
@@ -167,12 +207,6 @@ export default function BahrainNightsHomepage() {
     { id: 4, title: "Beach Party", venue: "Coral Bay", time: "12:00 PM", image: "https://images.unsplash.com/photo-1519046904884-53103b34b206?w=400&h=500&fit=crop", category: "Outdoor" }
   ];
 
-  const movies = [
-    { title: "Dune: Part Three", rating: 8.9, image: "https://images.unsplash.com/photo-1536440136628-849c177e76a1?w=300&h=450&fit=crop" },
-    { title: "Avatar 3", rating: 8.7, image: "https://images.unsplash.com/photo-1478720568477-152d9b164e26?w=300&h=450&fit=crop" },
-    { title: "Inception 2", rating: 8.8, image: "https://images.unsplash.com/photo-1440404653325-ab127d49abc1?w=300&h=450&fit=crop" },
-    { title: "The Matrix 5", rating: 8.5, image: "https://images.unsplash.com/photo-1485846234645-a62644f84728?w=300&h=450&fit=crop" }
-  ];
 
   // Auto-advance slider
   useEffect(() => {
@@ -562,7 +596,7 @@ export default function BahrainNightsHomepage() {
             variants={fadeIn}
           >
             <h2 className="text-3xl md:text-5xl font-bold">🎬 Now Showing in Cinemas</h2>
-            <a href="/cinema/now-showing" className="text-yellow-400 hover:text-yellow-300 flex items-center space-x-2 transition-colors group">
+            <a href="/cinema?filter=now-showing" className="text-yellow-400 hover:text-yellow-300 flex items-center space-x-2 transition-colors group">
               <span className="font-medium">All Movies</span>
               <ChevronRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
             </a>
@@ -575,25 +609,47 @@ export default function BahrainNightsHomepage() {
             whileInView="visible"
             viewport={{ once: true, margin: "-100px" }}
           >
-            {movies.map((movie, index) => (
-              <motion.div
-                key={index}
-                className="group relative rounded-2xl overflow-hidden cursor-pointer"
-                variants={fadeIn}
-                whileHover={cardHover}
-              >
-                <img src={movie.image} alt={movie.title} className="w-full h-[450px] object-cover group-hover:scale-105 transition-transform duration-300" />
-                <div className="absolute inset-0 bg-gradient-to-t from-black via-black/50 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-200">
-                  <div className="absolute bottom-0 left-0 right-0 p-6">
-                    <h3 className="font-bold text-xl mb-2">{movie.title}</h3>
-                    <div className="flex items-center space-x-2 text-yellow-400">
-                      <Star className="w-5 h-5 fill-current" />
-                      <span className="text-lg font-semibold">{movie.rating}</span>
+            {moviesLoading ? (
+              // Loading skeletons
+              [...Array(4)].map((_, index) => (
+                <div key={index} className="relative rounded-2xl overflow-hidden bg-white/5 animate-pulse">
+                  <div className="w-full h-[450px] bg-white/10" />
+                </div>
+              ))
+            ) : movies.length > 0 ? (
+              movies.map((movie) => (
+                <motion.a
+                  key={movie.id}
+                  href={`/cinema/${movie.slug}`}
+                  className="group relative rounded-2xl overflow-hidden cursor-pointer block"
+                  variants={fadeIn}
+                  whileHover={cardHover}
+                >
+                  <img
+                    src={movie.poster_url || 'https://images.unsplash.com/photo-1489599849927-2ee91cede3ba?w=300&h=450&fit=crop'}
+                    alt={movie.title}
+                    className="w-full h-[450px] object-cover group-hover:scale-105 transition-transform duration-300"
+                  />
+                  <div className="absolute inset-0 bg-gradient-to-t from-black via-black/50 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-200">
+                    <div className="absolute bottom-0 left-0 right-0 p-6">
+                      <h3 className="font-bold text-xl mb-2">{movie.title}</h3>
+                      {movie.tmdb_rating && (
+                        <div className="flex items-center space-x-2 text-yellow-400">
+                          <Star className="w-5 h-5 fill-current" />
+                          <span className="text-lg font-semibold">{movie.tmdb_rating.toFixed(1)}</span>
+                        </div>
+                      )}
                     </div>
                   </div>
-                </div>
-              </motion.div>
-            ))}
+                </motion.a>
+              ))
+            ) : (
+              // No movies fallback
+              <div className="col-span-4 text-center py-12">
+                <p className="text-gray-400">No movies currently showing. Check back soon!</p>
+                <a href="/cinema" className="text-yellow-400 hover:text-yellow-300 mt-2 inline-block">Browse all movies →</a>
+              </div>
+            )}
           </motion.div>
         </div>
       </section>
@@ -631,7 +687,9 @@ export default function BahrainNightsHomepage() {
                   <div className="text-5xl mb-4 group-hover:scale-110 transition-transform duration-200">{category.icon}</div>
                   <h3 className="text-xl font-bold mb-1">{category.name}</h3>
                   <p className="text-sm text-gray-400 mb-2">{category.description}</p>
-                  <p className="text-yellow-400 font-semibold">{category.count} listings</p>
+                  <p className="text-yellow-400 font-semibold">
+                    {category.count > 0 ? `${category.count} listings` : 'Coming soon'}
+                  </p>
                 </div>
               </motion.a>
             ))}
@@ -664,8 +722,8 @@ export default function BahrainNightsHomepage() {
               </div>
             </div>
             {[
-              { title: 'Events', links: [{ name: "Today's Events", href: '/events/today' }, { name: 'This Weekend', href: '/events/weekend' }, { name: 'Concerts', href: '/events/concerts' }, { name: 'Full Calendar', href: '/calendar' }] },
-              { title: 'Dining', links: [{ name: 'Restaurants', href: '/places?category=restaurants' }, { name: 'Cafes', href: '/places?category=cafes' }, { name: 'Nightlife', href: '/places?category=nightclubs' }, { name: 'View All', href: '/places' }] },
+              { title: 'Events', links: [{ name: "Today's Events", href: '/events?filter=today' }, { name: 'This Weekend', href: '/events?filter=weekend' }, { name: 'Concerts', href: '/events?category=concerts' }, { name: 'Full Calendar', href: '/events/calendar' }] },
+              { title: 'Dining', links: [{ name: 'Restaurants', href: '/places?category=restaurant' }, { name: 'Cafes', href: '/places?category=cafe' }, { name: 'Nightlife', href: '/places?category=nightclub' }, { name: 'View All', href: '/places' }] },
               { title: 'For Businesses', links: [{ name: 'List Your Event', href: '/list-event' }, { name: 'Advertise', href: '/advertise' }, { name: 'Become a Sponsor', href: '/sponsors' }, { name: 'Contact', href: '/contact' }] }
             ].map(section => (
               <div key={section.title}>
