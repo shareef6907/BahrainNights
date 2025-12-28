@@ -2,8 +2,9 @@ import { Suspense } from 'react';
 import { createClient } from '@supabase/supabase-js';
 import EventsPageClient, { Event } from '@/components/events/EventsPageClient';
 
-// Revalidate every 5 minutes for fresh data
-export const revalidate = 300;
+// Force dynamic rendering to ensure fresh data on every request
+export const dynamic = 'force-dynamic';
+export const revalidate = 0;
 
 // Create Supabase client directly to ensure service role key is used
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!;
@@ -36,12 +37,12 @@ async function getEvents(): Promise<Event[]> {
     }
   });
 
-  // Fetch published events ordered by created_at
+  // Fetch published events ordered by event date (upcoming first)
   const { data, error } = await supabase
     .from('events')
     .select('*')
     .eq('status', 'published')
-    .order('created_at', { ascending: false });
+    .order('date', { ascending: true });
 
   if (error) {
     console.error('Error fetching events:', error);
