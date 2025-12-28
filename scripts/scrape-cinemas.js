@@ -679,18 +679,23 @@ async function matchAndUpdateMovies(scrapedResults) {
   console.log('UPDATING NOW SHOWING STATUS');
   console.log('='.repeat(50));
 
-  if (totalMatched >= 3) {
-    console.log(`\nUpdating database: ${matched.length} matched + ${addedMovies.length} auto-added = ${totalMatched} total`);
+  // ALWAYS reset ALL movies to not showing first
+  // This ensures only verified movies from Bahrain cinemas are marked as showing
+  console.log('\nResetting ALL movies to not showing...');
+  const { error: resetError } = await supabase
+    .from('movies')
+    .update({ is_now_showing: false })
+    .neq('id', '00000000-0000-0000-0000-000000000000');
 
-    // First, reset all movies to not showing
-    const { error: resetError } = await supabase
-      .from('movies')
-      .update({ is_now_showing: false })
-      .neq('id', '00000000-0000-0000-0000-000000000000');
+  if (resetError) {
+    console.error('Error resetting movies:', resetError);
+  } else {
+    console.log('All movies reset to is_now_showing: false');
+  }
 
-    if (resetError) {
-      console.error('Error resetting movies:', resetError);
-    }
+  // Only mark movies that are VERIFIED from Bahrain cinema websites
+  if (totalMatched > 0) {
+    console.log(`\nMarking ${matched.length} matched + ${addedMovies.length} auto-added = ${totalMatched} movies as "Now Showing"`);
 
     // Set matched movies as now showing
     const matchedIds = matched.map((m) => m.movie.id);
@@ -710,43 +715,8 @@ async function matchAndUpdateMovies(scrapedResults) {
 
     console.log(`Successfully updated ${totalMatched} movies as "Now Showing"`);
   } else {
-    console.log('\nToo few matches. Using TMDB fallback...');
-
-    // TMDB Fallback: Mark movies released within last 60 days as now showing
-    const sixtyDaysAgo = new Date();
-    sixtyDaysAgo.setDate(sixtyDaysAgo.getDate() - 60);
-    const sixtyDaysAgoStr = sixtyDaysAgo.toISOString().split('T')[0];
-    const todayStr = new Date().toISOString().split('T')[0];
-
-    const { data: recentMovies, error: recentError } = await supabase
-      .from('movies')
-      .select('id, title, release_date, popularity')
-      .gte('release_date', sixtyDaysAgoStr)
-      .lte('release_date', todayStr)
-      .gte('popularity', 20)
-      .order('popularity', { ascending: false })
-      .limit(30);
-
-    if (recentError) {
-      console.error('Error fetching recent movies:', recentError);
-    } else if (recentMovies && recentMovies.length > 0) {
-      console.log(`Found ${recentMovies.length} movies via TMDB fallback`);
-
-      // Reset all first
-      await supabase
-        .from('movies')
-        .update({ is_now_showing: false })
-        .neq('id', '00000000-0000-0000-0000-000000000000');
-
-      // Set recent popular movies as now showing
-      const recentIds = recentMovies.map((m) => m.id);
-
-      for (const id of recentIds) {
-        await supabase.from('movies').update({ is_now_showing: true }).eq('id', id);
-      }
-
-      console.log(`Set ${recentIds.length} movies as "Now Showing" via fallback`);
-    }
+    console.log('\nNo movies matched from Bahrain cinemas - all movies set to not showing');
+    console.log('This is correct - we only show movies verified from actual cinema websites');
   }
 
   // ============================================================
@@ -769,7 +739,7 @@ async function matchAndUpdateMovies(scrapedResults) {
         matchedCount: matched.length,
         unmatchedCount: unmatched.length,
         autoAddedCount: addedMovies.length,
-        usedFallback: totalMatched < 3,
+        totalNowShowing: totalMatched,
         matchedMovies: matched.map((m) => ({
           scraped: m.scraped,
           matched: m.movie.title,
