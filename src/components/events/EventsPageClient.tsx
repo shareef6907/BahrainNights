@@ -56,13 +56,6 @@ interface EventsPageClientProps {
 export default function EventsPageClient({ initialEvents }: EventsPageClientProps) {
   const searchParams = useSearchParams();
   const router = useRouter();
-
-  // Debug: Log received events
-  console.log('[EventsPageClient] Received initialEvents:', initialEvents?.length || 0);
-  if (initialEvents && initialEvents.length > 0) {
-    console.log('[EventsPageClient] First event:', initialEvents[0]?.title);
-  }
-
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedCategory, setSelectedCategory] = useState(searchParams?.get('category') || 'all');
   const [selectedTime, setSelectedTime] = useState(searchParams?.get('filter') || 'all');

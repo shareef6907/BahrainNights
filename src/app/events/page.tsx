@@ -2,8 +2,8 @@ import { Suspense } from 'react';
 import { createClient } from '@supabase/supabase-js';
 import EventsPageClient, { Event } from '@/components/events/EventsPageClient';
 
-// Disable cache temporarily for debugging - set to 0
-export const revalidate = 0;
+// Revalidate every 5 minutes for fresh data
+export const revalidate = 300;
 
 // Create Supabase client directly to ensure service role key is used
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!;
@@ -28,12 +28,7 @@ function getCategoryColor(category: string): string {
 
 // Fetch all published events on the server
 async function getEvents(): Promise<Event[]> {
-  console.log('=== EVENTS DEBUG START ===');
-  console.log('SUPABASE_URL:', supabaseUrl);
-  console.log('SERVICE_KEY exists:', !!supabaseServiceKey);
-  console.log('SERVICE_KEY length:', supabaseServiceKey?.length);
-
-  // Create client directly here to ensure proper initialization
+  // Create Supabase client with service role key
   const supabase = createClient(supabaseUrl, supabaseServiceKey, {
     auth: {
       autoRefreshToken: false,
@@ -41,33 +36,12 @@ async function getEvents(): Promise<Event[]> {
     }
   });
 
-  // First, try to fetch ALL events (no filter) to see if database connection works
-  const { data: allEventsCheck, error: allError } = await supabase
-    .from('events')
-    .select('id, title, status')
-    .limit(10);
-
-  console.log('All events check (limit 10):', allEventsCheck?.length, 'Error:', allError?.message);
-  if (allEventsCheck) {
-    console.log('Sample events:', allEventsCheck.map(e => ({ id: e.id, title: e.title, status: e.status })));
-  }
-
-  // Now fetch published events with created_at ordering (like admin API does)
+  // Fetch published events ordered by created_at
   const { data, error } = await supabase
     .from('events')
     .select('*')
     .eq('status', 'published')
     .order('created_at', { ascending: false });
-
-  console.log('Published events count:', data?.length);
-  console.log('Query error:', error?.message);
-
-  if (data && data.length > 0) {
-    console.log('First event title:', data[0]?.title);
-    console.log('First event fields:', Object.keys(data[0]).join(', '));
-  }
-
-  console.log('=== EVENTS DEBUG END ===');
 
   if (error) {
     console.error('Error fetching events:', error);
@@ -75,7 +49,6 @@ async function getEvents(): Promise<Event[]> {
   }
 
   if (!data || data.length === 0) {
-    console.log('No published events found in database');
     return [];
   }
 
