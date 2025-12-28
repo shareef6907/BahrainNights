@@ -1,13 +1,12 @@
 'use client';
 
-import { useState, useRef, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { useRouter, useParams } from 'next/navigation';
 import Link from 'next/link';
 import Image from 'next/image';
 import { motion } from 'framer-motion';
 import {
   ArrowLeft,
-  Upload,
   Crown,
   Medal,
   Building2,
@@ -15,16 +14,25 @@ import {
   Calendar,
   DollarSign,
   Save,
-  X,
   Loader2,
 } from 'lucide-react';
+import { LogoUploader } from '@/components/upload';
 import type { Sponsor } from '@/types/database';
+
+// Generate slug from name
+function generateSlug(name: string): string {
+  return name
+    .toLowerCase()
+    .trim()
+    .replace(/[^a-z0-9\s-]/g, '')
+    .replace(/\s+/g, '-')
+    .replace(/-+/g, '-');
+}
 
 export default function EditSponsorPage() {
   const router = useRouter();
   const params = useParams();
   const sponsorId = params?.id as string;
-  const fileInputRef = useRef<HTMLInputElement>(null);
 
   const [loading, setLoading] = useState(true);
   const [formData, setFormData] = useState({
@@ -40,8 +48,6 @@ export default function EditSponsorPage() {
     logo_url: '',
   });
 
-  const [logoFile, setLogoFile] = useState<File | null>(null);
-  const [logoPreview, setLogoPreview] = useState<string>('');
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState('');
 
@@ -70,9 +76,6 @@ export default function EditSponsorPage() {
           status: (sponsor.status || 'pending') as 'pending' | 'active' | 'expired',
           logo_url: sponsor.logo_url || '',
         });
-        if (sponsor.logo_url) {
-          setLogoPreview(sponsor.logo_url);
-        }
       } else {
         setError('Sponsor not found');
       }
@@ -82,18 +85,6 @@ export default function EditSponsorPage() {
       setLoading(false);
     }
   }
-
-  const handleLogoChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (file) {
-      setLogoFile(file);
-      const reader = new FileReader();
-      reader.onloadend = () => {
-        setLogoPreview(reader.result as string);
-      };
-      reader.readAsDataURL(file);
-    }
-  };
 
   const handleTierChange = (tier: 'golden' | 'silver') => {
     setFormData({
@@ -109,35 +100,11 @@ export default function EditSponsorPage() {
     setError('');
 
     try {
-      let logoUrl = formData.logo_url;
-
-      // Upload new logo if provided
-      if (logoFile) {
-        const uploadFormData = new FormData();
-        uploadFormData.append('file', logoFile);
-        uploadFormData.append('folder', 'sponsors');
-
-        const uploadResponse = await fetch('/api/upload/image', {
-          method: 'POST',
-          body: uploadFormData,
-        });
-
-        if (uploadResponse.ok) {
-          const uploadData = await uploadResponse.json();
-          logoUrl = uploadData.url;
-        } else {
-          throw new Error('Failed to upload logo');
-        }
-      }
-
       // Update sponsor
       const response = await fetch(`/api/admin/sponsors/${sponsorId}`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          ...formData,
-          logo_url: logoUrl,
-        }),
+        body: JSON.stringify(formData),
       });
 
       if (response.ok) {
@@ -389,52 +356,14 @@ export default function EditSponsorPage() {
         {/* Sidebar - Logo Upload */}
         <div className="space-y-6">
           <div className="bg-white/5 backdrop-blur-sm border border-white/10 rounded-2xl p-6">
-            <h2 className="text-lg font-semibold text-white mb-4">Logo</h2>
-
-            <div
-              onClick={() => fileInputRef.current?.click()}
-              className={`relative aspect-[16/9] rounded-xl border-2 border-dashed cursor-pointer transition-colors overflow-hidden ${
-                logoPreview
-                  ? 'border-amber-500/50'
-                  : 'border-white/20 hover:border-white/40'
-              }`}
-            >
-              {logoPreview ? (
-                <>
-                  <Image
-                    src={logoPreview}
-                    alt="Logo preview"
-                    fill
-                    className="object-contain p-4"
-                  />
-                  <button
-                    type="button"
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      setLogoFile(null);
-                      setLogoPreview('');
-                      setFormData({ ...formData, logo_url: '' });
-                    }}
-                    className="absolute top-2 right-2 p-1 bg-black/50 hover:bg-black/70 rounded-full transition-colors"
-                  >
-                    <X className="w-4 h-4 text-white" />
-                  </button>
-                </>
-              ) : (
-                <div className="absolute inset-0 flex flex-col items-center justify-center">
-                  <Upload className="w-8 h-8 text-gray-500 mb-2" />
-                  <p className="text-sm text-gray-400">Click to upload</p>
-                  <p className="text-xs text-gray-500 mt-1">PNG, JPG up to 5MB</p>
-                </div>
-              )}
-            </div>
-
-            <input
-              ref={fileInputRef}
-              type="file"
-              accept="image/*"
-              onChange={handleLogoChange}
-              className="hidden"
+            <LogoUploader
+              entityType="sponsor"
+              sponsorSlug={generateSlug(formData.name) || 'sponsor'}
+              currentLogo={formData.logo_url}
+              onUpload={(url) => setFormData({ ...formData, logo_url: url })}
+              onRemove={() => setFormData({ ...formData, logo_url: '' })}
+              size="lg"
+              label="Sponsor Logo"
             />
 
             <p className="text-xs text-gray-500 mt-3">
@@ -462,13 +391,14 @@ export default function EditSponsorPage() {
                     height: formData.tier === 'golden' ? 100 : 80,
                   }}
                 >
-                  {logoPreview ? (
+                  {formData.logo_url ? (
                     <div className="relative w-full h-full p-3">
                       <Image
-                        src={logoPreview}
+                        src={formData.logo_url}
                         alt="Preview"
                         fill
                         className="object-contain grayscale hover:grayscale-0 transition-all"
+                        unoptimized
                       />
                     </div>
                   ) : (

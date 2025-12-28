@@ -7,6 +7,7 @@ import {
   LayoutDashboard,
   Building2,
   Calendar,
+  Film,
   Megaphone,
   BarChart3,
   Users,
@@ -35,6 +36,11 @@ const navItems = [
     name: 'Events',
     href: '/admin/events',
     icon: Calendar,
+  },
+  {
+    name: 'Cinema',
+    href: '/admin/cinema',
+    icon: Film,
   },
   {
     name: 'Sponsors',
