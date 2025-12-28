@@ -93,6 +93,14 @@ interface ScrapeStatus {
 
 type MovieTab = 'all' | 'now_showing' | 'coming_soon';
 
+// Helper to construct full TMDB image URLs
+function getPosterUrl(posterPath: string | null): string {
+  if (!posterPath) return '';
+  if (posterPath.startsWith('http')) return posterPath;
+  // Handle paths like "/abc123.jpg" - prepend TMDB URL
+  return `https://image.tmdb.org/t/p/w500${posterPath}`;
+}
+
 export default function AdminCinemaPage() {
   const [movies, setMovies] = useState<Movie[]>([]);
   const [loading, setLoading] = useState(true);
@@ -534,9 +542,9 @@ export default function AdminCinemaPage() {
                       <td className="p-4">
                         <div className="flex items-center gap-3">
                           <div className="relative w-12 h-16 rounded-lg overflow-hidden bg-white/10 flex-shrink-0">
-                            {movie.poster_url && !movie.poster_url.includes('placeholder') ? (
+                            {getPosterUrl(movie.poster_url) ? (
                               <Image
-                                src={movie.poster_url}
+                                src={getPosterUrl(movie.poster_url)}
                                 alt={movie.title}
                                 fill
                                 className="object-cover"
@@ -679,9 +687,9 @@ export default function AdminCinemaPage() {
                 <div key={movie.id} className="p-4">
                   <div className="flex gap-3">
                     <div className="relative w-16 h-24 rounded-lg overflow-hidden bg-white/10 flex-shrink-0">
-                      {movie.poster_url && !movie.poster_url.includes('placeholder') ? (
+                      {getPosterUrl(movie.poster_url) ? (
                         <Image
-                          src={movie.poster_url}
+                          src={getPosterUrl(movie.poster_url)}
                           alt={movie.title}
                           fill
                           className="object-cover"

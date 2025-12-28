@@ -33,6 +33,21 @@ interface DBMovie {
   is_coming_soon: boolean;
 }
 
+// Helper to construct full TMDB image URLs
+function getPosterUrl(posterPath: string | null): string {
+  if (!posterPath) return '/images/movie-placeholder.jpg';
+  if (posterPath.startsWith('http')) return posterPath;
+  // Handle paths like "/abc123.jpg" - prepend TMDB URL
+  return `https://image.tmdb.org/t/p/w500${posterPath}`;
+}
+
+function getBackdropUrl(backdropPath: string | null): string {
+  if (!backdropPath) return '/images/backdrop-placeholder.jpg';
+  if (backdropPath.startsWith('http')) return backdropPath;
+  // Handle paths like "/abc123.jpg" - prepend TMDB URL
+  return `https://image.tmdb.org/t/p/w1280${backdropPath}`;
+}
+
 // Convert DB movie to component Movie format
 function convertToMovieFormat(dbMovie: DBMovie): Movie {
   const durationMins = dbMovie.duration_minutes || 0;
@@ -44,8 +59,8 @@ function convertToMovieFormat(dbMovie: DBMovie): Movie {
     id: dbMovie.id,
     title: dbMovie.title,
     slug: dbMovie.slug,
-    poster: dbMovie.poster_url || '/images/movie-placeholder.jpg',
-    backdrop: dbMovie.backdrop_url || '/images/backdrop-placeholder.jpg',
+    poster: getPosterUrl(dbMovie.poster_url),
+    backdrop: getBackdropUrl(dbMovie.backdrop_url),
     rating: dbMovie.tmdb_rating || 0,
     genres: dbMovie.genre || [],
     duration: durationStr,
