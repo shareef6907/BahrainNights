@@ -28,7 +28,7 @@ async function getEvents(): Promise<Event[]> {
     .from('events')
     .select('*')
     .eq('status', 'published')
-    .order('start_date', { ascending: true });
+    .order('date', { ascending: true });
 
   if (error) {
     console.error('Error fetching events:', error);
