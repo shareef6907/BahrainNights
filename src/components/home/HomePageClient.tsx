@@ -374,6 +374,7 @@ export default function HomePageClient({ initialMovies, initialStats }: HomePage
             {/* Mobile Menu Button */}
             <button
               className="lg:hidden text-white p-2 hover:bg-white/5 rounded-lg transition-colors"
+              data-testid="mobile-menu-button"
               onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
             >
               {mobileMenuOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
@@ -386,6 +387,7 @@ export default function HomePageClient({ initialMovies, initialStats }: HomePage
           {mobileMenuOpen && (
             <motion.div
               className="lg:hidden bg-slate-900/98 backdrop-blur-xl border-t border-white/10 max-h-[calc(100vh-5rem)] overflow-y-auto"
+              data-testid="mobile-menu"
               initial={{ opacity: 0, height: 0 }}
               animate={{ opacity: 1, height: "auto" }}
               exit={{ opacity: 0, height: 0 }}

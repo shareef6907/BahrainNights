@@ -57,11 +57,19 @@ export default function EventsPageClient({ initialEvents }: EventsPageClientProp
   const searchParams = useSearchParams();
   const router = useRouter();
 
+  // Debug: Log received events
+  console.log('[EventsPageClient] Received initialEvents:', initialEvents?.length || 0);
+  if (initialEvents && initialEvents.length > 0) {
+    console.log('[EventsPageClient] First event:', initialEvents[0]?.title);
+  }
+
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedCategory, setSelectedCategory] = useState(searchParams?.get('category') || 'all');
   const [selectedTime, setSelectedTime] = useState(searchParams?.get('filter') || 'all');
   const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
-  const [events] = useState<Event[]>(initialEvents);
+
+  // Use initialEvents directly - SSR ensures data is already available
+  const events = initialEvents || [];
 
   // Update URL when filters change (without page reload)
   useEffect(() => {
@@ -303,6 +311,7 @@ export default function EventsPageClient({ initialEvents }: EventsPageClientProp
                 {filteredEvents.map((event) => (
                   <motion.div
                     key={event.id}
+                    data-testid="event-card"
                     variants={{
                       hidden: { opacity: 0, y: 20 },
                       visible: { opacity: 1, y: 0 }

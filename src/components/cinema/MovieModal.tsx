@@ -107,6 +107,7 @@ export default function MovieModal({
             <div className="min-h-full flex items-start justify-center p-4 pt-10 pb-20">
               <motion.div
                 className="relative w-full max-w-4xl bg-slate-900 rounded-2xl overflow-hidden shadow-2xl"
+                data-testid="movie-modal"
                 initial={{ opacity: 0, y: 50, scale: 0.95 }}
                 animate={{ opacity: 1, y: 0, scale: 1 }}
                 exit={{ opacity: 0, y: 50, scale: 0.95 }}
@@ -233,6 +234,7 @@ export default function MovieModal({
                               href={cinema.bookingUrl}
                               target="_blank"
                               rel="noopener noreferrer"
+                              data-testid="cinema-option"
                               className={`group p-4 bg-gradient-to-br ${cinema.color} border ${cinema.borderColor} ${cinema.hoverColor} rounded-xl transition-all hover:scale-[1.02] hover:shadow-lg`}
                             >
                               <div className="flex items-center gap-4">

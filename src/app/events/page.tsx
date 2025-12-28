@@ -1,9 +1,13 @@
 import { Suspense } from 'react';
-import { supabaseAdmin } from '@/lib/supabase';
+import { createClient } from '@supabase/supabase-js';
 import EventsPageClient, { Event } from '@/components/events/EventsPageClient';
 
-// Revalidate every 5 minutes for fresh data
-export const revalidate = 300;
+// Disable cache temporarily for debugging - set to 0
+export const revalidate = 0;
+
+// Create Supabase client directly to ensure service role key is used
+const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!;
+const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY!;
 
 // Category color mapping
 function getCategoryColor(category: string): string {
@@ -22,23 +26,63 @@ function getCategoryColor(category: string): string {
   return colors[category?.toLowerCase()] || 'bg-purple-500';
 }
 
-// Fetch all events on the server
+// Fetch all published events on the server
 async function getEvents(): Promise<Event[]> {
-  const { data, error } = await supabaseAdmin
+  console.log('=== EVENTS DEBUG START ===');
+  console.log('SUPABASE_URL:', supabaseUrl);
+  console.log('SERVICE_KEY exists:', !!supabaseServiceKey);
+  console.log('SERVICE_KEY length:', supabaseServiceKey?.length);
+
+  // Create client directly here to ensure proper initialization
+  const supabase = createClient(supabaseUrl, supabaseServiceKey, {
+    auth: {
+      autoRefreshToken: false,
+      persistSession: false
+    }
+  });
+
+  // First, try to fetch ALL events (no filter) to see if database connection works
+  const { data: allEventsCheck, error: allError } = await supabase
+    .from('events')
+    .select('id, title, status')
+    .limit(10);
+
+  console.log('All events check (limit 10):', allEventsCheck?.length, 'Error:', allError?.message);
+  if (allEventsCheck) {
+    console.log('Sample events:', allEventsCheck.map(e => ({ id: e.id, title: e.title, status: e.status })));
+  }
+
+  // Now fetch published events with created_at ordering (like admin API does)
+  const { data, error } = await supabase
     .from('events')
     .select('*')
     .eq('status', 'published')
-    .order('date', { ascending: true });
+    .order('created_at', { ascending: false });
+
+  console.log('Published events count:', data?.length);
+  console.log('Query error:', error?.message);
+
+  if (data && data.length > 0) {
+    console.log('First event title:', data[0]?.title);
+    console.log('First event fields:', Object.keys(data[0]).join(', '));
+  }
+
+  console.log('=== EVENTS DEBUG END ===');
 
   if (error) {
     console.error('Error fetching events:', error);
     return [];
   }
 
+  if (!data || data.length === 0) {
+    console.log('No published events found in database');
+    return [];
+  }
+
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  return (data || []).map((event: any) => {
-    // Handle date formatting
-    const eventDate = event.start_date || event.date;
+  return data.map((event: any) => {
+    // Handle date formatting - support both date and start_date fields
+    const eventDate = event.date || event.start_date;
     const formattedDate = eventDate
       ? new Date(eventDate).toLocaleDateString('en-US', {
           weekday: 'short',
@@ -47,26 +91,27 @@ async function getEvents(): Promise<Event[]> {
         })
       : 'Date TBA';
 
-    // Handle time formatting
-    const eventTime = event.start_time || event.time || 'Time TBA';
+    // Handle time formatting - support both time and start_time fields
+    const eventTime = event.time || event.start_time || 'Time TBA';
 
-    // Handle price
-    const price = event.price || event.price_range;
-    const isFree = !price || price === '0' || price.toLowerCase() === 'free';
+    // Handle price - support multiple field names
+    const price = event.price || event.price_range || event.booking_method;
+    const priceType = event.price_type;
+    const isFree = priceType === 'free' || !price || price === '0' || price.toLowerCase?.() === 'free';
 
     return {
       id: event.id,
       title: event.title || 'Untitled Event',
       slug: event.slug || event.id,
       description: event.description || '',
-      image: event.featured_image || event.cover_url || '/images/event-placeholder.jpg',
+      image: event.cover_url || event.featured_image || '/images/event-placeholder.jpg',
       category: event.category || 'general',
       categoryColor: getCategoryColor(event.category),
       venue: event.venue_name || event.venue || 'Venue TBA',
       location: event.venue_address || event.location || '',
       date: formattedDate,
       time: eventTime,
-      price: isFree ? 'Free' : `BD ${price}`,
+      price: isFree ? 'Free' : (price?.includes?.('BD') ? price : `BD ${price}`),
       isFree,
       isFeatured: event.is_featured || false,
     };
@@ -77,6 +122,12 @@ async function getEvents(): Promise<Event[]> {
 export default async function EventsPage() {
   // Fetch all data on the server - NO loading state needed!
   const events = await getEvents();
+
+  console.log('=== EVENTS PAGE RENDER ===');
+  console.log('Events passed to client:', events.length);
+  if (events.length > 0) {
+    console.log('Event titles:', events.map(e => e.title).join(', '));
+  }
 
   return (
     <Suspense fallback={null}>
