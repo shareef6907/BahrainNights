@@ -15,6 +15,8 @@ import {
   ChevronLeft,
   ChevronRight,
   Shield,
+  Crown,
+  Inbox,
 } from 'lucide-react';
 import { useAuth } from '@/lib/auth-context';
 
@@ -33,6 +35,16 @@ const navItems = [
     name: 'Events',
     href: '/admin/events',
     icon: Calendar,
+  },
+  {
+    name: 'Sponsors',
+    href: '/admin/sponsors',
+    icon: Crown,
+  },
+  {
+    name: 'Inquiries',
+    href: '/admin/sponsors/inquiries',
+    icon: Inbox,
   },
   {
     name: 'Ads Manager',
@@ -64,6 +76,16 @@ export default function AdminSidebar({ collapsed, onToggle }: AdminSidebarProps)
     if (!pathname) return false;
     if (href === '/admin') {
       return pathname === '/admin';
+    }
+    // Exact match for specific pages like /admin/sponsors/inquiries
+    if (href === '/admin/sponsors/inquiries') {
+      return pathname === '/admin/sponsors/inquiries';
+    }
+    // For parent routes like /admin/sponsors, only match if not on a specific sub-route
+    if (href === '/admin/sponsors') {
+      return pathname === '/admin/sponsors' ||
+             (pathname.startsWith('/admin/sponsors/') &&
+              !pathname.includes('/inquiries'));
     }
     return pathname.startsWith(href);
   };
