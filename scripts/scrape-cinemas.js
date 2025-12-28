@@ -100,36 +100,150 @@ const cinemas = [
   },
 ];
 
-// Helper to normalize movie titles for matching
-function normalizeTitle(str) {
-  return str
+// Generic titles to skip (not actual movies)
+const SKIP_TITLES = [
+  'now showing',
+  'coming soon',
+  'advance booking',
+  'restaurants',
+  'discover movies',
+  'whats on',
+  'what\'s on',
+  'book now',
+  'buy tickets',
+  'view all',
+  'see all',
+  'more movies',
+  'all movies',
+  'select cinema',
+  'select date',
+  'select time',
+  'food and beverages',
+  'food & beverages',
+  'offers',
+  'promotions',
+  'gift cards',
+  'contact us',
+  'about us',
+  'careers',
+  'terms and conditions',
+  'privacy policy',
+  'faq',
+  'help',
+  'support',
+  'cinema locations',
+  'our cinemas',
+  'experiences',
+  'vip',
+  'imax',
+  '4dx',
+  'dolby',
+  'screenx',
+];
+
+// Clean movie title for matching - STRICT cleaning
+function cleanTitle(title) {
+  return title
     .toLowerCase()
+    // Remove ratings like (PG-15), (15+), (PG), etc.
+    .replace(/\(pg-?\d*\)/gi, '')
+    .replace(/\(\d+\+?\)/gi, '')
+    .replace(/\(u\/a\)/gi, '')
+    .replace(/\(u\)/gi, '')
+    // Remove language indicators
+    .replace(/\(ar\)/gi, '')
+    .replace(/\(en\)/gi, '')
+    .replace(/\(hindi\)/gi, '')
+    .replace(/\(tamil\)/gi, '')
+    .replace(/\(malayalam\)/gi, '')
+    .replace(/arabic|english|tamil|hindi|malayalam|telugu/gi, '')
+    // Remove format indicators
+    .replace(/book now|2d|3d|imax|4dx|dolby|atmos|screenx/gi, '')
+    // Remove special characters and extra spaces
     .replace(/[^a-z0-9\s]/g, '')
-    .replace(/\b(the|a|an|of|in|on|at|to|for|and|or)\b/g, '')
     .replace(/\s+/g, ' ')
     .trim();
 }
 
-// Calculate similarity between two strings (Levenshtein-based)
-function calculateSimilarity(str1, str2) {
-  const s1 = normalizeTitle(str1);
-  const s2 = normalizeTitle(str2);
+// Check if title should be skipped
+function shouldSkipTitle(title) {
+  const cleaned = cleanTitle(title);
 
-  if (s1 === s2) return 1;
-  if (s1.includes(s2) || s2.includes(s1)) return 0.9;
+  // Too short
+  if (cleaned.length < 3) return true;
 
-  const longer = s1.length > s2.length ? s1 : s2;
-  const shorter = s1.length > s2.length ? s2 : s1;
+  // In skip list
+  if (SKIP_TITLES.some(skip => cleaned === skip || cleaned.includes(skip))) return true;
 
-  if (longer.length === 0) return 1;
+  // Only numbers
+  if (/^\d+$/.test(cleaned)) return true;
 
-  // Simple character overlap ratio
-  let matches = 0;
-  for (const char of shorter) {
-    if (longer.includes(char)) matches++;
+  return false;
+}
+
+// STRICT matching function - no fuzzy matching
+function matchMovies(scrapedTitles, dbMovies) {
+  const matched = new Map();
+  const unmatched = [];
+
+  console.log('\nMatching scraped titles to database...');
+
+  for (const scraped of scrapedTitles) {
+    // Skip generic titles
+    if (shouldSkipTitle(scraped)) {
+      console.log(`  SKIP: "${scraped}" (generic/invalid)`);
+      continue;
+    }
+
+    const cleanedScraped = cleanTitle(scraped);
+    let foundMatch = false;
+
+    for (const movie of dbMovies) {
+      const cleanedDb = cleanTitle(movie.title);
+
+      // EXACT match after cleaning
+      if (cleanedScraped === cleanedDb) {
+        if (!matched.has(movie.id)) {
+          matched.set(movie.id, { movie, scraped, matchType: 'exact' });
+          console.log(`  EXACT: "${scraped}" -> "${movie.title}"`);
+        }
+        foundMatch = true;
+        break;
+      }
+
+      // CONTAINS match (one contains the other completely)
+      // Only match if the shorter string is at least 5 characters
+      const shorter = cleanedScraped.length < cleanedDb.length ? cleanedScraped : cleanedDb;
+      const longer = cleanedScraped.length < cleanedDb.length ? cleanedDb : cleanedScraped;
+
+      if (shorter.length >= 5 && longer.includes(shorter)) {
+        // Additional check: the shorter should be at least 50% of the longer
+        // This prevents matching "a" in "avatar"
+        if (shorter.length >= longer.length * 0.5) {
+          if (!matched.has(movie.id)) {
+            matched.set(movie.id, { movie, scraped, matchType: 'contains' });
+            console.log(`  CONTAINS: "${scraped}" -> "${movie.title}"`);
+          }
+          foundMatch = true;
+          break;
+        }
+      }
+    }
+
+    if (!foundMatch) {
+      unmatched.push(scraped);
+    }
   }
 
-  return matches / longer.length;
+  console.log(`\nMatched: ${matched.size}, Unmatched: ${unmatched.length}`);
+  if (unmatched.length > 0) {
+    console.log('Unmatched titles (first 10):', unmatched.slice(0, 10));
+  }
+
+  return {
+    matched: Array.from(matched.values()),
+    unmatched,
+  };
 }
 
 // Scrape a single cinema
@@ -274,9 +388,9 @@ async function scrapeCinema(browser, cinema) {
   }
 
   const movieList = Array.from(allMovies);
-  console.log(`\n${cinema.name} Results: ${movieList.length} movies`);
+  console.log(`\n${cinema.name} Results: ${movieList.length} titles`);
   if (movieList.length > 0) {
-    console.log('Sample titles:', movieList.slice(0, 5));
+    console.log('All titles:', movieList);
   }
 
   return {
@@ -286,14 +400,22 @@ async function scrapeCinema(browser, cinema) {
   };
 }
 
-// Match scraped movies with database
+// Match scraped movies with database and update
 async function matchAndUpdateMovies(scrapedResults) {
   console.log('\n' + '='.repeat(50));
   console.log('Matching movies with database...');
   console.log('='.repeat(50));
 
-  // Get all movies from database
-  const { data: dbMovies, error } = await supabase.from('movies').select('id, title, tmdb_id');
+  // Get all movies from database - only get recent movies (released in last 2 years)
+  const twoYearsAgo = new Date();
+  twoYearsAgo.setFullYear(twoYearsAgo.getFullYear() - 2);
+  const twoYearsAgoStr = twoYearsAgo.toISOString().split('T')[0];
+
+  const { data: dbMovies, error } = await supabase
+    .from('movies')
+    .select('id, title, tmdb_id, release_date')
+    .gte('release_date', twoYearsAgoStr)
+    .order('release_date', { ascending: false });
 
   if (error) {
     console.error('Error fetching movies from database:', error);
@@ -301,58 +423,33 @@ async function matchAndUpdateMovies(scrapedResults) {
   }
 
   if (!dbMovies || dbMovies.length === 0) {
-    console.log('No movies in database to match against');
-    return { matchedCount: 0, error: 'No movies in database' };
+    console.log('No recent movies in database to match against');
+    return { matchedCount: 0, error: 'No recent movies in database' };
   }
 
-  console.log(`Database has ${dbMovies.length} movies`);
+  console.log(`Database has ${dbMovies.length} recent movies (released since ${twoYearsAgoStr})`);
 
-  // Collect all scraped titles
-  const allScrapedTitles = scrapedResults.flatMap((r) => r.movies);
-  console.log(`Total scraped titles to match: ${allScrapedTitles.length}`);
+  // Collect all scraped titles (unique)
+  const allScrapedTitles = [...new Set(scrapedResults.flatMap((r) => r.movies))];
+  console.log(`Total unique scraped titles: ${allScrapedTitles.length}`);
 
-  // Match scraped titles to database movies
-  const matchedIds = new Set();
-  const matchDetails = [];
+  // Match using STRICT matching
+  const { matched, unmatched } = matchMovies(allScrapedTitles, dbMovies);
 
-  for (const scrapedTitle of allScrapedTitles) {
-    let bestMatch = null;
-    let bestSimilarity = 0;
-
-    for (const dbMovie of dbMovies) {
-      const similarity = calculateSimilarity(scrapedTitle, dbMovie.title);
-
-      if (similarity > bestSimilarity && similarity >= 0.7) {
-        bestSimilarity = similarity;
-        bestMatch = dbMovie;
-      }
-    }
-
-    if (bestMatch && !matchedIds.has(bestMatch.id)) {
-      matchedIds.add(bestMatch.id);
-      matchDetails.push({
-        scraped: scrapedTitle,
-        matched: bestMatch.title,
-        similarity: Math.round(bestSimilarity * 100) + '%',
-      });
-    }
-  }
-
-  console.log(`\nMatched ${matchedIds.size} unique movies:`);
-  matchDetails.slice(0, 10).forEach((m) => {
-    console.log(`  "${m.scraped}" -> "${m.matched}" (${m.similarity})`);
-  });
+  console.log(`\n${'='.repeat(50)}`);
+  console.log(`MATCHING RESULTS: ${matched.length} movies matched`);
+  console.log(`${'='.repeat(50)}`);
 
   // Update database
-  if (matchedIds.size >= 3) {
-    // Reset all movies to not showing first
+  const now = new Date().toISOString();
+
+  if (matched.length >= 3) {
+    console.log('\nUpdating database with matched movies...');
+
+    // First, reset all movies to not showing
     const { error: resetError } = await supabase
       .from('movies')
-      .update({
-        is_now_showing: false,
-        scraped_from: null,
-        last_scraped: new Date().toISOString(),
-      })
+      .update({ is_now_showing: false })
       .neq('id', '00000000-0000-0000-0000-000000000000');
 
     if (resetError) {
@@ -360,23 +457,24 @@ async function matchAndUpdateMovies(scrapedResults) {
     }
 
     // Set matched movies as now showing
-    const matchedIdsArray = Array.from(matchedIds);
-    const { error: updateError } = await supabase
-      .from('movies')
-      .update({
-        is_now_showing: true,
-        scraped_from: ['github_actions'],
-        last_scraped: new Date().toISOString(),
-      })
-      .in('id', matchedIdsArray);
+    const matchedIds = matched.map((m) => m.movie.id);
 
-    if (updateError) {
-      console.error('Error updating matched movies:', updateError);
-    } else {
-      console.log(`\nSuccessfully updated ${matchedIds.size} movies as "Now Showing"`);
+    for (const id of matchedIds) {
+      const { error: updateError } = await supabase
+        .from('movies')
+        .update({
+          is_now_showing: true,
+        })
+        .eq('id', id);
+
+      if (updateError) {
+        console.error(`Error updating movie ${id}:`, updateError);
+      }
     }
+
+    console.log(`Successfully updated ${matchedIds.length} movies as "Now Showing"`);
   } else {
-    console.log('\nToo few matches to update. Using TMDB fallback...');
+    console.log('\nToo few matches. Using TMDB fallback...');
 
     // TMDB Fallback: Mark movies released within last 60 days as now showing
     const sixtyDaysAgo = new Date();
@@ -401,23 +499,18 @@ async function matchAndUpdateMovies(scrapedResults) {
       // Reset all first
       await supabase
         .from('movies')
-        .update({
-          is_now_showing: false,
-          scraped_from: null,
-          last_scraped: new Date().toISOString(),
-        })
+        .update({ is_now_showing: false })
         .neq('id', '00000000-0000-0000-0000-000000000000');
 
       // Set recent popular movies as now showing
       const recentIds = recentMovies.map((m) => m.id);
-      await supabase
-        .from('movies')
-        .update({
-          is_now_showing: true,
-          scraped_from: ['tmdb_fallback'],
-          last_scraped: new Date().toISOString(),
-        })
-        .in('id', recentIds);
+
+      for (const id of recentIds) {
+        await supabase
+          .from('movies')
+          .update({ is_now_showing: true })
+          .eq('id', id);
+      }
 
       console.log(`Set ${recentIds.length} movies as "Now Showing" via fallback`);
     }
@@ -427,19 +520,26 @@ async function matchAndUpdateMovies(scrapedResults) {
   try {
     await supabase.from('agent_logs').insert({
       agent_type: 'cinema_scraper_github',
-      started_at: new Date().toISOString(),
+      started_at: now,
       completed_at: new Date().toISOString(),
       status: 'completed',
       items_found: allScrapedTitles.length,
-      items_updated: matchedIds.size,
+      items_updated: matched.length,
       error_count: 0,
       metadata: {
         cinemas: scrapedResults.map((r) => ({
           name: r.cinema,
           count: r.count,
         })),
-        matchedCount: matchedIds.size,
-        usedFallback: matchedIds.size < 3,
+        matchedCount: matched.length,
+        unmatchedCount: unmatched.length,
+        usedFallback: matched.length < 3,
+        matchedMovies: matched.map((m) => ({
+          scraped: m.scraped,
+          matched: m.movie.title,
+          type: m.matchType,
+        })),
+        unmatchedTitles: unmatched.slice(0, 20),
       },
     });
     console.log('\nLogged results to agent_logs');
@@ -448,9 +548,10 @@ async function matchAndUpdateMovies(scrapedResults) {
   }
 
   return {
-    matchedCount: matchedIds.size,
+    matchedCount: matched.length,
     totalScraped: allScrapedTitles.length,
-    matchDetails: matchDetails.slice(0, 20),
+    matched,
+    unmatched,
   };
 }
 
@@ -460,8 +561,6 @@ async function main() {
   console.log('Cinema Scraper - GitHub Actions');
   console.log(`Started at: ${new Date().toISOString()}`);
   console.log('='.repeat(50));
-
-  // Environment already validated at top of script
 
   // Launch browser
   const browser = await puppeteer.launch({
@@ -482,7 +581,7 @@ async function main() {
     console.log('SCRAPING SUMMARY');
     console.log('='.repeat(50));
     results.forEach((r) => {
-      console.log(`${r.cinema}: ${r.count} movies`);
+      console.log(`${r.cinema}: ${r.count} titles`);
     });
 
     // Match and update database
