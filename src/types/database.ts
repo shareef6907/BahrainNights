@@ -707,6 +707,44 @@ export interface Database {
           created_at?: string;
         };
       };
+      sponsor_inquiries: {
+        Row: {
+          id: string;
+          business_name: string;
+          contact_name: string;
+          email: string;
+          phone: string | null;
+          preferred_tier: 'golden' | 'silver';
+          message: string | null;
+          status: 'pending' | 'contacted' | 'converted' | 'rejected';
+          created_at: string;
+          updated_at: string;
+        };
+        Insert: {
+          id?: string;
+          business_name: string;
+          contact_name: string;
+          email: string;
+          phone?: string | null;
+          preferred_tier?: 'golden' | 'silver';
+          message?: string | null;
+          status?: 'pending' | 'contacted' | 'converted' | 'rejected';
+          created_at?: string;
+          updated_at?: string;
+        };
+        Update: {
+          id?: string;
+          business_name?: string;
+          contact_name?: string;
+          email?: string;
+          phone?: string | null;
+          preferred_tier?: 'golden' | 'silver';
+          message?: string | null;
+          status?: 'pending' | 'contacted' | 'converted' | 'rejected';
+          created_at?: string;
+          updated_at?: string;
+        };
+      };
     };
     Views: {
       [_ in never]: never;
@@ -759,6 +797,10 @@ export type PageViewInsert = Database['public']['Tables']['page_views']['Insert'
 
 export type ActivityLog = Database['public']['Tables']['activity_log']['Row'];
 export type ActivityLogInsert = Database['public']['Tables']['activity_log']['Insert'];
+
+export type SponsorInquiry = Database['public']['Tables']['sponsor_inquiries']['Row'];
+export type SponsorInquiryInsert = Database['public']['Tables']['sponsor_inquiries']['Insert'];
+export type SponsorInquiryUpdate = Database['public']['Tables']['sponsor_inquiries']['Update'];
 
 // Extended types with relations
 export type VenueWithEvents = Venue & {

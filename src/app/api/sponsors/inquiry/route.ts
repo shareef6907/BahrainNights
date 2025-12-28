@@ -45,14 +45,15 @@ export async function POST(request: NextRequest) {
         phone: phone || null,
         preferred_tier: tier || 'golden',
         message: message || null,
-        status: 'new',
+        status: 'pending',
       } as any)
       .select()
       .single();
 
     if (error) {
       // If table doesn't exist, just log and return success (we'll create it later)
-      if (error.code === '42P01') {
+      // Handle both PostgreSQL error code and PostgREST error code
+      if (error.code === '42P01' || error.code === 'PGRST205') {
         console.log('Sponsor inquiry received (table not yet created):', {
           businessName,
           contactName,
@@ -61,7 +62,7 @@ export async function POST(request: NextRequest) {
         });
         return NextResponse.json({
           success: true,
-          message: 'Inquiry received',
+          message: 'Inquiry received - table pending creation',
         });
       }
       console.error('Error saving inquiry:', error);
