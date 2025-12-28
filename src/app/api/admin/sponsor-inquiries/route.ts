@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@supabase/supabase-js';
+import { requireAdmin } from '@/lib/api-auth';
 
 export const dynamic = 'force-dynamic';
 
@@ -19,6 +20,12 @@ function getSupabaseClient() {
 
 // GET /api/admin/sponsor-inquiries - Get all sponsor inquiries
 export async function GET(request: NextRequest) {
+  // Require admin authentication
+  const auth = await requireAdmin(request);
+  if (!auth.authenticated) {
+    return auth.response;
+  }
+
   try {
     const { searchParams } = new URL(request.url);
     const status = searchParams.get('status') || 'all';

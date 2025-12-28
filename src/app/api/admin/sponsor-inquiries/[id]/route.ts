@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@supabase/supabase-js';
+import { requireAdmin } from '@/lib/api-auth';
 
 export const dynamic = 'force-dynamic';
 
@@ -23,6 +24,12 @@ export async function GET(
   request: NextRequest,
   { params }: { params: Promise<{ id: string }> }
 ) {
+  // Require admin authentication
+  const auth = await requireAdmin(request);
+  if (!auth.authenticated) {
+    return auth.response;
+  }
+
   try {
     const { id } = await params;
     const supabase = getSupabaseClient();
@@ -58,6 +65,12 @@ export async function PATCH(
   request: NextRequest,
   { params }: { params: Promise<{ id: string }> }
 ) {
+  // Require admin authentication
+  const auth = await requireAdmin(request);
+  if (!auth.authenticated) {
+    return auth.response;
+  }
+
   try {
     const { id } = await params;
     const body = await request.json();
@@ -112,6 +125,12 @@ export async function DELETE(
   request: NextRequest,
   { params }: { params: Promise<{ id: string }> }
 ) {
+  // Require admin authentication
+  const auth = await requireAdmin(request);
+  if (!auth.authenticated) {
+    return auth.response;
+  }
+
   try {
     const { id } = await params;
     const supabase = getSupabaseClient();

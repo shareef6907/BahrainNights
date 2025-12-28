@@ -25,9 +25,12 @@ interface TokenPayload {
 
 async function verifyToken(token: string): Promise<TokenPayload | null> {
   try {
-    const secret = new TextEncoder().encode(
-      process.env.JWT_SECRET || 'default-secret-change-in-production-min-32-chars!'
-    );
+    const jwtSecret = process.env.JWT_SECRET;
+    if (!jwtSecret) {
+      console.error('CRITICAL: JWT_SECRET environment variable is not set');
+      return null;
+    }
+    const secret = new TextEncoder().encode(jwtSecret);
     const { payload } = await jwtVerify(token, secret);
     return payload as unknown as TokenPayload;
   } catch {

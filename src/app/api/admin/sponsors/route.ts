@@ -1,10 +1,17 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getSponsors, createSponsor } from '@/lib/db/sponsors';
+import { requireAdmin } from '@/lib/api-auth';
 
 export const dynamic = 'force-dynamic';
 
 // GET /api/admin/sponsors - Get all sponsors (admin)
 export async function GET(request: NextRequest) {
+  // Require admin authentication
+  const auth = await requireAdmin(request);
+  if (!auth.authenticated) {
+    return auth.response;
+  }
+
   try {
     const { searchParams } = new URL(request.url);
     const status = searchParams.get('status') || 'all';
@@ -32,6 +39,12 @@ export async function GET(request: NextRequest) {
 
 // POST /api/admin/sponsors - Create new sponsor
 export async function POST(request: NextRequest) {
+  // Require admin authentication
+  const auth = await requireAdmin(request);
+  if (!auth.authenticated) {
+    return auth.response;
+  }
+
   try {
     const body = await request.json();
     const {

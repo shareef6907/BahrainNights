@@ -11,6 +11,7 @@ import {
   EntityType,
   ImageType,
 } from '@/lib/s3';
+import { requireVenueOwnerOrAdmin } from '@/lib/api-auth';
 
 export const dynamic = 'force-dynamic';
 
@@ -18,6 +19,12 @@ const MAX_FILE_SIZE = 10 * 1024 * 1024; // 10MB
 const MAX_GALLERY_IMAGES = 12;
 
 export async function POST(request: NextRequest) {
+  // Require authentication - must be venue owner or admin
+  const auth = await requireVenueOwnerOrAdmin(request);
+  if (!auth.authenticated) {
+    return auth.response;
+  }
+
   try {
     const formData = await request.formData();
 
@@ -150,6 +157,12 @@ export async function POST(request: NextRequest) {
 
 // DELETE endpoint to remove an image
 export async function DELETE(request: NextRequest) {
+  // Require authentication - must be venue owner or admin
+  const auth = await requireVenueOwnerOrAdmin(request);
+  if (!auth.authenticated) {
+    return auth.response;
+  }
+
   try {
     const { searchParams } = new URL(request.url);
     const key = searchParams.get('key');

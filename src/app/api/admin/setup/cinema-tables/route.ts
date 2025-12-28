@@ -1,5 +1,6 @@
-import { NextResponse } from 'next/server';
+import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@supabase/supabase-js';
+import { requireAdmin } from '@/lib/api-auth';
 
 export const dynamic = 'force-dynamic';
 
@@ -16,7 +17,13 @@ function getSupabaseAdmin() {
   );
 }
 
-export async function POST() {
+export async function POST(request: NextRequest) {
+  // Require admin authentication
+  const auth = await requireAdmin(request);
+  if (!auth.authenticated) {
+    return auth.response;
+  }
+
   try {
     const supabase = getSupabaseAdmin();
     const results: string[] = [];

@@ -42,16 +42,16 @@ interface SyncResult {
 
 async function processMovie(
   supabase: ReturnType<typeof getSupabaseAdmin>,
-  movie: TMDBMovie,
-  isComingSoon: boolean
+  movie: TMDBMovie
 ): Promise<{ action: 'added' | 'updated' | 'error'; title: string; error?: string }> {
   try {
     // Get full movie details
     const details = await getMovieDetails(movie.id);
 
-    // IMPORTANT: NEVER set is_now_showing from TMDB sync!
-    // Only the GitHub Actions cinema scraper should set is_now_showing = true
+    // IMPORTANT: NEVER set is_now_showing or is_coming_soon from TMDB sync!
+    // Only the GitHub Actions cinema scraper should control these flags
     // based on actual Bahrain cinema data (Cineco, VOX, Cinepolis, Mukta)
+    // TMDB sync is ONLY for enriching movie metadata (posters, synopsis, trailer, etc.)
     const movieData = {
       tmdb_id: movie.id,
       title: details.title,
@@ -69,8 +69,8 @@ async function processMovie(
       director: getDirector(details.credits),
       movie_cast: getCast(details.credits, 10),
       tmdb_rating: details.vote_average || null,
-      // is_now_showing is NOT set here - only cinema scraper sets this
-      is_coming_soon: isComingSoon,
+      // is_now_showing and is_coming_soon are NOT set here
+      // Only the cinema scraper controls these based on actual Bahrain cinema data
       updated_at: new Date().toISOString(),
     };
 
@@ -154,16 +154,16 @@ export async function POST(request: Request) {
     // Track all TMDB IDs we're processing
     const processedTmdbIds = new Set<number>();
 
-    // Process now playing movies (add/update info only, NOT is_now_showing)
-    // Note: is_now_showing is ONLY set by the GitHub Actions cinema scraper
-    // based on actual Bahrain cinema websites (Cineco, VOX, Cinepolis, Mukta)
+    // Process now playing movies (add/update METADATA only)
+    // Note: is_now_showing and is_coming_soon are ONLY set by the GitHub Actions
+    // cinema scraper based on actual Bahrain cinema websites (Cineco, VOX, Cinepolis, Mukta)
     console.log(`Processing ${nowPlayingMovies.length} now playing movies (metadata only)...`);
     for (const movie of nowPlayingMovies) {
       if (processedTmdbIds.has(movie.id)) continue;
       processedTmdbIds.add(movie.id);
 
-      // is_coming_soon = false for now playing movies
-      const res = await processMovie(supabase, movie, false);
+      // TMDB sync only updates metadata, not is_now_showing or is_coming_soon
+      const res = await processMovie(supabase, movie);
       if (res.action === 'added') {
         result.added++;
         result.movies.push(`+ ${res.title}`);
@@ -178,20 +178,22 @@ export async function POST(request: Request) {
       await new Promise(resolve => setTimeout(resolve, 100));
     }
 
-    // Process upcoming movies
-    console.log(`Processing ${upcomingMovies.length} upcoming movies...`);
+    // Process upcoming movies (METADATA only - NOT setting is_coming_soon!)
+    // Note: is_coming_soon is ONLY set by cinema scraper when a movie is announced
+    // for Bahrain cinemas specifically, NOT from TMDB's global "upcoming" list
+    console.log(`Processing ${upcomingMovies.length} upcoming movies (metadata only)...`);
     for (const movie of upcomingMovies) {
       if (processedTmdbIds.has(movie.id)) continue;
       processedTmdbIds.add(movie.id);
 
-      // is_coming_soon = true for upcoming movies
-      const res = await processMovie(supabase, movie, true);
+      // TMDB sync only updates metadata, not is_coming_soon
+      const res = await processMovie(supabase, movie);
       if (res.action === 'added') {
         result.added++;
-        result.movies.push(`+ ${res.title} (coming soon)`);
+        result.movies.push(`+ ${res.title} (metadata)`);
       } else if (res.action === 'updated') {
         result.updated++;
-        result.movies.push(`~ ${res.title} (coming soon)`);
+        result.movies.push(`~ ${res.title} (metadata)`);
       } else if (res.error) {
         result.errors.push(`${res.title}: ${res.error}`);
       }

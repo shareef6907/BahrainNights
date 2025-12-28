@@ -39,11 +39,17 @@ export interface AuthTokenPayload {
 
 // Constants
 const SALT_ROUNDS = 12;
-const JWT_SECRET = new TextEncoder().encode(
-  process.env.JWT_SECRET || 'default-secret-change-in-production-min-32-chars!'
-);
 const DEFAULT_TOKEN_EXPIRY = '7d';
 const COOKIE_NAME = 'auth_token';
+
+// Get JWT secret - must be set in environment
+function getJwtSecret(): Uint8Array {
+  const secret = process.env.JWT_SECRET;
+  if (!secret) {
+    throw new Error('CRITICAL: JWT_SECRET environment variable is not set');
+  }
+  return new TextEncoder().encode(secret);
+}
 
 // Password utilities
 export async function hashPassword(password: string): Promise<string> {
@@ -117,14 +123,14 @@ export async function generateToken(user: User, expiry: string = DEFAULT_TOKEN_E
     .setProtectedHeader({ alg: 'HS256' })
     .setIssuedAt()
     .setExpirationTime(expiry)
-    .sign(JWT_SECRET);
+    .sign(getJwtSecret());
 
   return token;
 }
 
 export async function verifyToken(token: string): Promise<AuthTokenPayload | null> {
   try {
-    const { payload } = await jwtVerify(token, JWT_SECRET);
+    const { payload } = await jwtVerify(token, getJwtSecret());
     return payload as unknown as AuthTokenPayload;
   } catch {
     return null;
