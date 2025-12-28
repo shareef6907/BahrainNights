@@ -1,10 +1,18 @@
 const puppeteer = require('puppeteer');
 const { createClient } = require('@supabase/supabase-js');
 
+// Validate environment variables
+if (!process.env.SUPABASE_URL || !process.env.SUPABASE_SERVICE_ROLE_KEY) {
+  console.error('Missing environment variables:');
+  console.error('SUPABASE_URL:', process.env.SUPABASE_URL ? 'Set' : 'MISSING');
+  console.error('SUPABASE_SERVICE_ROLE_KEY:', process.env.SUPABASE_SERVICE_ROLE_KEY ? 'Set' : 'MISSING');
+  process.exit(1);
+}
+
 // Initialize Supabase client
 const supabase = createClient(
   process.env.SUPABASE_URL,
-  process.env.SUPABASE_SERVICE_KEY
+  process.env.SUPABASE_SERVICE_ROLE_KEY
 );
 
 // Cinema configurations
@@ -453,12 +461,7 @@ async function main() {
   console.log(`Started at: ${new Date().toISOString()}`);
   console.log('='.repeat(50));
 
-  // Validate environment
-  if (!process.env.SUPABASE_URL || !process.env.SUPABASE_SERVICE_KEY) {
-    console.error('Missing required environment variables!');
-    console.error('Required: SUPABASE_URL, SUPABASE_SERVICE_KEY');
-    process.exit(1);
-  }
+  // Environment already validated at top of script
 
   // Launch browser
   const browser = await puppeteer.launch({
