@@ -1,7 +1,21 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { getAdminClient } from '@/lib/supabase/server';
+import { createClient } from '@supabase/supabase-js';
 
 export const dynamic = 'force-dynamic';
+
+// Create an untyped Supabase client for sponsor_inquiries
+function getSupabaseClient() {
+  return createClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.SUPABASE_SERVICE_ROLE_KEY!,
+    {
+      auth: {
+        autoRefreshToken: false,
+        persistSession: false,
+      },
+    }
+  );
+}
 
 // GET /api/admin/sponsor-inquiries - Get all sponsor inquiries
 export async function GET(request: NextRequest) {
@@ -10,7 +24,7 @@ export async function GET(request: NextRequest) {
     const status = searchParams.get('status') || 'all';
     const tier = searchParams.get('tier') || 'all';
 
-    const supabase = getAdminClient();
+    const supabase = getSupabaseClient();
 
     let query = supabase
       .from('sponsor_inquiries')

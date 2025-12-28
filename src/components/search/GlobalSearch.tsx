@@ -4,9 +4,17 @@ import { useState, useEffect, useRef, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Search, X, Command } from 'lucide-react';
-import { getQuickSuggestions, SearchSuggestion } from '@/lib/searchData';
 import { addRecentSearch } from './RecentSearches';
 import SearchDropdown from './SearchDropdown';
+
+// API response type for instant search
+export interface SearchSuggestion {
+  type: 'event' | 'place' | 'cinema' | 'offer';
+  title: string;
+  url: string;
+  image?: string;
+  subtitle?: string;
+}
 
 interface GlobalSearchProps {
   variant?: 'navbar' | 'hero' | 'page';
@@ -37,23 +45,50 @@ export default function GlobalSearch({
 
   const showDropdown = isFocused && (variant === 'navbar' || variant === 'hero');
 
-  // Debounced search for suggestions
+  // Debounced search for suggestions - uses real API
   useEffect(() => {
-    const timeoutId = setTimeout(() => {
-      if (query.trim().length >= 2) {
-        setIsLoading(true);
-        // Simulate API call delay
-        setTimeout(() => {
-          const results = getQuickSuggestions(query);
-          setSuggestions(results);
-          setIsLoading(false);
-        }, 150);
-      } else {
-        setSuggestions([]);
-      }
-    }, 300);
+    const abortController = new AbortController();
 
-    return () => clearTimeout(timeoutId);
+    const fetchSuggestions = async () => {
+      if (query.trim().length < 2) {
+        setSuggestions([]);
+        return;
+      }
+
+      setIsLoading(true);
+
+      try {
+        const response = await fetch(
+          `/api/search/instant?q=${encodeURIComponent(query.trim())}&limit=8`,
+          { signal: abortController.signal }
+        );
+
+        if (!response.ok) {
+          throw new Error('Search request failed');
+        }
+
+        const data = await response.json();
+        setSuggestions(data.suggestions || []);
+      } catch (error) {
+        // Ignore abort errors
+        if (error instanceof Error && error.name === 'AbortError') {
+          return;
+        }
+        console.error('Search error:', error);
+        setSuggestions([]);
+      } finally {
+        if (!abortController.signal.aborted) {
+          setIsLoading(false);
+        }
+      }
+    };
+
+    const timeoutId = setTimeout(fetchSuggestions, 300);
+
+    return () => {
+      clearTimeout(timeoutId);
+      abortController.abort();
+    };
   }, [query]);
 
   // Keyboard shortcuts

@@ -8,8 +8,40 @@ import GlobalSearch from '@/components/search/GlobalSearch';
 import SearchFilters, { SearchTab, DateFilter, SortOption } from '@/components/search/SearchFilters';
 import SearchResults from '@/components/search/SearchResults';
 import NoResults, { EmptyQueryState } from '@/components/search/NoResults';
-import { searchItems, SearchResults as SearchResultsType } from '@/lib/searchData';
 import { addRecentSearch } from '@/components/search/RecentSearches';
+
+// API response type
+interface SearchResultItem {
+  id: string;
+  type: 'event' | 'place' | 'cinema' | 'offer';
+  title: string;
+  slug: string;
+  description: string;
+  image: string;
+  url: string;
+  date?: string;
+  time?: string;
+  venue?: string;
+  cuisine?: string;
+  priceRange?: string;
+  rating?: number;
+  area?: string;
+  category?: string;
+  tags?: string[];
+  features?: string[];
+}
+
+interface SearchResultsType {
+  query: string;
+  totalResults: number;
+  results: {
+    events: { count: number; items: SearchResultItem[] };
+    places: { count: number; items: SearchResultItem[] };
+    cinema: { count: number; items: SearchResultItem[] };
+    offers: { count: number; items: SearchResultItem[] };
+  };
+  suggestions: string[];
+}
 
 function SearchPageContent() {
   const searchParams = useSearchParams();
@@ -26,8 +58,8 @@ function SearchPageContent() {
   const [areaFilter, setAreaFilter] = useState('');
   const [sortBy, setSortBy] = useState<SortOption>('relevance');
 
-  // Perform search
-  const performSearch = useCallback((searchQuery: string) => {
+  // Perform search using real API
+  const performSearch = useCallback(async (searchQuery: string) => {
     if (!searchQuery.trim()) {
       setResults(null);
       return;
@@ -35,12 +67,92 @@ function SearchPageContent() {
 
     setIsLoading(true);
 
-    // Simulate API delay for realism
-    setTimeout(() => {
-      const searchResults = searchItems(searchQuery.trim(), activeTab);
-      setResults(searchResults);
+    try {
+      const params = new URLSearchParams({
+        q: searchQuery.trim(),
+        type: activeTab,
+        limit: '50',
+      });
+
+      const response = await fetch(`/api/search?${params.toString()}`);
+
+      if (!response.ok) {
+        throw new Error('Search request failed');
+      }
+
+      const data = await response.json();
+
+      // Transform API response to match expected format
+      const transformedResults: SearchResultsType = {
+        query: data.query,
+        totalResults: data.totalResults,
+        results: {
+          events: {
+            count: data.results.events.count,
+            items: data.results.events.items.map((item: { id: string; title: string; slug?: string; description?: string; image?: string; subtitle?: string; category?: string }) => ({
+              id: item.id,
+              type: 'event' as const,
+              title: item.title,
+              slug: item.slug || item.id,
+              description: item.description || '',
+              image: item.image || '',
+              url: `/events/${item.slug || item.id}`,
+              venue: item.subtitle,
+              category: item.category,
+            })),
+          },
+          places: {
+            count: data.results.places.count,
+            items: data.results.places.items.map((item: { id: string; title: string; slug?: string; description?: string; image?: string; subtitle?: string; category?: string }) => ({
+              id: item.id,
+              type: 'place' as const,
+              title: item.title,
+              slug: item.slug || item.id,
+              description: item.description || '',
+              image: item.image || '',
+              url: `/places/${item.slug || item.id}`,
+              area: item.subtitle,
+              category: item.category,
+            })),
+          },
+          cinema: {
+            count: data.results.cinema.count,
+            items: data.results.cinema.items.map((item: { id: string; title: string; slug?: string; description?: string; image?: string; subtitle?: string; category?: string }) => ({
+              id: item.id,
+              type: 'cinema' as const,
+              title: item.title,
+              slug: item.slug || item.id,
+              description: item.description || '',
+              image: item.image || '',
+              url: `/cinema/${item.slug || item.id}`,
+              category: item.category,
+            })),
+          },
+          offers: {
+            count: data.results.offers.count,
+            items: data.results.offers.items.map((item: { id: string; title: string; slug?: string; description?: string; image?: string; subtitle?: string; category?: string }) => ({
+              id: item.id,
+              type: 'offer' as const,
+              title: item.title,
+              slug: item.slug || item.id,
+              description: item.description || '',
+              image: item.image || '',
+              url: `/offers/${item.slug || item.id}`,
+              venue: item.subtitle,
+              category: item.category,
+            })),
+          },
+        },
+        suggestions: data.suggestions || [],
+      };
+
+      setResults(transformedResults);
+    } catch (error) {
+      console.error('Search error:', error);
+      setResults(null);
+    } finally {
       setIsLoading(false);
-    }, 200);
+    }
   }, [activeTab]);
 
   // Initial search on mount or when URL params change
@@ -64,17 +176,91 @@ function SearchPageContent() {
   };
 
   // Handle tab change
-  const handleTabChange = (tab: SearchTab) => {
+  const handleTabChange = async (tab: SearchTab) => {
     setActiveTab(tab);
     if (query.trim()) {
       router.push(`/search?q=${encodeURIComponent(query.trim())}&type=${tab}`, { scroll: false });
-      // Re-search with new tab
+      // Re-search with new tab using API
       setIsLoading(true);
-      setTimeout(() => {
-        const searchResults = searchItems(query.trim(), tab);
-        setResults(searchResults);
+      try {
+        const params = new URLSearchParams({
+          q: query.trim(),
+          type: tab,
+          limit: '50',
+        });
+        const response = await fetch(`/api/search?${params.toString()}`);
+        if (!response.ok) throw new Error('Search failed');
+        const data = await response.json();
+
+        const transformedResults: SearchResultsType = {
+          query: data.query,
+          totalResults: data.totalResults,
+          results: {
+            events: {
+              count: data.results.events.count,
+              items: data.results.events.items.map((item: { id: string; title: string; slug?: string; description?: string; image?: string; subtitle?: string; category?: string }) => ({
+                id: item.id,
+                type: 'event' as const,
+                title: item.title,
+                slug: item.slug || item.id,
+                description: item.description || '',
+                image: item.image || '',
+                url: `/events/${item.slug || item.id}`,
+                venue: item.subtitle,
+                category: item.category,
+              })),
+            },
+            places: {
+              count: data.results.places.count,
+              items: data.results.places.items.map((item: { id: string; title: string; slug?: string; description?: string; image?: string; subtitle?: string; category?: string }) => ({
+                id: item.id,
+                type: 'place' as const,
+                title: item.title,
+                slug: item.slug || item.id,
+                description: item.description || '',
+                image: item.image || '',
+                url: `/places/${item.slug || item.id}`,
+                area: item.subtitle,
+                category: item.category,
+              })),
+            },
+            cinema: {
+              count: data.results.cinema.count,
+              items: data.results.cinema.items.map((item: { id: string; title: string; slug?: string; description?: string; image?: string; subtitle?: string; category?: string }) => ({
+                id: item.id,
+                type: 'cinema' as const,
+                title: item.title,
+                slug: item.slug || item.id,
+                description: item.description || '',
+                image: item.image || '',
+                url: `/cinema/${item.slug || item.id}`,
+                category: item.category,
+              })),
+            },
+            offers: {
+              count: data.results.offers.count,
+              items: data.results.offers.items.map((item: { id: string; title: string; slug?: string; description?: string; image?: string; subtitle?: string; category?: string }) => ({
+                id: item.id,
+                type: 'offer' as const,
+                title: item.title,
+                slug: item.slug || item.id,
+                description: item.description || '',
+                image: item.image || '',
+                url: `/offers/${item.slug || item.id}`,
+                venue: item.subtitle,
+                category: item.category,
+              })),
+            },
+          },
+          suggestions: data.suggestions || [],
+        };
+
+        setResults(transformedResults);
+      } catch (error) {
+        console.error('Tab change search error:', error);
+      } finally {
         setIsLoading(false);
-      }, 100);
+      }
     }
   };
 
