@@ -410,19 +410,18 @@ async function autoAddFromTMDB(unmatchedTitles, existingTmdbIds) {
 
     const finalSlug = existingSlug ? `${slug}-${tmdbMovie.id}` : slug;
 
-    // Insert into database
+    // Insert into database - use EXACT column names from movies table
     const movieData = {
       tmdb_id: tmdbMovie.id,
       title: tmdbMovie.title,
       slug: finalSlug,
-      overview: tmdbMovie.overview || '',
-      poster_path: tmdbMovie.poster_path,
-      backdrop_path: tmdbMovie.backdrop_path,
+      synopsis: tmdbMovie.overview || '',
+      poster_url: tmdbMovie.poster_path ? `https://image.tmdb.org/t/p/w500${tmdbMovie.poster_path}` : null,
+      backdrop_url: tmdbMovie.backdrop_path ? `https://image.tmdb.org/t/p/w1280${tmdbMovie.backdrop_path}` : null,
       release_date: tmdbMovie.release_date,
       tmdb_rating: tmdbMovie.vote_average,
-      popularity: tmdbMovie.popularity,
-      genres: details?.genres?.map((g) => g.name) || [],
-      runtime: details?.runtime || null,
+      genre: details?.genres?.map((g) => g.name) || [],
+      duration_minutes: details?.runtime || null,
       language: tmdbMovie.original_language,
       is_now_showing: true,
       is_coming_soon: false,
