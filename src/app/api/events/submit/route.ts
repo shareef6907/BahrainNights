@@ -98,17 +98,21 @@ export async function POST(request: NextRequest) {
     // Generate slug
     const slug = generateSlug(body.title);
 
-    // Prepare event data - use both field naming conventions for compatibility
+    // Prepare event data - ONLY use columns that exist in the database
+    // Actual columns: id, title, slug, description, category, venue_name, venue_address,
+    // venue_lat, venue_lng, venue_place_id, date, time, end_date, end_time, price,
+    // cover_url, gallery_urls, contact_name, contact_email, contact_phone, status,
+    // is_featured, views, created_at, updated_at, booking_method, featured_image,
+    // booking_url, booking_link, image_url, thumbnail, banner_url
     const eventData = {
       title: sanitize(body.title) || '',
       slug,
       description: sanitize(body.description) || 'No description provided',
       category: sanitize(body.category) || 'other',
-      // Support both field naming conventions
       date: body.date,
-      start_date: body.date,
       time: body.time,
-      start_time: body.time,
+      end_date: body.endDate || null,
+      end_time: body.endTime || null,
       venue_name: sanitize(body.venueName) || '',
       venue_address: sanitize(body.venueAddress) || null,
       venue_lat: body.venueLat || null,
@@ -120,12 +124,10 @@ export async function POST(request: NextRequest) {
       cover_url: body.coverUrl || null,
       featured_image: body.coverUrl || null,
       price: body.price || 'Free',
-      price_type: body.price ? 'paid' : 'free',
       booking_method: body.price || 'Free',
       status: 'pending',
       is_featured: false,
       views: 0,
-      view_count: 0,
     };
 
     // Insert into database using admin client to bypass RLS
