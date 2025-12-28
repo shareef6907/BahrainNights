@@ -90,6 +90,12 @@ export async function POST() {
     // Get unique matched movie IDs
     const matchedIds = [...new Set(matched.map(m => m.id))];
 
+    // FALLBACK: If scraping found very few movies, use TMDB release date logic
+    const MIN_SCRAPED_THRESHOLD = 3; // If we scraped fewer than 3 movies, use fallback
+    const useTMDBFallback = matchedIds.length < MIN_SCRAPED_THRESHOLD;
+
+    console.log(`Matched ${matchedIds.length} movies. Use TMDB fallback: ${useTMDBFallback}`);
+
     // Update movies: set is_now_showing based on scrape results
     // First, set all movies to NOT now showing
     const { error: resetError } = await supabase
@@ -105,26 +111,73 @@ export async function POST() {
       console.error('Error resetting movies:', resetError);
     }
 
-    // Then, set matched movies to now showing
     let updatedCount = 0;
-    for (const movieId of matchedIds) {
-      const sources = matched
-        .filter(m => m.id === movieId)
-        .map(m => m.source);
+    let fallbackCount = 0;
 
-      const { error: updateError } = await supabase
+    if (useTMDBFallback) {
+      // TMDB Fallback: Mark movies as "now showing" if released within last 60 days
+      console.log('Using TMDB release date fallback...');
+
+      const sixtyDaysAgo = new Date();
+      sixtyDaysAgo.setDate(sixtyDaysAgo.getDate() - 60);
+      const sixtyDaysAgoStr = sixtyDaysAgo.toISOString().split('T')[0];
+
+      const today = new Date();
+      const todayStr = today.toISOString().split('T')[0];
+
+      // Get movies released in the last 60 days with decent popularity
+      const { data: recentMovies, error: recentError } = await supabase
         .from('movies')
-        .update({
-          is_now_showing: true,
-          scraped_from: sources,
-          last_scraped: new Date().toISOString(),
-        })
-        .eq('id', movieId);
+        .select('id, title, release_date, popularity')
+        .gte('release_date', sixtyDaysAgoStr)
+        .lte('release_date', todayStr)
+        .gte('popularity', 20) // Only popular movies
+        .order('popularity', { ascending: false })
+        .limit(30); // Top 30 recent popular movies
 
-      if (updateError) {
-        console.error(`Error updating movie ${movieId}:`, updateError);
-      } else {
-        updatedCount++;
+      if (recentError) {
+        console.error('Error fetching recent movies:', recentError);
+      } else if (recentMovies && recentMovies.length > 0) {
+        console.log(`Found ${recentMovies.length} movies via TMDB fallback`);
+
+        for (const movie of recentMovies) {
+          const { error: updateError } = await supabase
+            .from('movies')
+            .update({
+              is_now_showing: true,
+              scraped_from: ['tmdb_fallback'],
+              last_scraped: new Date().toISOString(),
+            })
+            .eq('id', movie.id);
+
+          if (updateError) {
+            console.error(`Error updating movie ${movie.id}:`, updateError);
+          } else {
+            fallbackCount++;
+          }
+        }
+      }
+    } else {
+      // Use scraped data
+      for (const movieId of matchedIds) {
+        const sources = matched
+          .filter(m => m.id === movieId)
+          .map(m => m.source);
+
+        const { error: updateError } = await supabase
+          .from('movies')
+          .update({
+            is_now_showing: true,
+            scraped_from: sources,
+            last_scraped: new Date().toISOString(),
+          })
+          .eq('id', movieId);
+
+        if (updateError) {
+          console.error(`Error updating movie ${movieId}:`, updateError);
+        } else {
+          updatedCount++;
+        }
       }
     }
 
@@ -138,7 +191,7 @@ export async function POST() {
           completed_at: new Date().toISOString(),
           status: 'completed',
           items_found: totalScraped,
-          items_updated: updatedCount,
+          items_updated: useTMDBFallback ? fallbackCount : updatedCount,
           duration_ms: duration,
           metadata: {
             scrapeResults: scrapeResults.map(r => ({
@@ -148,19 +201,27 @@ export async function POST() {
             matchedCount: matched.length,
             unmatchedCount: unmatched.length,
             unmatchedTitles: unmatched.slice(0, 20), // Limit for storage
+            usedTMDBFallback: useTMDBFallback,
+            fallbackCount: useTMDBFallback ? fallbackCount : 0,
           },
         })
         .eq('id', logId);
     }
 
+    const finalUpdatedCount = useTMDBFallback ? fallbackCount : updatedCount;
+
     return NextResponse.json({
       success: true,
-      message: `Scraped ${totalScraped} movies, matched ${matched.length}, updated ${updatedCount}`,
+      message: useTMDBFallback
+        ? `Scraping found too few movies. Used TMDB fallback: ${fallbackCount} movies marked as now showing`
+        : `Scraped ${totalScraped} movies, matched ${matched.length}, updated ${updatedCount}`,
       summary: {
         totalScraped,
         matchedCount: matched.length,
-        updatedCount,
+        updatedCount: finalUpdatedCount,
         unmatchedCount: unmatched.length,
+        usedFallback: useTMDBFallback,
+        fallbackCount: useTMDBFallback ? fallbackCount : 0,
         duration: `${duration}ms`,
       },
       scrapeResults: scrapeResults.map(r => ({
