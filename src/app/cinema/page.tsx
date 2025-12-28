@@ -208,7 +208,7 @@ export default function CinemaPage() {
       });
   }, [activeTab, nowShowingMovies, comingSoonMovies, searchQuery, selectedGenre, selectedLanguage, sortBy]);
 
-  const featuredMovies = nowShowingMovies.slice(0, 3);
+  const featuredMovies = nowShowingMovies.slice(0, 7);
 
   const handleMovieClick = (movie: Movie) => {
     setSelectedMovie(movie);

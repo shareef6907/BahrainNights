@@ -327,6 +327,38 @@ async function getTMDBDetails(tmdbId) {
   }
 }
 
+// Extract YouTube trailer URL from TMDB videos
+function getTrailerUrl(videos) {
+  if (!videos || !videos.results || videos.results.length === 0) {
+    return null;
+  }
+
+  // Priority: Official Trailer > Trailer > Teaser
+  const trailer =
+    videos.results.find((v) => v.type === 'Trailer' && v.site === 'YouTube' && v.official) ||
+    videos.results.find((v) => v.type === 'Trailer' && v.site === 'YouTube') ||
+    videos.results.find((v) => v.type === 'Teaser' && v.site === 'YouTube');
+
+  if (trailer) {
+    return `https://www.youtube.com/watch?v=${trailer.key}`;
+  }
+  return null;
+}
+
+// Get trailer key for embedding
+function getTrailerKey(videos) {
+  if (!videos || !videos.results || videos.results.length === 0) {
+    return null;
+  }
+
+  const trailer =
+    videos.results.find((v) => v.type === 'Trailer' && v.site === 'YouTube' && v.official) ||
+    videos.results.find((v) => v.type === 'Trailer' && v.site === 'YouTube') ||
+    videos.results.find((v) => v.type === 'Teaser' && v.site === 'YouTube');
+
+  return trailer ? trailer.key : null;
+}
+
 // Generate URL-friendly slug from title
 function generateSlug(title) {
   return title
@@ -337,7 +369,7 @@ function generateSlug(title) {
 }
 
 // Auto-add missing movies from TMDB
-async function autoAddFromTMDB(unmatchedTitles, existingTmdbIds, titleToCinemas) {
+async function autoAddFromTMDB(unmatchedTitles, existingTmdbIds, titleToCinemas, comingSoonTitles = new Set()) {
   if (!TMDB_API_KEY) {
     console.log('\nTMDB_API_KEY not set - skipping auto-add');
     return [];
@@ -414,6 +446,13 @@ async function autoAddFromTMDB(unmatchedTitles, existingTmdbIds, titleToCinemas)
     const cinemaSources = titleToCinemas?.get(cleaned);
     const scrapedFrom = cinemaSources ? [...cinemaSources] : [];
 
+    // Check if this is a coming soon movie
+    const isComingSoon = comingSoonTitles.has(cleaned);
+
+    // Extract trailer URL from details
+    const trailerUrl = getTrailerUrl(details?.videos);
+    const trailerKey = getTrailerKey(details?.videos);
+
     // Insert into database - use EXACT column names from movies table
     const movieData = {
       tmdb_id: tmdbMovie.id,
@@ -427,8 +466,10 @@ async function autoAddFromTMDB(unmatchedTitles, existingTmdbIds, titleToCinemas)
       genre: details?.genres?.map((g) => g.name) || [],
       duration_minutes: details?.runtime || null,
       language: tmdbMovie.original_language,
-      is_now_showing: true,
-      is_coming_soon: false,
+      trailer_url: trailerUrl,
+      trailer_key: trailerKey,
+      is_now_showing: !isComingSoon, // Only now showing if NOT coming soon
+      is_coming_soon: isComingSoon,
       scraped_from: scrapedFrom,
     };
 
@@ -437,12 +478,14 @@ async function autoAddFromTMDB(unmatchedTitles, existingTmdbIds, titleToCinemas)
     if (error) {
       console.log(`    FAILED TO ADD: ${error.message}`);
     } else {
-      console.log(`    ADDED TO DATABASE! Cinemas: [${scrapedFrom.join(', ')}]`);
+      const statusLabel = isComingSoon ? 'COMING SOON' : 'NOW SHOWING';
+      console.log(`    ADDED TO DATABASE! [${statusLabel}] Cinemas: [${scrapedFrom.join(', ')}]`);
       added.push({
         title: tmdbMovie.title,
         tmdb_id: tmdbMovie.id,
         release_date: tmdbMovie.release_date,
         scraped_from: scrapedFrom,
+        is_coming_soon: isComingSoon,
       });
       existingTmdbIds.add(tmdbMovie.id);
     }
@@ -466,6 +509,101 @@ async function autoAddFromTMDB(unmatchedTitles, existingTmdbIds, titleToCinemas)
 }
 
 // ============================================================
+// UPDATE EXISTING MOVIES WITH MISSING DATA
+// ============================================================
+
+async function updateMoviesWithMissingData() {
+  if (!TMDB_API_KEY) {
+    console.log('\nTMDB_API_KEY not set - skipping missing data update');
+    return { updated: 0 };
+  }
+
+  console.log('\n' + '='.repeat(50));
+  console.log('UPDATING MOVIES WITH MISSING DATA (poster/trailer)');
+  console.log('='.repeat(50));
+
+  // Get movies with missing poster_url or trailer_url that have a tmdb_id
+  const { data: moviesNeedingUpdate, error } = await supabase
+    .from('movies')
+    .select('id, title, tmdb_id, poster_url, trailer_url')
+    .not('tmdb_id', 'is', null)
+    .or('poster_url.is.null,trailer_url.is.null');
+
+  if (error) {
+    console.error('Error fetching movies needing update:', error);
+    return { updated: 0 };
+  }
+
+  if (!moviesNeedingUpdate || moviesNeedingUpdate.length === 0) {
+    console.log('No movies need updating');
+    return { updated: 0 };
+  }
+
+  console.log(`Found ${moviesNeedingUpdate.length} movies with missing data`);
+
+  let updated = 0;
+  const maxToUpdate = 30; // Limit to avoid rate limits
+
+  for (const movie of moviesNeedingUpdate.slice(0, maxToUpdate)) {
+    const needsPoster = !movie.poster_url;
+    const needsTrailer = !movie.trailer_url;
+
+    if (!needsPoster && !needsTrailer) continue;
+
+    console.log(`\n  Fetching data for: "${movie.title}" (TMDB: ${movie.tmdb_id})`);
+    console.log(`    Missing: ${needsPoster ? 'poster ' : ''}${needsTrailer ? 'trailer' : ''}`);
+
+    const details = await getTMDBDetails(movie.tmdb_id);
+
+    if (!details) {
+      console.log(`    Failed to fetch details`);
+      continue;
+    }
+
+    const updateData = {};
+
+    if (needsPoster && details.poster_path) {
+      updateData.poster_url = `https://image.tmdb.org/t/p/w500${details.poster_path}`;
+      console.log(`    Found poster: ${details.poster_path}`);
+    }
+
+    if (needsPoster && details.backdrop_path && !movie.backdrop_url) {
+      updateData.backdrop_url = `https://image.tmdb.org/t/p/w1280${details.backdrop_path}`;
+    }
+
+    if (needsTrailer) {
+      const trailerUrl = getTrailerUrl(details.videos);
+      const trailerKey = getTrailerKey(details.videos);
+      if (trailerUrl) {
+        updateData.trailer_url = trailerUrl;
+        updateData.trailer_key = trailerKey;
+        console.log(`    Found trailer: ${trailerKey}`);
+      }
+    }
+
+    if (Object.keys(updateData).length > 0) {
+      const { error: updateError } = await supabase
+        .from('movies')
+        .update(updateData)
+        .eq('id', movie.id);
+
+      if (updateError) {
+        console.log(`    Update failed: ${updateError.message}`);
+      } else {
+        console.log(`    Updated successfully!`);
+        updated++;
+      }
+    }
+
+    // Rate limit
+    await new Promise((r) => setTimeout(r, 200));
+  }
+
+  console.log(`\nUpdated ${updated} movies with missing data`);
+  return { updated };
+}
+
+// ============================================================
 // SCRAPING FUNCTIONS
 // ============================================================
 
@@ -477,6 +615,7 @@ async function scrapeCinema(browser, cinema) {
 
   const page = await browser.newPage();
   const allMovies = new Set();
+  const comingSoonMovies = new Set(); // Track coming soon movies separately
 
   try {
     // Set realistic browser headers
@@ -595,9 +734,87 @@ async function scrapeCinema(browser, cinema) {
           console.log(`Error extracting JSON-LD: ${err.message}`);
         }
 
+        // ============================================================
+        // MUKTA-SPECIFIC: Detect "Coming Soon" section separator
+        // ============================================================
+        if (cinema.name === 'Mukta' && allMovies.size > 0) {
+          try {
+            console.log('\nDetecting Coming Soon section for Mukta...');
+
+            // Get all text content in order from the page to detect section separators
+            const pageStructure = await page.evaluate(() => {
+              const result = [];
+              // Look for section headers and movie titles
+              const elements = document.querySelectorAll('h1, h2, h3, h4, .section-title, .section-header, [class*="section"], [class*="title"], [class*="movie"]');
+
+              for (const el of elements) {
+                const text = el.textContent?.trim();
+                if (text && text.length > 0 && text.length < 150) {
+                  result.push({
+                    text: text,
+                    tagName: el.tagName,
+                    className: el.className || ''
+                  });
+                }
+              }
+              return result;
+            });
+
+            // Find the "Coming Soon" separator
+            let foundComingSoonSection = false;
+            const nowShowingTitles = [];
+            const comingSoonTitles = [];
+
+            for (const item of pageStructure) {
+              const textUpper = item.text.toUpperCase();
+
+              // Check if this is a "Coming Soon" section header
+              if (textUpper.includes('COMING SOON') ||
+                  textUpper === 'COMING SOON' ||
+                  textUpper.includes('UPCOMING') ||
+                  textUpper.includes('ADVANCE BOOKING')) {
+                console.log(`  Found section separator: "${item.text}"`);
+                foundComingSoonSection = true;
+                continue;
+              }
+
+              // Check if this looks like a movie title (not a section header)
+              if (item.text.length >= 3 && item.text.length <= 80 && !shouldSkipTitle(item.text)) {
+                // Check if any of our scraped movies match this title
+                const cleaned = cleanTitle(item.text);
+                for (const movie of allMovies) {
+                  if (cleanTitle(movie) === cleaned || cleaned.includes(cleanTitle(movie)) || cleanTitle(movie).includes(cleaned)) {
+                    if (foundComingSoonSection) {
+                      comingSoonTitles.push(movie);
+                    } else {
+                      nowShowingTitles.push(movie);
+                    }
+                    break;
+                  }
+                }
+              }
+            }
+
+            if (foundComingSoonSection && comingSoonTitles.length > 0) {
+              console.log(`  Mukta Now Showing: ${nowShowingTitles.length} movies`);
+              console.log(`  Mukta Coming Soon: ${comingSoonTitles.length} movies`);
+
+              // Move coming soon movies from allMovies to comingSoonMovies
+              comingSoonTitles.forEach(title => {
+                comingSoonMovies.add(title);
+                allMovies.delete(title);
+              });
+            } else {
+              console.log('  No Coming Soon section detected or no movies in that section');
+            }
+          } catch (err) {
+            console.log(`  Error detecting Mukta sections: ${err.message}`);
+          }
+        }
+
         // If we found movies, no need to try other URLs
-        if (allMovies.size > 0) {
-          console.log(`Total unique titles found: ${allMovies.size}`);
+        if (allMovies.size > 0 || comingSoonMovies.size > 0) {
+          console.log(`Total unique titles found: ${allMovies.size} now showing, ${comingSoonMovies.size} coming soon`);
           break;
         }
       } catch (navError) {
@@ -610,16 +827,23 @@ async function scrapeCinema(browser, cinema) {
     await page.close();
   }
 
-  const movieList = Array.from(allMovies);
-  console.log(`\n${cinema.name} Results: ${movieList.length} titles`);
-  if (movieList.length > 0) {
-    console.log('All titles:', movieList);
+  const nowShowingList = Array.from(allMovies);
+  const comingSoonList = Array.from(comingSoonMovies);
+
+  console.log(`\n${cinema.name} Results: ${nowShowingList.length} now showing, ${comingSoonList.length} coming soon`);
+  if (nowShowingList.length > 0) {
+    console.log('Now Showing:', nowShowingList);
+  }
+  if (comingSoonList.length > 0) {
+    console.log('Coming Soon:', comingSoonList);
   }
 
   return {
     cinema: cinema.name,
-    movies: movieList,
-    count: movieList.length,
+    movies: nowShowingList, // Keep backwards compatibility
+    nowShowing: nowShowingList,
+    comingSoon: comingSoonList,
+    count: nowShowingList.length + comingSoonList.length,
   };
 }
 
@@ -672,13 +896,19 @@ async function matchAndUpdateMovies(scrapedResults) {
 
   const movieCinemaMap = new Map(); // movie_id -> Set of cinema keys
   const titleToCinemas = new Map(); // cleaned_title -> Set of cinema keys
+  const comingSoonTitles = new Set(); // Track which titles are coming soon
 
   // Process each cinema's results to build title->cinema mapping
   for (const result of scrapedResults) {
     const cinemaKey = CINEMA_KEY_MAP[result.cinema] || result.cinema.toLowerCase();
-    console.log(`\nProcessing ${result.cinema} (${result.movies.length} titles) -> key: ${cinemaKey}`);
+    const nowShowingMovies = result.nowShowing || result.movies || [];
+    const comingSoonMovies = result.comingSoon || [];
 
-    for (const title of result.movies) {
+    console.log(`\nProcessing ${result.cinema} -> key: ${cinemaKey}`);
+    console.log(`  Now Showing: ${nowShowingMovies.length}, Coming Soon: ${comingSoonMovies.length}`);
+
+    // Process now showing movies
+    for (const title of nowShowingMovies) {
       if (shouldSkipTitle(title)) continue;
 
       const cleaned = cleanTitle(title);
@@ -687,13 +917,28 @@ async function matchAndUpdateMovies(scrapedResults) {
       }
       titleToCinemas.get(cleaned).add(cinemaKey);
     }
+
+    // Process coming soon movies (track them separately)
+    for (const title of comingSoonMovies) {
+      if (shouldSkipTitle(title)) continue;
+
+      const cleaned = cleanTitle(title);
+      if (!titleToCinemas.has(cleaned)) {
+        titleToCinemas.set(cleaned, new Set());
+      }
+      titleToCinemas.get(cleaned).add(cinemaKey);
+      comingSoonTitles.add(cleaned); // Mark as coming soon
+    }
   }
 
   console.log(`Built title->cinema map with ${titleToCinemas.size} unique titles`);
+  console.log(`Coming soon titles: ${comingSoonTitles.size}`);
 
-  // Collect all scraped titles (unique)
-  const allScrapedTitles = [...new Set(scrapedResults.flatMap((r) => r.movies))];
-  console.log(`Total unique scraped titles: ${allScrapedTitles.length}`);
+  // Collect all scraped titles (unique) - including now showing and coming soon
+  const allNowShowingTitles = [...new Set(scrapedResults.flatMap((r) => r.nowShowing || r.movies || []))];
+  const allComingSoonOnlyTitles = [...new Set(scrapedResults.flatMap((r) => r.comingSoon || []))];
+  const allScrapedTitles = [...new Set([...allNowShowingTitles, ...allComingSoonOnlyTitles])];
+  console.log(`Total unique scraped titles: ${allScrapedTitles.length} (${allNowShowingTitles.length} now showing, ${allComingSoonOnlyTitles.length} coming soon)`);
 
   // Match using STRICT matching
   const { matched, unmatched } = matchMovies(allScrapedTitles, dbMovies || []);
@@ -719,8 +964,8 @@ async function matchAndUpdateMovies(scrapedResults) {
   // ============================================================
   let addedMovies = [];
   if (unmatched.length > 0 && TMDB_API_KEY) {
-    // Pass titleToCinemas so auto-add can track cinema sources
-    addedMovies = await autoAddFromTMDB(unmatched, existingTmdbIds, titleToCinemas);
+    // Pass titleToCinemas and comingSoonTitles so auto-add can track cinema sources and coming soon status
+    addedMovies = await autoAddFromTMDB(unmatched, existingTmdbIds, titleToCinemas, comingSoonTitles);
   }
 
   // ============================================================
@@ -749,17 +994,27 @@ async function matchAndUpdateMovies(scrapedResults) {
 
   // Only mark movies that are VERIFIED from Bahrain cinema websites
   if (totalMatched > 0) {
-    console.log(`\nMarking ${matched.length} matched + ${addedMovies.length} auto-added = ${totalMatched} movies as "Now Showing"`);
+    // Count how many are now showing vs coming soon
+    const addedComingSoon = addedMovies.filter(m => m.is_coming_soon).length;
+    const addedNowShowing = addedMovies.length - addedComingSoon;
 
-    // Set matched movies as now showing WITH cinema sources
+    console.log(`\nMarking ${matched.length} matched + ${addedNowShowing} auto-added = ${matched.length + addedNowShowing} movies as "Now Showing"`);
+    console.log(`Marking ${addedComingSoon} auto-added movies as "Coming Soon"`);
+
+    // Set matched movies as now showing or coming soon WITH cinema sources
     for (const match of matched) {
       const cinemas = movieCinemaMap.get(match.movie.id);
       const scrapedFrom = cinemas ? [...cinemas] : [];
 
+      // Check if this matched movie is a coming soon movie
+      const cleanedScraped = cleanTitle(match.scraped);
+      const isComingSoon = comingSoonTitles.has(cleanedScraped);
+
       const { error: updateError } = await supabase
         .from('movies')
         .update({
-          is_now_showing: true,
+          is_now_showing: !isComingSoon,
+          is_coming_soon: isComingSoon,
           scraped_from: scrapedFrom,
         })
         .eq('id', match.movie.id);
@@ -767,13 +1022,14 @@ async function matchAndUpdateMovies(scrapedResults) {
       if (updateError) {
         console.error(`Error updating movie ${match.movie.id}:`, updateError);
       } else {
-        console.log(`  Updated: ${match.movie.title} -> cinemas: [${scrapedFrom.join(', ')}]`);
+        const statusLabel = isComingSoon ? 'COMING SOON' : 'NOW SHOWING';
+        console.log(`  Updated: ${match.movie.title} [${statusLabel}] -> cinemas: [${scrapedFrom.join(', ')}]`);
       }
     }
 
-    // Auto-added movies already have scraped_from set during insert
+    // Auto-added movies already have scraped_from and is_coming_soon set during insert
 
-    console.log(`Successfully updated ${totalMatched} movies as "Now Showing" with cinema sources`);
+    console.log(`\nSuccessfully updated movies with correct status and cinema sources`);
   } else {
     console.log('\nNo movies matched from Bahrain cinemas - all movies set to not showing');
     console.log('This is correct - we only show movies verified from actual cinema websites');
@@ -867,6 +1123,9 @@ async function main() {
     // Match and update database
     const matchResult = await matchAndUpdateMovies(results);
 
+    // Update existing movies with missing poster/trailer data
+    const updateResult = await updateMoviesWithMissingData();
+
     console.log('\n' + '='.repeat(50));
     console.log('FINAL RESULTS');
     console.log('='.repeat(50));
@@ -874,6 +1133,7 @@ async function main() {
     console.log(`Matched to existing: ${matchResult.matchedCount}`);
     console.log(`Auto-added from TMDB: ${matchResult.autoAddedCount}`);
     console.log(`Total now showing: ${matchResult.totalNowShowing}`);
+    console.log(`Movies updated with missing data: ${updateResult.updated}`);
     console.log(`Completed at: ${new Date().toISOString()}`);
   } catch (error) {
     console.error('Fatal error:', error);
