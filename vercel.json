@@ -9,8 +9,8 @@
       "schedule": "0 */6 * * *"
     },
     {
-      "path": "/api/cinema/showtimes/cleanup",
-      "schedule": "0 3 * * *"
+      "path": "/api/agents/cinema/scrape",
+      "schedule": "30 */6 * * *"
     }
   ]
 }

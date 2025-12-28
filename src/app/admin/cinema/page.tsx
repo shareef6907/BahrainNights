@@ -19,6 +19,8 @@ import {
   Loader2,
   Play,
   Timer,
+  Globe,
+  Building2,
 } from 'lucide-react';
 
 interface Movie {
@@ -40,6 +42,8 @@ interface Movie {
   tmdb_rating: number;
   is_now_showing: boolean;
   is_coming_soon: boolean;
+  scraped_from?: string[];
+  last_scraped?: string;
   created_at: string;
   updated_at: string;
 }
@@ -64,14 +68,36 @@ interface AgentStatus {
   } | null;
 }
 
+interface ScrapeStatus {
+  lastScrape: {
+    started_at: string;
+    completed_at: string;
+    status: string;
+    items_found: number;
+    items_updated: number;
+    duration_ms: number;
+    metadata?: {
+      scrapeResults?: { cinema: string; moviesFound: number }[];
+      matchedCount?: number;
+      unmatchedCount?: number;
+      unmatchedTitles?: string[];
+    };
+  } | null;
+  nowShowingCount: number;
+  scrapedMovies: { title: string; scraped_from: string[]; last_scraped: string }[];
+}
+
 type MovieTab = 'all' | 'now_showing' | 'coming_soon';
 
 export default function AdminCinemaPage() {
   const [movies, setMovies] = useState<Movie[]>([]);
   const [loading, setLoading] = useState(true);
   const [syncing, setSyncing] = useState(false);
+  const [scraping, setScraping] = useState(false);
   const [syncResult, setSyncResult] = useState<{ success: boolean; message: string } | null>(null);
+  const [scrapeResult, setScrapeResult] = useState<{ success: boolean; message: string } | null>(null);
   const [status, setStatus] = useState<AgentStatus | null>(null);
+  const [scrapeStatus, setScrapeStatus] = useState<ScrapeStatus | null>(null);
   const [activeTab, setActiveTab] = useState<MovieTab>('all');
   const [searchQuery, setSearchQuery] = useState('');
   const [openActionMenu, setOpenActionMenu] = useState<string | null>(null);
@@ -81,11 +107,18 @@ export default function AdminCinemaPage() {
     try {
       setLoading(true);
 
-      // Fetch status
+      // Fetch TMDB sync status
       const statusRes = await fetch('/api/agents/cinema/status');
       if (statusRes.ok) {
         const statusData = await statusRes.json();
         setStatus(statusData);
+      }
+
+      // Fetch scrape status
+      const scrapeStatusRes = await fetch('/api/agents/cinema/scrape');
+      if (scrapeStatusRes.ok) {
+        const scrapeData = await scrapeStatusRes.json();
+        setScrapeStatus(scrapeData);
       }
 
       // Fetch movies from Supabase
@@ -134,6 +167,38 @@ export default function AdminCinemaPage() {
       });
     } finally {
       setSyncing(false);
+    }
+  };
+
+  // Scrape cinema websites
+  const handleScrape = async () => {
+    try {
+      setScraping(true);
+      setScrapeResult(null);
+
+      const res = await fetch('/api/agents/cinema/scrape', { method: 'POST' });
+      const data = await res.json();
+
+      if (data.success) {
+        setScrapeResult({
+          success: true,
+          message: data.message || `Scraped ${data.summary?.totalScraped || 0} movies, matched ${data.summary?.matchedCount || 0}`,
+        });
+        // Refresh data
+        await fetchData();
+      } else {
+        setScrapeResult({
+          success: false,
+          message: data.error || 'Scrape failed',
+        });
+      }
+    } catch (error) {
+      setScrapeResult({
+        success: false,
+        message: 'Failed to scrape cinema websites',
+      });
+    } finally {
+      setScraping(false);
     }
   };
 
@@ -217,11 +282,23 @@ export default function AdminCinemaPage() {
         <div>
           <h1 className="text-2xl font-bold text-white">Cinema Manager</h1>
           <p className="text-gray-400 mt-1">
-            Manage movies synced from TMDB
+            Sync movies from TMDB and scrape Bahrain cinemas
           </p>
         </div>
 
         <div className="flex gap-3">
+          <button
+            onClick={handleScrape}
+            disabled={scraping}
+            className="flex items-center gap-2 px-4 py-2.5 bg-gradient-to-r from-purple-500 to-pink-500 text-white rounded-xl hover:opacity-90 transition-opacity disabled:opacity-50"
+          >
+            {scraping ? (
+              <Loader2 className="w-4 h-4 animate-spin" />
+            ) : (
+              <Globe className="w-4 h-4" />
+            )}
+            {scraping ? 'Scraping...' : 'Scrape Cinemas'}
+          </button>
           <button
             onClick={handleSync}
             disabled={syncing}
@@ -232,12 +309,12 @@ export default function AdminCinemaPage() {
             ) : (
               <RefreshCw className="w-4 h-4" />
             )}
-            {syncing ? 'Syncing...' : 'Sync with TMDB'}
+            {syncing ? 'Syncing...' : 'Sync TMDB'}
           </button>
         </div>
       </motion.div>
 
-      {/* Sync Result */}
+      {/* Results */}
       {syncResult && (
         <motion.div
           initial={{ opacity: 0, y: -10 }}
@@ -254,12 +331,28 @@ export default function AdminCinemaPage() {
         </motion.div>
       )}
 
+      {scrapeResult && (
+        <motion.div
+          initial={{ opacity: 0, y: -10 }}
+          animate={{ opacity: 1, y: 0 }}
+          className={`p-4 rounded-xl ${
+            scrapeResult.success
+              ? 'bg-purple-500/10 border border-purple-500/20'
+              : 'bg-red-500/10 border border-red-500/20'
+          }`}
+        >
+          <p className={scrapeResult.success ? 'text-purple-400' : 'text-red-400'}>
+            {scrapeResult.message}
+          </p>
+        </motion.div>
+      )}
+
       {/* Stats Cards */}
       <motion.div
         initial={{ opacity: 0, y: 10 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ delay: 0.1 }}
-        className="grid grid-cols-2 lg:grid-cols-4 gap-4"
+        className="grid grid-cols-2 lg:grid-cols-5 gap-4"
       >
         <div className="bg-white/5 border border-white/10 rounded-2xl p-4">
           <div className="flex items-center gap-3">
@@ -306,17 +399,77 @@ export default function AdminCinemaPage() {
               <p className="text-sm font-medium text-white">
                 {status?.latest_run ? timeSince(status.latest_run.completed_at) : 'Never'}
               </p>
-              <p className="text-xs text-gray-400">Last Sync</p>
+              <p className="text-xs text-gray-400">Last TMDB Sync</p>
+            </div>
+          </div>
+        </div>
+
+        <div className="bg-white/5 border border-white/10 rounded-2xl p-4">
+          <div className="flex items-center gap-3">
+            <div className="p-2 bg-purple-500/20 rounded-lg">
+              <Globe className="w-5 h-5 text-purple-400" />
+            </div>
+            <div>
+              <p className="text-sm font-medium text-white">
+                {scrapeStatus?.lastScrape ? timeSince(scrapeStatus.lastScrape.completed_at) : 'Never'}
+              </p>
+              <p className="text-xs text-gray-400">Last Scrape</p>
             </div>
           </div>
         </div>
       </motion.div>
 
+      {/* Scrape Status Details */}
+      {scrapeStatus?.lastScrape?.metadata?.scrapeResults && (
+        <motion.div
+          initial={{ opacity: 0, y: 10 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.15 }}
+          className="bg-white/5 border border-white/10 rounded-2xl p-4"
+        >
+          <h3 className="text-sm font-medium text-white mb-3 flex items-center gap-2">
+            <Building2 className="w-4 h-4 text-purple-400" />
+            Last Scrape Results
+          </h3>
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+            {scrapeStatus.lastScrape.metadata.scrapeResults.map((result) => (
+              <div
+                key={result.cinema}
+                className="bg-white/5 rounded-lg p-3 text-center"
+              >
+                <p className="text-lg font-bold text-white">{result.moviesFound}</p>
+                <p className="text-xs text-gray-400">{result.cinema}</p>
+              </div>
+            ))}
+          </div>
+          {scrapeStatus.lastScrape.metadata.unmatchedTitles &&
+           scrapeStatus.lastScrape.metadata.unmatchedTitles.length > 0 && (
+            <div className="mt-4 pt-4 border-t border-white/10">
+              <p className="text-xs text-gray-400 mb-2">
+                Unmatched titles ({scrapeStatus.lastScrape.metadata.unmatchedCount || 0}):
+              </p>
+              <div className="flex flex-wrap gap-2">
+                {scrapeStatus.lastScrape.metadata.unmatchedTitles.slice(0, 10).map((title, i) => (
+                  <span key={i} className="px-2 py-1 text-xs bg-red-500/10 text-red-400 rounded">
+                    {title}
+                  </span>
+                ))}
+                {(scrapeStatus.lastScrape.metadata.unmatchedCount || 0) > 10 && (
+                  <span className="px-2 py-1 text-xs bg-white/5 text-gray-400 rounded">
+                    +{(scrapeStatus.lastScrape.metadata.unmatchedCount || 0) - 10} more
+                  </span>
+                )}
+              </div>
+            </div>
+          )}
+        </motion.div>
+      )}
+
       {/* Tabs */}
       <motion.div
         initial={{ opacity: 0, y: 10 }}
         animate={{ opacity: 1, y: 0 }}
-        transition={{ delay: 0.15 }}
+        transition={{ delay: 0.2 }}
         className="flex gap-2 border-b border-white/10 pb-px overflow-x-auto"
       >
         {(['all', 'now_showing', 'coming_soon'] as MovieTab[]).map((tab) => (
@@ -347,7 +500,7 @@ export default function AdminCinemaPage() {
       <motion.div
         initial={{ opacity: 0, y: 10 }}
         animate={{ opacity: 1, y: 0 }}
-        transition={{ delay: 0.2 }}
+        transition={{ delay: 0.25 }}
       >
         <div className="relative max-w-md">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
@@ -365,7 +518,7 @@ export default function AdminCinemaPage() {
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
-        transition={{ delay: 0.25 }}
+        transition={{ delay: 0.3 }}
         className="bg-white/5 backdrop-blur-sm border border-white/10 rounded-2xl overflow-hidden"
       >
         {loading ? (
@@ -379,7 +532,7 @@ export default function AdminCinemaPage() {
             <h3 className="text-lg font-medium text-white mb-2">No movies found</h3>
             <p className="text-gray-400 mb-4">
               {movies.length === 0
-                ? 'Click "Sync with TMDB" to fetch movies'
+                ? 'Click "Sync TMDB" to fetch movies, then "Scrape Cinemas" to detect now showing'
                 : 'Try adjusting your search'}
             </p>
             {movies.length === 0 && (
@@ -403,7 +556,7 @@ export default function AdminCinemaPage() {
                     <th className="text-left p-4 text-sm font-medium text-gray-400">Genre</th>
                     <th className="text-left p-4 text-sm font-medium text-gray-400">Duration</th>
                     <th className="text-left p-4 text-sm font-medium text-gray-400">Rating</th>
-                    <th className="text-left p-4 text-sm font-medium text-gray-400">Release</th>
+                    <th className="text-left p-4 text-sm font-medium text-gray-400">Source</th>
                     <th className="text-center p-4 text-sm font-medium text-gray-400">Now Showing</th>
                     <th className="text-center p-4 text-sm font-medium text-gray-400">Coming Soon</th>
                     <th className="text-left p-4 text-sm font-medium text-gray-400">Actions</th>
@@ -459,8 +612,21 @@ export default function AdminCinemaPage() {
                           <span className="text-white">{movie.tmdb_rating?.toFixed(1) || 'N/A'}</span>
                         </div>
                       </td>
-                      <td className="p-4 text-gray-300 text-sm">
-                        {formatDate(movie.release_date)}
+                      <td className="p-4">
+                        {movie.scraped_from && movie.scraped_from.length > 0 ? (
+                          <div className="flex flex-wrap gap-1">
+                            {movie.scraped_from.map((source) => (
+                              <span
+                                key={source}
+                                className="px-2 py-0.5 text-xs bg-purple-500/20 text-purple-400 rounded"
+                              >
+                                {source}
+                              </span>
+                            ))}
+                          </div>
+                        ) : (
+                          <span className="text-xs text-gray-500">Manual</span>
+                        )}
                       </td>
                       <td className="p-4 text-center">
                         <button
@@ -572,6 +738,11 @@ export default function AdminCinemaPage() {
                       <div className="flex items-center gap-2 mt-2">
                         <Star className="w-3 h-3 text-yellow-400 fill-current" />
                         <span className="text-sm text-gray-300">{movie.tmdb_rating?.toFixed(1)}</span>
+                        {movie.scraped_from && movie.scraped_from.length > 0 && (
+                          <span className="px-2 py-0.5 text-xs bg-purple-500/20 text-purple-400 rounded">
+                            {movie.scraped_from[0]}
+                          </span>
+                        )}
                       </div>
                       <div className="flex gap-2 mt-3">
                         <button
