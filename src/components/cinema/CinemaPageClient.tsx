@@ -3,7 +3,7 @@
 import { useState, useMemo, useEffect } from 'react';
 import { useSearchParams } from 'next/navigation';
 import { motion } from 'framer-motion';
-import { Search, Film } from 'lucide-react';
+import { Search, Film, Clock, AlertCircle } from 'lucide-react';
 import FeaturedMovie from '@/components/cinema/FeaturedMovie';
 import MovieFilters from '@/components/cinema/MovieFilters';
 import MovieGrid from '@/components/cinema/MovieGrid';
@@ -43,12 +43,37 @@ interface CinemaPageClientProps {
   initialNowShowing: Movie[];
   initialComingSoon: Movie[];
   initialCinemas?: { value: string; label: string }[];
+  lastUpdated?: string | null;
+}
+
+// Format the last updated timestamp
+function formatLastUpdated(timestamp: string | null | undefined): string {
+  if (!timestamp) return 'Unknown';
+  const date = new Date(timestamp);
+  const now = new Date();
+  const diffMs = now.getTime() - date.getTime();
+  const diffHours = Math.floor(diffMs / (1000 * 60 * 60));
+  const diffMins = Math.floor(diffMs / (1000 * 60));
+
+  if (diffMins < 60) {
+    return `${diffMins} minute${diffMins !== 1 ? 's' : ''} ago`;
+  } else if (diffHours < 24) {
+    return `${diffHours} hour${diffHours !== 1 ? 's' : ''} ago`;
+  } else {
+    return date.toLocaleDateString('en-US', {
+      month: 'short',
+      day: 'numeric',
+      hour: 'numeric',
+      minute: '2-digit',
+    });
+  }
 }
 
 export default function CinemaPageClient({
   initialNowShowing,
   initialComingSoon,
-  initialCinemas = defaultCinemas
+  initialCinemas = defaultCinemas,
+  lastUpdated
 }: CinemaPageClientProps) {
   const searchParams = useSearchParams();
   const filterParam = searchParams?.get('filter') ?? null;
@@ -173,6 +198,22 @@ export default function CinemaPageClient({
               <p className="text-xl text-gray-400">
                 Find movies, watch trailers, and book tickets at Bahrain cinemas
               </p>
+
+              {/* Last Updated & Report Link */}
+              <div className="flex items-center justify-center gap-4 mt-3 text-sm">
+                <div className="flex items-center gap-1.5 text-gray-500">
+                  <Clock className="w-4 h-4" />
+                  <span>Updated {formatLastUpdated(lastUpdated)}</span>
+                </div>
+                <span className="text-gray-600">•</span>
+                <a
+                  href="mailto:support@bahrainnights.com?subject=Cinema%20Data%20Correction&body=Please%20describe%20the%20incorrect%20information%3A%0A%0AMovie%20Title%3A%0ACinema%3A%0AWhat%20is%20incorrect%3A"
+                  className="flex items-center gap-1.5 text-yellow-400/70 hover:text-yellow-400 transition-colors"
+                >
+                  <AlertCircle className="w-4 h-4" />
+                  <span>Report incorrect info</span>
+                </a>
+              </div>
             </motion.div>
 
             {/* Search Bar */}

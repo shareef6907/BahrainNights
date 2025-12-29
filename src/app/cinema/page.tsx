@@ -115,12 +115,27 @@ async function getCinemas() {
   ];
 }
 
+// Fetch last scraper update time
+async function getLastUpdated() {
+  const { data } = await supabaseAdmin
+    .from('agent_logs')
+    .select('completed_at')
+    .eq('agent_type', 'cinema_scraper_github')
+    .eq('status', 'completed')
+    .order('completed_at', { ascending: false })
+    .limit(1)
+    .single();
+
+  return data?.completed_at || null;
+}
+
 // Server Component - data is fetched BEFORE the page renders
 export default async function CinemaPage() {
   // Fetch all data on the server - NO loading state needed!
-  const [{ nowShowing, comingSoon }, cinemas] = await Promise.all([
+  const [{ nowShowing, comingSoon }, cinemas, lastUpdated] = await Promise.all([
     getMovies(),
-    getCinemas()
+    getCinemas(),
+    getLastUpdated()
   ]);
 
   return (
@@ -129,6 +144,7 @@ export default async function CinemaPage() {
         initialNowShowing={nowShowing}
         initialComingSoon={comingSoon}
         initialCinemas={cinemas}
+        lastUpdated={lastUpdated}
       />
     </Suspense>
   );

@@ -92,9 +92,28 @@ function Toast({ message, type, onClose }: { message: string; type: 'success' | 
 }
 
 // Event Details Modal
-function EventDetailsModal({ event, onClose }: { event: Event; onClose: () => void }) {
+function EventDetailsModal({
+  event,
+  onClose,
+  onApprove,
+  onReject,
+  onUnpublish,
+  onDelete,
+  onEdit,
+  loading,
+}: {
+  event: Event;
+  onClose: () => void;
+  onApprove: () => void;
+  onReject: () => void;
+  onUnpublish: () => void;
+  onDelete: () => void;
+  onEdit: () => void;
+  loading: boolean;
+}) {
   const imageUrl = event.cover_url || event.featured_image;
   const bookingUrl = event.booking_url || event.booking_link;
+  const isPast = new Date(event.start_date) < new Date();
 
   return (
     <motion.div
@@ -287,6 +306,77 @@ function EventDetailsModal({ event, onClose }: { event: Event; onClose: () => vo
             <span>Created: {new Date(event.created_at).toLocaleDateString()}</span>
             <span>ID: {event.id.slice(0, 8)}...</span>
           </div>
+
+          {/* Action Buttons */}
+          <div className="border-t border-white/10 pt-6 flex flex-wrap gap-3">
+            {/* Pending Event Actions */}
+            {event.status === 'pending' && !isPast && (
+              <>
+                <button
+                  onClick={onApprove}
+                  disabled={loading}
+                  className="flex-1 min-w-[120px] px-4 py-2.5 bg-green-500 text-white rounded-xl hover:bg-green-600 transition-colors disabled:opacity-50 flex items-center justify-center gap-2"
+                >
+                  {loading ? <Loader2 className="w-4 h-4 animate-spin" /> : <CheckCircle className="w-4 h-4" />}
+                  Approve
+                </button>
+                <button
+                  onClick={onReject}
+                  disabled={loading}
+                  className="flex-1 min-w-[120px] px-4 py-2.5 bg-red-500 text-white rounded-xl hover:bg-red-600 transition-colors disabled:opacity-50 flex items-center justify-center gap-2"
+                >
+                  <XCircle className="w-4 h-4" />
+                  Reject
+                </button>
+              </>
+            )}
+
+            {/* Published Event Actions */}
+            {event.status === 'published' && !isPast && (
+              <button
+                onClick={onUnpublish}
+                disabled={loading}
+                className="flex-1 min-w-[120px] px-4 py-2.5 bg-gray-600 text-white rounded-xl hover:bg-gray-700 transition-colors disabled:opacity-50 flex items-center justify-center gap-2"
+              >
+                {loading ? <Loader2 className="w-4 h-4 animate-spin" /> : <Edit className="w-4 h-4" />}
+                Unpublish
+              </button>
+            )}
+
+            {/* Draft/Rejected Event Actions */}
+            {(event.status === 'draft' || event.status === 'rejected') && !isPast && (
+              <button
+                onClick={onApprove}
+                disabled={loading}
+                className="flex-1 min-w-[120px] px-4 py-2.5 bg-green-500 text-white rounded-xl hover:bg-green-600 transition-colors disabled:opacity-50 flex items-center justify-center gap-2"
+              >
+                {loading ? <Loader2 className="w-4 h-4 animate-spin" /> : <CheckCircle className="w-4 h-4" />}
+                Publish
+              </button>
+            )}
+
+            {/* Edit Button - Always show for non-past events */}
+            {!isPast && (
+              <Link
+                href={`/admin/events/${event.id}`}
+                onClick={onEdit}
+                className="flex-1 min-w-[120px] px-4 py-2.5 bg-cyan-500/20 text-cyan-400 rounded-xl hover:bg-cyan-500/30 transition-colors flex items-center justify-center gap-2"
+              >
+                <Edit className="w-4 h-4" />
+                Edit
+              </Link>
+            )}
+
+            {/* Delete Button - Always show */}
+            <button
+              onClick={onDelete}
+              disabled={loading}
+              className="px-4 py-2.5 bg-red-500/20 text-red-400 rounded-xl hover:bg-red-500/30 transition-colors disabled:opacity-50 flex items-center justify-center gap-2"
+            >
+              <Trash2 className="w-4 h-4" />
+              Delete
+            </button>
+          </div>
         </div>
       </motion.div>
     </motion.div>
@@ -375,6 +465,7 @@ function ActionDropdown({
   onReject,
   loading,
   onClose,
+  buttonRect,
 }: {
   event: Event;
   onAction: (action: string) => void;
@@ -383,27 +474,16 @@ function ActionDropdown({
   onReject: () => void;
   loading: boolean;
   onClose: () => void;
+  buttonRect: { top: number; left: number; bottom: number; right: number };
 }) {
-  const buttonRef = useRef<HTMLButtonElement>(null);
-  const [position, setPosition] = useState({ top: 0, left: 0 });
-
-  useEffect(() => {
-    if (buttonRef.current) {
-      const rect = buttonRef.current.getBoundingClientRect();
-      setPosition({
-        top: rect.bottom + 8,
-        left: rect.right - 192, // 192px = 12rem (w-48)
-      });
-    }
-  }, []);
-
   const isPast = new Date(event.start_date) < new Date();
+
+  // Calculate position based on the button rect
+  const dropdownTop = buttonRect.bottom + 8;
+  const dropdownLeft = Math.max(8, buttonRect.right - 192); // 192px = w-48
 
   return (
     <>
-      {/* Invisible button for positioning reference */}
-      <button ref={buttonRef} className="sr-only" />
-
       {/* Backdrop */}
       <div
         className="fixed inset-0 z-[55]"
@@ -413,7 +493,7 @@ function ActionDropdown({
       {/* Dropdown - Fixed Position */}
       <div
         className="fixed w-48 bg-[#1A1A2E] border border-white/10 rounded-xl shadow-2xl z-[56] py-1"
-        style={{ top: position.top, left: Math.max(8, position.left) }}
+        style={{ top: dropdownTop, left: dropdownLeft }}
       >
         {/* View Details */}
         <button
@@ -767,6 +847,24 @@ export default function AdminEventsPage() {
           <EventDetailsModal
             event={selectedEvent}
             onClose={() => setSelectedEvent(null)}
+            onApprove={() => {
+              handleAction(selectedEvent.id, 'approve');
+              setSelectedEvent(null);
+            }}
+            onReject={() => {
+              setRejectingEvent(selectedEvent);
+              setSelectedEvent(null);
+            }}
+            onUnpublish={() => {
+              handleAction(selectedEvent.id, 'draft');
+              setSelectedEvent(null);
+            }}
+            onDelete={() => {
+              handleDelete(selectedEvent.id);
+              setSelectedEvent(null);
+            }}
+            onEdit={() => setSelectedEvent(null)}
+            loading={actionLoading === selectedEvent.id}
           />
         )}
       </AnimatePresence>
@@ -985,7 +1083,7 @@ export default function AdminEventsPage() {
                           )}
                         </button>
 
-                        {openActionMenu === event.id && (
+                        {openActionMenu === event.id && menuButtonRefs.current[event.id] && (
                           <ActionDropdown
                             event={event}
                             onAction={(action) => handleAction(event.id, action)}
@@ -994,6 +1092,7 @@ export default function AdminEventsPage() {
                             onReject={() => setRejectingEvent(event)}
                             loading={actionLoading === event.id}
                             onClose={() => setOpenActionMenu(null)}
+                            buttonRect={menuButtonRefs.current[event.id]!.getBoundingClientRect()}
                           />
                         )}
                       </div>
