@@ -98,15 +98,17 @@ export default function EventsPageClient({ initialEvents }: EventsPageClientProp
       }
 
       // Time filter - use ISO string comparison to avoid timezone issues
+      // For ongoing/multi-day events, check if event is ACTIVE during the filter period
       if (selectedTime !== 'all') {
         // Get today's date in Bahrain timezone (UTC+3) as ISO string
         const now = new Date();
         const bahrainTime = new Date(now.getTime() + (3 * 60 * 60 * 1000) - (now.getTimezoneOffset() * 60 * 1000));
-        const todayISO = bahrainTime.toISOString().split('T')[0]; // "2025-12-29"
+        const todayISO = bahrainTime.toISOString().split('T')[0]; // "2025-12-30"
 
-        // Event date is already in ISO format from rawDate
-        const eventISO = event.rawDate;
-        if (!eventISO) return true; // Skip if no date
+        // Event start and end dates (for multi-day events)
+        const eventStartISO = event.rawDate;
+        const eventEndISO = event.rawEndDate || eventStartISO; // Use start date if no end date
+        if (!eventStartISO) return true; // Skip if no date
 
         // Helper to add days to ISO date string
         const addDays = (isoDate: string, days: number): string => {
@@ -115,13 +117,20 @@ export default function EventsPageClient({ initialEvents }: EventsPageClientProp
           return date.toISOString().split('T')[0];
         };
 
+        // Helper to check if event is active during a date range
+        // Event overlaps if: eventStart <= periodEnd AND eventEnd >= periodStart
+        const isEventActiveDuring = (periodStartISO: string, periodEndISO: string): boolean => {
+          return eventStartISO <= periodEndISO && eventEndISO >= periodStartISO;
+        };
+
         // Get day of week (0=Sun, 1=Mon, ..., 6=Sat)
         const todayDate = new Date(todayISO + 'T12:00:00Z');
         const dayOfWeek = todayDate.getUTCDay();
 
         switch (selectedTime) {
           case 'today':
-            if (eventISO !== todayISO) return false;
+            // Event is active today if today falls between start and end dates
+            if (!isEventActiveDuring(todayISO, todayISO)) return false;
             break;
 
           case 'weekend': {
@@ -148,7 +157,8 @@ export default function EventsPageClient({ initialEvents }: EventsPageClientProp
               sundayISO = addDays(fridayISO, 2);
             }
 
-            if (eventISO < fridayISO || eventISO > sundayISO) return false;
+            // Event is active during weekend if it overlaps with Fri-Sun
+            if (!isEventActiveDuring(fridayISO, sundayISO)) return false;
             break;
           }
 
@@ -167,7 +177,8 @@ export default function EventsPageClient({ initialEvents }: EventsPageClientProp
               sundayISO = addDays(mondayISO, 6);
             }
 
-            if (eventISO < mondayISO || eventISO > sundayISO) return false;
+            // Event is active this week if it overlaps with Mon-Sun
+            if (!isEventActiveDuring(mondayISO, sundayISO)) return false;
             break;
           }
 
@@ -180,7 +191,8 @@ export default function EventsPageClient({ initialEvents }: EventsPageClientProp
             const lastDayDate = new Date(Date.UTC(parseInt(year), parseInt(month), 0));
             const lastDayISO = lastDayDate.toISOString().split('T')[0];
 
-            if (eventISO < firstDayISO || eventISO > lastDayISO) return false;
+            // Event is active this month if it overlaps with the month
+            if (!isEventActiveDuring(firstDayISO, lastDayISO)) return false;
             break;
           }
         }
