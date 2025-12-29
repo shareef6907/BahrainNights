@@ -9,8 +9,9 @@ import {
   ArrowLeft,
   Save,
   Loader2,
-  ImageIcon,
   Upload,
+  Star,
+  StarOff,
 } from 'lucide-react';
 
 interface Event {
@@ -28,7 +29,6 @@ interface Event {
   end_date: string | null;
   end_time: string | null;
   price: string | null;
-  price_type: string | null;
   booking_url: string | null;
   cover_url: string | null;
   image_url: string | null;
@@ -45,13 +45,16 @@ export default function AdminEventEditPage() {
   const [event, setEvent] = useState<Event | null>(null);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
+  const [uploading, setUploading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  // Form state
+  // Form state - ONLY fields that exist in database
   const [formData, setFormData] = useState({
     title: '',
     description: '',
     category: '',
+    status: 'published',
+    is_featured: false,
     venue_name: '',
     venue_address: '',
     date: '',
@@ -59,7 +62,6 @@ export default function AdminEventEditPage() {
     end_date: '',
     end_time: '',
     price: '',
-    price_type: 'paid',
     booking_url: '',
     cover_url: '',
   });
@@ -85,6 +87,8 @@ export default function AdminEventEditPage() {
           title: e.title || '',
           description: e.description || '',
           category: e.category || '',
+          status: e.status || 'published',
+          is_featured: e.is_featured || false,
           venue_name: e.venue_name || '',
           venue_address: e.venue_address || '',
           date: e.date ? e.date.split('T')[0] : '',
@@ -92,7 +96,6 @@ export default function AdminEventEditPage() {
           end_date: e.end_date ? e.end_date.split('T')[0] : '',
           end_time: e.end_time || '',
           price: e.price || '',
-          price_type: e.price_type || 'paid',
           booking_url: e.booking_url || '',
           cover_url: e.cover_url || e.image_url || e.featured_image || '',
         });
@@ -109,23 +112,45 @@ export default function AdminEventEditPage() {
 
   // Handle form input changes
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
-    const { name, value } = e.target;
-    setFormData(prev => ({ ...prev, [name]: value }));
+    const { name, value, type } = e.target;
+
+    if (type === 'checkbox') {
+      const checked = (e.target as HTMLInputElement).checked;
+      setFormData(prev => ({ ...prev, [name]: checked }));
+    } else {
+      setFormData(prev => ({ ...prev, [name]: value }));
+    }
   };
 
-  // Handle save
+  // Handle save - only send fields that exist in DB
   const handleSave = async () => {
     if (!eventId) return;
 
     setSaving(true);
     try {
+      // Only include fields that exist in the database
+      const updatePayload = {
+        action: 'update',
+        title: formData.title,
+        description: formData.description,
+        category: formData.category,
+        status: formData.status,
+        is_featured: formData.is_featured,
+        venue_name: formData.venue_name,
+        venue_address: formData.venue_address || null,
+        date: formData.date || null,
+        time: formData.time || null,
+        end_date: formData.end_date || null,
+        end_time: formData.end_time || null,
+        price: formData.price || null,
+        booking_url: formData.booking_url || null,
+        cover_url: formData.cover_url || null,
+      };
+
       const response = await fetch(`/api/admin/events/${eventId}`, {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          action: 'update',
-          ...formData,
-        }),
+        body: JSON.stringify(updatePayload),
       });
 
       const data = await response.json();
@@ -145,7 +170,7 @@ export default function AdminEventEditPage() {
     }
   };
 
-  // Handle file upload for cover image
+  // Handle file upload for cover image - direct to S3, no watermark
   const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
@@ -156,20 +181,20 @@ export default function AdminEventEditPage() {
       return;
     }
 
-    // Validate file size (max 5MB)
-    if (file.size > 5 * 1024 * 1024) {
-      alert('Image must be less than 5MB');
+    // Validate file size (max 10MB)
+    if (file.size > 10 * 1024 * 1024) {
+      alert('Image must be less than 10MB');
       return;
     }
 
+    setUploading(true);
     try {
-      const formData = new FormData();
-      formData.append('file', file);
-      formData.append('folder', 'events');
+      const uploadData = new FormData();
+      uploadData.append('file', file);
 
-      const response = await fetch('/api/upload/image', {
+      const response = await fetch('/api/upload', {
         method: 'POST',
-        body: formData,
+        body: uploadData,
       });
 
       const data = await response.json();
@@ -183,6 +208,8 @@ export default function AdminEventEditPage() {
     } catch (err) {
       console.error('Upload error:', err);
       alert('Upload failed');
+    } finally {
+      setUploading(false);
     }
   };
 
@@ -216,6 +243,12 @@ export default function AdminEventEditPage() {
     'music', 'dining', 'family', 'arts', 'sports',
     'nightlife', 'business', 'wellness', 'shopping',
     'community', 'entertainment', 'other'
+  ];
+
+  const statuses = [
+    { value: 'published', label: 'Published', color: 'text-green-400' },
+    { value: 'draft', label: 'Draft', color: 'text-gray-400' },
+    { value: 'pending', label: 'Pending', color: 'text-orange-400' },
   ];
 
   return (
@@ -257,6 +290,50 @@ export default function AdminEventEditPage() {
         animate={{ opacity: 1, y: 0 }}
         className="bg-white/5 backdrop-blur-sm border border-white/10 rounded-2xl p-6 space-y-6"
       >
+        {/* Status & Featured Row */}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div>
+            <label className="block text-sm font-medium text-white mb-2">Status</label>
+            <select
+              name="status"
+              value={formData.status}
+              onChange={handleChange}
+              className="w-full px-4 py-2 bg-white/5 border border-white/10 rounded-lg text-white focus:outline-none focus:border-cyan-500/50"
+            >
+              {statuses.map(s => (
+                <option key={s.value} value={s.value} className="bg-[#1A1A2E]">
+                  {s.label}
+                </option>
+              ))}
+            </select>
+          </div>
+          <div className="flex items-center">
+            <label className="flex items-center gap-3 cursor-pointer">
+              <input
+                type="checkbox"
+                name="is_featured"
+                checked={formData.is_featured}
+                onChange={handleChange}
+                className="sr-only"
+              />
+              <div className={`flex items-center gap-2 px-4 py-2 rounded-lg border transition-colors ${
+                formData.is_featured
+                  ? 'bg-yellow-500/20 border-yellow-500/50 text-yellow-400'
+                  : 'bg-white/5 border-white/10 text-gray-400'
+              }`}>
+                {formData.is_featured ? (
+                  <Star className="w-4 h-4 fill-current" />
+                ) : (
+                  <StarOff className="w-4 h-4" />
+                )}
+                <span className="font-medium">
+                  {formData.is_featured ? 'Featured' : 'Not Featured'}
+                </span>
+              </div>
+            </label>
+          </div>
+        </div>
+
         {/* Cover Image */}
         <div className="space-y-3">
           <label className="block text-sm font-medium text-white">Cover Image</label>
@@ -287,13 +364,18 @@ export default function AdminEventEditPage() {
 
           {/* File Upload */}
           <div className="flex items-center gap-3">
-            <label className="flex items-center gap-2 px-4 py-2 bg-white/5 hover:bg-white/10 border border-white/10 rounded-lg text-white cursor-pointer transition-colors">
-              <Upload className="w-4 h-4" />
-              Upload Image
+            <label className={`flex items-center gap-2 px-4 py-2 bg-white/5 hover:bg-white/10 border border-white/10 rounded-lg text-white cursor-pointer transition-colors ${uploading ? 'opacity-50 pointer-events-none' : ''}`}>
+              {uploading ? (
+                <Loader2 className="w-4 h-4 animate-spin" />
+              ) : (
+                <Upload className="w-4 h-4" />
+              )}
+              {uploading ? 'Uploading...' : 'Upload Image'}
               <input
                 type="file"
                 accept="image/*"
                 onChange={handleFileUpload}
+                disabled={uploading}
                 className="hidden"
               />
             </label>
@@ -414,31 +496,16 @@ export default function AdminEventEditPage() {
         </div>
 
         {/* Price */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <div>
-            <label className="block text-sm font-medium text-white mb-2">Price Type</label>
-            <select
-              name="price_type"
-              value={formData.price_type}
-              onChange={handleChange}
-              className="w-full px-4 py-2 bg-white/5 border border-white/10 rounded-lg text-white focus:outline-none focus:border-cyan-500/50"
-            >
-              <option value="free" className="bg-[#1A1A2E]">Free</option>
-              <option value="paid" className="bg-[#1A1A2E]">Paid</option>
-              <option value="varies" className="bg-[#1A1A2E]">Varies</option>
-            </select>
-          </div>
-          <div>
-            <label className="block text-sm font-medium text-white mb-2">Price</label>
-            <input
-              type="text"
-              name="price"
-              value={formData.price}
-              onChange={handleChange}
-              placeholder="e.g., BD 25 or Free"
-              className="w-full px-4 py-2 bg-white/5 border border-white/10 rounded-lg text-white placeholder:text-gray-500 focus:outline-none focus:border-cyan-500/50"
-            />
-          </div>
+        <div>
+          <label className="block text-sm font-medium text-white mb-2">Price</label>
+          <input
+            type="text"
+            name="price"
+            value={formData.price}
+            onChange={handleChange}
+            placeholder="e.g., BD 25, Free, Varies"
+            className="w-full px-4 py-2 bg-white/5 border border-white/10 rounded-lg text-white placeholder:text-gray-500 focus:outline-none focus:border-cyan-500/50"
+          />
         </div>
 
         {/* Booking URL */}

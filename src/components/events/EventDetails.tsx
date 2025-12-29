@@ -94,12 +94,14 @@ export default function EventDetails({
             <div>
               <p className="text-sm text-gray-400">Date & Time</p>
               <p className="text-white font-medium">{dayOfWeek}, {date}</p>
-              <p className="text-gray-300">{time}</p>
+              {time && !time.toLowerCase().includes('tba') && (
+                <p className="text-gray-300">{time}</p>
+              )}
             </div>
           </div>
 
-          {/* Duration */}
-          {duration && (
+          {/* Duration - hide if TBA or empty */}
+          {duration && !duration.toLowerCase().includes('tba') && (
             <div className="flex items-start gap-4 p-4 bg-white/5 rounded-xl">
               <div className="p-3 bg-yellow-400/10 rounded-lg">
                 <Clock className="w-6 h-6 text-yellow-400" />

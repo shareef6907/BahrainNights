@@ -116,9 +116,9 @@ export async function GET(request: NextRequest) {
         location: event.venue_address || event.venue_name || 'Bahrain',
         date: formatDate(eventDateRaw),
         rawDate: normalizeToISODate(eventDateRaw), // ISO format for filtering
-        time: event.time || event.start_time || 'TBD',
-        price: formatPrice(event.price_type || event.price, event.booking_method),
-        isFree: event.price_type === 'free' || event.price === 'Free' || event.price === 'free',
+        time: (event.time || event.start_time || '').toLowerCase().includes('tba') ? '' : (event.time || event.start_time || ''),
+        price: formatPrice(event.price, event.booking_method),
+        isFree: !event.price || event.price === 'Free' || event.price.toLowerCase() === 'free',
         isFeatured: event.is_featured || false,
         viewCount: event.views || event.view_count || 0,
       };

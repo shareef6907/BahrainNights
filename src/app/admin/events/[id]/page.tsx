@@ -39,7 +39,6 @@ interface Event {
   end_date: string | null;
   end_time: string | null;
   price: string | null;
-  price_type: string | null;
   booking_url: string | null;
   booking_link: string | null;
   cover_url: string | null;
@@ -399,7 +398,7 @@ export default function AdminEventDetailPage() {
                 <div>
                   <p className="text-sm text-gray-400">Price</p>
                   <p className="text-white">
-                    {event.price_type === 'free' || !event.price ? 'Free' : event.price}
+                    {!event.price || event.price.toLowerCase() === 'free' ? 'Free' : event.price}
                   </p>
                 </div>
               </div>

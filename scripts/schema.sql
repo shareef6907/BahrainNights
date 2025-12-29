@@ -109,10 +109,7 @@ CREATE TABLE IF NOT EXISTS events (
   recurrence_days TEXT[],
 
   -- Pricing
-  price_type VARCHAR(50) DEFAULT 'free' CHECK (price_type IN ('free', 'paid', 'range')),
-  price_amount DECIMAL(10, 2),
-  price_min DECIMAL(10, 2),
-  price_max DECIMAL(10, 2),
+  price TEXT,
 
   -- Booking
   booking_url TEXT,

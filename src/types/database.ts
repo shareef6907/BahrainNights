@@ -178,10 +178,7 @@ export interface Database {
           is_recurring: boolean;
           recurrence_pattern: string | null;
           recurrence_days: string[] | null;
-          price_type: 'free' | 'paid' | 'range';
-          price_amount: number | null;
-          price_min: number | null;
-          price_max: number | null;
+          price: string | null;
           booking_url: string | null;
           booking_method: string | null;
           featured_image: string | null;
@@ -218,10 +215,7 @@ export interface Database {
           is_recurring?: boolean;
           recurrence_pattern?: string | null;
           recurrence_days?: string[] | null;
-          price_type?: 'free' | 'paid' | 'range';
-          price_amount?: number | null;
-          price_min?: number | null;
-          price_max?: number | null;
+          price?: string | null;
           booking_url?: string | null;
           booking_method?: string | null;
           featured_image?: string | null;
@@ -258,10 +252,7 @@ export interface Database {
           is_recurring?: boolean;
           recurrence_pattern?: string | null;
           recurrence_days?: string[] | null;
-          price_type?: 'free' | 'paid' | 'range';
-          price_amount?: number | null;
-          price_min?: number | null;
-          price_max?: number | null;
+          price?: string | null;
           booking_url?: string | null;
           booking_method?: string | null;
           featured_image?: string | null;

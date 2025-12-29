@@ -112,8 +112,7 @@ async function getEvents(): Promise<Event[]> {
 
     // Handle price - support multiple field names
     const price = event.price || event.price_range || event.booking_method;
-    const priceType = event.price_type;
-    const isFree = priceType === 'free' || !price || price === '0' || price.toLowerCase?.() === 'free';
+    const isFree = !price || price === '0' || price.toLowerCase?.() === 'free';
 
     return {
       id: event.id,
