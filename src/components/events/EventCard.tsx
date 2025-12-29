@@ -93,10 +93,13 @@ export default function EventCard({ event, view = 'grid', index = 0 }: EventCard
                   <Calendar className="w-3.5 h-3.5 text-yellow-400" />
                   <span>{event.date}</span>
                 </div>
-                <div className="flex items-center gap-1">
-                  <Clock className="w-3.5 h-3.5 text-yellow-400" />
-                  <span>{event.time}</span>
-                </div>
+                {/* Only show time if it's actually set (not TBA) */}
+                {event.time && event.time !== 'TBA' && event.time !== 'TBD' && (
+                  <div className="flex items-center gap-1">
+                    <Clock className="w-3.5 h-3.5 text-yellow-400" />
+                    <span>{event.time}</span>
+                  </div>
+                )}
               </div>
             </div>
           </div>
@@ -160,10 +163,15 @@ export default function EventCard({ event, view = 'grid', index = 0 }: EventCard
                 <span className="line-clamp-1">{event.venue}</span>
               </div>
               <div className="flex items-center justify-between">
-                <div className="flex items-center gap-2">
-                  <Clock className="w-4 h-4 text-yellow-400 flex-shrink-0" />
-                  <span>{event.time}</span>
-                </div>
+                {/* Only show time if it's actually set (not TBA) */}
+                {event.time && event.time !== 'TBA' && event.time !== 'TBD' ? (
+                  <div className="flex items-center gap-2">
+                    <Clock className="w-4 h-4 text-yellow-400 flex-shrink-0" />
+                    <span>{event.time}</span>
+                  </div>
+                ) : (
+                  <div /> /* Empty div to maintain spacing */
+                )}
                 <span className={`font-bold ${event.isFree ? 'text-green-400' : 'text-yellow-400'}`}>
                   {event.price}
                 </span>

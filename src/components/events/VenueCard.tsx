@@ -13,6 +13,7 @@ interface VenueCardProps {
   phone: string;
   latitude: number;
   longitude: number;
+  venueWebsite?: string; // External venue website (for scraped events)
 }
 
 export default function VenueCard({
@@ -22,7 +23,8 @@ export default function VenueCard({
   address,
   phone,
   latitude,
-  longitude
+  longitude,
+  venueWebsite,
 }: VenueCardProps) {
   const googleMapsUrl = `https://www.google.com/maps/dir/?api=1&destination=${latitude},${longitude}`;
   const staticMapUrl = `https://api.mapbox.com/styles/v1/mapbox/dark-v11/static/pin-l+f59e0b(${longitude},${latitude})/${longitude},${latitude},14,0/400x200@2x?access_token=pk.eyJ1IjoibWFwYm94IiwiYSI6ImNpejY4NXVycTA2emYycXBndHRqcmZ3N3gifQ.rJcFIG214AriISLbB6B5aw`;
@@ -80,13 +82,18 @@ export default function VenueCard({
             Get Directions
           </a>
 
-          <Link
-            href={`/venues/${slug}`}
-            className="flex items-center justify-center gap-2 w-full py-3 bg-yellow-400 rounded-xl text-black font-bold hover:bg-yellow-300 transition-colors"
-          >
-            <ExternalLink className="w-4 h-4" />
-            View Venue
-          </Link>
+          {/* View Venue button - link to external website if available, otherwise hide (no internal venue page) */}
+          {venueWebsite && (
+            <a
+              href={venueWebsite}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="flex items-center justify-center gap-2 w-full py-3 bg-yellow-400 rounded-xl text-black font-bold hover:bg-yellow-300 transition-colors"
+            >
+              <ExternalLink className="w-4 h-4" />
+              View Venue
+            </a>
+          )}
         </div>
       </div>
     </motion.div>

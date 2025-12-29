@@ -63,6 +63,25 @@ function formatDate(dateStr: string): { display: string; dayOfWeek: string } {
   return { display, dayOfWeek };
 }
 
+// Known venue coordinates for accurate map links
+const KNOWN_VENUES: Record<string, { lat: number; lng: number }> = {
+  'beyon al dana amphitheatre': { lat: 26.0325, lng: 50.5106 },
+  'al dana amphitheatre': { lat: 26.0325, lng: 50.5106 },
+  'bahrain international circuit': { lat: 26.0325, lng: 50.5106 },
+};
+
+// Get venue coordinates from known venues or use default Manama coordinates
+function getVenueCoordinates(venueName: string): { lat: number; lng: number } {
+  const normalized = venueName?.toLowerCase().trim() || '';
+  for (const [key, coords] of Object.entries(KNOWN_VENUES)) {
+    if (normalized.includes(key) || key.includes(normalized)) {
+      return coords;
+    }
+  }
+  // Default to Manama center
+  return { lat: 26.2285, lng: 50.5860 };
+}
+
 // Get default image based on category
 function getDefaultImage(category: string): string {
   const images: Record<string, string> = {
@@ -179,15 +198,19 @@ export default async function EventDetailPage({ params }: PageProps) {
     tags: dbEvent.tags || [categoryInfo.display],
     bookingUrl: dbEvent.booking_url || null,
     sourceUrl: dbEvent.source_url || null,
-    venueDetails: {
-      name: dbEvent.venue_name || 'Venue',
-      slug: dbEvent.venue_name?.toLowerCase().replace(/[^a-z0-9]+/g, '-') || 'venue',
-      image: 'https://images.unsplash.com/photo-1507676184212-d03ab07a01bf?w=400&h=300&fit=crop',
-      address: dbEvent.venue_address || 'Bahrain',
-      phone: dbEvent.contact_phone || '',
-      latitude: 26.2285,
-      longitude: 50.5860,
-    },
+    venueDetails: (() => {
+      const coords = getVenueCoordinates(dbEvent.venue_name || '');
+      return {
+        name: dbEvent.venue_name || 'Venue',
+        slug: dbEvent.venue_name?.toLowerCase().replace(/[^a-z0-9]+/g, '-') || 'venue',
+        image: 'https://images.unsplash.com/photo-1507676184212-d03ab07a01bf?w=400&h=300&fit=crop',
+        address: dbEvent.venue_address || 'Bahrain',
+        phone: dbEvent.contact_phone || '',
+        latitude: coords.lat,
+        longitude: coords.lng,
+        website: dbEvent.source_url || undefined, // Use source_url as venue website link
+      };
+    })(),
     startDate: `${dbEvent.date}T${dbEvent.time || '19:00'}:00`,
     endDate: `${dbEvent.date}T23:59:00`,
   };

@@ -44,6 +44,7 @@ interface EventData {
     phone: string;
     latitude: number;
     longitude: number;
+    website?: string; // External venue website for scraped events
   };
   startDate: string;
   endDate: string;
@@ -225,6 +226,7 @@ export default function EventDetailClient({ event, similarEvents }: EventDetailC
                 phone={event.venueDetails.phone}
                 latitude={event.venueDetails.latitude}
                 longitude={event.venueDetails.longitude}
+                venueWebsite={event.venueDetails.website}
               />
             </div>
           </div>

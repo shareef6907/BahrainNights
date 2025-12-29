@@ -17,9 +17,16 @@ import { sleep, getRandomDelay, scraperLog } from '../utils/request-helper';
 
 const BASE_URL = 'https://www.beyonaldana.com.bh';
 const SOURCE_NAME = SOURCE_NAMES.ALDANA;
-const VENUE_NAME = 'Al Dana Amphitheatre';
-const VENUE_ADDRESS = 'Bahrain Bay, Manama, Bahrain';
 const LOG_PREFIX = 'AlDana';
+
+// Correct venue information - Al Dana is in Sakhir, NOT Bahrain Bay
+const ALDANA_VENUE = {
+  name: 'Beyon Al Dana Amphitheatre',
+  address: 'Bahrain International Circuit, Sakhir, Bahrain',
+  lat: 26.0325,
+  lng: 50.5106,
+  website: 'https://www.beyonaldana.com.bh',
+};
 
 // Generate event ID from title and date
 function generateEventId(title: string, date: string): string {
@@ -211,17 +218,17 @@ export async function scrapeAlDana(): Promise<ScrapedEvent[]> {
         continue;
       }
 
-      // Create event object
+      // Create event object with correct Al Dana venue info
       const event: ScrapedEvent = {
         title: extracted.title,
-        description: `Experience ${extracted.title} live at ${VENUE_NAME}, Bahrain's premier outdoor concert venue.`,
+        description: `Experience ${extracted.title} live at ${ALDANA_VENUE.name}, Bahrain's premier outdoor concert venue located at the Bahrain International Circuit in Sakhir.`,
         date: parsedDate,
-        venue_name: VENUE_NAME,
-        venue_address: VENUE_ADDRESS,
+        venue_name: ALDANA_VENUE.name,
+        venue_address: ALDANA_VENUE.address,
         category: detectCategory(extracted.title),
         image_url: extracted.image || undefined,
         booking_url: extracted.buyLink || undefined,
-        source_url: BASE_URL,
+        source_url: ALDANA_VENUE.website,
         source_name: SOURCE_NAME,
         source_event_id: generateEventId(extracted.title, parsedDate),
       };

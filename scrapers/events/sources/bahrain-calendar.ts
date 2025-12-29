@@ -261,119 +261,130 @@ export async function scrapeBahrainCalendar(): Promise<ScrapedEvent[]> {
     const html = await page.content();
     const $ = cheerio.load(html);
 
-    // Try various selectors for event cards
-    // The actual site uses .item containers within #article-list
-    const eventSelectors = [
-      '#article-list .item',
-      '.item',
-      '.event-card',
-      '.event-item',
-      '.calendar-event',
-      '[data-event]',
-      '.events-list article',
-      '.event-listing',
-    ];
+    // The Bahrain Calendar page displays events as links in the "All Events" section
+    // Each link contains: title, date range (e.g., "Oct 03 2025 May 19 2026"), optional "Ticketed" text
+    // Example link text: "Batelco Fitness on Track Oct 03 2025 May 19 2026 Ticketed"
+    // The links have slugs like /batelco-fitness-on-track
 
-    let eventElements: ReturnType<typeof $> | null = null;
-    for (const selector of eventSelectors) {
-      const elements = $(selector);
-      if (elements.length > 0) {
-        scraperLog.info(LOG_PREFIX, `Found ${elements.length} events with selector: ${selector}`);
-        eventElements = elements;
-        break;
-      }
-    }
+    scraperLog.info(LOG_PREFIX, 'Searching for event links on page...');
 
-    if (!eventElements || eventElements.length === 0) {
-      scraperLog.warn(LOG_PREFIX, 'No events found with standard selectors. Trying generic link extraction...');
+    // Pattern to match date ranges in the link text: "Mon DD YYYY"
+    const datePattern = /(jan|feb|mar|apr|may|jun|jul|aug|sep|oct|nov|dec)\s+\d{1,2}\s+\d{4}/gi;
 
-      // Fall back to finding any links that look like events
-      $('a[href*="/event/"], a[href*="/calendar/"]').each((i, el) => {
-        try {
-          const $el = $(el);
-          const href = $el.attr('href');
-          const title = $el.text().trim() || $el.attr('title') || '';
+    // Find all links that look like event pages (have slug-like hrefs and contain dates)
+    const eventLinks = $('a').filter((i, el) => {
+      const href = $(el).attr('href') || '';
+      const text = $(el).text().trim();
 
-          if (title && title.length > 5 && href) {
-            const fullUrl = href.startsWith('http') ? href : `${BASE_URL}${href}`;
+      // Must have a slug-like href (not navigation, not external)
+      const isSlugLink = href.match(/^\/[a-z0-9-]+$/) || href.match(/^https?:\/\/www\.bahrain\.com\/[a-z0-9-]+$/);
 
-            events.push({
-              title,
-              description: '',
-              date: new Date().toISOString().split('T')[0],
-              venue_name: 'Bahrain',
-              category: 'other',
-              source_url: fullUrl,
-              source_name: SOURCE_NAME,
-              source_event_id: generateEventId(fullUrl, title, ''),
-            });
-            successCount++;
-          }
-        } catch (error) {
-          failCount++;
-          scraperLog.error(LOG_PREFIX, `Failed to parse event link: ${(error as Error).message}`);
+      // Must contain dates in the text
+      const hasDate = datePattern.test(text);
+      datePattern.lastIndex = 0; // Reset regex
+
+      // Filter out navigation links
+      const isNavigation = ['home', 'about', 'contact', 'menu', 'bahrain-calendar'].some(nav =>
+        href.toLowerCase().includes(nav)
+      );
+
+      return isSlugLink && hasDate && !isNavigation && text.length > 10;
+    });
+
+    scraperLog.info(LOG_PREFIX, `Found ${eventLinks.length} potential event links`);
+
+    eventLinks.each((i, el) => {
+      try {
+        const $el = $(el);
+        const href = $el.attr('href') || '';
+        const fullText = $el.text().trim();
+
+        // Extract dates from the text
+        const dates: string[] = [];
+        let match;
+        const regex = /(jan|feb|mar|apr|may|jun|jul|aug|sep|oct|nov|dec)\s+\d{1,2}\s+\d{4}/gi;
+        while ((match = regex.exec(fullText)) !== null) {
+          dates.push(match[0]);
         }
-      });
-    } else {
-      eventElements.each((i, el) => {
+
+        // Parse start date (first date found)
+        const startDateStr = dates[0] || '';
+        const parsedDate = startDateStr ? parseDate(startDateStr) : new Date().toISOString().split('T')[0];
+
+        // Extract title by removing dates and "Ticketed" from the text
+        let title = fullText;
+        dates.forEach(date => {
+          title = title.replace(date, '');
+        });
+        title = title.replace(/ticketed/gi, '').trim();
+
+        // Check if it's a ticketed event
+        const isTicketed = /ticketed/i.test(fullText);
+
+        // Get image if there's an img inside the link
+        const image = $el.find('img').first().attr('src') || $el.find('img').first().attr('data-src');
+
+        // Build full URL
+        const fullUrl = href.startsWith('http') ? href : `${BASE_URL}${href}`;
+
+        if (title && title.length > 3) {
+          events.push({
+            title,
+            description: '',
+            date: parsedDate,
+            venue_name: 'Bahrain',
+            category: 'other',
+            price: isTicketed ? 'Ticketed' : 'Free',
+            image_url: image,
+            source_url: fullUrl,
+            source_name: SOURCE_NAME,
+            source_event_id: generateEventId(fullUrl, title, parsedDate),
+          });
+          successCount++;
+          scraperLog.success(LOG_PREFIX, `Scraped: ${title} (${parsedDate})`);
+        }
+      } catch (error) {
+        failCount++;
+        scraperLog.error(LOG_PREFIX, `Failed to parse event link: ${(error as Error).message}`);
+      }
+    });
+
+    // If the above didn't work, try a broader approach
+    if (events.length === 0) {
+      scraperLog.warn(LOG_PREFIX, 'No events found with date-based filtering. Trying broader link extraction...');
+
+      // Look for any internal links with slug-like URLs
+      $('a[href^="/"]').each((i, el) => {
         try {
           const $el = $(el);
+          const href = $el.attr('href') || '';
+          const text = $el.text().trim();
 
-          // Extract basic info - try multiple selectors
-          const title = $el.find('h4, h3, h2, .event-title, .title').first().text().trim() ||
-                       $el.find('a').first().text().trim();
+          // Skip navigation and common pages
+          const skipPatterns = ['/en/', '/ar/', 'calendar', 'home', 'about', 'contact', 'privacy', 'terms'];
+          if (skipPatterns.some(p => href.toLowerCase().includes(p))) return;
 
-          // Try to get date from various locations
-          const dateText = $el.find('span').filter((i, span) => {
-            const text = $(span).text();
-            return /\d{1,2}\s*(jan|feb|mar|apr|may|jun|jul|aug|sep|oct|nov|dec)/i.test(text) ||
-                   /20\d{2}/.test(text);
-          }).first().text().trim() || $el.find('.event-date, .date, time').first().text().trim();
+          // Must be a simple slug
+          if (!href.match(/^\/[a-z0-9-]+$/)) return;
 
-          // Get link from anchor tag
-          const link = $el.find('a').first().attr('href');
+          // Must have reasonable text length
+          if (text.length < 5 || text.length > 200) return;
 
-          // Get image from img tag or background
-          let image = $el.find('img').first().attr('src') || $el.find('img').first().attr('data-src');
+          const fullUrl = `${BASE_URL}${href}`;
 
-          // Try to get data from favorite button data attributes
-          const favoriteBtn = $el.find('.favorite-btn, [data-url]');
-          if (favoriteBtn.length) {
-            if (!image) {
-              image = favoriteBtn.attr('data-image');
-            }
-          }
-
-          // Get category text
-          const category = $el.find('.category, .event-category, span').filter((i, span) => {
-            const text = $(span).text().trim().toLowerCase();
-            return ['sports', 'entertainment', 'music', 'arts', 'family', 'cultural', 'dining'].some(c => text.includes(c));
-          }).first().text().trim();
-
-          if (title && title.length > 3) {
-            const fullUrl = link
-              ? (link.startsWith('http') ? link : `${BASE_URL}${link}`)
-              : `${BASE_URL}${CALENDAR_PATH}`;
-
-            const parsedDate = dateText ? parseDate(dateText) : new Date().toISOString().split('T')[0];
-
-            events.push({
-              title,
-              description: '',
-              date: parsedDate,
-              venue_name: 'Bahrain',
-              category: category ? mapSourceCategory(category, SOURCE_NAME) : 'other',
-              image_url: image,
-              source_url: fullUrl,
-              source_name: SOURCE_NAME,
-              source_event_id: generateEventId(fullUrl, title, parsedDate),
-            });
-            successCount++;
-            scraperLog.success(LOG_PREFIX, `Scraped: ${title}`);
-          }
+          events.push({
+            title: text,
+            description: '',
+            date: new Date().toISOString().split('T')[0],
+            venue_name: 'Bahrain',
+            category: 'other',
+            source_url: fullUrl,
+            source_name: SOURCE_NAME,
+            source_event_id: generateEventId(fullUrl, text, ''),
+          });
+          successCount++;
         } catch (error) {
           failCount++;
-          scraperLog.error(LOG_PREFIX, `Failed to parse event card: ${(error as Error).message}`);
         }
       });
     }
