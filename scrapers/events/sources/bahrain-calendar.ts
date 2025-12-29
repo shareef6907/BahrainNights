@@ -261,6 +261,36 @@ export async function scrapeBahrainCalendar(): Promise<ScrapedEvent[]> {
     const html = await page.content();
     const $ = cheerio.load(html);
 
+    // === DEBUG: Log page structure ===
+    scraperLog.info(LOG_PREFIX, `Page HTML length: ${html.length} characters`);
+
+    // Log body text preview
+    const bodyText = $('body').text().replace(/\s+/g, ' ').trim().substring(0, 500);
+    scraperLog.info(LOG_PREFIX, `Body text preview: ${bodyText}...`);
+
+    // Log sample of all links on page
+    const allLinks: { href: string; text: string }[] = [];
+    $('a').each((i, el) => {
+      if (i < 30) { // First 30 links
+        const href = $(el).attr('href') || '';
+        const text = $(el).text().trim().substring(0, 80);
+        if (text.length > 3) {
+          allLinks.push({ href, text });
+        }
+      }
+    });
+    scraperLog.info(LOG_PREFIX, `Sample links on page (first 30 with text):`);
+    allLinks.forEach((link, i) => {
+      scraperLog.debug(LOG_PREFIX, `  [${i}] href="${link.href}" text="${link.text}"`);
+    });
+
+    // Check for specific page elements
+    const hasArticleList = $('#article-list').length > 0;
+    const hasEventSection = $('[class*="event"]').length;
+    const hasCalendarSection = $('[class*="calendar"]').length;
+    scraperLog.info(LOG_PREFIX, `Page elements: #article-list=${hasArticleList}, [class*=event]=${hasEventSection}, [class*=calendar]=${hasCalendarSection}`);
+    // === END DEBUG ===
+
     // The Bahrain Calendar page displays events as links in the "All Events" section
     // Each link contains: title, date range (e.g., "Oct 03 2025 May 19 2026"), optional "Ticketed" text
     // Example link text: "Batelco Fitness on Track Oct 03 2025 May 19 2026 Ticketed"
@@ -272,24 +302,38 @@ export async function scrapeBahrainCalendar(): Promise<ScrapedEvent[]> {
     const datePattern = /(jan|feb|mar|apr|may|jun|jul|aug|sep|oct|nov|dec)\s+\d{1,2}\s+\d{4}/gi;
 
     // Find all links that look like event pages (have slug-like hrefs and contain dates)
+    let debugLinksChecked = 0;
+    let debugSlugMatches = 0;
+    let debugDateMatches = 0;
+
     const eventLinks = $('a').filter((i, el): boolean => {
       const href = $(el).attr('href') || '';
       const text = $(el).text().trim();
+      debugLinksChecked++;
 
       // Must have a slug-like href (not navigation, not external)
       const isSlugLink = Boolean(href.match(/^\/[a-z0-9-]+$/) || href.match(/^https?:\/\/www\.bahrain\.com\/[a-z0-9-]+$/));
+      if (isSlugLink) debugSlugMatches++;
 
       // Must contain dates in the text
       const hasDate = datePattern.test(text);
       datePattern.lastIndex = 0; // Reset regex
+      if (hasDate) debugDateMatches++;
 
       // Filter out navigation links
       const isNavigation = ['home', 'about', 'contact', 'menu', 'bahrain-calendar'].some(nav =>
         href.toLowerCase().includes(nav)
       );
 
+      // Debug: Log promising links (slug matches or date matches)
+      if ((isSlugLink || hasDate) && text.length > 10 && i < 20) {
+        scraperLog.debug(LOG_PREFIX, `  Candidate link: slug=${isSlugLink}, date=${hasDate}, nav=${isNavigation}, href="${href.substring(0, 50)}", text="${text.substring(0, 60)}"`);
+      }
+
       return isSlugLink && hasDate && !isNavigation && text.length > 10;
     });
+
+    scraperLog.info(LOG_PREFIX, `Link filtering stats: checked=${debugLinksChecked}, slugMatches=${debugSlugMatches}, dateMatches=${debugDateMatches}`);
 
     scraperLog.info(LOG_PREFIX, `Found ${eventLinks.length} potential event links`);
 

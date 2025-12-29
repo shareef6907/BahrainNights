@@ -26,7 +26,8 @@ export default function VenueCard({
   longitude,
   venueWebsite,
 }: VenueCardProps) {
-  const googleMapsUrl = `https://www.google.com/maps/dir/?api=1&destination=${latitude},${longitude}`;
+  // Use venue name + Bahrain for Google Maps search - more accurate than just coordinates
+  const googleMapsUrl = `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(name + ', Bahrain')}`;
   const staticMapUrl = `https://api.mapbox.com/styles/v1/mapbox/dark-v11/static/pin-l+f59e0b(${longitude},${latitude})/${longitude},${latitude},14,0/400x200@2x?access_token=pk.eyJ1IjoibWFwYm94IiwiYSI6ImNpejY4NXVycTA2emYycXBndHRqcmZ3N3gifQ.rJcFIG214AriISLbB6B5aw`;
 
   return (

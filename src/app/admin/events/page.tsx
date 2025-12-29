@@ -168,7 +168,7 @@ function EventDetailsModal({
               event.status === 'rejected' ? 'bg-red-500/20 text-red-400' :
               'bg-gray-500/20 text-gray-400'
             }`}>
-              {event.status.charAt(0).toUpperCase() + event.status.slice(1)}
+              {event.status ? event.status.charAt(0).toUpperCase() + event.status.slice(1) : 'Unknown'}
             </span>
           </div>
 
@@ -187,7 +187,7 @@ function EventDetailsModal({
               <Tag className="w-5 h-5 text-cyan-400" />
               <div>
                 <p className="text-xs text-gray-500">Category</p>
-                <p className="text-white">{event.category.charAt(0).toUpperCase() + event.category.slice(1)}</p>
+                <p className="text-white">{event.category ? event.category.charAt(0).toUpperCase() + event.category.slice(1) : 'Unknown'}</p>
               </div>
             </div>
 
@@ -872,7 +872,8 @@ export default function AdminEventsPage() {
     }
   };
 
-  const formatCategory = (category: string) => {
+  const formatCategory = (category: string | null | undefined) => {
+    if (!category) return 'Unknown';
     return category.charAt(0).toUpperCase() + category.slice(1);
   };
 
