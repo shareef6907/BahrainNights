@@ -35,7 +35,6 @@ export interface DatabaseEvent {
   venue_name: string;
   venue_address?: string;
   price?: string;
-  price_type?: 'free' | 'paid' | 'varies';
   cover_url?: string;     // S3 URL after processing
   image_url?: string;     // Original or processed URL
   booking_url?: string;

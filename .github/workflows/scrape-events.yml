@@ -50,14 +50,15 @@ jobs:
           CLAUDE_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
 
           # AWS S3 for image uploads
-          BAHRAINNIGHTS_AWS_ACCESS_KEY_ID: ${{ secrets.BAHRAINNIGHTS_AWS_ACCESS_KEY_ID }}
-          BAHRAINNIGHTS_AWS_SECRET_ACCESS_KEY: ${{ secrets.BAHRAINNIGHTS_AWS_SECRET_ACCESS_KEY }}
-          BAHRAINNIGHTS_AWS_REGION: ${{ secrets.BAHRAINNIGHTS_AWS_REGION }}
-          BAHRAINNIGHTS_S3_BUCKET: ${{ secrets.BAHRAINNIGHTS_S3_BUCKET }}
-          AWS_ACCESS_KEY_ID: ${{ secrets.BAHRAINNIGHTS_AWS_ACCESS_KEY_ID }}
-          AWS_SECRET_ACCESS_KEY: ${{ secrets.BAHRAINNIGHTS_AWS_SECRET_ACCESS_KEY }}
-          AWS_REGION: ${{ secrets.BAHRAINNIGHTS_AWS_REGION }}
-          AWS_S3_BUCKET: ${{ secrets.BAHRAINNIGHTS_S3_BUCKET }}
+          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          AWS_REGION: ${{ secrets.AWS_REGION }}
+          AWS_S3_BUCKET: ${{ secrets.AWS_S3_BUCKET }}
+          # Also set with BAHRAINNIGHTS prefix for compatibility
+          BAHRAINNIGHTS_AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          BAHRAINNIGHTS_AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          BAHRAINNIGHTS_AWS_REGION: ${{ secrets.AWS_REGION }}
+          BAHRAINNIGHTS_S3_BUCKET: ${{ secrets.AWS_S3_BUCKET }}
 
           # Public URL for S3
           NEXT_PUBLIC_S3_URL: ${{ secrets.NEXT_PUBLIC_S3_URL }}

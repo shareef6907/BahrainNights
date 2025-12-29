@@ -51,20 +51,6 @@ function createUniqueSlug(title: string, date: string): string {
   return `${baseSlug}-${dateSlug}`;
 }
 
-// Determine price type from price string
-function getPriceType(price?: string): 'free' | 'paid' | 'varies' {
-  if (!price) return 'paid';
-
-  const lower = price.toLowerCase();
-  if (lower.includes('free') || lower === '0' || lower === 'bd 0') {
-    return 'free';
-  }
-  if (lower.includes('from') || lower.includes('starting') || lower.includes('-')) {
-    return 'varies';
-  }
-  return 'paid';
-}
-
 // Insert event into database
 async function insertEvent(event: ScrapedEvent, rewritten: { title: string; description: string; category: string }, imageUrl: string | null): Promise<boolean> {
   const db = getSupabase();
@@ -83,7 +69,6 @@ async function insertEvent(event: ScrapedEvent, rewritten: { title: string; desc
     venue_name: event.venue_name,
     venue_address: event.venue_address,
     price: event.price,
-    price_type: getPriceType(event.price),
     cover_url: imageUrl || undefined,
     booking_url: event.booking_url,
     source_url: event.source_url,
@@ -128,7 +113,6 @@ async function updateEvent(eventId: string, event: ScrapedEvent, rewritten: { ti
     venue_name: event.venue_name,
     venue_address: event.venue_address,
     price: event.price,
-    price_type: getPriceType(event.price),
     booking_url: event.booking_url,
     last_scraped_at: new Date().toISOString(),
   };
