@@ -398,10 +398,13 @@ export default function EventsPageClient({ initialEvents }: EventsPageClientProp
                               <MapPin className="w-4 h-4 text-yellow-400" />
                               <span className="line-clamp-1">{event.venue}</span>
                             </div>
-                            <div className="flex items-center gap-2">
-                              <Clock className="w-4 h-4 text-yellow-400" />
-                              <span>{event.time}</span>
-                            </div>
+                            {/* Only show time if it's set and not TBA */}
+                            {event.time && !event.time.toLowerCase().includes('tba') && (
+                              <div className="flex items-center gap-2">
+                                <Clock className="w-4 h-4 text-yellow-400" />
+                                <span>{event.time}</span>
+                              </div>
+                            )}
                           </div>
                         </div>
                       </div>

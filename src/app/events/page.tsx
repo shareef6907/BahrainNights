@@ -105,7 +105,10 @@ async function getEvents(): Promise<Event[]> {
       : 'Date TBA';
 
     // Handle time formatting - support both time and start_time fields
-    const eventTime = event.time || event.start_time || 'Time TBA';
+    // Don't default to "Time TBA" - leave it null/empty if no time is set
+    const rawTime = event.time || event.start_time || '';
+    // Filter out TBA values
+    const eventTime = rawTime && !rawTime.toLowerCase().includes('tba') ? rawTime : '';
 
     // Handle price - support multiple field names
     const price = event.price || event.price_range || event.booking_method;

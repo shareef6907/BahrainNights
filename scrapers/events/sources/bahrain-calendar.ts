@@ -361,9 +361,18 @@ export async function scrapeBahrainCalendar(): Promise<ScrapedEvent[]> {
           dates.push(match[0]);
         }
 
-        // Parse start date (first date found)
+        // Parse start date (first date found) and end date (second date if exists)
         const startDateStr = dates[0] || '';
+        const endDateStr = dates[1] || dates[0] || '';
         const parsedDate = startDateStr ? parseDate(startDateStr) : new Date().toISOString().split('T')[0];
+        const parsedEndDate = endDateStr ? parseDate(endDateStr) : parsedDate;
+
+        // For multi-day/ongoing events, use the END date to determine if event is still valid
+        // This prevents filtering out events that started in the past but are still running
+        const today = new Date();
+        today.setHours(0, 0, 0, 0);
+        const eventEndDate = new Date(parsedEndDate);
+        const isOngoing = eventEndDate >= today;
 
         // Extract title by removing dates, times, categories, and "Ticketed" from the text
         let title = fullText;
@@ -412,10 +421,27 @@ export async function scrapeBahrainCalendar(): Promise<ScrapedEvent[]> {
 
         // Skip if title is too short, empty, or garbage
         if (title && title.length > 5 && !title.match(/^\d+$/) && !isGarbage) {
+          // Skip events that have completely ended (end date is in the past)
+          if (!isOngoing) {
+            scraperLog.debug(LOG_PREFIX, `Skipping ended event: ${title} (ended: ${parsedEndDate})`);
+            return; // Skip to next iteration
+          }
+
+          // For ongoing multi-day events, use the current date if start is in the past
+          // This ensures the event appears in current listings
+          let effectiveDate = parsedDate;
+          const eventStartDate = new Date(parsedDate);
+          if (eventStartDate < today && isOngoing) {
+            // Event is ongoing - use today's date so it appears in current listings
+            effectiveDate = today.toISOString().split('T')[0];
+            scraperLog.info(LOG_PREFIX, `Ongoing event: ${title} (started: ${parsedDate}, ends: ${parsedEndDate}, using: ${effectiveDate})`);
+          }
+
           events.push({
             title,
             description: '',
-            date: parsedDate,
+            date: effectiveDate,
+            end_date: parsedEndDate !== parsedDate ? parsedEndDate : undefined,
             venue_name: 'Bahrain',
             category: 'other',
             price: isTicketed ? 'Ticketed' : 'Free',
@@ -425,7 +451,7 @@ export async function scrapeBahrainCalendar(): Promise<ScrapedEvent[]> {
             source_event_id: generateEventId(fullUrl, title, parsedDate),
           });
           successCount++;
-          scraperLog.success(LOG_PREFIX, `Scraped: ${title} (${parsedDate})`);
+          scraperLog.success(LOG_PREFIX, `Scraped: ${title} (${effectiveDate})`);
         }
       } catch (error) {
         failCount++;
