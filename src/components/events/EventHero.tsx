@@ -4,7 +4,6 @@ import { useState, useEffect } from 'react';
 import { motion, useScroll, useTransform } from 'framer-motion';
 import { MapPin, Calendar, Clock, Share2 } from 'lucide-react';
 import Image from 'next/image';
-import Link from 'next/link';
 
 interface EventHeroProps {
   title: string;
@@ -104,14 +103,16 @@ export default function EventHero({
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.4 }}
           >
-            {/* Venue */}
-            <Link
-              href={`/venues/${venueSlug}`}
+            {/* Venue - links to Google Maps */}
+            <a
+              href={`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(venue + ', Bahrain')}`}
+              target="_blank"
+              rel="noopener noreferrer"
               className="flex items-center gap-2 hover:text-yellow-400 transition-colors group"
             >
               <MapPin className="w-5 h-5 text-yellow-400" />
               <span className="font-medium group-hover:underline">{venue}</span>
-            </Link>
+            </a>
 
             {/* Date */}
             <div className="flex items-center gap-2">

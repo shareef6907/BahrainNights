@@ -2,10 +2,9 @@
 
 import { useState } from 'react';
 import { motion } from 'framer-motion';
-import { Ticket, Heart, ExternalLink } from 'lucide-react';
+import { Ticket, Heart, ExternalLink, MapPin } from 'lucide-react';
 import EventHero from '@/components/events/EventHero';
 import EventDetails from '@/components/events/EventDetails';
-import VenueCard from '@/components/events/VenueCard';
 import EventGallery from '@/components/events/EventGallery';
 import ShareModal from '@/components/events/ShareModal';
 import AddToCalendar from '@/components/events/AddToCalendar';
@@ -217,17 +216,33 @@ export default function EventDetailClient({ event, similarEvents }: EventDetailC
 
             {/* Right Column - 35% */}
             <div className="space-y-6">
-              {/* Venue Card */}
-              <VenueCard
-                name={event.venueDetails.name}
-                slug={event.venueDetails.slug}
-                image={event.venueDetails.image}
-                address={event.venueDetails.address}
-                phone={event.venueDetails.phone}
-                latitude={event.venueDetails.latitude}
-                longitude={event.venueDetails.longitude}
-                venueWebsite={event.venueDetails.website}
-              />
+              {/* Simple Venue Display */}
+              <motion.div
+                className="bg-white/5 backdrop-blur-sm border border-white/10 rounded-2xl p-6"
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+              >
+                <h3 className="text-lg font-bold text-white mb-4">Location</h3>
+                <a
+                  href={`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(event.venueDetails.name + ', Bahrain')}`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="flex items-center gap-3 text-gray-300 hover:text-yellow-400 transition-colors group"
+                >
+                  <div className="p-3 bg-yellow-400/10 rounded-xl group-hover:bg-yellow-400/20 transition-colors">
+                    <MapPin className="w-6 h-6 text-yellow-400" />
+                  </div>
+                  <div>
+                    <p className="font-medium text-white group-hover:text-yellow-400 transition-colors">
+                      {event.venueDetails.name}
+                    </p>
+                    {event.venueDetails.address && event.venueDetails.address !== event.venueDetails.name && (
+                      <p className="text-sm text-gray-400">{event.venueDetails.address}</p>
+                    )}
+                    <p className="text-xs text-gray-500 mt-1">Click to open in Google Maps</p>
+                  </div>
+                </a>
+              </motion.div>
             </div>
           </div>
 
