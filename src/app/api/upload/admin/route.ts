@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { S3Client, PutObjectCommand } from '@aws-sdk/client-s3';
+import sharp from 'sharp';
 
 export const dynamic = 'force-dynamic';
 
@@ -13,12 +14,15 @@ const s3Client = new S3Client({
 });
 
 const ALLOWED_TYPES = ['image/jpeg', 'image/png', 'image/webp', 'image/gif'];
-const MAX_SIZE = 10 * 1024 * 1024; // 10MB
+const MAX_UPLOAD_SIZE = 10 * 1024 * 1024; // 10MB upload limit
+const MAX_OUTPUT_SIZE = 600 * 1024; // 600KB target output
 
 /**
- * Simple admin upload endpoint
- * No watermarking, no Lambda processing - direct S3 upload
- * Used for admin event editing
+ * Admin upload endpoint with sharp compression
+ * - Compresses images to max 600KB
+ * - Resizes to max 1200x1200 (preserving aspect ratio)
+ * - No watermarking - direct S3 upload
+ * - Used for admin event editing
  */
 export async function POST(request: NextRequest) {
   try {
@@ -42,7 +46,7 @@ export async function POST(request: NextRequest) {
     }
 
     // Validate file size
-    if (file.size > MAX_SIZE) {
+    if (file.size > MAX_UPLOAD_SIZE) {
       return NextResponse.json(
         { error: 'File too large. Maximum 10MB allowed' },
         { status: 400 }
@@ -53,34 +57,57 @@ export async function POST(request: NextRequest) {
     const bytes = await file.arrayBuffer();
     const buffer = Buffer.from(bytes);
 
-    // Generate unique filename
+    // Compress image using sharp
+    let quality = 90;
+    let processedBuffer = await sharp(buffer)
+      .resize(1200, 1200, {
+        fit: 'inside',
+        withoutEnlargement: true
+      })
+      .jpeg({ quality })
+      .toBuffer();
+
+    // Reduce quality until under 600KB (minimum quality 20)
+    while (processedBuffer.length > MAX_OUTPUT_SIZE && quality > 20) {
+      quality -= 10;
+      processedBuffer = await sharp(buffer)
+        .resize(1200, 1200, {
+          fit: 'inside',
+          withoutEnlargement: true
+        })
+        .jpeg({ quality })
+        .toBuffer();
+    }
+
+    // Generate unique filename (always .jpg since we convert to JPEG)
     const timestamp = Date.now();
     const randomStr = Math.random().toString(36).substring(2, 10);
-    const ext = file.name.split('.').pop()?.toLowerCase() || 'jpg';
-    const filename = `uploads/events/admin/${timestamp}-${randomStr}.${ext}`;
+    const filename = `uploads/events/admin/${timestamp}-${randomStr}.jpg`;
 
     const bucket = process.env.BAHRAINNIGHTS_S3_BUCKET || process.env.AWS_S3_BUCKET || 'bahrainnights-production';
     const region = process.env.BAHRAINNIGHTS_AWS_REGION || process.env.AWS_REGION || 'me-south-1';
 
-    // Upload directly to S3 (no watermark processing)
+    // Upload compressed image to S3
     await s3Client.send(new PutObjectCommand({
       Bucket: bucket,
       Key: filename,
-      Body: buffer,
-      ContentType: file.type,
+      Body: processedBuffer,
+      ContentType: 'image/jpeg',
       CacheControl: 'public, max-age=31536000',
     }));
 
     // Generate public URL
     const url = `https://${bucket}.s3.${region}.amazonaws.com/${filename}`;
 
-    console.log('[Admin Upload] Success:', url);
+    console.log(`[Admin Upload] Success: ${url} (${file.size} -> ${processedBuffer.length} bytes, quality: ${quality})`);
 
     return NextResponse.json({
       success: true,
       url,
       key: filename,
       originalSize: file.size,
+      compressedSize: processedBuffer.length,
+      compressionQuality: quality,
     });
   } catch (error) {
     console.error('[Admin Upload] Error:', error);
