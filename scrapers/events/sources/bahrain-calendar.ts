@@ -312,7 +312,12 @@ export async function scrapeBahrainCalendar(): Promise<ScrapedEvent[]> {
       debugLinksChecked++;
 
       // Must have a slug-like href (not navigation, not external)
-      const isSlugLink = Boolean(href.match(/^\/[a-z0-9-]+$/) || href.match(/^https?:\/\/www\.bahrain\.com\/[a-z0-9-]+$/));
+      // URLs can be: /event-slug, event-slug, or https://www.bahrain.com/event-slug
+      const isSlugLink = Boolean(
+        href.match(/^\/[a-z0-9-]+$/) ||           // /event-slug
+        href.match(/^[a-z0-9][a-z0-9-]*$/) ||     // event-slug (no leading /)
+        href.match(/^https?:\/\/www\.bahrain\.com\/[a-z0-9-]+$/)  // full URL
+      );
       if (isSlugLink) debugSlugMatches++;
 
       // Must contain dates in the text
@@ -320,8 +325,13 @@ export async function scrapeBahrainCalendar(): Promise<ScrapedEvent[]> {
       datePattern.lastIndex = 0; // Reset regex
       if (hasDate) debugDateMatches++;
 
-      // Filter out navigation links
-      const isNavigation = ['home', 'about', 'contact', 'menu', 'bahrain-calendar'].some(nav =>
+      // Filter out navigation links and non-event pages
+      const skipPatterns = [
+        'home', 'about', 'contact', 'menu', 'bahrain-calendar',
+        'javascript:', 'void(0)', 'search', 'visa', 'favourites',
+        'interactive-map', '#', 'tel:', 'mailto:'
+      ];
+      const isNavigation = skipPatterns.some(nav =>
         href.toLowerCase().includes(nav)
       );
 
@@ -355,12 +365,28 @@ export async function scrapeBahrainCalendar(): Promise<ScrapedEvent[]> {
         const startDateStr = dates[0] || '';
         const parsedDate = startDateStr ? parseDate(startDateStr) : new Date().toISOString().split('T')[0];
 
-        // Extract title by removing dates and "Ticketed" from the text
+        // Extract title by removing dates, times, categories, and "Ticketed" from the text
         let title = fullText;
+
+        // Remove dates
         dates.forEach(date => {
-          title = title.replace(date, '');
+          title = title.replace(new RegExp(date.replace(/\s+/g, '\\s+'), 'gi'), '');
         });
-        title = title.replace(/ticketed/gi, '').trim();
+
+        // Remove time patterns like "07:15 PM - 11:45 PM" or "10:00 AM"
+        title = title.replace(/\d{1,2}:\d{2}\s*(AM|PM)?\s*[-–]?\s*(\d{1,2}:\d{2}\s*(AM|PM)?)?/gi, '');
+
+        // Remove common category names
+        const categories = ['Sports', 'Entertainment', 'Exhibition', 'Shopping', 'Live Shows & Concerts', 'Café', 'Food & Drink'];
+        categories.forEach(cat => {
+          title = title.replace(new RegExp(`\\b${cat}\\b`, 'gi'), '');
+        });
+
+        // Remove "Ticketed", "Free Entry" etc.
+        title = title.replace(/ticketed|free entry|free/gi, '');
+
+        // Clean up extra whitespace, pipes, and newlines
+        title = title.replace(/\|/g, '').replace(/\s+/g, ' ').trim();
 
         // Check if it's a ticketed event
         const isTicketed = /ticketed/i.test(fullText);
@@ -368,10 +394,24 @@ export async function scrapeBahrainCalendar(): Promise<ScrapedEvent[]> {
         // Get image if there's an img inside the link
         const image = $el.find('img').first().attr('src') || $el.find('img').first().attr('data-src');
 
-        // Build full URL
-        const fullUrl = href.startsWith('http') ? href : `${BASE_URL}${href}`;
+        // Build full URL - handle URLs with or without leading /
+        let fullUrl = href;
+        if (!href.startsWith('http')) {
+          fullUrl = href.startsWith('/') ? `${BASE_URL}${href}` : `${BASE_URL}/${href}`;
+        }
 
-        if (title && title.length > 3) {
+        // Skip if title is garbage (from featured carousel with times/days only)
+        const garbagePatterns = [
+          /^(Sun|Mon|Tue|Wed|Thu|Fri|Sat)\s*[-–]/i,  // Starts with day
+          /^Weekdays?:/i,                              // Starts with "Weekdays:"
+          /^Weekends?:/i,                              // Starts with "Weekends:"
+          /^\d+:\d+/,                                  // Starts with time
+          /^[-–\s:]+$/,                                // Only dashes/colons/spaces
+        ];
+        const isGarbage = garbagePatterns.some(pattern => pattern.test(title));
+
+        // Skip if title is too short, empty, or garbage
+        if (title && title.length > 5 && !title.match(/^\d+$/) && !isGarbage) {
           events.push({
             title,
             description: '',

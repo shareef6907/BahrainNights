@@ -121,13 +121,59 @@ export async function scrapeAlDana(): Promise<ScrapedEvent[]> {
     // Wait for content to load
     await sleep(getRandomDelay(SCRAPER_CONFIG.delays.betweenPages));
 
-    // Extract events using page.evaluate
+    // === DEBUG: Log page content before extraction ===
+    const pageDebug = await page.evaluate(() => {
+      const debug: {
+        h2Count: number;
+        h2Texts: string[];
+        allHeadings: string[];
+        bodyTextPreview: string;
+      } = {
+        h2Count: 0,
+        h2Texts: [],
+        allHeadings: [],
+        bodyTextPreview: '',
+      };
+
+      // Count h2 elements
+      const h2s = document.querySelectorAll('h2');
+      debug.h2Count = h2s.length;
+      h2s.forEach(h2 => {
+        const text = h2.textContent?.trim() || '';
+        if (text.length > 0) {
+          debug.h2Texts.push(text.substring(0, 100));
+        }
+      });
+
+      // Also check h1, h3, h4 for comparison
+      document.querySelectorAll('h1, h2, h3, h4').forEach(h => {
+        const text = h.textContent?.trim() || '';
+        if (text.length > 2 && text.length < 100) {
+          debug.allHeadings.push(`${h.tagName}: ${text}`);
+        }
+      });
+
+      // Get body text preview
+      debug.bodyTextPreview = document.body.textContent?.replace(/\s+/g, ' ').trim().substring(0, 500) || '';
+
+      return debug;
+    });
+
+    scraperLog.info(LOG_PREFIX, `=== PAGE DEBUG ===`);
+    scraperLog.info(LOG_PREFIX, `Total h2 elements found: ${pageDebug.h2Count}`);
+    scraperLog.info(LOG_PREFIX, `H2 texts: ${JSON.stringify(pageDebug.h2Texts)}`);
+    scraperLog.info(LOG_PREFIX, `All headings: ${JSON.stringify(pageDebug.allHeadings.slice(0, 20))}`);
+    scraperLog.info(LOG_PREFIX, `Body preview: ${pageDebug.bodyTextPreview.substring(0, 300)}...`);
+    scraperLog.info(LOG_PREFIX, `=== END PAGE DEBUG ===`);
+
+    // Extract events using page.evaluate with debug info
     const extractedEvents = await page.evaluate(() => {
       const results: Array<{
         title: string;
         date: string | null;
         image: string | null;
         buyLink: string | null;
+        debug?: string;
       }> = [];
 
       // Skip these headings - they're not events
@@ -139,36 +185,59 @@ export async function scrapeAlDana(): Promise<ScrapedEvent[]> {
       // Find all h2 elements (event titles)
       const h2Elements = document.querySelectorAll('h2');
 
-      h2Elements.forEach(h2 => {
+      // Debug log for each h2
+      const debugLogs: string[] = [];
+
+      h2Elements.forEach((h2, index) => {
         const title = h2.textContent?.trim();
-        if (!title || title.length < 3) return;
+
+        if (!title || title.length < 3) {
+          debugLogs.push(`h2[${index}]: SKIP - empty or too short: "${title}"`);
+          return;
+        }
 
         // Skip non-event headings
-        if (skipTitles.some(skip => title.toLowerCase().includes(skip))) return;
+        if (skipTitles.some(skip => title.toLowerCase().includes(skip))) {
+          debugLogs.push(`h2[${index}]: SKIP - matches skipTitle: "${title}"`);
+          return;
+        }
 
         // Get parent container (div.bottom)
         const container = h2.parentElement;
-        if (!container) return;
+        if (!container) {
+          debugLogs.push(`h2[${index}]: SKIP - no parent: "${title}"`);
+          return;
+        }
+
+        debugLogs.push(`h2[${index}]: PROCESSING: "${title}"`);
 
         // Find date - look for sibling element with date class or date pattern
         let date: string | null = null;
         let sibling = h2.nextElementSibling;
-        while (sibling) {
+        let siblingCount = 0;
+        while (sibling && siblingCount < 10) {
           const text = sibling.textContent?.trim();
           if (
             sibling.classList?.contains('date') ||
             text?.match(/\d{1,2}\s+(Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec)\s+\d{4}/i)
           ) {
             date = text?.replace('Array', '').trim() || null;
+            debugLogs.push(`  -> Found date: "${date}"`);
             break;
           }
           sibling = sibling.nextElementSibling;
+          siblingCount++;
+        }
+
+        if (!date) {
+          debugLogs.push(`  -> No date found after ${siblingCount} siblings`);
         }
 
         // Find buy link - look for platinumlist links in siblings
         let buyLink: string | null = null;
         sibling = h2.nextElementSibling;
-        while (sibling) {
+        siblingCount = 0;
+        while (sibling && siblingCount < 10) {
           const link = sibling.querySelector?.('a[href*="platinumlist"]') as HTMLAnchorElement | null;
           if (link) {
             buyLink = link.href;
@@ -179,6 +248,7 @@ export async function scrapeAlDana(): Promise<ScrapedEvent[]> {
             break;
           }
           sibling = sibling.nextElementSibling;
+          siblingCount++;
         }
 
         // Find image - look in grandparent container for picture element
@@ -197,24 +267,43 @@ export async function scrapeAlDana(): Promise<ScrapedEvent[]> {
           }
         }
 
-        results.push({ title, date, image, buyLink });
+        results.push({ title, date, image, buyLink, debug: `h2[${index}]` });
       });
+
+      // Add debug logs to console for visibility
+      (window as any).__aldanaDebugLogs = debugLogs;
 
       return results;
     });
 
+    // Get debug logs from page
+    const debugLogs = await page.evaluate(() => (window as any).__aldanaDebugLogs || []);
+    scraperLog.info(LOG_PREFIX, `=== EXTRACTION DEBUG ===`);
+    for (const log of debugLogs) {
+      scraperLog.debug(LOG_PREFIX, log);
+    }
+    scraperLog.info(LOG_PREFIX, `=== END EXTRACTION DEBUG ===`);
+
     scraperLog.info(LOG_PREFIX, `Found ${extractedEvents.length} events on page`);
 
     // Process extracted events
+    scraperLog.info(LOG_PREFIX, `=== PROCESSING ${extractedEvents.length} EXTRACTED EVENTS ===`);
+
     for (const extracted of extractedEvents) {
+      scraperLog.debug(LOG_PREFIX, `Processing: "${extracted.title}" with raw date: "${extracted.date}"`);
+
       const parsedDate = parseDate(extracted.date || '');
+      scraperLog.debug(LOG_PREFIX, `  -> Parsed date: ${parsedDate}`);
 
       // Skip past events
       const eventDate = new Date(parsedDate);
       const today = new Date();
       today.setHours(0, 0, 0, 0);
+
+      scraperLog.debug(LOG_PREFIX, `  -> Event date: ${eventDate.toISOString()}, Today: ${today.toISOString()}, Is past: ${eventDate < today}`);
+
       if (eventDate < today) {
-        scraperLog.debug(LOG_PREFIX, `Skipping past event: ${extracted.title}`);
+        scraperLog.warn(LOG_PREFIX, `SKIPPING past event: ${extracted.title} (${parsedDate})`);
         continue;
       }
 
