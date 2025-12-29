@@ -53,6 +53,7 @@ REQUIREMENTS:
 7. Include what attendees can expect at the event
 8. If the original title is too long or unclear, improve it (keep it under 80 characters)
 9. Assign the BEST category from: ${categoriesList}
+10. IMPORTANT: If the original description contains specific dates (e.g., "from October 31, 2025 to April 17, 2026"), you MUST preserve these exact dates in the rewritten description. Do not remove or change any date information.
 
 CATEGORY GUIDE:
 - dining: Restaurants, brunches, food festivals, ladies nights at restaurants

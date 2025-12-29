@@ -104,6 +104,17 @@ async function getEvents(): Promise<Event[]> {
         })
       : 'Date TBA';
 
+    // Handle end date for multi-day events
+    const eventEndDate = event.end_date;
+    const rawEndDate = eventEndDate ? normalizeToISODate(eventEndDate) : undefined;
+    const formattedEndDate = eventEndDate && rawEndDate !== rawDate
+      ? new Date(eventEndDate).toLocaleDateString('en-US', {
+          weekday: 'short',
+          month: 'short',
+          day: 'numeric',
+        })
+      : undefined;
+
     // Handle time formatting - support both time and start_time fields
     // Don't default to "Time TBA" - leave it null/empty if no time is set
     const rawTime = event.time || event.start_time || '';
@@ -125,7 +136,9 @@ async function getEvents(): Promise<Event[]> {
       venue: event.venue_name || event.venue || 'Venue TBA',
       location: event.venue_address || event.location || '',
       date: formattedDate,
+      endDate: formattedEndDate, // For multi-day events
       rawDate, // ISO date for filtering
+      rawEndDate, // ISO end date for filtering
       time: eventTime,
       price: isFree ? 'Free' : (price?.includes?.('BD') ? price : `BD ${price}`),
       isFree,

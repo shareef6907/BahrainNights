@@ -19,7 +19,9 @@ export interface Event {
   venue: string;
   location: string;
   date: string;
+  endDate?: string; // For multi-day events (formatted display string)
   rawDate: string; // ISO date string for filtering
+  rawEndDate?: string; // ISO end date for filtering
   time: string;
   price: string;
   isFree: boolean;
@@ -381,7 +383,7 @@ export default function EventsPageClient({ initialEvents }: EventsPageClientProp
                             {event.category}
                           </div>
                           <div className="absolute top-3 right-3 px-3 py-1 bg-black/70 text-white text-xs rounded-full">
-                            {event.date}
+                            {event.endDate ? `${event.date} - ${event.endDate}` : event.date}
                           </div>
                           {event.isFeatured && (
                             <div className="absolute bottom-3 left-3 px-2 py-1 bg-yellow-500 text-black text-xs font-bold rounded-full">

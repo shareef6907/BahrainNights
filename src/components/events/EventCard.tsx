@@ -16,6 +16,7 @@ export interface Event {
   venue: string;
   location: string;
   date: string;
+  endDate?: string; // For multi-day events (e.g., "Oct 31, 2025 - Apr 17, 2026")
   time: string;
   price: string;
   isFree: boolean;
@@ -91,7 +92,7 @@ export default function EventCard({ event, view = 'grid', index = 0 }: EventCard
                 </div>
                 <div className="flex items-center gap-1">
                   <Calendar className="w-3.5 h-3.5 text-yellow-400" />
-                  <span>{event.date}</span>
+                  <span>{event.endDate ? `${event.date} - ${event.endDate}` : event.date}</span>
                 </div>
                 {/* Only show time if it's actually set (not TBA/TBD/Time TBA) */}
                 {event.time && !['TBA', 'TBD', 'Time TBA', 'time tba'].includes(event.time) && !event.time.toLowerCase().includes('tba') && (
@@ -140,7 +141,7 @@ export default function EventCard({ event, view = 'grid', index = 0 }: EventCard
 
             {/* Date Badge */}
             <div className="absolute top-3 right-3 px-3 py-1 bg-black/70 backdrop-blur-sm text-white text-xs font-medium rounded-full">
-              {event.date}
+              {event.endDate ? `${event.date} - ${event.endDate}` : event.date}
             </div>
 
             {/* View Details Overlay */}

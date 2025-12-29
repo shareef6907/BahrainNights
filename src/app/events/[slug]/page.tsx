@@ -19,7 +19,9 @@ interface DBEvent {
   venue_name: string;
   venue_address: string;
   date: string;
+  end_date: string | null;
   time: string;
+  end_time: string | null;
   price: string;
   image_url: string | null;
   cover_url: string | null;
@@ -61,6 +63,21 @@ function formatDate(dateStr: string): { display: string; dayOfWeek: string } {
   });
   const dayOfWeek = date.toLocaleDateString('en-US', { weekday: 'long' });
   return { display, dayOfWeek };
+}
+
+// Format date range for multi-day events
+function formatDateRange(startDate: string, endDate: string | null): { display: string; dayOfWeek: string; endDisplay?: string } {
+  const startInfo = formatDate(startDate);
+  if (!endDate || endDate === startDate) {
+    return startInfo;
+  }
+  const endDateObj = new Date(endDate);
+  const endDisplay = endDateObj.toLocaleDateString('en-US', {
+    month: 'long',
+    day: 'numeric',
+    year: 'numeric',
+  });
+  return { ...startInfo, endDisplay };
 }
 
 // Known venue coordinates for accurate map links
@@ -168,7 +185,7 @@ export default async function EventDetailPage({ params }: PageProps) {
 
   // Get category info
   const categoryInfo = getCategoryInfo(dbEvent.category);
-  const dateInfo = formatDate(dbEvent.date);
+  const dateInfo = formatDateRange(dbEvent.date, dbEvent.end_date);
 
   // Get image
   const image = dbEvent.cover_url || dbEvent.image_url || getDefaultImage(dbEvent.category);
@@ -185,8 +202,8 @@ export default async function EventDetailPage({ params }: PageProps) {
     categoryColor: categoryInfo.color,
     venue: dbEvent.venue_name,
     venueSlug: dbEvent.venue_name?.toLowerCase().replace(/[^a-z0-9]+/g, '-') || 'venue',
-    location: dbEvent.venue_address || 'Bahrain',
-    date: dateInfo.display,
+    location: dbEvent.venue_address || dbEvent.venue_name || 'Bahrain',
+    date: dateInfo.endDisplay ? `${dateInfo.display} - ${dateInfo.endDisplay}` : dateInfo.display, // Date range for multi-day events
     dayOfWeek: dateInfo.dayOfWeek,
     time: (dbEvent.time && !dbEvent.time.toLowerCase().includes('tba')) ? dbEvent.time : '',
     duration: '',
@@ -204,7 +221,7 @@ export default async function EventDetailPage({ params }: PageProps) {
         name: dbEvent.venue_name || 'Venue',
         slug: dbEvent.venue_name?.toLowerCase().replace(/[^a-z0-9]+/g, '-') || 'venue',
         image: 'https://images.unsplash.com/photo-1507676184212-d03ab07a01bf?w=400&h=300&fit=crop',
-        address: dbEvent.venue_address || 'Bahrain',
+        address: dbEvent.venue_address || dbEvent.venue_name || 'Bahrain',
         phone: dbEvent.contact_phone || '',
         latitude: coords.lat,
         longitude: coords.lng,
@@ -212,7 +229,9 @@ export default async function EventDetailPage({ params }: PageProps) {
       };
     })(),
     startDate: `${dbEvent.date}T${dbEvent.time || '19:00'}:00`,
-    endDate: `${dbEvent.date}T23:59:00`,
+    endDate: dbEvent.end_date
+      ? `${dbEvent.end_date}T${dbEvent.end_time || '23:59'}:00`
+      : `${dbEvent.date}T23:59:00`,
   };
 
   // Get similar events
