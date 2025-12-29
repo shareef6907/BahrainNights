@@ -95,9 +95,34 @@ function isValidImageUrl(url: string | null | undefined): boolean {
 }
 
 /**
+ * Common image file extensions
+ */
+const IMAGE_EXTENSIONS = ['.jpg', '.jpeg', '.png', '.gif', '.webp', '.svg', '.bmp'];
+
+/**
+ * Get extension from URL (handles query strings)
+ */
+function getExtensionFromUrl(url: string): string | null {
+  const urlLower = url.toLowerCase();
+  for (const ext of IMAGE_EXTENSIONS) {
+    if (urlLower.endsWith(ext) || urlLower.includes(ext + '?')) {
+      return ext;
+    }
+  }
+  return null;
+}
+
+/**
+ * Check if URL has an image extension
+ */
+function hasImageExtension(url: string): boolean {
+  return getExtensionFromUrl(url) !== null;
+}
+
+/**
  * Download image from URL and return as buffer
  */
-async function downloadImage(url: string): Promise<{ buffer: Buffer; contentType: string } | null> {
+async function downloadImage(url: string): Promise<{ buffer: Buffer; contentType: string; urlExtension: string | null } | null> {
   try {
     // Handle relative URLs
     if (!url.startsWith('http')) {
@@ -118,12 +143,23 @@ async function downloadImage(url: string): Promise<{ buffer: Buffer; contentType
       return null;
     }
 
-    const contentType = response.headers.get('content-type') || 'image/jpeg';
+    const contentType = response.headers.get('content-type') || '';
+    const urlExtension = getExtensionFromUrl(url);
 
-    // Validate it's actually an image
-    if (!contentType.startsWith('image/')) {
+    // Accept image if:
+    // 1. Content-type starts with 'image/'
+    // 2. OR URL ends with common image extension
+    const hasImageContentType = contentType.startsWith('image/');
+    const urlHasImageExtension = hasImageExtension(url);
+
+    if (!hasImageContentType && !urlHasImageExtension) {
       console.warn(`[Image] Not an image (${contentType}): ${url}`);
       return null;
+    }
+
+    // If we have image extension but wrong content-type, log but continue
+    if (urlHasImageExtension && !hasImageContentType) {
+      console.log(`[Image] Accepting by extension despite content-type (${contentType}): ${url}`);
     }
 
     const arrayBuffer = await response.arrayBuffer();
@@ -135,7 +171,10 @@ async function downloadImage(url: string): Promise<{ buffer: Buffer; contentType
       return null;
     }
 
-    return { buffer, contentType };
+    // Use image/jpeg as fallback content-type if we accepted by extension
+    const effectiveContentType = hasImageContentType ? contentType : 'image/jpeg';
+
+    return { buffer, contentType: effectiveContentType, urlExtension };
   } catch (error) {
     console.error(`[Image] Download error for ${url}:`, error);
     return null;
@@ -226,14 +265,16 @@ export async function processEventImage(
     return null;
   }
 
-  // Determine file extension from content type
+  // Determine file extension - prefer URL extension over content-type
+  // This handles cases where server returns wrong content-type (e.g., application/octet-stream for .webp)
   const extMap: Record<string, string> = {
     'image/jpeg': '.jpg',
     'image/png': '.png',
     'image/webp': '.webp',
     'image/gif': '.gif',
   };
-  const ext = extMap[downloaded.contentType] || '.jpg';
+  // Use URL extension if available, otherwise fall back to content-type
+  const ext = downloaded.urlExtension || extMap[downloaded.contentType] || '.jpg';
 
   // Upload to S3 /uploads/ folder (Lambda will process and move to /processed/)
   const uploadKey = `uploads/${folder}/${filename}${ext}`;
@@ -346,14 +387,15 @@ export async function processEventImageWithFallback(
     return null;
   }
 
-  // Upload to S3
+  // Upload to S3 - prefer URL extension over content-type
   const extMap: Record<string, string> = {
     'image/jpeg': '.jpg',
     'image/png': '.png',
     'image/webp': '.webp',
     'image/gif': '.gif',
   };
-  const ext = extMap[downloaded.contentType] || '.webp';
+  // Use URL extension if available, otherwise fall back to content-type
+  const ext = downloaded.urlExtension || extMap[downloaded.contentType] || '.webp';
   const uploadKey = `uploads/${folder}/${filename}${ext}`;
   const processedKey = `processed/${folder}/${filename}.webp`;
   const processedUrl = `${PUBLIC_URL}/${folder}/${filename}.webp`;
