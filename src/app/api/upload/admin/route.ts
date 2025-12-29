@@ -123,14 +123,21 @@ export async function POST(request: NextRequest) {
       console.log('[Admin Upload] Recompressing at quality:', quality, 'Size:', processedBuffer.length);
     }
 
-    // Generate unique filename (always .jpg since we convert to JPEG)
+    // Generate unique filename
+    // Upload to 'processed/' folder which is publicly accessible
+    // (the 'uploads/' folder is NOT public - it's for Lambda processing)
     const timestamp = Date.now();
     const randomStr = Math.random().toString(36).substring(2, 10);
-    const filename = `uploads/events/admin/${timestamp}-${randomStr}.jpg`;
+    const now = new Date();
+    const yearMonth = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`;
+
+    // Use same folder structure as scraper but in admin subfolder
+    // processed/events/admin/YYYY-MM/timestamp-random.jpg
+    const filename = `processed/events/admin/${yearMonth}/${timestamp}-${randomStr}.jpg`;
 
     console.log('[Admin Upload] Uploading to S3:', { bucket, filename });
 
-    // Upload compressed image to S3
+    // Upload compressed image to S3 processed folder (publicly accessible)
     await s3Client.send(new PutObjectCommand({
       Bucket: bucket,
       Key: filename,
@@ -139,7 +146,7 @@ export async function POST(request: NextRequest) {
       CacheControl: 'public, max-age=31536000',
     }));
 
-    // Generate public URL
+    // Generate public URL (using processed folder which is public)
     const url = `https://${bucket}.s3.${region}.amazonaws.com/${filename}`;
 
     console.log('[Admin Upload] Success:', {
