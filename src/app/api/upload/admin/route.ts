@@ -25,20 +25,53 @@ const MAX_OUTPUT_SIZE = 600 * 1024; // 600KB target output
  * - Used for admin event editing
  */
 export async function POST(request: NextRequest) {
+  console.log('[Admin Upload] Starting upload...');
+
+  // Check environment variables
+  const accessKeyId = process.env.BAHRAINNIGHTS_AWS_ACCESS_KEY_ID || process.env.AWS_ACCESS_KEY_ID;
+  const secretKey = process.env.BAHRAINNIGHTS_AWS_SECRET_ACCESS_KEY || process.env.AWS_SECRET_ACCESS_KEY;
+  const bucket = process.env.BAHRAINNIGHTS_S3_BUCKET || process.env.AWS_S3_BUCKET || 'bahrainnights-production';
+  const region = process.env.BAHRAINNIGHTS_AWS_REGION || process.env.AWS_REGION || 'me-south-1';
+
+  console.log('[Admin Upload] Config check:', {
+    hasAccessKey: !!accessKeyId,
+    hasSecretKey: !!secretKey,
+    bucket,
+    region,
+  });
+
+  if (!accessKeyId || !secretKey) {
+    console.error('[Admin Upload] Missing AWS credentials');
+    return NextResponse.json(
+      { error: 'Server configuration error: Missing AWS credentials' },
+      { status: 500 }
+    );
+  }
+
   try {
     const formData = await request.formData();
     const file = formData.get('file');
 
+    console.log('[Admin Upload] File received:', file ? 'yes' : 'no');
+
     // Validate file exists
     if (!file || !(file instanceof File)) {
+      console.log('[Admin Upload] No valid file provided');
       return NextResponse.json(
         { error: 'No valid file provided' },
         { status: 400 }
       );
     }
 
+    console.log('[Admin Upload] File details:', {
+      name: file.name,
+      size: file.size,
+      type: file.type,
+    });
+
     // Validate file type
     if (!ALLOWED_TYPES.includes(file.type)) {
+      console.log('[Admin Upload] Invalid file type:', file.type);
       return NextResponse.json(
         { error: 'Invalid file type. Allowed: JPG, PNG, WebP, GIF' },
         { status: 400 }
@@ -47,6 +80,7 @@ export async function POST(request: NextRequest) {
 
     // Validate file size
     if (file.size > MAX_UPLOAD_SIZE) {
+      console.log('[Admin Upload] File too large:', file.size);
       return NextResponse.json(
         { error: 'File too large. Maximum 10MB allowed' },
         { status: 400 }
@@ -56,6 +90,8 @@ export async function POST(request: NextRequest) {
     // Convert file to buffer
     const bytes = await file.arrayBuffer();
     const buffer = Buffer.from(bytes);
+
+    console.log('[Admin Upload] Starting image compression...');
 
     // Compress image using sharp
     let quality = 90;
@@ -67,6 +103,12 @@ export async function POST(request: NextRequest) {
       .jpeg({ quality })
       .toBuffer();
 
+    console.log('[Admin Upload] Initial compression:', {
+      originalSize: buffer.length,
+      compressedSize: processedBuffer.length,
+      quality,
+    });
+
     // Reduce quality until under 600KB (minimum quality 20)
     while (processedBuffer.length > MAX_OUTPUT_SIZE && quality > 20) {
       quality -= 10;
@@ -77,6 +119,8 @@ export async function POST(request: NextRequest) {
         })
         .jpeg({ quality })
         .toBuffer();
+
+      console.log('[Admin Upload] Recompressing at quality:', quality, 'Size:', processedBuffer.length);
     }
 
     // Generate unique filename (always .jpg since we convert to JPEG)
@@ -84,8 +128,7 @@ export async function POST(request: NextRequest) {
     const randomStr = Math.random().toString(36).substring(2, 10);
     const filename = `uploads/events/admin/${timestamp}-${randomStr}.jpg`;
 
-    const bucket = process.env.BAHRAINNIGHTS_S3_BUCKET || process.env.AWS_S3_BUCKET || 'bahrainnights-production';
-    const region = process.env.BAHRAINNIGHTS_AWS_REGION || process.env.AWS_REGION || 'me-south-1';
+    console.log('[Admin Upload] Uploading to S3:', { bucket, filename });
 
     // Upload compressed image to S3
     await s3Client.send(new PutObjectCommand({
@@ -99,7 +142,13 @@ export async function POST(request: NextRequest) {
     // Generate public URL
     const url = `https://${bucket}.s3.${region}.amazonaws.com/${filename}`;
 
-    console.log(`[Admin Upload] Success: ${url} (${file.size} -> ${processedBuffer.length} bytes, quality: ${quality})`);
+    console.log('[Admin Upload] Success:', {
+      url,
+      originalSize: file.size,
+      compressedSize: processedBuffer.length,
+      compressionRatio: ((1 - processedBuffer.length / file.size) * 100).toFixed(1) + '%',
+      quality,
+    });
 
     return NextResponse.json({
       success: true,

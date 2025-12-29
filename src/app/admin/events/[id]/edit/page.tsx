@@ -3,7 +3,6 @@
 import { useState, useEffect } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import Link from 'next/link';
-import Image from 'next/image';
 import { motion } from 'framer-motion';
 import {
   ArrowLeft,
@@ -192,22 +191,33 @@ export default function AdminEventEditPage() {
       const uploadData = new FormData();
       uploadData.append('file', file);
 
+      console.log('[Edit Page] Starting upload for file:', file.name, file.size, file.type);
+
       const response = await fetch('/api/upload/admin', {
         method: 'POST',
         body: uploadData,
       });
 
       const data = await response.json();
+      console.log('[Edit Page] Upload response:', data);
 
       if (!response.ok) {
-        alert(data.error || 'Upload failed');
+        console.error('[Edit Page] Upload failed:', data);
+        alert(data.details || data.error || 'Upload failed');
         return;
       }
 
+      // Update the cover URL with the new image
       setFormData(prev => ({ ...prev, cover_url: data.url }));
+
+      // Show success message with compression info
+      const compressionInfo = data.compressedSize
+        ? `Compressed from ${(data.originalSize / 1024).toFixed(0)}KB to ${(data.compressedSize / 1024).toFixed(0)}KB`
+        : '';
+      alert(`Image uploaded successfully! ${compressionInfo}\n\nDon't forget to click "Save Changes" to save the event.`);
     } catch (err) {
-      console.error('Upload error:', err);
-      alert('Upload failed');
+      console.error('[Edit Page] Upload error:', err);
+      alert('Upload failed: ' + (err instanceof Error ? err.message : 'Unknown error'));
     } finally {
       setUploading(false);
     }
@@ -339,14 +349,36 @@ export default function AdminEventEditPage() {
           <label className="block text-sm font-medium text-white">Cover Image</label>
 
           {/* Current Image Preview */}
-          {formData.cover_url && (
-            <div className="relative aspect-video max-w-md rounded-xl overflow-hidden border border-white/10">
-              <Image
+          {formData.cover_url ? (
+            <div className="relative aspect-video max-w-md rounded-xl overflow-hidden border border-white/10 bg-white/5">
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img
                 src={formData.cover_url}
                 alt="Cover preview"
-                fill
-                className="object-cover object-top"
+                className="w-full h-full object-cover object-top"
+                onError={(e) => {
+                  console.error('Image failed to load:', formData.cover_url);
+                  (e.target as HTMLImageElement).style.display = 'none';
+                  const placeholder = document.getElementById('image-error-placeholder');
+                  if (placeholder) placeholder.style.display = 'flex';
+                }}
+                onLoad={(e) => {
+                  (e.target as HTMLImageElement).style.display = 'block';
+                  const placeholder = document.getElementById('image-error-placeholder');
+                  if (placeholder) placeholder.style.display = 'none';
+                }}
               />
+              <div
+                id="image-error-placeholder"
+                className="absolute inset-0 flex-col items-center justify-center bg-red-500/10 text-red-400 hidden"
+              >
+                <span className="text-sm">Image failed to load</span>
+                <span className="text-xs mt-1 text-gray-400">URL may be invalid</span>
+              </div>
+            </div>
+          ) : (
+            <div className="aspect-video max-w-md rounded-xl border border-white/10 bg-white/5 flex items-center justify-center text-gray-500">
+              No cover image
             </div>
           )}
 

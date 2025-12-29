@@ -526,6 +526,16 @@ function ActionDropdown({
           View Public Page
         </Link>
 
+        {/* Edit Event - Always available for all events */}
+        <Link
+          href={`/admin/events/${event.id}/edit`}
+          className="flex items-center gap-2 px-4 py-2 text-sm text-cyan-400 hover:bg-cyan-500/10"
+          onClick={onClose}
+        >
+          <Edit className="w-4 h-4" />
+          Edit Event
+        </Link>
+
         <div className="my-1 border-t border-white/10" />
 
         {/* Pending Event Actions */}
@@ -1200,6 +1210,12 @@ export default function AdminEventsPage() {
                       >
                         View Details
                       </button>
+                      <Link
+                        href={`/admin/events/${event.id}/edit`}
+                        className="px-3 py-1.5 text-xs bg-cyan-500/20 text-cyan-400 rounded-lg"
+                      >
+                        Edit
+                      </Link>
                       {event.status === 'pending' && (
                         <>
                           <button
