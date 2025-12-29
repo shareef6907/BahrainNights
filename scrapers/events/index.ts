@@ -354,8 +354,7 @@ export async function runEventScrapers(): Promise<void> {
     // DISABLED: Platinumlist scrapers - awaiting business agreement
     // { name: 'Platinumlist Events', baseUrl: 'https://manama.platinumlist.net', fn: scrapePlatinumlistEvents },
     // { name: 'Platinumlist Attractions', baseUrl: 'https://manama.platinumlist.net', fn: scrapePlatinumlistAttractions },
-    // DISABLED: Al Dana scraper - producing low-quality data, needs fixing
-    // { name: 'Al Dana Amphitheatre', baseUrl: 'https://www.beyonaldana.com.bh', fn: scrapeAlDana },
+    { name: 'Al Dana Amphitheatre', baseUrl: 'https://www.beyonaldana.com.bh', fn: scrapeAlDana },
   ];
 
   // Run scrapers sequentially to avoid overwhelming resources

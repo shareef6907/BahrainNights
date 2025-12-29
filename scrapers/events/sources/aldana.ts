@@ -1,11 +1,14 @@
 /**
  * Al Dana Amphitheatre Scraper
  * Scrapes events from https://www.beyonaldana.com.bh/
- * All events at this venue - concerts, festivals, shows
+ *
+ * Site Structure (as of Dec 2025):
+ * - Events displayed in a carousel on homepage
+ * - Each event has: h2 (title), .date (date), picture>source/img (image), a[href*="platinumlist"] (booking)
+ * - Container structure: div > div.inner > div > div.bg (image) + div.bottom (title, date, links)
  */
 
-import puppeteer, { Browser, Page } from 'puppeteer';
-import * as cheerio from 'cheerio';
+import puppeteer, { Browser } from 'puppeteer';
 import crypto from 'crypto';
 import { ScrapedEvent, SOURCE_NAMES } from '../types';
 import { SCRAPER_CONFIG } from '../config';
@@ -18,48 +21,33 @@ const VENUE_NAME = 'Al Dana Amphitheatre';
 const VENUE_ADDRESS = 'Bahrain Bay, Manama, Bahrain';
 const LOG_PREFIX = 'AlDana';
 
-// Generate event ID from URL or title
-function generateEventId(url: string, title: string): string {
-  const urlMatch = url.match(/\/([^\\/]+)\/?$/);
-  if (urlMatch && urlMatch[1].length > 5) {
-    return `aldana-${urlMatch[1]}`;
-  }
-
+// Generate event ID from title and date
+function generateEventId(title: string, date: string): string {
   const hash = crypto
     .createHash('md5')
-    .update(title)
+    .update(`${title}-${date}`)
     .digest('hex')
     .substring(0, 12);
   return `aldana-${hash}`;
 }
 
-// Parse date from various formats
-function parseDate(dateStr: string): { date: string; time?: string; endDate?: string } {
+// Parse date from format like "Fri, 9 Jan 2026" or "Sun, 18 Jan 2026"
+function parseDate(dateStr: string): string {
+  if (!dateStr) {
+    return new Date().toISOString().split('T')[0];
+  }
+
   try {
-    // Handle date ranges like "15 - 17 January 2025"
-    const rangeMatch = dateStr.match(/(\d{1,2})\s*[-–]\s*(\d{1,2})\s+(\w+)\s+(\d{4})/);
-    if (rangeMatch) {
-      const startDay = rangeMatch[1].padStart(2, '0');
-      const endDay = rangeMatch[2].padStart(2, '0');
-      const monthYear = `${rangeMatch[3]} ${rangeMatch[4]}`;
-      const startDate = new Date(`${startDay} ${monthYear}`);
-      const endDate = new Date(`${endDay} ${monthYear}`);
+    // Clean up the date string
+    const cleaned = dateStr.replace('Array', '').trim();
 
-      if (!isNaN(startDate.getTime())) {
-        return {
-          date: startDate.toISOString().split('T')[0],
-          endDate: endDate.toISOString().split('T')[0],
-        };
-      }
+    // Try direct Date parsing first
+    const parsed = new Date(cleaned);
+    if (!isNaN(parsed.getTime())) {
+      return parsed.toISOString().split('T')[0];
     }
 
-    // Handle single date "15 January 2025" or "January 15, 2025"
-    const date = new Date(dateStr);
-    if (!isNaN(date.getTime())) {
-      return { date: date.toISOString().split('T')[0] };
-    }
-
-    // Manual parsing
+    // Manual parsing for format like "Fri, 9 Jan 2026"
     const months: Record<string, string> = {
       jan: '01', january: '01',
       feb: '02', february: '02',
@@ -75,15 +63,15 @@ function parseDate(dateStr: string): { date: string; time?: string; endDate?: st
       dec: '12', december: '12',
     };
 
-    const lower = dateStr.toLowerCase();
+    const lower = cleaned.toLowerCase();
     for (const [monthName, monthNum] of Object.entries(months)) {
       if (lower.includes(monthName)) {
-        const dayMatch = dateStr.match(/(\d{1,2})/);
-        const yearMatch = dateStr.match(/20\d{2}/);
-        if (dayMatch) {
+        const dayMatch = cleaned.match(/(\d{1,2})/);
+        const yearMatch = cleaned.match(/20\d{2}/);
+        if (dayMatch && yearMatch) {
           const day = dayMatch[1].padStart(2, '0');
-          const year = yearMatch ? yearMatch[0] : new Date().getFullYear().toString();
-          return { date: `${year}-${monthNum}-${day}` };
+          const year = yearMatch[0];
+          return `${year}-${monthNum}-${day}`;
         }
       }
     }
@@ -91,155 +79,7 @@ function parseDate(dateStr: string): { date: string; time?: string; endDate?: st
     scraperLog.debug(LOG_PREFIX, `Date parse error: ${dateStr}`);
   }
 
-  return { date: new Date().toISOString().split('T')[0] };
-}
-
-// Parse time
-function parseTime(timeStr: string): string | undefined {
-  if (!timeStr) return undefined;
-
-  const timeMatch = timeStr.match(/(\d{1,2})[:\.]?(\d{2})?\s*(am|pm)?/i);
-  if (timeMatch) {
-    let hours = parseInt(timeMatch[1]);
-    const minutes = timeMatch[2] || '00';
-    const period = timeMatch[3]?.toLowerCase();
-
-    if (period === 'pm' && hours < 12) hours += 12;
-    if (period === 'am' && hours === 12) hours = 0;
-
-    return `${hours.toString().padStart(2, '0')}:${minutes}`;
-  }
-
-  return undefined;
-}
-
-// Scrape event detail page
-async function scrapeEventDetail(
-  page: Page,
-  eventUrl: string
-): Promise<Partial<ScrapedEvent>> {
-  try {
-    // Rate limiting delay
-    await sleep(getRandomDelay(SCRAPER_CONFIG.delays.betweenRequests));
-
-    await page.goto(eventUrl, { waitUntil: 'networkidle2', timeout: SCRAPER_CONFIG.timeout });
-    await sleep(1000);
-
-    const html = await page.content();
-    const $ = cheerio.load(html);
-
-    const details: Partial<ScrapedEvent> = {};
-
-    // Get description
-    const descriptionSelectors = [
-      '.event-description',
-      '.show-description',
-      '.content-section p',
-      '.event-content p',
-      '.event-details p',
-      'article p',
-      '.description',
-    ];
-
-    for (const selector of descriptionSelectors) {
-      const paragraphs: string[] = [];
-      $(selector).each((i, el) => {
-        const text = $(el).text().trim();
-        if (text.length > 30) {
-          paragraphs.push(text);
-        }
-      });
-
-      if (paragraphs.length > 0) {
-        details.description = paragraphs.slice(0, 4).join('\n\n');
-        break;
-      }
-    }
-
-    // Get time
-    const timeSelectors = [
-      '.event-time',
-      '.show-time',
-      '.start-time',
-      '.doors-open',
-    ];
-
-    for (const selector of timeSelectors) {
-      const timeText = $(selector).first().text().trim();
-      if (timeText) {
-        details.time = parseTime(timeText);
-        if (details.time) break;
-      }
-    }
-
-    // Get price
-    const priceSelectors = [
-      '.ticket-price',
-      '.price-range',
-      '.tickets-from',
-      '.price',
-    ];
-
-    for (const selector of priceSelectors) {
-      const price = $(selector).first().text().trim();
-      if (price) {
-        details.price = price;
-        break;
-      }
-    }
-
-    // Get high-res image
-    const imageSelectors = [
-      '.event-banner img',
-      '.hero-image img',
-      '.event-poster img',
-      '.show-image img',
-      'meta[property="og:image"]',
-      '.featured-image img',
-    ];
-
-    for (const selector of imageSelectors) {
-      let img: string | undefined;
-
-      if (selector.includes('meta')) {
-        img = $(selector).attr('content');
-      } else {
-        img = $(selector).first().attr('src') || $(selector).first().attr('data-src');
-      }
-
-      if (img && (img.startsWith('http') || img.startsWith('//'))) {
-        details.image_url = img.startsWith('//') ? `https:${img}` : img;
-        break;
-      }
-    }
-
-    // Look for booking URL
-    const bookingSelectors = [
-      'a[href*="ticket"]',
-      'a[href*="book"]',
-      '.buy-tickets',
-      '.get-tickets',
-      '.cta-button a',
-    ];
-
-    for (const selector of bookingSelectors) {
-      const bookingLink = $(selector).first().attr('href');
-      if (bookingLink && bookingLink.startsWith('http')) {
-        details.booking_url = bookingLink;
-        break;
-      }
-    }
-
-    // If no external booking URL found, use the event page
-    if (!details.booking_url) {
-      details.booking_url = eventUrl;
-    }
-
-    return details;
-  } catch (error) {
-    scraperLog.error(LOG_PREFIX, `Detail page failed: ${eventUrl} - ${(error as Error).message}`);
-    return { booking_url: eventUrl };
-  }
+  return new Date().toISOString().split('T')[0];
 }
 
 /**
@@ -249,8 +89,6 @@ export async function scrapeAlDana(): Promise<ScrapedEvent[]> {
   scraperLog.info(LOG_PREFIX, 'Starting Al Dana Amphitheatre scraper...');
   const events: ScrapedEvent[] = [];
   let browser: Browser | null = null;
-  let successCount = 0;
-  let failCount = 0;
 
   try {
     browser = await puppeteer.launch({
@@ -267,230 +105,142 @@ export async function scrapeAlDana(): Promise<ScrapedEvent[]> {
 
     // Set proper bot user agent
     await page.setUserAgent(SCRAPER_CONFIG.userAgent);
-
-    // Set extra headers
     await page.setExtraHTTPHeaders(SCRAPER_CONFIG.headers);
 
-    // Try multiple possible URLs for events
-    const possibleUrls = [
-      BASE_URL,
-      `${BASE_URL}/events`,
-      `${BASE_URL}/shows`,
-      `${BASE_URL}/upcoming`,
-      `${BASE_URL}/whats-on`,
-    ];
+    // Navigate to homepage
+    scraperLog.info(LOG_PREFIX, `Loading ${BASE_URL}...`);
+    await page.goto(BASE_URL, { waitUntil: 'networkidle2', timeout: SCRAPER_CONFIG.timeout });
 
-    for (const url of possibleUrls) {
-      scraperLog.info(LOG_PREFIX, `Trying URL: ${url}`);
+    // Wait for content to load
+    await sleep(getRandomDelay(SCRAPER_CONFIG.delays.betweenPages));
 
-      try {
-        await page.goto(url, { waitUntil: 'networkidle2', timeout: SCRAPER_CONFIG.timeout });
-        await sleep(getRandomDelay(SCRAPER_CONFIG.delays.betweenPages));
+    // Extract events using page.evaluate
+    const extractedEvents = await page.evaluate(() => {
+      const results: Array<{
+        title: string;
+        date: string | null;
+        image: string | null;
+        buyLink: string | null;
+      }> = [];
 
-        // Scroll to load content
-        await page.evaluate(() => window.scrollTo(0, document.body.scrollHeight));
-        await sleep(1500);
+      // Skip these headings - they're not events
+      const skipTitles = [
+        'upcoming events', 'menu', 'social media', 'proud partner',
+        'awards', 'certifications', 'be the first'
+      ];
 
-        const html = await page.content();
-        const $ = cheerio.load(html);
+      // Find all h2 elements (event titles)
+      const h2Elements = document.querySelectorAll('h2');
 
-        // Try various selectors for event cards
-        const eventSelectors = [
-          '.event-card',
-          '.show-card',
-          '.event-item',
-          '.upcoming-event',
-          '[data-event]',
-          '.events-grid article',
-          '.shows-list article',
-          'a[href*="/event/"]',
-          'a[href*="/show/"]',
-        ];
+      h2Elements.forEach(h2 => {
+        const title = h2.textContent?.trim();
+        if (!title || title.length < 3) return;
 
-        for (const selector of eventSelectors) {
-          const elements = $(selector);
-          if (elements.length > 0) {
-            scraperLog.info(LOG_PREFIX, `Found ${elements.length} elements with selector: ${selector}`);
+        // Skip non-event headings
+        if (skipTitles.some(skip => title.toLowerCase().includes(skip))) return;
 
-            elements.each((i, el) => {
-              try {
-                const $el = $(el);
+        // Get parent container (div.bottom)
+        const container = h2.parentElement;
+        if (!container) return;
 
-                // Get link
-                let link = $el.attr('href') || $el.find('a').first().attr('href');
-                if (!link) return;
+        // Find date - look for sibling element with date class or date pattern
+        let date: string | null = null;
+        let sibling = h2.nextElementSibling;
+        while (sibling) {
+          const text = sibling.textContent?.trim();
+          if (
+            sibling.classList?.contains('date') ||
+            text?.match(/\d{1,2}\s+(Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec)\s+\d{4}/i)
+          ) {
+            date = text?.replace('Array', '').trim() || null;
+            break;
+          }
+          sibling = sibling.nextElementSibling;
+        }
 
-                const fullUrl = link.startsWith('http') ? link : `${BASE_URL}${link}`;
+        // Find buy link - look for platinumlist links in siblings
+        let buyLink: string | null = null;
+        sibling = h2.nextElementSibling;
+        while (sibling) {
+          const link = sibling.querySelector?.('a[href*="platinumlist"]') as HTMLAnchorElement | null;
+          if (link) {
+            buyLink = link.href;
+            break;
+          }
+          if (sibling.tagName === 'A' && (sibling as HTMLAnchorElement).href?.includes('platinumlist')) {
+            buyLink = (sibling as HTMLAnchorElement).href;
+            break;
+          }
+          sibling = sibling.nextElementSibling;
+        }
 
-                // Get title - prioritize headings, avoid button text
-                let title = $el.find('.event-title, .show-title, h2, h3, h4').first().text().trim();
-
-                // If no title from headings, try other sources but avoid button text
-                if (!title || title.length < 3) {
-                  // Try aria-label or title attribute
-                  title = $el.attr('title') || $el.attr('aria-label') || '';
-                }
-
-                // If still no title, try anchor text but filter out button-like text
-                if (!title || title.length < 3) {
-                  const anchorText = $el.find('a').first().text().trim();
-                  const buttonWords = ['buy', 'ticket', 'book', 'get', 'purchase', 'register', 'sign', 'learn more', 'read more', 'view', 'more info'];
-                  const isButtonText = buttonWords.some(word => anchorText.toLowerCase().includes(word));
-                  if (!isButtonText && anchorText.length > 3) {
-                    title = anchorText;
-                  }
-                }
-
-                // Skip if title looks like a button
-                const skipPatterns = ['buy now', 'get tickets', 'book now', 'purchase', 'buy tickets', 'learn more', 'read more'];
-                if (!title || title.length < 3 || skipPatterns.some(p => title.toLowerCase().includes(p))) return;
-
-                // Get date
-                const dateText = $el.find('.event-date, .show-date, .date, time').first().text().trim();
-                const { date: parsedDate, endDate } = dateText ? parseDate(dateText) : { date: new Date().toISOString().split('T')[0] };
-
-                // Get image
-                let image = $el.find('img').first().attr('src') ||
-                           $el.find('img').first().attr('data-src');
-
-                if (image) {
-                  if (image.startsWith('//')) image = `https:${image}`;
-                  else if (image.startsWith('/')) image = `${BASE_URL}${image}`;
-                }
-
-                // Get price
-                const priceText = $el.find('.price, .ticket-price').first().text().trim();
-
-                // Check for duplicate
-                if (events.find(e => e.source_url === fullUrl)) return;
-
-                const event: ScrapedEvent = {
-                  title,
-                  description: '',
-                  date: parsedDate,
-                  venue_name: VENUE_NAME,
-                  venue_address: VENUE_ADDRESS,
-                  category: detectCategory(title), // Will be refined with description
-                  price: priceText || undefined,
-                  image_url: image || undefined,
-                  source_url: fullUrl,
-                  source_name: SOURCE_NAME,
-                  source_event_id: generateEventId(fullUrl, title),
-                };
-
-                if (endDate) {
-                  event.end_date = endDate;
-                }
-
-                events.push(event);
-                successCount++;
-                scraperLog.success(LOG_PREFIX, `Scraped: ${title}`);
-              } catch (error) {
-                failCount++;
-                scraperLog.error(LOG_PREFIX, `Failed to parse event card: ${(error as Error).message}`);
-              }
-            });
-
-            if (events.length > 0) break;
+        // Find image - look in grandparent container for picture element
+        let image: string | null = null;
+        const grandparent = container.parentElement;
+        if (grandparent) {
+          const picture = grandparent.querySelector('picture');
+          if (picture) {
+            const webpSource = picture.querySelector('source[type="image/webp"]') as HTMLSourceElement;
+            const img = picture.querySelector('img') as HTMLImageElement;
+            image = webpSource?.srcset || img?.src || null;
+          }
+          if (!image) {
+            const img = grandparent.querySelector('img') as HTMLImageElement;
+            image = img?.src || null;
           }
         }
 
-        if (events.length > 0) break;
+        results.push({ title, date, image, buyLink });
+      });
 
-      } catch (error) {
-        scraperLog.warn(LOG_PREFIX, `Failed to load ${url}: ${(error as Error).message}`);
+      return results;
+    });
+
+    scraperLog.info(LOG_PREFIX, `Found ${extractedEvents.length} events on page`);
+
+    // Process extracted events
+    for (const extracted of extractedEvents) {
+      const parsedDate = parseDate(extracted.date || '');
+
+      // Skip past events
+      const eventDate = new Date(parsedDate);
+      const today = new Date();
+      today.setHours(0, 0, 0, 0);
+      if (eventDate < today) {
+        scraperLog.debug(LOG_PREFIX, `Skipping past event: ${extracted.title}`);
         continue;
       }
-    }
 
-    // If no structured events found, try to find any event links
-    if (events.length === 0) {
-      scraperLog.warn(LOG_PREFIX, 'Trying generic event link extraction...');
+      // Create event object
+      const event: ScrapedEvent = {
+        title: extracted.title,
+        description: `Experience ${extracted.title} live at ${VENUE_NAME}, Bahrain's premier outdoor concert venue.`,
+        date: parsedDate,
+        venue_name: VENUE_NAME,
+        venue_address: VENUE_ADDRESS,
+        category: detectCategory(extracted.title),
+        image_url: extracted.image || undefined,
+        booking_url: extracted.buyLink || undefined,
+        source_url: BASE_URL,
+        source_name: SOURCE_NAME,
+        source_event_id: generateEventId(extracted.title, parsedDate),
+      };
 
-      const html = await page.content();
-      const $ = cheerio.load(html);
-
-      $('a').each((i, el) => {
-        try {
-          const href = $(el).attr('href') || '';
-          const text = $(el).text().trim();
-
-          // Skip button-like text
-          const buttonPatterns = ['buy', 'ticket', 'book', 'purchase', 'get', 'register', 'learn more', 'read more', 'view details'];
-          const isButtonText = buttonPatterns.some(p => text.toLowerCase().includes(p));
-          if (isButtonText) return;
-
-          // Look for links that might be events
-          if (href.includes('/event') || href.includes('/show') || href.includes('/concert')) {
-            const fullUrl = href.startsWith('http') ? href : `${BASE_URL}${href}`;
-
-            if (text && text.length > 3 && !events.find(e => e.source_url === fullUrl)) {
-              events.push({
-                title: text,
-                description: '',
-                date: new Date().toISOString().split('T')[0],
-                venue_name: VENUE_NAME,
-                venue_address: VENUE_ADDRESS,
-                category: detectCategory(text),
-                source_url: fullUrl,
-                source_name: SOURCE_NAME,
-                source_event_id: generateEventId(fullUrl, text),
-              });
-              successCount++;
-            }
-          }
-        } catch (error) {
-          failCount++;
-        }
-      });
-    }
-
-    scraperLog.info(LOG_PREFIX, `Found ${events.length} events from listing`);
-
-    // Scrape detail pages (limit per config)
-    const eventsToScrape = events.slice(0, SCRAPER_CONFIG.maxDetailPages);
-
-    for (let i = 0; i < eventsToScrape.length; i++) {
-      const event = eventsToScrape[i];
-
-      try {
-        scraperLog.info(LOG_PREFIX, `Scraping detail ${i + 1}/${eventsToScrape.length}: ${event.title}`);
-
-        const details = await scrapeEventDetail(page, event.source_url);
-
-        // Merge details
-        if (details.description) event.description = details.description;
-        if (details.time) event.time = details.time;
-        if (details.price) event.price = details.price;
-        if (details.image_url) event.image_url = details.image_url;
-        if (details.booking_url) event.booking_url = details.booking_url;
-
-        // Update category with description context
-        if (event.description) {
-          const detectedCategory = detectCategory(event.title, event.description);
-          // Al Dana is mostly music/concerts
-          if (detectedCategory === 'other') {
-            event.category = 'music';
-          } else {
-            event.category = detectedCategory;
-          }
-        } else {
-          // Default to music for Al Dana events
-          event.category = 'music';
-        }
-
-        scraperLog.success(LOG_PREFIX, `Detail scraped: ${event.title}`);
-      } catch (error) {
-        scraperLog.error(LOG_PREFIX, `Detail scrape failed for ${event.title}: ${(error as Error).message}`);
-        // Continue with next event
+      // Most Al Dana events are music/concerts
+      if (event.category === 'other') {
+        event.category = 'music';
       }
+
+      events.push(event);
+      scraperLog.success(LOG_PREFIX, `Scraped: ${event.title} (${parsedDate})`);
     }
 
-    scraperLog.info(LOG_PREFIX, `Scraping complete. ${successCount} succeeded, ${failCount} failed.`);
+    scraperLog.info(LOG_PREFIX, `Scraping complete. Found ${events.length} upcoming events.`);
     return events;
+
   } catch (error) {
     scraperLog.error(LOG_PREFIX, `Scraper error: ${(error as Error).message}`);
-    return events; // Return whatever we got so far
+    return events;
   } finally {
     if (browser) {
       await browser.close();
