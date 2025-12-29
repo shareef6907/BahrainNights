@@ -85,17 +85,24 @@ function isValidEvent(event: ScrapedEvent): { valid: boolean; reason?: string } 
   }
 
   // Check date is not too far in past (allow 1 day buffer for timezone issues)
-  const eventDate = new Date(event.date);
+  // For ongoing events with end_date, check if end_date is still in future
+  const eventStartDate = new Date(event.date);
+  const eventEndDate = event.end_date ? new Date(event.end_date) : eventStartDate;
   const yesterday = new Date();
   yesterday.setDate(yesterday.getDate() - 1);
-  if (eventDate < yesterday) {
-    return { valid: false, reason: `Past event: ${event.date}` };
+  yesterday.setHours(0, 0, 0, 0);
+
+  // Event is valid if either:
+  // 1. Start date is in future/today
+  // 2. End date is in future/today (for ongoing events)
+  if (eventEndDate < yesterday && eventStartDate < yesterday) {
+    return { valid: false, reason: `Past event: ${event.date}${event.end_date ? ` to ${event.end_date}` : ''}` };
   }
 
   // Check date is not too far in future (2 years max)
   const twoYearsFromNow = new Date();
   twoYearsFromNow.setFullYear(twoYearsFromNow.getFullYear() + 2);
-  if (eventDate > twoYearsFromNow) {
+  if (eventStartDate > twoYearsFromNow) {
     return { valid: false, reason: `Date too far in future: ${event.date}` };
   }
 

@@ -192,7 +192,7 @@ export default function AdminEventEditPage() {
       const uploadData = new FormData();
       uploadData.append('file', file);
 
-      const response = await fetch('/api/upload', {
+      const response = await fetch('/api/upload/admin', {
         method: 'POST',
         body: uploadData,
       });
