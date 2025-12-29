@@ -1,6 +1,7 @@
 /**
  * Image Processor - Downloads event images and uploads to S3
  * Uses the existing S3/Lambda pipeline for watermarking and optimization
+ * Falls back to AI-generated images when no source image is available
  */
 
 import {
@@ -8,7 +9,8 @@ import {
   PutObjectCommand,
   HeadObjectCommand,
 } from '@aws-sdk/client-s3';
-import crypto from 'crypto';
+import * as crypto from 'crypto';
+import { generateEventImage } from './image-generator';
 
 // Initialize S3 client
 const s3Client = new S3Client({
@@ -57,6 +59,39 @@ function isLogoImage(url: string): boolean {
 
   // Check if URL contains any logo patterns
   return logoPatterns.some(pattern => lowercaseUrl.includes(pattern));
+}
+
+/**
+ * Check if URL appears to be a placeholder or default image
+ */
+function isPlaceholderImage(url: string): boolean {
+  const lowercaseUrl = url.toLowerCase();
+
+  const placeholderPatterns = [
+    'placeholder',
+    'no-image',
+    'noimage',
+    'default',
+    'blank',
+    'empty',
+    'missing',
+    '1x1',
+    'pixel.gif',
+    'spacer',
+  ];
+
+  return placeholderPatterns.some(pattern => lowercaseUrl.includes(pattern));
+}
+
+/**
+ * Check if an image URL is valid and suitable for use
+ */
+function isValidImageUrl(url: string | null | undefined): boolean {
+  if (!url) return false;
+  if (!url.startsWith('http')) return false;
+  if (isLogoImage(url)) return false;
+  if (isPlaceholderImage(url)) return false;
+  return true;
 }
 
 /**
@@ -245,6 +280,112 @@ export function generateSlug(title: string): string {
     .replace(/\s+/g, '-') // Replace spaces with hyphens
     .replace(/-+/g, '-') // Replace multiple hyphens with single
     .substring(0, 60); // Limit length
+}
+
+/**
+ * Process an event image with AI fallback
+ * If no valid source image is available, generates one using AI
+ *
+ * @param imageUrl - Original image URL (may be null, logo, or placeholder)
+ * @param eventTitle - Title of the event (used for AI prompt)
+ * @param category - Event category (used for AI prompt)
+ * @param venueName - Venue name (used for AI prompt context)
+ * @param sourceName - Source name for S3 folder organization
+ * @returns S3 URL of processed image, or null if all methods fail
+ */
+export async function processEventImageWithFallback(
+  imageUrl: string | null | undefined,
+  eventTitle: string,
+  category: string,
+  venueName: string | undefined,
+  sourceName: string
+): Promise<string | null> {
+  const eventSlug = generateSlug(eventTitle);
+
+  // Check if we have a valid source image
+  if (isValidImageUrl(imageUrl)) {
+    console.log(`[Image] Processing source image for: ${eventTitle}`);
+    const result = await processEventImage(imageUrl!, eventSlug, sourceName);
+    if (result) {
+      return result;
+    }
+    // If source image processing failed, fall through to AI generation
+    console.log(`[Image] Source image processing failed, trying AI generation...`);
+  }
+
+  // No valid source image or processing failed - try AI generation
+  console.log(`[Image] Generating AI image for: ${eventTitle}`);
+
+  const generatedUrl = await generateEventImage(eventTitle, category, venueName);
+
+  if (!generatedUrl) {
+    console.log(`[Image] AI generation failed for: ${eventTitle}`);
+    return null;
+  }
+
+  // Download and upload the generated image to S3
+  console.log(`[Image] Uploading AI-generated image to S3...`);
+
+  // Generate unique filename for AI-generated image
+  const imageHash = generateImageHash(`ai-${eventTitle}-${Date.now()}`);
+  const now = new Date();
+  const yearMonth = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`;
+  const folder = `scraped-events/${sourceName}/${yearMonth}`;
+  const filename = `${eventSlug}-ai-${imageHash}`;
+
+  // Check cache
+  const cacheKey = `ai:${eventTitle}:${category}`;
+  if (processedImageCache.has(cacheKey)) {
+    return processedImageCache.get(cacheKey)!;
+  }
+
+  // Download the AI-generated image
+  const downloaded = await downloadImage(generatedUrl);
+  if (!downloaded) {
+    console.error(`[Image] Failed to download AI-generated image`);
+    return null;
+  }
+
+  // Upload to S3
+  const extMap: Record<string, string> = {
+    'image/jpeg': '.jpg',
+    'image/png': '.png',
+    'image/webp': '.webp',
+    'image/gif': '.gif',
+  };
+  const ext = extMap[downloaded.contentType] || '.webp';
+  const uploadKey = `uploads/${folder}/${filename}${ext}`;
+  const processedKey = `processed/${folder}/${filename}.webp`;
+  const processedUrl = `${PUBLIC_URL}/${folder}/${filename}.webp`;
+
+  try {
+    await s3Client.send(
+      new PutObjectCommand({
+        Bucket: BUCKET,
+        Key: uploadKey,
+        Body: downloaded.buffer,
+        ContentType: downloaded.contentType,
+      })
+    );
+
+    console.log(`[Image] Uploaded AI image to S3: ${uploadKey}`);
+
+    // Wait for Lambda to process
+    const isProcessed = await waitForProcessing(processedUrl, 20, 1500);
+
+    if (isProcessed) {
+      console.log(`[Image] AI image processed successfully: ${filename}`);
+    } else {
+      console.warn(`[Image] AI image processing timeout: ${filename}`);
+    }
+
+    // Cache and return URL
+    processedImageCache.set(cacheKey, processedUrl);
+    return processedUrl;
+  } catch (error) {
+    console.error(`[Image] Failed to upload AI-generated image:`, error);
+    return null;
+  }
 }
 
 /**

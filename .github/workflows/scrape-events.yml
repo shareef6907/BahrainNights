@@ -63,6 +63,9 @@ jobs:
           # Public URL for S3
           NEXT_PUBLIC_S3_URL: ${{ secrets.NEXT_PUBLIC_S3_URL }}
           NEXT_PUBLIC_CDN_URL: ${{ secrets.NEXT_PUBLIC_CDN_URL }}
+
+          # Replicate AI for image generation (fallback when no source image)
+          REPLICATE_API_TOKEN: ${{ secrets.REPLICATE_API_TOKEN }}
         run: |
           echo "Starting BahrainNights Event Scraper"
           echo "Bot User Agent: $BOT_USER_AGENT"
