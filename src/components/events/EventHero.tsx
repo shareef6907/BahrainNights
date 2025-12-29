@@ -51,7 +51,7 @@ export default function EventHero({
           src={image}
           alt={title}
           fill
-          className="object-cover"
+          className="object-cover object-top"
           priority
           sizes="100vw"
         />

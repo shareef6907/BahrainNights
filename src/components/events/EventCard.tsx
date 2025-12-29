@@ -60,7 +60,7 @@ export default function EventCard({ event, view = 'grid', index = 0 }: EventCard
                 src={event.image}
                 alt={event.title}
                 fill
-                className="object-cover group-hover:scale-105 transition-transform duration-300"
+                className="object-cover object-top group-hover:scale-105 transition-transform duration-300"
                 sizes="192px"
               />
               <div className={`absolute top-2 left-2 px-2 py-1 ${event.categoryColor} text-white text-xs font-bold rounded-full`}>
@@ -126,7 +126,7 @@ export default function EventCard({ event, view = 'grid', index = 0 }: EventCard
               src={event.image}
               alt={event.title}
               fill
-              className="object-cover group-hover:scale-105 transition-transform duration-300"
+              className="object-cover object-top group-hover:scale-105 transition-transform duration-300"
               sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
             />
 
