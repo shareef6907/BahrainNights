@@ -27,6 +27,44 @@ function getCategoryColor(category: string): string {
   return colors[category?.toLowerCase()] || 'bg-purple-500';
 }
 
+// Helper: Normalize date to ISO format (YYYY-MM-DD)
+function normalizeToISODate(dateStr: string | null | undefined): string {
+  if (!dateStr) return '';
+
+  // If already in ISO format (YYYY-MM-DD), return as-is
+  if (/^\d{4}-\d{2}-\d{2}/.test(dateStr)) {
+    return dateStr.split('T')[0]; // Strip time if present
+  }
+
+  // Try to parse various formats
+  try {
+    const date = new Date(dateStr);
+    if (!isNaN(date.getTime())) {
+      // If the year is missing/wrong (e.g., "Dec 29" parsed as 2001), use current/next year
+      const year = date.getFullYear();
+      const currentYear = new Date().getFullYear();
+
+      if (year < currentYear - 1) {
+        // Date was parsed with wrong year, assume current or next year
+        const month = date.getMonth();
+        const day = date.getDate();
+        const currentMonth = new Date().getMonth();
+
+        // If the month is before current month, assume next year
+        const targetYear = month < currentMonth ? currentYear + 1 : currentYear;
+        const correctedDate = new Date(targetYear, month, day);
+        return correctedDate.toISOString().split('T')[0];
+      }
+
+      return date.toISOString().split('T')[0];
+    }
+  } catch {
+    // Fall through
+  }
+
+  return ''; // Return empty if we can't parse
+}
+
 // Fetch all published events on the server
 async function getEvents(): Promise<Event[]> {
   // Create Supabase client with service role key
@@ -57,6 +95,7 @@ async function getEvents(): Promise<Event[]> {
   return data.map((event: any) => {
     // Handle date formatting - support both date and start_date fields
     const eventDate = event.date || event.start_date;
+    const rawDate = normalizeToISODate(eventDate); // Normalize to ISO format for filtering
     const formattedDate = eventDate
       ? new Date(eventDate).toLocaleDateString('en-US', {
           weekday: 'short',
@@ -78,12 +117,13 @@ async function getEvents(): Promise<Event[]> {
       title: event.title || 'Untitled Event',
       slug: event.slug || event.id,
       description: event.description || '',
-      image: event.cover_url || event.featured_image || '/images/event-placeholder.jpg',
+      image: event.cover_url || event.image_url || event.featured_image || '/images/event-placeholder.jpg',
       category: event.category || 'general',
       categoryColor: getCategoryColor(event.category),
       venue: event.venue_name || event.venue || 'Venue TBA',
       location: event.venue_address || event.location || '',
       date: formattedDate,
+      rawDate, // ISO date for filtering
       time: eventTime,
       price: isFree ? 'Free' : (price?.includes?.('BD') ? price : `BD ${price}`),
       isFree,
@@ -96,12 +136,6 @@ async function getEvents(): Promise<Event[]> {
 export default async function EventsPage() {
   // Fetch all data on the server - NO loading state needed!
   const events = await getEvents();
-
-  console.log('=== EVENTS PAGE RENDER ===');
-  console.log('Events passed to client:', events.length);
-  if (events.length > 0) {
-    console.log('Event titles:', events.map(e => e.title).join(', '));
-  }
 
   return (
     <Suspense fallback={null}>

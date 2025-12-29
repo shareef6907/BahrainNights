@@ -13,7 +13,46 @@ function generateSlug(title: string): string {
   return `${base}-${timestamp}`;
 }
 
-// Sample events data covering all categories
+// Category-specific images from Unsplash
+const categoryImages: Record<string, string[]> = {
+  music: [
+    'https://images.unsplash.com/photo-1540039155733-5bb30b53aa14?w=800&h=600&fit=crop',
+    'https://images.unsplash.com/photo-1511735111819-9a3f7709049c?w=800&h=600&fit=crop',
+    'https://images.unsplash.com/photo-1493225457124-a3eb161ffa5f?w=800&h=600&fit=crop',
+  ],
+  dining: [
+    'https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?w=800&h=600&fit=crop',
+    'https://images.unsplash.com/photo-1555939594-58d7cb561ad1?w=800&h=600&fit=crop',
+    'https://images.unsplash.com/photo-1414235077428-338989a2e8c0?w=800&h=600&fit=crop',
+  ],
+  family: [
+    'https://images.unsplash.com/photo-1536640712-4d4c36ff0e4e?w=800&h=600&fit=crop',
+    'https://images.unsplash.com/photo-1503454537195-1dcabb73ffb9?w=800&h=600&fit=crop',
+  ],
+  arts: [
+    'https://images.unsplash.com/photo-1531243269054-5ebf6f34081e?w=800&h=600&fit=crop',
+    'https://images.unsplash.com/photo-1536924940846-227afb31e2a5?w=800&h=600&fit=crop',
+  ],
+  sports: [
+    'https://images.unsplash.com/photo-1461896836934-5cf6e9c7fa5c?w=800&h=600&fit=crop',
+    'https://images.unsplash.com/photo-1544367567-0f2fcb009e0b?w=800&h=600&fit=crop',
+  ],
+  nightlife: [
+    'https://images.unsplash.com/photo-1566417713940-fe7c737a9ef2?w=800&h=600&fit=crop',
+    'https://images.unsplash.com/photo-1514525253161-7a46d19cd819?w=800&h=600&fit=crop',
+    'https://images.unsplash.com/photo-1571266028243-e4733b0f0bb0?w=800&h=600&fit=crop',
+  ],
+  business: [
+    'https://images.unsplash.com/photo-1556761175-4b46a572b786?w=800&h=600&fit=crop',
+    'https://images.unsplash.com/photo-1559136555-9303baea8ebd?w=800&h=600&fit=crop',
+  ],
+  wellness: [
+    'https://images.unsplash.com/photo-1544161515-4ab6ce6db874?w=800&h=600&fit=crop',
+    'https://images.unsplash.com/photo-1545205597-3d9d02c29597?w=800&h=600&fit=crop',
+  ],
+};
+
+// Sample events data covering all categories with images
 const sampleEvents = [
   // Music & Concerts (3 events)
   {
@@ -26,6 +65,7 @@ const sampleEvents = [
     time: "21:00",
     price: "BD 35",
     is_featured: true,
+    image_url: categoryImages.music[0],
   },
   {
     title: "Arabian Nights: Traditional Music Festival",
@@ -37,6 +77,7 @@ const sampleEvents = [
     time: "19:30",
     price: "BD 15",
     is_featured: false,
+    image_url: categoryImages.music[1],
   },
   {
     title: "Acoustic Sunset Sessions",
@@ -48,6 +89,7 @@ const sampleEvents = [
     time: "17:00",
     price: "Free",
     is_featured: false,
+    image_url: categoryImages.music[2],
   },
 
   // Dining & Food (3 events)
@@ -61,6 +103,7 @@ const sampleEvents = [
     time: "12:30",
     price: "BD 45",
     is_featured: true,
+    image_url: categoryImages.dining[0],
   },
   {
     title: "Street Food Festival Bahrain",
@@ -72,6 +115,7 @@ const sampleEvents = [
     time: "16:00",
     price: "Free Entry",
     is_featured: false,
+    image_url: categoryImages.dining[1],
   },
   {
     title: "Wine & Cheese Evening",
@@ -83,6 +127,7 @@ const sampleEvents = [
     time: "19:00",
     price: "BD 55",
     is_featured: false,
+    image_url: categoryImages.dining[2],
   },
 
   // Family & Kids (2 events)
@@ -96,6 +141,7 @@ const sampleEvents = [
     time: "10:00",
     price: "BD 12",
     is_featured: false,
+    image_url: categoryImages.family[0],
   },
   {
     title: "Kids Art Workshop: New Year Creations",
@@ -107,6 +153,7 @@ const sampleEvents = [
     time: "10:00",
     price: "BD 8",
     is_featured: false,
+    image_url: categoryImages.family[1],
   },
 
   // Arts & Culture (2 events)
@@ -120,6 +167,7 @@ const sampleEvents = [
     time: "10:00",
     price: "Free",
     is_featured: false,
+    image_url: categoryImages.arts[0],
   },
   {
     title: "Pearl Diving Heritage Experience",
@@ -131,6 +179,7 @@ const sampleEvents = [
     time: "09:00",
     price: "BD 3",
     is_featured: false,
+    image_url: categoryImages.arts[1],
   },
 
   // Sports & Fitness (2 events)
@@ -144,6 +193,7 @@ const sampleEvents = [
     time: "08:00",
     price: "BD 20 per team",
     is_featured: false,
+    image_url: categoryImages.sports[0],
   },
   {
     title: "Sunrise Yoga on the Beach",
@@ -155,6 +205,7 @@ const sampleEvents = [
     time: "06:30",
     price: "BD 10",
     is_featured: false,
+    image_url: categoryImages.sports[1],
   },
 
   // Nightlife (3 events)
@@ -168,6 +219,7 @@ const sampleEvents = [
     time: "22:00",
     price: "BD 75",
     is_featured: true,
+    image_url: categoryImages.nightlife[0],
   },
   {
     title: "Latin Night: Salsa & Bachata",
@@ -179,6 +231,7 @@ const sampleEvents = [
     time: "21:00",
     price: "Free",
     is_featured: false,
+    image_url: categoryImages.nightlife[1],
   },
   {
     title: "Rooftop Lounge: Chill & Groove",
@@ -190,6 +243,7 @@ const sampleEvents = [
     time: "20:00",
     price: "BD 20",
     is_featured: false,
+    image_url: categoryImages.nightlife[2],
   },
 
   // Business (2 events)
@@ -203,6 +257,7 @@ const sampleEvents = [
     time: "08:00",
     price: "BD 15",
     is_featured: false,
+    image_url: categoryImages.business[0],
   },
   {
     title: "Digital Marketing Workshop 2026",
@@ -214,6 +269,7 @@ const sampleEvents = [
     time: "09:00",
     price: "BD 75",
     is_featured: false,
+    image_url: categoryImages.business[1],
   },
 
   // Wellness (2 events)
@@ -227,6 +283,7 @@ const sampleEvents = [
     time: "08:00",
     price: "BD 95",
     is_featured: true,
+    image_url: categoryImages.wellness[0],
   },
   {
     title: "Meditation & Mindfulness Workshop",
@@ -238,9 +295,11 @@ const sampleEvents = [
     time: "18:00",
     price: "BD 12",
     is_featured: false,
+    image_url: categoryImages.wellness[1],
   },
 ];
 
+// POST - Create new sample events
 export async function POST() {
   try {
     const insertedEvents = [];
@@ -259,7 +318,9 @@ export async function POST() {
         price: event.price,
         status: 'published',
         is_featured: event.is_featured,
-        views: Math.floor(Math.random() * 500), // Random views for realism
+        image_url: event.image_url,
+        cover_url: event.image_url, // Use same image for cover
+        views: Math.floor(Math.random() * 500),
         contact_name: 'BahrainNights Team',
         contact_email: 'events@bahrainnights.com',
       };
@@ -292,9 +353,65 @@ export async function POST() {
   }
 }
 
+// PATCH - Update existing events with images based on category
+export async function PATCH() {
+  try {
+    // Get all events without images
+    const { data: events, error: fetchError } = await supabaseAdmin
+      .from('events')
+      .select('id, title, category, image_url, cover_url')
+      .or('image_url.is.null,image_url.eq.,cover_url.is.null,cover_url.eq.');
+
+    if (fetchError) {
+      return NextResponse.json({ error: fetchError.message }, { status: 500 });
+    }
+
+    const updatedEvents = [];
+    const errors = [];
+    const categoryCounters: Record<string, number> = {};
+
+    for (const event of events || []) {
+      const category = event.category?.toLowerCase() || 'music';
+      const images = categoryImages[category] || categoryImages.music;
+
+      // Get next image index for this category
+      categoryCounters[category] = (categoryCounters[category] || 0) % images.length;
+      const imageUrl = images[categoryCounters[category]];
+      categoryCounters[category]++;
+
+      const { error: updateError } = await supabaseAdmin
+        .from('events')
+        .update({
+          image_url: imageUrl,
+          cover_url: imageUrl,
+        })
+        .eq('id', event.id);
+
+      if (updateError) {
+        errors.push({ id: event.id, title: event.title, error: updateError.message });
+      } else {
+        updatedEvents.push({ id: event.id, title: event.title, image: imageUrl });
+      }
+    }
+
+    return NextResponse.json({
+      success: true,
+      message: `Updated ${updatedEvents.length} events with images`,
+      updated: updatedEvents,
+      errors: errors.length > 0 ? errors : undefined,
+    });
+  } catch (error) {
+    console.error('Update images error:', error);
+    return NextResponse.json(
+      { error: error instanceof Error ? error.message : 'Failed to update images' },
+      { status: 500 }
+    );
+  }
+}
+
 export async function GET() {
   return NextResponse.json({
-    message: 'Use POST to seed sample events',
+    message: 'POST to seed new events, PATCH to update existing events with images',
     eventCount: sampleEvents.length,
     categories: [...new Set(sampleEvents.map(e => e.category))],
   });

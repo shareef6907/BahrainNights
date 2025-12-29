@@ -102,23 +102,27 @@ export async function GET(request: NextRequest) {
     }
 
     // Transform events for frontend
-    const transformedEvents = filteredEvents.map(event => ({
-      id: event.id,
-      title: event.title || 'Untitled Event',
-      slug: event.slug || event.id,
-      description: event.description || '',
-      image: event.cover_url || event.featured_image || 'https://images.unsplash.com/photo-1492684223066-81342ee5ff30?w=800&h=500&fit=crop',
-      category: event.category || 'other',
-      categoryColor: getCategoryColor(event.category),
-      venue: event.venue_name || 'Venue TBD',
-      location: event.venue_address || event.venue_name || 'Bahrain',
-      date: formatDate(event.date || event.start_date),
-      time: event.time || event.start_time || 'TBD',
-      price: formatPrice(event.price_type || event.price, event.booking_method),
-      isFree: event.price_type === 'free' || event.price === 'Free' || event.price === 'free',
-      isFeatured: event.is_featured || false,
-      viewCount: event.views || event.view_count || 0,
-    }));
+    const transformedEvents = filteredEvents.map(event => {
+      const eventDateRaw = event.date || event.start_date;
+      return {
+        id: event.id,
+        title: event.title || 'Untitled Event',
+        slug: event.slug || event.id,
+        description: event.description || '',
+        image: event.cover_url || event.image_url || event.featured_image || 'https://images.unsplash.com/photo-1492684223066-81342ee5ff30?w=800&h=500&fit=crop',
+        category: event.category || 'other',
+        categoryColor: getCategoryColor(event.category),
+        venue: event.venue_name || 'Venue TBD',
+        location: event.venue_address || event.venue_name || 'Bahrain',
+        date: formatDate(eventDateRaw),
+        rawDate: normalizeToISODate(eventDateRaw), // ISO format for filtering
+        time: event.time || event.start_time || 'TBD',
+        price: formatPrice(event.price_type || event.price, event.booking_method),
+        isFree: event.price_type === 'free' || event.price === 'Free' || event.price === 'free',
+        isFeatured: event.is_featured || false,
+        viewCount: event.views || event.view_count || 0,
+      };
+    });
 
     return NextResponse.json({
       events: transformedEvents,
@@ -187,4 +191,42 @@ function formatPrice(priceType: string | null, bookingMethod: string | null): st
     return priceType;
   }
   return 'See Details';
+}
+
+// Helper: Normalize date to ISO format (YYYY-MM-DD)
+function normalizeToISODate(dateStr: string | null): string {
+  if (!dateStr) return '';
+
+  // If already in ISO format (YYYY-MM-DD), return as-is
+  if (/^\d{4}-\d{2}-\d{2}/.test(dateStr)) {
+    return dateStr.split('T')[0]; // Strip time if present
+  }
+
+  // Try to parse various formats
+  try {
+    const date = new Date(dateStr);
+    if (!isNaN(date.getTime())) {
+      // If the year is missing/wrong (e.g., "Dec 29" parsed as 2001), use current/next year
+      const year = date.getFullYear();
+      const currentYear = new Date().getFullYear();
+
+      if (year < currentYear - 1) {
+        // Date was parsed with wrong year, assume current or next year
+        const month = date.getMonth();
+        const day = date.getDate();
+        const currentMonth = new Date().getMonth();
+
+        // If the month is before current month, assume next year
+        const targetYear = month < currentMonth ? currentYear + 1 : currentYear;
+        const correctedDate = new Date(targetYear, month, day);
+        return correctedDate.toISOString().split('T')[0];
+      }
+
+      return date.toISOString().split('T')[0];
+    }
+  } catch {
+    // Fall through
+  }
+
+  return ''; // Return empty if we can't parse
 }

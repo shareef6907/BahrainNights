@@ -1,9 +1,11 @@
 'use client';
 
 import { useState, useEffect, useCallback, useRef } from 'react';
+import { createPortal } from 'react-dom';
 import Link from 'next/link';
 import Image from 'next/image';
 import { motion, AnimatePresence } from 'framer-motion';
+import { supabase } from '@/lib/supabase';
 import {
   Search,
   MoreVertical,
@@ -456,7 +458,7 @@ function RejectModal({
   );
 }
 
-// Dropdown Menu Component with Portal
+// Dropdown Menu Component with Portal - renders to document.body to avoid stacking context issues
 function ActionDropdown({
   event,
   onAction,
@@ -477,22 +479,28 @@ function ActionDropdown({
   buttonRect: { top: number; left: number; bottom: number; right: number };
 }) {
   const isPast = new Date(event.start_date) < new Date();
+  const [mounted, setMounted] = useState(false);
+
+  // Only render portal after mount (for SSR compatibility)
+  useEffect(() => {
+    setMounted(true);
+  }, []);
 
   // Calculate position based on the button rect
   const dropdownTop = buttonRect.bottom + 8;
   const dropdownLeft = Math.max(8, buttonRect.right - 192); // 192px = w-48
 
-  return (
+  const dropdownContent = (
     <>
       {/* Backdrop */}
       <div
-        className="fixed inset-0 z-[55]"
+        className="fixed inset-0 z-[9998]"
         onClick={onClose}
       />
 
       {/* Dropdown - Fixed Position */}
       <div
-        className="fixed w-48 bg-[#1A1A2E] border border-white/10 rounded-xl shadow-2xl z-[56] py-1"
+        className="fixed w-48 bg-[#1A1A2E] border border-white/10 rounded-xl shadow-2xl z-[9999] py-1"
         style={{ top: dropdownTop, left: dropdownLeft }}
       >
         {/* View Details */}
@@ -619,6 +627,10 @@ function ActionDropdown({
       </div>
     </>
   );
+
+  // Use portal to render dropdown at document.body level, bypassing stacking context issues
+  if (!mounted) return null;
+  return createPortal(dropdownContent, document.body);
 }
 
 export default function AdminEventsPage() {
@@ -696,6 +708,42 @@ export default function AdminEventsPage() {
 
   useEffect(() => {
     fetchEvents();
+  }, [fetchEvents]);
+
+  // Real-time subscription for new event submissions
+  useEffect(() => {
+    // Subscribe to all changes on the events table
+    const channel = supabase
+      .channel('admin-events-realtime')
+      .on(
+        'postgres_changes',
+        {
+          event: '*', // Listen to all events (INSERT, UPDATE, DELETE)
+          schema: 'public',
+          table: 'events',
+        },
+        (payload) => {
+          console.log('Real-time event update:', payload.eventType, payload);
+          // Refetch events when any change occurs
+          fetchEvents();
+
+          // Show toast notification for new submissions
+          if (payload.eventType === 'INSERT') {
+            const newEvent = payload.new as Event;
+            if (newEvent.status === 'pending') {
+              showToast(`New event submitted: ${newEvent.title}`, 'success');
+            }
+          }
+        }
+      )
+      .subscribe((status) => {
+        console.log('Supabase realtime subscription status:', status);
+      });
+
+    // Cleanup subscription on unmount
+    return () => {
+      supabase.removeChannel(channel);
+    };
   }, [fetchEvents]);
 
   // Filter events based on tab (for past events filtering)

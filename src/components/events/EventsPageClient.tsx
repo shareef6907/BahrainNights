@@ -19,6 +19,7 @@ export interface Event {
   venue: string;
   location: string;
   date: string;
+  rawDate: string; // ISO date string for filtering
   time: string;
   price: string;
   isFree: boolean;
@@ -94,37 +95,90 @@ export default function EventsPageClient({ initialEvents }: EventsPageClientProp
         }
       }
 
-      // Time filter (client-side filtering for now)
+      // Time filter - use ISO string comparison to avoid timezone issues
       if (selectedTime !== 'all') {
-        const today = new Date();
-        today.setHours(0, 0, 0, 0);
+        // Get today's date in Bahrain timezone (UTC+3) as ISO string
+        const now = new Date();
+        const bahrainTime = new Date(now.getTime() + (3 * 60 * 60 * 1000) - (now.getTimezoneOffset() * 60 * 1000));
+        const todayISO = bahrainTime.toISOString().split('T')[0]; // "2025-12-29"
 
-        // Parse the event date (format: "Dec 28, 2025" or similar)
-        const eventDate = new Date(event.date);
+        // Event date is already in ISO format from rawDate
+        const eventISO = event.rawDate;
+        if (!eventISO) return true; // Skip if no date
+
+        // Helper to add days to ISO date string
+        const addDays = (isoDate: string, days: number): string => {
+          const date = new Date(isoDate + 'T12:00:00Z'); // Use noon UTC to avoid DST issues
+          date.setUTCDate(date.getUTCDate() + days);
+          return date.toISOString().split('T')[0];
+        };
+
+        // Get day of week (0=Sun, 1=Mon, ..., 6=Sat)
+        const todayDate = new Date(todayISO + 'T12:00:00Z');
+        const dayOfWeek = todayDate.getUTCDay();
 
         switch (selectedTime) {
           case 'today':
-            if (eventDate.toDateString() !== today.toDateString()) return false;
+            if (eventISO !== todayISO) return false;
             break;
+
           case 'weekend': {
-            const dayOfWeek = today.getDay();
-            const friday = new Date(today);
-            friday.setDate(today.getDate() + (5 - dayOfWeek + 7) % 7);
-            const sunday = new Date(friday);
-            sunday.setDate(friday.getDate() + 2);
-            if (eventDate < friday || eventDate > sunday) return false;
+            // Weekend = Friday through Sunday
+            let fridayISO: string;
+            let sundayISO: string;
+
+            if (dayOfWeek === 0) {
+              // Today is Sunday - current weekend is Fri-Sun
+              fridayISO = addDays(todayISO, -2);
+              sundayISO = todayISO;
+            } else if (dayOfWeek === 6) {
+              // Today is Saturday
+              fridayISO = addDays(todayISO, -1);
+              sundayISO = addDays(todayISO, 1);
+            } else if (dayOfWeek === 5) {
+              // Today is Friday
+              fridayISO = todayISO;
+              sundayISO = addDays(todayISO, 2);
+            } else {
+              // Mon-Thu: show upcoming weekend
+              const daysUntilFriday = 5 - dayOfWeek;
+              fridayISO = addDays(todayISO, daysUntilFriday);
+              sundayISO = addDays(fridayISO, 2);
+            }
+
+            if (eventISO < fridayISO || eventISO > sundayISO) return false;
             break;
           }
+
           case 'week': {
-            const weekFromNow = new Date(today);
-            weekFromNow.setDate(today.getDate() + 7);
-            if (eventDate < today || eventDate > weekFromNow) return false;
+            // This week = Monday through Sunday of current week
+            let mondayISO: string;
+            let sundayISO: string;
+
+            if (dayOfWeek === 0) {
+              // Sunday - week started 6 days ago
+              mondayISO = addDays(todayISO, -6);
+              sundayISO = todayISO;
+            } else {
+              // Mon-Sat
+              mondayISO = addDays(todayISO, -(dayOfWeek - 1));
+              sundayISO = addDays(mondayISO, 6);
+            }
+
+            if (eventISO < mondayISO || eventISO > sundayISO) return false;
             break;
           }
+
           case 'month': {
-            const monthFromNow = new Date(today);
-            monthFromNow.setMonth(today.getMonth() + 1);
-            if (eventDate < today || eventDate > monthFromNow) return false;
+            // Current month
+            const year = todayISO.substring(0, 4);
+            const month = todayISO.substring(5, 7);
+            const firstDayISO = `${year}-${month}-01`;
+            // Get last day of month
+            const lastDayDate = new Date(Date.UTC(parseInt(year), parseInt(month), 0));
+            const lastDayISO = lastDayDate.toISOString().split('T')[0];
+
+            if (eventISO < firstDayISO || eventISO > lastDayISO) return false;
             break;
           }
         }
