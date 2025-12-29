@@ -322,12 +322,28 @@ export async function scrapeAlDana(): Promise<ScrapedEvent[]> {
 
                 const fullUrl = link.startsWith('http') ? link : `${BASE_URL}${link}`;
 
-                // Get title
-                const title = $el.find('.event-title, .show-title, h2, h3, h4').first().text().trim() ||
-                             $el.find('a').first().text().trim() ||
-                             $el.attr('title') || '';
+                // Get title - prioritize headings, avoid button text
+                let title = $el.find('.event-title, .show-title, h2, h3, h4').first().text().trim();
 
-                if (!title || title.length < 3) return;
+                // If no title from headings, try other sources but avoid button text
+                if (!title || title.length < 3) {
+                  // Try aria-label or title attribute
+                  title = $el.attr('title') || $el.attr('aria-label') || '';
+                }
+
+                // If still no title, try anchor text but filter out button-like text
+                if (!title || title.length < 3) {
+                  const anchorText = $el.find('a').first().text().trim();
+                  const buttonWords = ['buy', 'ticket', 'book', 'get', 'purchase', 'register', 'sign', 'learn more', 'read more', 'view', 'more info'];
+                  const isButtonText = buttonWords.some(word => anchorText.toLowerCase().includes(word));
+                  if (!isButtonText && anchorText.length > 3) {
+                    title = anchorText;
+                  }
+                }
+
+                // Skip if title looks like a button
+                const skipPatterns = ['buy now', 'get tickets', 'book now', 'purchase', 'buy tickets', 'learn more', 'read more'];
+                if (!title || title.length < 3 || skipPatterns.some(p => title.toLowerCase().includes(p))) return;
 
                 // Get date
                 const dateText = $el.find('.event-date, .show-date, .date, time').first().text().trim();
@@ -398,6 +414,11 @@ export async function scrapeAlDana(): Promise<ScrapedEvent[]> {
         try {
           const href = $(el).attr('href') || '';
           const text = $(el).text().trim();
+
+          // Skip button-like text
+          const buttonPatterns = ['buy', 'ticket', 'book', 'purchase', 'get', 'register', 'learn more', 'read more', 'view details'];
+          const isButtonText = buttonPatterns.some(p => text.toLowerCase().includes(p));
+          if (isButtonText) return;
 
           // Look for links that might be events
           if (href.includes('/event') || href.includes('/show') || href.includes('/concert')) {

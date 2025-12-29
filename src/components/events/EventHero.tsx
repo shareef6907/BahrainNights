@@ -124,11 +124,6 @@ export default function EventHero({
               <Clock className="w-5 h-5 text-yellow-400" />
               <span className="font-medium">{time}</span>
             </div>
-
-            {/* Price */}
-            <span className="px-4 py-1.5 bg-yellow-400 text-black font-bold rounded-full">
-              {price}
-            </span>
           </motion.div>
         </div>
       </motion.div>

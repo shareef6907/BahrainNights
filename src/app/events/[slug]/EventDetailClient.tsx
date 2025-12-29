@@ -144,7 +144,7 @@ export default function EventDetailClient({ event, similarEvents }: EventDetailC
                 ) : (
                   <div className="flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-yellow-400 via-orange-500 to-pink-500 rounded-xl text-black font-bold">
                     <Ticket className="w-5 h-5" />
-                    <span>{event.isFree ? 'Free Event' : event.price}</span>
+                    <span>View Event</span>
                   </div>
                 )}
 
@@ -235,25 +235,21 @@ export default function EventDetailClient({ event, similarEvents }: EventDetailC
 
         {/* Mobile Sticky Bottom Bar */}
         <div className="lg:hidden fixed bottom-0 left-0 right-0 z-50 bg-slate-950/95 backdrop-blur-xl border-t border-white/10 p-4">
-          <div className="flex items-center gap-3">
-            <div className="flex-1">
-              <p className="text-sm text-gray-400">Starting from</p>
-              <p className="text-xl font-bold text-yellow-400">{event.price}</p>
-            </div>
+          <div className="flex items-center justify-center gap-3">
             {event.bookingUrl && event.bookingUrl !== '#' ? (
               <a
                 href={event.bookingUrl}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="flex items-center gap-2 px-8 py-4 bg-gradient-to-r from-yellow-400 via-orange-500 to-pink-500 rounded-xl text-black font-bold"
+                className="flex items-center gap-2 px-8 py-4 bg-gradient-to-r from-yellow-400 via-orange-500 to-pink-500 rounded-xl text-black font-bold w-full justify-center"
               >
                 <Ticket className="w-5 h-5" />
                 Book Now
               </a>
             ) : (
-              <div className="flex items-center gap-2 px-8 py-4 bg-gradient-to-r from-yellow-400 via-orange-500 to-pink-500 rounded-xl text-black font-bold">
+              <div className="flex items-center gap-2 px-8 py-4 bg-gradient-to-r from-yellow-400 via-orange-500 to-pink-500 rounded-xl text-black font-bold w-full justify-center">
                 <Ticket className="w-5 h-5" />
-                {event.isFree ? 'Free' : 'View'}
+                View Event
               </div>
             )}
           </div>

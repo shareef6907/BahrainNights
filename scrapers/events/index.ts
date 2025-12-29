@@ -270,14 +270,16 @@ export async function runEventScrapers(): Promise<void> {
   const robotsPermissions = await preCheckAllSources();
 
   // Define all scrapers with their base URLs for robots.txt checking
+  // NOTE: Platinumlist scrapers disabled until business agreement is in place
   const scrapers: Array<{
     name: string;
     baseUrl: string;
     fn: () => Promise<ScrapedEvent[]>;
   }> = [
     { name: 'Bahrain Calendar', baseUrl: 'https://www.bahrain.com', fn: scrapeBahrainCalendar },
-    { name: 'Platinumlist Events', baseUrl: 'https://manama.platinumlist.net', fn: scrapePlatinumlistEvents },
-    { name: 'Platinumlist Attractions', baseUrl: 'https://manama.platinumlist.net', fn: scrapePlatinumlistAttractions },
+    // DISABLED: Platinumlist scrapers - awaiting business agreement
+    // { name: 'Platinumlist Events', baseUrl: 'https://manama.platinumlist.net', fn: scrapePlatinumlistEvents },
+    // { name: 'Platinumlist Attractions', baseUrl: 'https://manama.platinumlist.net', fn: scrapePlatinumlistAttractions },
     { name: 'Al Dana Amphitheatre', baseUrl: 'https://www.beyonaldana.com.bh', fn: scrapeAlDana },
   ];
 

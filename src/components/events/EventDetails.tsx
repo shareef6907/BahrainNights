@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import { motion } from 'framer-motion';
-import { Calendar, Clock, DollarSign, Users, Shirt, ChevronDown, ChevronUp, Tag } from 'lucide-react';
+import { Calendar, Clock, Users, Shirt, ChevronDown, ChevronUp, Tag } from 'lucide-react';
 import Link from 'next/link';
 
 interface PriceTier {
@@ -110,27 +110,6 @@ export default function EventDetails({
               </div>
             </div>
           )}
-
-          {/* Price Tiers */}
-          <div className="flex items-start gap-4 p-4 bg-white/5 rounded-xl sm:col-span-2">
-            <div className="p-3 bg-yellow-400/10 rounded-lg">
-              <DollarSign className="w-6 h-6 text-yellow-400" />
-            </div>
-            <div className="flex-1">
-              <p className="text-sm text-gray-400 mb-2">Ticket Prices</p>
-              <div className="flex flex-wrap gap-3">
-                {priceTiers.map((tier, index) => (
-                  <div
-                    key={index}
-                    className="px-4 py-2 bg-white/5 border border-white/10 rounded-lg"
-                  >
-                    <span className="text-gray-400 text-sm">{tier.tier}: </span>
-                    <span className="text-yellow-400 font-bold">{tier.price}</span>
-                  </div>
-                ))}
-              </div>
-            </div>
-          </div>
 
           {/* Age Restriction */}
           {ageRestriction && (

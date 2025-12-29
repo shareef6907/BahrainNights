@@ -244,17 +244,28 @@ export async function scrapeBahrainCalendar(): Promise<ScrapedEvent[]> {
     await page.goto(`${BASE_URL}${CALENDAR_PATH}`, { waitUntil: 'networkidle2', timeout: 60000 });
     await sleep(getRandomDelay(SCRAPER_CONFIG.delays.betweenPages));
 
-    // Scroll to load more content
-    await page.evaluate(() => {
-      window.scrollTo(0, document.body.scrollHeight);
-    });
+    // Wait for initial content to load
+    await sleep(3000);
+
+    // Scroll multiple times to trigger AJAX loading of more content
+    for (let i = 0; i < 3; i++) {
+      await page.evaluate(() => {
+        window.scrollTo(0, document.body.scrollHeight);
+      });
+      await sleep(2000);
+    }
+
+    // Wait for any remaining AJAX requests
     await sleep(2000);
 
     const html = await page.content();
     const $ = cheerio.load(html);
 
     // Try various selectors for event cards
+    // The actual site uses .item containers within #article-list
     const eventSelectors = [
+      '#article-list .item',
+      '.item',
       '.event-card',
       '.event-item',
       '.calendar-event',
@@ -308,14 +319,36 @@ export async function scrapeBahrainCalendar(): Promise<ScrapedEvent[]> {
         try {
           const $el = $(el);
 
-          // Extract basic info
-          const title = $el.find('.event-title, .title, h2, h3, h4').first().text().trim() ||
+          // Extract basic info - try multiple selectors
+          const title = $el.find('h4, h3, h2, .event-title, .title').first().text().trim() ||
                        $el.find('a').first().text().trim();
 
-          const dateText = $el.find('.event-date, .date, time').first().text().trim();
+          // Try to get date from various locations
+          const dateText = $el.find('span').filter((i, span) => {
+            const text = $(span).text();
+            return /\d{1,2}\s*(jan|feb|mar|apr|may|jun|jul|aug|sep|oct|nov|dec)/i.test(text) ||
+                   /20\d{2}/.test(text);
+          }).first().text().trim() || $el.find('.event-date, .date, time').first().text().trim();
+
+          // Get link from anchor tag
           const link = $el.find('a').first().attr('href');
-          const image = $el.find('img').first().attr('src');
-          const category = $el.find('.category, .event-category').first().text().trim();
+
+          // Get image from img tag or background
+          let image = $el.find('img').first().attr('src') || $el.find('img').first().attr('data-src');
+
+          // Try to get data from favorite button data attributes
+          const favoriteBtn = $el.find('.favorite-btn, [data-url]');
+          if (favoriteBtn.length) {
+            if (!image) {
+              image = favoriteBtn.attr('data-image');
+            }
+          }
+
+          // Get category text
+          const category = $el.find('.category, .event-category, span').filter((i, span) => {
+            const text = $(span).text().trim().toLowerCase();
+            return ['sports', 'entertainment', 'music', 'arts', 'family', 'cultural', 'dining'].some(c => text.includes(c));
+          }).first().text().trim();
 
           if (title && title.length > 3) {
             const fullUrl = link

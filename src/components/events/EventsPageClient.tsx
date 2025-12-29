@@ -398,14 +398,9 @@ export default function EventsPageClient({ initialEvents }: EventsPageClientProp
                               <MapPin className="w-4 h-4 text-yellow-400" />
                               <span className="line-clamp-1">{event.venue}</span>
                             </div>
-                            <div className="flex items-center justify-between">
-                              <div className="flex items-center gap-2">
-                                <Clock className="w-4 h-4 text-yellow-400" />
-                                <span>{event.time}</span>
-                              </div>
-                              <span className={`font-bold ${event.isFree ? 'text-green-400' : 'text-yellow-400'}`}>
-                                {event.price}
-                              </span>
+                            <div className="flex items-center gap-2">
+                              <Clock className="w-4 h-4 text-yellow-400" />
+                              <span>{event.time}</span>
                             </div>
                           </div>
                         </div>

@@ -33,6 +33,33 @@ function generateImageHash(url: string): string {
 }
 
 /**
+ * Check if URL appears to be a logo image (should be skipped)
+ * Logos are not suitable as event cover images
+ */
+function isLogoImage(url: string): boolean {
+  const lowercaseUrl = url.toLowerCase();
+
+  // Common patterns that indicate a logo
+  const logoPatterns = [
+    '/logo',
+    '-logo',
+    '_logo',
+    'logo.',
+    'logo-',
+    'logo_',
+    '/brand',
+    '/icon',
+    'favicon',
+    'sprite',
+    '/avatar',
+    'placeholder',
+  ];
+
+  // Check if URL contains any logo patterns
+  return logoPatterns.some(pattern => lowercaseUrl.includes(pattern));
+}
+
+/**
  * Download image from URL and return as buffer
  */
 async function downloadImage(url: string): Promise<{ buffer: Buffer; contentType: string } | null> {
@@ -126,6 +153,12 @@ export async function processEventImage(
   eventSlug: string,
   sourceName: string
 ): Promise<string | null> {
+  // Skip logo images - they're not suitable as event covers
+  if (isLogoImage(imageUrl)) {
+    console.log(`[Image] Skipping logo image: ${imageUrl}`);
+    return null;
+  }
+
   // Check cache first
   const cacheKey = `${sourceName}:${imageUrl}`;
   if (processedImageCache.has(cacheKey)) {
