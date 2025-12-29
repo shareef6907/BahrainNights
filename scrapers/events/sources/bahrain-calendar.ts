@@ -409,6 +409,13 @@ export async function scrapeBahrainCalendar(): Promise<ScrapedEvent[]> {
           fullUrl = href.startsWith('/') ? `${BASE_URL}${href}` : `${BASE_URL}/${href}`;
         }
 
+        // Ensure URL has /en/ prefix (correct Bahrain.com URL format)
+        if (!fullUrl.includes('/en/')) {
+          fullUrl = fullUrl.replace('bahrain.com/', 'bahrain.com/en/');
+        }
+        // Remove any /Error suffix that might be appended
+        fullUrl = fullUrl.replace(/\/Error$/i, '');
+
         // Skip if title is garbage (from featured carousel with times/days only)
         const garbagePatterns = [
           /^(Sun|Mon|Tue|Wed|Thu|Fri|Sat)\s*[-–]/i,  // Starts with day
@@ -427,20 +434,16 @@ export async function scrapeBahrainCalendar(): Promise<ScrapedEvent[]> {
             return; // Skip to next iteration
           }
 
-          // For ongoing multi-day events, use the current date if start is in the past
-          // This ensures the event appears in current listings
-          let effectiveDate = parsedDate;
-          const eventStartDate = new Date(parsedDate);
-          if (eventStartDate < today && isOngoing) {
-            // Event is ongoing - use today's date so it appears in current listings
-            effectiveDate = today.toISOString().split('T')[0];
-            scraperLog.info(LOG_PREFIX, `Ongoing event: ${title} (started: ${parsedDate}, ends: ${parsedEndDate}, using: ${effectiveDate})`);
+          // Use actual start date (not today) - this shows when the event actually starts
+          // End date is stored separately for filtering purposes
+          if (parsedDate !== parsedEndDate) {
+            scraperLog.info(LOG_PREFIX, `Multi-day event: ${title} (${parsedDate} to ${parsedEndDate})`);
           }
 
           events.push({
             title,
             description: '',
-            date: effectiveDate,
+            date: parsedDate, // Use actual start date
             end_date: parsedEndDate !== parsedDate ? parsedEndDate : undefined,
             venue_name: 'Bahrain',
             category: 'other',
@@ -451,7 +454,7 @@ export async function scrapeBahrainCalendar(): Promise<ScrapedEvent[]> {
             source_event_id: generateEventId(fullUrl, title, parsedDate),
           });
           successCount++;
-          scraperLog.success(LOG_PREFIX, `Scraped: ${title} (${effectiveDate})`);
+          scraperLog.success(LOG_PREFIX, `Scraped: ${title} (${parsedDate})`);
         }
       } catch (error) {
         failCount++;

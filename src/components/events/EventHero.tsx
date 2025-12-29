@@ -119,11 +119,13 @@ export default function EventHero({
               <span className="font-medium">{date}</span>
             </div>
 
-            {/* Time */}
-            <div className="flex items-center gap-2">
-              <Clock className="w-5 h-5 text-yellow-400" />
-              <span className="font-medium">{time}</span>
-            </div>
+            {/* Time - only show if not TBA */}
+            {time && !time.toLowerCase().includes('tba') && (
+              <div className="flex items-center gap-2">
+                <Clock className="w-5 h-5 text-yellow-400" />
+                <span className="font-medium">{time}</span>
+              </div>
+            )}
           </motion.div>
         </div>
       </motion.div>
