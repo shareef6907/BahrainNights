@@ -56,13 +56,16 @@ export default function VenueCard({
             <span className="text-sm">{address}</span>
           </div>
 
-          <a
-            href={`tel:${phone}`}
-            className="flex items-center gap-3 text-gray-300 hover:text-yellow-400 transition-colors"
-          >
-            <Phone className="w-5 h-5 text-yellow-400" />
-            <span className="text-sm">{phone}</span>
-          </a>
+          {/* Only show phone if it exists */}
+          {phone && phone.trim() !== '' && (
+            <a
+              href={`tel:${phone}`}
+              className="flex items-center gap-3 text-gray-300 hover:text-yellow-400 transition-colors"
+            >
+              <Phone className="w-5 h-5 text-yellow-400" />
+              <span className="text-sm">{phone}</span>
+            </a>
+          )}
         </div>
 
         {/* Action Buttons */}
@@ -85,29 +88,6 @@ export default function VenueCard({
             View Venue
           </Link>
         </div>
-      </div>
-
-      {/* Map Section */}
-      <div className="border-t border-white/10">
-        <a
-          href={googleMapsUrl}
-          target="_blank"
-          rel="noopener noreferrer"
-          className="block relative h-40 overflow-hidden group"
-        >
-          {/* Static Map Placeholder - In production, use actual Mapbox/Google Maps */}
-          <div className="absolute inset-0 bg-slate-800 flex items-center justify-center">
-            <div className="text-center">
-              <MapPin className="w-8 h-8 text-yellow-400 mx-auto mb-2" />
-              <p className="text-sm text-gray-400">View on Map</p>
-            </div>
-          </div>
-          <div className="absolute inset-0 bg-black/0 group-hover:bg-black/20 transition-colors flex items-center justify-center opacity-0 group-hover:opacity-100">
-            <span className="px-4 py-2 bg-yellow-400 text-black font-bold rounded-full text-sm">
-              Open in Maps
-            </span>
-          </div>
-        </a>
       </div>
     </motion.div>
   );

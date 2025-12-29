@@ -24,6 +24,7 @@ interface DBEvent {
   image_url: string | null;
   cover_url: string | null;
   booking_url: string | null;
+  source_url: string | null;
   status: string;
   is_featured: boolean;
   tags: string[] | null;
@@ -176,7 +177,8 @@ export default async function EventDetailPage({ params }: PageProps) {
     ageRestriction: 'All Ages Welcome',
     dressCode: 'Smart Casual',
     tags: dbEvent.tags || [categoryInfo.display],
-    bookingUrl: dbEvent.booking_url || '#',
+    bookingUrl: dbEvent.booking_url || null,
+    sourceUrl: dbEvent.source_url || null,
     venueDetails: {
       name: dbEvent.venue_name || 'Venue',
       slug: dbEvent.venue_name?.toLowerCase().replace(/[^a-z0-9]+/g, '-') || 'venue',

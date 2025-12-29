@@ -51,6 +51,72 @@ function createUniqueSlug(title: string, date: string): string {
   return `${baseSlug}-${dateSlug}`;
 }
 
+/**
+ * Validate event data quality before processing
+ * Returns true if event is valid, false if it should be skipped
+ */
+function isValidEvent(event: ScrapedEvent): { valid: boolean; reason?: string } {
+  // Skip garbage/button-like titles
+  const skipTitles = [
+    'buy now', 'get tickets', 'book now', 'learn more', 'read more',
+    'view details', 'click here', 'register now', 'sign up', 'purchase',
+    'buy tickets', 'get started', 'view event', 'see more', 'view more',
+  ];
+  const lowerTitle = event.title.toLowerCase().trim();
+  if (skipTitles.some(skip => lowerTitle === skip || lowerTitle.includes(skip))) {
+    return { valid: false, reason: `Button-like title: "${event.title}"` };
+  }
+
+  // Require minimum title length (3+ words or 10+ characters)
+  const wordCount = event.title.trim().split(/\s+/).length;
+  if (event.title.length < 10 && wordCount < 3) {
+    return { valid: false, reason: `Title too short: "${event.title}"` };
+  }
+
+  // Title max length check (prevent garbage data)
+  if (event.title.length > 200) {
+    return { valid: false, reason: `Title too long: ${event.title.length} chars` };
+  }
+
+  // Validate date format (YYYY-MM-DD)
+  const dateRegex = /^\d{4}-\d{2}-\d{2}$/;
+  if (!dateRegex.test(event.date)) {
+    return { valid: false, reason: `Invalid date format: "${event.date}"` };
+  }
+
+  // Check date is not too far in past (allow 1 day buffer for timezone issues)
+  const eventDate = new Date(event.date);
+  const yesterday = new Date();
+  yesterday.setDate(yesterday.getDate() - 1);
+  if (eventDate < yesterday) {
+    return { valid: false, reason: `Past event: ${event.date}` };
+  }
+
+  // Check date is not too far in future (2 years max)
+  const twoYearsFromNow = new Date();
+  twoYearsFromNow.setFullYear(twoYearsFromNow.getFullYear() + 2);
+  if (eventDate > twoYearsFromNow) {
+    return { valid: false, reason: `Date too far in future: ${event.date}` };
+  }
+
+  // Require venue name
+  if (!event.venue_name || event.venue_name.trim().length < 2) {
+    return { valid: false, reason: 'Missing venue name' };
+  }
+
+  // Require source URL
+  if (!event.source_url || !event.source_url.startsWith('http')) {
+    return { valid: false, reason: 'Missing or invalid source URL' };
+  }
+
+  // Require source name
+  if (!event.source_name || event.source_name.trim().length < 2) {
+    return { valid: false, reason: 'Missing source name' };
+  }
+
+  return { valid: true };
+}
+
 // Insert event into database
 async function insertEvent(event: ScrapedEvent, rewritten: { title: string; description: string; category: string }, imageUrl: string | null): Promise<boolean> {
   const db = getSupabase();
@@ -143,6 +209,14 @@ async function updateEvent(eventId: string, event: ScrapedEvent, rewritten: { ti
 // Process a single event
 async function processEvent(event: ScrapedEvent, stats: ScraperStats): Promise<void> {
   try {
+    // Validate event data quality first
+    const validation = isValidEvent(event);
+    if (!validation.valid) {
+      console.log(`[Orchestrator] Skipping invalid event: ${validation.reason}`);
+      stats.skipped++;
+      return;
+    }
+
     // Check for duplicates
     const existing = await findExistingEvent(event);
 
@@ -280,7 +354,8 @@ export async function runEventScrapers(): Promise<void> {
     // DISABLED: Platinumlist scrapers - awaiting business agreement
     // { name: 'Platinumlist Events', baseUrl: 'https://manama.platinumlist.net', fn: scrapePlatinumlistEvents },
     // { name: 'Platinumlist Attractions', baseUrl: 'https://manama.platinumlist.net', fn: scrapePlatinumlistAttractions },
-    { name: 'Al Dana Amphitheatre', baseUrl: 'https://www.beyonaldana.com.bh', fn: scrapeAlDana },
+    // DISABLED: Al Dana scraper - producing low-quality data, needs fixing
+    // { name: 'Al Dana Amphitheatre', baseUrl: 'https://www.beyonaldana.com.bh', fn: scrapeAlDana },
   ];
 
   // Run scrapers sequentially to avoid overwhelming resources

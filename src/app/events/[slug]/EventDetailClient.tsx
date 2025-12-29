@@ -34,7 +34,8 @@ interface EventData {
   ageRestriction: string;
   dressCode: string;
   tags: string[];
-  bookingUrl: string;
+  bookingUrl: string | null;
+  sourceUrl: string | null;
   venueDetails: {
     name: string;
     slug: string;
@@ -130,7 +131,8 @@ export default function EventDetailClient({ event, similarEvents }: EventDetailC
             <div className="flex items-center justify-between gap-4">
               {/* Left Actions */}
               <div className="flex items-center gap-3">
-                {event.bookingUrl && event.bookingUrl !== '#' ? (
+                {/* Show Book Now if booking_url exists, View Event if source_url exists, hide if neither */}
+                {event.bookingUrl ? (
                   <a
                     href={event.bookingUrl}
                     target="_blank"
@@ -141,12 +143,18 @@ export default function EventDetailClient({ event, similarEvents }: EventDetailC
                     <span>Book Now</span>
                     <ExternalLink className="w-4 h-4" />
                   </a>
-                ) : (
-                  <div className="flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-yellow-400 via-orange-500 to-pink-500 rounded-xl text-black font-bold">
+                ) : event.sourceUrl ? (
+                  <a
+                    href={event.sourceUrl}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-yellow-400 via-orange-500 to-pink-500 rounded-xl text-black font-bold hover:shadow-lg hover:shadow-orange-500/25 hover:scale-105 transition-all"
+                  >
                     <Ticket className="w-5 h-5" />
                     <span>View Event</span>
-                  </div>
-                )}
+                    <ExternalLink className="w-4 h-4" />
+                  </a>
+                ) : null}
 
                 <AddToCalendar
                   title={event.title}
@@ -233,27 +241,34 @@ export default function EventDetailClient({ event, similarEvents }: EventDetailC
           )}
         </div>
 
-        {/* Mobile Sticky Bottom Bar */}
-        <div className="lg:hidden fixed bottom-0 left-0 right-0 z-50 bg-slate-950/95 backdrop-blur-xl border-t border-white/10 p-4">
-          <div className="flex items-center justify-center gap-3">
-            {event.bookingUrl && event.bookingUrl !== '#' ? (
-              <a
-                href={event.bookingUrl}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="flex items-center gap-2 px-8 py-4 bg-gradient-to-r from-yellow-400 via-orange-500 to-pink-500 rounded-xl text-black font-bold w-full justify-center"
-              >
-                <Ticket className="w-5 h-5" />
-                Book Now
-              </a>
-            ) : (
-              <div className="flex items-center gap-2 px-8 py-4 bg-gradient-to-r from-yellow-400 via-orange-500 to-pink-500 rounded-xl text-black font-bold w-full justify-center">
-                <Ticket className="w-5 h-5" />
-                View Event
-              </div>
-            )}
+        {/* Mobile Sticky Bottom Bar - only show if there's a URL */}
+        {(event.bookingUrl || event.sourceUrl) && (
+          <div className="lg:hidden fixed bottom-0 left-0 right-0 z-50 bg-slate-950/95 backdrop-blur-xl border-t border-white/10 p-4">
+            <div className="flex items-center justify-center gap-3">
+              {event.bookingUrl ? (
+                <a
+                  href={event.bookingUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="flex items-center gap-2 px-8 py-4 bg-gradient-to-r from-yellow-400 via-orange-500 to-pink-500 rounded-xl text-black font-bold w-full justify-center"
+                >
+                  <Ticket className="w-5 h-5" />
+                  Book Now
+                </a>
+              ) : (
+                <a
+                  href={event.sourceUrl!}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="flex items-center gap-2 px-8 py-4 bg-gradient-to-r from-yellow-400 via-orange-500 to-pink-500 rounded-xl text-black font-bold w-full justify-center"
+                >
+                  <Ticket className="w-5 h-5" />
+                  View Event
+                </a>
+              )}
+            </div>
           </div>
-        </div>
+        )}
 
         {/* Share Modal */}
         <ShareModal
@@ -264,7 +279,9 @@ export default function EventDetailClient({ event, similarEvents }: EventDetailC
         />
 
         {/* Bottom padding for mobile sticky bar */}
-        <div className="h-24 lg:hidden" />
+        {(event.bookingUrl || event.sourceUrl) && (
+          <div className="h-24 lg:hidden" />
+        )}
       </div>
     </>
   );
