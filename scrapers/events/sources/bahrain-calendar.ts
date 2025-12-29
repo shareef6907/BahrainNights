@@ -119,87 +119,158 @@ async function scrapeEventDetail(
 
     const details: Partial<ScrapedEvent> = {};
 
-    // Try various selectors for description
-    const descriptionSelectors = [
-      '.event-description',
-      '.event-content',
-      '.description',
-      '.content',
-      '[itemprop="description"]',
-      'article p',
-      '.event-details p',
-    ];
-
-    for (const selector of descriptionSelectors) {
-      const desc = $(selector).first().text().trim();
-      if (desc && desc.length > 50) {
-        details.description = desc;
-        break;
+    // Try various selectors for description - Bahrain.com uses .events-description-wrapper
+    // First try the specific Bahrain.com selector
+    const descWrapper = $('.events-description-wrapper').first();
+    if (descWrapper.length > 0) {
+      // Get all text from h4 and p elements
+      const descParts: string[] = [];
+      descWrapper.find('h4').each((i, el) => {
+        const text = $(el).text().trim();
+        if (text) descParts.push(text);
+      });
+      descWrapper.find('p').each((i, el) => {
+        const text = $(el).text().trim();
+        if (text) descParts.push(text);
+      });
+      if (descParts.length > 0) {
+        details.description = descParts.join('\n\n');
+        scraperLog.debug(LOG_PREFIX, `Found description from events-description-wrapper: ${details.description.substring(0, 100)}...`);
       }
     }
 
-    // Try to get venue
-    const venueSelectors = [
-      '.venue-name',
-      '.location',
-      '[itemprop="location"]',
-      '.event-location',
-    ];
+    // Fallback to generic selectors
+    if (!details.description) {
+      const descriptionSelectors = [
+        '.event-description',
+        '.event-content',
+        '.description',
+        '.content',
+        '[itemprop="description"]',
+        'article p',
+        '.event-details p',
+      ];
 
-    for (const selector of venueSelectors) {
-      const venue = $(selector).first().text().trim();
-      if (venue && venue.length > 2) {
-        details.venue_name = venue;
-        break;
+      for (const selector of descriptionSelectors) {
+        const desc = $(selector).first().text().trim();
+        if (desc && desc.length > 50) {
+          details.description = desc;
+          break;
+        }
       }
     }
 
-    // Try to get time
-    const timeSelectors = [
-      '.event-time',
-      '.time',
-      '[itemprop="startDate"]',
-      '.start-time',
-    ];
+    // Try to get venue - Bahrain.com uses .__venuedetail .__lists with icon-location
+    // The structure is: <div class="__lists"><span class="icon-location"></span>Venue Name</div>
+    const venueFromDetail = $('.__venuedetail .__lists').filter((i, el) => {
+      return $(el).find('.icon-location').length > 0;
+    }).first().text().trim();
 
-    for (const selector of timeSelectors) {
-      const time = $(selector).first().text().trim();
-      if (time) {
-        details.time = parseTime(time);
-        break;
+    if (venueFromDetail && venueFromDetail.length > 2) {
+      details.venue_name = venueFromDetail;
+      scraperLog.debug(LOG_PREFIX, `Found venue from __venuedetail: ${venueFromDetail}`);
+    } else {
+      // Fallback to generic selectors
+      const venueSelectors = [
+        '.venue-name',
+        '.location',
+        '[itemprop="location"]',
+        '.event-location',
+      ];
+
+      for (const selector of venueSelectors) {
+        const venue = $(selector).first().text().trim();
+        if (venue && venue.length > 2) {
+          details.venue_name = venue;
+          break;
+        }
       }
     }
 
-    // Try to get price
-    const priceSelectors = [
-      '.price',
-      '.event-price',
-      '.ticket-price',
-      '[itemprop="price"]',
-    ];
+    // Try to get time - Bahrain.com uses .status-time-wrapper h6
+    const timeFromWrapper = $('.status-time-wrapper h6').first().text().trim();
+    if (timeFromWrapper && timeFromWrapper.length > 0) {
+      // Time could be in format "06:00 AM - 10:00 PM" or "From 6:00 AM to 10:00 AM"
+      details.time = timeFromWrapper;
+      scraperLog.debug(LOG_PREFIX, `Found time from status-time-wrapper: ${timeFromWrapper}`);
+    } else {
+      // Fallback to generic selectors
+      const timeSelectors = [
+        '.event-time',
+        '.time',
+        '[itemprop="startDate"]',
+        '.start-time',
+      ];
 
-    for (const selector of priceSelectors) {
-      const price = $(selector).first().text().trim();
-      if (price) {
-        details.price = price;
-        break;
+      for (const selector of timeSelectors) {
+        const time = $(selector).first().text().trim();
+        if (time) {
+          details.time = time;
+          break;
+        }
       }
     }
 
-    // Try to get larger image
-    const imageSelectors = [
-      '.event-image img',
-      '.hero-image img',
-      '.featured-image img',
-      'article img',
-      '[itemprop="image"]',
-    ];
+    // Try to get price/ticket info - Bahrain.com uses .__venuedetail .__lists with icon-ticket-2
+    const ticketFromDetail = $('.__venuedetail .__lists').filter((i, el) => {
+      return $(el).find('.icon-ticket-2').length > 0;
+    }).first().text().trim();
 
-    for (const selector of imageSelectors) {
-      const img = $(selector).first().attr('src');
-      if (img && img.startsWith('http')) {
-        details.image_url = img;
-        break;
+    if (ticketFromDetail && ticketFromDetail.length > 2) {
+      details.price = ticketFromDetail;
+      scraperLog.debug(LOG_PREFIX, `Found ticket info from __venuedetail: ${ticketFromDetail}`);
+    } else {
+      // Fallback to generic selectors
+      const priceSelectors = [
+        '.price',
+        '.event-price',
+        '.ticket-price',
+        '[itemprop="price"]',
+      ];
+
+      for (const selector of priceSelectors) {
+        const price = $(selector).first().text().trim();
+        if (price) {
+          details.price = price;
+          break;
+        }
+      }
+    }
+
+    // Try to get larger image - Bahrain.com uses .events-image-slider-wrapper with source/picture elements
+    // Try the event slider first
+    const sliderImage = $('.events-image-slider-wrapper source').first().attr('srcset') ||
+                        $('.events-image-slider-wrapper img').first().attr('src');
+    if (sliderImage && sliderImage.startsWith('http')) {
+      details.image_url = sliderImage;
+      scraperLog.debug(LOG_PREFIX, `Found image from events-image-slider-wrapper: ${sliderImage}`);
+    }
+
+    // Also check for data-image attributes on favorite buttons
+    if (!details.image_url) {
+      const dataImage = $('[data-image]').first().attr('data-image');
+      if (dataImage && dataImage.startsWith('http')) {
+        details.image_url = dataImage;
+        scraperLog.debug(LOG_PREFIX, `Found image from data-image attribute: ${dataImage}`);
+      }
+    }
+
+    // Fallback to generic selectors
+    if (!details.image_url) {
+      const imageSelectors = [
+        '.event-image img',
+        '.hero-image img',
+        '.featured-image img',
+        'article img',
+        '[itemprop="image"]',
+      ];
+
+      for (const selector of imageSelectors) {
+        const img = $(selector).first().attr('src');
+        if (img && img.startsWith('http')) {
+          details.image_url = img;
+          break;
+        }
       }
     }
 
