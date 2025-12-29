@@ -1,137 +1,16 @@
 /**
- * AI Content Rewriter - Uses Claude API to create unique event descriptions
- * This ensures all content is 100% original and not copied from sources
+ * Fix Event Categories Script
+ * Re-categorizes miscategorized events using keyword detection
+ *
+ * Run: npx tsx scrapers/events/fix-event-categories.ts
  */
 
-import Anthropic from '@anthropic-ai/sdk';
-import { ScrapedEvent, RewrittenContent, EVENT_CATEGORIES } from '../types';
+import { createClient } from '@supabase/supabase-js';
+import { config } from 'dotenv';
+import { resolve } from 'path';
 
-// Initialize Anthropic client
-const anthropic = new Anthropic({
-  apiKey: process.env.ANTHROPIC_API_KEY || process.env.CLAUDE_API_KEY,
-});
-
-// Rate limiting
-let lastRequestTime = 0;
-const MIN_REQUEST_INTERVAL = 500; // 500ms between requests
-
-async function rateLimitedWait(): Promise<void> {
-  const now = Date.now();
-  const timeSinceLastRequest = now - lastRequestTime;
-  if (timeSinceLastRequest < MIN_REQUEST_INTERVAL) {
-    await new Promise(resolve => setTimeout(resolve, MIN_REQUEST_INTERVAL - timeSinceLastRequest));
-  }
-  lastRequestTime = Date.now();
-}
-
-/**
- * Rewrite event content using Claude AI
- * Creates 100% unique descriptions while maintaining factual accuracy
- */
-export async function rewriteEventContent(event: ScrapedEvent): Promise<RewrittenContent> {
-  await rateLimitedWait();
-
-  const categoriesList = EVENT_CATEGORIES.join(', ');
-
-  // Pre-detect category based on keywords BEFORE sending to AI
-  // This provides a strong hint that the AI should respect
-  const detectedCategory = detectCategory(
-    event.title,
-    event.description || '',
-    event.venue_name || ''
-  );
-
-  const prompt = `You are a content writer for BahrainNights.com, a popular events magazine in Bahrain.
-Your task is to rewrite event content to be 100% unique while maintaining factual accuracy.
-
-ORIGINAL EVENT:
-Title: ${event.title}
-Description: ${event.description || 'No description provided'}
-Date: ${event.date}${event.time ? ` at ${event.time}` : ''}
-Venue: ${event.venue_name}${event.venue_address ? `, ${event.venue_address}` : ''}
-Price: ${event.price || 'Not specified'}
-
-PRE-DETECTED CATEGORY: ${detectedCategory}
-⚠️ IMPORTANT: The category "${detectedCategory}" was detected based on keywords in the title, description, and venue name.
-You MUST use this category unless you have an extremely compelling reason to change it.
-Examples where you should keep the pre-detected category:
-- "Fitness on Track" at "Bahrain International Circuit" → sports (NOT dining or wellness)
-- "Horse Racing" at "Turf Club" → sports (NOT nightlife)
-- "Concert" at "Al Dana Amphitheatre" → music (NOT nightlife)
-
-REQUIREMENTS:
-1. Rewrite the description COMPLETELY - it must be unique, not copied or paraphrased
-2. Keep all factual details accurate (date, venue, price are NOT changed)
-3. Make the content engaging, informative, and exciting
-4. Add local Bahrain context where appropriate
-5. Write 2-3 paragraphs, approximately 100-150 words total
-6. Use a warm, inviting tone suitable for a lifestyle magazine
-7. Include what attendees can expect at the event
-8. If the original title is too long or unclear, improve it (keep it under 80 characters)
-9. USE THE PRE-DETECTED CATEGORY: ${detectedCategory} (only change if absolutely wrong)
-10. IMPORTANT: If the original description contains specific dates (e.g., "from October 31, 2025 to April 17, 2026"), you MUST preserve these exact dates in the rewritten description. Do not remove or change any date information.
-
-CATEGORY GUIDE (for reference only - prefer the pre-detected category):
-- dining: Restaurants, brunches, food festivals, ladies nights at restaurants
-- music: Concerts, live performances, DJ nights
-- nightlife: Club events, bar events, after-dark entertainment
-- family: Kid-friendly events, family activities
-- arts: Exhibitions, theater, cultural performances
-- sports: Matches, FITNESS events, RACING, horse racing, track events, sports activities
-- business: Conferences, networking, professional events
-- wellness: Spa, yoga, meditation, health events (NOT fitness/racing)
-- shopping: Markets, sales, shopping events
-- community: Charity, volunteer, social events
-- tours: Tours, attractions, sightseeing
-- special: Holidays, national events, seasonal celebrations
-- other: If none of the above fit well
-
-Return ONLY valid JSON (no markdown, no code blocks):
-{"title": "...", "description": "...", "category": "..."}`;
-
-  try {
-    // Using Haiku for cost efficiency - 4x cheaper than Sonnet
-    // Haiku is sufficient for simple content rewriting tasks
-    const response = await anthropic.messages.create({
-      model: 'claude-3-5-haiku-20241022',
-      max_tokens: 500,  // Reduced since we only need ~250 tokens
-      messages: [{ role: 'user', content: prompt }],
-    });
-
-    const content = response.content[0];
-    if (content.type !== 'text') {
-      throw new Error('Unexpected response type from Claude');
-    }
-
-    // Parse JSON response
-    const text = content.text.trim();
-    // Remove any markdown code blocks if present
-    const jsonText = text.replace(/^```json?\s*/, '').replace(/\s*```$/, '').trim();
-
-    const result = JSON.parse(jsonText) as RewrittenContent;
-
-    // Validate category
-    if (!EVENT_CATEGORIES.includes(result.category as typeof EVENT_CATEGORIES[number])) {
-      result.category = 'other';
-    }
-
-    // Validate title length
-    if (result.title.length > 100) {
-      result.title = result.title.substring(0, 97) + '...';
-    }
-
-    return result;
-  } catch (error) {
-    console.error('AI rewrite error:', error);
-
-    // Fallback: return original content with basic category assignment
-    return {
-      title: event.title.substring(0, 100),
-      description: event.description || `Join us for ${event.title} at ${event.venue_name}. Don't miss this exciting event in Bahrain!`,
-      category: guessCategory(event),
-    };
-  }
-}
+// Load environment variables from .env.local
+config({ path: resolve(process.cwd(), '.env.local') });
 
 /**
  * Comprehensive category keywords - ordered by priority (more specific first)
@@ -278,6 +157,19 @@ const VENUE_CATEGORY_HINTS: Record<string, string> = {
 };
 
 /**
+ * Detect category from venue name
+ */
+function getCategoryFromVenue(venueName: string): string | null {
+  const venue = venueName.toLowerCase();
+  for (const [keyword, category] of Object.entries(VENUE_CATEGORY_HINTS)) {
+    if (venue.includes(keyword)) {
+      return category;
+    }
+  }
+  return null;
+}
+
+/**
  * High-confidence title keywords that should ALWAYS determine category
  * These are specific enough to be reliable
  */
@@ -308,22 +200,8 @@ const TITLE_PRIORITY_KEYWORDS: Record<string, string[]> = {
 };
 
 /**
- * Detect category from venue name
- */
-function getCategoryFromVenue(venueName: string): string | null {
-  const venue = venueName.toLowerCase();
-  for (const [keyword, category] of Object.entries(VENUE_CATEGORY_HINTS)) {
-    if (venue.includes(keyword)) {
-      return category;
-    }
-  }
-  return null;
-}
-
-/**
  * Score-based category detection
  * Uses multiple signals: title keywords, venue hints, description keywords
- * Runs BEFORE AI to provide a strong hint
  */
 function detectCategory(title: string, description: string, venueName: string): string {
   const titleLower = title.toLowerCase();
@@ -401,37 +279,117 @@ function detectCategory(title: string, description: string, venueName: string): 
   return 'community';
 }
 
-/**
- * Fallback category guesser based on keywords (used when AI fails)
- */
-function guessCategory(event: ScrapedEvent): string {
-  return detectCategory(
-    event.title,
-    event.description || '',
-    event.venue_name || ''
-  );
+interface Event {
+  id: string;
+  title: string;
+  description: string | null;
+  venue_name: string | null;
+  category: string;
 }
 
-/**
- * Batch rewrite multiple events with progress logging
- */
-export async function rewriteEventsBatch(
-  events: ScrapedEvent[],
-  onProgress?: (current: number, total: number) => void
-): Promise<RewrittenContent[]> {
-  const results: RewrittenContent[] = [];
+async function fixEventCategories() {
+  const url = process.env.NEXT_PUBLIC_SUPABASE_URL || process.env.SUPABASE_URL;
+  const key = process.env.SUPABASE_SERVICE_ROLE_KEY;
 
-  for (let i = 0; i < events.length; i++) {
-    if (onProgress) {
-      onProgress(i + 1, events.length);
-    }
-
-    const rewritten = await rewriteEventContent(events[i]);
-    results.push(rewritten);
-
-    // Log progress
-    console.log(`[AI] Rewrote ${i + 1}/${events.length}: ${rewritten.title}`);
+  if (!url || !key) {
+    console.error('Missing Supabase credentials. Set SUPABASE_URL and SUPABASE_SERVICE_ROLE_KEY');
+    process.exit(1);
   }
 
-  return results;
+  const supabase = createClient(url, key, {
+    auth: {
+      autoRefreshToken: false,
+      persistSession: false,
+    },
+  });
+
+  console.log('🔧 Fixing Event Categories...\n');
+
+  // Fetch all events
+  const { data: events, error } = await supabase
+    .from('events')
+    .select('id, title, description, venue_name, category')
+    .order('created_at', { ascending: false });
+
+  if (error) {
+    console.error('Error fetching events:', error);
+    process.exit(1);
+  }
+
+  console.log(`Found ${events?.length || 0} total events\n`);
+
+  const changes: { title: string; oldCategory: string; newCategory: string; venue: string }[] = [];
+  const unchanged: string[] = [];
+
+  for (const event of events || []) {
+    const detectedCategory = detectCategory(
+      event.title,
+      event.description || '',
+      event.venue_name || ''
+    );
+
+    if (detectedCategory !== event.category) {
+      changes.push({
+        title: event.title,
+        oldCategory: event.category,
+        newCategory: detectedCategory,
+        venue: event.venue_name || 'Unknown',
+      });
+
+      // Update the category in the database
+      const { error: updateError } = await supabase
+        .from('events')
+        .update({ category: detectedCategory })
+        .eq('id', event.id);
+
+      if (updateError) {
+        console.error(`  ❌ Error updating "${event.title}":`, updateError);
+      }
+    } else {
+      unchanged.push(event.title);
+    }
+  }
+
+  // Print results
+  console.log('=' .repeat(80));
+  console.log('📊 CATEGORY FIX RESULTS');
+  console.log('=' .repeat(80));
+
+  if (changes.length > 0) {
+    console.log(`\n✅ Fixed ${changes.length} events:\n`);
+    for (const change of changes) {
+      console.log(`  📝 "${change.title}"`);
+      console.log(`     Venue: ${change.venue}`);
+      console.log(`     ${change.oldCategory} → ${change.newCategory}`);
+      console.log('');
+    }
+  } else {
+    console.log('\n✨ All events are already correctly categorized!');
+  }
+
+  console.log(`\n📈 Summary:`);
+  console.log(`   - Total events: ${events?.length || 0}`);
+  console.log(`   - Fixed: ${changes.length}`);
+  console.log(`   - Already correct: ${unchanged.length}`);
+
+  // Show specific fixes for the known problematic events
+  console.log('\n🎯 Key Fixes:');
+  const keyEvents = ['Batelco Fitness', 'Horse Racing', 'Turf Club', 'on Track'];
+  for (const change of changes) {
+    for (const key of keyEvents) {
+      if (change.title.toLowerCase().includes(key.toLowerCase())) {
+        console.log(`   ✅ "${change.title}": ${change.oldCategory} → ${change.newCategory}`);
+      }
+    }
+  }
+
+  console.log('\n🎉 Category fix complete!');
 }
+
+// Run the fix
+fixEventCategories()
+  .then(() => process.exit(0))
+  .catch((error) => {
+    console.error('Fix failed:', error);
+    process.exit(1);
+  });
