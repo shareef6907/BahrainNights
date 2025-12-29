@@ -68,7 +68,7 @@ jobs:
           echo "Run time (UTC): $(date -u)"
           echo "Run time (Bahrain): $(TZ='Asia/Bahrain' date)"
           echo ""
-          npx ts-node --transpile-only scrapers/events/index.ts
+          npx tsx scrapers/events/index.ts
 
       - name: Report status
         if: always()
