@@ -73,9 +73,11 @@ Return ONLY valid JSON (no markdown, no code blocks):
 {"title": "...", "description": "...", "category": "..."}`;
 
   try {
+    // Using Haiku for cost efficiency - 4x cheaper than Sonnet
+    // Haiku is sufficient for simple content rewriting tasks
     const response = await anthropic.messages.create({
-      model: 'claude-sonnet-4-20250514',
-      max_tokens: 1000,
+      model: 'claude-3-5-haiku-20241022',
+      max_tokens: 500,  // Reduced since we only need ~250 tokens
       messages: [{ role: 'user', content: prompt }],
     });
 
