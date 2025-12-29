@@ -272,12 +272,12 @@ export async function scrapeBahrainCalendar(): Promise<ScrapedEvent[]> {
     const datePattern = /(jan|feb|mar|apr|may|jun|jul|aug|sep|oct|nov|dec)\s+\d{1,2}\s+\d{4}/gi;
 
     // Find all links that look like event pages (have slug-like hrefs and contain dates)
-    const eventLinks = $('a').filter((i, el) => {
+    const eventLinks = $('a').filter((i, el): boolean => {
       const href = $(el).attr('href') || '';
       const text = $(el).text().trim();
 
       // Must have a slug-like href (not navigation, not external)
-      const isSlugLink = href.match(/^\/[a-z0-9-]+$/) || href.match(/^https?:\/\/www\.bahrain\.com\/[a-z0-9-]+$/);
+      const isSlugLink = Boolean(href.match(/^\/[a-z0-9-]+$/) || href.match(/^https?:\/\/www\.bahrain\.com\/[a-z0-9-]+$/));
 
       // Must contain dates in the text
       const hasDate = datePattern.test(text);
