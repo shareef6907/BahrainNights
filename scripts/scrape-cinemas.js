@@ -758,12 +758,7 @@ async function updateDatabase(nowShowing, comingSoon, movieCinemaMap, originalTi
   console.log('UPDATING DATABASE');
   console.log('==================================================');
 
-  // Get today's date for release date comparison
-  const today = new Date();
-  today.setHours(0, 0, 0, 0);
-  console.log(`Today's date: ${today.toISOString().split('T')[0]}`);
-
-  // Get all movies from database (include release_date for categorization)
+  // Get all movies from database
   const { data: dbMovies, error: fetchError } = await supabase
     .from('movies')
     .select('id, title, slug, tmdb_id, release_date');
@@ -811,40 +806,22 @@ async function updateDatabase(nowShowing, comingSoon, movieCinemaMap, originalTi
 
     const cinemas = movieCinemaMap[matchedKey] || [];
 
-    // DETERMINE STATUS BY RELEASE DATE (source of truth)
+    // DETERMINE STATUS FROM CINEMA WEBSITES (source of truth for Bahrain)
+    // Cinema websites tell us what's actually showing in Bahrain, not TMDB global dates
+    const isNowShowingMatch = nowShowing.has(dbNormalized) || nowShowing.has(matchedKey);
+    const isComingSoonMatch = comingSoon.has(dbNormalized) || comingSoon.has(matchedKey);
+
     let isNowShowing = false;
     let isComingSoon = false;
 
-    if (movie.release_date) {
-      const releaseDate = new Date(movie.release_date);
-      releaseDate.setHours(0, 0, 0, 0);
-
-      if (releaseDate <= today) {
-        // Release date is today or in the past = NOW SHOWING
-        isNowShowing = true;
-        isComingSoon = false;
-      } else {
-        // Release date is in the future = COMING SOON
-        isNowShowing = false;
-        isComingSoon = true;
-      }
+    // If movie appears in both categories (rare), prefer now showing (it's actually playing)
+    if (isNowShowingMatch && isComingSoonMatch) {
+      isNowShowing = true;
+      isComingSoon = false;
     } else {
-      // No release date - use cinema website categorization as fallback
-      const isNowShowingMatch = nowShowing.has(dbNormalized) || nowShowing.has(matchedKey);
-      const isComingSoonMatch = comingSoon.has(dbNormalized) || comingSoon.has(matchedKey);
-
-      // If both, prefer now showing (it's actually playing)
-      if (isNowShowingMatch && isComingSoonMatch) {
-        isNowShowing = true;
-        isComingSoon = false;
-      } else {
-        isNowShowing = isNowShowingMatch;
-        isComingSoon = isComingSoonMatch;
-      }
+      isNowShowing = isNowShowingMatch;
+      isComingSoon = isComingSoonMatch;
     }
-
-    const releaseStr = movie.release_date || 'NO DATE';
-    const statusStr = isNowShowing ? 'NOW SHOWING' : 'COMING SOON';
 
     await supabase.from('movies').update({
       is_now_showing: isNowShowing,
@@ -854,10 +831,10 @@ async function updateDatabase(nowShowing, comingSoon, movieCinemaMap, originalTi
 
     if (isNowShowing) {
       matchedNowShowing++;
-      console.log(`  ✅ NOW SHOWING: ${movie.title} (${releaseStr}) [${cinemas.join(', ')}]`);
+      console.log(`  ✅ NOW SHOWING: ${movie.title} [${cinemas.join(', ')}]`);
     } else {
       matchedComingSoon++;
-      console.log(`  🔜 COMING SOON: ${movie.title} (${releaseStr}) [${cinemas.join(', ')}]`);
+      console.log(`  🔜 COMING SOON: ${movie.title} [${cinemas.join(', ')}]`);
     }
   }
 
@@ -937,30 +914,12 @@ async function autoAddFromTMDB(nowShowing, comingSoon, movieCinemaMap, originalT
 
         const cinemas = movieCinemaMap[normalized] || [];
 
-        // Determine status by release date (source of truth)
-        let isNowShowing = false;
-        let isComingSoon = false;
-
-        if (movie.release_date) {
-          const today = new Date();
-          today.setHours(0, 0, 0, 0);
-          const releaseDate = new Date(movie.release_date);
-          releaseDate.setHours(0, 0, 0, 0);
-
-          if (releaseDate <= today) {
-            isNowShowing = true;
-            isComingSoon = false;
-          } else {
-            isNowShowing = false;
-            isComingSoon = true;
-          }
-        } else {
-          // Fallback to cinema website categorization
-          const isNowShowingMatch = nowShowing.has(normalized);
-          const isComingSoonMatch = comingSoon.has(normalized);
-          isNowShowing = isNowShowingMatch && !isComingSoonMatch;
-          isComingSoon = isComingSoonMatch;
-        }
+        // Use cinema website categorization (source of truth for Bahrain)
+        // TMDB release dates are global, not Bahrain-specific
+        const isNowShowingMatch = nowShowing.has(normalized);
+        const isComingSoonMatch = comingSoon.has(normalized);
+        const isNowShowing = isNowShowingMatch && !isComingSoonMatch;
+        const isComingSoon = isComingSoonMatch;
 
         const newMovie = {
           title: movie.title,
