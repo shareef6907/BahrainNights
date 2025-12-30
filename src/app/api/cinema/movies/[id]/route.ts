@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@supabase/supabase-js';
+import { revalidatePath } from 'next/cache';
 
 export const dynamic = 'force-dynamic';
 
@@ -110,6 +111,9 @@ export async function PATCH(
       throw error;
     }
 
+    // Revalidate the public cinema page to show changes immediately
+    revalidatePath('/cinema');
+
     return NextResponse.json({ success: true, movie });
   } catch (error) {
     console.error('Update movie error:', error);
@@ -137,6 +141,9 @@ export async function DELETE(
     if (error) {
       throw error;
     }
+
+    // Revalidate the public cinema page
+    revalidatePath('/cinema');
 
     return NextResponse.json({ success: true });
   } catch (error) {
