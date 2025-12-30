@@ -19,6 +19,38 @@ const { createClient } = require('@supabase/supabase-js');
 // Helper function to wait (Puppeteer removed waitForTimeout)
 const wait = (ms) => new Promise(resolve => setTimeout(resolve, ms));
 
+/**
+ * Navigate to URL with retry logic
+ */
+async function navigateWithRetry(page, url, options = {}, maxRetries = 3) {
+  const { waitUntil = 'networkidle2', timeout = 30000 } = options;
+
+  for (let attempt = 1; attempt <= maxRetries; attempt++) {
+    try {
+      const response = await page.goto(url, {
+        waitUntil,
+        timeout,
+      });
+
+      if (response && response.status() < 400) {
+        return { success: true, response };
+      }
+
+      console.log(`  ⚠️ Attempt ${attempt}: Status ${response?.status()}`);
+    } catch (err) {
+      console.log(`  ⚠️ Attempt ${attempt}: ${err.message}`);
+    }
+
+    if (attempt < maxRetries) {
+      const waitTime = attempt * 2000; // Exponential backoff
+      console.log(`  Waiting ${waitTime / 1000}s before retry...`);
+      await wait(waitTime);
+    }
+  }
+
+  return { success: false, response: null };
+}
+
 // Support both env var names
 const SUPABASE_URL = process.env.SUPABASE_URL || process.env.NEXT_PUBLIC_SUPABASE_URL;
 const SUPABASE_SERVICE_ROLE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY;
@@ -45,14 +77,22 @@ const CINEMAS = {
   },
   vox: {
     name: 'VOX',
-    nowShowingUrl: 'https://bhr.voxcinemas.com/',
+    // Use /movies page which loads movie list
+    nowShowingUrl: 'https://bhr.voxcinemas.com/movies',
     comingSoonUrl: 'https://bhr.voxcinemas.com/movies/comingsoon',
-    skipOnError: true, // VOX often has issues
+    skipOnError: false,
+    // Use domcontentloaded to avoid HTTP/2 protocol errors during network idle
+    waitUntil: 'domcontentloaded',
+    timeout: 45000,
+    extraWait: 5000, // Wait for dynamic content after DOM loaded
   },
   cinepolis: {
     name: 'Cinepolis',
     nowShowingUrl: 'https://bahrain.cinepolisgulf.com/',
     comingSoonUrl: 'https://bahrain.cinepolisgulf.com/coming-soon',
+    waitUntil: 'networkidle2',
+    timeout: 60000,
+    extraWait: 5000, // Wait for React app to fully render
   },
   mukta: {
     name: 'Mukta',
@@ -83,6 +123,8 @@ const INVALID_TITLES = [
   'offers', 'special offers', '404', 'error', 'not found', 'page not found',
   'whats on', 'what\'s on', 'discover movies', 'technology', 'trax', 'cine gourmet',
   'food & drinks', 'food and drinks', 'restaurants', 'copyright',
+  // Empty/Error states
+  'no movies found', 'no results', 'loading', 'please wait',
   // Languages/Ratings only
   'english', 'arabic', 'hindi', 'tamil', 'malayalam', 'telugu', 'tagalog',
   'pg', 'pg-13', 'pg-15', '15+', '18+', 'tbc', 'tc',
@@ -199,23 +241,33 @@ async function extractCinecoTitles(page) {
 
 /**
  * Extract movie titles from VOX page
+ * VOX structure: article > h3 > a (movie title link)
  */
 async function extractVOXTitles(page) {
   return await page.evaluate(() => {
     const titles = [];
 
-    // VOX movie cards
-    document.querySelectorAll('.movie-card h2, .movie-card h3, .film-card h2, .film-card h3').forEach(el => {
-      if (el.closest('footer, nav')) return;
-      const text = el.textContent?.trim();
-      if (text) titles.push(text);
-    });
-
-    // Also try generic movie selectors
-    document.querySelectorAll('[class*="movie"] h2, [class*="movie"] h3, [class*="film"] h2').forEach(el => {
-      if (el.closest('footer, nav')) return;
+    // VOX uses article elements for movie cards
+    // Each article has an h3 with a link containing the movie title
+    document.querySelectorAll('article h3 a').forEach(el => {
+      if (el.closest('footer, nav, header')) return;
       const text = el.textContent?.trim();
       if (text && !titles.includes(text)) titles.push(text);
+    });
+
+    // Also check article h3 directly (some pages may not have links)
+    document.querySelectorAll('article h3').forEach(el => {
+      if (el.closest('footer, nav, header')) return;
+      const text = el.textContent?.trim();
+      if (text && !titles.includes(text)) titles.push(text);
+    });
+
+    // Fallback: img alt text from movie posters
+    document.querySelectorAll('article img[alt*="Movie poster for"]').forEach(el => {
+      if (el.closest('footer, nav, header')) return;
+      const alt = el.getAttribute('alt') || '';
+      const title = alt.replace('Movie poster for ', '').trim();
+      if (title && !titles.includes(title)) titles.push(title);
     });
 
     return titles;
@@ -224,16 +276,60 @@ async function extractVOXTitles(page) {
 
 /**
  * Extract movie titles from Cinepolis page
+ * Cinepolis structure: Uses h6 elements for movie titles in card layouts
  */
 async function extractCinepolisTitles(page) {
+  // Try to close any popup dialogs first
+  try {
+    await page.evaluate(() => {
+      // Look for close buttons in dialogs
+      const closeButtons = document.querySelectorAll('dialog img[alt*="close"], dialog button, [role="dialog"] img[alt*="close"]');
+      closeButtons.forEach(btn => {
+        if (btn.closest('dialog, [role="dialog"]')) {
+          btn.click();
+        }
+      });
+    });
+    await new Promise(r => setTimeout(r, 1000));
+  } catch (e) {
+    // Ignore popup errors
+  }
+
+  // Wait for movie content to load
+  try {
+    await page.waitForSelector('h6', { timeout: 10000 });
+  } catch (e) {
+    console.log('  Warning: Could not find h6 elements');
+  }
+
   return await page.evaluate(() => {
     const titles = [];
 
-    // Cinepolis uses .movie-title class
-    document.querySelectorAll('.movie-title, .movie-card h3, .poster-card h3').forEach(el => {
+    // Cinepolis uses h6 for movie titles in their React app
+    // Look for h6 elements that are movie titles (not section headers)
+    document.querySelectorAll('h6').forEach(el => {
+      if (el.closest('footer, nav, header')) return;
+      const text = el.textContent?.trim();
+
+      // Skip section headers and non-movie text
+      const skipTexts = [
+        'now showing', 'coming soon', 'advance booking', 'view more',
+        'quick book', 'select cinema', 'select movie', 'select date', 'select time',
+        'no movies found', 'loading', 'please wait'
+      ];
+      if (skipTexts.includes(text.toLowerCase())) return;
+
+      // Must have at least 4 characters and contain letters
+      if (text && text.length >= 4 && /[a-zA-Z]/.test(text) && !titles.includes(text)) {
+        titles.push(text);
+      }
+    });
+
+    // Also try .movie-title class as fallback
+    document.querySelectorAll('.movie-title').forEach(el => {
       if (el.closest('footer, nav')) return;
       const text = el.textContent?.trim();
-      if (text) titles.push(text);
+      if (text && !titles.includes(text)) titles.push(text);
     });
 
     return titles;
@@ -420,12 +516,30 @@ async function scrapeCinemas() {
 
   const browser = await puppeteer.launch({
     headless: 'new',
-    args: ['--no-sandbox', '--disable-setuid-sandbox']
+    protocolTimeout: 120000, // Increase protocol timeout for slow sites
+    args: [
+      '--no-sandbox',
+      '--disable-setuid-sandbox',
+      '--disable-dev-shm-usage',
+      '--disable-gpu',
+      '--window-size=1920,1080',
+    ]
   });
 
   const page = await browser.newPage();
-  await page.setUserAgent('Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36');
+
+  // Use a realistic user agent
+  await page.setUserAgent('Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36');
   await page.setViewport({ width: 1920, height: 1080 });
+
+  // Set extra headers to appear more like a real browser
+  await page.setExtraHTTPHeaders({
+    'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8',
+    'Accept-Language': 'en-US,en;q=0.5',
+    'Accept-Encoding': 'gzip, deflate, br',
+    'Connection': 'keep-alive',
+    'Upgrade-Insecure-Requests': '1',
+  });
 
   // Store results
   const comingSoonTitles = new Set(); // All Coming Soon titles (normalized)
@@ -446,13 +560,15 @@ async function scrapeCinemas() {
         // Dedicated Coming Soon page
         console.log(`  URL: ${cinema.comingSoonUrl}`);
 
-        const response = await page.goto(cinema.comingSoonUrl, {
-          waitUntil: 'networkidle2',
-          timeout: 30000
-        }).catch(() => null);
+        const navOptions = {
+          waitUntil: cinema.waitUntil || 'networkidle2',
+          timeout: cinema.timeout || 30000,
+        };
 
-        if (!response || response.status() >= 400) {
-          console.log(`  ⚠️ Page returned ${response?.status() || 'no response'}`);
+        const { success } = await navigateWithRetry(page, cinema.comingSoonUrl, navOptions);
+
+        if (!success) {
+          console.log(`  ❌ Failed to load page after retries`);
           if (cinema.skipOnError) {
             console.log(`  Skipping ${cinema.name} (skipOnError enabled)`);
             continue;
@@ -480,6 +596,13 @@ async function scrapeCinemas() {
             const normalized = normalizeForComparison(cleaned);
             comingSoonTitles.add(normalized);
             originalTitles[normalized] = cleaned;
+            // Track which cinema has this Coming Soon movie
+            if (!movieCinemaMap[normalized]) {
+              movieCinemaMap[normalized] = [];
+            }
+            if (!movieCinemaMap[normalized].includes(key)) {
+              movieCinemaMap[normalized].push(key);
+            }
             console.log(`  ✅ Coming Soon: ${cleaned}`);
           }
         });
@@ -499,6 +622,13 @@ async function scrapeCinemas() {
             const normalized = normalizeForComparison(cleaned);
             comingSoonTitles.add(normalized);
             originalTitles[normalized] = cleaned;
+            // Track which cinema has this Coming Soon movie
+            if (!movieCinemaMap[normalized]) {
+              movieCinemaMap[normalized] = [];
+            }
+            if (!movieCinemaMap[normalized].includes(key)) {
+              movieCinemaMap[normalized].push(key);
+            }
             console.log(`  ✅ Coming Soon: ${cleaned}`);
           }
         });
@@ -524,20 +654,24 @@ async function scrapeCinemas() {
     console.log(`  URL: ${cinema.nowShowingUrl}`);
 
     try {
-      const response = await page.goto(cinema.nowShowingUrl, {
-        waitUntil: 'networkidle2',
-        timeout: 30000
-      }).catch(() => null);
+      const navOptions = {
+        waitUntil: cinema.waitUntil || 'networkidle2',
+        timeout: cinema.timeout || 30000,
+      };
 
-      if (!response || response.status() >= 400) {
-        console.log(`  ⚠️ Page returned ${response?.status() || 'no response'}`);
+      const { success } = await navigateWithRetry(page, cinema.nowShowingUrl, navOptions);
+
+      if (!success) {
+        console.log(`  ❌ Failed to load page after retries`);
         if (cinema.skipOnError) {
           console.log(`  Skipping ${cinema.name} (skipOnError enabled)`);
           continue;
         }
       }
 
-      await wait(2000);
+      // Extra wait for dynamic content (React apps, etc.)
+      const extraWait = cinema.extraWait || 2000;
+      await wait(extraWait);
 
       // Extract titles based on cinema
       let titles = [];
