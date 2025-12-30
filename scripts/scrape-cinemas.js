@@ -1,11 +1,22 @@
 const puppeteer = require('puppeteer');
 const { createClient } = require('@supabase/supabase-js');
 
+// Load .env.local for local development
+try {
+  require('dotenv').config({ path: '.env.local' });
+} catch {
+  // dotenv might not be installed in production
+}
+
+// Support both SUPABASE_URL and NEXT_PUBLIC_SUPABASE_URL
+const SUPABASE_URL = process.env.SUPABASE_URL || process.env.NEXT_PUBLIC_SUPABASE_URL;
+const SUPABASE_SERVICE_ROLE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY;
+
 // Validate environment variables
-if (!process.env.SUPABASE_URL || !process.env.SUPABASE_SERVICE_ROLE_KEY) {
+if (!SUPABASE_URL || !SUPABASE_SERVICE_ROLE_KEY) {
   console.error('Missing environment variables:');
-  console.error('SUPABASE_URL:', process.env.SUPABASE_URL ? 'Set' : 'MISSING');
-  console.error('SUPABASE_SERVICE_ROLE_KEY:', process.env.SUPABASE_SERVICE_ROLE_KEY ? 'Set' : 'MISSING');
+  console.error('SUPABASE_URL:', SUPABASE_URL ? 'Set' : 'MISSING');
+  console.error('SUPABASE_SERVICE_ROLE_KEY:', SUPABASE_SERVICE_ROLE_KEY ? 'Set' : 'MISSING');
   process.exit(1);
 }
 
@@ -16,10 +27,7 @@ if (!TMDB_API_KEY) {
 }
 
 // Initialize Supabase client
-const supabase = createClient(
-  process.env.SUPABASE_URL,
-  process.env.SUPABASE_SERVICE_ROLE_KEY
-);
+const supabase = createClient(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY);
 
 // Cinema configurations
 const cinemas = [
@@ -65,6 +73,8 @@ const cinemas = [
       'a[href*="/movies/"] h2',
       'a[href*="/movies/"] h3',
     ],
+    // VOX often returns 404/error pages - skip gracefully and continue with other cinemas
+    skipOnError: true,
   },
   {
     name: 'Cinepolis',
@@ -110,46 +120,116 @@ const cinemas = [
   },
 ];
 
-// Generic titles to skip (not actual movies)
-const SKIP_TITLES = [
-  'now showing',
-  'coming soon',
-  'advance booking',
-  'restaurants',
-  'discover movies',
-  'whats on',
-  "what's on",
-  'book now',
-  'buy tickets',
-  'view all',
-  'see all',
-  'more movies',
-  'all movies',
-  'select cinema',
-  'select date',
-  'select time',
-  'food and beverages',
-  'food & beverages',
-  'offers',
-  'promotions',
-  'gift cards',
-  'contact us',
-  'about us',
-  'careers',
-  'terms and conditions',
-  'privacy policy',
-  'faq',
-  'help',
-  'support',
-  'cinema locations',
-  'our cinemas',
-  'experiences',
-  'vip',
-  'imax',
-  '4dx',
-  'dolby',
-  'screenx',
+// ============================================================
+// COMPREHENSIVE INVALID TITLES FILTER
+// These are NOT movie titles - they're garbage from page scraping
+// ============================================================
+const INVALID_TITLES = [
+  // Navigation/Menu items
+  'site links', 'connect with us', 'ways to book', 'cineco group',
+  'log in', 'login', 'register', 'sign in', 'sign up', 'my account', 'logout',
+  'log in to your account', 'register an account',
+  'bulk booking', 'feedback', 'quick book', 'whats on', "what's on",
+  'now showing', 'coming soon', 'advance booking', 'advance bookings',
+  'book tickets', 'book now', 'buy tickets', 'get tickets',
+  'discover movies', 'special offers', 'experiences', 'restaurants',
+  'food & drink', 'food and drink', 'cine gourmet', 'technology', 'trax',
+  'view all', 'see all', 'more movies', 'all movies',
+  'select cinema', 'select date', 'select time',
+
+  // Footer/Navigation items
+  'follow us', 'download', 'our app', 'download our app', 'download our mobile app',
+  'stay in touch', 'contact us', 'about us',
+  'terms', 'terms and conditions', 'privacy', 'privacy policy',
+  'careers', 'faq', 'help', 'support',
+  'cinema locations', 'our cinemas',
+  'resend confirmation', 'your booking', 'your notifications',
+  'currently accepting', 'credit cards only',
+  'the mukta a2 cinemas app is here',
+
+  // Generic UI text
+  'show trailer', 'watch trailer', 'trailer',
+  'lead cast', 'show timings', 'no imdb rating',
+  'featured', 'popular', 'trending',
+
+  // Error pages
+  '404 error', 'page not found', 'server error', 'resource cannot be found',
+  'the resource cannot be found', "server error in '/bahrain' application",
+
+  // Languages (should not be standalone titles)
+  'english', 'arabic', 'hindi', 'tamil', 'malayalam', 'telugu',
+  'en', 'ar',
+
+  // Experience types (not movies)
+  'vip', 'imax', '4dx', 'dolby', 'screenx', 'atmos',
+  'premium', 'gold', 'platinum',
+
+  // Misc garbage
+  'offers', 'promotions', 'gift cards',
+  'enjoy the ultimate movie-going experience',
+  'experience', 'the best with',
+  'your movie buddy for this week',
 ];
+
+// Patterns that indicate invalid titles
+const INVALID_PATTERNS = [
+  /^\d+\s*(mins?|hours?|h|m)\b/i,              // "187 Mins", "2 hours", "1h 40m"
+  /^\d+\s*mins?\s*\w+$/i,                       // "150 Mins Malayalam"
+  /^\d+\s*mins?\s*\w+\s*book\s*tickets$/i,     // "186 Mins Tamil Book Tickets"
+  /^(pg|pg-?\d+|15\+?|18\+?|tbc|tc|\d+tc)$/i,  // Just ratings
+  /^lead\s*cast/i,                              // Cast info
+  /^book\s*(now|tickets)/i,                     // Booking buttons
+  /^advance\s*booking/i,                        // Booking sections
+  /^\w+\s*\|\s*(pg|tbc)/i,                     // "English | PG"
+  /^(arabic|english|hindi|tamil|malayalam|telugu)\s*\|/i, // "English | PG 15 | 1h40m"
+  /spongeb.*friends.*sail/i,                   // Movie descriptions
+  /doug.*jack.*griff/i,                        // Movie descriptions
+  /cop.*escorts.*prisoner/i,                   // Movie descriptions
+  /divorce.*mahmoud.*jamila/i,                 // Movie descriptions
+  /^download\s*(our)?\s*(app)?/i,              // Download prompts
+  /^follow\s*us$/i,                            // Social links
+  /^\d+\s*$/, // Just numbers
+  /^[a-z]{2,3}$/i, // Just language codes
+];
+
+// Check if a title is a valid movie title
+function isValidMovieTitle(title) {
+  if (!title || typeof title !== 'string') return false;
+
+  const trimmed = title.trim();
+  if (trimmed.length < 2) return false;
+  if (trimmed.length > 100) return false; // Too long, probably description
+
+  const lowerTitle = trimmed.toLowerCase();
+
+  // Check against invalid titles (exact or contains)
+  for (const invalid of INVALID_TITLES) {
+    if (lowerTitle === invalid) return false;
+    // Only check "contains" for longer invalid strings to avoid false positives
+    if (invalid.length >= 8 && lowerTitle.includes(invalid)) return false;
+  }
+
+  // Check against invalid patterns
+  for (const pattern of INVALID_PATTERNS) {
+    if (pattern.test(trimmed)) return false;
+  }
+
+  // Must contain at least one letter
+  if (!/[a-zA-Z]/.test(trimmed)) return false;
+
+  // Must have at least 3 letters
+  const letterCount = (trimmed.match(/[a-zA-Z]/g) || []).length;
+  if (letterCount < 3) return false;
+
+  // Reject if it's mostly numbers with few letters
+  const digitCount = (trimmed.match(/\d/g) || []).length;
+  if (digitCount > letterCount * 2) return false;
+
+  return true;
+}
+
+// Legacy compatibility - keep SKIP_TITLES for existing code
+const SKIP_TITLES = INVALID_TITLES;
 
 // Clean movie title for matching - STRICT cleaning
 function cleanTitle(title) {
@@ -182,20 +262,10 @@ function cleanTitle(title) {
     .trim();
 }
 
-// Check if title should be skipped
+// Check if title should be skipped (uses comprehensive validation)
 function shouldSkipTitle(title) {
-  const cleaned = cleanTitle(title);
-
-  // Too short
-  if (cleaned.length < 3) return true;
-
-  // In skip list
-  if (SKIP_TITLES.some((skip) => cleaned === skip || cleaned.includes(skip))) return true;
-
-  // Only numbers
-  if (/^\d+$/.test(cleaned)) return true;
-
-  return false;
+  // Use the new comprehensive validation
+  return !isValidMovieTitle(title);
 }
 
 // STRICT matching function - no fuzzy matching
@@ -662,75 +732,101 @@ async function scrapeCinema(browser, cinema) {
           const pageTitle = await page.title();
           console.log(`  Page title: ${pageTitle}`);
 
-          // Try each selector
-          for (const selector of cinema.selectors) {
-            try {
-              const found = await page.$$eval(selector, (els) =>
-                els.map((el) => el.textContent?.trim()).filter((t) => t && t.length > 1 && t.length < 100)
+          // Extract ONLY from movie cards - not generic page elements
+          try {
+            const movieCardTitles = await page.evaluate(() => {
+              const results = [];
+
+              // Only look for actual movie cards, not all page content
+              const movieCards = document.querySelectorAll(
+                '.movie-card, .movie-item, .film-card, .poster-card, ' +
+                '[class*="movie-"][class*="card"], [class*="film-"][class*="card"], ' +
+                '[class*="MovieCard"], [class*="movie-poster"], ' +
+                '.coming-soon .movie, .movies-list .movie, .movies-grid .movie, ' +
+                '[class*="coming"] .movie, [class*="upcoming"] .movie'
               );
 
-              if (found.length > 0) {
-                console.log(`  Found ${found.length} coming soon items with selector: ${selector}`);
-                found.forEach((m) => {
-                  if (!shouldSkipTitle(m)) {
+              movieCards.forEach((card) => {
+                // Skip if inside excluded areas
+                if (card.closest('footer, nav, .footer, .navigation, .menu, .sidebar, .login, .register, .header, .navbar')) {
+                  return;
+                }
+
+                // Get title from specific elements within the card
+                const titleEl = card.querySelector('h2, h3, h4, .title, .movie-title, .film-title, .name, .movie-name');
+                if (titleEl) {
+                  let title = titleEl.textContent?.trim();
+                  if (title) {
+                    // Basic cleanup
+                    title = title.replace(/book\s*(now|tickets)/gi, '').trim();
+                    title = title.replace(/\d+\s*mins?/gi, '').trim();
+                    if (title.length >= 2 && title.length <= 80) {
+                      results.push(title);
+                    }
+                  }
+                }
+              });
+
+              return [...new Set(results)];
+            });
+
+            if (movieCardTitles.length > 0) {
+              console.log(`  Found ${movieCardTitles.length} titles from coming soon movie cards`);
+              // Filter through validation before adding
+              const validTitles = movieCardTitles.filter((m) => !shouldSkipTitle(m));
+              validTitles.forEach((m) => {
+                comingSoonMovies.add(m);
+                const cleaned = cleanTitle(m).toLowerCase();
+                if (cleaned.length >= 3) {
+                  definitelyComingSoon.add(cleaned);
+                }
+              });
+              console.log(`  → ${validTitles.length} valid coming soon titles added`);
+            }
+          } catch (err) {
+            console.log(`  Error extracting from coming soon movie cards: ${err.message}`);
+          }
+
+          // Fallback: Try cinema-specific selectors if movie cards didn't work
+          if (comingSoonMovies.size === 0) {
+            for (const selector of cinema.selectors) {
+              try {
+                const found = await page.$$eval(selector, (els) =>
+                  els
+                    .filter((el) => {
+                      // Skip if inside footer, nav, or other non-content areas
+                      if (el.closest('footer, nav, .footer, .navigation, .menu, .sidebar, .login, .register, .header, .navbar')) {
+                        return false;
+                      }
+                      return true;
+                    })
+                    .map((el) => {
+                      let text = el.textContent?.trim();
+                      if (text) {
+                        text = text.replace(/book\s*(now|tickets)/gi, '').trim();
+                        text = text.replace(/\d+\s*mins?/gi, '').trim();
+                      }
+                      return text;
+                    })
+                    .filter((t) => t && t.length > 1 && t.length < 100)
+                );
+
+                if (found.length > 0) {
+                  console.log(`  Fallback: Found ${found.length} coming soon items with selector: ${selector}`);
+                  const validTitles = found.filter((m) => !shouldSkipTitle(m));
+                  validTitles.forEach((m) => {
                     comingSoonMovies.add(m);
-                    // Add cleaned title to definitive set
                     const cleaned = cleanTitle(m).toLowerCase();
                     if (cleaned.length >= 3) {
                       definitelyComingSoon.add(cleaned);
                     }
-                  }
-                });
-              }
-            } catch {
-              // Selector not found, continue
-            }
-          }
-
-          // Also try generic approach for coming soon page
-          try {
-            const genericTitles = await page.evaluate(() => {
-              const elements = document.querySelectorAll(
-                'h1, h2, h3, h4, [class*="title"], [class*="name"], [class*="movie"], [class*="film"]'
-              );
-              return Array.from(elements)
-                .map((el) => el.textContent?.trim())
-                .filter((t) => {
-                  if (!t || t.length < 3 || t.length > 80) return false;
-                  const lower = t.toLowerCase();
-                  if (
-                    lower.includes('menu') ||
-                    lower.includes('login') ||
-                    lower.includes('sign') ||
-                    lower.includes('contact') ||
-                    lower.includes('about') ||
-                    lower.includes('home') ||
-                    lower.includes('cookie') ||
-                    lower.includes('privacy') ||
-                    lower.includes('terms') ||
-                    lower.includes('coming soon') ||
-                    lower.includes('now showing')
-                  ) {
-                    return false;
-                  }
-                  return true;
-                });
-            });
-
-            if (genericTitles.length > 0) {
-              console.log(`  Found ${genericTitles.length} generic coming soon titles`);
-              genericTitles.forEach((m) => {
-                if (!shouldSkipTitle(m)) {
-                  comingSoonMovies.add(m);
-                  const cleaned = cleanTitle(m).toLowerCase();
-                  if (cleaned.length >= 3) {
-                    definitelyComingSoon.add(cleaned);
-                  }
+                  });
+                  console.log(`  → ${validTitles.length} valid titles added`);
                 }
-              });
+              } catch {
+                // Selector not found, continue
+              }
             }
-          } catch (err) {
-            console.log(`  Error with generic coming soon extraction: ${err.message}`);
           }
 
           console.log(`  ✅ Coming Soon movies found: ${comingSoonMovies.size}`);
@@ -758,10 +854,20 @@ async function scrapeCinema(browser, cinema) {
       console.log(`\nTrying URL: ${url}`);
 
       try {
-        await page.goto(url, {
+        const response = await page.goto(url, {
           waitUntil: 'networkidle2',
           timeout: 30000,
         });
+
+        // Check for HTTP errors (404, 500, etc.)
+        const status = response?.status() || 200;
+        if (status >= 400) {
+          console.log(`  ⚠️ HTTP ${status} error for ${url}`);
+          if (cinema.skipOnError) {
+            console.log(`  Skipping ${cinema.name} due to HTTP error (skipOnError enabled)`);
+            continue;
+          }
+        }
 
         // Wait for content to load
         await new Promise((resolve) => setTimeout(resolve, 3000));
@@ -770,57 +876,101 @@ async function scrapeCinema(browser, cinema) {
         const title = await page.title();
         console.log(`Page title: ${title}`);
 
-        // Try each selector
+        // Check for error page content
+        const isErrorPage = await page.evaluate(() => {
+          const bodyText = document.body?.textContent?.toLowerCase() || '';
+          return (
+            bodyText.includes('404') ||
+            bodyText.includes('page not found') ||
+            bodyText.includes('server error') ||
+            bodyText.includes('resource cannot be found') ||
+            bodyText.includes("server error in '") ||
+            bodyText.includes('application error')
+          );
+        });
+
+        if (isErrorPage) {
+          console.log(`  ⚠️ Error page detected for ${url}`);
+          if (cinema.skipOnError) {
+            console.log(`  Skipping ${cinema.name} due to error page content (skipOnError enabled)`);
+            continue;
+          }
+        }
+
+        // Try each selector - but validate titles
         for (const selector of cinema.selectors) {
           try {
             const found = await page.$$eval(selector, (els) =>
-              els.map((el) => el.textContent?.trim()).filter((t) => t && t.length > 1 && t.length < 100)
+              els
+                .filter((el) => {
+                  // Skip if inside footer, nav, or other non-content areas
+                  if (el.closest('footer, nav, .footer, .navigation, .menu, .sidebar, .login, .register, .header, .navbar')) {
+                    return false;
+                  }
+                  return true;
+                })
+                .map((el) => el.textContent?.trim())
+                .filter((t) => t && t.length > 1 && t.length < 100)
             );
 
             if (found.length > 0) {
               console.log(`Found ${found.length} items with selector: ${selector}`);
-              found.forEach((m) => allMovies.add(m));
+              // Filter through validation before adding
+              const validTitles = found.filter((m) => !shouldSkipTitle(m));
+              validTitles.forEach((m) => allMovies.add(m));
+              console.log(`  → ${validTitles.length} valid titles added`);
             }
           } catch {
             // Selector not found, continue
           }
         }
 
-        // Also try generic approach - get all visible text that could be movie titles
+        // Extract ONLY from movie cards - not generic page elements
         try {
-          const genericTitles = await page.evaluate(() => {
-            const elements = document.querySelectorAll(
-              'h1, h2, h3, h4, [class*="title"], [class*="name"], [class*="movie"], [class*="film"]'
+          const movieCardTitles = await page.evaluate(() => {
+            const results = [];
+
+            // Only look for actual movie cards, not all page content
+            const movieCards = document.querySelectorAll(
+              '.movie-card, .movie-item, .film-card, .poster-card, ' +
+              '[class*="movie-"][class*="card"], [class*="film-"][class*="card"], ' +
+              '[class*="MovieCard"], [class*="movie-poster"], ' +
+              '.now-showing .movie, .movies-list .movie, .movies-grid .movie'
             );
-            return Array.from(elements)
-              .map((el) => el.textContent?.trim())
-              .filter((t) => {
-                if (!t || t.length < 3 || t.length > 80) return false;
-                // Filter out common non-movie text
-                const lower = t.toLowerCase();
-                if (
-                  lower.includes('menu') ||
-                  lower.includes('login') ||
-                  lower.includes('sign') ||
-                  lower.includes('contact') ||
-                  lower.includes('about') ||
-                  lower.includes('home') ||
-                  lower.includes('cookie') ||
-                  lower.includes('privacy') ||
-                  lower.includes('terms')
-                ) {
-                  return false;
+
+            movieCards.forEach((card) => {
+              // Skip if inside excluded areas
+              if (card.closest('footer, nav, .footer, .navigation, .menu, .sidebar, .login, .register')) {
+                return;
+              }
+
+              // Get title from specific elements within the card
+              const titleEl = card.querySelector('h2, h3, h4, .title, .movie-title, .film-title, .name, .movie-name');
+              if (titleEl) {
+                let title = titleEl.textContent?.trim();
+                if (title) {
+                  // Basic cleanup
+                  title = title.replace(/book\s*(now|tickets)/gi, '').trim();
+                  title = title.replace(/\d+\s*mins?/gi, '').trim();
+                  if (title.length >= 2 && title.length <= 80) {
+                    results.push(title);
+                  }
                 }
-                return true;
-              });
+              }
+            });
+
+            return [...new Set(results)];
           });
 
-          if (genericTitles.length > 0) {
-            console.log(`Found ${genericTitles.length} generic titles`);
-            genericTitles.forEach((m) => allMovies.add(m));
+          if (movieCardTitles.length > 0) {
+            console.log(`Found ${movieCardTitles.length} titles from movie cards`);
+            // Filter through validation before adding
+            const validTitles = movieCardTitles.filter((m) => !shouldSkipTitle(m));
+            validTitles.forEach((m) => allMovies.add(m));
+            console.log(`  → ${validTitles.length} valid titles added`);
           }
         } catch (err) {
-          console.log(`Error with generic extraction: ${err.message}`);
+          console.log(`Error extracting from movie cards: ${err.message}`);
         }
 
         // Try to extract from JSON-LD structured data
@@ -903,80 +1053,61 @@ async function scrapeCinema(browser, cinema) {
 
         // ============================================================
         // STEP 4: Fallback - Detect "Coming Soon" section separator (backup method)
+        // ONLY use this if we have NO Coming Soon data from dedicated URLs
         // ============================================================
-        if (allMovies.size > 0) {
+        if (allMovies.size > 0 && definitelyComingSoon.size === 0 && comingSoonMovies.size === 0) {
           try {
-            console.log(`\n🔍 [STEP 4] Detecting Coming Soon section separator (backup)...`);
+            console.log(`\n🔍 [STEP 4] Detecting Coming Soon section separator (backup - no Coming Soon URL data)...`);
 
-            // Get all text content in order from the page to detect section separators
-            const pageStructure = await page.evaluate(() => {
+            // Get section headers only (not all page content)
+            const sectionHeaders = await page.evaluate(() => {
               const result = [];
-              // Look for section headers and movie titles
-              const elements = document.querySelectorAll('h1, h2, h3, h4, .section-title, .section-header, [class*="section"], [class*="title"], [class*="movie"]');
+              // Only look for actual section headers, not movie cards
+              const headers = document.querySelectorAll('h1, h2, h3, .section-title, .section-header');
 
-              for (const el of elements) {
+              for (const el of headers) {
                 const text = el.textContent?.trim();
-                if (text && text.length > 0 && text.length < 150) {
+                // Only include if it looks like a section header (short, not a movie title)
+                if (text && text.length > 3 && text.length < 50) {
+                  const rect = el.getBoundingClientRect();
                   result.push({
                     text: text,
                     tagName: el.tagName,
-                    className: el.className || ''
+                    top: rect.top
                   });
                 }
               }
-              return result;
+              return result.sort((a, b) => a.top - b.top);
             });
 
-            // Find the "Coming Soon" separator
-            let foundComingSoonSection = false;
-            const nowShowingTitles = [];
-            const comingSoonTitles = [];
+            // Find distinct "Now Showing" and "Coming Soon" section positions
+            let comingSoonSectionTop = -1;
 
-            for (const item of pageStructure) {
-              const textUpper = item.text.toUpperCase();
-
-              // Check if this is a "Coming Soon" section header
-              if (textUpper.includes('COMING SOON') ||
-                  textUpper === 'COMING SOON' ||
-                  textUpper.includes('UPCOMING') ||
-                  textUpper.includes('ADVANCE BOOKING')) {
-                console.log(`  Found section separator: "${item.text}"`);
-                foundComingSoonSection = true;
-                continue;
-              }
-
-              // Check if this looks like a movie title (not a section header)
-              if (item.text.length >= 3 && item.text.length <= 80 && !shouldSkipTitle(item.text)) {
-                // Check if any of our scraped movies match this title
-                const cleaned = cleanTitle(item.text);
-                for (const movie of allMovies) {
-                  if (cleanTitle(movie) === cleaned || cleaned.includes(cleanTitle(movie)) || cleanTitle(movie).includes(cleaned)) {
-                    if (foundComingSoonSection) {
-                      comingSoonTitles.push(movie);
-                    } else {
-                      nowShowingTitles.push(movie);
-                    }
-                    break;
-                  }
-                }
+            for (const header of sectionHeaders) {
+              const textUpper = header.text.toUpperCase().trim();
+              // Only match exact or near-exact "Coming Soon" header
+              if (textUpper === 'COMING SOON' ||
+                  textUpper === 'UPCOMING MOVIES' ||
+                  textUpper === 'COMING SOON MOVIES') {
+                console.log(`  Found Coming Soon section header: "${header.text}" at position ${header.top}`);
+                comingSoonSectionTop = header.top;
+                break;
               }
             }
 
-            if (foundComingSoonSection && comingSoonTitles.length > 0) {
-              console.log(`  ${cinema.name} Now Showing: ${nowShowingTitles.length} movies`);
-              console.log(`  ${cinema.name} Coming Soon (from section): ${comingSoonTitles.length} movies`);
-
-              // Move coming soon movies from allMovies to comingSoonMovies
-              comingSoonTitles.forEach(title => {
-                comingSoonMovies.add(title);
-                allMovies.delete(title);
-              });
+            // If we found a Coming Soon section, we'd need to get movie positions too
+            // For now, skip this complex logic and rely on dedicated Coming Soon URLs
+            if (comingSoonSectionTop > 0) {
+              console.log(`  Coming Soon section found, but skipping complex position matching`);
+              console.log(`  Recommendation: Add dedicated Coming Soon URL for ${cinema.name}`);
             } else {
-              console.log('  No Coming Soon section detected on main page');
+              console.log(`  No distinct Coming Soon section header found on main page`);
             }
           } catch (err) {
-            console.log(`  Error detecting ${cinema.name} sections: ${err.message}`);
+            console.log(`  Error in STEP 4: ${err.message}`);
           }
+        } else if (definitelyComingSoon.size > 0 || comingSoonMovies.size > 0) {
+          console.log(`\n🔍 [STEP 4] SKIPPED - Already have Coming Soon data from dedicated URLs`);
         }
 
         // If we found movies, no need to try other URLs
