@@ -48,11 +48,16 @@ export async function GET(request: NextRequest) {
       );
     }
 
+    // Cache public movie data for 5 minutes
     return NextResponse.json({
       movies: movies || [],
       total: count || 0,
       limit,
       offset,
+    }, {
+      headers: {
+        'Cache-Control': 'public, s-maxage=300, stale-while-revalidate=600',
+      },
     });
   } catch (error) {
     console.error('Movies API error:', error);

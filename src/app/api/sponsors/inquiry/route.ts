@@ -3,9 +3,51 @@ import { getAdminClient } from '@/lib/supabase/server';
 
 export const dynamic = 'force-dynamic';
 
+// Rate limiting
+const inquiryAttempts = new Map<string, { count: number; resetTime: number }>();
+const MAX_INQUIRIES_PER_HOUR = 3;
+
+function checkRateLimit(ip: string): boolean {
+  const now = Date.now();
+  const entry = inquiryAttempts.get(ip);
+
+  if (!entry || now > entry.resetTime) {
+    inquiryAttempts.set(ip, { count: 1, resetTime: now + 3600000 });
+    return true;
+  }
+
+  if (entry.count >= MAX_INQUIRIES_PER_HOUR) {
+    return false;
+  }
+
+  entry.count++;
+  return true;
+}
+
+// Sanitize input to prevent XSS
+function sanitize(str: string | undefined | null): string | null {
+  if (!str) return null;
+  return str
+    .trim()
+    .replace(/<[^>]*>/g, '')
+    .replace(/[<>'\"]/g, '');
+}
+
 // POST /api/sponsors/inquiry - Submit sponsor inquiry
 export async function POST(request: NextRequest) {
   try {
+    // Rate limiting
+    const ip = request.headers.get('x-forwarded-for')?.split(',')[0] ||
+               request.headers.get('x-real-ip') ||
+               'unknown';
+
+    if (!checkRateLimit(ip)) {
+      return NextResponse.json(
+        { error: 'Too many inquiries. Please try again later.' },
+        { status: 429 }
+      );
+    }
+
     const body = await request.json();
     const {
       businessName,
@@ -35,16 +77,16 @@ export async function POST(request: NextRequest) {
 
     const supabase = getAdminClient();
 
-    // Store inquiry in database
+    // Store inquiry in database with sanitized inputs
     const { data, error } = await supabase
       .from('sponsor_inquiries')
       .insert({
-        business_name: businessName,
-        contact_name: contactName,
-        email,
-        phone: phone || null,
-        preferred_tier: tier || 'golden',
-        message: message || null,
+        business_name: sanitize(businessName) || '',
+        contact_name: sanitize(contactName) || '',
+        email: email.trim().toLowerCase(),
+        phone: sanitize(phone) || null,
+        preferred_tier: sanitize(tier) || 'golden',
+        message: sanitize(message) || null,
         status: 'pending',
       } as any)
       .select()

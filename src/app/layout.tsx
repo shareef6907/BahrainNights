@@ -7,6 +7,8 @@ import { LanguageProvider } from "@/context/LanguageContext";
 const inter = Inter({
   variable: "--font-inter",
   subsets: ["latin"],
+  display: "swap",
+  preload: true,
 });
 
 export const metadata: Metadata = {
@@ -21,6 +23,13 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en" suppressHydrationWarning>
+      <head>
+        {/* Preconnect to external resources for faster loading */}
+        <link rel="preconnect" href="https://bahrainnights-production.s3.me-south-1.amazonaws.com" />
+        <link rel="preconnect" href="https://image.tmdb.org" />
+        <link rel="dns-prefetch" href="https://bahrainnights-production.s3.me-south-1.amazonaws.com" />
+        <link rel="dns-prefetch" href="https://image.tmdb.org" />
+      </head>
       <body className={`${inter.variable} font-inter antialiased`}>
         <LanguageProvider>
           <AuthProvider>

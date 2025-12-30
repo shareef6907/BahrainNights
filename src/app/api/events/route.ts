@@ -124,9 +124,14 @@ export async function GET(request: NextRequest) {
       };
     });
 
+    // Cache public event data for 5 minutes
     return NextResponse.json({
       events: transformedEvents,
       total: transformedEvents.length,
+    }, {
+      headers: {
+        'Cache-Control': 'public, s-maxage=300, stale-while-revalidate=600',
+      },
     });
   } catch (error) {
     console.error('Events API error:', error);

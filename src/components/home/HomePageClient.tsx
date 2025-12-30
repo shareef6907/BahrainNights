@@ -1,14 +1,24 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import dynamic from 'next/dynamic';
 import { motion, AnimatePresence } from 'framer-motion';
 import { MapPin, Clock, Star, ChevronRight, ChevronDown, Menu, X, Sparkles, Plus, Play } from 'lucide-react';
 import GlobalSearch from '@/components/search/GlobalSearch';
 import { SponsorsSection } from '@/components/sponsors';
-import MovieModal from '@/components/cinema/MovieModal';
-import TrailerModal from '@/components/cinema/TrailerModal';
 import { Movie } from '@/components/cinema/MovieCard';
 import LanguageSwitcher from '@/components/LanguageSwitcher';
+
+// Lazy load modals - only loaded when user interacts with movies
+const MovieModal = dynamic(() => import('@/components/cinema/MovieModal'), {
+  loading: () => null,
+  ssr: false,
+});
+
+const TrailerModal = dynamic(() => import('@/components/cinema/TrailerModal'), {
+  loading: () => null,
+  ssr: false,
+});
 
 // Animation variants - optimized for speed
 const fadeIn = {

@@ -2,14 +2,24 @@
 
 import { useState, useMemo, useEffect } from 'react';
 import { useSearchParams } from 'next/navigation';
+import dynamic from 'next/dynamic';
 import { motion } from 'framer-motion';
 import { Search, Film, Clock, AlertCircle } from 'lucide-react';
 import FeaturedMovie from '@/components/cinema/FeaturedMovie';
 import MovieFilters from '@/components/cinema/MovieFilters';
 import MovieGrid from '@/components/cinema/MovieGrid';
-import MovieModal from '@/components/cinema/MovieModal';
-import TrailerModal from '@/components/cinema/TrailerModal';
 import { Movie } from '@/components/cinema/MovieCard';
+
+// Lazy load modals - only loaded when user clicks a movie
+const MovieModal = dynamic(() => import('@/components/cinema/MovieModal'), {
+  loading: () => null,
+  ssr: false,
+});
+
+const TrailerModal = dynamic(() => import('@/components/cinema/TrailerModal'), {
+  loading: () => null,
+  ssr: false,
+});
 
 // Filter options
 const defaultCinemas = [
