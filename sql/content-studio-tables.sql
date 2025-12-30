@@ -135,21 +135,27 @@ ALTER TABLE content_posts ENABLE ROW LEVEL SECURITY;
 ALTER TABLE content_settings ENABLE ROW LEVEL SECURITY;
 
 -- Policy: Allow authenticated users to read all content
-CREATE POLICY IF NOT EXISTS "Allow authenticated read instagram_accounts" ON instagram_accounts
+DROP POLICY IF EXISTS "Allow authenticated read instagram_accounts" ON instagram_accounts;
+CREATE POLICY "Allow authenticated read instagram_accounts" ON instagram_accounts
   FOR SELECT TO authenticated USING (true);
 
-CREATE POLICY IF NOT EXISTS "Allow authenticated read content_posts" ON content_posts
+DROP POLICY IF EXISTS "Allow authenticated read content_posts" ON content_posts;
+CREATE POLICY "Allow authenticated read content_posts" ON content_posts
   FOR SELECT TO authenticated USING (true);
 
-CREATE POLICY IF NOT EXISTS "Allow authenticated read content_settings" ON content_settings
+DROP POLICY IF EXISTS "Allow authenticated read content_settings" ON content_settings;
+CREATE POLICY "Allow authenticated read content_settings" ON content_settings
   FOR SELECT TO authenticated USING (true);
 
 -- Policy: Allow service role full access (for API routes)
-CREATE POLICY IF NOT EXISTS "Allow service role all instagram_accounts" ON instagram_accounts
+DROP POLICY IF EXISTS "Allow service role all instagram_accounts" ON instagram_accounts;
+CREATE POLICY "Allow service role all instagram_accounts" ON instagram_accounts
   FOR ALL TO service_role USING (true);
 
-CREATE POLICY IF NOT EXISTS "Allow service role all content_posts" ON content_posts
+DROP POLICY IF EXISTS "Allow service role all content_posts" ON content_posts;
+CREATE POLICY "Allow service role all content_posts" ON content_posts
   FOR ALL TO service_role USING (true);
 
-CREATE POLICY IF NOT EXISTS "Allow service role all content_settings" ON content_settings
+DROP POLICY IF EXISTS "Allow service role all content_settings" ON content_settings;
+CREATE POLICY "Allow service role all content_settings" ON content_settings
   FOR ALL TO service_role USING (true);
