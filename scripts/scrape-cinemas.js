@@ -771,13 +771,15 @@ async function updateDatabase(nowShowing, comingSoon, movieCinemaMap, originalTi
 
   console.log(`Found ${dbMovies?.length || 0} movies in database`);
 
-  // Reset all movies first
-  console.log('Resetting all movies...');
-  await supabase.from('movies').update({
-    is_now_showing: false,
-    is_coming_soon: false,
-    scraped_from: []
-  }).neq('id', '00000000-0000-0000-0000-000000000000');
+  // IMPORTANT: Do NOT reset all movies anymore!
+  // Previously, we were wiping scraped_from for ALL movies, which caused data loss
+  // when scraping failed for some cinemas (like VOX HTTP/2 errors).
+  //
+  // New approach: Only update movies we actually find during this scrape.
+  // Movies not found in the current scrape will retain their existing data.
+  // The fix scripts (fix-vox-movies.js, fix-cinepolis-movies.js, etc.) will
+  // supplement any missing cinema associations.
+  console.log('Starting incremental update (preserving existing data)...');
 
   // Match and update
   let matchedNowShowing = 0;
@@ -805,7 +807,7 @@ async function updateDatabase(nowShowing, comingSoon, movieCinemaMap, originalTi
     // Skip movies not found on any cinema website
     if (!foundOnCinema) continue;
 
-    const cinemas = movieCinemaMap[matchedKey] || [];
+    const scrapedCinemas = movieCinemaMap[matchedKey] || [];
 
     // DETERMINE STATUS FROM CINEMA WEBSITES (source of truth for Bahrain)
     // Cinema websites tell us what's actually showing in Bahrain, not TMDB global dates
@@ -824,18 +826,30 @@ async function updateDatabase(nowShowing, comingSoon, movieCinemaMap, originalTi
       isComingSoon = isComingSoonMatch;
     }
 
+    // Get current scraped_from to MERGE with new data (don't overwrite completely)
+    // This prevents data loss when a cinema scraper fails
+    const { data: currentMovie } = await supabase
+      .from('movies')
+      .select('scraped_from')
+      .eq('id', movie.id)
+      .single();
+
+    const existingCinemas = currentMovie?.scraped_from || [];
+    // Merge: keep existing cinemas and add any new ones found
+    const mergedCinemas = [...new Set([...existingCinemas, ...scrapedCinemas])];
+
     await supabase.from('movies').update({
       is_now_showing: isNowShowing,
       is_coming_soon: isComingSoon,
-      scraped_from: cinemas,
+      scraped_from: mergedCinemas,
     }).eq('id', movie.id);
 
     if (isNowShowing) {
       matchedNowShowing++;
-      console.log(`  ✅ NOW SHOWING: ${movie.title} [${cinemas.join(', ')}]`);
+      console.log(`  ✅ NOW SHOWING: ${movie.title} [${mergedCinemas.join(', ')}]`);
     } else {
       matchedComingSoon++;
-      console.log(`  🔜 COMING SOON: ${movie.title} [${cinemas.join(', ')}]`);
+      console.log(`  🔜 COMING SOON: ${movie.title} [${mergedCinemas.join(', ')}]`);
     }
   }
 

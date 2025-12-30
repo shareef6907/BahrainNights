@@ -142,7 +142,22 @@ export default function CinemaPageClient({
       });
   }, [activeTab, nowShowingMovies, comingSoonMovies, searchQuery, selectedGenre, selectedLanguage, sortBy]);
 
-  const featuredMovies = nowShowingMovies.slice(0, 7);
+  // Filter out movies without valid poster images for the featured slider
+  const featuredMovies = nowShowingMovies
+    .filter((movie) => {
+      // Must have a real poster URL (not placeholder)
+      const hasValidPoster = movie.poster &&
+        !movie.poster.includes('placeholder') &&
+        !movie.poster.includes('null') &&
+        movie.poster.startsWith('http');
+      // Must have a real backdrop URL (not placeholder)
+      const hasValidBackdrop = movie.backdrop &&
+        !movie.backdrop.includes('placeholder') &&
+        !movie.backdrop.includes('null') &&
+        movie.backdrop.startsWith('http');
+      return hasValidPoster && hasValidBackdrop;
+    })
+    .slice(0, 7);
 
   const handleMovieClick = (movie: Movie) => {
     setSelectedMovie(movie);

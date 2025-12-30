@@ -1,0 +1,43 @@
+name: Cinema Sync
+
+# What this does:
+# 1. Runs the main scraper (scrape-cinemas.js)
+# 2. Runs the sync script to fix any missing data (sync-cinemas.js)
+# 3. Runs every 4 hours automatically
+
+on:
+  schedule:
+    - cron: '0 */4 * * *'
+  workflow_dispatch:  # Allow manual runs
+
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+
+      # Install Puppeteer browser for scraping
+      - name: Install browser
+        run: sudo apt-get update && sudo apt-get install -y chromium-browser
+
+      - run: npm ci
+
+      # Step 1: Run main scraper
+      - name: Scrape Cinemas
+        env:
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
+          TMDB_API_KEY: ${{ secrets.TMDB_API_KEY }}
+        run: node scripts/scrape-cinemas.js || true  # Continue even if scraper fails
+
+      # Step 2: Sync and fix data
+      - name: Sync Cinema Data
+        env:
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
+        run: node scripts/sync-cinemas.js
