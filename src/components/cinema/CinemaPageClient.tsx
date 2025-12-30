@@ -143,6 +143,7 @@ export default function CinemaPageClient({
   }, [activeTab, nowShowingMovies, comingSoonMovies, searchQuery, selectedGenre, selectedLanguage, sortBy]);
 
   // Filter out movies without valid poster images for the featured slider
+  // Sort by IMDB rating (highest first) so best movies get top slider positions
   const featuredMovies = nowShowingMovies
     .filter((movie) => {
       // Must have a real poster URL (not placeholder)
@@ -157,6 +158,7 @@ export default function CinemaPageClient({
         movie.backdrop.startsWith('http');
       return hasValidPoster && hasValidBackdrop;
     })
+    .sort((a, b) => b.rating - a.rating) // Highest rating = 1st slide
     .slice(0, 7);
 
   const handleMovieClick = (movie: Movie) => {

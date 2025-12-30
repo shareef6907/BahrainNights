@@ -855,10 +855,9 @@ async function updateDatabase(nowShowing, comingSoon, movieCinemaMap, originalTi
 
   console.log(`\nMatched: ${matchedNowShowing} Now Showing, ${matchedComingSoon} Coming Soon`);
 
-  // Auto-add movies from TMDB if enabled
-  if (TMDB_API_KEY) {
-    await autoAddFromTMDB(nowShowing, comingSoon, movieCinemaMap, originalTitles, dbMovies);
-  }
+  // NOTE: TMDB auto-add DISABLED - causes wrong movie matches
+  // Cinema websites are the source of truth for what's showing in Bahrain
+  // Movies will be added manually or via the main scraper's direct scraping
 
   // Log results
   await logResults(matchedNowShowing, matchedComingSoon, nowShowing.size, comingSoon.size);
