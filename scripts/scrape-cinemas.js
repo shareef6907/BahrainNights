@@ -78,7 +78,7 @@ const CINEMAS = {
   vox: {
     name: 'VOX',
     // Use /movies page which loads movie list
-    nowShowingUrl: 'https://bhr.voxcinemas.com/movies',
+    nowShowingUrl: 'https://bhr.voxcinemas.com/movies/whatson',
     comingSoonUrl: 'https://bhr.voxcinemas.com/movies/comingsoon',
     skipOnError: false,
     // Use domcontentloaded to avoid HTTP/2 protocol errors during network idle
@@ -523,6 +523,7 @@ async function scrapeCinemas() {
       '--disable-dev-shm-usage',
       '--disable-gpu',
       '--window-size=1920,1080',
+      '--disable-http2', // Fix HTTP/2 protocol errors with VOX
     ]
   });
 
