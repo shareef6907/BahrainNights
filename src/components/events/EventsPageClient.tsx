@@ -276,11 +276,48 @@ export default function EventsPageClient({ initialEvents }: EventsPageClientProp
         </div>
       </section>
 
+      {/* Mobile Category Filter - Horizontal Scrollable Pills */}
+      <section className="lg:hidden px-4 pb-4 -mt-4">
+        <div className="flex gap-2 overflow-x-auto pb-2 scrollbar-hide">
+          {categories.map((category) => (
+            <button
+              key={category.id}
+              onClick={() => setSelectedCategory(category.id)}
+              className={`flex items-center gap-1.5 px-3 py-2 rounded-full whitespace-nowrap text-sm transition-all ${
+                selectedCategory === category.id
+                  ? 'bg-purple-500 text-white'
+                  : 'bg-white/10 text-gray-300 hover:bg-white/15'
+              }`}
+            >
+              <span>{category.icon}</span>
+              <span>{category.id === 'all' ? 'All' : category.name.split(' ')[0]}</span>
+            </button>
+          ))}
+        </div>
+
+        {/* Mobile Quick Links */}
+        <div className="flex gap-3 mt-3">
+          <Link
+            href="/events/calendar"
+            className="flex-1 flex items-center justify-center gap-2 px-3 py-2.5 bg-white/5 border border-white/10 rounded-xl text-yellow-400 text-sm font-medium"
+          >
+            <Calendar className="w-4 h-4" />
+            Calendar
+          </Link>
+          <Link
+            href="/list-event"
+            className="flex-1 flex items-center justify-center gap-2 px-3 py-2.5 bg-gradient-to-r from-cyan-500 to-blue-500 rounded-xl text-white text-sm font-medium"
+          >
+            List Event
+          </Link>
+        </div>
+      </section>
+
       {/* Main Content */}
       <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pb-16">
         <div className="flex flex-col lg:flex-row gap-8">
-          {/* Sidebar Filters */}
-          <div className="lg:w-64 flex-shrink-0">
+          {/* Sidebar Filters - Hidden on Mobile */}
+          <div className="hidden lg:block lg:w-64 flex-shrink-0">
             <div className="sticky top-24 bg-white/5 backdrop-blur-sm border border-white/10 rounded-2xl p-4">
               <h3 className="text-lg font-semibold text-white mb-4 flex items-center gap-2">
                 <Filter className="w-5 h-5" />
