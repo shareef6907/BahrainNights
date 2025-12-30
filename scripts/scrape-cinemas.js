@@ -155,20 +155,27 @@ const SKIP_TITLES = [
 function cleanTitle(title) {
   return title
     .toLowerCase()
-    // Remove ratings like (PG-15), (15+), (PG), etc.
+    // Remove ratings like (PG-15), (15+), (PG), (TBC), (18TC), etc.
     .replace(/\(pg-?\d*\)/gi, '')
     .replace(/\(\d+\+?\)/gi, '')
     .replace(/\(u\/a\)/gi, '')
     .replace(/\(u\)/gi, '')
+    .replace(/\(tbc\)/gi, '')
+    .replace(/\(\d*tc\)/gi, '')
+    .replace(/\(18\s*\+\)/gi, '')
+    // Remove duration info like "100 Mins", "186 Mins English", etc.
+    .replace(/\d+\s*mins?\b/gi, '')
+    .replace(/\d+h\d*m?/gi, '')
     // Remove language indicators
     .replace(/\(ar\)/gi, '')
     .replace(/\(en\)/gi, '')
     .replace(/\(hindi\)/gi, '')
     .replace(/\(tamil\)/gi, '')
     .replace(/\(malayalam\)/gi, '')
+    .replace(/\(telugu\)/gi, '')
     .replace(/arabic|english|tamil|hindi|malayalam|telugu/gi, '')
     // Remove format indicators
-    .replace(/book now|2d|3d|imax|4dx|dolby|atmos|screenx/gi, '')
+    .replace(/book now|book tickets|2d|3d|imax|4dx|dolby|atmos|screenx/gi, '')
     // Remove special characters and extra spaces
     .replace(/[^a-z0-9\s]/g, '')
     .replace(/\s+/g, ' ')
@@ -620,6 +627,7 @@ async function scrapeCinema(browser, cinema) {
   const page = await browser.newPage();
   const allMovies = new Set();
   const comingSoonMovies = new Set(); // Track coming soon movies separately
+  const definitelyComingSoon = new Set(); // DEFINITIVE list from Coming Soon URLs (cleaned titles)
 
   try {
     // Set realistic browser headers
@@ -630,6 +638,118 @@ async function scrapeCinema(browser, cinema) {
       'Accept-Language': 'en-US,en;q=0.9',
       Accept: 'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,image/apng,*/*;q=0.8',
     });
+
+    // ============================================================
+    // STEP 1: SCRAPE COMING SOON URLs FIRST (100% reliable source)
+    // This builds a definitive list BEFORE scraping main pages
+    // ============================================================
+    const comingSoonUrls = cinema.comingSoonUrls || [];
+    if (comingSoonUrls.length > 0) {
+      console.log(`\n🎬 [STEP 1] Scraping Coming Soon URLs FIRST for ${cinema.name}...`);
+
+      for (const comingSoonUrl of comingSoonUrls) {
+        console.log(`  📍 Coming Soon URL: ${comingSoonUrl}`);
+
+        try {
+          await page.goto(comingSoonUrl, {
+            waitUntil: 'networkidle2',
+            timeout: 30000,
+          });
+
+          // Wait for content to load
+          await new Promise((resolve) => setTimeout(resolve, 3000));
+
+          const pageTitle = await page.title();
+          console.log(`  Page title: ${pageTitle}`);
+
+          // Try each selector
+          for (const selector of cinema.selectors) {
+            try {
+              const found = await page.$$eval(selector, (els) =>
+                els.map((el) => el.textContent?.trim()).filter((t) => t && t.length > 1 && t.length < 100)
+              );
+
+              if (found.length > 0) {
+                console.log(`  Found ${found.length} coming soon items with selector: ${selector}`);
+                found.forEach((m) => {
+                  if (!shouldSkipTitle(m)) {
+                    comingSoonMovies.add(m);
+                    // Add cleaned title to definitive set
+                    const cleaned = cleanTitle(m).toLowerCase();
+                    if (cleaned.length >= 3) {
+                      definitelyComingSoon.add(cleaned);
+                    }
+                  }
+                });
+              }
+            } catch {
+              // Selector not found, continue
+            }
+          }
+
+          // Also try generic approach for coming soon page
+          try {
+            const genericTitles = await page.evaluate(() => {
+              const elements = document.querySelectorAll(
+                'h1, h2, h3, h4, [class*="title"], [class*="name"], [class*="movie"], [class*="film"]'
+              );
+              return Array.from(elements)
+                .map((el) => el.textContent?.trim())
+                .filter((t) => {
+                  if (!t || t.length < 3 || t.length > 80) return false;
+                  const lower = t.toLowerCase();
+                  if (
+                    lower.includes('menu') ||
+                    lower.includes('login') ||
+                    lower.includes('sign') ||
+                    lower.includes('contact') ||
+                    lower.includes('about') ||
+                    lower.includes('home') ||
+                    lower.includes('cookie') ||
+                    lower.includes('privacy') ||
+                    lower.includes('terms') ||
+                    lower.includes('coming soon') ||
+                    lower.includes('now showing')
+                  ) {
+                    return false;
+                  }
+                  return true;
+                });
+            });
+
+            if (genericTitles.length > 0) {
+              console.log(`  Found ${genericTitles.length} generic coming soon titles`);
+              genericTitles.forEach((m) => {
+                if (!shouldSkipTitle(m)) {
+                  comingSoonMovies.add(m);
+                  const cleaned = cleanTitle(m).toLowerCase();
+                  if (cleaned.length >= 3) {
+                    definitelyComingSoon.add(cleaned);
+                  }
+                }
+              });
+            }
+          } catch (err) {
+            console.log(`  Error with generic coming soon extraction: ${err.message}`);
+          }
+
+          console.log(`  ✅ Coming Soon movies found: ${comingSoonMovies.size}`);
+        } catch (navError) {
+          console.log(`  ⚠️ Failed to navigate to coming soon URL ${comingSoonUrl}: ${navError.message}`);
+        }
+      }
+
+      // Log the definitive coming soon list
+      if (definitelyComingSoon.size > 0) {
+        console.log(`\n  📋 DEFINITIVE Coming Soon titles for ${cinema.name}:`);
+        definitelyComingSoon.forEach(t => console.log(`    → ${t}`));
+      }
+    }
+
+    // ============================================================
+    // STEP 2: Scrape main pages (Now Showing)
+    // ============================================================
+    console.log(`\n🎬 [STEP 2] Scraping main pages for ${cinema.name}...`);
 
     // Try main URL and alternatives
     const urlsToTry = [cinema.url, ...(cinema.altUrls || [])];
@@ -739,11 +859,54 @@ async function scrapeCinema(browser, cinema) {
         }
 
         // ============================================================
-        // GENERIC: Detect "Coming Soon" section separator for ALL cinemas
+        // STEP 3: Cross-check against DEFINITIVE Coming Soon list
+        // Any movie found on Coming Soon URL = Coming Soon (100% reliable)
+        // ============================================================
+        if (allMovies.size > 0 && definitelyComingSoon.size > 0) {
+          console.log(`\n🔍 [STEP 3] Cross-checking movies against Coming Soon list...`);
+
+          const moviesToMove = [];
+          for (const movie of allMovies) {
+            const cleaned = cleanTitle(movie).toLowerCase();
+
+            // Check if this movie is in the definitive Coming Soon set
+            let isComingSoon = definitelyComingSoon.has(cleaned);
+
+            // Also check partial matches (for slight title variations)
+            if (!isComingSoon) {
+              for (const csTitle of definitelyComingSoon) {
+                if ((cleaned.length >= 5 && csTitle.includes(cleaned)) ||
+                    (csTitle.length >= 5 && cleaned.includes(csTitle))) {
+                  isComingSoon = true;
+                  console.log(`  📍 Partial match: "${movie}" ↔ "${csTitle}"`);
+                  break;
+                }
+              }
+            }
+
+            if (isComingSoon) {
+              moviesToMove.push(movie);
+              console.log(`  ✅ "${movie}" → COMING SOON (found on Coming Soon URL)`);
+            }
+          }
+
+          // Move confirmed Coming Soon movies
+          moviesToMove.forEach(title => {
+            comingSoonMovies.add(title);
+            allMovies.delete(title);
+          });
+
+          if (moviesToMove.length > 0) {
+            console.log(`  Moved ${moviesToMove.length} movies to Coming Soon based on URL source`);
+          }
+        }
+
+        // ============================================================
+        // STEP 4: Fallback - Detect "Coming Soon" section separator (backup method)
         // ============================================================
         if (allMovies.size > 0) {
           try {
-            console.log(`\nDetecting Coming Soon section for ${cinema.name}...`);
+            console.log(`\n🔍 [STEP 4] Detecting Coming Soon section separator (backup)...`);
 
             // Get all text content in order from the page to detect section separators
             const pageStructure = await page.evaluate(() => {
@@ -801,7 +964,7 @@ async function scrapeCinema(browser, cinema) {
 
             if (foundComingSoonSection && comingSoonTitles.length > 0) {
               console.log(`  ${cinema.name} Now Showing: ${nowShowingTitles.length} movies`);
-              console.log(`  ${cinema.name} Coming Soon: ${comingSoonTitles.length} movies`);
+              console.log(`  ${cinema.name} Coming Soon (from section): ${comingSoonTitles.length} movies`);
 
               // Move coming soon movies from allMovies to comingSoonMovies
               comingSoonTitles.forEach(title => {
@@ -809,7 +972,7 @@ async function scrapeCinema(browser, cinema) {
                 allMovies.delete(title);
               });
             } else {
-              console.log('  No Coming Soon section detected or no movies in that section');
+              console.log('  No Coming Soon section detected on main page');
             }
           } catch (err) {
             console.log(`  Error detecting ${cinema.name} sections: ${err.message}`);
@@ -818,7 +981,7 @@ async function scrapeCinema(browser, cinema) {
 
         // If we found movies, no need to try other URLs
         if (allMovies.size > 0 || comingSoonMovies.size > 0) {
-          console.log(`Total unique titles found: ${allMovies.size} now showing, ${comingSoonMovies.size} coming soon`);
+          console.log(`\n📊 Total unique titles: ${allMovies.size} now showing, ${comingSoonMovies.size} coming soon`);
           break;
         }
       } catch (navError) {
@@ -826,100 +989,7 @@ async function scrapeCinema(browser, cinema) {
       }
     }
 
-    // ============================================================
-    // SCRAPE DEDICATED "COMING SOON" URLs
-    // ============================================================
-    const comingSoonUrls = cinema.comingSoonUrls || [];
-    if (comingSoonUrls.length > 0) {
-      console.log(`\nScraping Coming Soon URLs for ${cinema.name}...`);
-
-      for (const comingSoonUrl of comingSoonUrls) {
-        console.log(`  Trying Coming Soon URL: ${comingSoonUrl}`);
-
-        try {
-          await page.goto(comingSoonUrl, {
-            waitUntil: 'networkidle2',
-            timeout: 30000,
-          });
-
-          // Wait for content to load
-          await new Promise((resolve) => setTimeout(resolve, 3000));
-
-          const pageTitle = await page.title();
-          console.log(`  Page title: ${pageTitle}`);
-
-          // Try each selector
-          for (const selector of cinema.selectors) {
-            try {
-              const found = await page.$$eval(selector, (els) =>
-                els.map((el) => el.textContent?.trim()).filter((t) => t && t.length > 1 && t.length < 100)
-              );
-
-              if (found.length > 0) {
-                console.log(`  Found ${found.length} coming soon items with selector: ${selector}`);
-                // Add these as Coming Soon movies (not Now Showing)
-                found.forEach((m) => {
-                  if (!shouldSkipTitle(m)) {
-                    comingSoonMovies.add(m);
-                    // Remove from allMovies if it was also there
-                    allMovies.delete(m);
-                  }
-                });
-              }
-            } catch {
-              // Selector not found, continue
-            }
-          }
-
-          // Also try generic approach for coming soon page
-          try {
-            const genericTitles = await page.evaluate(() => {
-              const elements = document.querySelectorAll(
-                'h1, h2, h3, h4, [class*="title"], [class*="name"], [class*="movie"], [class*="film"]'
-              );
-              return Array.from(elements)
-                .map((el) => el.textContent?.trim())
-                .filter((t) => {
-                  if (!t || t.length < 3 || t.length > 80) return false;
-                  const lower = t.toLowerCase();
-                  if (
-                    lower.includes('menu') ||
-                    lower.includes('login') ||
-                    lower.includes('sign') ||
-                    lower.includes('contact') ||
-                    lower.includes('about') ||
-                    lower.includes('home') ||
-                    lower.includes('cookie') ||
-                    lower.includes('privacy') ||
-                    lower.includes('terms') ||
-                    lower.includes('coming soon') ||
-                    lower.includes('now showing')
-                  ) {
-                    return false;
-                  }
-                  return true;
-                });
-            });
-
-            if (genericTitles.length > 0) {
-              console.log(`  Found ${genericTitles.length} generic coming soon titles`);
-              genericTitles.forEach((m) => {
-                if (!shouldSkipTitle(m)) {
-                  comingSoonMovies.add(m);
-                  allMovies.delete(m);
-                }
-              });
-            }
-          } catch (err) {
-            console.log(`  Error with generic coming soon extraction: ${err.message}`);
-          }
-
-          console.log(`  Coming Soon movies after scraping: ${comingSoonMovies.size}`);
-        } catch (navError) {
-          console.log(`  Failed to navigate to coming soon URL ${comingSoonUrl}: ${navError.message}`);
-        }
-      }
-    }
+    // Coming Soon URLs already scraped in STEP 1 at the beginning
   } catch (error) {
     console.error(`Error scraping ${cinema.name}:`, error.message);
   } finally {
@@ -929,13 +999,21 @@ async function scrapeCinema(browser, cinema) {
   const nowShowingList = Array.from(allMovies);
   const comingSoonList = Array.from(comingSoonMovies);
 
-  console.log(`\n${cinema.name} Results: ${nowShowingList.length} now showing, ${comingSoonList.length} coming soon`);
+  console.log(`\n${'='.repeat(60)}`);
+  console.log(`📊 FINAL CATEGORIZATION RESULTS: ${cinema.name}`);
+  console.log(`${'='.repeat(60)}`);
+  console.log(`  ✅ Now Showing: ${nowShowingList.length} movies`);
+  console.log(`  🔜 Coming Soon: ${comingSoonList.length} movies`);
+  console.log(`  📋 Coming Soon Source: ${definitelyComingSoon.size} titles from dedicated URLs`);
   if (nowShowingList.length > 0) {
-    console.log('Now Showing:', nowShowingList);
+    console.log(`\n  NOW SHOWING:`);
+    nowShowingList.forEach((m, i) => console.log(`    ${i + 1}. ${m}`));
   }
   if (comingSoonList.length > 0) {
-    console.log('Coming Soon:', comingSoonList);
+    console.log(`\n  COMING SOON:`);
+    comingSoonList.forEach((m, i) => console.log(`    ${i + 1}. ${m}`));
   }
+  console.log(`${'='.repeat(60)}\n`);
 
   return {
     cinema: cinema.name,
