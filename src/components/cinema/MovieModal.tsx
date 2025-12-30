@@ -220,15 +220,10 @@ export default function MovieModal({
                         Select a cinema to book your tickets for {movie.title}
                       </p>
 
-                      {/* Cinema Grid - Filter based on scraped_from */}
+                      {/* Cinema Grid - Show ALL cinemas for Now Showing movies */}
+                      {/* Most movies in Bahrain play at all major cinemas, so show all booking options */}
                       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                        {(() => {
-                          // Filter cinemas based on scraped_from, or show all if empty/undefined
-                          const availableCinemas = movie.scrapedFrom && movie.scrapedFrom.length > 0
-                            ? BAHRAIN_CINEMAS.filter((cinema) => movie.scrapedFrom?.includes(cinema.id))
-                            : BAHRAIN_CINEMAS; // Fallback: show all cinemas
-
-                          return availableCinemas.map((cinema) => (
+                        {BAHRAIN_CINEMAS.map((cinema) => (
                             <a
                               key={cinema.id}
                               href={cinema.bookingUrl}
@@ -262,8 +257,7 @@ export default function MovieModal({
                                 </div>
                               </div>
                             </a>
-                          ));
-                        })()}
+                          ))}
                       </div>
                     </div>
                   )}
