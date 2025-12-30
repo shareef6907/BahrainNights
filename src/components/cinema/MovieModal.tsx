@@ -297,9 +297,59 @@ export default function MovieModal({
 
                   {/* Coming Soon */}
                   {!movie.isNowShowing && (
-                    <div className="mt-6 p-6 bg-gradient-to-r from-orange-500/10 to-yellow-500/10 border border-orange-500/20 rounded-xl text-center">
-                      <p className="text-orange-400 font-medium mb-1">Coming to cinemas</p>
-                      <p className="text-2xl font-bold text-white">{movie.releaseDate}</p>
+                    <div className="mt-6">
+                      <div className="p-6 bg-gradient-to-r from-orange-500/10 to-yellow-500/10 border border-orange-500/20 rounded-xl text-center">
+                        <p className="text-orange-400 font-medium mb-1">Coming to cinemas</p>
+                        <p className="text-2xl font-bold text-white">{movie.releaseDate}</p>
+                      </div>
+
+                      {/* Show which cinemas will have this movie */}
+                      {(() => {
+                        const availableCinemas = movie.scrapedFrom && movie.scrapedFrom.length > 0
+                          ? BAHRAIN_CINEMAS.filter((cinema) => movie.scrapedFrom?.includes(cinema.id))
+                          : [];
+
+                        if (availableCinemas.length > 0) {
+                          return (
+                            <div className="mt-4">
+                              <div className="flex items-center gap-2 mb-3">
+                                <Ticket className="w-5 h-5 text-orange-400" />
+                                <h4 className="text-lg font-bold text-white">Coming to</h4>
+                              </div>
+                              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                                {availableCinemas.map((cinema) => (
+                                  <a
+                                    key={cinema.id}
+                                    href={cinema.bookingUrl}
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                    data-testid="cinema-option"
+                                    className={`group p-3 bg-gradient-to-br ${cinema.color} border ${cinema.borderColor} ${cinema.hoverColor} rounded-xl transition-all hover:scale-[1.02] hover:shadow-lg`}
+                                  >
+                                    <div className="flex items-center gap-3">
+                                      <div className="w-10 h-10 bg-white/10 rounded-lg flex items-center justify-center flex-shrink-0">
+                                        <span className="text-lg font-bold text-white">
+                                          {cinema.name.charAt(0)}
+                                        </span>
+                                      </div>
+                                      <div className="flex-1 min-w-0">
+                                        <h5 className="font-bold text-white truncate">
+                                          {cinema.name}
+                                        </h5>
+                                        <p className="text-xs text-gray-400 truncate">
+                                          {cinema.locations.join(' • ')}
+                                        </p>
+                                      </div>
+                                      <ExternalLink className="w-4 h-4 text-gray-400 group-hover:text-white transition-colors" />
+                                    </div>
+                                  </a>
+                                ))}
+                              </div>
+                            </div>
+                          );
+                        }
+                        return null;
+                      })()}
                     </div>
                   )}
                 </div>
