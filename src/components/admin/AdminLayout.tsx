@@ -26,6 +26,13 @@ const pageTitles: Record<string, string> = {
   '/admin/ads/new': 'Create New Ad',
   '/admin/analytics': 'Platform Analytics',
   '/admin/users': 'Manage Users',
+  '/admin/studio': 'Content Studio',
+  '/admin/studio/blog': 'Blog Posts',
+  '/admin/studio/feed': 'Feed Posts',
+  '/admin/studio/stories': 'Stories',
+  '/admin/studio/reels': 'Reel Briefs',
+  '/admin/studio/analytics': 'Studio Analytics',
+  '/admin/studio/settings': 'Studio Settings',
 };
 
 export default function AdminLayout({ children }: AdminLayoutProps) {

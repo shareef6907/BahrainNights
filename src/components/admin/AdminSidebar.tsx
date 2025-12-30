@@ -18,6 +18,7 @@ import {
   Shield,
   Crown,
   Inbox,
+  Sparkles,
 } from 'lucide-react';
 import { useAuth } from '@/lib/auth-context';
 
@@ -26,6 +27,12 @@ const navItems = [
     name: 'Dashboard',
     href: '/admin',
     icon: LayoutDashboard,
+  },
+  {
+    name: 'Content Studio',
+    href: '/admin/studio',
+    icon: Sparkles,
+    highlight: true,
   },
   {
     name: 'Venues',
@@ -92,6 +99,10 @@ export default function AdminSidebar({ collapsed, onToggle }: AdminSidebarProps)
       return pathname === '/admin/sponsors' ||
              (pathname.startsWith('/admin/sponsors/') &&
               !pathname.includes('/inquiries'));
+    }
+    // Handle studio routes
+    if (href === '/admin/studio') {
+      return pathname === '/admin/studio' || pathname.startsWith('/admin/studio/');
     }
     return pathname.startsWith(href);
   };
