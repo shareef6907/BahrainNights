@@ -1,173 +1,102 @@
-'use client';
+import { Suspense } from 'react';
+import { createClient } from '@supabase/supabase-js';
+import EventsCalendarClient from '@/components/events/EventsCalendarClient';
 
-import { useState } from 'react';
-import { motion } from 'framer-motion';
-import { ChevronLeft, ChevronRight, Calendar as CalendarIcon } from 'lucide-react';
-import Link from 'next/link';
+// Force dynamic rendering to ensure fresh data
+export const dynamic = 'force-dynamic';
+export const revalidate = 0;
 
-// Days of the week
-const DAYS = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
-const MONTHS = [
-  'January', 'February', 'March', 'April', 'May', 'June',
-  'July', 'August', 'September', 'October', 'November', 'December'
-];
+// Create Supabase client
+const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!;
+const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY!;
 
-export default function EventsCalendarPage() {
-  const [currentDate, setCurrentDate] = useState(new Date());
-  const [selectedDate, setSelectedDate] = useState<Date | null>(null);
+// Calendar event type
+export interface CalendarEvent {
+  id: string;
+  title: string;
+  slug: string;
+  date: string; // ISO format YYYY-MM-DD
+  endDate?: string;
+  time?: string;
+  venue: string;
+  category: string;
+}
 
-  const year = currentDate.getFullYear();
-  const month = currentDate.getMonth();
+// Fetch all published events
+async function getEvents(): Promise<CalendarEvent[]> {
+  const supabase = createClient(supabaseUrl, supabaseServiceKey, {
+    auth: {
+      autoRefreshToken: false,
+      persistSession: false
+    }
+  });
 
-  // Get first day of month and total days
-  const firstDayOfMonth = new Date(year, month, 1).getDay();
-  const daysInMonth = new Date(year, month + 1, 0).getDate();
+  const { data, error } = await supabase
+    .from('events')
+    .select('id, title, slug, date, end_date, time, start_time, venue_name, venue, category')
+    .eq('status', 'published')
+    .order('date', { ascending: true });
 
-  // Generate calendar days
-  const calendarDays = [];
-  for (let i = 0; i < firstDayOfMonth; i++) {
-    calendarDays.push(null);
+  if (error) {
+    console.error('Error fetching events:', error);
+    return [];
   }
-  for (let i = 1; i <= daysInMonth; i++) {
-    calendarDays.push(i);
+
+  if (!data || data.length === 0) {
+    return [];
   }
 
-  const goToPreviousMonth = () => {
-    setCurrentDate(new Date(year, month - 1, 1));
-  };
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  return data.map((event: any) => {
+    const eventDate = event.date || '';
+    const rawDate = eventDate ? eventDate.split('T')[0] : '';
+    const endDate = event.end_date ? event.end_date.split('T')[0] : undefined;
+    const time = event.time || event.start_time || '';
 
-  const goToNextMonth = () => {
-    setCurrentDate(new Date(year, month + 1, 1));
-  };
+    return {
+      id: event.id,
+      title: event.title || 'Untitled Event',
+      slug: event.slug || event.id,
+      date: rawDate,
+      endDate,
+      time: time && !time.toLowerCase().includes('tba') ? time : undefined,
+      venue: event.venue_name || event.venue || 'Venue TBA',
+      category: event.category || 'general',
+    };
+  });
+}
 
-  const isToday = (day: number) => {
-    const today = new Date();
-    return day === today.getDate() && month === today.getMonth() && year === today.getFullYear();
-  };
+// Server Component
+export default async function EventsCalendarPage() {
+  const events = await getEvents();
 
   return (
-    <div className="min-h-screen bg-slate-950">
-      {/* Hero Section */}
-      <section className="relative pt-24 pb-12 overflow-hidden">
-        <div className="absolute inset-0">
-          <div className="absolute inset-0 bg-gradient-to-b from-blue-500/10 via-purple-500/5 to-transparent" />
-        </div>
+    <Suspense fallback={<CalendarLoading />}>
+      <EventsCalendarClient events={events} />
+    </Suspense>
+  );
+}
 
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            className="text-center mb-8"
-          >
-            <h1 className="text-4xl md:text-5xl font-bold text-white mb-4 flex items-center justify-center gap-3">
-              <CalendarIcon className="w-10 h-10 text-blue-400" />
-              Events Calendar
-            </h1>
-            <p className="text-gray-400 text-lg max-w-2xl mx-auto">
-              Plan your month with all the best events happening in Bahrain
-            </p>
-          </motion.div>
-
-          {/* Back to Events */}
-          <div className="flex justify-center mb-8">
-            <Link
-              href="/events"
-              className="inline-flex items-center gap-2 text-yellow-400 hover:text-yellow-300 transition-colors"
-            >
-              <ChevronLeft className="w-4 h-4" />
-              Back to Events
-            </Link>
-          </div>
-        </div>
-      </section>
-
-      {/* Calendar Section */}
-      <section className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 pb-16">
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.1 }}
-          className="bg-white/5 backdrop-blur-sm border border-white/10 rounded-3xl overflow-hidden"
-        >
-          {/* Calendar Header */}
-          <div className="flex items-center justify-between p-6 border-b border-white/10">
-            <button
-              onClick={goToPreviousMonth}
-              className="p-2 rounded-xl bg-white/5 hover:bg-white/10 transition-colors"
-            >
-              <ChevronLeft className="w-6 h-6 text-white" />
-            </button>
-            <h2 className="text-2xl font-bold text-white">
-              {MONTHS[month]} {year}
-            </h2>
-            <button
-              onClick={goToNextMonth}
-              className="p-2 rounded-xl bg-white/5 hover:bg-white/10 transition-colors"
-            >
-              <ChevronRight className="w-6 h-6 text-white" />
-            </button>
-          </div>
-
-          {/* Days of Week Header */}
-          <div className="grid grid-cols-7 border-b border-white/10">
-            {DAYS.map((day) => (
-              <div
-                key={day}
-                className="py-4 text-center text-sm font-semibold text-gray-400"
-              >
-                {day}
-              </div>
-            ))}
-          </div>
-
-          {/* Calendar Grid */}
-          <div className="grid grid-cols-7">
-            {calendarDays.map((day, index) => (
-              <div
-                key={index}
-                className={`min-h-[100px] p-2 border-b border-r border-white/5 ${
-                  day ? 'cursor-pointer hover:bg-white/5 transition-colors' : ''
-                }`}
-                onClick={() => day && setSelectedDate(new Date(year, month, day))}
-              >
-                {day && (
-                  <div className="h-full">
-                    <span
-                      className={`inline-flex items-center justify-center w-8 h-8 rounded-full text-sm font-medium ${
-                        isToday(day)
-                          ? 'bg-gradient-to-r from-purple-500 to-pink-500 text-white'
-                          : selectedDate?.getDate() === day &&
-                            selectedDate?.getMonth() === month
-                          ? 'bg-yellow-400 text-black'
-                          : 'text-white hover:bg-white/10'
-                      }`}
-                    >
-                      {day}
-                    </span>
-                    {/* Placeholder for events - will be populated when database is ready */}
-                  </div>
-                )}
-              </div>
-            ))}
-          </div>
-
-          {/* Coming Soon Notice */}
-          <div className="p-8 text-center border-t border-white/10">
-            <div className="text-4xl mb-4">🚀</div>
-            <h3 className="text-xl font-bold text-white mb-2">Calendar View Coming Soon!</h3>
-            <p className="text-gray-400 mb-6 max-w-md mx-auto">
-              We&apos;re working on an interactive calendar where you can see all events at a glance.
-              Check back soon!
-            </p>
-            <Link
-              href="/events"
-              className="inline-flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-purple-500 to-pink-500 text-white font-semibold rounded-xl hover:shadow-lg transition-all"
-            >
-              Browse Events List
-            </Link>
-          </div>
-        </motion.div>
-      </section>
+// Loading component
+function CalendarLoading() {
+  return (
+    <div className="min-h-screen bg-slate-950 flex items-center justify-center">
+      <div className="flex flex-col items-center gap-4">
+        <div className="w-8 h-8 border-4 border-purple-400 border-t-transparent rounded-full animate-spin" />
+        <p className="text-gray-400">Loading calendar...</p>
+      </div>
     </div>
   );
 }
+
+// Metadata for SEO
+export const metadata = {
+  title: 'Events Calendar | BahrainNights',
+  description: 'View all upcoming events in Bahrain on our interactive calendar. Plan your month with concerts, shows, dining, and more.',
+  openGraph: {
+    title: 'Events Calendar - BahrainNights',
+    description: 'View all upcoming events in Bahrain on our interactive calendar.',
+    url: 'https://bahrainnights.com/events/calendar',
+    type: 'website',
+  },
+};
