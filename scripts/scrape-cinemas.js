@@ -758,10 +758,15 @@ async function updateDatabase(nowShowing, comingSoon, movieCinemaMap, originalTi
   console.log('UPDATING DATABASE');
   console.log('==================================================');
 
-  // Get all movies from database
+  // Get today's date for release date comparison
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+  console.log(`Today's date: ${today.toISOString().split('T')[0]}`);
+
+  // Get all movies from database (include release_date for categorization)
   const { data: dbMovies, error: fetchError } = await supabase
     .from('movies')
-    .select('id, title, slug, tmdb_id');
+    .select('id, title, slug, tmdb_id, release_date');
 
   if (fetchError) {
     console.error('Error fetching movies:', fetchError);
@@ -785,44 +790,74 @@ async function updateDatabase(nowShowing, comingSoon, movieCinemaMap, originalTi
   for (const movie of dbMovies || []) {
     const dbNormalized = normalizeForComparison(movie.title);
 
-    // Check if this movie is in our scraped lists
-    let isNowShowingMatch = nowShowing.has(dbNormalized);
-    let isComingSoonMatch = comingSoon.has(dbNormalized);
+    // Check if this movie is in our scraped lists (found on any cinema website)
+    let foundOnCinema = nowShowing.has(dbNormalized) || comingSoon.has(dbNormalized);
     let matchedKey = dbNormalized;
 
     // Try partial matching if no exact match
-    if (!isNowShowingMatch && !isComingSoonMatch) {
+    if (!foundOnCinema) {
       for (const scrapedTitle of [...nowShowing, ...comingSoon]) {
         // Check if one contains the other
         if (dbNormalized.includes(scrapedTitle) || scrapedTitle.includes(dbNormalized)) {
           matchedKey = scrapedTitle;
-          isNowShowingMatch = nowShowing.has(scrapedTitle);
-          isComingSoonMatch = comingSoon.has(scrapedTitle);
+          foundOnCinema = true;
           break;
         }
       }
     }
 
-    if (isNowShowingMatch || isComingSoonMatch) {
-      const cinemas = movieCinemaMap[matchedKey] || [];
+    // Skip movies not found on any cinema website
+    if (!foundOnCinema) continue;
 
-      // Coming Soon takes priority (if a movie is in both, it's Coming Soon)
-      const finalIsNowShowing = isNowShowingMatch && !isComingSoonMatch;
-      const finalIsComingSoon = isComingSoonMatch;
+    const cinemas = movieCinemaMap[matchedKey] || [];
 
-      await supabase.from('movies').update({
-        is_now_showing: finalIsNowShowing,
-        is_coming_soon: finalIsComingSoon,
-        scraped_from: cinemas,
-      }).eq('id', movie.id);
+    // DETERMINE STATUS BY RELEASE DATE (source of truth)
+    let isNowShowing = false;
+    let isComingSoon = false;
 
-      if (finalIsNowShowing) {
-        matchedNowShowing++;
-        console.log(`  ✅ NOW SHOWING: ${movie.title} [${cinemas.join(', ')}]`);
+    if (movie.release_date) {
+      const releaseDate = new Date(movie.release_date);
+      releaseDate.setHours(0, 0, 0, 0);
+
+      if (releaseDate <= today) {
+        // Release date is today or in the past = NOW SHOWING
+        isNowShowing = true;
+        isComingSoon = false;
       } else {
-        matchedComingSoon++;
-        console.log(`  🔜 COMING SOON: ${movie.title} [${cinemas.join(', ')}]`);
+        // Release date is in the future = COMING SOON
+        isNowShowing = false;
+        isComingSoon = true;
       }
+    } else {
+      // No release date - use cinema website categorization as fallback
+      const isNowShowingMatch = nowShowing.has(dbNormalized) || nowShowing.has(matchedKey);
+      const isComingSoonMatch = comingSoon.has(dbNormalized) || comingSoon.has(matchedKey);
+
+      // If both, prefer now showing (it's actually playing)
+      if (isNowShowingMatch && isComingSoonMatch) {
+        isNowShowing = true;
+        isComingSoon = false;
+      } else {
+        isNowShowing = isNowShowingMatch;
+        isComingSoon = isComingSoonMatch;
+      }
+    }
+
+    const releaseStr = movie.release_date || 'NO DATE';
+    const statusStr = isNowShowing ? 'NOW SHOWING' : 'COMING SOON';
+
+    await supabase.from('movies').update({
+      is_now_showing: isNowShowing,
+      is_coming_soon: isComingSoon,
+      scraped_from: cinemas,
+    }).eq('id', movie.id);
+
+    if (isNowShowing) {
+      matchedNowShowing++;
+      console.log(`  ✅ NOW SHOWING: ${movie.title} (${releaseStr}) [${cinemas.join(', ')}]`);
+    } else {
+      matchedComingSoon++;
+      console.log(`  🔜 COMING SOON: ${movie.title} (${releaseStr}) [${cinemas.join(', ')}]`);
     }
   }
 
@@ -900,9 +935,32 @@ async function autoAddFromTMDB(nowShowing, comingSoon, movieCinemaMap, originalT
           .replace(/\s+/g, '-')
           .substring(0, 100);
 
-        const isNowShowing = nowShowing.has(normalized);
-        const isComingSoon = comingSoon.has(normalized);
         const cinemas = movieCinemaMap[normalized] || [];
+
+        // Determine status by release date (source of truth)
+        let isNowShowing = false;
+        let isComingSoon = false;
+
+        if (movie.release_date) {
+          const today = new Date();
+          today.setHours(0, 0, 0, 0);
+          const releaseDate = new Date(movie.release_date);
+          releaseDate.setHours(0, 0, 0, 0);
+
+          if (releaseDate <= today) {
+            isNowShowing = true;
+            isComingSoon = false;
+          } else {
+            isNowShowing = false;
+            isComingSoon = true;
+          }
+        } else {
+          // Fallback to cinema website categorization
+          const isNowShowingMatch = nowShowing.has(normalized);
+          const isComingSoonMatch = comingSoon.has(normalized);
+          isNowShowing = isNowShowingMatch && !isComingSoonMatch;
+          isComingSoon = isComingSoonMatch;
+        }
 
         const newMovie = {
           title: movie.title,
@@ -918,7 +976,7 @@ async function autoAddFromTMDB(nowShowing, comingSoon, movieCinemaMap, originalT
           trailer_url: trailerUrl,
           tmdb_id: movie.id,
           tmdb_rating: movie.vote_average,
-          is_now_showing: isNowShowing && !isComingSoon,
+          is_now_showing: isNowShowing,
           is_coming_soon: isComingSoon,
           scraped_from: cinemas,
           genre: details.genres?.map(g => g.name) || [],
