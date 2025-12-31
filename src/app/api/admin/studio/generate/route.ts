@@ -11,9 +11,11 @@ import {
 } from '@/lib/studio/ai-generator';
 import {
   generateImage,
+  generateReelImages,
   buildBlogImagePrompt,
   buildInstagramImagePrompt,
   buildStoryImagePrompt,
+  buildReelSlideImagePrompt,
 } from '@/lib/studio/image-generator';
 
 export const dynamic = 'force-dynamic';
@@ -261,11 +263,14 @@ export async function POST(request: NextRequest) {
               }
             }
 
-            // Story has headline + subtext instead of caption
+            // Story has headline, subtext, and full caption
+            // Use the full caption if available, otherwise combine headline + subtext
+            const fullCaption = story.caption || `${story.headline}\n\n${story.subtext || ''}`.trim();
+
             const contentData = {
               content_type: 'story',
               title: story.title,
-              caption: `${story.headline}\n\n${story.subtext || ''}`.trim(),
+              caption: fullCaption,
               story_type: story.story_type,
               story_sticker_data: story.sticker_data || null,
               media_urls: mediaUrls.length > 0 ? mediaUrls : null,
@@ -307,6 +312,28 @@ export async function POST(request: NextRequest) {
               visual_note: s.visualNote,
             })) || [];
 
+            // Generate images for each slide if enabled
+            let mediaUrls: string[] = [];
+            if (generateImages && reelBrief.slides && reelBrief.slides.length > 0) {
+              console.log(`[Generate] Creating ${reelBrief.slides.length} reel slide images for: ${reelBrief.title}`);
+
+              // Generate images for each slide (limit to first 5 slides to manage API costs)
+              const slidesToProcess = reelBrief.slides.slice(0, 5);
+              for (const slide of slidesToProcess) {
+                try {
+                  const imagePrompt = buildReelSlideImagePrompt(slide.text, slide.visualNote, userInput);
+                  const imageUrl = await generateImage(imagePrompt, 'instagram');
+                  if (imageUrl) {
+                    mediaUrls.push(imageUrl);
+                    console.log(`[Generate] Reel slide image ${slide.order} created`);
+                  }
+                } catch (imgError) {
+                  console.error(`[Generate] Failed to create slide ${slide.order} image:`, imgError);
+                }
+              }
+              console.log(`[Generate] Created ${mediaUrls.length} reel images`);
+            }
+
             const contentData = {
               content_type: 'reel_brief',
               title: reelBrief.title,
@@ -318,6 +345,9 @@ export async function POST(request: NextRequest) {
               reel_music_suggestions: reelBrief.music_suggestions,
               reel_duration: reelBrief.duration,
               reel_style: reelBrief.style,
+              reel_editing_style: reelBrief.editing_style || null,
+              reel_higgsfield_prompt: reelBrief.higgsfield_prompt || null,
+              media_urls: mediaUrls.length > 0 ? mediaUrls : null,
               source_type: 'ai',
               status: 'pending_review',
             };

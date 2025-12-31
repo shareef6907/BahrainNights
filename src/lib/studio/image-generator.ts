@@ -1,8 +1,9 @@
 // Image Generator Library
-// Supports: OpenAI DALL-E, Leonardo.ai, Unsplash fallback
+// Supports: Replicate (FLUX), OpenAI DALL-E, Leonardo.ai, Unsplash fallback
 
 import { S3Client, PutObjectCommand } from '@aws-sdk/client-s3';
 
+const REPLICATE_API_TOKEN = process.env.REPLICATE_API_TOKEN;
 const OPENAI_API_KEY = process.env.OPENAI_API_KEY;
 const LEONARDO_API_KEY = process.env.LEONARDO_API_KEY;
 const UNSPLASH_ACCESS_KEY = process.env.UNSPLASH_ACCESS_KEY;
@@ -33,7 +34,7 @@ const DIMENSIONS: Record<ImageStyle, ImageDimensions> = {
 
 /**
  * Main function to generate an image
- * Tries providers in order: DALL-E → Leonardo → Unsplash
+ * Tries providers in order: Replicate (FLUX) → DALL-E → Leonardo → Unsplash
  */
 export async function generateImage(
   prompt: string,
@@ -44,7 +45,17 @@ export async function generateImage(
   console.log(`[ImageGen] Generating ${style} image (${width}x${height})`);
   console.log(`[ImageGen] Prompt: ${prompt.substring(0, 100)}...`);
 
-  // Try OpenAI DALL-E first (best quality)
+  // Try Replicate FLUX first (best quality/cost ratio)
+  if (REPLICATE_API_TOKEN) {
+    try {
+      console.log('[ImageGen] Using Replicate FLUX');
+      return await generateWithReplicate(prompt, width, height);
+    } catch (error) {
+      console.error('[ImageGen] Replicate failed:', error);
+    }
+  }
+
+  // Try OpenAI DALL-E (premium quality)
   if (OPENAI_API_KEY) {
     try {
       console.log('[ImageGen] Using DALL-E 3');
@@ -66,13 +77,108 @@ export async function generateImage(
 
   // Fallback: Unsplash (always free)
   try {
-    console.log('[ImageGen] Using Unsplash fallback');
+    console.log('[ImageGen] Using Unsplash/Picsum fallback');
     return await getUnsplashImage(prompt, width, height);
   } catch (error) {
     console.error('[ImageGen] Unsplash failed:', error);
   }
 
   return null;
+}
+
+/**
+ * Generate image using Replicate FLUX model
+ */
+async function generateWithReplicate(
+  prompt: string,
+  width: number,
+  height: number
+): Promise<string> {
+  // Determine aspect ratio for FLUX
+  let aspectRatio = '1:1';
+  if (width > height) {
+    aspectRatio = '16:9';
+  } else if (height > width) {
+    aspectRatio = '9:16';
+  }
+
+  // Start prediction
+  const response = await fetch('https://api.replicate.com/v1/predictions', {
+    method: 'POST',
+    headers: {
+      'Authorization': `Bearer ${REPLICATE_API_TOKEN}`,
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({
+      // FLUX Schnell model (fast, good quality)
+      version: 'black-forest-labs/flux-schnell',
+      input: {
+        prompt: sanitizePromptForImage(prompt),
+        aspect_ratio: aspectRatio,
+        output_format: 'webp',
+        output_quality: 90,
+        num_outputs: 1,
+      },
+    }),
+  });
+
+  if (!response.ok) {
+    const error = await response.json();
+    throw new Error(`Replicate API error: ${error.detail || JSON.stringify(error)}`);
+  }
+
+  const prediction = await response.json();
+
+  // Poll for completion (max 60 seconds)
+  let imageUrl: string | null = null;
+  for (let i = 0; i < 30; i++) {
+    await new Promise(r => setTimeout(r, 2000)); // Wait 2 seconds
+
+    const statusResponse = await fetch(prediction.urls.get, {
+      headers: { 'Authorization': `Bearer ${REPLICATE_API_TOKEN}` },
+    });
+
+    if (!statusResponse.ok) continue;
+
+    const statusData = await statusResponse.json();
+
+    if (statusData.status === 'succeeded' && statusData.output) {
+      imageUrl = Array.isArray(statusData.output) ? statusData.output[0] : statusData.output;
+      break;
+    }
+
+    if (statusData.status === 'failed') {
+      throw new Error(`Replicate generation failed: ${statusData.error}`);
+    }
+  }
+
+  if (!imageUrl) {
+    throw new Error('Replicate generation timed out');
+  }
+
+  // Upload to S3 for permanent storage
+  const s3Url = await uploadToS3(imageUrl, `studio/generated/${Date.now()}-flux.webp`);
+  return s3Url;
+}
+
+/**
+ * Generate multiple images for a reel (one per slide)
+ */
+export async function generateReelImages(
+  slides: { text: string; visualNote: string }[],
+  userInput?: string
+): Promise<string[]> {
+  const imageUrls: string[] = [];
+
+  for (const slide of slides) {
+    const prompt = buildReelSlideImagePrompt(slide.text, slide.visualNote, userInput);
+    const imageUrl = await generateImage(prompt, 'instagram');
+    if (imageUrl) {
+      imageUrls.push(imageUrl);
+    }
+  }
+
+  return imageUrls;
 }
 
 /**
@@ -195,7 +301,7 @@ async function generateWithLeonardo(
 }
 
 /**
- * Get image from Unsplash (free fallback)
+ * Get image from Unsplash or reliable placeholder (free fallback)
  */
 async function getUnsplashImage(
   query: string,
@@ -206,23 +312,86 @@ async function getUnsplashImage(
 
   // If we have an API key, use the search API
   if (UNSPLASH_ACCESS_KEY) {
-    const response = await fetch(
-      `https://api.unsplash.com/search/photos?query=${encodeURIComponent(searchTerms)}&client_id=${UNSPLASH_ACCESS_KEY}&per_page=1&orientation=${width === height ? 'squarish' : height > width ? 'portrait' : 'landscape'}`
-    );
+    try {
+      const response = await fetch(
+        `https://api.unsplash.com/search/photos?query=${encodeURIComponent(searchTerms)}&client_id=${UNSPLASH_ACCESS_KEY}&per_page=1&orientation=${width === height ? 'squarish' : height > width ? 'portrait' : 'landscape'}`
+      );
 
-    if (response.ok) {
-      const data = await response.json();
+      if (response.ok) {
+        const data = await response.json();
 
-      if (data.results?.[0]?.urls?.regular) {
-        // Add size parameters
-        const url = data.results[0].urls.regular;
-        return `${url}&w=${width}&h=${height}&fit=crop`;
+        if (data.results?.[0]?.urls?.regular) {
+          // Add size parameters
+          const url = data.results[0].urls.regular;
+          return `${url}&w=${width}&h=${height}&fit=crop`;
+        }
       }
+    } catch (error) {
+      console.error('[ImageGen] Unsplash API error:', error);
     }
   }
 
-  // Ultimate fallback - use Unsplash Source (no API key needed)
-  return `https://source.unsplash.com/${width}x${height}/?${encodeURIComponent(searchTerms)}`;
+  // Use Pexels-style curated images based on category
+  const categoryImages = getCategoryPlaceholderImage(searchTerms, width, height);
+  if (categoryImages) {
+    return categoryImages;
+  }
+
+  // Ultimate fallback - use Lorem Picsum (reliable placeholder service)
+  // Add random seed based on search terms for variety
+  const seed = searchTerms.split('').reduce((a, b) => a + b.charCodeAt(0), 0);
+  return `https://picsum.photos/seed/${seed}/${width}/${height}`;
+}
+
+/**
+ * Get curated placeholder images by category
+ */
+function getCategoryPlaceholderImage(searchTerms: string, width: number, height: number): string | null {
+  const terms = searchTerms.toLowerCase();
+
+  // Map search terms to reliable stock photo URLs (using Lorem Picsum with category seeds)
+  const categorySeeds: Record<string, number[]> = {
+    food: [292, 312, 376, 429, 488],
+    restaurant: [292, 312, 429, 490, 674],
+    dining: [292, 312, 376, 429, 488],
+    brunch: [292, 312, 376, 429, 488],
+    family: [447, 823, 1027, 1043, 1045],
+    kids: [447, 823, 1027, 1043, 1045],
+    spa: [183, 395, 576, 696, 737],
+    wellness: [183, 395, 576, 696, 737],
+    yoga: [183, 395, 576, 696, 737],
+    fitness: [416, 685, 766, 879, 967],
+    gym: [416, 685, 766, 879, 967],
+    sports: [416, 685, 766, 879, 967],
+    beach: [247, 349, 426, 473, 610],
+    tour: [247, 349, 426, 473, 610],
+    adventure: [247, 349, 426, 473, 610],
+    art: [339, 379, 453, 514, 622],
+    museum: [339, 379, 453, 514, 622],
+    culture: [339, 379, 453, 514, 622],
+    music: [145, 193, 325, 453, 514],
+    concert: [145, 193, 325, 453, 514],
+    party: [145, 193, 325, 453, 514],
+    nightlife: [145, 193, 325, 453, 514],
+    shopping: [335, 336, 403, 428, 534],
+    market: [335, 336, 403, 428, 534],
+    cinema: [274, 336, 453, 514, 622],
+    movie: [274, 336, 453, 514, 622],
+    business: [180, 366, 380, 507, 534],
+    networking: [180, 366, 380, 507, 534],
+    luxury: [164, 250, 338, 416, 564],
+    bahrain: [164, 250, 338, 416, 564],
+  };
+
+  // Find matching category
+  for (const [category, seeds] of Object.entries(categorySeeds)) {
+    if (terms.includes(category)) {
+      const randomSeed = seeds[Math.floor(Math.random() * seeds.length)];
+      return `https://picsum.photos/id/${randomSeed}/${width}/${height}`;
+    }
+  }
+
+  return null;
 }
 
 /**
@@ -387,8 +556,9 @@ export function buildReelSlideImagePrompt(
  * Check which image generation provider is available
  */
 export function getAvailableProvider(): string {
+  if (REPLICATE_API_TOKEN) return 'Replicate FLUX';
   if (OPENAI_API_KEY) return 'DALL-E 3';
   if (LEONARDO_API_KEY) return 'Leonardo.ai';
   if (UNSPLASH_ACCESS_KEY) return 'Unsplash';
-  return 'Unsplash (fallback)';
+  return 'Picsum (fallback)';
 }

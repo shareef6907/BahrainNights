@@ -16,6 +16,10 @@ import {
   Hash,
   Music,
   Sparkles,
+  Download,
+  Wand2,
+  Video,
+  Zap,
 } from 'lucide-react';
 import StatusBadge from './StatusBadge';
 
@@ -43,9 +47,29 @@ interface ContentDetail {
   reel_concept?: string;
   reel_hook?: string;
   reel_text_overlays?: { slide: number; text: string; visual_note?: string }[];
-  reel_music_suggestions?: { song: string; artist: string; reason: string }[];
+  reel_music_suggestions?: {
+    genre?: string;
+    mood?: string;
+    tempo?: string;
+    reason: string;
+    // Legacy fields
+    song?: string;
+    artist?: string;
+  }[];
   reel_duration?: string;
   reel_style?: string;
+  reel_editing_style?: {
+    trend_name: string;
+    description: string;
+    difficulty: 'easy' | 'medium' | 'hard';
+    apps_to_use: string[];
+  };
+  reel_higgsfield_prompt?: {
+    start_frame_description: string;
+    end_frame_description: string;
+    transition_type: string;
+    full_prompt: string;
+  };
 }
 
 interface PreviewModalProps {
@@ -186,18 +210,69 @@ export default function PreviewModal({ isOpen, onClose, contentId }: PreviewModa
                   )}
                 </div>
 
-                {/* Image Preview */}
+                {/* Image Preview - Single or Multiple */}
                 {content.media_urls && content.media_urls.length > 0 && (
-                  <div className="relative rounded-xl overflow-hidden bg-black/30">
-                    <img
-                      src={content.media_urls[0]}
-                      alt={content.title}
-                      className="w-full max-h-80 object-contain"
-                    />
-                    <div className="absolute top-2 left-2 px-2 py-1 bg-green-500/90 text-white text-xs rounded font-medium flex items-center gap-1">
-                      <Sparkles className="w-3 h-3" />
-                      AI Generated
-                    </div>
+                  <div className="space-y-3">
+                    {content.media_urls.length === 1 ? (
+                      // Single image
+                      <div className="relative rounded-xl overflow-hidden bg-black/30">
+                        <img
+                          src={content.media_urls[0]}
+                          alt={content.title}
+                          className="w-full max-h-80 object-contain"
+                        />
+                        <div className="absolute top-2 left-2 px-2 py-1 bg-green-500/90 text-white text-xs rounded font-medium flex items-center gap-1">
+                          <Sparkles className="w-3 h-3" />
+                          AI Generated
+                        </div>
+                        <a
+                          href={content.media_urls[0]}
+                          download={`${content.title.replace(/[^a-z0-9]/gi, '-').toLowerCase()}.webp`}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="absolute bottom-2 right-2 px-3 py-1.5 bg-white/90 hover:bg-white text-black text-xs rounded-lg font-medium flex items-center gap-1.5 transition-colors"
+                        >
+                          <Download className="w-3.5 h-3.5" />
+                          Download
+                        </a>
+                      </div>
+                    ) : (
+                      // Multiple images (for reels)
+                      <>
+                        <div className="flex items-center justify-between">
+                          <h4 className="text-lg font-semibold text-white flex items-center gap-2">
+                            <Image className="w-5 h-5 text-orange-400" />
+                            Slide Images ({content.media_urls.length})
+                          </h4>
+                        </div>
+                        <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
+                          {content.media_urls.map((url, i) => (
+                            <div key={i} className="relative group rounded-lg overflow-hidden bg-black/30">
+                              <img
+                                src={url}
+                                alt={`Slide ${i + 1}`}
+                                className="w-full aspect-square object-cover"
+                              />
+                              <div className="absolute top-2 left-2 w-6 h-6 bg-orange-500 text-white rounded-full flex items-center justify-center text-xs font-bold">
+                                {i + 1}
+                              </div>
+                              <a
+                                href={url}
+                                download={`${content.title.replace(/[^a-z0-9]/gi, '-').toLowerCase()}-slide-${i + 1}.webp`}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 flex items-center justify-center transition-opacity"
+                              >
+                                <span className="px-3 py-1.5 bg-white text-black text-xs rounded-lg font-medium flex items-center gap-1.5">
+                                  <Download className="w-3.5 h-3.5" />
+                                  Download
+                                </span>
+                              </a>
+                            </div>
+                          ))}
+                        </div>
+                      </>
+                    )}
                   </div>
                 )}
 
@@ -299,6 +374,72 @@ export default function PreviewModal({ isOpen, onClose, contentId }: PreviewModa
                         <p className="text-gray-300">{content.reel_concept}</p>
                       </div>
                     )}
+
+                    {/* Editing Style Trend */}
+                    {content.reel_editing_style && (
+                      <div className="bg-gradient-to-br from-violet-500/10 to-purple-500/10 border border-violet-500/20 rounded-xl p-4 space-y-3">
+                        <div className="flex items-center justify-between">
+                          <h5 className="text-sm font-medium text-violet-400 flex items-center gap-2">
+                            <Video className="w-4 h-4" />
+                            Trending Edit Style
+                          </h5>
+                          <span className={`px-2 py-0.5 rounded text-xs font-medium ${
+                            content.reel_editing_style.difficulty === 'easy' ? 'bg-green-500/20 text-green-400' :
+                            content.reel_editing_style.difficulty === 'medium' ? 'bg-yellow-500/20 text-yellow-400' :
+                            'bg-red-500/20 text-red-400'
+                          }`}>
+                            {content.reel_editing_style.difficulty}
+                          </span>
+                        </div>
+                        <p className="text-white text-lg font-semibold">{content.reel_editing_style.trend_name}</p>
+                        <p className="text-gray-300 text-sm">{content.reel_editing_style.description}</p>
+                        <div className="flex flex-wrap gap-2">
+                          {content.reel_editing_style.apps_to_use.map((app, i) => (
+                            <span key={i} className="px-2 py-1 bg-violet-500/20 text-violet-300 rounded text-xs">
+                              {app}
+                            </span>
+                          ))}
+                        </div>
+                      </div>
+                    )}
+
+                    {/* Higgsfield AI Transition Prompt */}
+                    {content.reel_higgsfield_prompt && (
+                      <div className="bg-gradient-to-br from-cyan-500/10 to-blue-500/10 border border-cyan-500/20 rounded-xl p-4 space-y-3">
+                        <div className="flex items-center justify-between">
+                          <h5 className="text-sm font-medium text-cyan-400 flex items-center gap-2">
+                            <Wand2 className="w-4 h-4" />
+                            Higgsfield AI Transition
+                          </h5>
+                          <span className="px-2 py-0.5 bg-cyan-500/20 text-cyan-300 rounded text-xs">
+                            {content.reel_higgsfield_prompt.transition_type}
+                          </span>
+                        </div>
+                        <div className="grid grid-cols-2 gap-3">
+                          <div className="bg-black/30 rounded-lg p-3">
+                            <span className="text-xs text-gray-500 block mb-1">Start Frame</span>
+                            <p className="text-gray-300 text-sm">{content.reel_higgsfield_prompt.start_frame_description}</p>
+                          </div>
+                          <div className="bg-black/30 rounded-lg p-3">
+                            <span className="text-xs text-gray-500 block mb-1">End Frame</span>
+                            <p className="text-gray-300 text-sm">{content.reel_higgsfield_prompt.end_frame_description}</p>
+                          </div>
+                        </div>
+                        <div className="relative">
+                          <div className="bg-black/50 rounded-lg p-3">
+                            <span className="text-xs text-gray-500 block mb-1">Full Prompt (copy for Higgsfield)</span>
+                            <p className="text-white text-sm">{content.reel_higgsfield_prompt.full_prompt}</p>
+                          </div>
+                          <button
+                            onClick={() => handleCopy(content.reel_higgsfield_prompt!.full_prompt)}
+                            className="absolute top-2 right-2 p-1.5 bg-white/10 hover:bg-white/20 rounded-lg transition-colors"
+                          >
+                            {copied ? <Check className="w-3.5 h-3.5 text-green-400" /> : <Copy className="w-3.5 h-3.5 text-gray-400" />}
+                          </button>
+                        </div>
+                      </div>
+                    )}
+
                     {content.reel_text_overlays && content.reel_text_overlays.length > 0 && (
                       <div className="space-y-2">
                         <h5 className="text-sm font-medium text-gray-400">Slides</h5>
@@ -317,16 +458,44 @@ export default function PreviewModal({ isOpen, onClose, contentId }: PreviewModa
                         ))}
                       </div>
                     )}
+
+                    {/* Music Suggestions - Updated format */}
                     {content.reel_music_suggestions && content.reel_music_suggestions.length > 0 && (
                       <div className="space-y-2">
                         <h5 className="text-sm font-medium text-gray-400 flex items-center gap-2">
                           <Music className="w-4 h-4" />
-                          Music Suggestions
+                          Music Style Suggestions
                         </h5>
                         {content.reel_music_suggestions.map((music, i) => (
                           <div key={i} className="bg-black/30 rounded-lg p-3">
-                            <p className="text-white font-medium">{music.song} - {music.artist}</p>
-                            <p className="text-gray-500 text-sm">{music.reason}</p>
+                            {/* New format: genre/mood/tempo */}
+                            {music.genre ? (
+                              <>
+                                <div className="flex items-center gap-2 mb-2">
+                                  <span className="px-2 py-0.5 bg-orange-500/20 text-orange-300 rounded text-xs font-medium uppercase">
+                                    {music.genre}
+                                  </span>
+                                  {music.mood && (
+                                    <span className="px-2 py-0.5 bg-purple-500/20 text-purple-300 rounded text-xs">
+                                      {music.mood}
+                                    </span>
+                                  )}
+                                  {music.tempo && (
+                                    <span className="px-2 py-0.5 bg-blue-500/20 text-blue-300 rounded text-xs flex items-center gap-1">
+                                      <Zap className="w-3 h-3" />
+                                      {music.tempo}
+                                    </span>
+                                  )}
+                                </div>
+                                <p className="text-gray-400 text-sm">{music.reason}</p>
+                              </>
+                            ) : (
+                              // Legacy format fallback
+                              <>
+                                <p className="text-white font-medium">{music.song} - {music.artist}</p>
+                                <p className="text-gray-500 text-sm">{music.reason}</p>
+                              </>
+                            )}
                           </div>
                         ))}
                       </div>

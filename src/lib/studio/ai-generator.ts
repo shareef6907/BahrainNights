@@ -90,6 +90,7 @@ export interface GeneratedStory {
   story_type: 'promo' | 'countdown' | 'poll' | 'question' | 'tip' | 'this_or_that';
   headline: string;
   subtext: string;
+  caption?: string;  // Full descriptive caption for the story
   sticker_data?: Record<string, unknown>;
   backgroundColor?: string;
   imageDescription?: string;
@@ -102,9 +103,28 @@ export interface GeneratedReelBrief {
   concept: string;
   hook: string;
   slides: { order: number; text: string; duration: string; visualNote: string }[];
-  music_suggestions: { song: string; artist: string; reason: string; searchTip?: string }[];
+  music_suggestions: {
+    genre: string;       // Main genre: epic/cinematic/dramatic/violin/funk/hip-hop/house/piano
+    mood: string;        // The mood: energetic/emotional/suspenseful/uplifting
+    tempo: string;       // slow/medium/fast
+    reason: string;      // Why this style fits
+  }[];
   duration: string;
   style: string;
+  // Video editing trends
+  editing_style?: {
+    trend_name: string;         // e.g., "Mask Transition", "Velocity Edit", "3D Zoom"
+    description: string;        // How to execute this trend
+    difficulty: 'easy' | 'medium' | 'hard';
+    apps_to_use: string[];      // CapCut, VN, Premiere, etc.
+  };
+  // Higgsfield AI transition prompt
+  higgsfield_prompt?: {
+    start_frame_description: string;   // Description of the starting frame
+    end_frame_description: string;     // Description of the ending frame
+    transition_type: string;           // morph/zoom/pan/reveal
+    full_prompt: string;               // Complete prompt for Higgsfield
+  };
 }
 
 // Default settings
@@ -501,13 +521,14 @@ STORY TYPES:
 Return ONLY valid JSON array:
 [
   {
-    "title": "Internal title",
+    "title": "Internal title (descriptive, 5-10 words)",
     "story_type": "promo|countdown|poll|question|tip|this_or_that",
     "headline": "Short punchy text (max 8 words)",
-    "subtext": "Supporting text if needed",
+    "subtext": "Supporting text line (10-15 words)",
+    "caption": "Full descriptive caption (50-100 words) that provides context, details, and encourages engagement. Include specific Bahrain locations, times, prices when relevant. End with a call to action.",
     "sticker_data": {"question": "...", "options": ["A", "B"]},
     "backgroundColor": "from-orange-500 to-red-500",
-    "imageDescription": "What the background image should show"
+    "imageDescription": "Detailed description for image generation (20-30 words)"
   }
 ]`;
 
@@ -526,20 +547,51 @@ Return ONLY valid JSON array:
     return JSON.parse(jsonMatch[0]);
   } catch (error) {
     console.error('Failed to parse stories response:', text.substring(0, 500));
-    // Diverse fallback options
+    // Diverse fallback options with full captions
     const fallbackOptions = [
-      { title: 'Weekend Plans', headline: 'This weekend in Bahrain 🔥', imageDescription: 'Bahrain skyline or lifestyle scene' },
-      { title: 'Dining Guide', headline: 'Best brunch spots? 🍳', imageDescription: 'Beautiful restaurant or food scene' },
-      { title: 'Family Fun', headline: 'Kids activities this week 👨‍👩‍👧', imageDescription: 'Family-friendly venue in Bahrain' },
-      { title: 'Wellness Tip', headline: 'Self-care Sunday? 🧘', imageDescription: 'Spa or wellness setting' },
-      { title: 'Hidden Gem', headline: 'This place is underrated 💎', imageDescription: 'Unique venue or attraction in Bahrain' },
+      {
+        title: 'Weekend Plans in Bahrain',
+        headline: 'This weekend in Bahrain 🔥',
+        subtext: 'So many amazing things happening!',
+        caption: 'Your ultimate guide to the best things happening in Bahrain this weekend! From exciting events to hidden gems, we\'ve got you covered. Whether you\'re looking for family fun, romantic dinners, or adventure - Bahrain has it all. Save this for your weekend planning! 📍 DM us for specific recommendations.',
+        imageDescription: 'Stunning Bahrain skyline at golden hour with modern buildings and traditional architecture, vibrant city life'
+      },
+      {
+        title: 'Best Brunch Spots in Bahrain',
+        headline: 'Best brunch spots? 🍳',
+        subtext: 'We tested them all for you',
+        caption: 'Looking for the perfect brunch in Bahrain? We\'ve tried over 20 spots so you don\'t have to! From luxurious hotel brunches starting at BD 25 to cozy cafes in Adliya, we\'ve got recommendations for every budget. Comment "BRUNCH" and we\'ll send you our top 5 picks! 🥂',
+        imageDescription: 'Elegant brunch spread with fresh pastries, eggs benedict, and mimosas at a luxury Bahrain restaurant with natural lighting'
+      },
+      {
+        title: 'Family Activities This Weekend',
+        headline: 'Kids activities this week 👨‍👩‍👧',
+        subtext: 'Fun for the whole family!',
+        caption: 'Looking for family-friendly activities in Bahrain? This week has some amazing options! From educational workshops at Bahrain National Museum to fun at Wahooo! Waterpark, there\'s something for every age. Most activities are under BD 10 per person. Save this for your family day planning! 🎨',
+        imageDescription: 'Happy family enjoying outdoor activities in Bahrain, colorful playground, children playing, sunny day, joyful atmosphere'
+      },
+      {
+        title: 'Wellness and Self-Care in Bahrain',
+        headline: 'Self-care Sunday? 🧘',
+        subtext: 'You deserve this break',
+        caption: 'Time to treat yourself! Bahrain has incredible spa and wellness options from traditional hammams to modern wellness centers. Whether you want a quick massage (starting BD 15) or a full day retreat, we\'ve got the insider scoop. DM us "SPA" for our favorite spots in Seef, Juffair, and Amwaj! 💆‍♀️',
+        imageDescription: 'Serene spa setting with candles, essential oils, and relaxation area, soft lighting, luxury wellness center in Bahrain'
+      },
+      {
+        title: 'Hidden Gem Discovery in Bahrain',
+        headline: 'This place is underrated 💎',
+        subtext: 'A spot locals love',
+        caption: 'We found another hidden gem in Bahrain that most people don\'t know about! This local favorite has been serving authentic cuisine for years but stays under the radar. The ambiance is incredible and prices are reasonable. Want to know where it is? Comment "GEM" below! 🗺️',
+        imageDescription: 'Charming hidden alley in old Bahrain with traditional architecture, warm lighting, authentic local atmosphere, cozy setting'
+      },
     ];
     const randomFallback = fallbackOptions[Math.floor(Math.random() * fallbackOptions.length)];
     return [{
       title: randomFallback.title,
-      story_type: 'promo',
+      story_type: 'promo' as const,
       headline: randomFallback.headline,
-      subtext: 'Swipe up for more',
+      subtext: randomFallback.subtext,
+      caption: randomFallback.caption,
       backgroundColor: 'from-purple-600 to-pink-600',
       imageDescription: randomFallback.imageDescription
     }];
@@ -592,7 +644,7 @@ REEL STYLE: ${reelStyle}
 1. First 1 second = HOOK (stops the scroll)
 2. Keep it 15-30 seconds
 3. Fast cuts = more watch time
-4. Trending audio = more reach
+4. Use royalty-free music (NO copyrighted songs!)
 5. End with CTA
 6. VARY THE TOPICS - cover different categories
 
@@ -606,11 +658,44 @@ HOOK IDEAS THAT WORK (diverse topics):
 - "Bahrain spa day for under BD 50"
 - "Stop scrolling if you live in Bahrain 🇧🇭"
 
+🎵 MUSIC STYLE SUGGESTIONS:
+- Suggest music GENRE and TYPE only (NO specific songs or artists!)
+- Choose from these categories:
+  * EPIC - grand, powerful, builds momentum
+  * CINEMATIC - movie-quality, emotional, storytelling
+  * DRAMATIC - intense, suspenseful, attention-grabbing
+  * VIOLIN/ORCHESTRAL - classical instruments, elegant
+  * FILMY/BOLLYWOOD - Indian cinema inspired, emotional
+  * FUNK - groovy, rhythmic, fun energy
+  * HIP HOP - urban, beats, trendy
+  * HOUSE/ELECTRONIC - dance, energetic, modern
+  * PIANO - emotional, soft, intimate
+  * UPBEAT POP - happy, catchy, feel-good
+
+🎬 VIDEO EDITING TRENDS (2024-2025):
+Suggest ONE trending editing style for this reel:
+  * MASK TRANSITION - Use shape/object masks to reveal next scene (e.g., swipe phone to reveal new location)
+  * VELOCITY EDIT - Speed ramping with beat sync, slow-mo to fast cuts
+  * 3D ZOOM - Fake 3D camera movement using parallax layers
+  * CLONE EFFECT - Appear in multiple places in same frame
+  * TEXT TRACKING - Text follows objects/movements in video
+  * SEAMLESS TRANSITION - Match cut between similar actions/shapes
+  * MORPH CUT - AI-assisted smooth transformation between scenes
+  * SPLIT SCREEN REVEAL - Creative screen divisions
+  * CINEMATIC BARS - Add letterbox for movie feel with animated reveals
+  * LIGHT LEAK TRANSITION - Vintage film light leak effects
+
+🤖 HIGGSFIELD AI TRANSITION:
+Create a prompt for AI video transition:
+- Describe the START frame (what you see at the beginning)
+- Describe the END frame (what you want to transition TO)
+- The AI will morph between these two frames
+
 Return ONLY valid JSON array:
 [
   {
     "title": "Reel title",
-    "concept": "One line description",
+    "concept": "One line description (50-100 words with specific Bahrain details)",
     "hook": "The text/visual that appears first",
     "duration": "15-30 seconds",
     "style": "${reelStyle}",
@@ -619,19 +704,31 @@ Return ONLY valid JSON array:
         "order": 1,
         "text": "Text overlay for this part",
         "duration": "2-3s",
-        "visualNote": "What to show visually"
+        "visualNote": "Detailed description of what to show visually (20-30 words)"
       }
     ],
     "music_suggestions": [
       {
-        "song": "Song Name",
-        "artist": "Artist",
-        "reason": "Why it works",
-        "searchTip": "Search for X on Instagram"
+        "genre": "Main genre (epic/cinematic/dramatic/violin/filmy/funk/hip-hop/house/piano/upbeat-pop)",
+        "mood": "The mood (energetic/emotional/suspenseful/uplifting/dramatic/groovy)",
+        "tempo": "slow/medium/fast",
+        "reason": "Why this style fits the reel content"
       }
     ],
-    "caption": "Ready to post caption with line breaks using \\n",
-    "hashtags": ["tag1", "tag2"]
+    "editing_style": {
+      "trend_name": "Name of trending edit style (e.g., Mask Transition, Velocity Edit)",
+      "description": "Step-by-step how to execute this edit effect (50-100 words)",
+      "difficulty": "easy/medium/hard",
+      "apps_to_use": ["CapCut", "VN", "etc - apps that can do this effect"]
+    },
+    "higgsfield_prompt": {
+      "start_frame_description": "Detailed description of the starting frame/scene (20-30 words)",
+      "end_frame_description": "Detailed description of the ending frame/scene to morph into (20-30 words)",
+      "transition_type": "morph/zoom/pan/reveal",
+      "full_prompt": "Complete Higgsfield prompt combining start and end frames for AI video generation"
+    },
+    "caption": "Ready to post caption (100-150 words) with line breaks using \\n, include call-to-action",
+    "hashtags": ["tag1", "tag2", "up to 12 relevant hashtags"]
   }
 ]`;
 
@@ -650,21 +747,79 @@ Return ONLY valid JSON array:
     return JSON.parse(jsonMatch[0]);
   } catch (error) {
     console.error('Failed to parse reel response:', text.substring(0, 500));
+    // Diverse fallback options with royalty-free music and editing trends
+    const fallbackOptions = [
+      {
+        title: 'Ultimate Weekend Guide Bahrain',
+        concept: 'A complete guide to the best weekend experiences in Bahrain - from luxurious brunches at The Ritz-Carlton to hidden beaches in Hawar Islands, family fun at Wahooo!, and sunset views from rooftop lounges.',
+        hook: 'POV: You just discovered the best weekend in Bahrain',
+        slides: [
+          { order: 1, text: 'WEEKEND PLANS?', duration: '2s', visualNote: 'Stunning aerial shot of Bahrain skyline at sunset with modern buildings and traditional architecture' },
+          { order: 2, text: 'Start with brunch', duration: '2s', visualNote: 'Luxurious brunch spread at a 5-star hotel, champagne, fresh pastries, elegant setting' },
+          { order: 3, text: 'Hit the beach', duration: '2s', visualNote: 'Beautiful crystal clear waters at a Bahrain beach, palm trees, relaxation vibes' },
+          { order: 4, text: 'End with sunset', duration: '2s', visualNote: 'Golden sunset view from a rooftop lounge, city lights starting to glow' },
+          { order: 5, text: 'Save for later!', duration: '2s', visualNote: 'BahrainNights logo with call-to-action overlay' },
+        ],
+        music_suggestions: [
+          { genre: 'upbeat-pop', mood: 'uplifting', tempo: 'fast', reason: 'Creates positive energy and matches the weekend vibe' },
+        ],
+        editing_style: {
+          trend_name: 'Mask Transition',
+          description: 'Use the phone screen or hand swipe to mask reveal the next scene. Film yourself swiping on phone, then use CapCut mask tool to reveal the next location behind the swipe motion.',
+          difficulty: 'medium' as const,
+          apps_to_use: ['CapCut', 'VN', 'Premiere Pro'],
+        },
+        higgsfield_prompt: {
+          start_frame_description: 'Person holding phone showing Bahrain skyline on screen, standing in modern apartment',
+          end_frame_description: 'Same person now standing at outdoor brunch table with food spread, sunny morning',
+          transition_type: 'morph',
+          full_prompt: 'Smooth morph transition from person looking at phone with Bahrain skyline to same person at luxurious outdoor brunch setting, maintaining body position',
+        },
+        caption: 'Your ultimate weekend guide to Bahrain is HERE! 🇧🇭✨\n\nFrom BD 25 brunches to hidden beaches to sunset cocktails - we\'ve got you covered.\n\n📍 Save this for your next weekend\n🔖 Share with your weekend crew\n💬 Which spot are you hitting first?\n\n#BahrainNights #Bahrain #WeekendVibes #BahrainLife #ThingsToDoInBahrain #BahrainFood #BahrainBeach #MiddleEast #GulfLife #WeekendPlans #BahrainTravel #ExploreBahrain',
+        hashtags: ['BahrainNights', 'Bahrain', 'WeekendVibes', 'BahrainLife', 'ThingsToDoInBahrain', 'BahrainFood', 'BahrainBeach', 'MiddleEast', 'GulfLife', 'WeekendPlans'],
+      },
+      {
+        title: 'Best Brunches in Bahrain Ranked',
+        concept: 'A mouth-watering tour of Bahrain\'s top brunch spots - testing everything from the famous Four Seasons brunch to hidden cafe gems in Adliya.',
+        hook: 'I tried 20+ brunches in Bahrain so you don\'t have to',
+        slides: [
+          { order: 1, text: 'BRUNCH RANKED', duration: '2s', visualNote: 'Overhead shot of multiple brunch dishes beautifully arranged' },
+          { order: 2, text: '#1 The Choice', duration: '2s', visualNote: 'Elegant hotel brunch setting with champagne and fresh seafood' },
+          { order: 3, text: 'Best Value', duration: '2s', visualNote: 'Cozy cafe interior with hearty brunch plates' },
+          { order: 4, text: 'Hidden Gem', duration: '2s', visualNote: 'Charming courtyard restaurant with Instagram-worthy plating' },
+        ],
+        music_suggestions: [
+          { genre: 'cinematic', mood: 'emotional', tempo: 'medium', reason: 'Builds anticipation for each reveal in the ranking' },
+        ],
+        editing_style: {
+          trend_name: 'Velocity Edit',
+          description: 'Use speed ramping to sync with music beats. Slow down on the reveal of each brunch spot, then speed up during transitions. Add camera shake effect on beat drops.',
+          difficulty: 'easy' as const,
+          apps_to_use: ['CapCut', 'VN'],
+        },
+        higgsfield_prompt: {
+          start_frame_description: 'Empty elegant restaurant table with white tablecloth, morning light streaming through windows',
+          end_frame_description: 'Same table now filled with luxurious brunch spread - eggs benedict, pastries, mimosas, flowers',
+          transition_type: 'morph',
+          full_prompt: 'Magical reveal transition from empty elegant restaurant table to same table overflowing with beautiful brunch dishes, maintaining lighting and camera angle',
+        },
+        caption: 'I tried 20+ brunches in Bahrain so you don\'t have to 🍳\n\nHere\'s my honest ranking:\n\n1️⃣ Best Overall: Four Seasons\n2️⃣ Best Value: Masso (BD 22!)\n3️⃣ Hidden Gem: La Vinoteca\n\nComment "BRUNCH" and I\'ll send you the full list with prices! 👇\n\n#BahrainBrunch #BahrainFood #BrunchBahrain #FoodiesBahrain #BahrainNights',
+        hashtags: ['BahrainBrunch', 'BahrainFood', 'BrunchBahrain', 'FoodiesBahrain', 'BahrainNights', 'BahrainFoodies', 'GulfFood', 'BrunchTime'],
+      },
+    ];
+    const randomFallback = fallbackOptions[Math.floor(Math.random() * fallbackOptions.length)];
     return [{
-      title: 'Weekend in Bahrain',
-      concept: 'Showcase top things to do this weekend',
-      hook: 'POV: You just discovered the best weekend plans in Bahrain',
+      title: randomFallback.title,
+      concept: randomFallback.concept,
+      hook: randomFallback.hook,
       duration: '15-30 seconds',
       style: reelStyle,
-      slides: [
-        { order: 1, text: 'WEEKEND PLANS?', duration: '2s', visualNote: 'Eye-catching opening' },
-        { order: 2, text: 'Check these out!', duration: '3s', visualNote: 'Show highlights' },
-      ],
-      music_suggestions: [
-        { song: 'Trending audio', artist: 'Various', reason: 'High engagement', searchTip: 'Check Instagram trending' },
-      ],
-      caption: 'Save this for your weekend plans! 🇧🇭\n\nWhich one are you trying first? 👇',
-      hashtags: ['BahrainNights', 'Bahrain', 'BahrainReels', 'WeekendVibes'],
+      slides: randomFallback.slides,
+      music_suggestions: randomFallback.music_suggestions,
+      editing_style: randomFallback.editing_style,
+      higgsfield_prompt: randomFallback.higgsfield_prompt,
+      caption: randomFallback.caption,
+      hashtags: randomFallback.hashtags,
     }];
   }
 }
