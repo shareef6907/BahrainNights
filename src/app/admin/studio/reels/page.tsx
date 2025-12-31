@@ -14,8 +14,10 @@ import {
   Clock,
   Copy,
   Check,
+  Lightbulb,
+  Sparkles,
+  Loader2,
 } from 'lucide-react';
-import GenerateButton from '@/components/studio/GenerateButton';
 import StatusBadge from '@/components/studio/StatusBadge';
 
 interface ReelBrief {
@@ -25,7 +27,7 @@ interface ReelBrief {
   hashtags: string[];
   reel_concept: string;
   reel_hook: string;
-  reel_text_overlays: { slide: number; text: string }[];
+  reel_text_overlays: { slide: number; text: string; visual_note?: string }[];
   reel_music_suggestions: { song: string; artist: string; reason?: string }[];
   reel_duration: string;
   reel_style: string;
@@ -34,20 +36,26 @@ interface ReelBrief {
 }
 
 const reelStyles = [
-  { id: 'trendy', label: 'Trendy', emoji: '🔥' },
-  { id: 'educational', label: 'Educational', emoji: '📚' },
-  { id: 'entertaining', label: 'Entertaining', emoji: '🎉' },
-  { id: 'aesthetic', label: 'Aesthetic', emoji: '✨' },
-  { id: 'listicle', label: 'Listicle', emoji: '📋' },
+  { id: 'trendy', label: 'Trendy', emoji: '🔥', description: 'Viral-worthy content' },
+  { id: 'educational', label: 'Educational', emoji: '📚', description: 'Tips & guides' },
+  { id: 'entertaining', label: 'Entertaining', emoji: '🎉', description: 'Fun & engaging' },
+  { id: 'aesthetic', label: 'Aesthetic', emoji: '✨', description: 'Visually stunning' },
+  { id: 'listicle', label: 'Listicle', emoji: '📋', description: 'Top X lists' },
 ];
 
 export default function ReelsPage() {
   const [reels, setReels] = useState<ReelBrief[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [isGenerating, setIsGenerating] = useState(false);
   const [filter, setFilter] = useState<string>('all');
   const [searchQuery, setSearchQuery] = useState('');
   const [copiedId, setCopiedId] = useState<string | null>(null);
   const [expandedReel, setExpandedReel] = useState<string | null>(null);
+
+  // User input states
+  const [userInput, setUserInput] = useState('');
+  const [selectedStyle, setSelectedStyle] = useState('trendy');
+  const [reelCount, setReelCount] = useState(1);
 
   useEffect(() => {
     fetchReels();
@@ -73,15 +81,28 @@ export default function ReelsPage() {
     }
   };
 
-  const handleGenerate = async (style: string = 'trendy') => {
-    const response = await fetch('/api/admin/studio/generate', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ type: 'reel', count: 1, reelStyle: style }),
-    });
+  const handleGenerate = async () => {
+    setIsGenerating(true);
+    try {
+      const response = await fetch('/api/admin/studio/generate', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          type: 'reel',
+          count: reelCount,
+          reelStyle: selectedStyle,
+          userInput,
+        }),
+      });
 
-    if (response.ok) {
-      await fetchReels();
+      if (response.ok) {
+        await fetchReels();
+        setUserInput('');
+      }
+    } catch (error) {
+      console.error('Error generating reels:', error);
+    } finally {
+      setIsGenerating(false);
     }
   };
 
@@ -151,37 +172,87 @@ HASHTAGS: ${reel.hashtags?.map(h => `#${h}`).join(' ') || ''}
           </h1>
           <p className="text-gray-400 mt-1">Video content briefs for your video editor</p>
         </div>
-        <div className="flex items-center gap-3">
-          <button
-            onClick={fetchReels}
-            className="p-2 bg-white/5 hover:bg-white/10 rounded-xl text-gray-400 transition-all"
-          >
-            <RefreshCw className="w-5 h-5" />
-          </button>
-          <GenerateButton
-            type="reel"
-            label="Generate Brief"
-            onGenerate={() => handleGenerate('trendy')}
-            variant="primary"
-          />
-        </div>
+        <button
+          onClick={fetchReels}
+          className="p-2 bg-white/5 hover:bg-white/10 rounded-xl text-gray-400 transition-all self-start"
+        >
+          <RefreshCw className="w-5 h-5" />
+        </button>
       </div>
 
-      {/* Style Selector */}
-      <div className="bg-[#0F0F1A]/50 border border-white/10 rounded-2xl p-4">
-        <h3 className="text-sm font-medium text-gray-400 mb-3">Generate by Style</h3>
-        <div className="flex flex-wrap gap-2">
-          {reelStyles.map((style) => (
-            <button
-              key={style.id}
-              onClick={() => handleGenerate(style.id)}
-              className="flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-orange-500/20 to-red-500/20 hover:from-orange-500/30 hover:to-red-500/30 text-white rounded-xl transition-all"
-            >
-              <span>{style.emoji}</span>
-              <span className="text-sm font-medium">{style.label}</span>
-            </button>
-          ))}
+      {/* User Input Section */}
+      <div className="bg-gradient-to-br from-orange-500/10 to-red-500/10 border border-orange-500/20 rounded-2xl p-6">
+        <h3 className="text-lg font-semibold text-white mb-3 flex items-center gap-2">
+          <Lightbulb className="w-5 h-5 text-yellow-400" />
+          What&apos;s the reel about?
+        </h3>
+
+        <textarea
+          value={userInput}
+          onChange={(e) => setUserInput(e.target.value)}
+          placeholder="Example: I want to make a reel about the best hidden gems in Bahrain - cafes that most people don't know about. Include places like Little Italy in Riffa, that tiny coffee shop in Muharraq, and the Japanese place near the airport..."
+          className="w-full h-28 p-4 bg-black/30 border border-white/10 rounded-xl text-white placeholder:text-gray-500 resize-none focus:outline-none focus:border-orange-500/50 focus:ring-1 focus:ring-orange-500/50"
+        />
+
+        {/* Style Selection */}
+        <div className="mt-4">
+          <label className="text-sm text-gray-400 block mb-2">Reel Style</label>
+          <div className="flex flex-wrap gap-2">
+            {reelStyles.map((style) => (
+              <button
+                key={style.id}
+                onClick={() => setSelectedStyle(style.id)}
+                className={`flex items-center gap-2 px-4 py-2 rounded-xl transition-all ${
+                  selectedStyle === style.id
+                    ? 'bg-gradient-to-r from-orange-500 to-red-500 text-white'
+                    : 'bg-white/5 text-gray-400 hover:bg-white/10 border border-white/10'
+                }`}
+              >
+                <span>{style.emoji}</span>
+                <span className="text-sm font-medium">{style.label}</span>
+              </button>
+            ))}
+          </div>
         </div>
+
+        <div className="flex flex-wrap gap-3 mt-4">
+          {/* Brief Count */}
+          <div className="flex items-center gap-2">
+            <label className="text-sm text-gray-400">Briefs:</label>
+            <select
+              value={reelCount}
+              onChange={(e) => setReelCount(Number(e.target.value))}
+              className="px-3 py-1.5 bg-black/30 border border-white/10 rounded-lg text-white text-sm focus:outline-none focus:border-orange-500/50"
+            >
+              <option value={1}>1</option>
+              <option value={3}>3</option>
+              <option value={5}>5</option>
+            </select>
+          </div>
+        </div>
+
+        <p className="text-gray-400 text-sm mt-4">
+          <span className="text-orange-400 font-medium">🎬</span> Briefs include hook, concept, text overlays for each slide, and music suggestions
+        </p>
+
+        {/* Generate Button */}
+        <button
+          onClick={handleGenerate}
+          disabled={isGenerating}
+          className="w-full mt-4 py-4 bg-gradient-to-r from-orange-600 to-red-600 hover:from-orange-500 hover:to-red-500 rounded-xl text-white font-semibold flex items-center justify-center gap-2 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+        >
+          {isGenerating ? (
+            <>
+              <Loader2 className="w-5 h-5 animate-spin" />
+              Generating {reelCount} {reelStyles.find(s => s.id === selectedStyle)?.label} brief{reelCount > 1 ? 's' : ''}...
+            </>
+          ) : (
+            <>
+              <Sparkles className="w-5 h-5" />
+              Generate {reelCount} Reel Brief{reelCount > 1 ? 's' : ''}
+            </>
+          )}
+        </button>
       </div>
 
       {/* Filters */}
@@ -217,12 +288,7 @@ HASHTAGS: ${reel.hashtags?.map(h => `#${h}`).join(' ') || ''}
         <div className="text-center py-12 bg-[#0F0F1A]/50 border border-white/10 rounded-2xl">
           <Film className="w-12 h-12 text-gray-600 mx-auto mb-4" />
           <h3 className="text-lg font-semibold text-white mb-2">No Reel Briefs Yet</h3>
-          <p className="text-gray-400 mb-4">Generate your first video content brief</p>
-          <GenerateButton
-            type="reel"
-            label="Generate First Brief"
-            onGenerate={() => handleGenerate('trendy')}
-          />
+          <p className="text-gray-400">Use the form above to generate your first video brief</p>
         </div>
       ) : (
         <div className="space-y-4">

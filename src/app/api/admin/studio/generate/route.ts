@@ -1,14 +1,20 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@supabase/supabase-js';
 import {
-  generateBlogPost,
-  generateFeedPost,
-  generateStory,
-  generateReelBrief,
+  generateBlogPosts,
+  generateFeedPosts,
+  generateStories,
+  generateReelBriefs,
   checkCompliance,
   type EventData,
   type ContentSettings,
 } from '@/lib/studio/ai-generator';
+import {
+  generateImage,
+  buildBlogImagePrompt,
+  buildInstagramImagePrompt,
+  buildStoryImagePrompt,
+} from '@/lib/studio/image-generator';
 
 export const dynamic = 'force-dynamic';
 
@@ -79,7 +85,17 @@ export async function POST(request: NextRequest) {
   try {
     const supabase = getSupabaseAdmin();
     const body = await request.json();
-    const { type, count = 1, eventId, storyType, reelStyle } = body;
+    const {
+      type,
+      count = 1,
+      eventId,
+      storyType,
+      reelStyle,
+      userInput,
+      contentSource = 'custom',
+      contentStyle = 'listicle',
+      generateImages = true,
+    } = body;
 
     if (!type) {
       return NextResponse.json(
@@ -110,22 +126,40 @@ export async function POST(request: NextRequest) {
 
     const generatedContent = [];
 
-    for (let i = 0; i < count; i++) {
-      let content: Record<string, unknown> = {};
-      let contentData: Record<string, unknown> = {};
+    console.log(`[Generate] Starting ${type} generation: count=${count}, generateImages=${generateImages}`);
 
-      try {
-        switch (type) {
-          case 'blog': {
-            const blogPost = await generateBlogPost(events, settings);
+    try {
+      switch (type) {
+        case 'blog': {
+          // Generate all blog posts at once using params object
+          const blogPosts = await generateBlogPosts({
+            userInput,
+            contentSource,
+            contentStyle,
+            count,
+            settings,
+          });
 
+          for (const blogPost of blogPosts) {
             // Check compliance
             const compliance = checkCompliance(blogPost.body, settings);
             if (!compliance.passed) {
               console.warn('Blog post failed compliance:', compliance.issues);
             }
 
-            contentData = {
+            // Generate image if enabled
+            let mediaUrls: string[] = [];
+            if (generateImages) {
+              console.log(`[Generate] Creating blog image for: ${blogPost.title}`);
+              const imagePrompt = buildBlogImagePrompt(blogPost.title, userInput);
+              const imageUrl = await generateImage(imagePrompt, 'blog');
+              if (imageUrl) {
+                mediaUrls = [imageUrl];
+                console.log(`[Generate] Blog image created: ${imageUrl}`);
+              }
+            }
+
+            const contentData = {
               content_type: 'blog',
               title: blogPost.title,
               body: blogPost.body,
@@ -134,92 +168,179 @@ export async function POST(request: NextRequest) {
               seo_description: blogPost.seo_description,
               seo_keywords: blogPost.seo_keywords,
               hashtags: blogPost.seo_keywords,
-              source_type: 'ai',
+              media_urls: mediaUrls.length > 0 ? mediaUrls : null,
+              source_type: contentSource === 'custom' ? 'ai' : contentSource,
               status: 'pending_review',
             };
-            break;
+
+            // Save to database
+            const { data, error } = await supabase
+              .from('content_posts')
+              .insert(contentData)
+              .select()
+              .single();
+
+            if (error) {
+              console.error('Error saving blog post:', error);
+              continue;
+            }
+
+            generatedContent.push(data);
           }
+          break;
+        }
 
-          case 'feed': {
-            const event = specificEvent || events[i % events.length] || null;
-            const feedPost = await generateFeedPost(event, settings);
+        case 'feed': {
+          // Generate all feed posts at once using params object
+          const feedPosts = await generateFeedPosts({
+            userInput,
+            contentSource,
+            count,
+            settings,
+          });
 
-            contentData = {
+          for (const feedPost of feedPosts) {
+            // Generate image if enabled
+            let mediaUrls: string[] = [];
+            if (generateImages) {
+              console.log(`[Generate] Creating feed image for: ${feedPost.title}`);
+              const imagePrompt = buildInstagramImagePrompt(feedPost.caption, userInput);
+              const imageUrl = await generateImage(imagePrompt, 'instagram');
+              if (imageUrl) {
+                mediaUrls = [imageUrl];
+                console.log(`[Generate] Feed image created: ${imageUrl}`);
+              }
+            }
+
+            const contentData = {
               content_type: 'feed',
               title: feedPost.title,
               caption: feedPost.caption,
               hashtags: feedPost.hashtags,
-              source_type: event ? 'event' : 'ai',
-              source_id: event?.id || null,
+              media_urls: mediaUrls.length > 0 ? mediaUrls : null,
+              source_type: contentSource === 'custom' ? 'ai' : contentSource,
               status: 'pending_review',
             };
-            break;
+
+            // Save to database
+            const { data, error } = await supabase
+              .from('content_posts')
+              .insert(contentData)
+              .select()
+              .single();
+
+            if (error) {
+              console.error('Error saving feed post:', error);
+              continue;
+            }
+
+            generatedContent.push(data);
           }
+          break;
+        }
 
-          case 'story': {
-            const event = specificEvent || events[i % events.length] || null;
-            const story = await generateStory(
-              event,
-              storyType || 'promo',
-              settings
-            );
+        case 'story': {
+          // Generate all stories at once using params object
+          const stories = await generateStories({
+            userInput,
+            storyTypes: storyType ? [storyType] : undefined,
+            count,
+            settings,
+          });
 
-            contentData = {
+          for (const story of stories) {
+            // Generate image if enabled
+            let mediaUrls: string[] = [];
+            if (generateImages) {
+              console.log(`[Generate] Creating story background for: ${story.title}`);
+              const imagePrompt = buildStoryImagePrompt(story.title, story.story_type, userInput);
+              const imageUrl = await generateImage(imagePrompt, 'story');
+              if (imageUrl) {
+                mediaUrls = [imageUrl];
+                console.log(`[Generate] Story background created: ${imageUrl}`);
+              }
+            }
+
+            // Story has headline + subtext instead of caption
+            const contentData = {
               content_type: 'story',
               title: story.title,
-              caption: story.caption,
+              caption: `${story.headline}\n\n${story.subtext || ''}`.trim(),
               story_type: story.story_type,
               story_sticker_data: story.sticker_data || null,
-              source_type: event ? 'event' : 'ai',
-              source_id: event?.id || null,
+              media_urls: mediaUrls.length > 0 ? mediaUrls : null,
+              source_type: 'ai',
               status: 'pending_review',
             };
-            break;
+
+            // Save to database
+            const { data, error } = await supabase
+              .from('content_posts')
+              .insert(contentData)
+              .select()
+              .single();
+
+            if (error) {
+              console.error('Error saving story:', error);
+              continue;
+            }
+
+            generatedContent.push(data);
           }
+          break;
+        }
 
-          case 'reel': {
-            const reelBrief = await generateReelBrief(
-              events.slice(0, 5),
-              reelStyle || 'trendy',
-              settings
-            );
+        case 'reel': {
+          // Generate all reel briefs at once using params object
+          const reelBriefs = await generateReelBriefs({
+            userInput,
+            reelStyle: reelStyle || 'trendy',
+            count,
+            settings,
+          });
 
-            contentData = {
+          for (const reelBrief of reelBriefs) {
+            // Transform slides to text_overlays for database storage
+            const textOverlays = reelBrief.slides?.map(s => ({
+              slide: s.order,
+              text: s.text,
+              visual_note: s.visualNote,
+            })) || [];
+
+            const contentData = {
               content_type: 'reel_brief',
               title: reelBrief.title,
               caption: reelBrief.caption,
               hashtags: reelBrief.hashtags,
               reel_concept: reelBrief.concept,
               reel_hook: reelBrief.hook,
-              reel_text_overlays: reelBrief.text_overlays,
+              reel_text_overlays: textOverlays,
               reel_music_suggestions: reelBrief.music_suggestions,
               reel_duration: reelBrief.duration,
               reel_style: reelBrief.style,
               source_type: 'ai',
               status: 'pending_review',
             };
-            break;
+
+            // Save to database
+            const { data, error } = await supabase
+              .from('content_posts')
+              .insert(contentData)
+              .select()
+              .single();
+
+            if (error) {
+              console.error('Error saving reel brief:', error);
+              continue;
+            }
+
+            generatedContent.push(data);
           }
+          break;
         }
-
-        // Save to database
-        const { data, error } = await supabase
-          .from('content_posts')
-          .insert(contentData)
-          .select()
-          .single();
-
-        if (error) {
-          console.error('Error saving generated content:', error);
-          continue;
-        }
-
-        content = data;
-        generatedContent.push(content);
-      } catch (genError) {
-        console.error(`Error generating ${type} content:`, genError);
-        continue;
       }
+    } catch (genError) {
+      console.error(`Error generating ${type} content:`, genError);
     }
 
     return NextResponse.json({

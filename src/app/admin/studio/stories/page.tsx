@@ -14,8 +14,10 @@ import {
   Sparkles,
   ThumbsUp,
   Calendar,
+  Lightbulb,
+  Image as ImageIcon,
+  Loader2,
 } from 'lucide-react';
-import GenerateButton from '@/components/studio/GenerateButton';
 import StatusBadge from '@/components/studio/StatusBadge';
 
 interface Story {
@@ -24,26 +26,34 @@ interface Story {
   caption: string;
   story_type: 'promo' | 'countdown' | 'poll' | 'question' | 'tip' | 'this_or_that';
   story_sticker_data?: Record<string, unknown>;
+  media_urls?: string[];
   status: 'draft' | 'pending_review' | 'approved' | 'scheduled' | 'posted' | 'rejected';
   created_at: string;
   scheduled_for?: string;
 }
 
 const storyTypeConfig = {
-  promo: { icon: Sparkles, label: 'Promo', color: 'from-pink-500 to-rose-500' },
-  countdown: { icon: Clock, label: 'Countdown', color: 'from-orange-500 to-yellow-500' },
-  poll: { icon: ThumbsUp, label: 'Poll', color: 'from-blue-500 to-cyan-500' },
-  question: { icon: HelpCircle, label: 'Question', color: 'from-purple-500 to-violet-500' },
-  tip: { icon: MessageCircle, label: 'Tip', color: 'from-green-500 to-emerald-500' },
-  this_or_that: { icon: Calendar, label: 'This or That', color: 'from-indigo-500 to-purple-500' },
+  promo: { icon: Sparkles, label: 'Promo', color: 'from-pink-500 to-rose-500', description: 'Promote events/venues' },
+  countdown: { icon: Clock, label: 'Countdown', color: 'from-orange-500 to-yellow-500', description: 'Build anticipation' },
+  poll: { icon: ThumbsUp, label: 'Poll', color: 'from-blue-500 to-cyan-500', description: 'Engage audience' },
+  question: { icon: HelpCircle, label: 'Question', color: 'from-purple-500 to-violet-500', description: 'Q&A content' },
+  tip: { icon: MessageCircle, label: 'Tip', color: 'from-green-500 to-emerald-500', description: 'Share knowledge' },
+  this_or_that: { icon: Calendar, label: 'This or That', color: 'from-indigo-500 to-purple-500', description: 'Fun choices' },
 };
 
 export default function StoriesPage() {
   const [stories, setStories] = useState<Story[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [isGenerating, setIsGenerating] = useState(false);
   const [filter, setFilter] = useState<string>('all');
   const [typeFilter, setTypeFilter] = useState<string>('all');
   const [searchQuery, setSearchQuery] = useState('');
+
+  // User input states
+  const [userInput, setUserInput] = useState('');
+  const [selectedStoryType, setSelectedStoryType] = useState<string>('promo');
+  const [generateImages, setGenerateImages] = useState(true);
+  const [storyCount, setStoryCount] = useState(5);
 
   useEffect(() => {
     fetchStories();
@@ -69,15 +79,29 @@ export default function StoriesPage() {
     }
   };
 
-  const handleGenerate = async (storyType: string = 'promo') => {
-    const response = await fetch('/api/admin/studio/generate', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ type: 'story', count: 1, storyType }),
-    });
+  const handleGenerate = async () => {
+    setIsGenerating(true);
+    try {
+      const response = await fetch('/api/admin/studio/generate', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          type: 'story',
+          count: storyCount,
+          storyType: selectedStoryType,
+          userInput,
+          generateImages,
+        }),
+      });
 
-    if (response.ok) {
-      await fetchStories();
+      if (response.ok) {
+        await fetchStories();
+        setUserInput('');
+      }
+    } catch (error) {
+      console.error('Error generating stories:', error);
+    } finally {
+      setIsGenerating(false);
     }
   };
 
@@ -128,42 +152,108 @@ export default function StoriesPage() {
             <PlaySquare className="w-6 h-6 text-purple-400" />
             Stories
           </h1>
-          <p className="text-gray-400 mt-1">Instagram story sequences ready to post</p>
+          <p className="text-gray-400 mt-1">Instagram story sequences with AI backgrounds</p>
         </div>
-        <div className="flex items-center gap-3">
-          <button
-            onClick={fetchStories}
-            className="p-2 bg-white/5 hover:bg-white/10 rounded-xl text-gray-400 transition-all"
-          >
-            <RefreshCw className="w-5 h-5" />
-          </button>
-          <GenerateButton
-            type="story"
-            label="Generate Story"
-            onGenerate={() => handleGenerate('promo')}
-            variant="primary"
-          />
-        </div>
+        <button
+          onClick={fetchStories}
+          className="p-2 bg-white/5 hover:bg-white/10 rounded-xl text-gray-400 transition-all self-start"
+        >
+          <RefreshCw className="w-5 h-5" />
+        </button>
       </div>
 
-      {/* Story Type Selector */}
-      <div className="bg-[#0F0F1A]/50 border border-white/10 rounded-2xl p-4">
-        <h3 className="text-sm font-medium text-gray-400 mb-3">Generate Story Type</h3>
-        <div className="grid grid-cols-3 sm:grid-cols-6 gap-2">
-          {Object.entries(storyTypeConfig).map(([type, config]) => {
-            const Icon = config.icon;
-            return (
-              <button
-                key={type}
-                onClick={() => handleGenerate(type)}
-                className={`flex flex-col items-center gap-2 p-3 rounded-xl bg-gradient-to-br ${config.color} opacity-80 hover:opacity-100 transition-all`}
-              >
-                <Icon className="w-5 h-5 text-white" />
-                <span className="text-xs text-white font-medium">{config.label}</span>
-              </button>
-            );
-          })}
+      {/* User Input Section */}
+      <div className="bg-gradient-to-br from-purple-500/10 to-violet-500/10 border border-purple-500/20 rounded-2xl p-6">
+        <h3 className="text-lg font-semibold text-white mb-3 flex items-center gap-2">
+          <Lightbulb className="w-5 h-5 text-yellow-400" />
+          Story Topic (optional)
+        </h3>
+
+        <input
+          type="text"
+          value={userInput}
+          onChange={(e) => setUserInput(e.target.value)}
+          placeholder="Example: Weekend brunch spots, F1 weekend tips, new rooftop bar opening..."
+          className="w-full p-4 bg-black/30 border border-white/10 rounded-xl text-white placeholder:text-gray-500 focus:outline-none focus:border-purple-500/50 focus:ring-1 focus:ring-purple-500/50"
+        />
+
+        {/* Story Type Selection */}
+        <div className="mt-4">
+          <label className="text-sm text-gray-400 block mb-2">Story Type</label>
+          <div className="grid grid-cols-3 sm:grid-cols-6 gap-2">
+            {Object.entries(storyTypeConfig).map(([type, config]) => {
+              const Icon = config.icon;
+              return (
+                <button
+                  key={type}
+                  onClick={() => setSelectedStoryType(type)}
+                  className={`flex flex-col items-center gap-2 p-3 rounded-xl transition-all ${
+                    selectedStoryType === type
+                      ? `bg-gradient-to-br ${config.color}`
+                      : 'bg-white/5 hover:bg-white/10 border border-white/10'
+                  }`}
+                >
+                  <Icon className={`w-5 h-5 ${selectedStoryType === type ? 'text-white' : 'text-gray-400'}`} />
+                  <span className={`text-xs font-medium ${selectedStoryType === type ? 'text-white' : 'text-gray-400'}`}>
+                    {config.label}
+                  </span>
+                </button>
+              );
+            })}
+          </div>
         </div>
+
+        <div className="flex flex-wrap gap-3 mt-4">
+          {/* Story Count */}
+          <div className="flex items-center gap-2">
+            <label className="text-sm text-gray-400">Stories:</label>
+            <select
+              value={storyCount}
+              onChange={(e) => setStoryCount(Number(e.target.value))}
+              className="px-3 py-1.5 bg-black/30 border border-white/10 rounded-lg text-white text-sm focus:outline-none focus:border-purple-500/50"
+            >
+              <option value={3}>3</option>
+              <option value={5}>5</option>
+              <option value={10}>10</option>
+            </select>
+          </div>
+
+          {/* AI Background Images Toggle */}
+          <button
+            onClick={() => setGenerateImages(!generateImages)}
+            className={`px-4 py-1.5 rounded-lg text-sm font-medium transition-all flex items-center gap-2 ${
+              generateImages
+                ? 'bg-green-500/20 text-green-400 border border-green-500/30'
+                : 'bg-white/5 text-gray-400 border border-white/10'
+            }`}
+          >
+            <ImageIcon className="w-4 h-4" />
+            {generateImages ? 'AI Backgrounds: On' : 'AI Backgrounds: Off'}
+          </button>
+        </div>
+
+        <p className="text-gray-400 text-sm mt-4">
+          <span className="text-purple-400 font-medium">📱</span> AI will generate story-optimized backgrounds (1080x1920) perfect for text overlays
+        </p>
+
+        {/* Generate Button */}
+        <button
+          onClick={handleGenerate}
+          disabled={isGenerating}
+          className="w-full mt-4 py-4 bg-gradient-to-r from-purple-600 to-violet-600 hover:from-purple-500 hover:to-violet-500 rounded-xl text-white font-semibold flex items-center justify-center gap-2 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+        >
+          {isGenerating ? (
+            <>
+              <Loader2 className="w-5 h-5 animate-spin" />
+              Generating {storyCount} {storyTypeConfig[selectedStoryType as keyof typeof storyTypeConfig]?.label} stories...
+            </>
+          ) : (
+            <>
+              <Sparkles className="w-5 h-5" />
+              Generate {storyCount} {storyTypeConfig[selectedStoryType as keyof typeof storyTypeConfig]?.label} Stories
+            </>
+          )}
+        </button>
       </div>
 
       {/* Filters */}
@@ -214,18 +304,14 @@ export default function StoriesPage() {
         <div className="text-center py-12 bg-[#0F0F1A]/50 border border-white/10 rounded-2xl">
           <PlaySquare className="w-12 h-12 text-gray-600 mx-auto mb-4" />
           <h3 className="text-lg font-semibold text-white mb-2">No Stories Yet</h3>
-          <p className="text-gray-400 mb-4">Generate your first Instagram story sequence</p>
-          <GenerateButton
-            type="story"
-            label="Generate First Story"
-            onGenerate={() => handleGenerate('promo')}
-          />
+          <p className="text-gray-400">Use the form above to generate your first Instagram story</p>
         </div>
       ) : (
         <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4">
           {filteredStories.map((story, index) => {
             const config = storyTypeConfig[story.story_type] || storyTypeConfig.promo;
             const Icon = config.icon;
+            const hasImage = story.media_urls?.[0];
 
             return (
               <motion.div
@@ -236,12 +322,27 @@ export default function StoriesPage() {
                 className="group relative"
               >
                 {/* Story Card - Phone-like aspect ratio */}
-                <div className={`aspect-[9/16] bg-gradient-to-br ${config.color} rounded-2xl overflow-hidden relative`}>
+                <div className={`aspect-[9/16] rounded-2xl overflow-hidden relative ${!hasImage ? `bg-gradient-to-br ${config.color}` : ''}`}>
+                  {/* AI Generated Background Image */}
+                  {hasImage && (
+                    <>
+                      <img
+                        src={story.media_urls![0]}
+                        alt={story.title}
+                        className="absolute inset-0 w-full h-full object-cover"
+                      />
+                      <div className="absolute inset-0 bg-gradient-to-b from-black/30 via-transparent to-black/60" />
+                      <div className="absolute top-2 left-2 px-2 py-0.5 bg-green-500/90 text-white text-[10px] rounded font-medium">
+                        AI Background
+                      </div>
+                    </>
+                  )}
+
                   {/* Content */}
                   <div className="absolute inset-0 flex flex-col items-center justify-center p-4 text-center">
-                    <Icon className="w-8 h-8 text-white/80 mb-2" />
-                    <h3 className="text-white font-bold text-sm line-clamp-2">{story.title}</h3>
-                    <p className="text-white/70 text-xs mt-2 line-clamp-2">{story.caption}</p>
+                    <Icon className="w-8 h-8 text-white/80 mb-2 drop-shadow-lg" />
+                    <h3 className="text-white font-bold text-sm line-clamp-2 drop-shadow-lg">{story.title}</h3>
+                    <p className="text-white/90 text-xs mt-2 line-clamp-2 drop-shadow-lg">{story.caption}</p>
                   </div>
 
                   {/* Status Badge */}
