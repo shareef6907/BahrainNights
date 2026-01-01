@@ -1,5 +1,6 @@
 'use client';
 
+import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import Link from 'next/link';
 import {
@@ -15,83 +16,86 @@ import {
   TrendingDown,
   Clock,
   CheckCircle,
-  XCircle,
   PlusCircle,
+  Loader2,
 } from 'lucide-react';
 
-// Mock data
-const mockStats = {
-  totalVenues: 245,
-  approvedVenues: 230,
-  pendingVenues: 12,
-  rejectedVenues: 3,
-  totalEvents: 1247,
-  eventsThisMonth: 156,
-  totalUsers: 150,
-  pageViewsToday: 3421,
-  pageViewsTrend: 12,
-  activeAds: 5,
-  revenueThisMonth: 2500,
-  revenueTrend: 8,
-};
+interface DashboardStats {
+  totalVenues: number;
+  approvedVenues: number;
+  pendingVenues: number;
+  rejectedVenues: number;
+  totalEvents: number;
+  eventsThisMonth: number;
+  totalUsers: number;
+  pageViewsToday: number;
+  pageViewsTrend: number;
+  activeAds: number;
+  revenueThisMonth: number;
+  revenueTrend: number;
+}
 
-const mockPendingVenues = [
-  { id: 'v1', name: 'Cafe Lilou', category: 'Cafe', area: 'Adliya', registeredAgo: '2 days ago' },
-  { id: 'v2', name: 'Block 338', category: 'Bar', area: 'Adliya', registeredAgo: '1 day ago' },
-  { id: 'v3', name: 'The Meat Company', category: 'Restaurant', area: 'Seef', registeredAgo: 'today' },
-];
+interface PendingVenue {
+  id: string;
+  name: string;
+  category: string;
+  registeredAgo: string;
+}
 
-const mockPendingEvents = [
-  { id: 'e1', title: 'Wine Tasting Night', venue: 'The Orangery', date: 'Jan 5' },
-  { id: 'e2', title: 'Kids Art Workshop', venue: 'Bahrain National Museum', date: 'Jan 8' },
-  { id: 'e3', title: 'Beach Party', venue: 'Coral Bay', date: 'Jan 10' },
-  { id: 'e4', title: 'Stand-up Comedy', venue: 'The Junction', date: 'Jan 12' },
-  { id: 'e5', title: 'Food Festival', venue: 'Gulf Hotel', date: 'Jan 15' },
-];
+interface ActivityItem {
+  id: string;
+  type: string;
+  text: string;
+  time: string;
+}
 
-const mockRecentActivity = [
-  { id: 1, type: 'venue', text: 'New venue registered: Cafe Lilou', time: '2 hours ago' },
-  { id: 2, type: 'event', text: 'Event approved: Jazz Night at The Orangery', time: '4 hours ago' },
-  { id: 3, type: 'ad', text: 'Ad expired: Ritz-Carlton NYE Banner', time: '6 hours ago' },
-  { id: 4, type: 'venue', text: 'Venue approved: Saffron Restaurant', time: '1 day ago' },
-  { id: 5, type: 'event', text: 'New event submitted: Beach Party at Coral Bay', time: '1 day ago' },
-];
+interface TopItem {
+  id: string;
+  name: string;
+  views: number;
+  change: number;
+}
 
-const mockTopVenues = [
-  { name: 'The Orangery', views: 2450, change: 15 },
-  { name: 'Gulf Hotel', views: 1890, change: 8 },
-  { name: 'Ritz-Carlton', views: 1650, change: -3 },
-  { name: 'Coral Bay', views: 1420, change: 22 },
-  { name: "Trader Vic's", views: 1180, change: 5 },
-];
+interface CategoryData {
+  category: string;
+  count: number;
+  color: string;
+}
 
-const mockTopEvents = [
-  { name: 'NYE Gala at Ritz-Carlton', views: 3200, change: 45 },
-  { name: 'Friday Brunch at Gulf Hotel', views: 2100, change: 12 },
-  { name: 'Jazz Night at The Orangery', views: 1560, change: 8 },
-  { name: 'Beach Party at Coral Bay', views: 1230, change: 30 },
-  { name: 'Ladies Night at Amber', views: 980, change: -5 },
-];
-
-const mockDailyViews = [
-  { day: 'Mon', views: 2450 },
-  { day: 'Tue', views: 3120 },
-  { day: 'Wed', views: 2890 },
-  { day: 'Thu', views: 3560 },
-  { day: 'Fri', views: 4230 },
-  { day: 'Sat', views: 5120 },
-  { day: 'Sun', views: 3421 },
-];
-
-const mockCategoryData = [
-  { category: 'Dining', count: 450, color: 'bg-orange-400' },
-  { category: 'Nightlife', count: 320, color: 'bg-purple-400' },
-  { category: 'Cultural', count: 210, color: 'bg-blue-400' },
-  { category: 'Family', count: 180, color: 'bg-green-400' },
-  { category: 'Sports', count: 87, color: 'bg-red-400' },
-];
+interface DashboardData {
+  stats: DashboardStats;
+  pendingVenues: PendingVenue[];
+  recentActivity: ActivityItem[];
+  topVenues: TopItem[];
+  topEvents: TopItem[];
+  categoryData: CategoryData[];
+}
 
 export default function AdminDashboard() {
+  const [data, setData] = useState<DashboardData | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    fetchDashboardData();
+  }, []);
+
+  async function fetchDashboardData() {
+    try {
+      setLoading(true);
+      const response = await fetch('/api/admin/dashboard/stats');
+      if (!response.ok) {
+        throw new Error('Failed to fetch dashboard data');
+      }
+      const result = await response.json();
+      setData(result);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'An error occurred');
+    } finally {
+      setLoading(false);
+    }
+  }
+
   const currentDate = new Date().toLocaleDateString('en-US', {
     weekday: 'long',
     year: 'numeric',
@@ -99,7 +103,38 @@ export default function AdminDashboard() {
     day: 'numeric',
   });
 
-  const pendingTotal = mockStats.pendingVenues + mockPendingEvents.length;
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center min-h-[60vh]">
+        <div className="text-center">
+          <Loader2 className="w-8 h-8 animate-spin text-cyan-400 mx-auto mb-4" />
+          <p className="text-gray-400">Loading dashboard...</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="flex items-center justify-center min-h-[60vh]">
+        <div className="text-center">
+          <AlertTriangle className="w-8 h-8 text-red-400 mx-auto mb-4" />
+          <p className="text-red-400 mb-4">{error}</p>
+          <button
+            onClick={fetchDashboardData}
+            className="px-4 py-2 bg-cyan-500 hover:bg-cyan-600 text-white rounded-lg"
+          >
+            Try Again
+          </button>
+        </div>
+      </div>
+    );
+  }
+
+  if (!data) return null;
+
+  const { stats, pendingVenues, recentActivity, topVenues, topEvents, categoryData } = data;
+  const pendingTotal = stats.pendingVenues + 0; // Add pending events count if available
 
   return (
     <div className="space-y-6">
@@ -111,37 +146,38 @@ export default function AdminDashboard() {
         <h1 className="text-2xl font-bold text-white">Admin Dashboard</h1>
         <p className="text-gray-400 mt-1">{currentDate}</p>
         <p className="text-cyan-400 text-sm mt-2">
-          {pendingTotal} items pending approval
+          {pendingTotal > 0 ? `${pendingTotal} items pending approval` : 'All caught up!'}
         </p>
       </motion.div>
 
       {/* Pending Approvals Alert */}
-      <motion.div
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ delay: 0.1 }}
-        className="bg-orange-500/10 border border-orange-500/30 rounded-2xl p-5"
-      >
-        <div className="flex items-start gap-4">
-          <div className="p-3 bg-orange-500/20 rounded-xl">
-            <AlertTriangle className="w-6 h-6 text-orange-400" />
+      {stats.pendingVenues > 0 && (
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.1 }}
+          className="bg-orange-500/10 border border-orange-500/30 rounded-2xl p-5"
+        >
+          <div className="flex items-start gap-4">
+            <div className="p-3 bg-orange-500/20 rounded-xl">
+              <AlertTriangle className="w-6 h-6 text-orange-400" />
+            </div>
+            <div className="flex-1">
+              <h3 className="font-semibold text-white">Pending Approvals</h3>
+              <p className="text-gray-300 mt-1">
+                You have <span className="text-orange-400 font-medium">{stats.pendingVenues} venues</span> pending approval
+              </p>
+            </div>
+            <Link
+              href="/admin/venues?status=pending"
+              className="px-4 py-2 bg-orange-500 hover:bg-orange-600 text-white rounded-lg font-medium transition-colors flex items-center gap-2"
+            >
+              Review Now
+              <ArrowRight className="w-4 h-4" />
+            </Link>
           </div>
-          <div className="flex-1">
-            <h3 className="font-semibold text-white">Pending Approvals</h3>
-            <p className="text-gray-300 mt-1">
-              You have <span className="text-orange-400 font-medium">{mockStats.pendingVenues} venues</span> and{' '}
-              <span className="text-orange-400 font-medium">{mockPendingEvents.length} events</span> pending approval
-            </p>
-          </div>
-          <Link
-            href="/admin/venues?status=pending"
-            className="px-4 py-2 bg-orange-500 hover:bg-orange-600 text-white rounded-lg font-medium transition-colors flex items-center gap-2"
-          >
-            Review Now
-            <ArrowRight className="w-4 h-4" />
-          </Link>
-        </div>
-      </motion.div>
+        </motion.div>
+      )}
 
       {/* Key Metrics Cards */}
       <div className="grid grid-cols-2 lg:grid-cols-3 gap-4">
@@ -155,11 +191,11 @@ export default function AdminDashboard() {
           <div className="flex items-start justify-between">
             <div>
               <p className="text-sm text-gray-400">Total Venues</p>
-              <p className="text-3xl font-bold text-white mt-1">{mockStats.totalVenues}</p>
+              <p className="text-3xl font-bold text-white mt-1">{stats.totalVenues}</p>
               <div className="flex items-center gap-2 mt-2 text-sm">
-                <span className="text-green-400">{mockStats.approvedVenues} approved</span>
+                <span className="text-green-400">{stats.approvedVenues} approved</span>
                 <span className="text-gray-500">•</span>
-                <span className="text-orange-400">{mockStats.pendingVenues} pending</span>
+                <span className="text-orange-400">{stats.pendingVenues} pending</span>
               </div>
             </div>
             <div className="p-3 bg-cyan-500/20 rounded-xl">
@@ -178,9 +214,9 @@ export default function AdminDashboard() {
           <div className="flex items-start justify-between">
             <div>
               <p className="text-sm text-gray-400">Total Events</p>
-              <p className="text-3xl font-bold text-white mt-1">{mockStats.totalEvents}</p>
+              <p className="text-3xl font-bold text-white mt-1">{stats.totalEvents}</p>
               <p className="text-sm text-gray-500 mt-2">
-                {mockStats.eventsThisMonth} this month
+                {stats.eventsThisMonth} this month
               </p>
             </div>
             <div className="p-3 bg-purple-500/20 rounded-xl">
@@ -199,7 +235,7 @@ export default function AdminDashboard() {
           <div className="flex items-start justify-between">
             <div>
               <p className="text-sm text-gray-400">Total Users</p>
-              <p className="text-3xl font-bold text-white mt-1">{mockStats.totalUsers}</p>
+              <p className="text-3xl font-bold text-white mt-1">{stats.totalUsers}</p>
               <p className="text-sm text-gray-500 mt-2">Venue owners</p>
             </div>
             <div className="p-3 bg-blue-500/20 rounded-xl">
@@ -219,11 +255,17 @@ export default function AdminDashboard() {
             <div>
               <p className="text-sm text-gray-400">Page Views Today</p>
               <p className="text-3xl font-bold text-white mt-1">
-                {mockStats.pageViewsToday.toLocaleString()}
+                {stats.pageViewsToday.toLocaleString()}
               </p>
               <div className="flex items-center gap-1 mt-2">
-                <TrendingUp className="w-4 h-4 text-green-400" />
-                <span className="text-sm text-green-400">+{mockStats.pageViewsTrend}%</span>
+                {stats.pageViewsTrend >= 0 ? (
+                  <TrendingUp className="w-4 h-4 text-green-400" />
+                ) : (
+                  <TrendingDown className="w-4 h-4 text-red-400" />
+                )}
+                <span className={`text-sm ${stats.pageViewsTrend >= 0 ? 'text-green-400' : 'text-red-400'}`}>
+                  {stats.pageViewsTrend >= 0 ? '+' : ''}{stats.pageViewsTrend}%
+                </span>
                 <span className="text-xs text-gray-500">vs yesterday</span>
               </div>
             </div>
@@ -243,7 +285,7 @@ export default function AdminDashboard() {
           <div className="flex items-start justify-between">
             <div>
               <p className="text-sm text-gray-400">Active Ads</p>
-              <p className="text-3xl font-bold text-white mt-1">{mockStats.activeAds}</p>
+              <p className="text-3xl font-bold text-white mt-1">{stats.activeAds}</p>
               <p className="text-sm text-gray-500 mt-2">of 5 slots filled</p>
             </div>
             <div className="p-3 bg-pink-500/20 rounded-xl">
@@ -263,11 +305,17 @@ export default function AdminDashboard() {
             <div>
               <p className="text-sm text-gray-400">Revenue This Month</p>
               <p className="text-3xl font-bold text-white mt-1">
-                BD {mockStats.revenueThisMonth.toLocaleString()}
+                BD {stats.revenueThisMonth.toLocaleString()}
               </p>
               <div className="flex items-center gap-1 mt-2">
-                <TrendingUp className="w-4 h-4 text-green-400" />
-                <span className="text-sm text-green-400">+{mockStats.revenueTrend}%</span>
+                {stats.revenueTrend >= 0 ? (
+                  <TrendingUp className="w-4 h-4 text-green-400" />
+                ) : (
+                  <TrendingDown className="w-4 h-4 text-red-400" />
+                )}
+                <span className={`text-sm ${stats.revenueTrend >= 0 ? 'text-green-400' : 'text-red-400'}`}>
+                  {stats.revenueTrend >= 0 ? '+' : ''}{stats.revenueTrend}%
+                </span>
                 <span className="text-xs text-gray-500">vs last month</span>
               </div>
             </div>
@@ -310,69 +358,71 @@ export default function AdminDashboard() {
 
       {/* Charts Row */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        {/* Daily Page Views Chart */}
+        {/* Events by Category */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.5 }}
           className="bg-white/5 backdrop-blur-sm border border-white/10 rounded-2xl p-6"
         >
-          <h3 className="text-lg font-semibold text-white mb-6">Daily Page Views</h3>
-          <div className="flex items-end justify-between h-48 gap-2">
-            {mockDailyViews.map((data, index) => {
-              const maxViews = Math.max(...mockDailyViews.map((d) => d.views));
-              const height = (data.views / maxViews) * 100;
+          <h3 className="text-lg font-semibold text-white mb-6">Events by Category</h3>
+          {categoryData.length > 0 ? (
+            <div className="space-y-4">
+              {categoryData.map((cat) => {
+                const maxCount = Math.max(...categoryData.map((c) => c.count));
+                const width = maxCount > 0 ? (cat.count / maxCount) * 100 : 0;
 
-              return (
-                <div key={data.day} className="flex-1 flex flex-col items-center gap-2">
-                  <motion.div
-                    initial={{ height: 0 }}
-                    animate={{ height: `${height}%` }}
-                    transition={{ duration: 0.5, delay: index * 0.05 }}
-                    className="w-full bg-gradient-to-t from-cyan-500 to-teal-400 rounded-t-lg relative group"
-                  >
-                    <div className="absolute -top-8 left-1/2 -translate-x-1/2 px-2 py-1 bg-[#1A1A2E] rounded text-xs text-white opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap">
-                      {data.views.toLocaleString()}
+                return (
+                  <div key={cat.category} className="space-y-1">
+                    <div className="flex items-center justify-between text-sm">
+                      <span className="text-gray-300">{cat.category}</span>
+                      <span className="text-white font-medium">{cat.count}</span>
                     </div>
-                  </motion.div>
-                  <span className="text-xs text-gray-400">{data.day}</span>
-                </div>
-              );
-            })}
-          </div>
+                    <div className="h-2 bg-white/10 rounded-full overflow-hidden">
+                      <motion.div
+                        initial={{ width: 0 }}
+                        animate={{ width: `${width}%` }}
+                        transition={{ duration: 0.5 }}
+                        className={`h-full ${cat.color} rounded-full`}
+                      />
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          ) : (
+            <p className="text-gray-500 text-center py-8">No events data available</p>
+          )}
         </motion.div>
 
-        {/* Events by Category */}
+        {/* Pending Venues */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.55 }}
           className="bg-white/5 backdrop-blur-sm border border-white/10 rounded-2xl p-6"
         >
-          <h3 className="text-lg font-semibold text-white mb-6">Events by Category</h3>
-          <div className="space-y-4">
-            {mockCategoryData.map((cat) => {
-              const maxCount = Math.max(...mockCategoryData.map((c) => c.count));
-              const width = (cat.count / maxCount) * 100;
-
-              return (
-                <div key={cat.category} className="space-y-1">
-                  <div className="flex items-center justify-between text-sm">
-                    <span className="text-gray-300">{cat.category}</span>
-                    <span className="text-white font-medium">{cat.count}</span>
+          <h3 className="text-lg font-semibold text-white mb-4">Pending Venues</h3>
+          {pendingVenues.length > 0 ? (
+            <div className="space-y-3">
+              {pendingVenues.map((venue) => (
+                <div key={venue.id} className="flex items-center justify-between py-2">
+                  <div>
+                    <p className="text-gray-300 text-sm">{venue.name}</p>
+                    <p className="text-gray-500 text-xs">{venue.category} • {venue.registeredAgo}</p>
                   </div>
-                  <div className="h-2 bg-white/10 rounded-full overflow-hidden">
-                    <motion.div
-                      initial={{ width: 0 }}
-                      animate={{ width: `${width}%` }}
-                      transition={{ duration: 0.5 }}
-                      className={`h-full ${cat.color} rounded-full`}
-                    />
-                  </div>
+                  <Link
+                    href={`/admin/venues/${venue.id}`}
+                    className="text-cyan-400 hover:text-cyan-300 text-sm"
+                  >
+                    Review
+                  </Link>
                 </div>
-              );
-            })}
-          </div>
+              ))}
+            </div>
+          ) : (
+            <p className="text-gray-500 text-center py-8">No pending venues</p>
+          )}
         </motion.div>
       </div>
 
@@ -386,36 +436,40 @@ export default function AdminDashboard() {
           className="bg-white/5 backdrop-blur-sm border border-white/10 rounded-2xl p-6"
         >
           <h3 className="text-lg font-semibold text-white mb-4">Recent Activity</h3>
-          <div className="space-y-4">
-            {mockRecentActivity.map((activity) => (
-              <div key={activity.id} className="flex items-start gap-3">
-                <div
-                  className={`p-2 rounded-lg ${
-                    activity.type === 'venue'
-                      ? 'bg-cyan-500/20'
-                      : activity.type === 'event'
-                      ? 'bg-purple-500/20'
-                      : 'bg-pink-500/20'
-                  }`}
-                >
-                  {activity.type === 'venue' ? (
-                    <Building2 className="w-4 h-4 text-cyan-400" />
-                  ) : activity.type === 'event' ? (
-                    <Calendar className="w-4 h-4 text-purple-400" />
-                  ) : (
-                    <Megaphone className="w-4 h-4 text-pink-400" />
-                  )}
+          {recentActivity.length > 0 ? (
+            <div className="space-y-4">
+              {recentActivity.map((activity) => (
+                <div key={activity.id} className="flex items-start gap-3">
+                  <div
+                    className={`p-2 rounded-lg ${
+                      activity.type === 'venue'
+                        ? 'bg-cyan-500/20'
+                        : activity.type === 'event'
+                        ? 'bg-purple-500/20'
+                        : 'bg-pink-500/20'
+                    }`}
+                  >
+                    {activity.type === 'venue' ? (
+                      <Building2 className="w-4 h-4 text-cyan-400" />
+                    ) : activity.type === 'event' ? (
+                      <Calendar className="w-4 h-4 text-purple-400" />
+                    ) : (
+                      <Megaphone className="w-4 h-4 text-pink-400" />
+                    )}
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <p className="text-sm text-gray-300 truncate">{activity.text}</p>
+                    <p className="text-xs text-gray-500 flex items-center gap-1 mt-1">
+                      <Clock className="w-3 h-3" />
+                      {activity.time}
+                    </p>
+                  </div>
                 </div>
-                <div className="flex-1 min-w-0">
-                  <p className="text-sm text-gray-300 truncate">{activity.text}</p>
-                  <p className="text-xs text-gray-500 flex items-center gap-1 mt-1">
-                    <Clock className="w-3 h-3" />
-                    {activity.time}
-                  </p>
-                </div>
-              </div>
-            ))}
-          </div>
+              ))}
+            </div>
+          ) : (
+            <p className="text-gray-500 text-center py-8">No recent activity</p>
+          )}
         </motion.div>
 
         {/* Top Venues */}
@@ -426,31 +480,37 @@ export default function AdminDashboard() {
           className="bg-white/5 backdrop-blur-sm border border-white/10 rounded-2xl p-6"
         >
           <h3 className="text-lg font-semibold text-white mb-4">Top Venues by Views</h3>
-          <div className="space-y-3">
-            {mockTopVenues.map((venue, index) => (
-              <div key={venue.name} className="flex items-center justify-between py-2">
-                <div className="flex items-center gap-3">
-                  <span className="w-6 h-6 rounded-full bg-white/10 flex items-center justify-center text-sm text-gray-400">
-                    {index + 1}
-                  </span>
-                  <span className="text-gray-300 text-sm">{venue.name}</span>
+          {topVenues.length > 0 ? (
+            <div className="space-y-3">
+              {topVenues.map((venue, index) => (
+                <div key={venue.id} className="flex items-center justify-between py-2">
+                  <div className="flex items-center gap-3">
+                    <span className="w-6 h-6 rounded-full bg-white/10 flex items-center justify-center text-sm text-gray-400">
+                      {index + 1}
+                    </span>
+                    <span className="text-gray-300 text-sm">{venue.name}</span>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <span className="text-white font-medium text-sm">
+                      {venue.views.toLocaleString()}
+                    </span>
+                    {venue.change !== 0 && (
+                      <span
+                        className={`text-xs ${
+                          venue.change >= 0 ? 'text-green-400' : 'text-red-400'
+                        }`}
+                      >
+                        {venue.change >= 0 ? '+' : ''}
+                        {venue.change}%
+                      </span>
+                    )}
+                  </div>
                 </div>
-                <div className="flex items-center gap-2">
-                  <span className="text-white font-medium text-sm">
-                    {venue.views.toLocaleString()}
-                  </span>
-                  <span
-                    className={`text-xs ${
-                      venue.change >= 0 ? 'text-green-400' : 'text-red-400'
-                    }`}
-                  >
-                    {venue.change >= 0 ? '+' : ''}
-                    {venue.change}%
-                  </span>
-                </div>
-              </div>
-            ))}
-          </div>
+              ))}
+            </div>
+          ) : (
+            <p className="text-gray-500 text-center py-8">No venue data available</p>
+          )}
         </motion.div>
 
         {/* Top Events */}
@@ -461,33 +521,39 @@ export default function AdminDashboard() {
           className="bg-white/5 backdrop-blur-sm border border-white/10 rounded-2xl p-6"
         >
           <h3 className="text-lg font-semibold text-white mb-4">Top Events by Views</h3>
-          <div className="space-y-3">
-            {mockTopEvents.map((event, index) => (
-              <div key={event.name} className="flex items-center justify-between py-2">
-                <div className="flex items-center gap-3">
-                  <span className="w-6 h-6 rounded-full bg-white/10 flex items-center justify-center text-sm text-gray-400">
-                    {index + 1}
-                  </span>
-                  <span className="text-gray-300 text-sm truncate max-w-[150px]">
-                    {event.name}
-                  </span>
+          {topEvents.length > 0 ? (
+            <div className="space-y-3">
+              {topEvents.map((event, index) => (
+                <div key={event.id} className="flex items-center justify-between py-2">
+                  <div className="flex items-center gap-3">
+                    <span className="w-6 h-6 rounded-full bg-white/10 flex items-center justify-center text-sm text-gray-400">
+                      {index + 1}
+                    </span>
+                    <span className="text-gray-300 text-sm truncate max-w-[150px]">
+                      {event.name}
+                    </span>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <span className="text-white font-medium text-sm">
+                      {event.views.toLocaleString()}
+                    </span>
+                    {event.change !== 0 && (
+                      <span
+                        className={`text-xs ${
+                          event.change >= 0 ? 'text-green-400' : 'text-red-400'
+                        }`}
+                      >
+                        {event.change >= 0 ? '+' : ''}
+                        {event.change}%
+                      </span>
+                    )}
+                  </div>
                 </div>
-                <div className="flex items-center gap-2">
-                  <span className="text-white font-medium text-sm">
-                    {event.views.toLocaleString()}
-                  </span>
-                  <span
-                    className={`text-xs ${
-                      event.change >= 0 ? 'text-green-400' : 'text-red-400'
-                    }`}
-                  >
-                    {event.change >= 0 ? '+' : ''}
-                    {event.change}%
-                  </span>
-                </div>
-              </div>
-            ))}
-          </div>
+              ))}
+            </div>
+          ) : (
+            <p className="text-gray-500 text-center py-8">No event data available</p>
+          )}
         </motion.div>
       </div>
     </div>

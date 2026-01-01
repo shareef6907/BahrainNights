@@ -6,7 +6,8 @@ export async function POST() {
     const supabase = getAdminClient();
 
     // Create homepage_ads table
-    const { error: tableError } = await supabase.rpc('exec_sql', {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const { error: tableError } = await (supabase as any).rpc('exec_sql', {
       sql: `
         CREATE TABLE IF NOT EXISTS homepage_ads (
           id UUID PRIMARY KEY DEFAULT gen_random_uuid(),

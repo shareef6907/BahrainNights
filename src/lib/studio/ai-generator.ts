@@ -218,13 +218,18 @@ export async function fetchCinemaForAI(): Promise<string> {
 // BLOG POST GENERATION (Viral Content)
 // ============================================
 export async function generateBlogPosts(params: {
-  userInput?: string;
+  userInput: string;  // REQUIRED - user's topic is PRIMARY
   contentSource?: string;
   contentStyle?: string;
   count?: number;
   settings?: ContentSettings;
 }): Promise<GeneratedBlogPost[]> {
   const { userInput, contentSource = 'custom', contentStyle = 'listicle', count = 3, settings = DEFAULT_SETTINGS } = params;
+
+  // Validate user input is provided
+  if (!userInput || userInput.trim().length < 3) {
+    throw new Error('User input is required. Please specify what topic you want to write about.');
+  }
 
   // Fetch source data if needed
   let sourceData = '';
@@ -244,14 +249,15 @@ IMPORTANT: BahrainNights covers ALL aspects of life in Bahrain - NOT just nightl
 
 YOUR MISSION: Create content that people SAVE, SHARE, and TALK ABOUT. Not generic boring content.
 
-${userInput ? `
-🎯 THE USER WANTS TO WRITE ABOUT:
+🎯 **PRIMARY TOPIC - THIS IS WHAT THE USER WANTS:**
 "${userInput}"
 
-CRITICAL: You MUST incorporate the user's specific opinions, places, prices, and ideas. Don't ignore what they said. Make their voice come through in the content.
-` : `
-🎯 CREATE DIVERSE CONTENT covering different categories like dining, family activities, arts, sports, wellness, tours, shopping, etc. - NOT just nightlife!
-`}
+⚠️ CRITICAL RULES:
+1. Your ENTIRE content MUST be about "${userInput}" - this is NON-NEGOTIABLE
+2. Every blog post title MUST include keywords from the user's topic
+3. DO NOT generate generic "Weekend Guide" or "Things to Do" content
+4. The user's specific topic is the ONLY thing you should write about
+5. Include the user's specific opinions, places, prices, and ideas if mentioned
 
 ${sourceData && sourceData !== 'Unable to fetch events.' && sourceData !== 'Unable to fetch movies.' ? `
 📊 AVAILABLE DATA FROM BAHRAIN:
@@ -332,12 +338,17 @@ Return ONLY valid JSON array (no markdown, no explanation):
   }
 }
 
-// Legacy function for compatibility
+// Legacy function for compatibility (deprecated - use generateBlogPosts with userInput instead)
 export async function generateBlogPost(
   events: EventData[],
   settings: ContentSettings = DEFAULT_SETTINGS
 ): Promise<GeneratedBlogPost> {
+  // Extract topic from events if available
+  const eventTopics = events.map(e => e.title).join(', ');
+  const userInput = eventTopics || 'Best things to do in Bahrain this week';
+
   const results = await generateBlogPosts({
+    userInput,
     contentSource: 'events',
     count: 1,
     settings,
@@ -349,12 +360,17 @@ export async function generateBlogPost(
 // FEED POST GENERATION (Instagram)
 // ============================================
 export async function generateFeedPosts(params: {
-  userInput?: string;
+  userInput: string;  // REQUIRED - user's topic is PRIMARY
   contentSource?: string;
   count?: number;
   settings?: ContentSettings;
 }): Promise<GeneratedFeedPost[]> {
   const { userInput, contentSource = 'custom', count = 3, settings = DEFAULT_SETTINGS } = params;
+
+  // Validate user input is provided
+  if (!userInput || userInput.trim().length < 3) {
+    throw new Error('User input is required. Please specify what topic you want to post about.');
+  }
 
   let sourceData = '';
   if (contentSource === 'events') {
@@ -373,14 +389,14 @@ IMPORTANT: BahrainNights covers ALL aspects of life in Bahrain - NOT just nightl
 
 YOUR GOAL: Create posts that get SAVED, SHARED, and COMMENTED on. We want ENGAGEMENT.
 
-${userInput ? `
-🎯 USER'S INPUT - USE THIS AS THE MAIN TOPIC:
+🎯 **PRIMARY TOPIC - THIS IS WHAT THE USER WANTS:**
 "${userInput}"
 
-IMPORTANT: Build the post around what the user said. Include their specific details.
-` : `
-🎯 CREATE DIVERSE POSTS about different topics: dining, family fun, arts, sports, wellness, tours, shopping, special events - NOT just nightlife!
-`}
+⚠️ CRITICAL RULES:
+1. Your ENTIRE post MUST be about "${userInput}" - this is NON-NEGOTIABLE
+2. DO NOT generate generic "Weekend Guide" or "Things to Do" posts
+3. The user's specific topic is the ONLY thing you should write about
+4. Include the user's specific details, places, times, and ideas
 
 ${sourceData && sourceData !== 'Unable to fetch events.' && sourceData !== 'Unable to fetch movies.' ? `
 📊 DATA FROM BAHRAIN:
@@ -460,12 +476,16 @@ Return ONLY valid JSON array:
   }
 }
 
-// Legacy function for compatibility
+// Legacy function for compatibility (deprecated - use generateFeedPosts with userInput instead)
 export async function generateFeedPost(
   event: EventData | null,
   settings: ContentSettings = DEFAULT_SETTINGS
 ): Promise<GeneratedFeedPost> {
+  // Extract topic from event if available
+  const userInput = event?.title || 'What to do in Bahrain this weekend';
+
   const results = await generateFeedPosts({
+    userInput,
     contentSource: event ? 'events' : 'custom',
     count: 1,
     settings,
@@ -477,12 +497,17 @@ export async function generateFeedPost(
 // STORIES GENERATION
 // ============================================
 export async function generateStories(params: {
-  userInput?: string;
+  userInput: string;  // REQUIRED - user's topic is PRIMARY
   storyTypes?: string[];
   count?: number;
   settings?: ContentSettings;
 }): Promise<GeneratedStory[]> {
   const { userInput, storyTypes = ['promo', 'poll', 'tip', 'countdown', 'question'], count = 10, settings = DEFAULT_SETTINGS } = params;
+
+  // Validate user input is provided
+  if (!userInput || userInput.trim().length < 3) {
+    throw new Error('User input is required. Please specify what topic you want stories about.');
+  }
 
   // Get diverse categories for content generation
   const diverseCategories = getCategoryContext();
@@ -492,7 +517,10 @@ export async function generateStories(params: {
 IMPORTANT: BahrainNights covers ALL aspects of life in Bahrain - NOT just nightlife! Our categories include:
 - ${diverseCategories}
 
-${userInput ? `Topic focus: "${userInput}"` : 'Topic: Create DIVERSE stories about dining, family, arts, sports, wellness, tours, shopping, events - NOT just nightlife!'}
+🎯 **PRIMARY TOPIC - THIS IS WHAT THE USER WANTS:**
+"${userInput}"
+
+⚠️ CRITICAL: ALL ${count} stories MUST be about "${userInput}" - no generic content!
 
 Story types to create (mix of these): ${storyTypes.join(', ')}
 
@@ -598,13 +626,17 @@ Return ONLY valid JSON array:
   }
 }
 
-// Legacy function for compatibility
+// Legacy function for compatibility (deprecated - use generateStories with userInput instead)
 export async function generateStory(
   event: EventData | null,
   storyType: GeneratedStory['story_type'],
   settings: ContentSettings = DEFAULT_SETTINGS
 ): Promise<GeneratedStory> {
+  // Extract topic from event if available
+  const userInput = event?.title || 'Bahrain events and activities';
+
   const results = await generateStories({
+    userInput,
     storyTypes: [storyType],
     count: 1,
     settings,
@@ -616,12 +648,17 @@ export async function generateStory(
 // REEL BRIEF GENERATION
 // ============================================
 export async function generateReelBriefs(params: {
-  userInput?: string;
+  userInput: string;  // REQUIRED - user's topic is PRIMARY
   reelStyle?: string;
   count?: number;
   settings?: ContentSettings;
 }): Promise<GeneratedReelBrief[]> {
   const { userInput, reelStyle = 'trendy', count = 1, settings = DEFAULT_SETTINGS } = params;
+
+  // Validate user input is provided
+  if (!userInput || userInput.trim().length < 3) {
+    throw new Error('User input is required. Please specify what topic you want the reel about.');
+  }
 
   // Get diverse categories for content generation
   const diverseCategories = getCategoryContext();
@@ -631,46 +668,39 @@ export async function generateReelBriefs(params: {
 IMPORTANT: BahrainNights covers ALL aspects of life in Bahrain - NOT just nightlife! Our categories include:
 - ${diverseCategories}
 
-${userInput ? `
-🎯 USER'S REEL IDEA:
+🎯 **PRIMARY TOPIC - THIS IS WHAT THE USER WANTS:**
 "${userInput}"
 
-Build the entire reel around this concept. Include their specific ideas.
-` : 'Create DIVERSE reels about dining, family activities, arts, sports, wellness, tours, shopping - NOT just nightlife!'}
+⚠️ CRITICAL RULES:
+1. The ENTIRE reel MUST be about "${userInput}" - this is NON-NEGOTIABLE
+2. DO NOT create generic "Weekend Guide" or "Things to Do" reels
+3. Every slide, hook, and visual MUST relate to the user's specific topic
+4. Include specific details, places, and ideas from the user's input
 
 REEL STYLE: ${reelStyle}
 
 🔥 VIRAL REEL RULES:
 1. First 1 second = HOOK (stops the scroll)
-2. Keep it 15-30 seconds
+2. Keep it 30-60 seconds
 3. Fast cuts = more watch time
-4. Use royalty-free music (NO copyrighted songs!)
-5. End with CTA
-6. VARY THE TOPICS - cover different categories
+4. End with CTA
+5. Generate 10-15 SLIDES (not 5 - we need more content!)
 
-HOOK IDEAS THAT WORK (diverse topics):
-- "POV: You live in Bahrain"
-- "Things in Bahrain that just hit different"
-- "I tried every brunch in Bahrain so you don't have to"
-- "Best family spots in Bahrain ranked"
-- "Hidden gems in Bahrain you NEED to visit"
-- "Unpopular Bahrain food opinion:"
-- "Bahrain spa day for under BD 50"
-- "Stop scrolling if you live in Bahrain 🇧🇭"
+📱 VIRAL HOOK FORMULAS (use one of these for "${userInput}"):
+- "POV: [scenario related to ${userInput}]"
+- "Stop scrolling if you want to know about ${userInput} 🛑"
+- "I tried ${userInput} so you don't have to"
+- "${userInput} - everything you need to know"
+- "The TRUTH about ${userInput} in Bahrain"
+- "This is your sign to try ${userInput}"
+- "Wait for it... ${userInput} reveal"
+- "Things about ${userInput} that just hit different"
+- "You're doing ${userInput} wrong - here's how"
+- "[Number] things about ${userInput} you didn't know"
+- "Nobody's talking about ${userInput} but..."
+- "The secret to ${userInput} in Bahrain"
 
-🎵 MUSIC STYLE SUGGESTIONS:
-- Suggest music GENRE and TYPE only (NO specific songs or artists!)
-- Choose from these categories:
-  * EPIC - grand, powerful, builds momentum
-  * CINEMATIC - movie-quality, emotional, storytelling
-  * DRAMATIC - intense, suspenseful, attention-grabbing
-  * VIOLIN/ORCHESTRAL - classical instruments, elegant
-  * FILMY/BOLLYWOOD - Indian cinema inspired, emotional
-  * FUNK - groovy, rhythmic, fun energy
-  * HIP HOP - urban, beats, trendy
-  * HOUSE/ELECTRONIC - dance, energetic, modern
-  * PIANO - emotional, soft, intimate
-  * UPBEAT POP - happy, catchy, feel-good
+⚠️ CRITICAL: Generate EXACTLY 10-15 slides. Each slide should be 2-3 seconds with unique visual content.
 
 🎬 VIDEO EDITING TRENDS (2024-2025):
 Suggest ONE trending editing style for this reel:
@@ -694,26 +724,28 @@ Create a prompt for AI video transition:
 Return ONLY valid JSON array:
 [
   {
-    "title": "Reel title",
-    "concept": "One line description (50-100 words with specific Bahrain details)",
-    "hook": "The text/visual that appears first",
-    "duration": "15-30 seconds",
+    "title": "Reel title related to ${userInput}",
+    "concept": "One line description (50-100 words with specific Bahrain details about ${userInput})",
+    "hook": "Viral hook using one of the formulas above - MUST relate to ${userInput}",
+    "duration": "30-60 seconds",
     "style": "${reelStyle}",
     "slides": [
       {
         "order": 1,
-        "text": "Text overlay for this part",
+        "text": "Hook text (grabs attention)",
         "duration": "2-3s",
-        "visualNote": "Detailed description of what to show visually (20-30 words)"
-      }
-    ],
-    "music_suggestions": [
-      {
-        "genre": "Main genre (epic/cinematic/dramatic/violin/filmy/funk/hip-hop/house/piano/upbeat-pop)",
-        "mood": "The mood (energetic/emotional/suspenseful/uplifting/dramatic/groovy)",
-        "tempo": "slow/medium/fast",
-        "reason": "Why this style fits the reel content"
-      }
+        "visualNote": "Detailed description of what to show (20-30 words)"
+      },
+      {"order": 2, "text": "...", "duration": "2-3s", "visualNote": "..."},
+      {"order": 3, "text": "...", "duration": "2-3s", "visualNote": "..."},
+      {"order": 4, "text": "...", "duration": "2-3s", "visualNote": "..."},
+      {"order": 5, "text": "...", "duration": "2-3s", "visualNote": "..."},
+      {"order": 6, "text": "...", "duration": "2-3s", "visualNote": "..."},
+      {"order": 7, "text": "...", "duration": "2-3s", "visualNote": "..."},
+      {"order": 8, "text": "...", "duration": "2-3s", "visualNote": "..."},
+      {"order": 9, "text": "...", "duration": "2-3s", "visualNote": "..."},
+      {"order": 10, "text": "...", "duration": "2-3s", "visualNote": "..."},
+      {"order": 11, "text": "Call to action", "duration": "2-3s", "visualNote": "..."}
     ],
     "editing_style": {
       "trend_name": "Name of trending edit style (e.g., Mask Transition, Velocity Edit)",
@@ -747,90 +779,60 @@ Return ONLY valid JSON array:
     return JSON.parse(jsonMatch[0]);
   } catch (error) {
     console.error('Failed to parse reel response:', text.substring(0, 500));
-    // Diverse fallback options with royalty-free music and editing trends
-    const fallbackOptions = [
-      {
-        title: 'Ultimate Weekend Guide Bahrain',
-        concept: 'A complete guide to the best weekend experiences in Bahrain - from luxurious brunches at The Ritz-Carlton to hidden beaches in Hawar Islands, family fun at Wahooo!, and sunset views from rooftop lounges.',
-        hook: 'POV: You just discovered the best weekend in Bahrain',
-        slides: [
-          { order: 1, text: 'WEEKEND PLANS?', duration: '2s', visualNote: 'Stunning aerial shot of Bahrain skyline at sunset with modern buildings and traditional architecture' },
-          { order: 2, text: 'Start with brunch', duration: '2s', visualNote: 'Luxurious brunch spread at a 5-star hotel, champagne, fresh pastries, elegant setting' },
-          { order: 3, text: 'Hit the beach', duration: '2s', visualNote: 'Beautiful crystal clear waters at a Bahrain beach, palm trees, relaxation vibes' },
-          { order: 4, text: 'End with sunset', duration: '2s', visualNote: 'Golden sunset view from a rooftop lounge, city lights starting to glow' },
-          { order: 5, text: 'Save for later!', duration: '2s', visualNote: 'BahrainNights logo with call-to-action overlay' },
-        ],
-        music_suggestions: [
-          { genre: 'upbeat-pop', mood: 'uplifting', tempo: 'fast', reason: 'Creates positive energy and matches the weekend vibe' },
-        ],
-        editing_style: {
-          trend_name: 'Mask Transition',
-          description: 'Use the phone screen or hand swipe to mask reveal the next scene. Film yourself swiping on phone, then use CapCut mask tool to reveal the next location behind the swipe motion.',
-          difficulty: 'medium' as const,
-          apps_to_use: ['CapCut', 'VN', 'Premiere Pro'],
-        },
-        higgsfield_prompt: {
-          start_frame_description: 'Person holding phone showing Bahrain skyline on screen, standing in modern apartment',
-          end_frame_description: 'Same person now standing at outdoor brunch table with food spread, sunny morning',
-          transition_type: 'morph',
-          full_prompt: 'Smooth morph transition from person looking at phone with Bahrain skyline to same person at luxurious outdoor brunch setting, maintaining body position',
-        },
-        caption: 'Your ultimate weekend guide to Bahrain is HERE! 🇧🇭✨\n\nFrom BD 25 brunches to hidden beaches to sunset cocktails - we\'ve got you covered.\n\n📍 Save this for your next weekend\n🔖 Share with your weekend crew\n💬 Which spot are you hitting first?\n\n#BahrainNights #Bahrain #WeekendVibes #BahrainLife #ThingsToDoInBahrain #BahrainFood #BahrainBeach #MiddleEast #GulfLife #WeekendPlans #BahrainTravel #ExploreBahrain',
-        hashtags: ['BahrainNights', 'Bahrain', 'WeekendVibes', 'BahrainLife', 'ThingsToDoInBahrain', 'BahrainFood', 'BahrainBeach', 'MiddleEast', 'GulfLife', 'WeekendPlans'],
-      },
-      {
-        title: 'Best Brunches in Bahrain Ranked',
-        concept: 'A mouth-watering tour of Bahrain\'s top brunch spots - testing everything from the famous Four Seasons brunch to hidden cafe gems in Adliya.',
-        hook: 'I tried 20+ brunches in Bahrain so you don\'t have to',
-        slides: [
-          { order: 1, text: 'BRUNCH RANKED', duration: '2s', visualNote: 'Overhead shot of multiple brunch dishes beautifully arranged' },
-          { order: 2, text: '#1 The Choice', duration: '2s', visualNote: 'Elegant hotel brunch setting with champagne and fresh seafood' },
-          { order: 3, text: 'Best Value', duration: '2s', visualNote: 'Cozy cafe interior with hearty brunch plates' },
-          { order: 4, text: 'Hidden Gem', duration: '2s', visualNote: 'Charming courtyard restaurant with Instagram-worthy plating' },
-        ],
-        music_suggestions: [
-          { genre: 'cinematic', mood: 'emotional', tempo: 'medium', reason: 'Builds anticipation for each reveal in the ranking' },
-        ],
-        editing_style: {
-          trend_name: 'Velocity Edit',
-          description: 'Use speed ramping to sync with music beats. Slow down on the reveal of each brunch spot, then speed up during transitions. Add camera shake effect on beat drops.',
-          difficulty: 'easy' as const,
-          apps_to_use: ['CapCut', 'VN'],
-        },
-        higgsfield_prompt: {
-          start_frame_description: 'Empty elegant restaurant table with white tablecloth, morning light streaming through windows',
-          end_frame_description: 'Same table now filled with luxurious brunch spread - eggs benedict, pastries, mimosas, flowers',
-          transition_type: 'morph',
-          full_prompt: 'Magical reveal transition from empty elegant restaurant table to same table overflowing with beautiful brunch dishes, maintaining lighting and camera angle',
-        },
-        caption: 'I tried 20+ brunches in Bahrain so you don\'t have to 🍳\n\nHere\'s my honest ranking:\n\n1️⃣ Best Overall: Four Seasons\n2️⃣ Best Value: Masso (BD 22!)\n3️⃣ Hidden Gem: La Vinoteca\n\nComment "BRUNCH" and I\'ll send you the full list with prices! 👇\n\n#BahrainBrunch #BahrainFood #BrunchBahrain #FoodiesBahrain #BahrainNights',
-        hashtags: ['BahrainBrunch', 'BahrainFood', 'BrunchBahrain', 'FoodiesBahrain', 'BahrainNights', 'BahrainFoodies', 'GulfFood', 'BrunchTime'],
-      },
-    ];
-    const randomFallback = fallbackOptions[Math.floor(Math.random() * fallbackOptions.length)];
+    // Fallback with 12 slides based on user's topic
+    const topic = userInput || 'Bahrain experiences';
     return [{
-      title: randomFallback.title,
-      concept: randomFallback.concept,
-      hook: randomFallback.hook,
-      duration: '15-30 seconds',
+      title: `${topic} - Complete Guide`,
+      concept: `A comprehensive guide to ${topic} in Bahrain with insider tips, specific locations, and actionable advice.`,
+      hook: `Stop scrolling if you want to know about ${topic} 🛑`,
+      duration: '30-60 seconds',
       style: reelStyle,
-      slides: randomFallback.slides,
-      music_suggestions: randomFallback.music_suggestions,
-      editing_style: randomFallback.editing_style,
-      higgsfield_prompt: randomFallback.higgsfield_prompt,
-      caption: randomFallback.caption,
-      hashtags: randomFallback.hashtags,
+      slides: [
+        { order: 1, text: `${topic.toUpperCase()}`, duration: '2s', visualNote: `Eye-catching intro scene related to ${topic} in Bahrain` },
+        { order: 2, text: 'Everything you need to know', duration: '2s', visualNote: `Overview shot of ${topic} scene in Bahrain` },
+        { order: 3, text: '#1 Tip', duration: '2s', visualNote: `First key insight about ${topic}` },
+        { order: 4, text: 'The best spot', duration: '2s', visualNote: `Featured location for ${topic}` },
+        { order: 5, text: 'Hidden gem alert', duration: '2s', visualNote: `Lesser-known place for ${topic}` },
+        { order: 6, text: 'Pro tip', duration: '2s', visualNote: `Insider knowledge about ${topic}` },
+        { order: 7, text: 'What to expect', duration: '2s', visualNote: `Realistic expectation for ${topic}` },
+        { order: 8, text: 'Price range', duration: '2s', visualNote: `Cost breakdown visual for ${topic}` },
+        { order: 9, text: 'Best time to go', duration: '2s', visualNote: `Timing recommendation visual` },
+        { order: 10, text: 'Don\'t miss this', duration: '2s', visualNote: `Must-see highlight of ${topic}` },
+        { order: 11, text: 'Final thoughts', duration: '2s', visualNote: `Summary scene of ${topic} experience` },
+        { order: 12, text: 'Save this! 🔖', duration: '2s', visualNote: 'BahrainNights logo with follow CTA overlay' },
+      ],
+      // NO music_suggestions - user will add music manually
+      music_suggestions: [],
+      editing_style: {
+        trend_name: 'Velocity Edit',
+        description: 'Use speed ramping to sync with music beats. Slow down on key reveals, speed up during transitions.',
+        difficulty: 'easy' as const,
+        apps_to_use: ['CapCut', 'VN', 'InShot'],
+      },
+      higgsfield_prompt: {
+        start_frame_description: `Person looking at phone with ${topic} search on screen`,
+        end_frame_description: `Person now experiencing ${topic} in Bahrain, excited expression`,
+        transition_type: 'morph',
+        full_prompt: `Morph transition from searching about ${topic} to experiencing it firsthand in Bahrain`,
+      },
+      caption: `${topic} in Bahrain - the COMPLETE guide! 🇧🇭\n\nSave this for later ⬇️\n\n📍 Best spots revealed\n💰 Price breakdown included\n⏰ Best timing tips\n\nComment your questions below! 👇\n\n#BahrainNights #Bahrain #${topic.replace(/\s+/g, '')} #BahrainLife #ThingsToDoInBahrain`,
+      hashtags: ['BahrainNights', 'Bahrain', 'BahrainLife', 'ThingsToDoInBahrain', 'ExploreBahrain'],
     }];
   }
 }
 
-// Legacy function for compatibility
+// Legacy function for compatibility (deprecated - use generateReelBriefs with userInput instead)
 export async function generateReelBrief(
   events: EventData[],
   style: string = 'trendy',
   settings: ContentSettings = DEFAULT_SETTINGS
 ): Promise<GeneratedReelBrief> {
+  // Extract topic from events if available
+  const eventTopics = events.map(e => e.title).join(', ');
+  const userInput = eventTopics || 'Best experiences in Bahrain';
+
   const results = await generateReelBriefs({
+    userInput,
     reelStyle: style,
     count: 1,
     settings,

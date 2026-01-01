@@ -114,6 +114,14 @@ export async function POST(request: NextRequest) {
       );
     }
 
+    // CRITICAL: User input is REQUIRED for all content types
+    if (!userInput || userInput.trim().length < 3) {
+      return NextResponse.json(
+        { error: 'User input is required. Please specify what topic you want to create content about (minimum 3 characters).' },
+        { status: 400 }
+      );
+    }
+
     // Get settings and events
     const [settings, events] = await Promise.all([
       getSettings(),
@@ -312,14 +320,14 @@ export async function POST(request: NextRequest) {
               visual_note: s.visualNote,
             })) || [];
 
-            // Generate images for each slide if enabled
+            // Generate images for each slide if enabled (10-15 images for reels)
             let mediaUrls: string[] = [];
             if (generateImages && reelBrief.slides && reelBrief.slides.length > 0) {
               console.log(`[Generate] Creating ${reelBrief.slides.length} reel slide images for: ${reelBrief.title}`);
 
-              // Generate images for each slide (limit to first 5 slides to manage API costs)
-              const slidesToProcess = reelBrief.slides.slice(0, 5);
-              for (const slide of slidesToProcess) {
+              // Generate images for ALL slides (10-15 images for proper reel content)
+              // No limit - generate images for every slide
+              for (const slide of reelBrief.slides) {
                 try {
                   const imagePrompt = buildReelSlideImagePrompt(slide.text, slide.visualNote, userInput);
                   const imageUrl = await generateImage(imagePrompt, 'instagram');
@@ -334,6 +342,7 @@ export async function POST(request: NextRequest) {
               console.log(`[Generate] Created ${mediaUrls.length} reel images`);
             }
 
+            // NOTE: Music suggestions are NOT saved - user will add music manually
             const contentData = {
               content_type: 'reel_brief',
               title: reelBrief.title,
@@ -342,7 +351,7 @@ export async function POST(request: NextRequest) {
               reel_concept: reelBrief.concept,
               reel_hook: reelBrief.hook,
               reel_text_overlays: textOverlays,
-              reel_music_suggestions: reelBrief.music_suggestions,
+              // reel_music_suggestions: NOT INCLUDED - user adds music manually
               reel_duration: reelBrief.duration,
               reel_style: reelBrief.style,
               reel_editing_style: reelBrief.editing_style || null,
