@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react';
 import dynamic from 'next/dynamic';
 import { motion, AnimatePresence } from 'framer-motion';
-import { MapPin, Clock, Star, ChevronRight, ChevronDown, Menu, X, Sparkles, Plus, Play } from 'lucide-react';
+import { MapPin, Clock, Star, ChevronRight, ChevronDown, Menu, X, Sparkles, Plus, Play, Building2 } from 'lucide-react';
 import GlobalSearch from '@/components/search/GlobalSearch';
 import { SponsorsSection } from '@/components/sponsors';
 import { Movie } from '@/components/cinema/MovieCard';
@@ -372,6 +372,13 @@ export default function HomePageClient({ initialMovies, initialStats }: HomePage
             <div className="hidden lg:flex items-center space-x-4">
               <GlobalSearch variant="navbar" />
               <LanguageSwitcher variant="desktop" />
+              <a
+                href="/register"
+                className="flex items-center space-x-2 bg-white/10 border border-white/20 text-white px-4 py-2.5 rounded-full font-medium hover:bg-white/20 hover:border-white/30 transition-all duration-200"
+              >
+                <Building2 className="w-4 h-4" />
+                <span>Register Venue</span>
+              </a>
               <a
                 href="/list-event"
                 className="flex items-center space-x-2 bg-gradient-to-r from-yellow-400 via-orange-500 to-pink-500 text-black px-5 py-2.5 rounded-full font-semibold hover:shadow-lg hover:shadow-orange-500/25 hover:scale-105 transition-all duration-200"
@@ -796,7 +803,7 @@ export default function HomePageClient({ initialMovies, initialStats }: HomePage
             {[
               { title: 'Events', links: [{ name: "Today's Events", href: '/events?filter=today' }, { name: 'This Weekend', href: '/events?filter=weekend' }, { name: 'Concerts', href: '/events?category=concerts' }, { name: 'Full Calendar', href: '/events/calendar' }] },
               { title: 'Dining', links: [{ name: 'Restaurants', href: '/places?category=restaurant' }, { name: 'Cafes', href: '/places?category=cafe' }, { name: 'Nightlife', href: '/places?category=nightclub' }, { name: 'View All', href: '/places' }] },
-              { title: 'For Businesses', links: [{ name: 'List Your Event', href: '/list-event' }, { name: 'Advertise', href: '/advertise' }, { name: 'Become a Sponsor', href: '/sponsors' }, { name: 'Contact', href: '/contact' }] }
+              { title: 'For Businesses', links: [{ name: 'Register Your Venue', href: '/register' }, { name: 'List Your Event', href: '/list-event' }, { name: 'Advertise', href: '/advertise' }, { name: 'Become a Sponsor', href: '/sponsors' }, { name: 'Contact', href: '/contact' }] }
             ].map(section => (
               <div key={section.title}>
                 <h4 className="font-bold text-lg mb-4">{section.title}</h4>
