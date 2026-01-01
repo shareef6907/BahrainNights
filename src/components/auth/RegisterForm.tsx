@@ -175,6 +175,7 @@ export default function RegisterForm() {
         area: formData.area,
         address: formData.address,
         googleMapsLink: formData.googleMapsLink || undefined,
+        agreeToTerms: formData.agreeToTerms,
       });
 
       if (success) {

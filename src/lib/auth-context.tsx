@@ -47,6 +47,7 @@ interface RegisterData {
   area: string;
   address: string;
   googleMapsLink?: string;
+  agreeToTerms: boolean;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
