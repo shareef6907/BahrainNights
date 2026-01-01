@@ -45,6 +45,7 @@ export interface EventFormData {
 interface EventFormProps {
   initialData?: Partial<EventFormData>;
   isEditing?: boolean;
+  eventId?: string;
 }
 
 const categories = [
@@ -106,7 +107,7 @@ const defaultFormData: EventFormData = {
   specialInstructions: '',
 };
 
-export default function EventForm({ initialData, isEditing = false }: EventFormProps) {
+export default function EventForm({ initialData, isEditing = false, eventId }: EventFormProps) {
   const router = useRouter();
   const [formData, setFormData] = useState<EventFormData>({
     ...defaultFormData,
@@ -193,17 +194,45 @@ export default function EventForm({ initialData, isEditing = false }: EventFormP
     setIsSubmitting(true);
 
     try {
-      // TODO: Implement actual API call
-      console.log('Submitting:', { ...formData, status: isDraft ? 'draft' : 'published' });
+      const payload = {
+        ...formData,
+        status: isDraft ? 'draft' : 'published',
+      };
 
-      // Simulate API delay
-      await new Promise((resolve) => setTimeout(resolve, 1000));
+      const url = isEditing && eventId
+        ? `/api/dashboard/events/${eventId}`
+        : '/api/dashboard/events';
+
+      const method = isEditing && eventId ? 'PATCH' : 'POST';
+
+      const response = await fetch(url, {
+        method,
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(payload),
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        if (data.details) {
+          // Handle validation errors
+          const fieldErrors: Partial<Record<keyof EventFormData, string>> = {};
+          data.details.forEach((err: { field: string; message: string }) => {
+            fieldErrors[err.field as keyof EventFormData] = err.message;
+          });
+          setErrors(fieldErrors);
+          return;
+        }
+        throw new Error(data.error || 'Failed to save event');
+      }
 
       // Show success and redirect
       router.push('/dashboard/events');
     } catch (error) {
       console.error('Submit error:', error);
-      alert('Failed to save event. Please try again.');
+      alert(error instanceof Error ? error.message : 'Failed to save event. Please try again.');
     } finally {
       setIsSubmitting(false);
     }

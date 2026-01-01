@@ -1,76 +1,131 @@
 'use client';
 
+import { useState, useEffect } from 'react';
 import { useParams } from 'next/navigation';
 import Link from 'next/link';
 import { motion } from 'framer-motion';
 import { ArrowLeft, Loader2 } from 'lucide-react';
 import EventForm, { EventFormData } from '@/components/dashboard/EventForm';
 
-// Mock data for events - in production, this would come from an API
-const mockEvents: Record<string, Partial<EventFormData>> = {
-  '1': {
-    title: 'Live Jazz Night',
-    description:
-      'Join us for an unforgettable evening of smooth jazz featuring local and international artists. Enjoy premium cocktails and gourmet appetizers while experiencing the finest live music in Bahrain.',
-    category: 'Live Music',
-    tags: 'jazz, live music, cocktails, lounge',
-    startDate: '2025-12-28',
-    startTime: '20:00',
-    endTime: '23:00',
-    priceType: 'paid',
-    price: '25',
-    bookingMethod: 'website',
-    bookingUrl: 'https://example.com/book',
-    featuredImage:
-      'https://images.unsplash.com/photo-1511735111819-9a3f7709049c?w=1920&h=1080&fit=crop',
-    ageRestriction: '21+',
-    dressCode: 'Smart casual',
-  },
-  '2': {
-    title: 'NYE Countdown Party',
-    description:
-      'Ring in 2026 with the ultimate New Year\'s Eve celebration! Live DJ, champagne toast at midnight, and a spectacular fireworks view.',
-    category: 'Nightlife',
-    tags: 'new year, party, celebration, countdown',
-    startDate: '2025-12-31',
-    startTime: '21:00',
-    endDate: '2026-01-01',
-    endTime: '03:00',
-    priceType: 'range',
-    priceMin: '50',
-    priceMax: '150',
-    bookingMethod: 'website',
-    bookingUrl: 'https://example.com/nye',
-    featuredImage:
-      'https://images.unsplash.com/photo-1514525253161-7a46d19cd819?w=1920&h=1080&fit=crop',
-    ageRestriction: '21+',
-    dressCode: 'Elegant',
-  },
-  '3': {
-    title: 'Wine Tasting Evening',
-    description:
-      'Discover exquisite wines from around the world with our expert sommelier. Includes cheese pairing and light bites.',
-    category: 'Dining',
-    tags: 'wine, tasting, dining, gourmet',
-    startDate: '2026-01-03',
-    startTime: '19:00',
-    endTime: '22:00',
-    priceType: 'paid',
-    price: '35',
-    bookingMethod: 'phone',
-    featuredImage:
-      'https://images.unsplash.com/photo-1510812431401-41d2bd2722f3?w=1920&h=1080&fit=crop',
-    ageRestriction: '21+',
-  },
-};
+interface ApiEvent {
+  id: string;
+  title: string;
+  description: string;
+  category: string;
+  tags: string[];
+  start_date: string;
+  start_time: string;
+  end_date: string | null;
+  end_time: string | null;
+  is_recurring: boolean;
+  recurrence_pattern: string | null;
+  recurrence_days: string[] | null;
+  price: string | null;
+  booking_url: string | null;
+  featured_image: string;
+  gallery: string[] | null;
+  age_restriction: string | null;
+  dress_code: string | null;
+  special_instructions: string | null;
+  status: string;
+}
+
+function parsePrice(priceRange: string | null): {
+  priceType: 'free' | 'paid' | 'range';
+  price: string;
+  priceMin: string;
+  priceMax: string;
+} {
+  if (!priceRange || priceRange.toLowerCase() === 'free') {
+    return { priceType: 'free', price: '', priceMin: '', priceMax: '' };
+  }
+
+  // Check for range: "BD 15 - 50"
+  const rangeMatch = priceRange.match(/BD\s*(\d+(?:\.\d+)?)\s*-\s*(\d+(?:\.\d+)?)/i);
+  if (rangeMatch) {
+    return {
+      priceType: 'range',
+      price: '',
+      priceMin: rangeMatch[1],
+      priceMax: rangeMatch[2],
+    };
+  }
+
+  // Single price: "BD 25"
+  const singleMatch = priceRange.match(/BD\s*(\d+(?:\.\d+)?)/i);
+  if (singleMatch) {
+    return {
+      priceType: 'paid',
+      price: singleMatch[1],
+      priceMin: '',
+      priceMax: '',
+    };
+  }
+
+  return { priceType: 'free', price: '', priceMin: '', priceMax: '' };
+}
+
+function transformEventToFormData(event: ApiEvent): Partial<EventFormData> {
+  const priceData = parsePrice(event.price);
+
+  return {
+    title: event.title,
+    description: event.description,
+    category: event.category,
+    tags: event.tags?.join(', ') || '',
+    startDate: event.start_date,
+    startTime: event.start_time,
+    endDate: event.end_date || '',
+    endTime: event.end_time || '',
+    isRecurring: event.is_recurring || false,
+    recurringPattern: event.recurrence_pattern || 'weekly',
+    recurringDays: event.recurrence_days || [],
+    ...priceData,
+    bookingUrl: event.booking_url || '',
+    bookingMethod: event.booking_url ? 'website' : 'none',
+    featuredImage: event.featured_image || '',
+    galleryImages: event.gallery || [],
+    ageRestriction: event.age_restriction || 'all',
+    dressCode: event.dress_code || '',
+    specialInstructions: event.special_instructions || '',
+  };
+}
 
 export default function EditEventPage() {
   const params = useParams();
   const eventId = params?.id as string | undefined;
 
-  // In production, this would be fetched from an API
-  const eventData = eventId ? mockEvents[eventId] : undefined;
-  const isLoading = false; // Would be true while fetching
+  const [eventData, setEventData] = useState<Partial<EventFormData> | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    async function fetchEvent() {
+      if (!eventId) {
+        setError('Event ID not provided');
+        setIsLoading(false);
+        return;
+      }
+
+      try {
+        const response = await fetch(`/api/dashboard/events/${eventId}`);
+        const data = await response.json();
+
+        if (!response.ok) {
+          throw new Error(data.error || 'Failed to fetch event');
+        }
+
+        const formData = transformEventToFormData(data.event);
+        setEventData(formData);
+      } catch (err) {
+        setError(err instanceof Error ? err.message : 'An error occurred');
+      } finally {
+        setIsLoading(false);
+      }
+    }
+
+    fetchEvent();
+  }, [eventId]);
 
   if (isLoading) {
     return (
@@ -80,12 +135,12 @@ export default function EditEventPage() {
     );
   }
 
-  if (!eventData) {
+  if (error || !eventData) {
     return (
       <div className="text-center py-12">
         <h2 className="text-xl font-semibold text-white mb-2">Event not found</h2>
         <p className="text-gray-400 mb-4">
-          The event you&apos;re looking for doesn&apos;t exist or has been deleted.
+          {error || "The event you're looking for doesn't exist or has been deleted."}
         </p>
         <Link
           href="/dashboard/events"
@@ -119,7 +174,7 @@ export default function EditEventPage() {
       </motion.div>
 
       {/* Form */}
-      <EventForm initialData={eventData} isEditing />
+      <EventForm initialData={eventData} isEditing eventId={eventId} />
     </div>
   );
 }

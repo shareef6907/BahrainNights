@@ -99,6 +99,27 @@ export default function NewAdPage() {
     { position: 5, label: 'Slot 5', price: 300 },
   ];
 
+  // Company VAT Information
+  const companyInfo = {
+    name: 'BAHRAIN NIGHTS WHIZZ PRO FOR PRODUCTION',
+    crNumber: '113587-1',
+    vatNumber: '220026984300002',
+    website: 'www.BahrainNights.com',
+    paymentTerms: '100% in advance',
+    bank: {
+      name: 'Bank of Bahrain and Kuwait (BBK Adliya)',
+      accountName: 'Bahrain Nights Whizz Pro For Production',
+      accountNo: '200006283757',
+      iban: 'BH90-BBKU-0020-0006-2837-57',
+      swiftCode: 'BBKUBHBM',
+    },
+  };
+
+  // Calculate VAT (10%)
+  const subtotal = formData.price;
+  const vatAmount = subtotal * 0.10;
+  const totalWithVat = subtotal + vatAmount;
+
   return (
     <AdminLayout>
       <div className="p-4 md:p-6 lg:p-8">
@@ -391,7 +412,7 @@ export default function NewAdPage() {
                 >
                   {slotPricing.map(slot => (
                     <option key={slot.position} value={slot.position}>
-                      {slot.label} - BD {slot.price}/mo
+                      {slot.label} - BD {slot.price}/mo + 10% VAT
                     </option>
                   ))}
                 </select>
@@ -507,12 +528,22 @@ export default function NewAdPage() {
               />
             </div>
 
-            {/* Pricing Summary */}
+            {/* Pricing Summary with VAT */}
             <div className="mt-6 p-4 bg-cyan-500/10 border border-cyan-500/30 rounded-lg">
-              <div className="flex justify-between items-center">
-                <div>
-                  <p className="text-gray-400 text-sm">Total Amount</p>
-                  <p className="text-2xl font-bold text-white">BD {formData.price}</p>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div className="space-y-3">
+                  <div className="flex justify-between">
+                    <span className="text-gray-400">Subtotal</span>
+                    <span className="text-white">BD {subtotal.toFixed(2)}</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span className="text-gray-400">VAT (10%)</span>
+                    <span className="text-white">BD {vatAmount.toFixed(2)}</span>
+                  </div>
+                  <div className="border-t border-gray-600 pt-3 flex justify-between">
+                    <span className="text-white font-semibold">Total Amount</span>
+                    <span className="text-2xl font-bold text-cyan-400">BD {totalWithVat.toFixed(2)}</span>
+                  </div>
                 </div>
                 <div className="text-right">
                   <p className="text-gray-400 text-sm">Duration</p>
@@ -520,6 +551,67 @@ export default function NewAdPage() {
                     {formData.startDate && formData.endDate
                       ? `${Math.ceil((new Date(formData.endDate).getTime() - new Date(formData.startDate).getTime()) / (1000 * 60 * 60 * 24))} days`
                       : 'Select dates'}
+                  </p>
+                </div>
+              </div>
+            </div>
+
+            {/* Company VAT Information with Logo Header */}
+            <div className="mt-6 bg-gray-900/50 border border-gray-700 rounded-lg overflow-hidden">
+              {/* Logo Header */}
+              <div className="bg-gradient-to-r from-cyan-500/10 to-purple-500/10 p-4 border-b border-gray-700 flex justify-center">
+                <img
+                  src="/logo.png"
+                  alt="Bahrain Nights"
+                  className="h-12 object-contain"
+                />
+              </div>
+
+              {/* Invoice Info */}
+              <div className="p-4">
+                <p className="text-gray-400 text-xs mb-3 uppercase tracking-wider text-center">Invoice will be issued by:</p>
+                <div className="text-center space-y-1">
+                  <p className="text-white font-semibold">{companyInfo.name}</p>
+                </div>
+              </div>
+
+              {/* Footer with Company Details */}
+              <div className="bg-gray-800/50 px-4 py-3 border-t border-gray-700">
+                <div className="flex flex-wrap justify-center gap-4 text-sm">
+                  <span className="text-gray-400">CR: <span className="text-white">{companyInfo.crNumber}</span></span>
+                  <span className="text-gray-400">VAT No: <span className="text-white">{companyInfo.vatNumber}</span></span>
+                  <span className="text-cyan-400">{companyInfo.website}</span>
+                </div>
+                <p className="text-center text-amber-400 text-sm mt-2 font-medium">
+                  Payment Terms: {companyInfo.paymentTerms}
+                </p>
+              </div>
+
+              {/* Bank Details - Highlighted in Yellow */}
+              <div className="bg-yellow-400 px-4 py-4 border-t-2 border-yellow-500">
+                <p className="text-yellow-900 text-xs mb-3 uppercase tracking-wider text-center font-bold">
+                  Bank Account Details
+                </p>
+                <div className="space-y-2 text-sm">
+                  <p className="text-yellow-900">
+                    <span className="text-yellow-800 font-medium">Bank Name: </span>
+                    <span className="font-semibold">{companyInfo.bank.name}</span>
+                  </p>
+                  <p className="text-yellow-900">
+                    <span className="text-yellow-800 font-medium">Account Name: </span>
+                    <span className="font-semibold">{companyInfo.bank.accountName}</span>
+                  </p>
+                  <p className="text-yellow-900">
+                    <span className="text-yellow-800 font-medium">Account No: </span>
+                    <span className="font-semibold">{companyInfo.bank.accountNo}</span>
+                  </p>
+                  <p className="text-yellow-900">
+                    <span className="text-yellow-800 font-medium">IBAN: </span>
+                    <span className="font-semibold">{companyInfo.bank.iban}</span>
+                  </p>
+                  <p className="text-yellow-900">
+                    <span className="text-yellow-800 font-medium">Swift Code: </span>
+                    <span className="font-semibold">{companyInfo.bank.swiftCode}</span>
                   </p>
                 </div>
               </div>
@@ -616,8 +708,8 @@ export default function NewAdPage() {
                     </p>
                   </div>
                   <div className="bg-gray-700/50 p-4 rounded-lg">
-                    <p className="text-gray-400 text-sm">Price</p>
-                    <p className="text-white font-medium">BD {formData.price}</p>
+                    <p className="text-gray-400 text-sm">Price (incl. 10% VAT)</p>
+                    <p className="text-white font-medium">BD {totalWithVat.toFixed(2)}</p>
                   </div>
                 </div>
               </div>

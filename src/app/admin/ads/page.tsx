@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import Link from 'next/link';
 import { motion } from 'framer-motion';
 import {
@@ -16,114 +16,154 @@ import {
   DollarSign,
   MousePointer,
   TrendingUp,
-  ChevronDown,
+  Loader2,
+  AlertCircle,
+  CheckCircle,
+  RefreshCw,
 } from 'lucide-react';
 
-// Mock ads data
-const mockAds = [
-  {
-    id: 'ad1',
-    advertiserName: 'The Ritz-Carlton',
-    companyName: 'Ritz-Carlton Bahrain',
-    title: 'NYE Gala 2025',
-    image: 'https://images.unsplash.com/photo-1514525253161-7a46d19cd819?w=800&h=300&fit=crop',
-    targetUrl: 'https://ritzcarlton.com/nye',
-    slotPosition: 1,
-    startDate: '2024-12-15',
-    endDate: '2025-01-01',
-    status: 'active',
-    impressions: 45000,
-    clicks: 1250,
-    price: 500,
-    paymentStatus: 'paid',
-  },
-  {
-    id: 'ad2',
-    advertiserName: 'Gulf Hotel',
-    companyName: 'Gulf Hotel Convention & Spa',
-    title: 'Friday Brunch Special',
-    image: 'https://images.unsplash.com/photo-1504674900247-0877df9cc836?w=800&h=300&fit=crop',
-    targetUrl: 'https://gulfhotel.com/brunch',
-    slotPosition: 2,
-    startDate: '2025-01-01',
-    endDate: '2025-03-31',
-    status: 'active',
-    impressions: 32000,
-    clicks: 890,
-    price: 400,
-    paymentStatus: 'paid',
-  },
-  {
-    id: 'ad3',
-    advertiserName: 'Amber Lounge',
-    companyName: 'Amber Entertainment',
-    title: 'Weekend Party Nights',
-    image: 'https://images.unsplash.com/photo-1519671482749-fd09be7ccebf?w=800&h=300&fit=crop',
-    targetUrl: 'https://amberlounge.bh/weekends',
-    slotPosition: 3,
-    startDate: '2025-01-10',
-    endDate: '2025-02-28',
-    status: 'active',
-    impressions: 18000,
-    clicks: 520,
-    price: 350,
-    paymentStatus: 'pending',
-  },
-  {
-    id: 'ad4',
-    advertiserName: 'Coral Bay',
-    companyName: 'Coral Bay Beach Resort',
-    title: 'Summer Beach Festival',
-    image: 'https://images.unsplash.com/photo-1507525428034-b723cf961d3e?w=800&h=300&fit=crop',
-    targetUrl: 'https://coralbay.bh/festival',
-    slotPosition: null,
-    startDate: '2025-06-01',
-    endDate: '2025-08-31',
-    status: 'scheduled',
-    impressions: 0,
-    clicks: 0,
-    price: 450,
-    paymentStatus: 'pending',
-  },
-  {
-    id: 'ad5',
-    advertiserName: 'Four Seasons',
-    companyName: 'Four Seasons Hotel Bahrain',
-    title: 'Spa & Wellness Retreat',
-    image: 'https://images.unsplash.com/photo-1544161515-4ab6ce6db874?w=800&h=300&fit=crop',
-    targetUrl: 'https://fourseasons.com/bahrain/spa',
-    slotPosition: null,
-    startDate: '2024-11-01',
-    endDate: '2024-12-31',
-    status: 'expired',
-    impressions: 62000,
-    clicks: 1800,
-    price: 500,
-    paymentStatus: 'paid',
-  },
-];
+interface Ad {
+  id: string;
+  advertiser_name: string;
+  company_name: string | null;
+  contact_email: string;
+  contact_phone: string | null;
+  title: string | null;
+  subtitle: string | null;
+  cta_text: string | null;
+  image_url: string;
+  target_url: string;
+  slot_position: number | null;
+  start_date: string;
+  end_date: string;
+  price_bd: number;
+  payment_status: 'pending' | 'paid' | 'overdue';
+  payment_date: string | null;
+  status: 'pending' | 'active' | 'paused' | 'expired';
+  impressions: number;
+  clicks: number;
+  invoice_number: string | null;
+  notes: string | null;
+  created_at: string;
+  updated_at: string;
+}
 
-type AdStatus = 'all' | 'active' | 'scheduled' | 'expired';
+interface Stats {
+  totalAds: number;
+  activeAds: number;
+  pendingAds: number;
+  totalRevenue: number;
+  paidRevenue: number;
+  pendingRevenue: number;
+  totalImpressions: number;
+  totalClicks: number;
+}
+
+type AdStatus = 'all' | 'active' | 'pending' | 'paused' | 'expired';
 
 export default function AdminAdsPage() {
+  const [ads, setAds] = useState<Ad[]>([]);
+  const [stats, setStats] = useState<Stats | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
   const [activeTab, setActiveTab] = useState<AdStatus>('all');
   const [openActionMenu, setOpenActionMenu] = useState<string | null>(null);
+  const [actionLoading, setActionLoading] = useState<string | null>(null);
+  const [toast, setToast] = useState<{ message: string; type: 'success' | 'error' } | null>(null);
 
-  const filteredAds = mockAds.filter((ad) => {
+  const fetchAds = useCallback(async () => {
+    try {
+      setLoading(true);
+      setError(null);
+
+      const params = new URLSearchParams();
+      if (activeTab !== 'all') {
+        params.set('status', activeTab);
+      }
+
+      const response = await fetch(`/api/admin/ads?${params.toString()}`);
+      if (!response.ok) {
+        throw new Error('Failed to fetch ads');
+      }
+
+      const data = await response.json();
+      setAds(data.ads);
+      setStats(data.stats);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'An error occurred');
+    } finally {
+      setLoading(false);
+    }
+  }, [activeTab]);
+
+  useEffect(() => {
+    fetchAds();
+  }, [fetchAds]);
+
+  const showToast = (message: string, type: 'success' | 'error') => {
+    setToast({ message, type });
+    setTimeout(() => setToast(null), 3000);
+  };
+
+  const handleAction = async (adId: string, action: 'pause' | 'activate' | 'delete' | 'markPaid') => {
+    try {
+      setActionLoading(adId);
+      setOpenActionMenu(null);
+
+      if (action === 'delete') {
+        const response = await fetch(`/api/admin/ads/${adId}`, {
+          method: 'DELETE',
+        });
+
+        if (!response.ok) {
+          throw new Error('Failed to delete ad');
+        }
+
+        showToast('Ad deleted successfully', 'success');
+      } else {
+        const response = await fetch(`/api/admin/ads/${adId}`, {
+          method: 'PATCH',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ action }),
+        });
+
+        if (!response.ok) {
+          throw new Error(`Failed to ${action} ad`);
+        }
+
+        const actionMessages: Record<string, string> = {
+          pause: 'Ad paused successfully',
+          activate: 'Ad activated successfully',
+          markPaid: 'Ad marked as paid',
+        };
+
+        showToast(actionMessages[action], 'success');
+      }
+
+      fetchAds();
+    } catch (err) {
+      showToast(err instanceof Error ? err.message : 'An error occurred', 'error');
+    } finally {
+      setActionLoading(null);
+    }
+  };
+
+  const filteredAds = ads.filter((ad) => {
     if (activeTab === 'all') return true;
     return ad.status === activeTab;
   });
 
   const statusCounts = {
-    all: mockAds.length,
-    active: mockAds.filter((a) => a.status === 'active').length,
-    scheduled: mockAds.filter((a) => a.status === 'scheduled').length,
-    expired: mockAds.filter((a) => a.status === 'expired').length,
+    all: ads.length,
+    active: ads.filter((a) => a.status === 'active').length,
+    pending: ads.filter((a) => a.status === 'pending').length,
+    paused: ads.filter((a) => a.status === 'paused').length,
+    expired: ads.filter((a) => a.status === 'expired').length,
   };
 
-  const totalRevenue = mockAds.reduce((sum, ad) => sum + ad.price, 0);
-  const totalImpressions = mockAds.reduce((sum, ad) => sum + ad.impressions, 0);
-  const totalClicks = mockAds.reduce((sum, ad) => sum + ad.clicks, 0);
+  const totalRevenue = stats?.totalRevenue || 0;
+  const totalImpressions = stats?.totalImpressions || 0;
+  const totalClicks = stats?.totalClicks || 0;
 
   const getStatusBadge = (status: string) => {
     switch (status) {
@@ -133,10 +173,10 @@ export default function AdminAdsPage() {
             Active
           </span>
         );
-      case 'scheduled':
+      case 'pending':
         return (
           <span className="px-2 py-1 text-xs font-medium bg-blue-500/20 text-blue-400 rounded-full">
-            Scheduled
+            Pending
           </span>
         );
       case 'expired':
@@ -181,8 +221,57 @@ export default function AdminAdsPage() {
     }
   };
 
+  if (loading && ads.length === 0) {
+    return (
+      <div className="flex items-center justify-center min-h-[400px]">
+        <div className="text-center">
+          <Loader2 className="w-8 h-8 text-cyan-400 animate-spin mx-auto mb-4" />
+          <p className="text-gray-400">Loading ads...</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (error && ads.length === 0) {
+    return (
+      <div className="flex items-center justify-center min-h-[400px]">
+        <div className="text-center">
+          <AlertCircle className="w-12 h-12 text-red-400 mx-auto mb-4" />
+          <h3 className="text-lg font-medium text-white mb-2">Error Loading Ads</h3>
+          <p className="text-gray-400 mb-4">{error}</p>
+          <button
+            onClick={() => fetchAds()}
+            className="inline-flex items-center gap-2 px-4 py-2 bg-cyan-500 hover:bg-cyan-600 text-white rounded-lg font-medium transition-colors"
+          >
+            <RefreshCw className="w-4 h-4" />
+            Try Again
+          </button>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="space-y-6">
+      {/* Toast Notification */}
+      {toast && (
+        <motion.div
+          initial={{ opacity: 0, y: -20 }}
+          animate={{ opacity: 1, y: 0 }}
+          exit={{ opacity: 0, y: -20 }}
+          className={`fixed top-4 right-4 z-50 flex items-center gap-2 px-4 py-3 rounded-lg shadow-lg ${
+            toast.type === 'success' ? 'bg-green-500' : 'bg-red-500'
+          } text-white`}
+        >
+          {toast.type === 'success' ? (
+            <CheckCircle className="w-5 h-5" />
+          ) : (
+            <AlertCircle className="w-5 h-5" />
+          )}
+          {toast.message}
+        </motion.div>
+      )}
+
       {/* Header */}
       <motion.div
         initial={{ opacity: 0, y: -10 }}
@@ -195,13 +284,23 @@ export default function AdminAdsPage() {
             Manage homepage slider advertisements
           </p>
         </div>
-        <Link
-          href="/admin/ads/new"
-          className="inline-flex items-center gap-2 px-4 py-2 bg-cyan-500 hover:bg-cyan-600 text-white rounded-lg font-medium transition-colors"
-        >
-          <Plus className="w-4 h-4" />
-          Create New Ad
-        </Link>
+        <div className="flex items-center gap-3">
+          <button
+            onClick={() => fetchAds()}
+            disabled={loading}
+            className="p-2 hover:bg-white/10 rounded-lg transition-colors disabled:opacity-50"
+            title="Refresh"
+          >
+            <RefreshCw className={`w-5 h-5 text-gray-400 ${loading ? 'animate-spin' : ''}`} />
+          </button>
+          <Link
+            href="/admin/ads/new"
+            className="inline-flex items-center gap-2 px-4 py-2 bg-cyan-500 hover:bg-cyan-600 text-white rounded-lg font-medium transition-colors"
+          >
+            <Plus className="w-4 h-4" />
+            Create New Ad
+          </Link>
+        </div>
       </motion.div>
 
       {/* Stats Cards */}
@@ -288,34 +387,34 @@ export default function AdminAdsPage() {
           Currently Active ({statusCounts.active} of 5 slots)
         </h3>
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-          {mockAds
+          {ads
             .filter((ad) => ad.status === 'active')
-            .sort((a, b) => (a.slotPosition || 99) - (b.slotPosition || 99))
+            .sort((a, b) => (a.slot_position || 99) - (b.slot_position || 99))
             .map((ad) => (
               <div
                 key={ad.id}
                 className="relative rounded-xl overflow-hidden group"
               >
                 <img
-                  src={ad.image}
-                  alt={ad.title}
+                  src={ad.image_url}
+                  alt={ad.title || ad.advertiser_name}
                   className="w-full h-32 object-cover"
                 />
                 <div className="absolute inset-0 bg-gradient-to-t from-black/80 to-transparent" />
                 <div className="absolute bottom-0 left-0 right-0 p-3">
                   <div className="flex items-center justify-between">
                     <div>
-                      <p className="text-white font-medium text-sm">{ad.title}</p>
-                      <p className="text-gray-300 text-xs">{ad.advertiserName}</p>
+                      <p className="text-white font-medium text-sm">{ad.title || ad.advertiser_name}</p>
+                      <p className="text-gray-300 text-xs">{ad.advertiser_name}</p>
                     </div>
                     <span className="px-2 py-1 bg-cyan-500/20 text-cyan-400 text-xs rounded-full">
-                      Slot {ad.slotPosition}
+                      Slot {ad.slot_position}
                     </span>
                   </div>
                 </div>
               </div>
             ))}
-          {Array.from({ length: 5 - statusCounts.active }).map((_, i) => (
+          {Array.from({ length: Math.max(0, 5 - statusCounts.active) }).map((_, i) => (
             <div
               key={`empty-${i}`}
               className="h-32 border-2 border-dashed border-white/10 rounded-xl flex items-center justify-center"
@@ -333,7 +432,7 @@ export default function AdminAdsPage() {
         transition={{ delay: 0.35 }}
         className="flex gap-2 border-b border-white/10 pb-px overflow-x-auto"
       >
-        {(['all', 'active', 'scheduled', 'expired'] as AdStatus[]).map((tab) => (
+        {(['all', 'active', 'pending', 'paused', 'expired'] as AdStatus[]).map((tab) => (
           <button
             key={tab}
             onClick={() => setActiveTab(tab)}
@@ -383,6 +482,7 @@ export default function AdminAdsPage() {
             <tbody>
               {filteredAds.map((ad) => {
                 const ctr = ad.impressions > 0 ? ((ad.clicks / ad.impressions) * 100).toFixed(2) : '0';
+                const isActionLoading = actionLoading === ad.id;
                 return (
                   <tr
                     key={ad.id}
@@ -390,24 +490,24 @@ export default function AdminAdsPage() {
                   >
                     <td className="p-4">
                       <img
-                        src={ad.image}
-                        alt={ad.title}
+                        src={ad.image_url}
+                        alt={ad.title || ad.advertiser_name}
                         className="w-24 h-14 rounded-lg object-cover"
                       />
                     </td>
                     <td className="p-4">
-                      <p className="font-medium text-white">{ad.advertiserName}</p>
-                      <p className="text-sm text-gray-400">{ad.title}</p>
+                      <p className="font-medium text-white">{ad.advertiser_name}</p>
+                      <p className="text-sm text-gray-400">{ad.title || '-'}</p>
                     </td>
                     <td className="p-4 text-gray-300">
-                      {ad.slotPosition ? `Slot ${ad.slotPosition}` : '-'}
+                      {ad.slot_position ? `Slot ${ad.slot_position}` : '-'}
                     </td>
                     <td className="p-4">
                       <p className="text-white text-sm">
-                        {new Date(ad.startDate).toLocaleDateString()}
+                        {new Date(ad.start_date).toLocaleDateString()}
                       </p>
                       <p className="text-gray-400 text-xs">
-                        to {new Date(ad.endDate).toLocaleDateString()}
+                        to {new Date(ad.end_date).toLocaleDateString()}
                       </p>
                     </td>
                     <td className="p-4">{getStatusBadge(ad.status)}</td>
@@ -417,18 +517,22 @@ export default function AdminAdsPage() {
                         {ad.clicks.toLocaleString()} clicks ({ctr}% CTR)
                       </p>
                     </td>
-                    <td className="p-4 text-white font-medium">BD {ad.price}</td>
-                    <td className="p-4">{getPaymentBadge(ad.paymentStatus)}</td>
+                    <td className="p-4 text-white font-medium">BD {ad.price_bd}</td>
+                    <td className="p-4">{getPaymentBadge(ad.payment_status)}</td>
                     <td className="p-4">
                       <div className="relative">
-                        <button
-                          onClick={() =>
-                            setOpenActionMenu(openActionMenu === ad.id ? null : ad.id)
-                          }
-                          className="p-2 hover:bg-white/10 rounded-lg transition-colors"
-                        >
-                          <MoreVertical className="w-4 h-4 text-gray-400" />
-                        </button>
+                        {isActionLoading ? (
+                          <Loader2 className="w-5 h-5 text-cyan-400 animate-spin" />
+                        ) : (
+                          <button
+                            onClick={() =>
+                              setOpenActionMenu(openActionMenu === ad.id ? null : ad.id)
+                            }
+                            className="p-2 hover:bg-white/10 rounded-lg transition-colors"
+                          >
+                            <MoreVertical className="w-4 h-4 text-gray-400" />
+                          </button>
+                        )}
 
                         {openActionMenu === ad.id && (
                           <>
@@ -437,10 +541,13 @@ export default function AdminAdsPage() {
                               onClick={() => setOpenActionMenu(null)}
                             />
                             <div className="absolute right-0 mt-1 w-48 bg-[#1A1A2E] border border-white/10 rounded-xl shadow-xl z-50 py-1">
-                              <button className="w-full flex items-center gap-2 px-4 py-2 text-sm text-gray-300 hover:text-white hover:bg-white/5">
+                              <Link
+                                href={`/admin/ads/${ad.id}`}
+                                className="w-full flex items-center gap-2 px-4 py-2 text-sm text-gray-300 hover:text-white hover:bg-white/5"
+                              >
                                 <Eye className="w-4 h-4" />
                                 View Details
-                              </button>
+                              </Link>
                               <Link
                                 href={`/admin/ads/${ad.id}/edit`}
                                 className="w-full flex items-center gap-2 px-4 py-2 text-sm text-gray-300 hover:text-white hover:bg-white/5"
@@ -449,22 +556,40 @@ export default function AdminAdsPage() {
                                 Edit
                               </Link>
                               {ad.status === 'active' ? (
-                                <button className="w-full flex items-center gap-2 px-4 py-2 text-sm text-orange-400 hover:bg-orange-500/10">
+                                <button
+                                  onClick={() => handleAction(ad.id, 'pause')}
+                                  className="w-full flex items-center gap-2 px-4 py-2 text-sm text-orange-400 hover:bg-orange-500/10"
+                                >
                                   <Pause className="w-4 h-4" />
                                   Pause
                                 </button>
-                              ) : ad.status === 'scheduled' ? (
-                                <button className="w-full flex items-center gap-2 px-4 py-2 text-sm text-green-400 hover:bg-green-500/10">
+                              ) : ad.status === 'pending' || ad.status === 'paused' ? (
+                                <button
+                                  onClick={() => handleAction(ad.id, 'activate')}
+                                  className="w-full flex items-center gap-2 px-4 py-2 text-sm text-green-400 hover:bg-green-500/10"
+                                >
                                   <Play className="w-4 h-4" />
                                   Activate Now
                                 </button>
                               ) : null}
+                              {ad.payment_status === 'pending' && (
+                                <button
+                                  onClick={() => handleAction(ad.id, 'markPaid')}
+                                  className="w-full flex items-center gap-2 px-4 py-2 text-sm text-green-400 hover:bg-green-500/10"
+                                >
+                                  <CheckCircle className="w-4 h-4" />
+                                  Mark as Paid
+                                </button>
+                              )}
                               <button className="w-full flex items-center gap-2 px-4 py-2 text-sm text-gray-300 hover:text-white hover:bg-white/5">
                                 <FileText className="w-4 h-4" />
                                 Generate Invoice
                               </button>
                               <div className="my-1 border-t border-white/10" />
-                              <button className="w-full flex items-center gap-2 px-4 py-2 text-sm text-red-400 hover:bg-red-500/10">
+                              <button
+                                onClick={() => handleAction(ad.id, 'delete')}
+                                className="w-full flex items-center gap-2 px-4 py-2 text-sm text-red-400 hover:bg-red-500/10"
+                              >
                                 <Trash2 className="w-4 h-4" />
                                 Delete
                               </button>
@@ -486,24 +611,24 @@ export default function AdminAdsPage() {
             <div key={ad.id} className="p-4">
               <div className="flex gap-4">
                 <img
-                  src={ad.image}
-                  alt={ad.title}
+                  src={ad.image_url}
+                  alt={ad.title || ad.advertiser_name}
                   className="w-20 h-14 rounded-lg object-cover flex-shrink-0"
                 />
                 <div className="flex-1 min-w-0">
                   <div className="flex items-start justify-between gap-2">
                     <div>
-                      <h3 className="font-medium text-white">{ad.title}</h3>
-                      <p className="text-sm text-gray-400">{ad.advertiserName}</p>
+                      <h3 className="font-medium text-white">{ad.title || ad.advertiser_name}</h3>
+                      <p className="text-sm text-gray-400">{ad.advertiser_name}</p>
                     </div>
                     {getStatusBadge(ad.status)}
                   </div>
                   <div className="mt-2 flex flex-wrap items-center gap-2 text-xs text-gray-500">
-                    <span>BD {ad.price}</span>
-                    <span>•</span>
+                    <span>BD {ad.price_bd}</span>
+                    <span>-</span>
                     <span>{ad.impressions.toLocaleString()} views</span>
-                    <span>•</span>
-                    {getPaymentBadge(ad.paymentStatus)}
+                    <span>-</span>
+                    {getPaymentBadge(ad.payment_status)}
                   </div>
                   <div className="mt-3 flex gap-2">
                     <Link
@@ -512,6 +637,23 @@ export default function AdminAdsPage() {
                     >
                       Edit
                     </Link>
+                    {ad.status === 'active' ? (
+                      <button
+                        onClick={() => handleAction(ad.id, 'pause')}
+                        disabled={actionLoading === ad.id}
+                        className="px-3 py-1.5 text-xs bg-orange-500/20 text-orange-400 rounded-lg disabled:opacity-50"
+                      >
+                        {actionLoading === ad.id ? 'Loading...' : 'Pause'}
+                      </button>
+                    ) : ad.status === 'pending' || ad.status === 'paused' ? (
+                      <button
+                        onClick={() => handleAction(ad.id, 'activate')}
+                        disabled={actionLoading === ad.id}
+                        className="px-3 py-1.5 text-xs bg-green-500/20 text-green-400 rounded-lg disabled:opacity-50"
+                      >
+                        {actionLoading === ad.id ? 'Loading...' : 'Activate'}
+                      </button>
+                    ) : null}
                     <button className="px-3 py-1.5 text-xs bg-white/5 text-gray-300 rounded-lg">
                       Invoice
                     </button>

@@ -77,6 +77,7 @@ export interface Database {
           is_verified: boolean;
           is_featured: boolean;
           view_count: number;
+          like_count: number;
           created_at: string;
           updated_at: string;
           approved_at: string | null;
@@ -116,6 +117,7 @@ export interface Database {
           is_verified?: boolean;
           is_featured?: boolean;
           view_count?: number;
+          like_count?: number;
           created_at?: string;
           updated_at?: string;
           approved_at?: string | null;
@@ -155,6 +157,7 @@ export interface Database {
           is_verified?: boolean;
           is_featured?: boolean;
           view_count?: number;
+          like_count?: number;
           created_at?: string;
           updated_at?: string;
           approved_at?: string | null;
@@ -748,6 +751,78 @@ export interface Database {
           updated_at?: string;
         };
       };
+      public_users: {
+        Row: {
+          id: string;
+          google_id: string;
+          email: string;
+          name: string | null;
+          avatar_url: string | null;
+          created_at: string;
+          updated_at: string;
+          last_login: string;
+        };
+        Insert: {
+          id?: string;
+          google_id: string;
+          email: string;
+          name?: string | null;
+          avatar_url?: string | null;
+          created_at?: string;
+          updated_at?: string;
+          last_login?: string;
+        };
+        Update: {
+          id?: string;
+          google_id?: string;
+          email?: string;
+          name?: string | null;
+          avatar_url?: string | null;
+          created_at?: string;
+          updated_at?: string;
+          last_login?: string;
+        };
+      };
+      venue_likes: {
+        Row: {
+          id: string;
+          user_id: string;
+          venue_id: string;
+          created_at: string;
+        };
+        Insert: {
+          id?: string;
+          user_id: string;
+          venue_id: string;
+          created_at?: string;
+        };
+        Update: {
+          id?: string;
+          user_id?: string;
+          venue_id?: string;
+          created_at?: string;
+        };
+      };
+      like_rate_limits: {
+        Row: {
+          id: string;
+          user_id: string;
+          action_count: number;
+          window_start: string;
+        };
+        Insert: {
+          id?: string;
+          user_id: string;
+          action_count?: number;
+          window_start?: string;
+        };
+        Update: {
+          id?: string;
+          user_id?: string;
+          action_count?: number;
+          window_start?: string;
+        };
+      };
     };
     Views: {
       [_ in never]: never;
@@ -804,6 +879,15 @@ export type ActivityLogInsert = Database['public']['Tables']['activity_log']['In
 export type SponsorInquiry = Database['public']['Tables']['sponsor_inquiries']['Row'];
 export type SponsorInquiryInsert = Database['public']['Tables']['sponsor_inquiries']['Insert'];
 export type SponsorInquiryUpdate = Database['public']['Tables']['sponsor_inquiries']['Update'];
+
+export type PublicUser = Database['public']['Tables']['public_users']['Row'];
+export type PublicUserInsert = Database['public']['Tables']['public_users']['Insert'];
+export type PublicUserUpdate = Database['public']['Tables']['public_users']['Update'];
+
+export type VenueLike = Database['public']['Tables']['venue_likes']['Row'];
+export type VenueLikeInsert = Database['public']['Tables']['venue_likes']['Insert'];
+
+export type LikeRateLimit = Database['public']['Tables']['like_rate_limits']['Row'];
 
 // Extended types with relations
 export type VenueWithEvents = Venue & {

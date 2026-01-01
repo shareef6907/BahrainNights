@@ -1,104 +1,98 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import Link from 'next/link';
 import { motion } from 'framer-motion';
-import { Plus, Search, Filter, ChevronLeft, ChevronRight } from 'lucide-react';
+import { Plus, Search, Filter, ChevronLeft, ChevronRight, Loader2 } from 'lucide-react';
 import EventsTable, { Event } from '@/components/dashboard/EventsTable';
 
-// Mock data for events
-const allMockEvents: Event[] = [
-  {
-    id: '1',
-    title: 'Live Jazz Night',
-    date: 'Dec 28, 2025',
-    time: '8:00 PM',
-    category: 'Live Music',
-    status: 'published',
-    views: 120,
-    image: 'https://images.unsplash.com/photo-1511735111819-9a3f7709049c?w=100&h=100&fit=crop',
-  },
-  {
-    id: '2',
-    title: 'NYE Countdown Party',
-    date: 'Dec 31, 2025',
-    time: '9:00 PM',
-    category: 'Nightlife',
-    status: 'published',
-    views: 350,
-    image: 'https://images.unsplash.com/photo-1514525253161-7a46d19cd819?w=100&h=100&fit=crop',
-  },
-  {
-    id: '3',
-    title: 'Wine Tasting Evening',
-    date: 'Jan 3, 2026',
-    time: '7:00 PM',
-    category: 'Dining',
-    status: 'draft',
-    views: 0,
-    image: 'https://images.unsplash.com/photo-1510812431401-41d2bd2722f3?w=100&h=100&fit=crop',
-  },
-  {
-    id: '4',
-    title: 'Ladies Night Special',
-    date: 'Jan 5, 2026',
-    time: '8:00 PM',
-    category: 'Nightlife',
-    status: 'published',
-    views: 89,
-    image: 'https://images.unsplash.com/photo-1566417713940-fe7c737a9ef2?w=100&h=100&fit=crop',
-  },
-  {
-    id: '5',
-    title: 'Sunday Brunch Launch',
-    date: 'Jan 7, 2026',
-    time: '12:00 PM',
-    category: 'Dining',
-    status: 'published',
-    views: 210,
-    image: 'https://images.unsplash.com/photo-1504674900247-0877df9cc836?w=100&h=100&fit=crop',
-  },
-  {
-    id: '6',
-    title: 'Acoustic Night',
-    date: 'Nov 15, 2025',
-    time: '7:30 PM',
-    category: 'Live Music',
-    status: 'past',
-    views: 156,
-    image: 'https://images.unsplash.com/photo-1493225457124-a3eb161ffa5f?w=100&h=100&fit=crop',
-  },
-  {
-    id: '7',
-    title: 'Halloween Party',
-    date: 'Oct 31, 2025',
-    time: '9:00 PM',
-    category: 'Nightlife',
-    status: 'past',
-    views: 423,
-    image: 'https://images.unsplash.com/photo-1509557965875-b88c97052f0e?w=100&h=100&fit=crop',
-  },
-];
-
-type StatusFilter = 'all' | 'published' | 'draft' | 'past';
+type StatusFilter = 'all' | 'published' | 'draft' | 'past' | 'cancelled';
 type SortOption = 'newest' | 'oldest' | 'views';
 
+interface ApiEvent {
+  id: string;
+  title: string;
+  start_date: string;
+  start_time: string;
+  category: string;
+  status: string;
+  view_count: number;
+  featured_image: string;
+}
+
+function formatDate(dateStr: string): string {
+  const date = new Date(dateStr);
+  return date.toLocaleDateString('en-US', {
+    month: 'short',
+    day: 'numeric',
+    year: 'numeric',
+  });
+}
+
+function formatTime(timeStr: string): string {
+  if (!timeStr) return '';
+  const [hours, minutes] = timeStr.split(':');
+  const hour = parseInt(hours, 10);
+  const ampm = hour >= 12 ? 'PM' : 'AM';
+  const hour12 = hour % 12 || 12;
+  return `${hour12}:${minutes} ${ampm}`;
+}
+
 export default function EventsPage() {
+  const [events, setEvents] = useState<Event[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
   const [searchQuery, setSearchQuery] = useState('');
   const [statusFilter, setStatusFilter] = useState<StatusFilter>('all');
   const [sortBy, setSortBy] = useState<SortOption>('newest');
   const [currentPage, setCurrentPage] = useState(1);
   const eventsPerPage = 10;
 
-  // Filter and sort events
-  const filteredEvents = allMockEvents
-    .filter((event) => {
-      // Search filter
-      if (searchQuery && !event.title.toLowerCase().includes(searchQuery.toLowerCase())) {
-        return false;
+  const fetchEvents = useCallback(async () => {
+    setIsLoading(true);
+    setError(null);
+
+    try {
+      const params = new URLSearchParams();
+      if (statusFilter !== 'all') {
+        params.set('status', statusFilter);
       }
-      // Status filter
-      if (statusFilter !== 'all' && event.status !== statusFilter) {
+
+      const response = await fetch(`/api/dashboard/events?${params.toString()}`);
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.error || 'Failed to fetch events');
+      }
+
+      // Transform API events to table format
+      const transformedEvents: Event[] = data.events.map((event: ApiEvent) => ({
+        id: event.id,
+        title: event.title,
+        date: formatDate(event.start_date),
+        time: formatTime(event.start_time),
+        category: event.category,
+        status: event.status as 'published' | 'draft' | 'past' | 'cancelled',
+        views: event.view_count || 0,
+        image: event.featured_image || 'https://images.unsplash.com/photo-1540575467063-178a50c2df87?w=100&h=100&fit=crop',
+      }));
+
+      setEvents(transformedEvents);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'An error occurred');
+    } finally {
+      setIsLoading(false);
+    }
+  }, [statusFilter]);
+
+  useEffect(() => {
+    fetchEvents();
+  }, [fetchEvents]);
+
+  // Filter and sort events
+  const filteredEvents = events
+    .filter((event) => {
+      if (searchQuery && !event.title.toLowerCase().includes(searchQuery.toLowerCase())) {
         return false;
       }
       return true;
@@ -127,22 +121,71 @@ export default function EventsPage() {
     window.location.href = `/dashboard/events/${id}/edit`;
   };
 
-  const handleDuplicate = (id: string) => {
-    console.log('Duplicate event:', id);
+  const handleDuplicate = async (id: string) => {
     // TODO: Implement duplicate logic
+    console.log('Duplicate event:', id);
   };
 
-  const handleTogglePublish = (id: string) => {
-    console.log('Toggle publish:', id);
-    // TODO: Implement toggle publish logic
-  };
+  const handleTogglePublish = async (id: string) => {
+    const event = events.find(e => e.id === id);
+    if (!event) return;
 
-  const handleDelete = (id: string) => {
-    if (confirm('Are you sure you want to delete this event?')) {
-      console.log('Delete event:', id);
-      // TODO: Implement delete logic
+    const action = event.status === 'published' ? 'unpublish' : 'publish';
+
+    try {
+      const response = await fetch(`/api/dashboard/events/${id}`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ action }),
+      });
+
+      if (!response.ok) {
+        const data = await response.json();
+        throw new Error(data.error || 'Failed to update event');
+      }
+
+      // Refresh events
+      fetchEvents();
+    } catch (err) {
+      alert(err instanceof Error ? err.message : 'Failed to update event');
     }
   };
+
+  const handleDelete = async (id: string) => {
+    if (!confirm('Are you sure you want to delete this event?')) {
+      return;
+    }
+
+    try {
+      const response = await fetch(`/api/dashboard/events/${id}`, {
+        method: 'DELETE',
+      });
+
+      if (!response.ok) {
+        const data = await response.json();
+        throw new Error(data.error || 'Failed to delete event');
+      }
+
+      // Refresh events
+      fetchEvents();
+    } catch (err) {
+      alert(err instanceof Error ? err.message : 'Failed to delete event');
+    }
+  };
+
+  if (error) {
+    return (
+      <div className="flex flex-col items-center justify-center min-h-[400px] text-center">
+        <p className="text-red-400 mb-4">{error}</p>
+        <button
+          onClick={fetchEvents}
+          className="px-4 py-2 bg-yellow-400 text-black rounded-lg hover:bg-yellow-500 transition-colors"
+        >
+          Try Again
+        </button>
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-6">
@@ -199,7 +242,7 @@ export default function EventsPage() {
               <option value="all">All Status</option>
               <option value="published">Published</option>
               <option value="draft">Draft</option>
-              <option value="past">Past</option>
+              <option value="cancelled">Cancelled</option>
             </select>
           </div>
 
@@ -222,13 +265,30 @@ export default function EventsPage() {
         animate={{ opacity: 1, y: 0 }}
         transition={{ delay: 0.1 }}
       >
-        <EventsTable
-          events={paginatedEvents}
-          onEdit={handleEdit}
-          onDuplicate={handleDuplicate}
-          onTogglePublish={handleTogglePublish}
-          onDelete={handleDelete}
-        />
+        {isLoading ? (
+          <div className="flex items-center justify-center py-20">
+            <Loader2 className="w-8 h-8 animate-spin text-yellow-400" />
+          </div>
+        ) : filteredEvents.length === 0 ? (
+          <div className="flex flex-col items-center justify-center py-20 text-center">
+            <p className="text-gray-400 mb-4">No events found</p>
+            <Link
+              href="/dashboard/events/new"
+              className="inline-flex items-center gap-2 px-5 py-2.5 bg-gradient-to-r from-yellow-400 to-orange-500 text-black font-semibold rounded-xl hover:shadow-lg hover:shadow-yellow-500/25 transition-all"
+            >
+              <Plus className="w-5 h-5" />
+              Create Your First Event
+            </Link>
+          </div>
+        ) : (
+          <EventsTable
+            events={paginatedEvents}
+            onEdit={handleEdit}
+            onDuplicate={handleDuplicate}
+            onTogglePublish={handleTogglePublish}
+            onDelete={handleDelete}
+          />
+        )}
       </motion.div>
 
       {/* Pagination */}

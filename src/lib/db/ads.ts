@@ -43,7 +43,7 @@ export async function getAds(filters: AdFilters = {}): Promise<HomepageAd[]> {
 
   if (error) {
     console.error('Error fetching ads:', error);
-    throw new Error('Failed to fetch ads');
+    throw new Error(`Failed to fetch ads: ${error.message}`);
   }
 
   return (data || []) as HomepageAd[];
