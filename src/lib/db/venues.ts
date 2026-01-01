@@ -53,7 +53,7 @@ export async function getVenues(filters: VenueFilters = {}): Promise<Venue[]> {
 
   if (error) {
     console.error('Error fetching venues:', error);
-    throw new Error('Failed to fetch venues');
+    throw new Error(`Failed to fetch venues: ${error.message || error.code || JSON.stringify(error)}`);
   }
 
   return (data || []) as Venue[];
@@ -295,7 +295,7 @@ export async function countVenuesByStatus(): Promise<Record<string, number>> {
 
   if (error) {
     console.error('Error counting venues:', error);
-    return {};
+    throw new Error(`Failed to count venues: ${error.message || error.code || JSON.stringify(error)}`);
   }
 
   const venues = (data || []) as { status: string }[];
