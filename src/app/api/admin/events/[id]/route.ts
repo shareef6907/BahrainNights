@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { supabaseAdmin } from '@/lib/supabase';
+import { sendEventApprovalEmail, sendEventRejectionEmail } from '@/lib/email';
 
 export const dynamic = 'force-dynamic';
 
@@ -47,7 +48,14 @@ export async function PATCH(
   try {
     const { id } = await params;
     const body = await request.json();
-    const { action, ...updateData } = body;
+    const { action, rejectionReason, ...updateData } = body;
+
+    // First, get the current event data for email notifications
+    const { data: existingEvent } = await supabaseAdmin
+      .from('events')
+      .select('*')
+      .eq('id', id)
+      .single();
 
     let updates: Record<string, unknown> = {};
 
@@ -92,13 +100,37 @@ export async function PATCH(
       );
     }
 
+    // Send email notifications for approval/rejection
+    const contactEmail = existingEvent?.contact_email;
+    const eventTitle = existingEvent?.title || event?.title || 'Your Event';
+    const eventSlug = event?.slug || '';
+    const venueName = existingEvent?.venue_name || event?.venue_name || 'Your Venue';
+
+    if (contactEmail) {
+      try {
+        if (action === 'approve') {
+          await sendEventApprovalEmail(contactEmail, eventTitle, eventSlug, venueName);
+          console.log(`Approval email sent to ${contactEmail} for event: ${eventTitle}`);
+        } else if (action === 'reject') {
+          const reason = rejectionReason || 'Your event did not meet our publishing guidelines. Please review and resubmit.';
+          await sendEventRejectionEmail(contactEmail, eventTitle, venueName, reason);
+          console.log(`Rejection email sent to ${contactEmail} for event: ${eventTitle}`);
+        }
+      } catch (emailError) {
+        // Log email error but don't fail the request
+        console.error('Failed to send email notification:', emailError);
+      }
+    } else {
+      console.log(`No contact email found for event: ${eventTitle}`);
+    }
+
     return NextResponse.json({
       success: true,
       event,
       message: action === 'approve'
-        ? 'Event approved and published!'
+        ? 'Event approved and published! Email notification sent.'
         : action === 'reject'
-        ? 'Event rejected'
+        ? 'Event rejected. Email notification sent.'
         : 'Event updated successfully',
     });
   } catch (error) {

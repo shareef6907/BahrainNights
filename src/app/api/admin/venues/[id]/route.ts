@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { verifyToken } from '@/lib/auth';
 import { getVenueById, approveVenue, rejectVenue, deleteVenue, updateVenue } from '@/lib/db/venues';
+import { sendVenueApprovalEmail, sendVenueRejectionEmail } from '@/lib/email';
 import { cookies } from 'next/headers';
 
 // Get single venue
@@ -65,9 +66,22 @@ export async function PATCH(
     const { action, reason, ...updates } = body;
 
     let venue;
+    let emailSent = false;
+    let emailError: string | undefined;
 
     if (action === 'approve') {
       venue = await approveVenue(id);
+
+      // Send approval email notification
+      if (venue && venue.email) {
+        const emailResult = await sendVenueApprovalEmail(
+          venue.email,
+          venue.name,
+          venue.slug
+        );
+        emailSent = emailResult.success;
+        emailError = emailResult.error;
+      }
     } else if (action === 'reject') {
       if (!reason) {
         return NextResponse.json(
@@ -76,6 +90,17 @@ export async function PATCH(
         );
       }
       venue = await rejectVenue(id, reason);
+
+      // Send rejection email notification
+      if (venue && venue.email) {
+        const emailResult = await sendVenueRejectionEmail(
+          venue.email,
+          venue.name,
+          reason
+        );
+        emailSent = emailResult.success;
+        emailError = emailResult.error;
+      }
     } else if (Object.keys(updates).length > 0) {
       venue = await updateVenue(id, updates);
     } else {
@@ -85,7 +110,12 @@ export async function PATCH(
       );
     }
 
-    return NextResponse.json({ venue, message: `Venue ${action || 'updated'} successfully` });
+    return NextResponse.json({
+      venue,
+      message: `Venue ${action || 'updated'} successfully`,
+      emailSent,
+      emailError,
+    });
   } catch (error) {
     console.error('Error updating venue:', error);
     return NextResponse.json(

@@ -1,9 +1,11 @@
 'use client';
 
-import { motion } from 'framer-motion';
+import { useState } from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
 import Image from 'next/image';
 import Link from 'next/link';
-import { MapPin, Clock, Share2, Heart, ChevronLeft, Star } from 'lucide-react';
+import { MapPin, Clock, Share2, Heart, ChevronLeft, Star, X } from 'lucide-react';
+import { useLikeVenue } from '@/hooks/useLikeVenue';
 
 interface PlaceHeroProps {
   name: string;
@@ -17,8 +19,7 @@ interface PlaceHeroProps {
   isOpen: boolean;
   todayHours: string;
   onShareClick: () => void;
-  onSaveClick: () => void;
-  isSaved: boolean;
+  venueId?: string | null; // Database UUID for like functionality
 }
 
 export default function PlaceHero({
@@ -33,9 +34,19 @@ export default function PlaceHero({
   isOpen,
   todayHours,
   onShareClick,
-  onSaveClick,
-  isSaved,
+  venueId = null,
 }: PlaceHeroProps) {
+  const [showLoginPrompt, setShowLoginPrompt] = useState(false);
+  const { isLiked, likeCount, isLoading, toggleLike, requiresAuth } = useLikeVenue(venueId);
+
+  const handleLikeClick = async () => {
+    await toggleLike();
+    // Show login prompt if auth is required
+    if (requiresAuth) {
+      setShowLoginPrompt(true);
+    }
+  };
+
   const renderPriceRange = () => {
     return (
       <span className="font-bold text-sm">
@@ -80,18 +91,22 @@ export default function PlaceHero({
               {renderPriceRange()}
             </div>
 
-            {/* Save Button */}
+            {/* Like Button */}
             <motion.button
-              onClick={onSaveClick}
-              className={`p-2.5 rounded-xl transition-all ${
-                isSaved
+              onClick={handleLikeClick}
+              disabled={isLoading}
+              className={`flex items-center gap-1.5 px-3 py-2 rounded-xl transition-all ${
+                isLiked
                   ? 'bg-red-500/20 backdrop-blur-md text-red-400'
                   : 'bg-black/50 backdrop-blur-md text-white hover:bg-black/70'
-              }`}
-              whileTap={{ scale: 0.95 }}
-              aria-label={isSaved ? 'Remove from saved' : 'Save place'}
+              } ${isLoading ? 'opacity-50 cursor-not-allowed' : ''}`}
+              whileTap={{ scale: isLoading ? 1 : 0.95 }}
+              aria-label={isLiked ? 'Unlike venue' : 'Like venue'}
             >
-              <Heart className={`w-5 h-5 ${isSaved ? 'fill-current' : ''}`} />
+              <Heart className={`w-5 h-5 ${isLiked ? 'fill-current' : ''}`} />
+              {likeCount > 0 && (
+                <span className="text-sm font-medium">{likeCount}</span>
+              )}
             </motion.button>
 
             {/* Share Button */}
@@ -191,6 +206,57 @@ export default function PlaceHero({
           </div>
         </div>
       </div>
+
+      {/* Login Prompt Modal */}
+      <AnimatePresence>
+        {showLoginPrompt && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm"
+            onClick={() => setShowLoginPrompt(false)}
+          >
+            <motion.div
+              initial={{ scale: 0.9, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              exit={{ scale: 0.9, opacity: 0 }}
+              onClick={(e) => e.stopPropagation()}
+              className="bg-slate-900 border border-white/10 rounded-2xl p-6 max-w-sm w-full shadow-2xl"
+            >
+              <div className="flex justify-between items-start mb-4">
+                <div className="p-3 bg-red-500/10 rounded-full">
+                  <Heart className="w-6 h-6 text-red-400" />
+                </div>
+                <button
+                  onClick={() => setShowLoginPrompt(false)}
+                  className="p-1 hover:bg-white/10 rounded-full transition-colors"
+                >
+                  <X className="w-5 h-5 text-gray-400" />
+                </button>
+              </div>
+              <h3 className="text-xl font-bold text-white mb-2">Sign in to like</h3>
+              <p className="text-gray-400 text-sm mb-6">
+                Create an account or sign in to save your favorite venues and get personalized recommendations.
+              </p>
+              <div className="flex gap-3">
+                <Link
+                  href="/login"
+                  className="flex-1 px-4 py-2.5 bg-gradient-to-r from-yellow-400 to-orange-500 text-black font-semibold rounded-xl text-center hover:shadow-lg hover:shadow-yellow-500/25 transition-all"
+                >
+                  Sign In
+                </Link>
+                <button
+                  onClick={() => setShowLoginPrompt(false)}
+                  className="flex-1 px-4 py-2.5 bg-white/10 text-white font-medium rounded-xl hover:bg-white/20 transition-colors"
+                >
+                  Maybe Later
+                </button>
+              </div>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </section>
   );
 }

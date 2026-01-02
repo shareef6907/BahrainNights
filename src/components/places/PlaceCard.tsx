@@ -13,14 +13,14 @@ export interface Place {
   id: string;
   name: string;
   slug: string;
-  category: 'restaurant' | 'cafe' | 'lounge' | 'bar' | 'nightclub' | 'beach-club';
+  category: string; // More flexible to support any category from database
   subcategory: string[];
   description: string;
   address: string;
   area: string;
   latitude: number;
   longitude: number;
-  phone: string;
+  phone?: string;
   email?: string;
   website?: string;
   instagram?: string;
@@ -30,6 +30,7 @@ export interface Place {
   images: string[];
   logo: string;
   upcomingEventsCount: number;
+  likeCount?: number; // For sorting by popularity
 }
 
 interface PlaceCardProps {

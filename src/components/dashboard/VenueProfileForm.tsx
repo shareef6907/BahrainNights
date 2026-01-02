@@ -18,6 +18,7 @@ import {
   Twitter,
 } from 'lucide-react';
 import ImageUpload from './ImageUpload';
+import { GalleryUploader } from '../upload/GalleryUploader';
 
 interface OpeningHours {
   closed: boolean;
@@ -659,6 +660,21 @@ export default function VenueProfileForm() {
                   required
                 />
               </div>
+            </div>
+
+            {/* Gallery Images */}
+            <div className="pt-4 border-t border-white/10">
+              <GalleryUploader
+                entityType="venue"
+                venueSlug={formData.name.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '')}
+                currentImages={formData.galleryImages}
+                onUpdate={(urls) => setFormData((prev) => ({ ...prev, galleryImages: urls }))}
+                maxImages={20}
+                label="Gallery Photos (up to 20 images)"
+              />
+              <p className="text-xs text-gray-500 mt-2">
+                Showcase your venue with high-quality photos. The first image will be the main gallery preview.
+              </p>
             </div>
           </div>
         )}

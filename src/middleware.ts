@@ -5,8 +5,11 @@ import { jwtVerify } from 'jose';
 // Routes that require authentication
 const protectedRoutes = ['/dashboard', '/admin'];
 
-// Routes only for guests (not logged in)
-const guestOnlyRoutes = ['/login', '/register', '/forgot-password', '/reset-password'];
+// Routes only for guests (not logged in) - exact paths only
+const guestOnlyRoutes = ['/login', '/forgot-password', '/reset-password'];
+
+// Auth register route specifically (not /register-venue)
+const authRegisterRoute = '/register';
 
 // Admin-only routes
 const adminRoutes = ['/admin'];
@@ -47,10 +50,10 @@ export async function middleware(request: NextRequest) {
     pathname.startsWith(route)
   );
 
-  // Check if current path is guest-only
+  // Check if current path is guest-only (exact match for /register to avoid matching /register-venue)
   const isGuestOnlyRoute = guestOnlyRoutes.some((route) =>
     pathname.startsWith(route)
-  );
+  ) || pathname === authRegisterRoute;
 
   // Check if current path is admin-only
   const isAdminRoute = adminRoutes.some((route) => pathname.startsWith(route));

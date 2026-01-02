@@ -5,8 +5,8 @@ import { Phone, Navigation, Calendar, Menu, Instagram, Globe } from 'lucide-reac
 
 interface PlaceActionBarProps {
   phone?: string;
-  latitude: number;
-  longitude: number;
+  latitude?: number;
+  longitude?: number;
   bookingUrl?: string;
   menuUrl?: string;
   instagram?: string;
@@ -81,15 +81,17 @@ export default function PlaceActionBar({
           )}
 
           {/* Directions Button */}
-          <motion.button
-            onClick={handleDirections}
-            className="flex items-center gap-2 px-5 py-3 bg-gradient-to-r from-blue-500 to-indigo-600 rounded-xl text-white font-semibold whitespace-nowrap hover:shadow-lg hover:shadow-blue-500/25 transition-all"
-            whileHover={{ scale: 1.02 }}
-            whileTap={{ scale: 0.98 }}
-          >
-            <Navigation className="w-5 h-5" />
-            <span>Directions</span>
-          </motion.button>
+          {latitude && longitude && (
+            <motion.button
+              onClick={handleDirections}
+              className="flex items-center gap-2 px-5 py-3 bg-gradient-to-r from-blue-500 to-indigo-600 rounded-xl text-white font-semibold whitespace-nowrap hover:shadow-lg hover:shadow-blue-500/25 transition-all"
+              whileHover={{ scale: 1.02 }}
+              whileTap={{ scale: 0.98 }}
+            >
+              <Navigation className="w-5 h-5" />
+              <span>Directions</span>
+            </motion.button>
+          )}
 
           {/* Book Table Button */}
           {bookingUrl && (
