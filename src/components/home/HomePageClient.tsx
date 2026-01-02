@@ -296,8 +296,8 @@ export default function HomePageClient({ initialMovies, initialStats }: HomePage
 
       {/* Navigation */}
       <nav className={`fixed top-0 w-full z-50 transition-all duration-300 ${isScrolled ? 'bg-slate-950/95 backdrop-blur-xl border-b border-white/10 shadow-xl shadow-black/20' : ''}`}>
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex items-center h-20">
+        <div className="w-full px-4 sm:px-6 lg:px-8">
+          <div className="flex items-center justify-between h-20">
             {/* Logo */}
             <div className="flex items-center flex-shrink-0">
               <a href="/" className="flex items-center">
@@ -308,7 +308,7 @@ export default function HomePageClient({ initialMovies, initialStats }: HomePage
             </div>
 
             {/* Desktop Navigation - Centered */}
-            <div className="hidden lg:flex flex-1 items-center justify-center space-x-1">
+            <div className="hidden lg:flex items-center space-x-1">
               {menuItems.map((item) => (
                 <div
                   key={item.name}
@@ -364,30 +364,30 @@ export default function HomePageClient({ initialMovies, initialStats }: HomePage
               ))}
             </div>
 
-            {/* Right Side Actions - Fixed width for balance */}
-            <div className="hidden lg:flex items-center justify-end space-x-3 flex-shrink-0">
+            {/* Right Side Actions */}
+            <div className="hidden lg:flex items-center space-x-2">
               <GlobalSearch variant="navbar" />
               <LanguageSwitcher variant="desktop" />
               <a
                 href="/register-venue"
-                className="flex items-center space-x-2 bg-white/10 border border-white/20 text-white px-3 py-2 rounded-full text-sm font-medium hover:bg-white/20 hover:border-white/30 transition-all duration-200"
+                className="flex items-center space-x-1.5 bg-white/10 border border-white/20 text-white px-3 py-2 rounded-full text-sm font-medium hover:bg-white/20 hover:border-white/30 transition-all duration-200"
               >
                 <Building2 className="w-4 h-4" />
-                <span>Register Venue</span>
+                <span>Register</span>
               </a>
               <a
                 href="/login"
-                className="flex items-center space-x-2 text-gray-300 hover:text-white px-2 py-2 text-sm font-medium transition-all duration-200"
+                className="flex items-center space-x-1.5 text-gray-300 hover:text-white px-2 py-2 text-sm transition-all duration-200"
               >
                 <LogIn className="w-4 h-4" />
                 <span>Login</span>
               </a>
               <a
                 href="/list-event"
-                className="flex items-center space-x-2 bg-gradient-to-r from-yellow-400 via-orange-500 to-pink-500 text-black px-4 py-2 rounded-full text-sm font-semibold hover:shadow-lg hover:shadow-orange-500/25 hover:scale-105 transition-all duration-200"
+                className="flex items-center space-x-1.5 bg-gradient-to-r from-yellow-400 via-orange-500 to-pink-500 text-black px-3 py-2 rounded-full text-sm font-semibold hover:shadow-lg hover:shadow-orange-500/25 hover:scale-105 transition-all duration-200"
               >
                 <Plus className="w-4 h-4" />
-                <span>List Your Event</span>
+                <span>List Event</span>
               </a>
             </div>
 
