@@ -376,6 +376,13 @@ export default function HomePageClient({ initialMovies, initialStats }: HomePage
                 <span>Register Venue</span>
               </a>
               <a
+                href="/login"
+                className="flex items-center space-x-2 text-gray-300 hover:text-white px-2 py-2 text-sm font-medium transition-all duration-200"
+              >
+                <LogIn className="w-4 h-4" />
+                <span>Login</span>
+              </a>
+              <a
                 href="/list-event"
                 className="flex items-center space-x-2 bg-gradient-to-r from-yellow-400 via-orange-500 to-pink-500 text-black px-4 py-2 rounded-full text-sm font-semibold hover:shadow-lg hover:shadow-orange-500/25 hover:scale-105 transition-all duration-200"
               >
