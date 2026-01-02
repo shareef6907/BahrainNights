@@ -7,6 +7,7 @@ import {
   useEffect,
   useCallback,
   ReactNode,
+  Suspense,
 } from 'react';
 import { useSearchParams, useRouter, usePathname } from 'next/navigation';
 
@@ -32,15 +33,12 @@ interface PublicAuthContextType {
 
 const PublicAuthContext = createContext<PublicAuthContextType | undefined>(undefined);
 
-export function PublicAuthProvider({ children }: { children: ReactNode }) {
-  const [user, setUser] = useState<PublicUser | null>(null);
-  const [isLoading, setIsLoading] = useState(true);
-  const [likedVenueIds, setLikedVenueIds] = useState<string[]>([]);
+// Inner component that handles auth error from URL params (uses useSearchParams)
+function AuthErrorHandler() {
   const searchParams = useSearchParams();
   const router = useRouter();
   const pathname = usePathname();
 
-  // Check for auth errors in URL and display them
   useEffect(() => {
     if (!searchParams) return;
     const authError = searchParams.get('auth_error');
@@ -56,6 +54,14 @@ export function PublicAuthProvider({ children }: { children: ReactNode }) {
       }
     }
   }, [searchParams, router, pathname]);
+
+  return null;
+}
+
+export function PublicAuthProvider({ children }: { children: ReactNode }) {
+  const [user, setUser] = useState<PublicUser | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
+  const [likedVenueIds, setLikedVenueIds] = useState<string[]>([]);
 
   // Check authentication status on mount
   const checkAuth = useCallback(async () => {
@@ -182,6 +188,9 @@ export function PublicAuthProvider({ children }: { children: ReactNode }) {
 
   return (
     <PublicAuthContext.Provider value={value}>
+      <Suspense fallback={null}>
+        <AuthErrorHandler />
+      </Suspense>
       {children}
     </PublicAuthContext.Provider>
   );

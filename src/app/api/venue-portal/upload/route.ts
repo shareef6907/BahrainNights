@@ -6,15 +6,7 @@ import sharp from 'sharp';
 import { getAdminClient } from '@/lib/supabase/server';
 
 export const dynamic = 'force-dynamic';
-
-// Allow up to 25MB uploads (will be compressed to 600KB)
-export const config = {
-  api: {
-    bodyParser: {
-      sizeLimit: '25mb',
-    },
-  },
-};
+export const maxDuration = 60;
 
 // S3 client configuration
 const s3Client = new S3Client({
