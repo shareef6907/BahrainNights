@@ -48,10 +48,15 @@ export default function PlaceHero({
   };
 
   const renderPriceRange = () => {
+    if (!priceRange || priceRange < 1 || priceRange > 4) {
+      return null;
+    }
+    const symbols = '$'.repeat(priceRange);
+    const emptySymbols = '$'.repeat(4 - priceRange);
     return (
       <span className="font-bold text-sm">
-        <span className="text-yellow-400">{'BD '.repeat(priceRange).trim()}</span>
-        <span className="text-gray-500">{' BD'.repeat(3 - priceRange)}</span>
+        <span className="text-yellow-400">{symbols}</span>
+        <span className="text-gray-500">{emptySymbols}</span>
       </span>
     );
   };
@@ -87,9 +92,11 @@ export default function PlaceHero({
           {/* Actions */}
           <div className="flex items-center gap-2">
             {/* Price Range */}
-            <div className="px-3 py-2 bg-black/50 backdrop-blur-md rounded-xl">
-              {renderPriceRange()}
-            </div>
+            {renderPriceRange() && (
+              <div className="px-3 py-2 bg-black/50 backdrop-blur-md rounded-xl">
+                {renderPriceRange()}
+              </div>
+            )}
 
             {/* Like Button */}
             <motion.button

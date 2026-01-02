@@ -4,6 +4,7 @@ import { motion } from 'framer-motion';
 import Image from 'next/image';
 import Link from 'next/link';
 import { MapPin, Phone, Navigation, Instagram } from 'lucide-react';
+import { LikeButton } from '@/components/ui/LikeButton';
 
 export interface OpeningHours {
   [key: string]: { open: string; close: string } | 'closed';
@@ -82,10 +83,16 @@ export default function PlaceCard({ place, index }: PlaceCardProps) {
   const colors = categoryColors[place.category] || categoryColors.restaurant;
 
   const renderPriceRange = () => {
+    // Only show price range if it's a valid value
+    if (!place.priceRange || place.priceRange < 1 || place.priceRange > 4) {
+      return null;
+    }
+    const symbols = '$'.repeat(place.priceRange);
+    const emptySymbols = '$'.repeat(4 - place.priceRange);
     return (
-      <span className="text-yellow-400 font-bold">
-        {'BD'.repeat(place.priceRange)}
-        <span className="text-gray-600">{'BD'.repeat(3 - place.priceRange)}</span>
+      <span className="font-bold text-sm">
+        <span className="text-yellow-400">{symbols}</span>
+        <span className="text-gray-600">{emptySymbols}</span>
       </span>
     );
   };
@@ -139,9 +146,11 @@ export default function PlaceCard({ place, index }: PlaceCardProps) {
             </div>
 
             {/* Price Range */}
-            <div className="absolute top-3 right-3 px-2 py-1 bg-black/60 backdrop-blur-sm rounded-lg">
-              {renderPriceRange()}
-            </div>
+            {renderPriceRange() && (
+              <div className="absolute top-3 right-3 px-2 py-1 bg-black/60 backdrop-blur-sm rounded-lg">
+                {renderPriceRange()}
+              </div>
+            )}
 
             {/* Logo */}
             <div className="absolute bottom-3 left-3 w-12 h-12 bg-white rounded-xl shadow-lg overflow-hidden">
@@ -238,6 +247,13 @@ export default function PlaceCard({ place, index }: PlaceCardProps) {
                   <Instagram className="w-4 h-4" />
                 </button>
               )}
+              <div className="ml-auto" onClick={(e) => e.preventDefault()}>
+                <LikeButton
+                  venueId={place.id}
+                  initialLikeCount={place.likeCount || 0}
+                  size="sm"
+                />
+              </div>
             </div>
           </div>
         </div>
