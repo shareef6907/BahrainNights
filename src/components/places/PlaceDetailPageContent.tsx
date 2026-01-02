@@ -65,7 +65,6 @@ function venueToPlace(venue: Venue): Place {
     email: venue.email || undefined,
     website: venue.website || undefined,
     instagram: venue.instagram || undefined,
-    priceRange: (venue.price_range as 1 | 2 | 3) || 2,
     openingHours: (venue.opening_hours as OpeningHours) || {},
     features: venue.features || [],
     images: venue.gallery || (venue.cover_image_url ? [venue.cover_image_url] : []),
@@ -169,7 +168,6 @@ export default function PlaceDetailPageContent({ venue, similarVenues }: PlaceDe
               latitude: venue.latitude,
               longitude: venue.longitude,
             } : undefined,
-            priceRange: 'BD'.repeat(venue.price_range || 2),
           }),
         }}
       />
@@ -182,7 +180,6 @@ export default function PlaceDetailPageContent({ venue, similarVenues }: PlaceDe
           categoryColor={categoryColors[venue.category] || 'bg-gray-500'}
           subcategory={venue.subcategories || []}
           area={venue.area}
-          priceRange={(venue.price_range as 1 | 2 | 3) || 2}
           coverImage={venue.cover_image_url || images[0] || '/placeholder-venue.jpg'}
           logo={venue.logo_url || '/placeholder-logo.jpg'}
           isOpen={isOpen}
@@ -239,27 +236,6 @@ export default function PlaceDetailPageContent({ venue, similarVenues }: PlaceDe
                   area={venue.area}
                 />
               )}
-
-              {/* Price Range Card */}
-              <motion.div
-                initial={{ opacity: 0, y: 20 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true }}
-                className="bg-white/5 backdrop-blur-sm border border-white/10 rounded-2xl p-6"
-              >
-                <h3 className="text-lg font-bold text-white mb-3">Price Range</h3>
-                <div className="flex items-center gap-3 mb-2">
-                  <span className="text-2xl font-bold">
-                    <span className="text-yellow-400">{'BD '.repeat(venue.price_range || 2).trim()}</span>
-                    <span className="text-gray-600">{' BD'.repeat(3 - (venue.price_range || 2))}</span>
-                  </span>
-                </div>
-                {venue.avg_cost_per_person && (
-                  <p className="text-gray-400 text-sm">
-                    Average cost: <span className="text-white font-medium">{venue.avg_cost_per_person}</span> per person
-                  </p>
-                )}
-              </motion.div>
 
               {/* Like Count Card */}
               <motion.div

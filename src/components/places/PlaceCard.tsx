@@ -25,7 +25,6 @@ export interface Place {
   email?: string;
   website?: string;
   instagram?: string;
-  priceRange: 1 | 2 | 3;
   openingHours: OpeningHours;
   features: string[];
   images: string[];
@@ -82,21 +81,6 @@ export default function PlaceCard({ place, index }: PlaceCardProps) {
   const open = isOpenNow();
   const colors = categoryColors[place.category] || categoryColors.restaurant;
 
-  const renderPriceRange = () => {
-    // Only show price range if it's a valid value
-    if (!place.priceRange || place.priceRange < 1 || place.priceRange > 4) {
-      return null;
-    }
-    const symbols = '$'.repeat(place.priceRange);
-    const emptySymbols = '$'.repeat(4 - place.priceRange);
-    return (
-      <span className="font-bold text-sm">
-        <span className="text-yellow-400">{symbols}</span>
-        <span className="text-gray-600">{emptySymbols}</span>
-      </span>
-    );
-  };
-
   const handlePhone = (e: React.MouseEvent) => {
     e.preventDefault();
     e.stopPropagation();
@@ -144,13 +128,6 @@ export default function PlaceCard({ place, index }: PlaceCardProps) {
                 {categoryLabels[place.category]}
               </span>
             </div>
-
-            {/* Price Range */}
-            {renderPriceRange() && (
-              <div className="absolute top-3 right-3 px-2 py-1 bg-black/60 backdrop-blur-sm rounded-lg">
-                {renderPriceRange()}
-              </div>
-            )}
 
             {/* Logo */}
             <div className="absolute bottom-3 left-3 w-12 h-12 bg-white rounded-xl shadow-lg overflow-hidden">

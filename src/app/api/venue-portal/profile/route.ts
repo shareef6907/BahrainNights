@@ -3,6 +3,21 @@ import { cookies } from 'next/headers';
 import { jwtVerify } from 'jose';
 import { getAdminClient } from '@/lib/supabase/server';
 
+interface OpeningHoursDay {
+  open: string;
+  close: string;
+}
+
+interface OpeningHours {
+  sunday?: OpeningHoursDay | 'closed';
+  monday?: OpeningHoursDay | 'closed';
+  tuesday?: OpeningHoursDay | 'closed';
+  wednesday?: OpeningHoursDay | 'closed';
+  thursday?: OpeningHoursDay | 'closed';
+  friday?: OpeningHoursDay | 'closed';
+  saturday?: OpeningHoursDay | 'closed';
+}
+
 interface VenueProfileData {
   id: string;
   name: string;
@@ -14,15 +29,16 @@ interface VenueProfileData {
   area: string | null;
   website: string | null;
   instagram: string | null;
-  opening_hours: string | null;
+  opening_hours: OpeningHours | string | null;
   menu_url: string | null;
   booking_url: string | null;
-  price_range: string | null;
   cuisine_type: string | null;
   features: string[] | null;
   logo_url: string | null;
   cover_image_url: string | null;
   gallery_images: string[] | null;
+  latitude: number | null;
+  longitude: number | null;
   status: string;
   password_hash?: string;
 }
@@ -112,12 +128,13 @@ export async function PATCH(request: NextRequest) {
       'website',
       'menu_url',
       'booking_url',
-      'price_range',
       'cuisine_type',
       'features',
       'logo_url',
       'cover_image_url',
       'gallery_images',
+      'latitude',
+      'longitude',
     ];
 
     const updates: Record<string, unknown> = {};

@@ -47,7 +47,6 @@ interface VenueProfileData {
   logo: string;
   coverImage: string;
   galleryImages: string[];
-  priceRange: number;
   averageCost: string;
 }
 
@@ -133,8 +132,7 @@ const mockVenueData: VenueProfileData = {
   coverImage:
     'https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?w=1920&h=1080&fit=crop',
   galleryImages: [],
-  priceRange: 2,
-  averageCost: '15-25',
+  averageCost: '15-25 BD',
 };
 
 export default function VenueProfileForm() {
@@ -692,33 +690,6 @@ export default function VenueProfileForm() {
         {expandedSections.includes('pricing') && (
           <div className="px-4 pb-4 space-y-4">
             <div>
-              <label className="block text-sm font-medium text-gray-300 mb-3">
-                Price Range <span className="text-red-400">*</span>
-              </label>
-              <div className="flex gap-3">
-                {[1, 2, 3].map((level) => (
-                  <button
-                    key={level}
-                    type="button"
-                    onClick={() =>
-                      setFormData((prev) => ({ ...prev, priceRange: level }))
-                    }
-                    className={`flex-1 py-3 rounded-xl border transition-all ${
-                      formData.priceRange === level
-                        ? 'bg-yellow-400/20 border-yellow-400/50 text-yellow-400'
-                        : 'border-white/10 text-gray-400 hover:border-white/20'
-                    }`}
-                  >
-                    {'BD'.repeat(level)}
-                  </button>
-                ))}
-              </div>
-              <p className="text-xs text-gray-500 mt-2">
-                BD = Budget, BDBD = Moderate, BDBDBD = Expensive
-              </p>
-            </div>
-
-            <div>
               <label className="block text-sm font-medium text-gray-300 mb-2">
                 Average Cost per Person <span className="text-gray-500">(Optional)</span>
               </label>
@@ -730,6 +701,9 @@ export default function VenueProfileForm() {
                 placeholder="e.g., 15-25 BD"
                 className="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-xl text-white placeholder-gray-500 focus:outline-none focus:border-yellow-400/50 focus:ring-1 focus:ring-yellow-400/25 transition-all"
               />
+              <p className="text-xs text-gray-500 mt-2">
+                Enter the typical cost range for a meal or visit
+              </p>
             </div>
           </div>
         )}

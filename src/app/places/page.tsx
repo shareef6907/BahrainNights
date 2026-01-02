@@ -29,7 +29,6 @@ function venueToPlace(venue: Venue): Place {
     email: venue.email || undefined,
     website: venue.website || undefined,
     instagram: venue.instagram || undefined,
-    priceRange: (venue.price_range as 1 | 2 | 3) || 2,
     openingHours: (venue.opening_hours as OpeningHours) || {},
     features: venue.features || [],
     images: venue.gallery || (venue.cover_image_url ? [venue.cover_image_url] : []),
@@ -50,7 +49,6 @@ function PlacesPageContent() {
   // Read initial values from URL parameters
   const categoryParam = searchParams?.get('category') as PlaceCategory | null;
   const areaParam = searchParams?.get('area') ?? null;
-  const priceParam = searchParams?.get('price') ?? null;
   const queryParam = searchParams?.get('q') ?? null;
 
   const [searchQuery, setSearchQuery] = useState(queryParam || '');
@@ -58,7 +56,6 @@ function PlacesPageContent() {
   const [viewMode, setViewMode] = useState<'grid' | 'map'>('grid');
   const [filters, setFilters] = useState<PlaceFiltersState>({
     area: areaParam || 'all',
-    priceRange: priceParam || 'all',
     features: [],
     sortBy: 'popular', // Default to popular (most liked)
   });
@@ -96,13 +93,10 @@ function PlacesPageContent() {
     if (areaParam) {
       setFilters(prev => ({ ...prev, area: areaParam }));
     }
-    if (priceParam) {
-      setFilters(prev => ({ ...prev, priceRange: priceParam }));
-    }
     if (queryParam) {
       setSearchQuery(queryParam);
     }
-  }, [categoryParam, areaParam, priceParam, queryParam]);
+  }, [categoryParam, areaParam, queryParam]);
 
   // Calculate category counts
   const categoryCounts = useMemo(() => {
@@ -166,13 +160,6 @@ function PlacesPageContent() {
       );
     }
 
-    // Price filter
-    if (filters.priceRange !== 'all') {
-      result = result.filter(
-        (place) => place.priceRange === parseInt(filters.priceRange)
-      );
-    }
-
     // Features filter
     if (filters.features.length > 0) {
       result = result.filter((place) =>
@@ -217,7 +204,6 @@ function PlacesPageContent() {
   const clearFilters = () => {
     setFilters({
       area: 'all',
-      priceRange: 'all',
       features: [],
       sortBy: 'popular',
     });
@@ -228,7 +214,6 @@ function PlacesPageContent() {
     const params = new URLSearchParams();
     if (selectedCategory !== 'all') params.set('category', selectedCategory);
     if (filters.area !== 'all') params.set('area', filters.area);
-    if (filters.priceRange !== 'all') params.set('price', filters.priceRange);
     if (searchQuery) params.set('q', searchQuery);
 
     const newUrl = params.toString()
@@ -459,7 +444,6 @@ function PlacesPageContent() {
                         addressCountry: 'BH',
                       },
                       telephone: place.phone,
-                      priceRange: 'BD'.repeat(place.priceRange),
                       geo: place.latitude && place.longitude ? {
                         '@type': 'GeoCoordinates',
                         latitude: place.latitude,

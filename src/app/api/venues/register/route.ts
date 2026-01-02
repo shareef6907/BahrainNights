@@ -3,6 +3,7 @@ import { createClient } from '@supabase/supabase-js';
 import { getAdminClient } from '@/lib/supabase/server';
 import { uploadImage, isValidImageType, isValidFileSize, generateFolderPath } from '@/lib/s3';
 import { sendVenueRegistrationEmail } from '@/lib/email';
+import bcrypt from 'bcryptjs';
 
 // Create Supabase admin client for auth operations
 function getSupabaseAdminClient() {
@@ -188,6 +189,9 @@ export async function POST(request: NextRequest) {
       console.log('Profile creation skipped (table may not exist):', profileErr);
     }
 
+    // Hash the password for venue portal login
+    const passwordHash = await bcrypt.hash(password, 12);
+
     // Create venue in database
     // Note: owner_id is set to null for now since the foreign key references 'users' table
     // which uses a different auth system. The venue email can be used to link them later.
@@ -200,7 +204,8 @@ export async function POST(request: NextRequest) {
       area,
       address,
       phone,
-      email,
+      email: email.toLowerCase(),
+      password_hash: passwordHash, // Store hashed password for venue portal login
       website: website || null,
       instagram: instagram || null,
       logo_url: logoUrl,

@@ -5,16 +5,18 @@ import { motion } from 'framer-motion';
 import {
   Building2,
   Phone,
-  Mail,
   MapPin,
   Globe,
   Instagram,
-  Clock,
   Save,
   Loader2,
   CheckCircle,
   AlertCircle,
+  ChevronRight,
+  Clock,
+  Navigation,
 } from 'lucide-react';
+import Link from 'next/link';
 
 interface VenueProfile {
   id: string;
@@ -27,10 +29,8 @@ interface VenueProfile {
   area?: string;
   website?: string;
   instagram?: string;
-  opening_hours?: string;
   menu_url?: string;
   booking_url?: string;
-  price_range?: string;
   cuisine_type?: string;
   features?: string[];
 }
@@ -48,10 +48,8 @@ export default function VenueProfilePage() {
     area: '',
     website: '',
     instagram: '',
-    opening_hours: '',
     menu_url: '',
     booking_url: '',
-    price_range: '',
     cuisine_type: '',
     features: '',
   });
@@ -70,10 +68,8 @@ export default function VenueProfilePage() {
             area: data.venue.area || '',
             website: data.venue.website || '',
             instagram: data.venue.instagram || '',
-            opening_hours: data.venue.opening_hours || '',
             menu_url: data.venue.menu_url || '',
             booking_url: data.venue.booking_url || '',
-            price_range: data.venue.price_range || '',
             cuisine_type: data.venue.cuisine_type || '',
             features: data.venue.features?.join(', ') || '',
           });
@@ -295,20 +291,38 @@ export default function VenueProfilePage() {
           </div>
         </div>
 
-        {/* Opening Hours */}
-        <div>
-          <label className="block text-sm font-medium text-gray-300 mb-2">
-            <Clock className="w-4 h-4 inline mr-2" />
-            Opening Hours
-          </label>
-          <input
-            type="text"
-            name="opening_hours"
-            value={formData.opening_hours}
-            onChange={handleChange}
-            className="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-xl text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-yellow-400/50 focus:border-transparent"
-            placeholder="e.g., Sun-Thu 10AM-11PM, Fri-Sat 10AM-1AM"
-          />
+        {/* Quick Links to Hours & Location */}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 p-4 bg-white/5 rounded-xl">
+          <Link
+            href="/venue-portal/hours"
+            className="flex items-center justify-between p-4 bg-white/5 rounded-xl hover:bg-white/10 transition-colors group"
+          >
+            <div className="flex items-center gap-3">
+              <div className="p-2 bg-yellow-400/20 rounded-lg">
+                <Clock className="w-5 h-5 text-yellow-400" />
+              </div>
+              <div>
+                <p className="text-white font-medium">Opening Hours</p>
+                <p className="text-gray-400 text-sm">Set your daily hours</p>
+              </div>
+            </div>
+            <ChevronRight className="w-5 h-5 text-gray-400 group-hover:text-white transition-colors" />
+          </Link>
+          <Link
+            href="/venue-portal/location"
+            className="flex items-center justify-between p-4 bg-white/5 rounded-xl hover:bg-white/10 transition-colors group"
+          >
+            <div className="flex items-center gap-3">
+              <div className="p-2 bg-blue-400/20 rounded-lg">
+                <Navigation className="w-5 h-5 text-blue-400" />
+              </div>
+              <div>
+                <p className="text-white font-medium">Location</p>
+                <p className="text-gray-400 text-sm">Set map coordinates</p>
+              </div>
+            </div>
+            <ChevronRight className="w-5 h-5 text-gray-400 group-hover:text-white transition-colors" />
+          </Link>
         </div>
 
         {/* Links */}
@@ -342,37 +356,18 @@ export default function VenueProfilePage() {
         </div>
 
         {/* Additional Info */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <div>
-            <label className="block text-sm font-medium text-gray-300 mb-2">
-              Price Range
-            </label>
-            <select
-              name="price_range"
-              value={formData.price_range}
-              onChange={handleChange}
-              className="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-xl text-white focus:outline-none focus:ring-2 focus:ring-yellow-400/50 focus:border-transparent"
-            >
-              <option value="">Select price range</option>
-              <option value="$">$ - Budget Friendly</option>
-              <option value="$$">$$ - Moderate</option>
-              <option value="$$$">$$$ - Upscale</option>
-              <option value="$$$$">$$$$ - Fine Dining</option>
-            </select>
-          </div>
-          <div>
-            <label className="block text-sm font-medium text-gray-300 mb-2">
-              Cuisine Type
-            </label>
-            <input
-              type="text"
-              name="cuisine_type"
-              value={formData.cuisine_type}
-              onChange={handleChange}
-              className="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-xl text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-yellow-400/50 focus:border-transparent"
-              placeholder="e.g., Italian, Arabic, International"
-            />
-          </div>
+        <div>
+          <label className="block text-sm font-medium text-gray-300 mb-2">
+            Cuisine Type
+          </label>
+          <input
+            type="text"
+            name="cuisine_type"
+            value={formData.cuisine_type}
+            onChange={handleChange}
+            className="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-xl text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-yellow-400/50 focus:border-transparent"
+            placeholder="e.g., Italian, Arabic, International"
+          />
         </div>
 
         {/* Features */}

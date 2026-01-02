@@ -19,6 +19,7 @@ import {
   Crown,
   Inbox,
   Sparkles,
+  Heart,
 } from 'lucide-react';
 import { useAuth } from '@/lib/auth-context';
 
@@ -68,6 +69,11 @@ const navItems = [
     name: 'Analytics',
     href: '/admin/analytics',
     icon: BarChart3,
+  },
+  {
+    name: 'Members',
+    href: '/admin/members',
+    icon: Heart,
   },
   {
     name: 'Users',

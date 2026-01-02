@@ -33,15 +33,6 @@ export default function PlaceMapView({ places }: PlaceMapViewProps) {
   const [selectedPlace, setSelectedPlace] = useState<Place | null>(null);
   const [isListExpanded, setIsListExpanded] = useState(true);
 
-  const renderPriceRange = (priceRange: number) => {
-    return (
-      <span className="text-yellow-400 font-bold text-xs">
-        {'BD'.repeat(priceRange)}
-        <span className="text-gray-600">{'BD'.repeat(3 - priceRange)}</span>
-      </span>
-    );
-  };
-
   return (
     <div className="relative h-[600px] md:h-[700px] bg-slate-800 rounded-2xl overflow-hidden">
       {/* Map Area (Placeholder) */}
@@ -140,10 +131,7 @@ export default function PlaceMapView({ places }: PlaceMapViewProps) {
               </div>
             </div>
             <div className="p-4">
-              <div className="flex items-start justify-between gap-2 mb-2">
-                <h3 className="text-lg font-bold text-white">{selectedPlace.name}</h3>
-                {renderPriceRange(selectedPlace.priceRange)}
-              </div>
+              <h3 className="text-lg font-bold text-white mb-2">{selectedPlace.name}</h3>
               <div className="flex items-center gap-1.5 text-gray-400 text-sm mb-2">
                 <MapPin className="w-3.5 h-3.5" />
                 <span>{selectedPlace.area}</span>
@@ -211,14 +199,11 @@ export default function PlaceMapView({ places }: PlaceMapViewProps) {
                   {place.name}
                 </h4>
                 <p className="text-xs text-gray-400 mb-1">{place.area}</p>
-                <div className="flex items-center gap-2">
-                  <span
-                    className={`px-1.5 py-0.5 ${categoryColors[place.category]} rounded text-[10px] font-bold text-white`}
-                  >
-                    {categoryLabels[place.category]}
-                  </span>
-                  {renderPriceRange(place.priceRange)}
-                </div>
+                <span
+                  className={`px-1.5 py-0.5 ${categoryColors[place.category]} rounded text-[10px] font-bold text-white`}
+                >
+                  {categoryLabels[place.category]}
+                </span>
               </div>
             </button>
           ))}
@@ -278,14 +263,11 @@ export default function PlaceMapView({ places }: PlaceMapViewProps) {
                           {place.name}
                         </h4>
                         <p className="text-sm text-gray-400 mb-1">{place.area}</p>
-                        <div className="flex items-center gap-2">
-                          <span
-                            className={`px-2 py-0.5 ${categoryColors[place.category]} rounded text-xs font-bold text-white`}
-                          >
-                            {categoryLabels[place.category]}
-                          </span>
-                          {renderPriceRange(place.priceRange)}
-                        </div>
+                        <span
+                          className={`px-2 py-0.5 ${categoryColors[place.category]} rounded text-xs font-bold text-white`}
+                        >
+                          {categoryLabels[place.category]}
+                        </span>
                       </div>
                     </Link>
                   ))}

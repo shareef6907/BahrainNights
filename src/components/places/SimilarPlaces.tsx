@@ -79,16 +79,6 @@ export default function SimilarPlaces({ title, places, showViewAll = true, viewA
                     </span>
                   </div>
 
-                  {/* Price */}
-                  <div className="absolute top-3 right-3 px-2 py-1 bg-black/60 backdrop-blur-sm rounded-lg">
-                    <span className="text-yellow-400 font-bold text-sm">
-                      {'BD'.repeat(place.priceRange)}
-                    </span>
-                    <span className="text-gray-600 text-sm">
-                      {'BD'.repeat(3 - place.priceRange)}
-                    </span>
-                  </div>
-
                   {/* Logo */}
                   <div className="absolute bottom-3 left-3 w-10 h-10 bg-white rounded-lg overflow-hidden shadow-lg">
                     <Image

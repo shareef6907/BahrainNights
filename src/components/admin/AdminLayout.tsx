@@ -25,6 +25,7 @@ const pageTitles: Record<string, string> = {
   '/admin/ads': 'Ads Manager',
   '/admin/ads/new': 'Create New Ad',
   '/admin/analytics': 'Platform Analytics',
+  '/admin/members': 'Members',
   '/admin/users': 'Manage Users',
   '/admin/studio': 'Content Studio',
   '/admin/studio/blog': 'Blog Posts',

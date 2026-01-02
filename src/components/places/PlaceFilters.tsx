@@ -6,7 +6,6 @@ import { ChevronDown, X, SlidersHorizontal } from 'lucide-react';
 
 export interface PlaceFiltersState {
   area: string;
-  priceRange: string;
   features: string[];
   sortBy: string;
 }
@@ -25,13 +24,6 @@ const areas = [
   { value: 'amwaj', label: 'Amwaj' },
   { value: 'adliya', label: 'Adliya' },
   { value: 'riffa', label: 'Riffa' },
-];
-
-const priceRanges = [
-  { value: 'all', label: 'All Prices' },
-  { value: '1', label: 'Budget (BD)' },
-  { value: '2', label: 'Mid-Range (BD BD)' },
-  { value: '3', label: 'Premium (BD BD BD)' },
 ];
 
 const features = [
@@ -75,7 +67,6 @@ export default function PlaceFilters({
 
   const hasActiveFilters =
     filters.area !== 'all' ||
-    filters.priceRange !== 'all' ||
     filters.features.length > 0 ||
     filters.sortBy !== 'recommended';
 
@@ -247,13 +238,6 @@ export default function PlaceFilters({
           value={filters.area}
           onChange={(v) => updateFilter('area', v)}
         />
-        <FilterDropdown
-          name="price"
-          label="Price Range"
-          options={priceRanges}
-          value={filters.priceRange}
-          onChange={(v) => updateFilter('priceRange', v)}
-        />
         <FeaturesDropdown />
         <FilterDropdown
           name="sort"
@@ -286,7 +270,6 @@ export default function PlaceFilters({
         {hasActiveFilters && (
           <span className="px-1.5 py-0.5 bg-yellow-400 text-black text-xs font-bold rounded-full">
             {(filters.area !== 'all' ? 1 : 0) +
-              (filters.priceRange !== 'all' ? 1 : 0) +
               filters.features.length +
               (filters.sortBy !== 'recommended' ? 1 : 0)}
           </span>
@@ -337,26 +320,6 @@ export default function PlaceFilters({
                         }`}
                       >
                         {area.label}
-                      </button>
-                    ))}
-                  </div>
-                </div>
-
-                {/* Price Range */}
-                <div className="mb-6">
-                  <h4 className="text-sm font-medium text-gray-400 mb-3">Price Range</h4>
-                  <div className="flex flex-wrap gap-2">
-                    {priceRanges.map((price) => (
-                      <button
-                        key={price.value}
-                        onClick={() => updateFilter('priceRange', price.value)}
-                        className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
-                          filters.priceRange === price.value
-                            ? 'bg-yellow-400 text-black'
-                            : 'bg-white/5 text-gray-300'
-                        }`}
-                      >
-                        {price.label}
                       </button>
                     ))}
                   </div>

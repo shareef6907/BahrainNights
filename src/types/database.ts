@@ -59,6 +59,7 @@ export interface Database {
           google_maps_url: string | null;
           phone: string | null;
           email: string | null;
+          password_hash: string | null;
           website: string | null;
           whatsapp: string | null;
           instagram: string | null;
@@ -99,6 +100,7 @@ export interface Database {
           google_maps_url?: string | null;
           phone?: string | null;
           email?: string | null;
+          password_hash?: string | null;
           website?: string | null;
           whatsapp?: string | null;
           instagram?: string | null;
@@ -139,6 +141,7 @@ export interface Database {
           google_maps_url?: string | null;
           phone?: string | null;
           email?: string | null;
+          password_hash?: string | null;
           website?: string | null;
           whatsapp?: string | null;
           instagram?: string | null;

@@ -12,7 +12,9 @@ import {
   LogOut,
   Menu,
   X,
-  ChevronRight
+  ChevronRight,
+  Clock,
+  MapPin,
 } from 'lucide-react';
 
 interface VenueSession {
@@ -26,6 +28,8 @@ interface VenueSession {
 const sidebarLinks = [
   { href: '/venue-portal/dashboard', label: 'Dashboard', icon: LayoutDashboard },
   { href: '/venue-portal/profile', label: 'Venue Profile', icon: User },
+  { href: '/venue-portal/hours', label: 'Opening Hours', icon: Clock },
+  { href: '/venue-portal/location', label: 'Location', icon: MapPin },
   { href: '/venue-portal/images', label: 'Gallery Images', icon: Images },
   { href: '/venue-portal/events', label: 'My Events', icon: Calendar },
 ];
