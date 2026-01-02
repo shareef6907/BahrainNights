@@ -45,6 +45,12 @@ export async function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
   const token = request.cookies.get('auth_token')?.value;
 
+  // Skip venue portal routes - they use their own authentication (venue_session cookie)
+  // handled in the venue-portal layout component
+  if (pathname.startsWith('/venue-portal')) {
+    return NextResponse.next();
+  }
+
   // Check if current path matches any protected route
   const isProtectedRoute = protectedRoutes.some((route) =>
     pathname.startsWith(route)
