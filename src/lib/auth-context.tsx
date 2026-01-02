@@ -40,6 +40,7 @@ interface RegisterData {
   email: string;
   password: string;
   venueName: string;
+  crNumber: string;
   venueType: string;
   phone: string;
   website?: string;
