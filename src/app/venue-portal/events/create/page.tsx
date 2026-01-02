@@ -69,9 +69,9 @@ export default function CreateEventPage() {
       return;
     }
 
-    // Validate file size (max 5MB)
-    if (file.size > 5 * 1024 * 1024) {
-      setMessage({ type: 'error', text: 'Image must be less than 5MB' });
+    // Validate file size (max 25MB - will be compressed to 600KB)
+    if (file.size > 25 * 1024 * 1024) {
+      setMessage({ type: 'error', text: 'Image must be less than 25MB' });
       return;
     }
 
@@ -81,9 +81,9 @@ export default function CreateEventPage() {
     try {
       const formDataUpload = new FormData();
       formDataUpload.append('file', file);
-      formDataUpload.append('folder', 'events');
+      formDataUpload.append('imageType', 'event');
 
-      const response = await fetch('/api/upload/image', {
+      const response = await fetch('/api/venue-portal/upload', {
         method: 'POST',
         body: formDataUpload,
       });
@@ -246,7 +246,7 @@ export default function CreateEventPage() {
                   </div>
                   <div className="text-center">
                     <p className="text-gray-400">Click to upload image</p>
-                    <p className="text-gray-500 text-sm">PNG, JPG up to 5MB</p>
+                    <p className="text-gray-500 text-sm">PNG, JPG up to 25MB (auto-compressed)</p>
                   </div>
                 </>
               )}
@@ -394,14 +394,22 @@ export default function CreateEventPage() {
               <LinkIcon className="w-4 h-4 inline mr-2" />
               Booking URL
             </label>
-            <input
-              type="url"
-              name="booking_url"
-              value={formData.booking_url}
-              onChange={handleChange}
-              className="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-xl text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-yellow-400/50 focus:border-transparent"
-              placeholder="https://..."
-            />
+            <div className="relative">
+              <span className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-500">
+                https://
+              </span>
+              <input
+                type="text"
+                name="booking_url"
+                value={formData.booking_url.replace(/^https?:\/\//, '')}
+                onChange={(e) => {
+                  const value = e.target.value.replace(/^https?:\/\//, '');
+                  setFormData((prev) => ({ ...prev, booking_url: value ? `https://${value}` : '' }));
+                }}
+                className="w-full pl-20 pr-4 py-3 bg-white/5 border border-white/10 rounded-xl text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-yellow-400/50 focus:border-transparent"
+                placeholder="www.booking-site.com/event"
+              />
+            </div>
           </div>
         </div>
 

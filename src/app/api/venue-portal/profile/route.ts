@@ -135,6 +135,7 @@ export async function PATCH(request: NextRequest) {
       'gallery_images',
       'latitude',
       'longitude',
+      'google_maps_url',
     ];
 
     const updates: Record<string, unknown> = {};

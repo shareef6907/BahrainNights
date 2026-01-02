@@ -376,10 +376,18 @@ export default function HomePageClient({ initialMovies, initialStats }: HomePage
                 <span>List Event</span>
               </a>
               <a
+                href="/register-venue"
+                className="flex items-center space-x-1.5 bg-white/10 border border-white/20 text-white px-3 py-2 rounded-full text-sm font-medium hover:bg-white/20 hover:border-yellow-400/50 transition-all duration-200"
+              >
+                <Building2 className="w-4 h-4" />
+                <span>Register Venue</span>
+              </a>
+              <a
                 href="/venue-portal/login"
                 className="flex items-center space-x-1.5 text-gray-400 hover:text-white px-2 py-2 text-xs transition-all duration-200"
               >
-                <span>Venue Login</span>
+                <LogIn className="w-3 h-3" />
+                <span>Login</span>
               </a>
             </div>
 
@@ -471,10 +479,19 @@ export default function HomePageClient({ initialMovies, initialStats }: HomePage
                     <span>List Your Event</span>
                   </a>
                   <a
-                    href="/venue-portal/login"
-                    className="w-full flex items-center justify-center text-gray-400 hover:text-white text-sm py-2"
+                    href="/register-venue"
+                    className="w-full flex items-center justify-center space-x-2 bg-white/10 border border-white/20 text-white px-6 py-4 rounded-xl font-medium"
                     onClick={() => setMobileMenuOpen(false)}
                   >
+                    <Building2 className="w-5 h-5" />
+                    <span>Register Your Venue</span>
+                  </a>
+                  <a
+                    href="/venue-portal/login"
+                    className="w-full flex items-center justify-center space-x-2 text-gray-400 hover:text-white text-sm py-2"
+                    onClick={() => setMobileMenuOpen(false)}
+                  >
+                    <LogIn className="w-4 h-4" />
                     <span>Venue Login</span>
                   </a>
                 </div>

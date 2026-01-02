@@ -266,14 +266,22 @@ export default function VenueProfilePage() {
               <Globe className="w-4 h-4 inline mr-2" />
               Website
             </label>
-            <input
-              type="url"
-              name="website"
-              value={formData.website}
-              onChange={handleChange}
-              className="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-xl text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-yellow-400/50 focus:border-transparent"
-              placeholder="https://yourwebsite.com"
-            />
+            <div className="relative">
+              <span className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-500">
+                https://
+              </span>
+              <input
+                type="text"
+                name="website"
+                value={formData.website.replace(/^https?:\/\//, '')}
+                onChange={(e) => {
+                  const value = e.target.value.replace(/^https?:\/\//, '');
+                  setFormData((prev) => ({ ...prev, website: value ? `https://${value}` : '' }));
+                }}
+                className="w-full pl-20 pr-4 py-3 bg-white/5 border border-white/10 rounded-xl text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-yellow-400/50 focus:border-transparent"
+                placeholder="www.yourwebsite.com"
+              />
+            </div>
           </div>
           <div>
             <label className="block text-sm font-medium text-gray-300 mb-2">
@@ -331,27 +339,43 @@ export default function VenueProfilePage() {
             <label className="block text-sm font-medium text-gray-300 mb-2">
               Menu URL
             </label>
-            <input
-              type="url"
-              name="menu_url"
-              value={formData.menu_url}
-              onChange={handleChange}
-              className="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-xl text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-yellow-400/50 focus:border-transparent"
-              placeholder="https://yourmenu.com"
-            />
+            <div className="relative">
+              <span className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-500">
+                https://
+              </span>
+              <input
+                type="text"
+                name="menu_url"
+                value={formData.menu_url.replace(/^https?:\/\//, '')}
+                onChange={(e) => {
+                  const value = e.target.value.replace(/^https?:\/\//, '');
+                  setFormData((prev) => ({ ...prev, menu_url: value ? `https://${value}` : '' }));
+                }}
+                className="w-full pl-20 pr-4 py-3 bg-white/5 border border-white/10 rounded-xl text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-yellow-400/50 focus:border-transparent"
+                placeholder="www.yourmenu.com"
+              />
+            </div>
           </div>
           <div>
             <label className="block text-sm font-medium text-gray-300 mb-2">
               Booking URL
             </label>
-            <input
-              type="url"
-              name="booking_url"
-              value={formData.booking_url}
-              onChange={handleChange}
-              className="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-xl text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-yellow-400/50 focus:border-transparent"
-              placeholder="https://bookings.com/yourvenue"
-            />
+            <div className="relative">
+              <span className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-500">
+                https://
+              </span>
+              <input
+                type="text"
+                name="booking_url"
+                value={formData.booking_url.replace(/^https?:\/\//, '')}
+                onChange={(e) => {
+                  const value = e.target.value.replace(/^https?:\/\//, '');
+                  setFormData((prev) => ({ ...prev, booking_url: value ? `https://${value}` : '' }));
+                }}
+                className="w-full pl-20 pr-4 py-3 bg-white/5 border border-white/10 rounded-xl text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-yellow-400/50 focus:border-transparent"
+                placeholder="www.booking-site.com/venue"
+              />
+            </div>
           </div>
         </div>
 

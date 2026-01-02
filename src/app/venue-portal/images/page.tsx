@@ -63,17 +63,17 @@ export default function VenueImagesPage() {
           continue;
         }
 
-        // Validate file size (max 5MB)
-        if (file.size > 5 * 1024 * 1024) {
-          setMessage({ type: 'error', text: `${file.name} is too large (max 5MB)` });
+        // Validate file size (max 25MB - will be compressed to 600KB)
+        if (file.size > 25 * 1024 * 1024) {
+          setMessage({ type: 'error', text: `${file.name} is too large (max 25MB)` });
           continue;
         }
 
         const formData = new FormData();
         formData.append('file', file);
-        formData.append('folder', 'venues/gallery');
+        formData.append('imageType', 'gallery');
 
-        const uploadResponse = await fetch('/api/upload/image', {
+        const uploadResponse = await fetch('/api/venue-portal/upload', {
           method: 'POST',
           body: formData,
         });
@@ -221,7 +221,7 @@ export default function VenueImagesPage() {
                       : 'Click to upload images'}
                   </p>
                   <p className="text-gray-500 text-sm mt-1">
-                    PNG, JPG up to 5MB each
+                    PNG, JPG up to 25MB (auto-compressed to 600KB)
                   </p>
                 </div>
               </>

@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { revalidatePath } from 'next/cache';
 import { supabaseAdmin } from '@/lib/supabase';
 import { sendEventApprovalEmail, sendEventRejectionEmail } from '@/lib/email';
 
@@ -100,6 +101,19 @@ export async function PATCH(
       );
     }
 
+    // Revalidate pages that display events
+    try {
+      revalidatePath('/events');
+      revalidatePath('/events/calendar');
+      revalidatePath('/');
+      if (event?.slug) {
+        revalidatePath(`/events/${event.slug}`);
+      }
+      console.log('Revalidated event pages after status change');
+    } catch (revalidateError) {
+      console.error('Failed to revalidate:', revalidateError);
+    }
+
     // Send email notifications for approval/rejection
     const contactEmail = existingEvent?.contact_email;
     const eventTitle = existingEvent?.title || event?.title || 'Your Event';
@@ -163,6 +177,16 @@ export async function DELETE(
         { error: 'Failed to delete event: ' + error.message },
         { status: 500 }
       );
+    }
+
+    // Revalidate pages that display events
+    try {
+      revalidatePath('/events');
+      revalidatePath('/events/calendar');
+      revalidatePath('/');
+      console.log('Revalidated event pages after deletion');
+    } catch (revalidateError) {
+      console.error('Failed to revalidate:', revalidateError);
     }
 
     return NextResponse.json({
