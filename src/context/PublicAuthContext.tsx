@@ -8,6 +8,7 @@ import {
   useCallback,
   ReactNode,
 } from 'react';
+import { useSearchParams, useRouter, usePathname } from 'next/navigation';
 
 // Types
 export interface PublicUser {
@@ -35,6 +36,26 @@ export function PublicAuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<PublicUser | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [likedVenueIds, setLikedVenueIds] = useState<string[]>([]);
+  const searchParams = useSearchParams();
+  const router = useRouter();
+  const pathname = usePathname();
+
+  // Check for auth errors in URL and display them
+  useEffect(() => {
+    if (!searchParams) return;
+    const authError = searchParams.get('auth_error');
+    if (authError) {
+      // Show error to user
+      alert(`Login Error: ${decodeURIComponent(authError)}`);
+      // Remove the error from URL to prevent showing it again
+      const params = new URLSearchParams(searchParams.toString());
+      params.delete('auth_error');
+      const newUrl = params.toString() ? `${pathname}?${params.toString()}` : pathname;
+      if (newUrl) {
+        router.replace(newUrl);
+      }
+    }
+  }, [searchParams, router, pathname]);
 
   // Check authentication status on mount
   const checkAuth = useCallback(async () => {

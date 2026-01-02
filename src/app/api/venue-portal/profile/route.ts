@@ -24,21 +24,28 @@ interface VenueProfileData {
   slug: string;
   email: string;
   description: string | null;
+  description_ar: string | null;
   phone: string | null;
   address: string | null;
   area: string | null;
   website: string | null;
+  whatsapp: string | null;
   instagram: string | null;
+  facebook: string | null;
+  tiktok: string | null;
+  twitter: string | null;
   opening_hours: OpeningHours | string | null;
-  menu_url: string | null;
-  booking_url: string | null;
-  cuisine_type: string | null;
+  cuisine_types: string[] | null;
+  subcategories: string[] | null;
   features: string[] | null;
   logo_url: string | null;
   cover_image_url: string | null;
-  gallery_images: string[] | null;
+  gallery: string[] | null;
   latitude: number | null;
   longitude: number | null;
+  google_maps_url: string | null;
+  price_range: number | null;
+  avg_cost_per_person: string | null;
   status: string;
   password_hash?: string;
 }
@@ -118,24 +125,31 @@ export async function PATCH(request: NextRequest) {
     const body = await request.json();
 
     // Only allow updating certain fields
+    // Note: must match actual database column names exactly (from database.ts)
     const allowedFields = [
       'description',
+      'description_ar',
       'phone',
       'address',
       'area',
       'opening_hours',
       'instagram',
       'website',
-      'menu_url',
-      'booking_url',
-      'cuisine_type',
+      'whatsapp',
+      'facebook',
+      'tiktok',
+      'twitter',
+      'cuisine_types', // plural - matches database column
+      'subcategories',
       'features',
       'logo_url',
       'cover_image_url',
-      'gallery_images',
+      'gallery',
       'latitude',
       'longitude',
       'google_maps_url',
+      'price_range',
+      'avg_cost_per_person',
     ];
 
     const updates: Record<string, unknown> = {};

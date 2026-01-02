@@ -10,7 +10,6 @@ import {
   Clock,
   Tag,
   Link as LinkIcon,
-  Upload,
   Loader2,
   CheckCircle,
   AlertCircle,
@@ -49,11 +48,8 @@ export default function CreateEventPage() {
     end_date: '',
     start_time: '',
     end_time: '',
-    price_min: '',
-    price_max: '',
     booking_url: '',
     google_maps_url: '',
-    tags: '',
     featured_image: '',
   });
 
@@ -130,17 +126,10 @@ export default function CreateEventPage() {
     }
 
     try {
-      const eventData = {
-        ...formData,
-        tags: formData.tags
-          ? formData.tags.split(',').map((t) => t.trim()).filter(Boolean)
-          : [],
-      };
-
       const response = await fetch('/api/venue-portal/events', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(eventData),
+        body: JSON.stringify(formData),
       });
 
       if (response.ok) {
@@ -372,52 +361,6 @@ export default function CreateEventPage() {
           </div>
         </div>
 
-        {/* Price (BD Currency) */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <div>
-            <label className="block text-sm font-medium text-gray-300 mb-2">
-              Price From (BD)
-            </label>
-            <div className="relative">
-              <span className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-500">
-                BD
-              </span>
-              <input
-                type="number"
-                name="price_min"
-                value={formData.price_min}
-                onChange={handleChange}
-                min="0"
-                step="0.001"
-                className="w-full pl-12 pr-4 py-3 bg-white/5 border border-white/10 rounded-xl text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-yellow-400/50 focus:border-transparent"
-                placeholder="0.000"
-              />
-            </div>
-            <p className="text-gray-500 text-xs mt-1">Leave empty for free events</p>
-          </div>
-          <div>
-            <label className="block text-sm font-medium text-gray-300 mb-2">
-              Price To (BD)
-            </label>
-            <div className="relative">
-              <span className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-500">
-                BD
-              </span>
-              <input
-                type="number"
-                name="price_max"
-                value={formData.price_max}
-                onChange={handleChange}
-                min="0"
-                step="0.001"
-                className="w-full pl-12 pr-4 py-3 bg-white/5 border border-white/10 rounded-xl text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-yellow-400/50 focus:border-transparent"
-                placeholder="0.000"
-              />
-            </div>
-            <p className="text-gray-500 text-xs mt-1">Optional - for price range</p>
-          </div>
-        </div>
-
         {/* Booking URL */}
         <div>
           <label className="block text-sm font-medium text-gray-300 mb-2">
@@ -440,21 +383,6 @@ export default function CreateEventPage() {
               placeholder="www.booking-site.com/event"
             />
           </div>
-        </div>
-
-        {/* Tags */}
-        <div>
-          <label className="block text-sm font-medium text-gray-300 mb-2">
-            Tags (comma-separated)
-          </label>
-          <input
-            type="text"
-            name="tags"
-            value={formData.tags}
-            onChange={handleChange}
-            className="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-xl text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-yellow-400/50 focus:border-transparent"
-            placeholder="e.g., ladies night, happy hour, live music"
-          />
         </div>
 
         {/* Google Maps Link */}

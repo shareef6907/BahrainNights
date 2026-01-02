@@ -133,6 +133,7 @@ export async function POST(request: NextRequest) {
     const slug = `${baseSlug}-${timestamp}`;
 
     // Create event with correct database column names
+    // Note: tags, price_min, price_max columns don't exist in the events table
     const eventData = {
       venue_id: venueId,
       venue_name: venue.name,
@@ -145,11 +146,8 @@ export async function POST(request: NextRequest) {
       end_date: body.end_date || null,
       start_time: body.start_time || null,
       end_time: body.end_time || null,
-      price_min: body.price_min ? parseFloat(body.price_min) : null,
-      price_max: body.price_max ? parseFloat(body.price_max) : null,
       booking_url: body.booking_url || null,
       google_maps_link: body.google_maps_url || null,
-      tags: body.tags || [],
       featured_image: body.featured_image || null,
       status: 'pending',
       is_featured: false,

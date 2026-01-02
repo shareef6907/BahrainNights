@@ -69,7 +69,7 @@ export default function PlaceHours({
       initial={{ opacity: 0, y: 20 }}
       whileInView={{ opacity: 1, y: 0 }}
       viewport={{ once: true }}
-      className="bg-white/5 backdrop-blur-sm border border-white/10 rounded-2xl p-6 sticky top-24"
+      className="bg-white/5 backdrop-blur-sm border border-white/10 rounded-2xl p-6"
     >
       {/* Opening Hours */}
       <div className="mb-6">

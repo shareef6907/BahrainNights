@@ -57,24 +57,31 @@ export async function POST(request: NextRequest) {
     }
 
     // Only allow certain fields to be changed
+    // Note: must match actual database column names exactly (from database.ts)
     const allowedFields = [
       'description',
+      'description_ar',
       'phone',
       'address',
       'area',
       'opening_hours',
       'instagram',
       'website',
-      'menu_url',
-      'booking_url',
-      'cuisine_type',
+      'whatsapp',
+      'facebook',
+      'tiktok',
+      'twitter',
+      'cuisine_types', // plural - matches database column
+      'subcategories',
       'features',
       'logo_url',
       'cover_image_url',
-      'gallery_images',
+      'gallery',
       'latitude',
       'longitude',
       'google_maps_url',
+      'price_range',
+      'avg_cost_per_person',
     ];
 
     const filteredChanges: Record<string, unknown> = {};

@@ -57,11 +57,55 @@ export async function POST(request: NextRequest, context: RouteContext) {
       );
     }
 
-    // Apply the changes to the venue
+    // Valid venue columns that can be updated
+    // Must match actual database column names exactly (from database.ts)
+    const validVenueColumns = [
+      'description',
+      'description_ar',
+      'phone',
+      'address',
+      'area',
+      'opening_hours',
+      'instagram',
+      'website',
+      'whatsapp',
+      'facebook',
+      'tiktok',
+      'twitter',
+      'cuisine_types', // plural - database column name
+      'subcategories',
+      'features',
+      'logo_url',
+      'cover_image_url',
+      'gallery',
+      'latitude',
+      'longitude',
+      'google_maps_url',
+      'price_range',
+      'avg_cost_per_person',
+    ];
+
+    // Filter changes to only include valid columns
+    const filteredChanges: Record<string, unknown> = {};
+    for (const [key, value] of Object.entries(request_data.changes)) {
+      if (validVenueColumns.includes(key)) {
+        filteredChanges[key] = value;
+      }
+    }
+
+    // Skip update if no valid changes
+    if (Object.keys(filteredChanges).length === 0) {
+      return NextResponse.json(
+        { error: 'No valid changes to apply' },
+        { status: 400 }
+      );
+    }
+
+    // Apply the filtered changes to the venue
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const { error: updateVenueError } = await (supabase
       .from('venues') as any)
-      .update(request_data.changes)
+      .update(filteredChanges)
       .eq('id', request_data.venue_id);
 
     if (updateVenueError) {

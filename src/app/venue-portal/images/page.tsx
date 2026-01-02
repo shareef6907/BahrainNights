@@ -39,7 +39,7 @@ export default function VenueImagesPage() {
       const response = await fetch('/api/venue-portal/profile');
       if (response.ok) {
         const data = await response.json();
-        setImages(data.venue.gallery_images || []);
+        setImages(data.venue.gallery || []);
       }
     } catch (error) {
       console.error('Failed to load images:', error);
@@ -132,7 +132,7 @@ export default function VenueImagesPage() {
         const updateResponse = await fetch('/api/venue-portal/profile', {
           method: 'PATCH',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ gallery_images: newImages }),
+          body: JSON.stringify({ gallery: newImages }),
         });
 
         if (updateResponse.ok) {
@@ -165,7 +165,7 @@ export default function VenueImagesPage() {
       const response = await fetch('/api/venue-portal/profile', {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ gallery_images: newImages }),
+        body: JSON.stringify({ gallery: newImages }),
       });
 
       if (response.ok) {
