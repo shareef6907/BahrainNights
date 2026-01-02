@@ -19,6 +19,8 @@ import {
   BarChart3,
   Loader2,
   Mail,
+  Globe,
+  Activity,
 } from 'lucide-react';
 import AdminLayout from '@/components/admin/AdminLayout';
 
@@ -69,7 +71,20 @@ interface AnalyticsData {
       comingSoon: number;
     };
     subscribers: number;
+    visitors: {
+      totalPageViews: number;
+      uniqueVisitors: number;
+      today: number;
+      thisWeek: number;
+      thisMonth: number;
+    };
   };
+  visitorsByCountry: Record<string, number>;
+  dailyTraffic: Array<{
+    date: string;
+    views: number;
+    visitors: number;
+  }>;
   topVenues: {
     byLikes: Array<{
       id: string;
@@ -220,7 +235,7 @@ export default function AnalyticsPage() {
 
   if (!data) return null;
 
-  const { overview, topVenues, topEvents, venuesByCategory, eventsByCategory, recentActivity } = data;
+  const { overview, topVenues, topEvents, venuesByCategory, eventsByCategory, recentActivity, visitorsByCountry, dailyTraffic } = data;
 
   // Calculate category bar widths
   const maxVenueCategory = Math.max(...Object.values(venuesByCategory), 1);
@@ -333,6 +348,135 @@ export default function AnalyticsPage() {
               <span className="text-gray-500">|</span>
               <span className="text-cyan-400">+{overview.likes.thisMonth} this month</span>
             </div>
+          </motion.div>
+        </div>
+
+        {/* Website Visitors Section */}
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.35 }}
+          className="bg-gradient-to-r from-blue-500/10 to-purple-500/10 rounded-xl p-6 border border-blue-500/30 mb-6"
+        >
+          <div className="flex items-center gap-3 mb-4">
+            <div className="p-2 bg-blue-500/20 rounded-lg">
+              <Globe className="w-5 h-5 text-blue-400" />
+            </div>
+            <h2 className="text-lg font-semibold text-white">Website Visitors</h2>
+          </div>
+          <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
+            <div className="bg-gray-800/50 rounded-lg p-4">
+              <p className="text-gray-400 text-sm">Total Page Views</p>
+              <p className="text-2xl font-bold text-white">{formatNumber(overview.visitors?.totalPageViews || 0)}</p>
+            </div>
+            <div className="bg-gray-800/50 rounded-lg p-4">
+              <p className="text-gray-400 text-sm">Unique Visitors</p>
+              <p className="text-2xl font-bold text-white">{formatNumber(overview.visitors?.uniqueVisitors || 0)}</p>
+            </div>
+            <div className="bg-gray-800/50 rounded-lg p-4">
+              <p className="text-gray-400 text-sm">Today</p>
+              <p className="text-2xl font-bold text-green-400">{formatNumber(overview.visitors?.today || 0)}</p>
+            </div>
+            <div className="bg-gray-800/50 rounded-lg p-4">
+              <p className="text-gray-400 text-sm">This Week</p>
+              <p className="text-2xl font-bold text-cyan-400">{formatNumber(overview.visitors?.thisWeek || 0)}</p>
+            </div>
+            <div className="bg-gray-800/50 rounded-lg p-4">
+              <p className="text-gray-400 text-sm">This Month</p>
+              <p className="text-2xl font-bold text-purple-400">{formatNumber(overview.visitors?.thisMonth || 0)}</p>
+            </div>
+          </div>
+        </motion.div>
+
+        {/* Visitors by Country + Daily Traffic */}
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
+          {/* Visitors by Country */}
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.4 }}
+            className="bg-gray-800/50 rounded-xl p-6 border border-gray-700"
+          >
+            <div className="flex items-center gap-3 mb-6">
+              <div className="p-2 bg-green-500/20 rounded-lg">
+                <Globe className="w-5 h-5 text-green-400" />
+              </div>
+              <h2 className="text-lg font-semibold text-white">Visitors by Country</h2>
+            </div>
+
+            {Object.keys(visitorsByCountry || {}).length === 0 ? (
+              <p className="text-gray-500 text-center py-8">No country data yet - visitors will appear here</p>
+            ) : (
+              <div className="space-y-3">
+                {Object.entries(visitorsByCountry)
+                  .sort((a, b) => b[1] - a[1])
+                  .slice(0, 8)
+                  .map(([country, count]) => {
+                    const maxCount = Math.max(...Object.values(visitorsByCountry), 1);
+                    return (
+                      <div key={country}>
+                        <div className="flex items-center justify-between mb-1">
+                          <span className="text-gray-300 text-sm truncate max-w-[180px]">
+                            {country}
+                          </span>
+                          <span className="text-white font-medium">{formatNumber(count)}</span>
+                        </div>
+                        <div className="h-2 bg-gray-700 rounded-full overflow-hidden">
+                          <div
+                            className="h-full bg-green-500 rounded-full"
+                            style={{ width: `${(count / maxCount) * 100}%` }}
+                          />
+                        </div>
+                      </div>
+                    );
+                  })}
+              </div>
+            )}
+          </motion.div>
+
+          {/* Daily Traffic */}
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.45 }}
+            className="bg-gray-800/50 rounded-xl p-6 border border-gray-700"
+          >
+            <div className="flex items-center gap-3 mb-6">
+              <div className="p-2 bg-cyan-500/20 rounded-lg">
+                <Activity className="w-5 h-5 text-cyan-400" />
+              </div>
+              <h2 className="text-lg font-semibold text-white">Daily Traffic (Last 30 Days)</h2>
+            </div>
+
+            {(dailyTraffic || []).length === 0 ? (
+              <p className="text-gray-500 text-center py-8">No traffic data yet - views will appear here</p>
+            ) : (
+              <div className="space-y-2">
+                <div className="flex items-end gap-1 h-32">
+                  {(dailyTraffic || []).slice(-14).map((day, index) => {
+                    const maxViews = Math.max(...(dailyTraffic || []).map(d => d.views), 1);
+                    const height = (day.views / maxViews) * 100;
+                    return (
+                      <div
+                        key={day.date}
+                        className="flex-1 bg-cyan-500/30 hover:bg-cyan-500/50 rounded-t transition-colors relative group"
+                        style={{ height: `${Math.max(height, 5)}%` }}
+                      >
+                        <div className="absolute bottom-full mb-2 left-1/2 -translate-x-1/2 bg-gray-900 text-white text-xs px-2 py-1 rounded opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap z-10">
+                          {new Date(day.date).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}
+                          <br />
+                          {day.views} views | {day.visitors} visitors
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+                <div className="flex justify-between text-xs text-gray-500 mt-2">
+                  <span>{(dailyTraffic || []).length > 0 && new Date((dailyTraffic || [])[Math.max(0, (dailyTraffic || []).length - 14)]?.date).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}</span>
+                  <span>Today</span>
+                </div>
+              </div>
+            )}
           </motion.div>
         </div>
 

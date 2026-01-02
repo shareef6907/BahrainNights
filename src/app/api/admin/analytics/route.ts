@@ -280,6 +280,122 @@ export async function GET() {
       // Table may not exist
     }
 
+    // ============ WEBSITE VISITORS (from page_views table) ============
+    let totalPageViews = 0;
+    let uniqueVisitors = 0;
+    let visitorsToday = 0;
+    let visitorsThisWeek = 0;
+    let visitorsThisMonth = 0;
+    let visitorsByCountry: Record<string, number> = {};
+    let dailyTraffic: { date: string; views: number; visitors: number }[] = [];
+
+    try {
+      // Total page views
+      const { count: pageViewCount } = await supabase
+        .from('page_views')
+        .select('*', { count: 'exact', head: true });
+      totalPageViews = pageViewCount || 0;
+
+      // Today's stats
+      const todayStart = new Date();
+      todayStart.setHours(0, 0, 0, 0);
+
+      const { data: todayViews } = await supabase
+        .from('page_views')
+        .select('ip_hash')
+        .gte('created_at', todayStart.toISOString());
+
+      const todayUniqueIPs = new Set((todayViews as { ip_hash: string | null }[] | null)?.map(v => v.ip_hash).filter(Boolean) || []);
+      visitorsToday = todayUniqueIPs.size;
+
+      // This week's stats
+      const weekStart = new Date();
+      weekStart.setDate(weekStart.getDate() - 7);
+
+      const { data: weekViews } = await supabase
+        .from('page_views')
+        .select('ip_hash')
+        .gte('created_at', weekStart.toISOString());
+
+      const weekUniqueIPs = new Set((weekViews as { ip_hash: string | null }[] | null)?.map(v => v.ip_hash).filter(Boolean) || []);
+      visitorsThisWeek = weekUniqueIPs.size;
+
+      // This month's stats
+      const { data: monthViews } = await supabase
+        .from('page_views')
+        .select('ip_hash')
+        .gte('created_at', startOfMonth.toISOString());
+
+      const monthUniqueIPs = new Set((monthViews as { ip_hash: string | null }[] | null)?.map(v => v.ip_hash).filter(Boolean) || []);
+      visitorsThisMonth = monthUniqueIPs.size;
+
+      // Total unique visitors (all time)
+      const { data: allViews } = await supabase
+        .from('page_views')
+        .select('ip_hash');
+
+      const allUniqueIPs = new Set((allViews as { ip_hash: string | null }[] | null)?.map(v => v.ip_hash).filter(Boolean) || []);
+      uniqueVisitors = allUniqueIPs.size;
+
+      // Visitors by country
+      const { data: countryViews } = await supabase
+        .from('page_views')
+        .select('country, ip_hash')
+        .not('country', 'is', null);
+
+      const countryVisitors: Record<string, Set<string>> = {};
+      (countryViews as { country: string | null; ip_hash: string | null }[] | null)?.forEach((v) => {
+        const country = v.country || 'Unknown';
+        if (!countryVisitors[country]) {
+          countryVisitors[country] = new Set();
+        }
+        if (v.ip_hash) {
+          countryVisitors[country].add(v.ip_hash);
+        }
+      });
+
+      visitorsByCountry = Object.fromEntries(
+        Object.entries(countryVisitors)
+          .map(([country, ips]) => [country, ips.size])
+          .sort((a, b) => (b[1] as number) - (a[1] as number))
+          .slice(0, 10)
+      );
+
+      // Daily traffic for last 30 days
+      const thirtyDaysAgo = new Date();
+      thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
+
+      const { data: dailyViews } = await supabase
+        .from('page_views')
+        .select('created_at, ip_hash')
+        .gte('created_at', thirtyDaysAgo.toISOString())
+        .order('created_at', { ascending: true });
+
+      const dailyStats: Record<string, { views: number; visitors: Set<string> }> = {};
+      (dailyViews as { created_at: string; ip_hash: string | null }[] | null)?.forEach((v) => {
+        const date = v.created_at.split('T')[0];
+        if (!dailyStats[date]) {
+          dailyStats[date] = { views: 0, visitors: new Set() };
+        }
+        dailyStats[date].views++;
+        if (v.ip_hash) {
+          dailyStats[date].visitors.add(v.ip_hash);
+        }
+      });
+
+      dailyTraffic = Object.entries(dailyStats)
+        .map(([date, stats]) => ({
+          date,
+          views: stats.views,
+          visitors: stats.visitors.size,
+        }))
+        .sort((a, b) => a.date.localeCompare(b.date));
+
+    } catch (err) {
+      console.error('Error fetching page view stats:', err);
+      // Table may not exist or have no data yet
+    }
+
     return NextResponse.json({
       overview: {
         venues: {
@@ -327,7 +443,16 @@ export async function GET() {
           comingSoon: comingSoonMovies,
         },
         subscribers: totalSubscribers,
+        visitors: {
+          totalPageViews,
+          uniqueVisitors,
+          today: visitorsToday,
+          thisWeek: visitorsThisWeek,
+          thisMonth: visitorsThisMonth,
+        },
       },
+      visitorsByCountry,
+      dailyTraffic,
       topVenues: {
         byLikes: topVenuesByLikes || [],
         byViews: topVenuesByViews || [],

@@ -609,6 +609,9 @@ export interface Database {
           user_agent: string | null;
           ip_hash: string | null;
           referrer: string | null;
+          country: string | null;
+          country_code: string | null;
+          city: string | null;
           created_at: string;
         };
         Insert: {
@@ -619,6 +622,9 @@ export interface Database {
           user_agent?: string | null;
           ip_hash?: string | null;
           referrer?: string | null;
+          country?: string | null;
+          country_code?: string | null;
+          city?: string | null;
           created_at?: string;
         };
         Update: {
@@ -629,6 +635,9 @@ export interface Database {
           user_agent?: string | null;
           ip_hash?: string | null;
           referrer?: string | null;
+          country?: string | null;
+          country_code?: string | null;
+          city?: string | null;
           created_at?: string;
         };
       };

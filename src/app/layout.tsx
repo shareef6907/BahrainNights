@@ -4,6 +4,7 @@ import "./globals.css";
 import { AuthProvider } from "@/lib/auth-context";
 import { LanguageProvider } from "@/context/LanguageContext";
 import { PublicAuthProvider } from "@/context/PublicAuthContext";
+import { PageTracker } from "@/components/analytics/PageTracker";
 
 const inter = Inter({
   variable: "--font-inter",
@@ -69,6 +70,7 @@ export default function RootLayout({
         <LanguageProvider>
           <PublicAuthProvider>
             <AuthProvider>
+              <PageTracker />
               {children}
             </AuthProvider>
           </PublicAuthProvider>

@@ -29,6 +29,9 @@ export async function trackPageView(data: {
   ipHash?: string;
   userAgent?: string;
   referrer?: string;
+  country?: string;
+  countryCode?: string;
+  city?: string;
 }): Promise<void> {
   const supabase = getAdminClient();
 
@@ -39,6 +42,9 @@ export async function trackPageView(data: {
     ip_hash: data.ipHash || null,
     user_agent: data.userAgent || null,
     referrer: data.referrer || null,
+    country: data.country || null,
+    country_code: data.countryCode || null,
+    city: data.city || null,
   };
 
   const { error } = await supabase
