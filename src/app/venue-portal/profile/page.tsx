@@ -8,13 +8,14 @@ import {
   MapPin,
   Globe,
   Instagram,
-  Save,
+  Send,
   Loader2,
   CheckCircle,
   AlertCircle,
   ChevronRight,
   Clock,
   Navigation,
+  Info,
 } from 'lucide-react';
 import Link from 'next/link';
 
@@ -35,11 +36,20 @@ interface VenueProfile {
   features?: string[];
 }
 
+interface PendingChangeRequest {
+  id: string;
+  venue_id: string;
+  changes: Record<string, unknown>;
+  status: string;
+  submitted_at: string;
+}
+
 export default function VenueProfilePage() {
   const [venue, setVenue] = useState<VenueProfile | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [isSaving, setIsSaving] = useState(false);
-  const [message, setMessage] = useState<{ type: 'success' | 'error'; text: string } | null>(null);
+  const [message, setMessage] = useState<{ type: 'success' | 'error' | 'info'; text: string } | null>(null);
+  const [pendingRequest, setPendingRequest] = useState<PendingChangeRequest | null>(null);
 
   const [formData, setFormData] = useState({
     description: '',
@@ -57,6 +67,7 @@ export default function VenueProfilePage() {
   useEffect(() => {
     async function loadProfile() {
       try {
+        // Load profile data
         const response = await fetch('/api/venue-portal/profile');
         if (response.ok) {
           const data = await response.json();
@@ -73,6 +84,13 @@ export default function VenueProfilePage() {
             cuisine_type: data.venue.cuisine_type || '',
             features: data.venue.features?.join(', ') || '',
           });
+        }
+
+        // Check for pending change request
+        const pendingResponse = await fetch('/api/venue-portal/profile/request-change');
+        if (pendingResponse.ok) {
+          const pendingData = await pendingResponse.json();
+          setPendingRequest(pendingData.pendingRequest);
         }
       } catch (error) {
         console.error('Failed to load profile:', error);
@@ -95,30 +113,34 @@ export default function VenueProfilePage() {
     setMessage(null);
 
     try {
-      const updateData = {
+      const changes = {
         ...formData,
         features: formData.features
           ? formData.features.split(',').map((f) => f.trim()).filter(Boolean)
           : [],
       };
 
-      const response = await fetch('/api/venue-portal/profile', {
-        method: 'PATCH',
+      // Submit changes for approval instead of direct update
+      const response = await fetch('/api/venue-portal/profile/request-change', {
+        method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(updateData),
+        body: JSON.stringify({ changes }),
       });
 
       if (response.ok) {
         const data = await response.json();
-        setVenue(data.venue);
-        setMessage({ type: 'success', text: 'Profile updated successfully!' });
+        setPendingRequest(data.request);
+        setMessage({
+          type: 'success',
+          text: data.message || 'Your changes have been submitted for admin approval.'
+        });
       } else {
         const data = await response.json();
-        setMessage({ type: 'error', text: data.error || 'Failed to update profile' });
+        setMessage({ type: 'error', text: data.error || 'Failed to submit changes' });
       }
     } catch (error) {
       console.error('Save error:', error);
-      setMessage({ type: 'error', text: 'An error occurred while saving' });
+      setMessage({ type: 'error', text: 'An error occurred while submitting changes' });
     } finally {
       setIsSaving(false);
     }
@@ -140,6 +162,29 @@ export default function VenueProfilePage() {
         <p className="text-gray-400 mt-1">Update your venue information visible to visitors.</p>
       </div>
 
+      {/* Pending Request Notice */}
+      {pendingRequest && (
+        <motion.div
+          initial={{ opacity: 0, y: -10 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="flex items-start gap-3 p-4 rounded-xl bg-yellow-500/20 text-yellow-400 border border-yellow-500/30"
+        >
+          <Info className="w-5 h-5 mt-0.5 flex-shrink-0" />
+          <div>
+            <p className="font-medium">Profile Changes Pending Approval</p>
+            <p className="text-sm text-yellow-400/80 mt-1">
+              You submitted changes on {new Date(pendingRequest.submitted_at).toLocaleDateString('en-GB', {
+                day: 'numeric',
+                month: 'short',
+                year: 'numeric',
+                hour: '2-digit',
+                minute: '2-digit'
+              })}. An admin will review your changes soon. You can update your submission below.
+            </p>
+          </div>
+        </motion.div>
+      )}
+
       {/* Message */}
       {message && (
         <motion.div
@@ -148,11 +193,15 @@ export default function VenueProfilePage() {
           className={`flex items-center gap-3 p-4 rounded-xl ${
             message.type === 'success'
               ? 'bg-green-500/20 text-green-400 border border-green-500/30'
+              : message.type === 'info'
+              ? 'bg-blue-500/20 text-blue-400 border border-blue-500/30'
               : 'bg-red-500/20 text-red-400 border border-red-500/30'
           }`}
         >
           {message.type === 'success' ? (
             <CheckCircle className="w-5 h-5" />
+          ) : message.type === 'info' ? (
+            <Info className="w-5 h-5" />
           ) : (
             <AlertCircle className="w-5 h-5" />
           )}
@@ -410,7 +459,7 @@ export default function VenueProfilePage() {
         </div>
 
         {/* Submit Button */}
-        <div className="flex justify-end pt-4">
+        <div className="flex flex-col items-end gap-2 pt-4">
           <button
             type="submit"
             disabled={isSaving}
@@ -419,15 +468,18 @@ export default function VenueProfilePage() {
             {isSaving ? (
               <>
                 <Loader2 className="w-5 h-5 animate-spin" />
-                Saving...
+                Submitting...
               </>
             ) : (
               <>
-                <Save className="w-5 h-5" />
-                Save Changes
+                <Send className="w-5 h-5" />
+                {pendingRequest ? 'Update Submission' : 'Submit for Approval'}
               </>
             )}
           </button>
+          <p className="text-xs text-gray-500">
+            Changes require admin approval before going live.
+          </p>
         </div>
       </motion.form>
     </div>

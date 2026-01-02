@@ -132,24 +132,26 @@ export async function POST(request: NextRequest) {
     const timestamp = Date.now().toString(36);
     const slug = `${baseSlug}-${timestamp}`;
 
-    // Create event
+    // Create event with correct database column names
     const eventData = {
       venue_id: venueId,
       venue_name: venue.name,
       venue_slug: venue.slug,
       title: body.title.trim(),
       slug,
-      description: body.description?.trim() || '', // Required field - empty string if not provided
+      description: body.description?.trim() || '',
       category: body.category,
       start_date: body.start_date,
       end_date: body.end_date || null,
       start_time: body.start_time || null,
       end_time: body.end_time || null,
-      price: body.price_range || null, // DB field is 'price' not 'price_range'
+      price_min: body.price_min ? parseFloat(body.price_min) : null,
+      price_max: body.price_max ? parseFloat(body.price_max) : null,
       booking_url: body.booking_url || null,
+      google_maps_link: body.google_maps_url || null,
       tags: body.tags || [],
       featured_image: body.featured_image || null,
-      status: 'pending', // All venue-created events start as pending
+      status: 'pending',
       is_featured: false,
       view_count: 0,
     };

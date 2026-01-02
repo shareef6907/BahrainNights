@@ -17,6 +17,7 @@ import {
   CheckCircle2,
   ArrowLeft,
   ArrowRight,
+  Hash,
 } from 'lucide-react';
 import { useAuth } from '@/lib/auth-context';
 import {
@@ -42,6 +43,7 @@ interface FormData {
   password: string;
   confirmPassword: string;
   venueName: string;
+  crNumber: string;
   venueType: string;
   phone: string;
   website: string;
@@ -62,6 +64,7 @@ export default function RegisterForm() {
     password: '',
     confirmPassword: '',
     venueName: '',
+    crNumber: '',
     venueType: '',
     phone: '',
     website: '',
@@ -111,6 +114,7 @@ export default function RegisterForm() {
         schema = registerStep2Schema;
         dataToValidate = {
           venueName: formData.venueName,
+          crNumber: formData.crNumber,
           venueType: formData.venueType,
           phone: formData.phone,
           website: formData.website,
@@ -168,6 +172,7 @@ export default function RegisterForm() {
         email: formData.email,
         password: formData.password,
         venueName: formData.venueName,
+        crNumber: formData.crNumber,
         venueType: formData.venueType,
         phone: formData.phone,
         website: formData.website || undefined,
@@ -338,6 +343,32 @@ export default function RegisterForm() {
               </div>
               {errors.venueName && (
                 <p className="text-red-400 text-sm">{errors.venueName}</p>
+              )}
+            </div>
+
+            {/* CR Number */}
+            <div className="space-y-2">
+              <label className="block text-sm font-medium text-gray-300">
+                CR Number (Commercial Registration) *
+              </label>
+              <div className="relative">
+                <Hash className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
+                <input
+                  type="text"
+                  name="crNumber"
+                  value={formData.crNumber}
+                  onChange={handleChange}
+                  placeholder="e.g., 12345 or 123456-1"
+                  className={`w-full pl-12 pr-4 py-3 bg-white/5 border ${
+                    errors.crNumber ? 'border-red-500' : 'border-white/10'
+                  } rounded-xl text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-yellow-500/50 focus:border-transparent transition-all`}
+                />
+              </div>
+              <p className="text-gray-500 text-xs">
+                Your Bahrain Commercial Registration number (5-7 digits)
+              </p>
+              {errors.crNumber && (
+                <p className="text-red-400 text-sm">{errors.crNumber}</p>
               )}
             </div>
 

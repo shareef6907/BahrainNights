@@ -36,12 +36,22 @@ export const registerStep1Schema = z
 
 export type RegisterStep1Input = z.infer<typeof registerStep1Schema>;
 
+// Bahrain CR Number validator (5-7 digits, optionally followed by -1)
+const crNumberSchema = z
+  .string()
+  .min(1, 'CR Number is required')
+  .regex(
+    /^\d{5,7}(-1)?$/,
+    'Invalid CR Number format. Example: 12345 or 123456-1'
+  );
+
 // Register Step 2: Venue Information
 export const registerStep2Schema = z.object({
   venueName: z
     .string()
     .min(2, 'Venue name must be at least 2 characters')
     .max(100, 'Venue name must be less than 100 characters'),
+  crNumber: crNumberSchema,
   venueType: z.enum(
     [
       'restaurant',
@@ -114,6 +124,7 @@ export const registerSchema = z
     password: passwordSchema,
     confirmPassword: z.string(),
     venueName: z.string().min(2).max(100),
+    crNumber: crNumberSchema,
     venueType: z.enum([
       'restaurant',
       'cafe',

@@ -11,6 +11,10 @@ const fullRegistrationSchema = z.object({
   password: z.string().min(8, 'Password must be at least 8 characters'),
   // Step 2
   venueName: z.string().min(2, 'Venue name is required'),
+  crNumber: z
+    .string()
+    .min(1, 'CR Number is required')
+    .regex(/^\d{5,7}(-1)?$/, 'Invalid CR Number format. Example: 12345 or 123456-1'),
   venueType: z.string().min(1, 'Please select a venue type'),
   phone: z.string().min(8, 'Please enter a valid phone number'),
   website: z.string().optional(),
@@ -66,10 +70,12 @@ export async function POST(request: NextRequest) {
       .replace(/(^-|-$)/g, '');
 
     // Create venue in database
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const newVenue = await createVenue({
       owner_id: newUser.id,
       name: data.venueName,
       slug: venueSlug,
+      cr_number: data.crNumber,
       category: data.venueType,
       phone: data.phone,
       website: data.website || null,
@@ -78,7 +84,7 @@ export async function POST(request: NextRequest) {
       address: data.address,
       google_maps_url: data.googleMapsLink || null,
       status: 'pending',
-    });
+    } as any);
 
     // Send welcome email
     sendWelcomeEmail(newUser.email, newVenue.name);

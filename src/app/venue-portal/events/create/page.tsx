@@ -49,7 +49,8 @@ export default function CreateEventPage() {
     end_date: '',
     start_time: '',
     end_time: '',
-    price_range: '',
+    price_min: '',
+    price_max: '',
     booking_url: '',
     google_maps_url: '',
     tags: '',
@@ -371,47 +372,73 @@ export default function CreateEventPage() {
           </div>
         </div>
 
-        {/* Price & Booking */}
+        {/* Price (BD Currency) */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <div>
             <label className="block text-sm font-medium text-gray-300 mb-2">
-              Price Range
-            </label>
-            <select
-              name="price_range"
-              value={formData.price_range}
-              onChange={handleChange}
-              className="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-xl text-white focus:outline-none focus:ring-2 focus:ring-yellow-400/50 focus:border-transparent"
-            >
-              <option value="">Select price range</option>
-              <option value="Free">Free</option>
-              <option value="$">$ (Under BD 10)</option>
-              <option value="$$">$$ (BD 10-25)</option>
-              <option value="$$$">$$$ (BD 25-50)</option>
-              <option value="$$$$">$$$$ (Over BD 50)</option>
-            </select>
-          </div>
-          <div>
-            <label className="block text-sm font-medium text-gray-300 mb-2">
-              <LinkIcon className="w-4 h-4 inline mr-2" />
-              Booking URL
+              Price From (BD)
             </label>
             <div className="relative">
               <span className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-500">
-                https://
+                BD
               </span>
               <input
-                type="text"
-                name="booking_url"
-                value={formData.booking_url.replace(/^https?:\/\//, '')}
-                onChange={(e) => {
-                  const value = e.target.value.replace(/^https?:\/\//, '');
-                  setFormData((prev) => ({ ...prev, booking_url: value ? `https://${value}` : '' }));
-                }}
-                className="w-full pl-20 pr-4 py-3 bg-white/5 border border-white/10 rounded-xl text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-yellow-400/50 focus:border-transparent"
-                placeholder="www.booking-site.com/event"
+                type="number"
+                name="price_min"
+                value={formData.price_min}
+                onChange={handleChange}
+                min="0"
+                step="0.001"
+                className="w-full pl-12 pr-4 py-3 bg-white/5 border border-white/10 rounded-xl text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-yellow-400/50 focus:border-transparent"
+                placeholder="0.000"
               />
             </div>
+            <p className="text-gray-500 text-xs mt-1">Leave empty for free events</p>
+          </div>
+          <div>
+            <label className="block text-sm font-medium text-gray-300 mb-2">
+              Price To (BD)
+            </label>
+            <div className="relative">
+              <span className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-500">
+                BD
+              </span>
+              <input
+                type="number"
+                name="price_max"
+                value={formData.price_max}
+                onChange={handleChange}
+                min="0"
+                step="0.001"
+                className="w-full pl-12 pr-4 py-3 bg-white/5 border border-white/10 rounded-xl text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-yellow-400/50 focus:border-transparent"
+                placeholder="0.000"
+              />
+            </div>
+            <p className="text-gray-500 text-xs mt-1">Optional - for price range</p>
+          </div>
+        </div>
+
+        {/* Booking URL */}
+        <div>
+          <label className="block text-sm font-medium text-gray-300 mb-2">
+            <LinkIcon className="w-4 h-4 inline mr-2" />
+            Booking URL
+          </label>
+          <div className="relative">
+            <span className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-500">
+              https://
+            </span>
+            <input
+              type="text"
+              name="booking_url"
+              value={formData.booking_url.replace(/^https?:\/\//, '')}
+              onChange={(e) => {
+                const value = e.target.value.replace(/^https?:\/\//, '');
+                setFormData((prev) => ({ ...prev, booking_url: value ? `https://${value}` : '' }));
+              }}
+              className="w-full pl-20 pr-4 py-3 bg-white/5 border border-white/10 rounded-xl text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-yellow-400/50 focus:border-transparent"
+              placeholder="www.booking-site.com/event"
+            />
           </div>
         </div>
 

@@ -81,10 +81,42 @@ async function getVenueFromSession() {
 }
 
 /**
- * Compress image to target size (600KB)
+ * Create watermark SVG text
+ */
+function createWatermarkSvg(imageWidth: number, imageHeight: number): Buffer {
+  // Scale watermark based on image size
+  const fontSize = Math.max(16, Math.min(32, Math.round(imageWidth / 40)));
+  const padding = Math.round(fontSize * 0.75);
+  const text = 'BahrainNights.com';
+
+  const svg = `
+    <svg width="${imageWidth}" height="${imageHeight}">
+      <style>
+        .watermark {
+          fill: rgba(255, 255, 255, 0.6);
+          font-family: Arial, sans-serif;
+          font-size: ${fontSize}px;
+          font-weight: bold;
+          text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.5);
+        }
+      </style>
+      <text
+        x="${imageWidth - padding}"
+        y="${imageHeight - padding}"
+        class="watermark"
+        text-anchor="end"
+      >${text}</text>
+    </svg>
+  `;
+
+  return Buffer.from(svg);
+}
+
+/**
+ * Compress image to target size (600KB) and add watermark
  * Iteratively reduces quality until under target size
  */
-async function compressImage(buffer: Buffer): Promise<{
+async function compressImage(buffer: Buffer, addWatermark: boolean = true): Promise<{
   buffer: Buffer;
   width: number;
   height: number;
@@ -104,20 +136,44 @@ async function compressImage(buffer: Buffer): Promise<{
     height = MAX_HEIGHT;
   }
 
+  // Create base sharp instance with resize
+  let sharpInstance = sharp(buffer)
+    .resize(width, height, { fit: 'inside', withoutEnlargement: true });
+
+  // Add watermark if requested
+  if (addWatermark) {
+    const watermarkSvg = createWatermarkSvg(width, height);
+    sharpInstance = sharpInstance.composite([
+      {
+        input: watermarkSvg,
+        top: 0,
+        left: 0,
+      },
+    ]);
+  }
+
   // Start with high quality
   let quality = 90;
-  let compressedBuffer = await sharp(buffer)
-    .resize(width, height, { fit: 'inside', withoutEnlargement: true })
-    .webp({ quality })
-    .toBuffer();
+  let compressedBuffer = await sharpInstance.webp({ quality }).toBuffer();
 
   // Iteratively reduce quality until under target size
   while (compressedBuffer.length > TARGET_SIZE_KB * 1024 && quality > 20) {
     quality -= 10;
-    compressedBuffer = await sharp(buffer)
-      .resize(width, height, { fit: 'inside', withoutEnlargement: true })
-      .webp({ quality })
-      .toBuffer();
+    sharpInstance = sharp(buffer)
+      .resize(width, height, { fit: 'inside', withoutEnlargement: true });
+
+    if (addWatermark) {
+      const watermarkSvg = createWatermarkSvg(width, height);
+      sharpInstance = sharpInstance.composite([
+        {
+          input: watermarkSvg,
+          top: 0,
+          left: 0,
+        },
+      ]);
+    }
+
+    compressedBuffer = await sharpInstance.webp({ quality }).toBuffer();
   }
 
   // If still too large, reduce dimensions
@@ -126,10 +182,21 @@ async function compressImage(buffer: Buffer): Promise<{
     width = Math.round(width * scaleFactor);
     height = Math.round(height * scaleFactor);
 
-    compressedBuffer = await sharp(buffer)
-      .resize(width, height, { fit: 'inside', withoutEnlargement: true })
-      .webp({ quality: 80 })
-      .toBuffer();
+    sharpInstance = sharp(buffer)
+      .resize(width, height, { fit: 'inside', withoutEnlargement: true });
+
+    if (addWatermark) {
+      const watermarkSvg = createWatermarkSvg(width, height);
+      sharpInstance = sharpInstance.composite([
+        {
+          input: watermarkSvg,
+          top: 0,
+          left: 0,
+        },
+      ]);
+    }
+
+    compressedBuffer = await sharpInstance.webp({ quality: 80 }).toBuffer();
   }
 
   return {
@@ -204,8 +271,11 @@ export async function POST(request: NextRequest) {
     const arrayBuffer = await file.arrayBuffer();
     const buffer = Buffer.from(arrayBuffer);
 
-    // Compress image to 600KB
-    const { buffer: compressedBuffer, width, height } = await compressImage(buffer);
+    // Determine if watermark should be added (gallery images only)
+    const shouldAddWatermark = imageType === 'gallery';
+
+    // Compress image to 600KB and optionally add watermark
+    const { buffer: compressedBuffer, width, height } = await compressImage(buffer, shouldAddWatermark);
 
     // Generate S3 key based on image type
     let s3Key: string;

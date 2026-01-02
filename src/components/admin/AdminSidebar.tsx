@@ -20,6 +20,7 @@ import {
   Inbox,
   Sparkles,
   Heart,
+  ClipboardCheck,
 } from 'lucide-react';
 import { useAuth } from '@/lib/auth-context';
 
@@ -79,6 +80,11 @@ const navItems = [
     name: 'Users',
     href: '/admin/users',
     icon: Users,
+  },
+  {
+    name: 'Venue Changes',
+    href: '/admin/venue-changes',
+    icon: ClipboardCheck,
   },
 ];
 
