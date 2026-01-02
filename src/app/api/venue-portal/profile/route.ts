@@ -164,9 +164,9 @@ export async function PATCH(request: NextRequest) {
     const venue = data as VenueProfileData | null;
 
     if (error || !venue) {
-      console.error('Update profile error:', error);
+      console.error('Update profile error:', error?.message, error?.details, error?.hint);
       return NextResponse.json(
-        { error: 'Failed to update profile' },
+        { error: 'Failed to update profile: ' + (error?.message || 'Unknown error') },
         { status: 500 }
       );
     }

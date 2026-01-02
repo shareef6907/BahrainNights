@@ -15,10 +15,18 @@ import {
 
 const MAX_IMAGES = 20;
 
+interface UploadProgress {
+  fileName: string;
+  previewUrl: string;
+  progress: number; // 0-100
+  status: 'uploading' | 'success' | 'error';
+}
+
 export default function VenueImagesPage() {
   const [images, setImages] = useState<string[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [isUploading, setIsUploading] = useState(false);
+  const [uploadProgress, setUploadProgress] = useState<UploadProgress[]>([]);
   const [message, setMessage] = useState<{ type: 'success' | 'error'; text: string } | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
@@ -54,24 +62,51 @@ export default function VenueImagesPage() {
     setIsUploading(true);
     setMessage(null);
 
+    // Create preview URLs and initial progress state
+    const initialProgress: UploadProgress[] = filesToUpload.map(file => ({
+      fileName: file.name,
+      previewUrl: URL.createObjectURL(file),
+      progress: 0,
+      status: 'uploading' as const,
+    }));
+    setUploadProgress(initialProgress);
+
     try {
       const uploadedUrls: string[] = [];
 
-      for (const file of filesToUpload) {
+      for (let i = 0; i < filesToUpload.length; i++) {
+        const file = filesToUpload[i];
+
         // Validate file type
         if (!file.type.startsWith('image/')) {
+          setUploadProgress(prev => prev.map((p, idx) =>
+            idx === i ? { ...p, status: 'error', progress: 100 } : p
+          ));
           continue;
         }
 
-        // Validate file size (max 25MB - will be compressed to 600KB)
+        // Validate file size (max 25MB)
         if (file.size > 25 * 1024 * 1024) {
           setMessage({ type: 'error', text: `${file.name} is too large (max 25MB)` });
+          setUploadProgress(prev => prev.map((p, idx) =>
+            idx === i ? { ...p, status: 'error', progress: 100 } : p
+          ));
           continue;
         }
+
+        // Update progress to show uploading
+        setUploadProgress(prev => prev.map((p, idx) =>
+          idx === i ? { ...p, progress: 30 } : p
+        ));
 
         const formData = new FormData();
         formData.append('file', file);
         formData.append('imageType', 'gallery');
+
+        // Update progress to show processing
+        setUploadProgress(prev => prev.map((p, idx) =>
+          idx === i ? { ...p, progress: 60 } : p
+        ));
 
         const uploadResponse = await fetch('/api/venue-portal/upload', {
           method: 'POST',
@@ -81,6 +116,13 @@ export default function VenueImagesPage() {
         if (uploadResponse.ok) {
           const uploadData = await uploadResponse.json();
           uploadedUrls.push(uploadData.url);
+          setUploadProgress(prev => prev.map((p, idx) =>
+            idx === i ? { ...p, status: 'success', progress: 100 } : p
+          ));
+        } else {
+          setUploadProgress(prev => prev.map((p, idx) =>
+            idx === i ? { ...p, status: 'error', progress: 100 } : p
+          ));
         }
       }
 
@@ -106,6 +148,10 @@ export default function VenueImagesPage() {
       setMessage({ type: 'error', text: 'Failed to upload images' });
     } finally {
       setIsUploading(false);
+      // Clear upload progress after a delay
+      setTimeout(() => {
+        setUploadProgress([]);
+      }, 2000);
       if (fileInputRef.current) {
         fileInputRef.current.value = '';
       }
@@ -221,7 +267,7 @@ export default function VenueImagesPage() {
                       : 'Click to upload images'}
                   </p>
                   <p className="text-gray-500 text-sm mt-1">
-                    PNG, JPG up to 25MB (auto-compressed to 600KB)
+                    PNG, JPG up to 25MB
                   </p>
                 </div>
               </>
@@ -229,6 +275,75 @@ export default function VenueImagesPage() {
           </div>
         </button>
       </motion.div>
+
+      {/* Upload Progress with Low Opacity Previews */}
+      <AnimatePresence>
+        {uploadProgress.length > 0 && (
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -20 }}
+            className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4"
+          >
+            {uploadProgress.map((item, index) => (
+              <motion.div
+                key={item.fileName + index}
+                initial={{ opacity: 0, scale: 0.8 }}
+                animate={{ opacity: 1, scale: 1 }}
+                exit={{ opacity: 0, scale: 0.8 }}
+                className="relative aspect-square rounded-xl overflow-hidden bg-white/5"
+              >
+                {/* Low opacity preview image */}
+                <img
+                  src={item.previewUrl}
+                  alt={`Uploading ${item.fileName}`}
+                  className={`w-full h-full object-cover transition-opacity duration-300 ${
+                    item.status === 'uploading' ? 'opacity-40' : 'opacity-100'
+                  }`}
+                />
+
+                {/* Progress overlay */}
+                {item.status === 'uploading' && (
+                  <div className="absolute inset-0 flex flex-col items-center justify-center bg-black/30">
+                    <Loader2 className="w-8 h-8 text-yellow-400 animate-spin mb-2" />
+                    <div className="w-2/3 h-2 bg-white/20 rounded-full overflow-hidden">
+                      <motion.div
+                        className="h-full bg-yellow-400 rounded-full"
+                        initial={{ width: 0 }}
+                        animate={{ width: `${item.progress}%` }}
+                        transition={{ duration: 0.3 }}
+                      />
+                    </div>
+                    <p className="text-white text-xs mt-2">{item.progress}%</p>
+                  </div>
+                )}
+
+                {/* Success overlay */}
+                {item.status === 'success' && (
+                  <motion.div
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    className="absolute inset-0 flex items-center justify-center bg-green-500/20"
+                  >
+                    <CheckCircle className="w-10 h-10 text-green-400" />
+                  </motion.div>
+                )}
+
+                {/* Error overlay */}
+                {item.status === 'error' && (
+                  <motion.div
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    className="absolute inset-0 flex items-center justify-center bg-red-500/20"
+                  >
+                    <AlertCircle className="w-10 h-10 text-red-400" />
+                  </motion.div>
+                )}
+              </motion.div>
+            ))}
+          </motion.div>
+        )}
+      </AnimatePresence>
 
       {/* Images Grid */}
       {images.length > 0 ? (

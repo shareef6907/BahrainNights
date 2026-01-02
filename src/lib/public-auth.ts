@@ -138,14 +138,21 @@ export async function handleGoogleAuth(googleUserInfo: {
   return { user, token };
 }
 
-// Google OAuth URL generator
-export function getGoogleOAuthUrl(): string {
+// Google OAuth URL generator with state parameter for return URL
+export function getGoogleOAuthUrl(returnUrl?: string): string {
   const clientId = process.env.GOOGLE_CLIENT_ID;
   const redirectUri = `${process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:3000'}/api/auth/google/callback`;
 
   if (!clientId) {
     throw new Error('GOOGLE_CLIENT_ID is not configured');
   }
+
+  // Encode return URL in state parameter (base64 to avoid URL encoding issues)
+  const stateData = {
+    returnUrl: returnUrl || '/',
+    timestamp: Date.now(),
+  };
+  const state = Buffer.from(JSON.stringify(stateData)).toString('base64url');
 
   const params = new URLSearchParams({
     client_id: clientId,
@@ -154,9 +161,24 @@ export function getGoogleOAuthUrl(): string {
     scope: 'openid email profile',
     access_type: 'offline',
     prompt: 'consent',
+    state: state,
   });
 
   return `https://accounts.google.com/o/oauth2/v2/auth?${params.toString()}`;
+}
+
+// Decode state parameter from OAuth callback
+export function decodeOAuthState(state: string): { returnUrl: string; timestamp: number } | null {
+  try {
+    const decoded = Buffer.from(state, 'base64url').toString('utf8');
+    const parsed = JSON.parse(decoded);
+    return {
+      returnUrl: parsed.returnUrl || '/',
+      timestamp: parsed.timestamp || 0,
+    };
+  } catch {
+    return null;
+  }
 }
 
 // Exchange authorization code for tokens

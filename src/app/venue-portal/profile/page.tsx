@@ -326,7 +326,7 @@ export default function VenueProfilePage() {
               </div>
               <div>
                 <p className="text-white font-medium">Location</p>
-                <p className="text-gray-400 text-sm">Set map coordinates</p>
+                <p className="text-gray-400 text-sm">Set Google Map</p>
               </div>
             </div>
             <ChevronRight className="w-5 h-5 text-gray-400 group-hover:text-white transition-colors" />

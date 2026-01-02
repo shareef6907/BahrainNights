@@ -7,17 +7,10 @@ export async function GET(request: NextRequest) {
     // Get the return URL from query params
     const returnUrl = request.nextUrl.searchParams.get('returnUrl') || '/';
 
-    // Store return URL in a cookie for after callback
-    const response = NextResponse.redirect(getGoogleOAuthUrl());
-    response.cookies.set('oauth_return_url', returnUrl, {
-      httpOnly: true,
-      secure: process.env.NODE_ENV === 'production',
-      sameSite: 'lax',
-      maxAge: 60 * 10, // 10 minutes
-      path: '/',
-    });
+    // Pass return URL via OAuth state parameter (more reliable than cookies)
+    const oauthUrl = getGoogleOAuthUrl(returnUrl);
 
-    return response;
+    return NextResponse.redirect(oauthUrl);
   } catch (error) {
     console.error('Google OAuth initiation error:', error);
     return NextResponse.redirect(

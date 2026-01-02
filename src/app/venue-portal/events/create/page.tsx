@@ -16,6 +16,7 @@ import {
   AlertCircle,
   Image as ImageIcon,
   X,
+  MapPin,
 } from 'lucide-react';
 
 const CATEGORIES = [
@@ -50,6 +51,7 @@ export default function CreateEventPage() {
     end_time: '',
     price_range: '',
     booking_url: '',
+    google_maps_url: '',
     tags: '',
     featured_image: '',
   });
@@ -246,7 +248,7 @@ export default function CreateEventPage() {
                   </div>
                   <div className="text-center">
                     <p className="text-gray-400">Click to upload image</p>
-                    <p className="text-gray-500 text-sm">PNG, JPG up to 25MB (auto-compressed)</p>
+                    <p className="text-gray-500 text-sm">PNG, JPG up to 25MB</p>
                   </div>
                 </>
               )}
@@ -426,6 +428,25 @@ export default function CreateEventPage() {
             className="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-xl text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-yellow-400/50 focus:border-transparent"
             placeholder="e.g., ladies night, happy hour, live music"
           />
+        </div>
+
+        {/* Google Maps Link */}
+        <div>
+          <label className="block text-sm font-medium text-gray-300 mb-2">
+            <MapPin className="w-4 h-4 inline mr-2" />
+            Event Location (Google Maps Link)
+          </label>
+          <input
+            type="url"
+            name="google_maps_url"
+            value={formData.google_maps_url}
+            onChange={handleChange}
+            className="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-xl text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-yellow-400/50 focus:border-transparent"
+            placeholder="https://maps.google.com/..."
+          />
+          <p className="text-gray-500 text-xs mt-1">
+            Paste the Google Maps link to your event location (optional - uses venue location if empty)
+          </p>
         </div>
 
         {/* Submit */}

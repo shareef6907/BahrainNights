@@ -3,6 +3,7 @@ import { cookies } from 'next/headers';
 import { jwtVerify } from 'jose';
 import { S3Client, PutObjectCommand } from '@aws-sdk/client-s3';
 import sharp from 'sharp';
+import { getAdminClient } from '@/lib/supabase/server';
 
 export const dynamic = 'force-dynamic';
 
@@ -50,14 +51,31 @@ async function getVenueFromSession() {
 
   try {
     const { payload } = await jwtVerify(token, VENUE_SESSION_SECRET);
-    if (payload.type !== 'venue' || !payload.venueId || !payload.venueSlug) {
+    if (payload.type !== 'venue' || !payload.venueId) {
       return null;
     }
+
+    const venueId = payload.venueId as string;
+    let venueSlug = payload.venueSlug as string | undefined;
+
+    // If venueSlug not in token, fetch from database
+    if (!venueSlug) {
+      const supabase = getAdminClient();
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const { data } = await (supabase
+        .from('venues') as any)
+        .select('slug')
+        .eq('id', venueId)
+        .single();
+      venueSlug = (data as { slug?: string })?.slug || venueId; // Fallback to ID if no slug
+    }
+
     return {
-      venueId: payload.venueId as string,
-      venueSlug: payload.venueSlug as string,
+      venueId,
+      venueSlug,
     };
-  } catch {
+  } catch (error) {
+    console.error('Session verification error:', error);
     return null;
   }
 }

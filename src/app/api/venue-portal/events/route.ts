@@ -139,20 +139,19 @@ export async function POST(request: NextRequest) {
       venue_slug: venue.slug,
       title: body.title.trim(),
       slug,
-      description: body.description?.trim() || null,
+      description: body.description?.trim() || '', // Required field - empty string if not provided
       category: body.category,
       start_date: body.start_date,
       end_date: body.end_date || null,
       start_time: body.start_time || null,
       end_time: body.end_time || null,
-      price_range: body.price_range || null,
+      price: body.price_range || null, // DB field is 'price' not 'price_range'
       booking_url: body.booking_url || null,
       tags: body.tags || [],
       featured_image: body.featured_image || null,
       status: 'pending', // All venue-created events start as pending
       is_featured: false,
       view_count: 0,
-      like_count: 0,
     };
 
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -163,9 +162,9 @@ export async function POST(request: NextRequest) {
       .single();
 
     if (error) {
-      console.error('Create event error:', error);
+      console.error('Create event error:', error.message, error.details, error.hint);
       return NextResponse.json(
-        { error: 'Failed to create event' },
+        { error: 'Failed to create event: ' + error.message },
         { status: 500 }
       );
     }

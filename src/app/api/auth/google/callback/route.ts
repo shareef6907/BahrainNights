@@ -4,11 +4,13 @@ import {
   getGoogleUserInfo,
   handleGoogleAuth,
   setPublicAuthCookie,
+  decodeOAuthState,
 } from '@/lib/public-auth';
 
 export async function GET(request: NextRequest) {
   try {
     const code = request.nextUrl.searchParams.get('code');
+    const state = request.nextUrl.searchParams.get('state');
     const error = request.nextUrl.searchParams.get('error');
 
     // Check for OAuth errors
@@ -32,23 +34,34 @@ export async function GET(request: NextRequest) {
     const googleUser = await getGoogleUserInfo(tokens.access_token);
 
     // Create or update user in our database and get JWT
-    const { user, token } = await handleGoogleAuth({
+    const { token } = await handleGoogleAuth({
       id: googleUser.id,
       email: googleUser.email,
       name: googleUser.name,
       picture: googleUser.picture,
     });
 
-    // Get return URL from cookie
-    const returnUrl = request.cookies.get('oauth_return_url')?.value || '/';
+    // Get return URL from state parameter (more reliable than cookies)
+    let returnUrl = '/';
+    if (state) {
+      const stateData = decodeOAuthState(state);
+      if (stateData) {
+        returnUrl = stateData.returnUrl;
+      }
+    }
 
-    // Create response with redirect
+    // Fallback to cookie if state doesn't work
+    if (returnUrl === '/' && request.cookies.get('oauth_return_url')?.value) {
+      returnUrl = request.cookies.get('oauth_return_url')?.value || '/';
+    }
+
+    // Create response with redirect to the original page
     const response = NextResponse.redirect(new URL(returnUrl, request.url));
 
     // Set auth cookie
     setPublicAuthCookie(response, token);
 
-    // Clear return URL cookie
+    // Clear legacy return URL cookie if it exists
     response.cookies.delete('oauth_return_url');
 
     return response;
