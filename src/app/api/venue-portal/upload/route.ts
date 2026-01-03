@@ -18,7 +18,9 @@ const s3Client = new S3Client({
 });
 
 const BUCKET = process.env.BAHRAINNIGHTS_S3_BUCKET || process.env.AWS_S3_BUCKET || 'bahrainnights-production';
-const PUBLIC_URL = process.env.NEXT_PUBLIC_S3_URL || process.env.NEXT_PUBLIC_CDN_URL || `https://${BUCKET}.s3.me-south-1.amazonaws.com/processed`;
+const REGION = process.env.BAHRAINNIGHTS_AWS_REGION || process.env.AWS_REGION || 'me-south-1';
+// Always use the full S3 URL with bucket name and region - don't rely on CDN URL as it might not include /processed path
+const S3_BASE_URL = `https://${BUCKET}.s3.${REGION}.amazonaws.com`;
 
 // Compression settings
 const TARGET_SIZE_KB = 600;
@@ -216,9 +218,8 @@ async function uploadToS3(
     })
   );
 
-  // Return the processed URL
-  const urlPath = key.replace('processed/', '');
-  return `${PUBLIC_URL}/${urlPath}`;
+  // Return the full S3 URL - key already includes the full path (e.g., processed/venues/...)
+  return `${S3_BASE_URL}/${key}`;
 }
 
 export async function POST(request: NextRequest) {
