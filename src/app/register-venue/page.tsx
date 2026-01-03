@@ -129,7 +129,7 @@ export default function RegisterVenuePage() {
       submitData.append('phone', formData.phone);
       submitData.append('email', formData.email);
       submitData.append('password', formData.password);
-      if (formData.website) submitData.append('website', formData.website);
+      if (formData.website) submitData.append('website', `https://${formData.website}`);
       if (formData.instagram) submitData.append('instagram', formData.instagram);
       if (formData.description) submitData.append('description', formData.description);
       if (formData.logo) submitData.append('logo', formData.logo);
@@ -336,15 +336,18 @@ export default function RegisterVenuePage() {
               </div>
               <div>
                 <label className="block text-sm text-gray-400 mb-2">Website</label>
-                <div className="relative">
-                  <Globe className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-500" />
+                <div className="relative flex">
+                  <span className="inline-flex items-center px-3 bg-gray-700 border border-r-0 border-gray-700 rounded-l-lg text-gray-400 text-sm">
+                    <Globe className="w-4 h-4 mr-2" />
+                    https://
+                  </span>
                   <input
-                    type="url"
+                    type="text"
                     name="website"
                     value={formData.website}
                     onChange={handleInputChange}
-                    className="w-full bg-gray-900/50 border border-gray-700 rounded-lg pl-10 pr-4 py-3 text-white placeholder-gray-500 focus:border-orange-500 focus:ring-1 focus:ring-orange-500 outline-none transition-all"
-                    placeholder="https://yourwebsite.com"
+                    className="flex-1 bg-gray-900/50 border border-gray-700 rounded-r-lg px-4 py-3 text-white placeholder-gray-500 focus:border-orange-500 focus:ring-1 focus:ring-orange-500 outline-none transition-all"
+                    placeholder="www.yourvenue.com"
                   />
                 </div>
               </div>
