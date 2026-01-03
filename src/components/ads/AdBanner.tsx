@@ -57,7 +57,7 @@ export default function AdBanner({
     if ((placement === 'slider' || placement === 'banner') && ads.length > 1) {
       const interval = setInterval(() => {
         setCurrentIndex((prev) => (prev + 1) % ads.length);
-      }, 5000);
+      }, 4000); // Rotate every 4 seconds
       return () => clearInterval(interval);
     }
   }, [ads.length, placement]);
