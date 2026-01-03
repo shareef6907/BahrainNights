@@ -1,8 +1,95 @@
 import { S3Client, GetObjectCommand, PutObjectCommand, DeleteObjectCommand } from '@aws-sdk/client-s3';
+import { RekognitionClient, DetectModerationLabelsCommand } from '@aws-sdk/client-rekognition';
 import sharp from 'sharp';
 
 const s3Client = new S3Client({ region: process.env.REGION });
+// Rekognition not available in me-south-1 (Bahrain), use eu-west-1 (Ireland) for lower latency
+const rekognition = new RekognitionClient({ region: 'eu-west-1' });
 const BUCKET = process.env.S3_BUCKET;
+
+// Content moderation settings (MODERATE strictness)
+// Block explicit content, allow suggestive nightlife photos
+const BLOCKED_CATEGORIES = [
+  'Explicit Nudity',      // Full nudity, genitalia
+  'Graphic Violence',     // Blood, gore
+  'Drugs',                // Illegal substances
+  'Drug Paraphernalia',   // Pipes, syringes
+  'Tobacco',              // Smoking/cigarettes
+  'Hate Symbols',         // Nazi, extremist, political hate symbols - BIG NO
+  'Extremist',            // Extremist content
+  'Rude Gestures',        // Offensive hand gestures
+  'Visually Disturbing'   // Disturbing/defaming imagery
+];
+
+// Categories we ALLOW (nightlife-friendly):
+// - Suggestive (revealing outfits OK)
+// - Alcohol (cocktails, bars OK)
+// - Violence (action scenes OK)
+// - Gambling (cards, casino OK)
+
+// IMPORTANT: Hate symbols and political extremism are STRICTLY blocked
+
+const MODERATION_CONFIDENCE = 75; // 75% confidence threshold
+
+/**
+ * Check image for inappropriate content using AWS Rekognition
+ * @param {string} bucket - S3 bucket name
+ * @param {string} key - S3 object key
+ * @returns {Promise<{safe: boolean, violations: Array}>}
+ */
+async function checkContentModeration(bucket, key) {
+  try {
+    console.log(`🔍 Checking content moderation for: ${key}`);
+
+    // Download image from S3 first (cross-region S3->Rekognition not supported)
+    const getCommand = new GetObjectCommand({ Bucket: bucket, Key: key });
+    const s3Response = await s3Client.send(getCommand);
+    const imageBytes = await s3Response.Body.transformToByteArray();
+
+    const command = new DetectModerationLabelsCommand({
+      Image: {
+        Bytes: imageBytes
+      },
+      MinConfidence: MODERATION_CONFIDENCE
+    });
+
+    const response = await rekognition.send(command);
+
+    // Log all detected labels for debugging
+    if (response.ModerationLabels && response.ModerationLabels.length > 0) {
+      console.log('Detected moderation labels:', JSON.stringify(response.ModerationLabels, null, 2));
+    }
+
+    // Filter for blocked categories only
+    const violations = (response.ModerationLabels || []).filter(label =>
+      BLOCKED_CATEGORIES.some(blocked =>
+        label.Name === blocked || label.ParentName === blocked
+      )
+    );
+
+    if (violations.length > 0) {
+      console.log('🚫 Content violations found:', violations.map(v => ({
+        name: v.Name,
+        parent: v.ParentName,
+        confidence: v.Confidence.toFixed(1) + '%'
+      })));
+    }
+
+    return {
+      safe: violations.length === 0,
+      violations: violations.map(v => ({
+        name: v.Name,
+        parent: v.ParentName,
+        confidence: v.Confidence
+      }))
+    };
+  } catch (error) {
+    // Log error but allow image through (fail open)
+    // This prevents blocking all uploads if Rekognition has issues
+    console.error('⚠️ Rekognition error (allowing image):', error.message);
+    return { safe: true, violations: [], error: error.message };
+  }
+}
 
 // Always fetch fresh watermark (no caching to ensure updates are reflected)
 async function getWatermark() {
@@ -39,6 +126,30 @@ export const handler = async (event) => {
     }
 
     try {
+      // ============================================
+      // STEP 0: AI CONTENT MODERATION CHECK
+      // ============================================
+      const moderationResult = await checkContentModeration(BUCKET, uploadKey);
+
+      if (!moderationResult.safe) {
+        console.log('🚫 CONTENT BLOCKED - Deleting image:', uploadKey);
+        console.log('Violations:', JSON.stringify(moderationResult.violations));
+
+        // Silent deletion - delete the uploaded file
+        await s3Client.send(new DeleteObjectCommand({
+          Bucket: BUCKET,
+          Key: uploadKey
+        }));
+
+        console.log('✅ Blocked image deleted successfully');
+
+        // Continue to next image (don't throw error)
+        continue;
+      }
+
+      console.log('✅ Content moderation passed for:', uploadKey);
+      // ============================================
+
       // 1. Get the uploaded image
       const getCommand = new GetObjectCommand({ Bucket: BUCKET, Key: uploadKey });
       const response = await s3Client.send(getCommand);
