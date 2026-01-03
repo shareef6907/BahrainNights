@@ -34,6 +34,7 @@ export async function POST(request: NextRequest) {
 
     // Extract form fields
     const venueName = formData.get('venueName') as string;
+    const crNumber = formData.get('crNumber') as string;
     const category = formData.get('category') as string;
     const area = formData.get('area') as string;
     const address = formData.get('address') as string;
@@ -47,7 +48,7 @@ export async function POST(request: NextRequest) {
     const coverImage = formData.get('coverImage') as File | null;
 
     // Validate required fields
-    if (!venueName || !category || !area || !address || !phone || !email || !password) {
+    if (!venueName || !crNumber || !category || !area || !address || !phone || !email || !password) {
       return NextResponse.json(
         { error: 'Missing required fields' },
         { status: 400 }
@@ -199,6 +200,7 @@ export async function POST(request: NextRequest) {
       owner_id: null, // Will be linked when admin system is unified
       name: venueName,
       slug,
+      cr_number: crNumber,
       description: description || null,
       category,
       area,
@@ -275,7 +277,7 @@ export async function POST(request: NextRequest) {
 export async function GET() {
   return NextResponse.json({
     message: 'POST to this endpoint to register a venue',
-    required_fields: ['venueName', 'category', 'area', 'address', 'phone', 'email'],
+    required_fields: ['venueName', 'crNumber', 'category', 'area', 'address', 'phone', 'email', 'password'],
     optional_fields: ['website', 'instagram', 'description', 'logo', 'coverImage'],
   });
 }

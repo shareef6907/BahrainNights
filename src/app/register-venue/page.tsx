@@ -41,6 +41,7 @@ const BAHRAIN_AREAS = [
 
 interface FormData {
   venueName: string;
+  crNumber: string;
   category: string;
   area: string;
   address: string;
@@ -58,6 +59,7 @@ interface FormData {
 export default function RegisterVenuePage() {
   const [formData, setFormData] = useState<FormData>({
     venueName: '',
+    crNumber: '',
     category: '',
     area: '',
     address: '',
@@ -106,6 +108,13 @@ export default function RegisterVenuePage() {
     setIsSubmitting(true);
     setError('');
 
+    // Validate CR number
+    if (!formData.crNumber.trim()) {
+      setError('CR Number is required');
+      setIsSubmitting(false);
+      return;
+    }
+
     // Validate passwords
     if (formData.password.length < 8) {
       setError('Password must be at least 8 characters long');
@@ -123,6 +132,7 @@ export default function RegisterVenuePage() {
       // Create FormData for file upload
       const submitData = new FormData();
       submitData.append('venueName', formData.venueName);
+      submitData.append('crNumber', formData.crNumber.trim());
       submitData.append('category', formData.category);
       submitData.append('area', formData.area);
       submitData.append('address', formData.address);
@@ -246,6 +256,18 @@ export default function RegisterVenuePage() {
                   required
                   className="w-full bg-gray-900/50 border border-gray-700 rounded-lg px-4 py-3 text-white placeholder-gray-500 focus:border-orange-500 focus:ring-1 focus:ring-orange-500 outline-none transition-all"
                   placeholder="Enter venue name"
+                />
+              </div>
+              <div>
+                <label className="block text-sm text-gray-400 mb-2">CR Number *</label>
+                <input
+                  type="text"
+                  name="crNumber"
+                  value={formData.crNumber}
+                  onChange={handleInputChange}
+                  required
+                  className="w-full bg-gray-900/50 border border-gray-700 rounded-lg px-4 py-3 text-white placeholder-gray-500 focus:border-orange-500 focus:ring-1 focus:ring-orange-500 outline-none transition-all"
+                  placeholder="Commercial Registration Number"
                 />
               </div>
               <div>
