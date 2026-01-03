@@ -2,7 +2,9 @@
 
 import { useState } from 'react';
 import { motion } from 'framer-motion';
-import { Ticket, Heart, ExternalLink, MapPin } from 'lucide-react';
+import Link from 'next/link';
+import Image from 'next/image';
+import { Ticket, Heart, ExternalLink, MapPin, Phone, Mail, Globe, Building2 } from 'lucide-react';
 import EventHero from '@/components/events/EventHero';
 import EventDetails from '@/components/events/EventDetails';
 import EventGallery from '@/components/events/EventGallery';
@@ -10,6 +12,18 @@ import ShareModal from '@/components/events/ShareModal';
 import AddToCalendar from '@/components/events/AddToCalendar';
 import SimilarEvents from '@/components/events/SimilarEvents';
 import { Event } from '@/components/events/EventCard';
+
+interface HostedByVenue {
+  id: string;
+  name: string;
+  slug: string;
+  logo: string | null;
+  phone: string | null;
+  email: string | null;
+  website: string | null;
+  instagram: string | null;
+  bookingUrl: string | null;
+}
 
 interface EventData {
   id: string;
@@ -35,15 +49,17 @@ interface EventData {
   tags: string[];
   bookingUrl: string | null;
   sourceUrl: string | null;
+  hostedByVenue: HostedByVenue | null;
   venueDetails: {
     name: string;
     slug: string;
     image: string;
     address: string;
     phone: string;
+    email: string;
     latitude: number;
     longitude: number;
-    website?: string; // External venue website for scraped events
+    website?: string;
   };
   startDate: string;
   endDate: string;
@@ -216,11 +232,99 @@ export default function EventDetailClient({ event, similarEvents }: EventDetailC
 
             {/* Right Column - 35% */}
             <div className="space-y-6">
-              {/* Simple Venue Display */}
+              {/* Hosted By Venue Section */}
+              {event.hostedByVenue && (
+                <motion.div
+                  className="bg-gradient-to-br from-yellow-400/10 to-orange-500/10 backdrop-blur-sm border border-yellow-400/20 rounded-2xl p-6"
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                >
+                  <h3 className="text-lg font-bold text-white mb-4 flex items-center gap-2">
+                    <Building2 className="w-5 h-5 text-yellow-400" />
+                    Hosted By
+                  </h3>
+                  <Link
+                    href={`/places/${event.hostedByVenue.slug}`}
+                    className="flex items-center gap-4 group"
+                  >
+                    <div className="relative w-16 h-16 rounded-xl overflow-hidden bg-white/10 flex-shrink-0">
+                      {event.hostedByVenue.logo ? (
+                        <Image
+                          src={event.hostedByVenue.logo}
+                          alt={event.hostedByVenue.name}
+                          fill
+                          className="object-cover group-hover:scale-110 transition-transform"
+                        />
+                      ) : (
+                        <div className="w-full h-full flex items-center justify-center">
+                          <Building2 className="w-8 h-8 text-gray-400" />
+                        </div>
+                      )}
+                    </div>
+                    <div>
+                      <p className="font-bold text-white group-hover:text-yellow-400 transition-colors">
+                        {event.hostedByVenue.name}
+                      </p>
+                      <p className="text-sm text-yellow-400/80">View venue profile →</p>
+                    </div>
+                  </Link>
+
+                  {/* Contact Info */}
+                  <div className="mt-4 pt-4 border-t border-white/10 space-y-3">
+                    {event.hostedByVenue.phone && (
+                      <a
+                        href={`tel:${event.hostedByVenue.phone}`}
+                        className="flex items-center gap-3 text-gray-300 hover:text-yellow-400 transition-colors"
+                      >
+                        <Phone className="w-4 h-4 text-yellow-400" />
+                        <span className="text-sm">{event.hostedByVenue.phone}</span>
+                      </a>
+                    )}
+                    {event.hostedByVenue.email && (
+                      <a
+                        href={`mailto:${event.hostedByVenue.email}`}
+                        className="flex items-center gap-3 text-gray-300 hover:text-yellow-400 transition-colors"
+                      >
+                        <Mail className="w-4 h-4 text-yellow-400" />
+                        <span className="text-sm">{event.hostedByVenue.email}</span>
+                      </a>
+                    )}
+                    {event.hostedByVenue.website && (
+                      <a
+                        href={event.hostedByVenue.website}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="flex items-center gap-3 text-gray-300 hover:text-yellow-400 transition-colors"
+                      >
+                        <Globe className="w-4 h-4 text-yellow-400" />
+                        <span className="text-sm">Visit Website</span>
+                        <ExternalLink className="w-3 h-3" />
+                      </a>
+                    )}
+                  </div>
+
+                  {/* Book via Venue Button */}
+                  {event.hostedByVenue.bookingUrl && (
+                    <a
+                      href={event.hostedByVenue.bookingUrl}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="mt-4 w-full flex items-center justify-center gap-2 px-4 py-3 bg-gradient-to-r from-yellow-400 to-orange-500 rounded-xl text-black font-bold hover:shadow-lg hover:shadow-orange-500/25 transition-all"
+                    >
+                      <Ticket className="w-4 h-4" />
+                      Book via Venue
+                      <ExternalLink className="w-3 h-3" />
+                    </a>
+                  )}
+                </motion.div>
+              )}
+
+              {/* Location Section */}
               <motion.div
                 className="bg-white/5 backdrop-blur-sm border border-white/10 rounded-2xl p-6"
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.1 }}
               >
                 <h3 className="text-lg font-bold text-white mb-4">Location</h3>
                 <a
@@ -242,6 +346,30 @@ export default function EventDetailClient({ event, similarEvents }: EventDetailC
                     <p className="text-xs text-gray-500 mt-1">Click to open in Google Maps</p>
                   </div>
                 </a>
+
+                {/* Contact info for non-venue events */}
+                {!event.hostedByVenue && (event.venueDetails.phone || event.venueDetails.email) && (
+                  <div className="mt-4 pt-4 border-t border-white/10 space-y-3">
+                    {event.venueDetails.phone && (
+                      <a
+                        href={`tel:${event.venueDetails.phone}`}
+                        className="flex items-center gap-3 text-gray-300 hover:text-yellow-400 transition-colors"
+                      >
+                        <Phone className="w-4 h-4 text-yellow-400" />
+                        <span className="text-sm">{event.venueDetails.phone}</span>
+                      </a>
+                    )}
+                    {event.venueDetails.email && (
+                      <a
+                        href={`mailto:${event.venueDetails.email}`}
+                        className="flex items-center gap-3 text-gray-300 hover:text-yellow-400 transition-colors"
+                      >
+                        <Mail className="w-4 h-4 text-yellow-400" />
+                        <span className="text-sm">{event.venueDetails.email}</span>
+                      </a>
+                    )}
+                  </div>
+                )}
               </motion.div>
             </div>
           </div>

@@ -16,6 +16,7 @@ interface DBEvent {
   slug: string;
   description: string;
   category: string;
+  venue_id: string | null;
   venue_name: string;
   venue_address: string;
   date: string;
@@ -25,6 +26,7 @@ interface DBEvent {
   price: string;
   image_url: string | null;
   cover_url: string | null;
+  featured_image: string | null;
   booking_url: string | null;
   source_url: string | null;
   status: string;
@@ -36,6 +38,22 @@ interface DBEvent {
   contact_phone: string | null;
   created_at: string;
   updated_at: string;
+}
+
+// Venue data type
+interface DBVenue {
+  id: string;
+  name: string;
+  slug: string;
+  logo_url: string | null;
+  cover_image_url: string | null;
+  phone: string | null;
+  email: string | null;
+  address: string;
+  area: string;
+  booking_url: string | null;
+  website: string | null;
+  instagram: string | null;
 }
 
 // Get category display name and color
@@ -130,6 +148,39 @@ async function getEvent(slug: string) {
   return event as DBEvent;
 }
 
+// Fetch venue by ID
+async function getVenueById(venueId: string): Promise<DBVenue | null> {
+  const { data: venue, error } = await supabaseAdmin
+    .from('venues')
+    .select('id, name, slug, logo_url, cover_image_url, phone, email, address, area, booking_url, website, instagram')
+    .eq('id', venueId)
+    .eq('status', 'approved')
+    .single();
+
+  if (error || !venue) {
+    return null;
+  }
+
+  return venue as DBVenue;
+}
+
+// Fetch venue by name (fallback for scraped events)
+async function getVenueByName(venueName: string): Promise<DBVenue | null> {
+  const { data: venue, error } = await supabaseAdmin
+    .from('venues')
+    .select('id, name, slug, logo_url, cover_image_url, phone, email, address, area, booking_url, website, instagram')
+    .ilike('name', `%${venueName}%`)
+    .eq('status', 'approved')
+    .limit(1)
+    .single();
+
+  if (error || !venue) {
+    return null;
+  }
+
+  return venue as DBVenue;
+}
+
 // Fetch similar events (same category)
 async function getSimilarEvents(category: string, excludeId: string) {
   const { data: events } = await supabaseAdmin
@@ -183,12 +234,21 @@ export default async function EventDetailPage({ params }: PageProps) {
     .update({ views: (dbEvent.views || 0) + 1 })
     .eq('id', dbEvent.id);
 
+  // Try to fetch venue data - first by venue_id, then by venue_name
+  let venueData: DBVenue | null = null;
+  if (dbEvent.venue_id) {
+    venueData = await getVenueById(dbEvent.venue_id);
+  }
+  if (!venueData && dbEvent.venue_name) {
+    venueData = await getVenueByName(dbEvent.venue_name);
+  }
+
   // Get category info
   const categoryInfo = getCategoryInfo(dbEvent.category);
   const dateInfo = formatDateRange(dbEvent.date, dbEvent.end_date);
 
-  // Get image
-  const image = dbEvent.cover_url || dbEvent.image_url || getDefaultImage(dbEvent.category);
+  // Get image - prioritize featured_image, then cover_url, then image_url
+  const image = dbEvent.featured_image || dbEvent.cover_url || dbEvent.image_url || getDefaultImage(dbEvent.category);
 
   // Format the event for the client component
   const event = {
@@ -200,9 +260,9 @@ export default async function EventDetailPage({ params }: PageProps) {
     images: [image], // Single image for now
     category: categoryInfo.display,
     categoryColor: categoryInfo.color,
-    venue: dbEvent.venue_name,
-    venueSlug: dbEvent.venue_name?.toLowerCase().replace(/[^a-z0-9]+/g, '-') || 'venue',
-    location: dbEvent.venue_address || dbEvent.venue_name || 'Bahrain',
+    venue: venueData?.name || dbEvent.venue_name,
+    venueSlug: venueData?.slug || dbEvent.venue_name?.toLowerCase().replace(/[^a-z0-9]+/g, '-') || 'venue',
+    location: venueData?.address || dbEvent.venue_address || dbEvent.venue_name || 'Bahrain',
     date: dateInfo.endDisplay ? `${dateInfo.display} - ${dateInfo.endDisplay}` : dateInfo.display, // Date range for multi-day events
     dayOfWeek: dateInfo.dayOfWeek,
     time: (dbEvent.time && !dbEvent.time.toLowerCase().includes('tba')) ? dbEvent.time : '',
@@ -213,19 +273,32 @@ export default async function EventDetailPage({ params }: PageProps) {
     ageRestriction: 'All Ages Welcome',
     dressCode: 'Smart Casual',
     tags: dbEvent.tags || [categoryInfo.display],
-    bookingUrl: dbEvent.booking_url || null,
+    bookingUrl: dbEvent.booking_url || venueData?.booking_url || null,
     sourceUrl: dbEvent.source_url || null,
+    // Venue info from venues table (if found)
+    hostedByVenue: venueData ? {
+      id: venueData.id,
+      name: venueData.name,
+      slug: venueData.slug,
+      logo: venueData.logo_url,
+      phone: venueData.phone,
+      email: venueData.email,
+      website: venueData.website,
+      instagram: venueData.instagram,
+      bookingUrl: venueData.booking_url,
+    } : null,
     venueDetails: (() => {
       const coords = getVenueCoordinates(dbEvent.venue_name || '');
       return {
-        name: dbEvent.venue_name || 'Venue',
-        slug: dbEvent.venue_name?.toLowerCase().replace(/[^a-z0-9]+/g, '-') || 'venue',
-        image: 'https://images.unsplash.com/photo-1507676184212-d03ab07a01bf?w=400&h=300&fit=crop',
-        address: dbEvent.venue_address || dbEvent.venue_name || 'Bahrain',
-        phone: dbEvent.contact_phone || '',
+        name: venueData?.name || dbEvent.venue_name || 'Venue',
+        slug: venueData?.slug || dbEvent.venue_name?.toLowerCase().replace(/[^a-z0-9]+/g, '-') || 'venue',
+        image: venueData?.logo_url || venueData?.cover_image_url || 'https://images.unsplash.com/photo-1507676184212-d03ab07a01bf?w=400&h=300&fit=crop',
+        address: venueData?.address || dbEvent.venue_address || dbEvent.venue_name || 'Bahrain',
+        phone: venueData?.phone || dbEvent.contact_phone || '',
+        email: venueData?.email || dbEvent.contact_email || '',
         latitude: coords.lat,
         longitude: coords.lng,
-        website: dbEvent.source_url || undefined, // Use source_url as venue website link
+        website: venueData?.website || dbEvent.source_url || undefined,
       };
     })(),
     startDate: `${dbEvent.date}T${dbEvent.time || '19:00'}:00`,
