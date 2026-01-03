@@ -212,7 +212,9 @@ export async function exchangeCodeForTokens(code: string): Promise<{
   if (!response.ok) {
     const error = await response.text();
     console.error('Token exchange failed:', error);
-    throw new Error('Failed to exchange authorization code');
+    console.error('Redirect URI used:', redirectUri);
+    console.error('NEXT_PUBLIC_SITE_URL:', process.env.NEXT_PUBLIC_SITE_URL);
+    throw new Error(`Failed to exchange authorization code: ${error}`);
   }
 
   return response.json();
