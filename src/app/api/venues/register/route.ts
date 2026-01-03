@@ -95,6 +95,20 @@ export async function POST(request: NextRequest) {
     // Get Supabase admin client for auth operations
     const supabaseAuth = getSupabaseAdminClient();
 
+    // Check if email already exists in venues table
+    const { data: existingVenueByEmail } = await supabase
+      .from('venues')
+      .select('id, name')
+      .eq('email', email.toLowerCase())
+      .single();
+
+    if (existingVenueByEmail) {
+      return NextResponse.json(
+        { error: 'A venue with this email already exists. Please use a different email or login instead.' },
+        { status: 400 }
+      );
+    }
+
     // Check if email already exists in Supabase Auth
     const { data: existingUsers } = await supabaseAuth.auth.admin.listUsers();
     const existingUser = existingUsers?.users?.find(u => u.email?.toLowerCase() === email.toLowerCase());

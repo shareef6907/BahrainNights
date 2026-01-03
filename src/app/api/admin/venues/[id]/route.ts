@@ -167,20 +167,30 @@ export async function DELETE(
       return NextResponse.json({ error: 'Venue not found' }, { status: 404 });
     }
 
-    // Delete the venue from database
-    await deleteVenue(id);
-
-    // Also delete the associated Supabase Auth user (if exists)
+    // Also delete the associated Supabase Auth user (if exists) BEFORE deleting venue
     let authUserDeleted = false;
+    let profileDeleted = false;
+    const supabaseAuth = getSupabaseAdminClient();
+
     if (venue.email) {
       try {
-        const supabaseAuth = getSupabaseAdminClient();
         const { data: existingUsers } = await supabaseAuth.auth.admin.listUsers();
         const authUser = existingUsers?.users?.find(
           u => u.email?.toLowerCase() === venue.email!.toLowerCase()
         );
 
         if (authUser) {
+          // Delete from profiles table first (before auth user)
+          try {
+            const supabase = (await import('@/lib/supabase/server')).getAdminClient();
+            await supabase.from('profiles').delete().eq('id', authUser.id);
+            profileDeleted = true;
+            console.log(`Deleted profile for venue: ${venue.email}`);
+          } catch (profileError) {
+            console.error('Error deleting profile:', profileError);
+          }
+
+          // Delete auth user
           await supabaseAuth.auth.admin.deleteUser(authUser.id);
           authUserDeleted = true;
           console.log(`Deleted auth user for venue: ${venue.email}`);
@@ -191,9 +201,13 @@ export async function DELETE(
       }
     }
 
+    // Delete the venue from database
+    await deleteVenue(id);
+
     return NextResponse.json({
       message: 'Venue deleted successfully',
-      authUserDeleted
+      authUserDeleted,
+      profileDeleted
     });
   } catch (error) {
     console.error('Error deleting venue:', error);
