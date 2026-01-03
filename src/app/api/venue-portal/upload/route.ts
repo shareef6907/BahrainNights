@@ -19,13 +19,7 @@ const s3Client = new S3Client({
 
 const BUCKET = process.env.BAHRAINNIGHTS_S3_BUCKET || process.env.AWS_S3_BUCKET || 'bahrainnights-production';
 const REGION = process.env.BAHRAINNIGHTS_AWS_REGION || process.env.AWS_REGION || 'me-south-1';
-// Always use the full S3 URL with bucket name and region - don't rely on CDN URL as it might not include /processed path
 const S3_BASE_URL = `https://${BUCKET}.s3.${REGION}.amazonaws.com`;
-
-// Compression settings
-const TARGET_SIZE_KB = 600;
-const MAX_WIDTH = 1920;
-const MAX_HEIGHT = 1080;
 
 const VENUE_SESSION_SECRET = new TextEncoder().encode(
   process.env.JWT_SECRET || 'venue-portal-secret-key-min-32-chars!'
@@ -34,7 +28,6 @@ const VENUE_SESSION_SECRET = new TextEncoder().encode(
 // Allowed image types
 const ALLOWED_TYPES = ['image/jpeg', 'image/png', 'image/webp', 'image/gif'];
 // Vercel serverless functions have a 4.5MB body size limit
-// Setting to 4MB to leave room for form data overhead
 const MAX_FILE_SIZE = 4 * 1024 * 1024; // 4MB (Vercel limit)
 
 async function getVenueFromSession() {
@@ -63,7 +56,7 @@ async function getVenueFromSession() {
         .select('slug')
         .eq('id', venueId)
         .single();
-      venueSlug = (data as { slug?: string })?.slug || venueId; // Fallback to ID if no slug
+      venueSlug = (data as { slug?: string })?.slug || venueId;
     }
 
     return {
@@ -74,132 +67,6 @@ async function getVenueFromSession() {
     console.error('Session verification error:', error);
     return null;
   }
-}
-
-/**
- * Create watermark SVG text
- */
-function createWatermarkSvg(imageWidth: number, imageHeight: number): Buffer {
-  // Scale watermark based on image size
-  const fontSize = Math.max(16, Math.min(32, Math.round(imageWidth / 40)));
-  const padding = Math.round(fontSize * 0.75);
-  const text = 'BahrainNights.com';
-
-  const svg = `
-    <svg width="${imageWidth}" height="${imageHeight}">
-      <style>
-        .watermark {
-          fill: rgba(255, 255, 255, 0.6);
-          font-family: Arial, sans-serif;
-          font-size: ${fontSize}px;
-          font-weight: bold;
-          text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.5);
-        }
-      </style>
-      <text
-        x="${imageWidth - padding}"
-        y="${imageHeight - padding}"
-        class="watermark"
-        text-anchor="end"
-      >${text}</text>
-    </svg>
-  `;
-
-  return Buffer.from(svg);
-}
-
-/**
- * Compress image to target size (600KB) and add watermark
- * Iteratively reduces quality until under target size
- */
-async function compressImage(buffer: Buffer, addWatermark: boolean = true): Promise<{
-  buffer: Buffer;
-  width: number;
-  height: number;
-}> {
-  // Get original metadata
-  const metadata = await sharp(buffer).metadata();
-  let width = metadata.width || MAX_WIDTH;
-  let height = metadata.height || MAX_HEIGHT;
-
-  // Calculate resize dimensions while maintaining aspect ratio
-  if (width > MAX_WIDTH) {
-    height = Math.round((height * MAX_WIDTH) / width);
-    width = MAX_WIDTH;
-  }
-  if (height > MAX_HEIGHT) {
-    width = Math.round((width * MAX_HEIGHT) / height);
-    height = MAX_HEIGHT;
-  }
-
-  // Create base sharp instance with resize
-  let sharpInstance = sharp(buffer)
-    .resize(width, height, { fit: 'inside', withoutEnlargement: true });
-
-  // Add watermark if requested
-  if (addWatermark) {
-    const watermarkSvg = createWatermarkSvg(width, height);
-    sharpInstance = sharpInstance.composite([
-      {
-        input: watermarkSvg,
-        top: 0,
-        left: 0,
-      },
-    ]);
-  }
-
-  // Start with high quality
-  let quality = 90;
-  let compressedBuffer = await sharpInstance.webp({ quality }).toBuffer();
-
-  // Iteratively reduce quality until under target size
-  while (compressedBuffer.length > TARGET_SIZE_KB * 1024 && quality > 20) {
-    quality -= 10;
-    sharpInstance = sharp(buffer)
-      .resize(width, height, { fit: 'inside', withoutEnlargement: true });
-
-    if (addWatermark) {
-      const watermarkSvg = createWatermarkSvg(width, height);
-      sharpInstance = sharpInstance.composite([
-        {
-          input: watermarkSvg,
-          top: 0,
-          left: 0,
-        },
-      ]);
-    }
-
-    compressedBuffer = await sharpInstance.webp({ quality }).toBuffer();
-  }
-
-  // If still too large, reduce dimensions
-  if (compressedBuffer.length > TARGET_SIZE_KB * 1024) {
-    const scaleFactor = Math.sqrt((TARGET_SIZE_KB * 1024) / compressedBuffer.length);
-    width = Math.round(width * scaleFactor);
-    height = Math.round(height * scaleFactor);
-
-    sharpInstance = sharp(buffer)
-      .resize(width, height, { fit: 'inside', withoutEnlargement: true });
-
-    if (addWatermark) {
-      const watermarkSvg = createWatermarkSvg(width, height);
-      sharpInstance = sharpInstance.composite([
-        {
-          input: watermarkSvg,
-          top: 0,
-          left: 0,
-        },
-      ]);
-    }
-
-    compressedBuffer = await sharpInstance.webp({ quality: 80 }).toBuffer();
-  }
-
-  return {
-    buffer: compressedBuffer,
-    width,
-    height,
-  };
 }
 
 /**
@@ -216,12 +83,23 @@ async function uploadToS3(
       Key: key,
       Body: buffer,
       ContentType: contentType,
-      CacheControl: 'public, max-age=31536000',
     })
   );
 
-  // Return the full S3 URL - key already includes the full path (e.g., processed/venues/...)
   return `${S3_BASE_URL}/${key}`;
+}
+
+/**
+ * Get file extension from MIME type
+ */
+function getExtension(mimeType: string): string {
+  const map: Record<string, string> = {
+    'image/jpeg': 'jpg',
+    'image/png': 'png',
+    'image/webp': 'webp',
+    'image/gif': 'gif',
+  };
+  return map[mimeType] || 'jpg';
 }
 
 export async function POST(request: NextRequest) {
@@ -239,7 +117,6 @@ export async function POST(request: NextRequest) {
     const formData = await request.formData();
     const file = formData.get('file') as File | null;
     const imageType = formData.get('imageType') as string || 'gallery';
-    const folder = formData.get('folder') as string || 'venues/gallery';
 
     // Validate file
     if (!file) {
@@ -266,45 +143,58 @@ export async function POST(request: NextRequest) {
     const arrayBuffer = await file.arrayBuffer();
     const buffer = Buffer.from(arrayBuffer);
 
-    // Determine if watermark should be added (gallery images only)
-    const shouldAddWatermark = imageType === 'gallery';
+    // Get image dimensions for response
+    const metadata = await sharp(buffer).metadata();
+    const width = metadata.width || 0;
+    const height = metadata.height || 0;
 
-    // Compress image to 600KB and optionally add watermark
-    const { buffer: compressedBuffer, width, height } = await compressImage(buffer, shouldAddWatermark);
-
-    // Generate S3 key based on image type
-    let s3Key: string;
+    // Get file extension
+    const extension = getExtension(file.type);
     const timestamp = Date.now();
+
+    // Generate S3 keys - upload to 'uploads/' folder to trigger Lambda processing
+    // Lambda will process and move to 'processed/' folder with logo watermark
+    let uploadKey: string;
+    let processedKey: string;
 
     switch (imageType) {
       case 'logo':
-        s3Key = `processed/venues/${venue.venueSlug}/logo.webp`;
+        // Logos don't get watermarked by Lambda, so upload directly to processed
+        uploadKey = `uploads/venues/${venue.venueSlug}/logo.${extension}`;
+        processedKey = `processed/venues/${venue.venueSlug}/logo.webp`;
         break;
       case 'cover':
-        s3Key = `processed/venues/${venue.venueSlug}/cover.webp`;
+        uploadKey = `uploads/venues/${venue.venueSlug}/cover.${extension}`;
+        processedKey = `processed/venues/${venue.venueSlug}/cover.webp`;
         break;
       case 'event':
         const eventSlug = formData.get('eventSlug') as string || `event-${timestamp}`;
-        s3Key = `processed/events/${venue.venueSlug}/${eventSlug}/cover.webp`;
+        uploadKey = `uploads/events/${venue.venueSlug}/${eventSlug}/cover.${extension}`;
+        processedKey = `processed/events/${venue.venueSlug}/${eventSlug}/cover.webp`;
         break;
       case 'gallery':
       default:
-        s3Key = `processed/venues/${venue.venueSlug}/gallery/${timestamp}.webp`;
+        uploadKey = `uploads/venues/${venue.venueSlug}/gallery/${timestamp}.${extension}`;
+        processedKey = `processed/venues/${venue.venueSlug}/gallery/${timestamp}.webp`;
         break;
     }
 
-    // Upload to S3
-    const url = await uploadToS3(compressedBuffer, s3Key, 'image/webp');
+    // Upload raw file to S3 - Lambda will process it
+    // Lambda adds: logo watermark, compression, WebP conversion, content moderation
+    await uploadToS3(buffer, uploadKey, file.type);
+
+    // Return the processed URL (Lambda will create this file)
+    const processedUrl = `${S3_BASE_URL}/${processedKey}`;
 
     return NextResponse.json({
       success: true,
-      url,
-      key: s3Key,
+      url: processedUrl,        // Final URL after Lambda processing
+      uploadKey: uploadKey,     // Where we uploaded the raw file
+      processedKey: processedKey,
       width,
       height,
       originalSize: file.size,
-      compressedSize: compressedBuffer.length,
-      compressionRatio: Math.round((1 - compressedBuffer.length / file.size) * 100),
+      processing: true,         // Indicates Lambda is processing async
     });
   } catch (error) {
     console.error('Venue upload error:', error);
