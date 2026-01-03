@@ -85,17 +85,28 @@ export async function PATCH(
     let emailError: string | undefined;
 
     if (action === 'approve') {
+      console.log('[Admin] Approving venue:', id);
       venue = await approveVenue(id);
+      console.log('[Admin] Venue approved:', venue ? { id: venue.id, name: venue.name, email: venue.email, slug: venue.slug } : null);
 
       // Send approval email notification
       if (venue && venue.email) {
-        const emailResult = await sendVenueApprovalEmail(
-          venue.email,
-          venue.name,
-          venue.slug
-        );
-        emailSent = emailResult.success;
-        emailError = emailResult.error;
+        console.log('[Admin] Sending approval email to:', venue.email);
+        try {
+          const emailResult = await sendVenueApprovalEmail(
+            venue.email,
+            venue.name,
+            venue.slug
+          );
+          emailSent = emailResult.success;
+          emailError = emailResult.error;
+          console.log('[Admin] Approval email result:', { emailSent, emailError });
+        } catch (err) {
+          console.error('[Admin] Approval email error:', err);
+          emailError = err instanceof Error ? err.message : 'Unknown error';
+        }
+      } else {
+        console.log('[Admin] No email to send - venue or venue.email is missing:', { venue: !!venue, email: venue?.email });
       }
     } else if (action === 'reject') {
       if (!reason) {

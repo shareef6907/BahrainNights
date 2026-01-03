@@ -36,11 +36,21 @@ export async function sendVenueApprovalEmail(
   venueName: string,
   venueSlug: string
 ): Promise<EmailResult> {
-  return sendEmail({
-    to: email,
-    subject: `🎉 ${venueName} is now live on BahrainNights!`,
-    html: venueApprovalEmail(venueName, venueSlug),
-  });
+  console.log('[Email] Sending venue approval email:', { email, venueName, venueSlug });
+
+  try {
+    const result = await sendEmail({
+      to: email,
+      subject: `🎉 ${venueName} is now live on BahrainNights!`,
+      html: venueApprovalEmail(venueName, venueSlug),
+    });
+
+    console.log('[Email] Venue approval email result:', result);
+    return result;
+  } catch (error) {
+    console.error('[Email] Error sending venue approval email:', error);
+    throw error;
+  }
 }
 
 /**

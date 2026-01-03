@@ -6,6 +6,9 @@
 const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL || 'https://bahrainnights.com';
 const CURRENT_YEAR = new Date().getFullYear();
 
+// Logo URL - hosted on S3 (in processed folder for public access)
+const LOGO_URL = 'https://bahrainnights-production.s3.me-south-1.amazonaws.com/processed/assets/logo-email.png';
+
 // Brand colors
 const COLORS = {
   primary: '#4f46e5',
@@ -47,6 +50,14 @@ function baseLayout(content: string): string {
     <tr>
       <td align="center" style="padding: 40px 20px;">
         <table role="presentation" width="600" cellpadding="0" cellspacing="0" style="max-width: 600px; width: 100%;">
+          <!-- Logo Header -->
+          <tr>
+            <td align="center" style="padding: 0 0 20px;">
+              <a href="${SITE_URL}" style="text-decoration: none;">
+                <img src="${LOGO_URL}" alt="BahrainNights" width="180" style="max-width: 180px; height: auto;" />
+              </a>
+            </td>
+          </tr>
           ${content}
           <!-- Footer -->
           <tr>
@@ -194,7 +205,7 @@ export function venueRegistrationConfirmation(venueName: string): string {
       `)}
 
       <p style="color: ${COLORS.gray[500]}; font-size: 14px; line-height: 1.6; margin: 20px 0 0;">
-        Questions? Reply to this email or contact us at
+        Questions? Contact us at
         <a href="mailto:support@bahrainnights.com" style="color: ${COLORS.primary};">support@bahrainnights.com</a>
       </p>
     `)}
@@ -205,9 +216,9 @@ export function venueRegistrationConfirmation(venueName: string): string {
  * Venue Approval Email
  */
 export function venueApprovalEmail(venueName: string, venueSlug: string): string {
-  const loginUrl = `${SITE_URL}/login`;
+  const loginUrl = `${SITE_URL}/venue-portal/login`;
   const venueUrl = `${SITE_URL}/venues/${venueSlug}`;
-  const dashboardUrl = `${SITE_URL}/dashboard`;
+  const dashboardUrl = `${SITE_URL}/venue-portal`;
 
   return baseLayout(`
     ${gradientHeader('Congratulations!', 'Your venue has been approved', '🎉')}
@@ -235,7 +246,7 @@ export function venueApprovalEmail(venueName: string, venueSlug: string): string
       `)}
 
       <p style="color: ${COLORS.gray[500]}; font-size: 14px; line-height: 1.6; margin: 20px 0 0;">
-        Questions? Reply to this email or contact us at
+        Questions? Contact us at
         <a href="mailto:support@bahrainnights.com" style="color: ${COLORS.primary};">support@bahrainnights.com</a>
       </p>
     `)}
