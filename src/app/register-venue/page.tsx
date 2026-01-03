@@ -54,6 +54,8 @@ interface FormData {
   description: string;
   logo: File | null;
   coverImage: File | null;
+  logoUrl: string | null;
+  coverImageUrl: string | null;
 }
 
 export default function RegisterVenuePage() {
@@ -71,7 +73,9 @@ export default function RegisterVenuePage() {
     instagram: '',
     description: '',
     logo: null,
-    coverImage: null
+    coverImage: null,
+    logoUrl: null,
+    coverImageUrl: null
   });
 
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -81,25 +85,96 @@ export default function RegisterVenuePage() {
   const [coverPreview, setCoverPreview] = useState<string | null>(null);
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+  const [logoUploading, setLogoUploading] = useState(false);
+  const [coverUploading, setCoverUploading] = useState(false);
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target;
     setFormData(prev => ({ ...prev, [name]: value }));
   };
 
-  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>, field: 'logo' | 'coverImage') => {
+  // Upload file directly to S3 using presigned URL
+  const uploadToS3 = async (file: File, imageType: 'logo' | 'cover'): Promise<string | null> => {
+    try {
+      // Get presigned URL from our API
+      const presignResponse = await fetch('/api/upload/presign', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          filename: file.name,
+          contentType: file.type,
+          entityType: 'venue-registration',
+          imageType: imageType
+        })
+      });
+
+      if (!presignResponse.ok) {
+        const errorData = await presignResponse.json();
+        throw new Error(errorData.error || 'Failed to get upload URL');
+      }
+
+      const { uploadUrl, processedUrl } = await presignResponse.json();
+
+      // Upload directly to S3
+      const uploadResponse = await fetch(uploadUrl, {
+        method: 'PUT',
+        headers: { 'Content-Type': file.type },
+        body: file
+      });
+
+      if (!uploadResponse.ok) {
+        throw new Error('Failed to upload image to storage');
+      }
+
+      return processedUrl;
+    } catch (err) {
+      console.error('S3 upload error:', err);
+      throw err;
+    }
+  };
+
+  const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>, field: 'logo' | 'coverImage') => {
     const file = e.target.files?.[0];
-    if (file) {
-      setFormData(prev => ({ ...prev, [field]: file }));
-      const reader = new FileReader();
-      reader.onloadend = () => {
-        if (field === 'logo') {
-          setLogoPreview(reader.result as string);
-        } else {
-          setCoverPreview(reader.result as string);
-        }
-      };
-      reader.readAsDataURL(file);
+    if (!file) return;
+
+    // Validate file size (10MB max)
+    if (file.size > 10 * 1024 * 1024) {
+      setError('File too large. Maximum size is 10MB.');
+      return;
+    }
+
+    // Show preview immediately
+    const reader = new FileReader();
+    reader.onloadend = () => {
+      if (field === 'logo') {
+        setLogoPreview(reader.result as string);
+      } else {
+        setCoverPreview(reader.result as string);
+      }
+    };
+    reader.readAsDataURL(file);
+
+    // Start upload to S3
+    const setUploading = field === 'logo' ? setLogoUploading : setCoverUploading;
+    const urlField = field === 'logo' ? 'logoUrl' : 'coverImageUrl';
+    const imageType = field === 'logo' ? 'logo' : 'cover';
+
+    setUploading(true);
+    setError('');
+
+    try {
+      const s3Url = await uploadToS3(file, imageType);
+      setFormData(prev => ({ ...prev, [field]: file, [urlField]: s3Url }));
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Failed to upload image');
+      // Reset preview on error
+      if (field === 'logo') {
+        setLogoPreview(null);
+      } else {
+        setCoverPreview(null);
+      }
+    } finally {
+      setUploading(false);
     }
   };
 
@@ -128,26 +203,35 @@ export default function RegisterVenuePage() {
       return;
     }
 
+    // Check if images are still uploading
+    if (logoUploading || coverUploading) {
+      setError('Please wait for images to finish uploading');
+      setIsSubmitting(false);
+      return;
+    }
+
     try {
-      // Create FormData for file upload
-      const submitData = new FormData();
-      submitData.append('venueName', formData.venueName);
-      submitData.append('crNumber', formData.crNumber.trim());
-      submitData.append('category', formData.category);
-      submitData.append('area', formData.area);
-      submitData.append('address', formData.address);
-      submitData.append('phone', formData.phone);
-      submitData.append('email', formData.email);
-      submitData.append('password', formData.password);
-      if (formData.website) submitData.append('website', `https://${formData.website}`);
-      if (formData.instagram) submitData.append('instagram', formData.instagram);
-      if (formData.description) submitData.append('description', formData.description);
-      if (formData.logo) submitData.append('logo', formData.logo);
-      if (formData.coverImage) submitData.append('coverImage', formData.coverImage);
+      // Send JSON with S3 URLs instead of FormData with files
+      const submitData = {
+        venueName: formData.venueName,
+        crNumber: formData.crNumber.trim(),
+        category: formData.category,
+        area: formData.area,
+        address: formData.address,
+        phone: formData.phone,
+        email: formData.email,
+        password: formData.password,
+        website: formData.website ? `https://${formData.website}` : null,
+        instagram: formData.instagram || null,
+        description: formData.description || null,
+        logoUrl: formData.logoUrl,
+        coverImageUrl: formData.coverImageUrl
+      };
 
       const response = await fetch('/api/venues/register', {
         method: 'POST',
-        body: submitData,
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(submitData),
       });
 
       const data = await response.json();
@@ -466,14 +550,27 @@ export default function RegisterVenuePage() {
             <div className="grid md:grid-cols-2 gap-4">
               <div>
                 <label className="block text-sm text-gray-400 mb-2">Logo</label>
-                <label className="flex flex-col items-center justify-center w-full h-40 border-2 border-gray-700 border-dashed rounded-lg cursor-pointer hover:border-orange-500/50 transition-colors overflow-hidden">
+                <label className={`flex flex-col items-center justify-center w-full h-40 border-2 border-dashed rounded-lg transition-colors overflow-hidden relative ${logoUploading ? 'border-orange-500 cursor-wait' : 'border-gray-700 cursor-pointer hover:border-orange-500/50'}`}>
+                  {logoUploading && (
+                    <div className="absolute inset-0 bg-gray-900/80 flex items-center justify-center z-10">
+                      <div className="flex flex-col items-center">
+                        <Loader2 className="w-8 h-8 text-orange-500 animate-spin mb-2" />
+                        <span className="text-sm text-gray-300">Uploading...</span>
+                      </div>
+                    </div>
+                  )}
                   {logoPreview ? (
                     <img src={logoPreview} alt="Logo preview" className="w-full h-full object-contain p-2" />
                   ) : (
                     <div className="flex flex-col items-center justify-center py-6">
                       <Upload className="w-8 h-8 text-gray-500 mb-2" />
                       <p className="text-sm text-gray-500">Click to upload logo</p>
-                      <p className="text-xs text-gray-600 mt-1">PNG, JPG up to 5MB</p>
+                      <p className="text-xs text-gray-600 mt-1">PNG, JPG up to 10MB</p>
+                    </div>
+                  )}
+                  {formData.logoUrl && !logoUploading && (
+                    <div className="absolute top-2 right-2 bg-green-500 rounded-full p-1">
+                      <CheckCircle className="w-4 h-4 text-white" />
                     </div>
                   )}
                   <input
@@ -481,12 +578,21 @@ export default function RegisterVenuePage() {
                     accept="image/*"
                     onChange={(e) => handleFileChange(e, 'logo')}
                     className="hidden"
+                    disabled={logoUploading}
                   />
                 </label>
               </div>
               <div>
                 <label className="block text-sm text-gray-400 mb-2">Cover Image</label>
-                <label className="flex flex-col items-center justify-center w-full h-40 border-2 border-gray-700 border-dashed rounded-lg cursor-pointer hover:border-orange-500/50 transition-colors overflow-hidden">
+                <label className={`flex flex-col items-center justify-center w-full h-40 border-2 border-dashed rounded-lg transition-colors overflow-hidden relative ${coverUploading ? 'border-orange-500 cursor-wait' : 'border-gray-700 cursor-pointer hover:border-orange-500/50'}`}>
+                  {coverUploading && (
+                    <div className="absolute inset-0 bg-gray-900/80 flex items-center justify-center z-10">
+                      <div className="flex flex-col items-center">
+                        <Loader2 className="w-8 h-8 text-orange-500 animate-spin mb-2" />
+                        <span className="text-sm text-gray-300">Uploading...</span>
+                      </div>
+                    </div>
+                  )}
                   {coverPreview ? (
                     <img src={coverPreview} alt="Cover preview" className="w-full h-full object-cover" />
                   ) : (
@@ -496,11 +602,17 @@ export default function RegisterVenuePage() {
                       <p className="text-xs text-gray-600 mt-1">Recommended: 1200x600px</p>
                     </div>
                   )}
+                  {formData.coverImageUrl && !coverUploading && (
+                    <div className="absolute top-2 right-2 bg-green-500 rounded-full p-1">
+                      <CheckCircle className="w-4 h-4 text-white" />
+                    </div>
+                  )}
                   <input
                     type="file"
                     accept="image/*"
                     onChange={(e) => handleFileChange(e, 'coverImage')}
                     className="hidden"
+                    disabled={coverUploading}
                   />
                 </label>
               </div>

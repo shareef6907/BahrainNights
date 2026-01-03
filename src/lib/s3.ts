@@ -5,6 +5,7 @@ import {
   ListObjectsV2Command,
   HeadObjectCommand,
 } from '@aws-sdk/client-s3';
+import { getSignedUrl } from '@aws-sdk/s3-request-presigner';
 
 // Initialize S3 client - support both BAHRAINNIGHTS_ and AWS_ prefixed env vars
 const s3Client = new S3Client({
@@ -277,6 +278,43 @@ export function generateUniqueFilename(
   }
 
   return `${imageType}${ext}`;
+}
+
+/**
+ * Generate a presigned URL for direct browser-to-S3 upload
+ * This bypasses Vercel's 4.5MB limit by uploading directly to S3
+ */
+export interface PresignedUrlResult {
+  uploadUrl: string;
+  uploadKey: string;
+  processedUrl: string;
+  processedKey: string;
+}
+
+export async function getPresignedUploadUrl(
+  folder: string,
+  filename: string,
+  contentType: string,
+  expiresIn: number = 300 // 5 minutes default
+): Promise<PresignedUrlResult> {
+  const uploadKey = `uploads/${folder}/${filename}`;
+  const processedFilename = filename.replace(/\.[^.]+$/, '.webp');
+  const processedKey = `processed/${folder}/${processedFilename}`;
+
+  const command = new PutObjectCommand({
+    Bucket: BUCKET,
+    Key: uploadKey,
+    ContentType: contentType,
+  });
+
+  const uploadUrl = await getSignedUrl(s3Client, command, { expiresIn });
+
+  return {
+    uploadUrl,
+    uploadKey,
+    processedKey,
+    processedUrl: `${PUBLIC_URL}/${folder}/${processedFilename}`,
+  };
 }
 
 // Export the S3 client for advanced use cases

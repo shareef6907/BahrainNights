@@ -1,7 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@supabase/supabase-js';
 import { getAdminClient } from '@/lib/supabase/server';
-import { uploadImage, isValidImageType, isValidFileSize, generateFolderPath } from '@/lib/s3';
 import { sendVenueRegistrationEmail } from '@/lib/email';
 import bcrypt from 'bcryptjs';
 
@@ -28,24 +27,43 @@ function generateSlug(name: string): string {
     .trim();
 }
 
+interface RegisterData {
+  venueName: string;
+  crNumber: string;
+  category: string;
+  area: string;
+  address: string;
+  phone: string;
+  email: string;
+  password: string;
+  website?: string | null;
+  instagram?: string | null;
+  description?: string | null;
+  logoUrl?: string | null;
+  coverImageUrl?: string | null;
+}
+
 export async function POST(request: NextRequest) {
   try {
-    const formData = await request.formData();
+    // Parse JSON body (images already uploaded directly to S3)
+    const body: RegisterData = await request.json();
 
-    // Extract form fields
-    const venueName = formData.get('venueName') as string;
-    const crNumber = formData.get('crNumber') as string;
-    const category = formData.get('category') as string;
-    const area = formData.get('area') as string;
-    const address = formData.get('address') as string;
-    const phone = formData.get('phone') as string;
-    const email = formData.get('email') as string;
-    const password = formData.get('password') as string;
-    const website = formData.get('website') as string | null;
-    const instagram = formData.get('instagram') as string | null;
-    const description = formData.get('description') as string | null;
-    const logo = formData.get('logo') as File | null;
-    const coverImage = formData.get('coverImage') as File | null;
+    // Extract fields from JSON
+    const {
+      venueName,
+      crNumber,
+      category,
+      area,
+      address,
+      phone,
+      email,
+      password,
+      website,
+      instagram,
+      description,
+      logoUrl,
+      coverImageUrl
+    } = body;
 
     // Validate required fields
     if (!venueName || !crNumber || !category || !area || !address || !phone || !email || !password) {
@@ -100,61 +118,8 @@ export async function POST(request: NextRequest) {
       slug = `${slug}-${Date.now().toString(36)}`;
     }
 
-    // Upload images if provided
-    let logoUrl: string | null = null;
-    let coverImageUrl: string | null = null;
-
-    const folderPath = generateFolderPath('venue', { venueSlug: slug });
-
-    if (logo && logo.size > 0) {
-      // Validate logo
-      if (!isValidImageType(logo.type)) {
-        return NextResponse.json(
-          { error: 'Invalid logo file type. Allowed: JPEG, PNG, WebP, GIF' },
-          { status: 400 }
-        );
-      }
-      if (!isValidFileSize(logo.size, 5)) {
-        return NextResponse.json(
-          { error: 'Logo file too large. Maximum size: 5MB' },
-          { status: 400 }
-        );
-      }
-
-      const logoBuffer = Buffer.from(await logo.arrayBuffer());
-      const logoResult = await uploadImage(
-        logoBuffer,
-        folderPath,
-        `logo.${logo.type.split('/')[1]}`,
-        logo.type
-      );
-      logoUrl = logoResult.processedUrl;
-    }
-
-    if (coverImage && coverImage.size > 0) {
-      // Validate cover image
-      if (!isValidImageType(coverImage.type)) {
-        return NextResponse.json(
-          { error: 'Invalid cover image file type. Allowed: JPEG, PNG, WebP, GIF' },
-          { status: 400 }
-        );
-      }
-      if (!isValidFileSize(coverImage.size, 10)) {
-        return NextResponse.json(
-          { error: 'Cover image file too large. Maximum size: 10MB' },
-          { status: 400 }
-        );
-      }
-
-      const coverBuffer = Buffer.from(await coverImage.arrayBuffer());
-      const coverResult = await uploadImage(
-        coverBuffer,
-        folderPath,
-        `cover.${coverImage.type.split('/')[1]}`,
-        coverImage.type
-      );
-      coverImageUrl = coverResult.processedUrl;
-    }
+    // Images are already uploaded directly to S3 via presigned URLs
+    // logoUrl and coverImageUrl are passed from the frontend
 
     // Create user account using Supabase Auth
     const { data: authData, error: authError } = await supabaseAuth.auth.admin.createUser({
