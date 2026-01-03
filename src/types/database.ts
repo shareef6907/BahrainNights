@@ -66,6 +66,8 @@ export interface Database {
           facebook: string | null;
           tiktok: string | null;
           twitter: string | null;
+          menu_url: string | null;
+          booking_url: string | null;
           logo_url: string | null;
           cover_image_url: string | null;
           gallery: string[] | null;
@@ -107,6 +109,8 @@ export interface Database {
           facebook?: string | null;
           tiktok?: string | null;
           twitter?: string | null;
+          menu_url?: string | null;
+          booking_url?: string | null;
           logo_url?: string | null;
           cover_image_url?: string | null;
           gallery?: string[] | null;
@@ -148,6 +152,8 @@ export interface Database {
           facebook?: string | null;
           tiktok?: string | null;
           twitter?: string | null;
+          menu_url?: string | null;
+          booking_url?: string | null;
           logo_url?: string | null;
           cover_image_url?: string | null;
           gallery?: string[] | null;

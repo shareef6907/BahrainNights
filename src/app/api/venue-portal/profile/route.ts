@@ -34,6 +34,8 @@ interface VenueProfileData {
   facebook: string | null;
   tiktok: string | null;
   twitter: string | null;
+  menu_url: string | null;
+  booking_url: string | null;
   opening_hours: OpeningHours | string | null;
   cuisine_types: string[] | null;
   subcategories: string[] | null;
@@ -139,6 +141,8 @@ export async function PATCH(request: NextRequest) {
       'facebook',
       'tiktok',
       'twitter',
+      'menu_url',
+      'booking_url',
       'cuisine_types', // plural - matches database column
       'subcategories',
       'features',
