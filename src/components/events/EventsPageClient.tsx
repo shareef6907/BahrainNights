@@ -316,7 +316,7 @@ export default function EventsPageClient({ initialEvents }: EventsPageClientProp
 
       {/* Ad Banner */}
       <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mb-8">
-        <AdBanner targetPage="events" placement="banner" />
+        <AdBanner targetPage="events" placement="banner" limit={5} />
       </section>
 
       {/* Main Content */}

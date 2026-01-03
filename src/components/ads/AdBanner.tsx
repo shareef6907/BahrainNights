@@ -52,9 +52,9 @@ export default function AdBanner({
     fetchAds();
   }, [targetPage, placement, limit]);
 
-  // Auto-rotate for slider ads
+  // Auto-rotate for slider and banner ads
   useEffect(() => {
-    if (placement === 'slider' && ads.length > 1) {
+    if ((placement === 'slider' || placement === 'banner') && ads.length > 1) {
       const interval = setInterval(() => {
         setCurrentIndex((prev) => (prev + 1) % ads.length);
       }, 5000);
@@ -141,6 +141,21 @@ export default function AdBanner({
             Sponsored
           </span>
         </Link>
+
+        {/* Dots indicator for multiple ads */}
+        {ads.length > 1 && (
+          <div className="absolute bottom-3 right-3 flex gap-1">
+            {ads.map((_, index) => (
+              <button
+                key={index}
+                onClick={() => setCurrentIndex(index)}
+                className={`w-2 h-2 rounded-full transition-colors ${
+                  index === currentIndex ? 'bg-amber-400' : 'bg-white/30'
+                }`}
+              />
+            ))}
+          </div>
+        )}
       </motion.div>
     );
   }

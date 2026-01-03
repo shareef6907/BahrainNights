@@ -377,7 +377,7 @@ function PlacesPageContent() {
 
           {/* Ad Banner */}
           <div className="mb-8">
-            <AdBanner targetPage="places" placement="banner" />
+            <AdBanner targetPage="places" placement="banner" limit={5} />
           </div>
 
           {/* Empty State */}

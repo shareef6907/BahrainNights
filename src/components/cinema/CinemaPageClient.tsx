@@ -324,7 +324,7 @@ export default function CinemaPageClient({
         {/* Ad Banner */}
         <section className="px-4 mb-8">
           <div className="max-w-7xl mx-auto">
-            <AdBanner targetPage="cinema" placement="banner" />
+            <AdBanner targetPage="cinema" placement="banner" limit={5} />
           </div>
         </section>
 
