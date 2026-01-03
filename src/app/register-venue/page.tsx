@@ -233,12 +233,6 @@ export default function RegisterVenuePage() {
           onSubmit={handleSubmit}
           className="bg-gray-800/50 backdrop-blur-sm rounded-2xl p-6 md:p-8 border border-gray-700"
         >
-          {error && (
-            <div className="bg-red-500/10 border border-red-500/50 rounded-lg p-4 mb-6">
-              <p className="text-red-400">{error}</p>
-            </div>
-          )}
-
           {/* Basic Info */}
           <div className="mb-8">
             <h3 className="text-lg font-semibold text-white mb-4 flex items-center gap-2">
@@ -335,7 +329,8 @@ export default function RegisterVenuePage() {
               <div>
                 <label className="block text-sm text-gray-400 mb-2">Phone *</label>
                 <input
-                  type="tel"
+                  type="text"
+                  inputMode="tel"
                   name="phone"
                   value={formData.phone}
                   onChange={handleInputChange}
@@ -536,6 +531,13 @@ export default function RegisterVenuePage() {
               )}
             </button>
           </div>
+
+          {/* Error Message */}
+          {error && (
+            <div className="bg-red-500/10 border border-red-500/50 rounded-lg p-4 mt-4">
+              <p className="text-red-400 text-center">{error}</p>
+            </div>
+          )}
         </motion.form>
 
         {/* Benefits Section */}
