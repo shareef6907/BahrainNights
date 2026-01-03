@@ -221,7 +221,7 @@ function eventToSearchResult(event: Event, query: string): SearchResult {
     slug: event.slug,
     image: event.featured_image,
     category: event.category,
-    date: event.start_date,
+    date: event.start_date ?? undefined,
     relevanceScore: calculateRelevance(event.title, query) +
       (event.description ? calculateRelevance(event.description, query) * 0.5 : 0),
   };

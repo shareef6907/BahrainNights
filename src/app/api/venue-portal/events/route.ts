@@ -51,11 +51,25 @@ export async function GET() {
       );
     }
 
+    // Get venue name first since events table doesn't have venue_id
     const supabase = getAdminClient();
+    const { data: venueData } = await supabase
+      .from('venues')
+      .select('name')
+      .eq('id', venueId)
+      .single();
+
+    const venue = venueData as { name: string } | null;
+
+    if (!venue) {
+      return NextResponse.json({ events: [] });
+    }
+
+    // Filter events by venue_name (events table uses venue_name, not venue_id)
     const { data: events, error } = await supabase
       .from('events')
       .select('id, title, slug, status, start_date, end_date, start_time, category, featured_image')
-      .eq('venue_id', venueId)
+      .eq('venue_name', venue.name)
       .order('start_date', { ascending: false });
 
     if (error) {
@@ -133,9 +147,10 @@ export async function POST(request: NextRequest) {
     const slug = `${baseSlug}-${timestamp}`;
 
     // Create event with correct database column names
-    // Only include columns that exist in the events table (see database.ts)
+    // Based on actual DB schema: id, title, slug, description, category, venue_name,
+    // venue_address, start_date, end_date, start_time, end_time, price, booking_url,
+    // featured_image, status, is_featured, views, contact_name, contact_email, contact_phone
     const eventData = {
-      venue_id: venueId,
       venue_name: venue.name,
       title: body.title.trim(),
       slug,
@@ -149,7 +164,7 @@ export async function POST(request: NextRequest) {
       featured_image: body.featured_image || null,
       status: 'pending',
       is_featured: false,
-      view_count: 0,
+      views: 0,
     };
 
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
