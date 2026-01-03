@@ -1,0 +1,310 @@
+'use client';
+
+import { useEffect, useState } from 'react';
+import Link from 'next/link';
+import Image from 'next/image';
+import { motion } from 'framer-motion';
+
+interface Ad {
+  id: string;
+  title: string | null;
+  subtitle: string | null;
+  cta_text: string | null;
+  image_url: string;
+  target_url: string;
+  advertiser_name: string;
+}
+
+interface AdBannerProps {
+  targetPage: string;
+  placement: 'slider' | 'banner' | 'sidebar' | 'inline';
+  className?: string;
+  limit?: number;
+}
+
+export default function AdBanner({
+  targetPage,
+  placement,
+  className = '',
+  limit = 1,
+}: AdBannerProps) {
+  const [ads, setAds] = useState<Ad[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [currentIndex, setCurrentIndex] = useState(0);
+
+  useEffect(() => {
+    const fetchAds = async () => {
+      try {
+        const response = await fetch(
+          `/api/public/ads?targetPage=${targetPage}&placement=${placement}&limit=${limit}`
+        );
+        if (response.ok) {
+          const data = await response.json();
+          setAds(data.ads || []);
+        }
+      } catch (error) {
+        console.error('Error fetching ads:', error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchAds();
+  }, [targetPage, placement, limit]);
+
+  // Auto-rotate for slider ads
+  useEffect(() => {
+    if (placement === 'slider' && ads.length > 1) {
+      const interval = setInterval(() => {
+        setCurrentIndex((prev) => (prev + 1) % ads.length);
+      }, 5000);
+      return () => clearInterval(interval);
+    }
+  }, [ads.length, placement]);
+
+  // Track impression when ad is shown
+  const trackImpression = async (adId: string) => {
+    try {
+      await fetch(`/api/public/ads/${adId}/impression`, { method: 'POST' });
+    } catch (error) {
+      // Silently fail - don't affect user experience
+    }
+  };
+
+  // Track click when ad is clicked
+  const trackClick = async (adId: string) => {
+    try {
+      await fetch(`/api/public/ads/${adId}/click`, { method: 'POST' });
+    } catch (error) {
+      // Silently fail
+    }
+  };
+
+  useEffect(() => {
+    if (ads.length > 0) {
+      trackImpression(ads[currentIndex]?.id);
+    }
+  }, [ads, currentIndex]);
+
+  if (loading || ads.length === 0) {
+    return null;
+  }
+
+  const currentAd = ads[currentIndex];
+
+  // Banner style (horizontal, full-width)
+  if (placement === 'banner') {
+    return (
+      <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        className={`relative overflow-hidden rounded-2xl ${className}`}
+      >
+        <Link
+          href={currentAd.target_url}
+          target="_blank"
+          rel="noopener noreferrer sponsored"
+          onClick={() => trackClick(currentAd.id)}
+          className="block relative aspect-[4/1] md:aspect-[6/1] group"
+        >
+          <Image
+            src={currentAd.image_url}
+            alt={currentAd.title || currentAd.advertiser_name}
+            fill
+            className="object-cover transition-transform duration-500 group-hover:scale-105"
+          />
+          <div className="absolute inset-0 bg-gradient-to-r from-black/60 via-transparent to-transparent" />
+
+          {/* Content Overlay */}
+          <div className="absolute inset-0 flex items-center">
+            <div className="px-6 md:px-10">
+              {currentAd.title && (
+                <h3 className="text-white text-lg md:text-2xl font-bold mb-1">
+                  {currentAd.title}
+                </h3>
+              )}
+              {currentAd.subtitle && (
+                <p className="text-white/80 text-sm md:text-base mb-3">
+                  {currentAd.subtitle}
+                </p>
+              )}
+              {currentAd.cta_text && (
+                <span className="inline-block px-4 py-2 bg-amber-400 text-black text-sm font-semibold rounded-lg group-hover:bg-amber-300 transition-colors">
+                  {currentAd.cta_text}
+                </span>
+              )}
+            </div>
+          </div>
+
+          {/* Sponsored label */}
+          <span className="absolute top-3 right-3 px-2 py-1 text-xs bg-black/50 text-white/70 rounded">
+            Sponsored
+          </span>
+        </Link>
+      </motion.div>
+    );
+  }
+
+  // Sidebar style (vertical, compact)
+  if (placement === 'sidebar') {
+    return (
+      <motion.div
+        initial={{ opacity: 0, x: 20 }}
+        animate={{ opacity: 1, x: 0 }}
+        className={`bg-white/5 border border-white/10 rounded-xl overflow-hidden ${className}`}
+      >
+        <Link
+          href={currentAd.target_url}
+          target="_blank"
+          rel="noopener noreferrer sponsored"
+          onClick={() => trackClick(currentAd.id)}
+          className="block group"
+        >
+          <div className="relative aspect-square">
+            <Image
+              src={currentAd.image_url}
+              alt={currentAd.title || currentAd.advertiser_name}
+              fill
+              className="object-cover transition-transform duration-500 group-hover:scale-105"
+            />
+          </div>
+          <div className="p-4">
+            {currentAd.title && (
+              <h4 className="text-white font-semibold text-sm mb-1 line-clamp-2">
+                {currentAd.title}
+              </h4>
+            )}
+            {currentAd.subtitle && (
+              <p className="text-gray-400 text-xs mb-2 line-clamp-2">
+                {currentAd.subtitle}
+              </p>
+            )}
+            {currentAd.cta_text && (
+              <span className="text-amber-400 text-xs font-medium group-hover:text-amber-300 transition-colors">
+                {currentAd.cta_text} →
+              </span>
+            )}
+          </div>
+          <div className="px-4 pb-2">
+            <span className="text-xs text-gray-500">Sponsored</span>
+          </div>
+        </Link>
+      </motion.div>
+    );
+  }
+
+  // Inline style (within content)
+  if (placement === 'inline') {
+    return (
+      <motion.div
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        className={`bg-gradient-to-r from-amber-500/10 to-pink-500/10 border border-white/10 rounded-xl p-4 ${className}`}
+      >
+        <Link
+          href={currentAd.target_url}
+          target="_blank"
+          rel="noopener noreferrer sponsored"
+          onClick={() => trackClick(currentAd.id)}
+          className="flex items-center gap-4 group"
+        >
+          <div className="relative w-20 h-20 flex-shrink-0 rounded-lg overflow-hidden">
+            <Image
+              src={currentAd.image_url}
+              alt={currentAd.title || currentAd.advertiser_name}
+              fill
+              className="object-cover"
+            />
+          </div>
+          <div className="flex-1 min-w-0">
+            <div className="flex items-center gap-2 mb-1">
+              <span className="text-xs text-gray-500 bg-white/5 px-2 py-0.5 rounded">
+                Sponsored
+              </span>
+            </div>
+            {currentAd.title && (
+              <h4 className="text-white font-medium text-sm mb-0.5 truncate group-hover:text-amber-400 transition-colors">
+                {currentAd.title}
+              </h4>
+            )}
+            {currentAd.subtitle && (
+              <p className="text-gray-400 text-xs truncate">{currentAd.subtitle}</p>
+            )}
+          </div>
+          {currentAd.cta_text && (
+            <span className="flex-shrink-0 px-3 py-1.5 bg-amber-400/20 text-amber-400 text-xs font-medium rounded-lg group-hover:bg-amber-400 group-hover:text-black transition-colors">
+              {currentAd.cta_text}
+            </span>
+          )}
+        </Link>
+      </motion.div>
+    );
+  }
+
+  // Default/slider style
+  return (
+    <motion.div
+      initial={{ opacity: 0, y: 20 }}
+      animate={{ opacity: 1, y: 0 }}
+      className={`relative overflow-hidden rounded-2xl ${className}`}
+    >
+      <Link
+        href={currentAd.target_url}
+        target="_blank"
+        rel="noopener noreferrer sponsored"
+        onClick={() => trackClick(currentAd.id)}
+        className="block relative aspect-[16/9] md:aspect-[21/9] group"
+      >
+        <Image
+          src={currentAd.image_url}
+          alt={currentAd.title || currentAd.advertiser_name}
+          fill
+          className="object-cover"
+        />
+        <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent" />
+
+        {/* Content */}
+        <div className="absolute bottom-0 left-0 right-0 p-6">
+          {currentAd.title && (
+            <h3 className="text-white text-2xl md:text-3xl font-bold mb-2">
+              {currentAd.title}
+            </h3>
+          )}
+          {currentAd.subtitle && (
+            <p className="text-white/80 text-base mb-4 max-w-2xl">
+              {currentAd.subtitle}
+            </p>
+          )}
+          {currentAd.cta_text && (
+            <span className="inline-block px-6 py-3 bg-amber-400 text-black font-semibold rounded-lg group-hover:bg-amber-300 transition-colors">
+              {currentAd.cta_text}
+            </span>
+          )}
+        </div>
+
+        {/* Sponsored label */}
+        <span className="absolute top-4 right-4 px-2 py-1 text-xs bg-black/50 text-white/70 rounded">
+          Sponsored
+        </span>
+      </Link>
+
+      {/* Dots indicator for multiple ads */}
+      {ads.length > 1 && (
+        <div className="absolute bottom-4 right-4 flex gap-1">
+          {ads.map((_, index) => (
+            <button
+              key={index}
+              onClick={(e) => {
+                e.preventDefault();
+                setCurrentIndex(index);
+              }}
+              className={`w-2 h-2 rounded-full transition-colors ${
+                index === currentIndex ? 'bg-amber-400' : 'bg-white/30'
+              }`}
+            />
+          ))}
+        </div>
+      )}
+    </motion.div>
+  );
+}

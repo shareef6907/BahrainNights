@@ -9,6 +9,7 @@ import FeaturedMovie from '@/components/cinema/FeaturedMovie';
 import MovieFilters from '@/components/cinema/MovieFilters';
 import MovieGrid from '@/components/cinema/MovieGrid';
 import { Movie } from '@/components/cinema/MovieCard';
+import AdBanner from '@/components/ads/AdBanner';
 
 // Lazy load modals - only loaded when user clicks a movie
 const MovieModal = dynamic(() => import('@/components/cinema/MovieModal'), {
@@ -317,6 +318,13 @@ export default function CinemaPageClient({
               onSortChange={setSortBy}
               onClearFilters={handleClearFilters}
             />
+          </div>
+        </section>
+
+        {/* Ad Banner */}
+        <section className="px-4 mb-8">
+          <div className="max-w-7xl mx-auto">
+            <AdBanner targetPage="cinema" placement="banner" />
           </div>
         </section>
 

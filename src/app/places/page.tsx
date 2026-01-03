@@ -11,6 +11,7 @@ import PlaceMapView from '@/components/places/PlaceMapView';
 import TrendingPlaces from '@/components/places/TrendingPlaces';
 import { Place, OpeningHours } from '@/components/places/PlaceCard';
 import type { Venue } from '@/types/database';
+import AdBanner from '@/components/ads/AdBanner';
 
 // Convert database venue to Place type
 function venueToPlace(venue: Venue): Place {
@@ -374,6 +375,11 @@ function PlacesPageContent() {
             </p>
           </div>
 
+          {/* Ad Banner */}
+          <div className="mb-8">
+            <AdBanner targetPage="places" placement="banner" />
+          </div>
+
           {/* Empty State */}
           {placesData.length === 0 && !loading && (
             <div className="text-center py-20">
@@ -405,12 +411,15 @@ function PlacesPageContent() {
 
               {/* Sidebar (Desktop Only) */}
               {trendingPlaces.length > 0 && (
-                <div className="hidden xl:block w-80 flex-shrink-0">
+                <div className="hidden xl:block w-80 flex-shrink-0 space-y-6">
                   <TrendingPlaces
                     trending={trendingPlaces}
                     newOpenings={newOpenings}
                     tonightOffers={[]}
                   />
+
+                  {/* Sidebar Ad */}
+                  <AdBanner targetPage="places" placement="sidebar" />
                 </div>
               )}
             </div>

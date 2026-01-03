@@ -25,12 +25,16 @@ export async function GET(request: NextRequest) {
     const status = searchParams.get('status') || undefined;
     const paymentStatus = searchParams.get('paymentStatus') || undefined;
     const search = searchParams.get('search') || undefined;
+    const targetPage = searchParams.get('targetPage') || undefined;
+    const placement = searchParams.get('placement') || undefined;
 
     // Get ads
     const ads = await getAds({
       status: status as 'active' | 'pending' | 'paused' | 'expired' | 'all' | undefined,
       paymentStatus: paymentStatus as 'pending' | 'paid' | 'overdue' | undefined,
       search,
+      targetPage: targetPage as any,
+      placement: placement as any,
     });
 
     // Get stats
@@ -64,6 +68,8 @@ const createAdSchema = z.object({
   paymentStatus: z.enum(['pending', 'paid', 'overdue']).optional(),
   status: z.enum(['pending', 'active', 'paused', 'expired']).optional(),
   notes: z.string().optional(),
+  targetPage: z.enum(['homepage', 'events', 'cinema', 'places', 'restaurants', 'cafes', 'lounges', 'nightclubs', 'offers', 'explore', 'all']).optional(),
+  placement: z.enum(['slider', 'banner', 'sidebar', 'inline']).optional(),
 });
 
 // Create new ad
@@ -132,6 +138,8 @@ export async function POST(request: NextRequest) {
       status: data.status || 'pending',
       invoice_number: invoiceNumber,
       notes: data.notes || null,
+      target_page: data.targetPage || 'homepage',
+      placement: data.placement || 'slider',
     });
 
     return NextResponse.json(

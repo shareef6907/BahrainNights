@@ -20,7 +20,37 @@ import {
   AlertCircle,
   CheckCircle,
   RefreshCw,
+  Filter,
+  LayoutGrid,
+  Monitor,
 } from 'lucide-react';
+
+// Target pages for ads
+const TARGET_PAGES = [
+  { value: 'all', label: 'All Pages' },
+  { value: 'homepage', label: 'Homepage' },
+  { value: 'events', label: 'Events' },
+  { value: 'cinema', label: 'Cinema' },
+  { value: 'places', label: 'Places' },
+  { value: 'restaurants', label: 'Restaurants' },
+  { value: 'cafes', label: 'Cafes' },
+  { value: 'lounges', label: 'Lounges' },
+  { value: 'nightclubs', label: 'Nightclubs' },
+  { value: 'offers', label: 'Offers' },
+  { value: 'explore', label: 'Explore' },
+] as const;
+
+// Placement types
+const PLACEMENTS = [
+  { value: 'all', label: 'All Placements' },
+  { value: 'slider', label: 'Slider' },
+  { value: 'banner', label: 'Banner' },
+  { value: 'sidebar', label: 'Sidebar' },
+  { value: 'inline', label: 'Inline' },
+] as const;
+
+type TargetPage = typeof TARGET_PAGES[number]['value'];
+type Placement = typeof PLACEMENTS[number]['value'];
 
 interface Ad {
   id: string;
@@ -44,6 +74,8 @@ interface Ad {
   clicks: number;
   invoice_number: string | null;
   notes: string | null;
+  target_page: string;
+  placement: string;
   created_at: string;
   updated_at: string;
 }
@@ -67,6 +99,8 @@ export default function AdminAdsPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [activeTab, setActiveTab] = useState<AdStatus>('all');
+  const [targetPageFilter, setTargetPageFilter] = useState<TargetPage>('all');
+  const [placementFilter, setPlacementFilter] = useState<Placement>('all');
   const [openActionMenu, setOpenActionMenu] = useState<string | null>(null);
   const [actionLoading, setActionLoading] = useState<string | null>(null);
   const [toast, setToast] = useState<{ message: string; type: 'success' | 'error' } | null>(null);
@@ -79,6 +113,12 @@ export default function AdminAdsPage() {
       const params = new URLSearchParams();
       if (activeTab !== 'all') {
         params.set('status', activeTab);
+      }
+      if (targetPageFilter !== 'all') {
+        params.set('targetPage', targetPageFilter);
+      }
+      if (placementFilter !== 'all') {
+        params.set('placement', placementFilter);
       }
 
       const response = await fetch(`/api/admin/ads?${params.toString()}`);
@@ -94,7 +134,7 @@ export default function AdminAdsPage() {
     } finally {
       setLoading(false);
     }
-  }, [activeTab]);
+  }, [activeTab, targetPageFilter, placementFilter]);
 
   useEffect(() => {
     fetchAds();
@@ -279,9 +319,9 @@ export default function AdminAdsPage() {
         className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4"
       >
         <div>
-          <h1 className="text-2xl font-bold text-white">Homepage Ads Manager</h1>
+          <h1 className="text-2xl font-bold text-white">Ads Manager</h1>
           <p className="text-gray-400 mt-1">
-            Manage homepage slider advertisements
+            Manage advertisements across all pages
           </p>
         </div>
         <div className="flex items-center gap-3">
@@ -301,6 +341,54 @@ export default function AdminAdsPage() {
             Create New Ad
           </Link>
         </div>
+      </motion.div>
+
+      {/* Page & Placement Filters */}
+      <motion.div
+        initial={{ opacity: 0, y: 10 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ delay: 0.05 }}
+        className="flex flex-wrap gap-3"
+      >
+        <div className="flex items-center gap-2">
+          <Monitor className="w-4 h-4 text-gray-400" />
+          <select
+            value={targetPageFilter}
+            onChange={(e) => setTargetPageFilter(e.target.value as TargetPage)}
+            className="bg-white/5 border border-white/10 rounded-lg px-3 py-2 text-sm text-white focus:outline-none focus:border-cyan-500"
+          >
+            {TARGET_PAGES.map((page) => (
+              <option key={page.value} value={page.value} className="bg-[#1A1A2E]">
+                {page.label}
+              </option>
+            ))}
+          </select>
+        </div>
+        <div className="flex items-center gap-2">
+          <LayoutGrid className="w-4 h-4 text-gray-400" />
+          <select
+            value={placementFilter}
+            onChange={(e) => setPlacementFilter(e.target.value as Placement)}
+            className="bg-white/5 border border-white/10 rounded-lg px-3 py-2 text-sm text-white focus:outline-none focus:border-cyan-500"
+          >
+            {PLACEMENTS.map((placement) => (
+              <option key={placement.value} value={placement.value} className="bg-[#1A1A2E]">
+                {placement.label}
+              </option>
+            ))}
+          </select>
+        </div>
+        {(targetPageFilter !== 'all' || placementFilter !== 'all') && (
+          <button
+            onClick={() => {
+              setTargetPageFilter('all');
+              setPlacementFilter('all');
+            }}
+            className="text-sm text-cyan-400 hover:text-cyan-300 transition-colors"
+          >
+            Clear filters
+          </button>
+        )}
       </motion.div>
 
       {/* Stats Cards */}
@@ -470,7 +558,8 @@ export default function AdminAdsPage() {
               <tr className="border-b border-white/10">
                 <th className="text-left p-4 text-sm font-medium text-gray-400">Preview</th>
                 <th className="text-left p-4 text-sm font-medium text-gray-400">Advertiser</th>
-                <th className="text-left p-4 text-sm font-medium text-gray-400">Slot</th>
+                <th className="text-left p-4 text-sm font-medium text-gray-400">Page</th>
+                <th className="text-left p-4 text-sm font-medium text-gray-400">Placement</th>
                 <th className="text-left p-4 text-sm font-medium text-gray-400">Duration</th>
                 <th className="text-left p-4 text-sm font-medium text-gray-400">Status</th>
                 <th className="text-left p-4 text-sm font-medium text-gray-400">Performance</th>
@@ -499,8 +588,18 @@ export default function AdminAdsPage() {
                       <p className="font-medium text-white">{ad.advertiser_name}</p>
                       <p className="text-sm text-gray-400">{ad.title || '-'}</p>
                     </td>
-                    <td className="p-4 text-gray-300">
-                      {ad.slot_position ? `Slot ${ad.slot_position}` : '-'}
+                    <td className="p-4">
+                      <span className="px-2 py-1 text-xs font-medium bg-indigo-500/20 text-indigo-400 rounded-full capitalize">
+                        {ad.target_page || 'homepage'}
+                      </span>
+                    </td>
+                    <td className="p-4">
+                      <span className="px-2 py-1 text-xs font-medium bg-violet-500/20 text-violet-400 rounded-full capitalize">
+                        {ad.placement || 'slider'}
+                      </span>
+                      {ad.slot_position && (
+                        <span className="ml-1 text-xs text-gray-500">#{ad.slot_position}</span>
+                      )}
                     </td>
                     <td className="p-4">
                       <p className="text-white text-sm">

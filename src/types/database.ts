@@ -539,6 +539,8 @@ export interface Database {
           clicks: number;
           status: 'pending' | 'active' | 'paused' | 'expired';
           notes: string | null;
+          target_page: 'homepage' | 'events' | 'cinema' | 'places' | 'restaurants' | 'cafes' | 'lounges' | 'nightclubs' | 'offers' | 'explore' | 'all';
+          placement: 'slider' | 'banner' | 'sidebar' | 'inline';
           created_at: string;
           updated_at: string;
         };
@@ -564,6 +566,8 @@ export interface Database {
           clicks?: number;
           status?: 'pending' | 'active' | 'paused' | 'expired';
           notes?: string | null;
+          target_page?: 'homepage' | 'events' | 'cinema' | 'places' | 'restaurants' | 'cafes' | 'lounges' | 'nightclubs' | 'offers' | 'explore' | 'all';
+          placement?: 'slider' | 'banner' | 'sidebar' | 'inline';
           created_at?: string;
           updated_at?: string;
         };
@@ -589,6 +593,8 @@ export interface Database {
           clicks?: number;
           status?: 'pending' | 'active' | 'paused' | 'expired';
           notes?: string | null;
+          target_page?: 'homepage' | 'events' | 'cinema' | 'places' | 'restaurants' | 'cafes' | 'lounges' | 'nightclubs' | 'offers' | 'explore' | 'all';
+          placement?: 'slider' | 'banner' | 'sidebar' | 'inline';
           created_at?: string;
           updated_at?: string;
         };

@@ -1,10 +1,38 @@
 import { getAdminClient } from '@/lib/supabase/server';
 import type { HomepageAd, HomepageAdInsert, HomepageAdUpdate } from '@/types/database';
 
+// Available target pages for ads
+export const AD_TARGET_PAGES = [
+  'homepage',
+  'events',
+  'cinema',
+  'places',
+  'restaurants',
+  'cafes',
+  'lounges',
+  'nightclubs',
+  'offers',
+  'explore',
+  'all'
+] as const;
+
+// Available placements for ads
+export const AD_PLACEMENTS = [
+  'slider',
+  'banner',
+  'sidebar',
+  'inline'
+] as const;
+
+export type AdTargetPage = typeof AD_TARGET_PAGES[number];
+export type AdPlacement = typeof AD_PLACEMENTS[number];
+
 export interface AdFilters {
   status?: HomepageAd['status'] | 'all';
   paymentStatus?: HomepageAd['payment_status'];
   slotPosition?: number;
+  targetPage?: AdTargetPage | 'all';
+  placement?: AdPlacement | 'all';
   search?: string;
   limit?: number;
   offset?: number;
@@ -31,6 +59,14 @@ export async function getAds(filters: AdFilters = {}): Promise<HomepageAd[]> {
     query = query.eq('slot_position', filters.slotPosition);
   }
 
+  if (filters.targetPage && filters.targetPage !== 'all') {
+    query = query.eq('target_page', filters.targetPage);
+  }
+
+  if (filters.placement && filters.placement !== 'all') {
+    query = query.eq('placement', filters.placement);
+  }
+
   if (filters.search) {
     query = query.or(`advertiser_name.ilike.%${filters.search}%,title.ilike.%${filters.search}%`);
   }
@@ -49,8 +85,47 @@ export async function getAds(filters: AdFilters = {}): Promise<HomepageAd[]> {
   return (data || []) as HomepageAd[];
 }
 
-// Get active ads for homepage slider
+// Get active ads for homepage slider (legacy function for backwards compatibility)
 export async function getActiveAds(): Promise<HomepageAd[]> {
+  return getAdsForPage('homepage', 'slider');
+}
+
+// Get active ads for a specific page and placement
+export async function getAdsForPage(
+  targetPage: AdTargetPage,
+  placement?: AdPlacement
+): Promise<HomepageAd[]> {
+  const supabase = getAdminClient();
+  const today = new Date().toISOString().split('T')[0];
+
+  let query = supabase
+    .from('homepage_ads')
+    .select('*')
+    .eq('status', 'active')
+    .lte('start_date', today)
+    .gte('end_date', today);
+
+  // Match target_page = specified page OR target_page = 'all'
+  query = query.or(`target_page.eq.${targetPage},target_page.eq.all`);
+
+  if (placement) {
+    query = query.eq('placement', placement);
+  }
+
+  query = query.order('slot_position', { ascending: true });
+
+  const { data, error } = await query;
+
+  if (error) {
+    console.error('Error fetching ads for page:', error);
+    return [];
+  }
+
+  return (data || []) as HomepageAd[];
+}
+
+// Get all active ads across all pages (for admin overview)
+export async function getAllActiveAds(): Promise<HomepageAd[]> {
   const supabase = getAdminClient();
   const today = new Date().toISOString().split('T')[0];
 
@@ -60,10 +135,11 @@ export async function getActiveAds(): Promise<HomepageAd[]> {
     .eq('status', 'active')
     .lte('start_date', today)
     .gte('end_date', today)
+    .order('target_page', { ascending: true })
     .order('slot_position', { ascending: true });
 
   if (error) {
-    console.error('Error fetching active ads:', error);
+    console.error('Error fetching all active ads:', error);
     return [];
   }
 
@@ -187,18 +263,80 @@ export async function markAdPaid(id: string, paymentDate?: string): Promise<Home
   });
 }
 
-// Get ad stats
+// Get ad stats (legacy function - calls getAdStatsByPage internally)
 export async function getAdStats(): Promise<{
   totalRevenue: number;
   totalImpressions: number;
   totalClicks: number;
   activeAds: number;
 }> {
+  const stats = await getAdStatsByPage();
+  return {
+    totalRevenue: stats.totalRevenue,
+    totalImpressions: stats.totalImpressions,
+    totalClicks: stats.totalClicks,
+    activeAds: stats.activeAds,
+  };
+}
+
+// Check available slots for a specific page and placement
+export async function getAvailableSlots(
+  startDate: string,
+  endDate: string,
+  targetPage: AdTargetPage = 'homepage',
+  placement: AdPlacement = 'slider'
+): Promise<number[]> {
   const supabase = getAdminClient();
 
-  const { data, error } = await supabase
+  // Get ads that overlap with the date range for this page/placement
+  let query = supabase
     .from('homepage_ads')
-    .select('price_bd, impressions, clicks, status, payment_status');
+    .select('slot_position')
+    .or(`status.eq.active,status.eq.pending`)
+    .lte('start_date', endDate)
+    .gte('end_date', startDate);
+
+  // Filter by target page (also include 'all' as it takes up slots)
+  query = query.or(`target_page.eq.${targetPage},target_page.eq.all`);
+  query = query.eq('placement', placement);
+
+  const { data, error } = await query;
+
+  if (error) {
+    console.error('Error checking slots:', error);
+    return [1, 2, 3, 4, 5];
+  }
+
+  const ads = (data || []) as { slot_position: number | null }[];
+  const takenSlots = new Set(ads.map(ad => ad.slot_position).filter(Boolean));
+
+  // Different slot counts for different placements
+  const maxSlots = placement === 'slider' ? 5 : placement === 'banner' ? 3 : 2;
+  const allSlots = Array.from({ length: maxSlots }, (_, i) => i + 1);
+  const availableSlots = allSlots.filter(slot => !takenSlots.has(slot));
+
+  return availableSlots;
+}
+
+// Get ad stats by page
+export async function getAdStatsByPage(targetPage?: AdTargetPage): Promise<{
+  totalRevenue: number;
+  totalImpressions: number;
+  totalClicks: number;
+  activeAds: number;
+  byPage: Record<string, { count: number; revenue: number }>;
+}> {
+  const supabase = getAdminClient();
+
+  let query = supabase
+    .from('homepage_ads')
+    .select('price_bd, impressions, clicks, status, payment_status, target_page');
+
+  if (targetPage && targetPage !== 'all') {
+    query = query.eq('target_page', targetPage);
+  }
+
+  const { data, error } = await query;
 
   if (error) {
     console.error('Error fetching ad stats:', error);
@@ -207,6 +345,7 @@ export async function getAdStats(): Promise<{
       totalImpressions: 0,
       totalClicks: 0,
       activeAds: 0,
+      byPage: {},
     };
   }
 
@@ -215,12 +354,22 @@ export async function getAdStats(): Promise<{
     totalImpressions: 0,
     totalClicks: 0,
     activeAds: 0,
+    byPage: {} as Record<string, { count: number; revenue: number }>,
   };
 
-  const ads = (data || []) as HomepageAd[];
+  const ads = (data || []) as (HomepageAd & { target_page?: string })[];
   ads.forEach(ad => {
+    const page = ad.target_page || 'homepage';
+
+    if (!stats.byPage[page]) {
+      stats.byPage[page] = { count: 0, revenue: 0 };
+    }
+
+    stats.byPage[page].count += 1;
+
     if (ad.payment_status === 'paid') {
       stats.totalRevenue += ad.price_bd || 0;
+      stats.byPage[page].revenue += ad.price_bd || 0;
     }
     stats.totalImpressions += ad.impressions || 0;
     stats.totalClicks += ad.clicks || 0;
@@ -230,30 +379,6 @@ export async function getAdStats(): Promise<{
   });
 
   return stats;
-}
-
-// Check available slots
-export async function getAvailableSlots(startDate: string, endDate: string): Promise<number[]> {
-  const supabase = getAdminClient();
-
-  // Get ads that overlap with the date range
-  const { data, error } = await supabase
-    .from('homepage_ads')
-    .select('slot_position')
-    .or(`status.eq.active,status.eq.pending`)
-    .lte('start_date', endDate)
-    .gte('end_date', startDate);
-
-  if (error) {
-    console.error('Error checking slots:', error);
-    return [1, 2, 3, 4, 5];
-  }
-
-  const ads = (data || []) as { slot_position: number | null }[];
-  const takenSlots = new Set(ads.map(ad => ad.slot_position).filter(Boolean));
-  const availableSlots = [1, 2, 3, 4, 5].filter(slot => !takenSlots.has(slot));
-
-  return availableSlots;
 }
 
 // Generate invoice number

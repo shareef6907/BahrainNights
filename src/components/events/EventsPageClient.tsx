@@ -6,6 +6,7 @@ import { motion } from 'framer-motion';
 import { Search, Calendar, MapPin, Clock, Filter, Grid3X3, List, ChevronRight } from 'lucide-react';
 import Link from 'next/link';
 import Image from 'next/image';
+import AdBanner from '@/components/ads/AdBanner';
 
 // Event interface
 export interface Event {
@@ -313,6 +314,11 @@ export default function EventsPageClient({ initialEvents }: EventsPageClientProp
         </div>
       </section>
 
+      {/* Ad Banner */}
+      <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mb-8">
+        <AdBanner targetPage="events" placement="banner" />
+      </section>
+
       {/* Main Content */}
       <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pb-16">
         <div className="flex flex-col lg:flex-row gap-8">
@@ -360,6 +366,11 @@ export default function EventsPageClient({ initialEvents }: EventsPageClientProp
                 >
                   List Your Event
                 </Link>
+              </div>
+
+              {/* Sidebar Ad */}
+              <div className="mt-6">
+                <AdBanner targetPage="events" placement="sidebar" />
               </div>
             </div>
           </div>
