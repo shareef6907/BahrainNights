@@ -3,6 +3,21 @@ import { verifyToken } from '@/lib/auth';
 import { getVenueById, approveVenue, rejectVenue, deleteVenue, updateVenue } from '@/lib/db/venues';
 import { sendVenueApprovalEmail, sendVenueRejectionEmail } from '@/lib/email';
 import { cookies } from 'next/headers';
+import { createClient } from '@supabase/supabase-js';
+
+// Create Supabase admin client for auth operations
+function getSupabaseAdminClient() {
+  return createClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.SUPABASE_SERVICE_ROLE_KEY!,
+    {
+      auth: {
+        autoRefreshToken: false,
+        persistSession: false,
+      },
+    }
+  );
+}
 
 // Get single venue
 export async function GET(
@@ -146,9 +161,40 @@ export async function DELETE(
       return NextResponse.json({ error: 'Admin access required' }, { status: 403 });
     }
 
+    // Get venue details before deletion to find the associated auth user
+    const venue = await getVenueById(id);
+    if (!venue) {
+      return NextResponse.json({ error: 'Venue not found' }, { status: 404 });
+    }
+
+    // Delete the venue from database
     await deleteVenue(id);
 
-    return NextResponse.json({ message: 'Venue deleted successfully' });
+    // Also delete the associated Supabase Auth user (if exists)
+    let authUserDeleted = false;
+    if (venue.email) {
+      try {
+        const supabaseAuth = getSupabaseAdminClient();
+        const { data: existingUsers } = await supabaseAuth.auth.admin.listUsers();
+        const authUser = existingUsers?.users?.find(
+          u => u.email?.toLowerCase() === venue.email!.toLowerCase()
+        );
+
+        if (authUser) {
+          await supabaseAuth.auth.admin.deleteUser(authUser.id);
+          authUserDeleted = true;
+          console.log(`Deleted auth user for venue: ${venue.email}`);
+        }
+      } catch (authError) {
+        console.error('Error deleting auth user:', authError);
+        // Don't fail the request if auth user deletion fails
+      }
+    }
+
+    return NextResponse.json({
+      message: 'Venue deleted successfully',
+      authUserDeleted
+    });
   } catch (error) {
     console.error('Error deleting venue:', error);
     return NextResponse.json(
