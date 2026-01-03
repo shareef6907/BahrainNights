@@ -106,11 +106,23 @@ export default function TermsPage() {
           <div className="pl-12 space-y-6 text-gray-300">
 
             <div>
-              <h3 className="text-lg font-semibold text-white mb-3">3.1 Prohibited Content</h3>
+              <h3 className="text-lg font-semibold text-white mb-3">3.1 Prohibited Content (Bahrain Law Compliance)</h3>
               <ul className="space-y-3">
                 <li className="flex items-start gap-3">
                   <span className="text-red-400 font-bold">✗</span>
-                  <span><strong>No alcohol imagery:</strong> Do not display bottles, glasses of alcohol, or people drinking alcohol. Refer to drinks as &quot;beverages,&quot; &quot;refreshments,&quot; or &quot;cocktails&quot; (can be non-alcoholic).</span>
+                  <span><strong>No alcohol bottles or branded drinks:</strong> Do not display alcohol bottles, beer cans, branded alcoholic beverages, or people visibly drinking alcohol. <span className="text-green-400">(Cocktail glasses and mocktails are acceptable)</span></span>
+                </li>
+                <li className="flex items-start gap-3">
+                  <span className="text-red-400 font-bold">✗</span>
+                  <span><strong>No excessive skin exposure:</strong> Photos must show appropriate dress. No revealing clothing, swimwear in non-beach contexts, or suggestive poses.</span>
+                </li>
+                <li className="flex items-start gap-3">
+                  <span className="text-red-400 font-bold">✗</span>
+                  <span><strong>No drugs or drug-related imagery:</strong> Any content depicting illegal substances, drug paraphernalia, or promoting drug use is strictly prohibited.</span>
+                </li>
+                <li className="flex items-start gap-3">
+                  <span className="text-red-400 font-bold">✗</span>
+                  <span><strong>No nudity or sexual content:</strong> Nudity, sexually suggestive content, or explicit material is strictly prohibited.</span>
                 </li>
                 <li className="flex items-start gap-3">
                   <span className="text-red-400 font-bold">✗</span>
@@ -126,13 +138,22 @@ export default function TermsPage() {
                 </li>
                 <li className="flex items-start gap-3">
                   <span className="text-red-400 font-bold">✗</span>
-                  <span><strong>No inappropriate imagery:</strong> Nudity, sexually suggestive content, or explicit material is strictly prohibited.</span>
-                </li>
-                <li className="flex items-start gap-3">
-                  <span className="text-red-400 font-bold">✗</span>
                   <span><strong>No hate speech:</strong> Content promoting discrimination, hatred, or violence against any group is not permitted.</span>
                 </li>
               </ul>
+
+              {/* What's Allowed */}
+              <div className="mt-6 bg-green-500/10 border border-green-500/30 rounded-lg p-4">
+                <p className="text-green-400 font-semibold mb-2">✓ What IS Allowed:</p>
+                <ul className="text-gray-300 space-y-1">
+                  <li>• Cocktail glasses and mocktails (without visible alcohol branding)</li>
+                  <li>• Professional venue and event photography</li>
+                  <li>• Food and beverage presentations</li>
+                  <li>• People in appropriate attire for the venue type</li>
+                  <li>• Entertainment and ambiance shots</li>
+                  <li>• Beach/pool venues with appropriate swimwear coverage</li>
+                </ul>
+              </div>
             </div>
 
             <div>
@@ -154,7 +175,18 @@ export default function TermsPage() {
             </div>
 
             <div>
-              <h3 className="text-lg font-semibold text-white mb-3">3.3 Image Requirements</h3>
+              <h3 className="text-lg font-semibold text-white mb-3">3.3 Image Format Requirements</h3>
+              <div className="bg-blue-500/10 border border-blue-500/30 rounded-lg p-4 mb-4">
+                <p className="text-blue-400 font-semibold mb-2">Supported File Formats:</p>
+                <ul className="text-gray-300 space-y-1">
+                  <li>• <strong>JPG / JPEG</strong> - Recommended for photos</li>
+                  <li>• <strong>PNG</strong> - Good for logos and graphics</li>
+                  <li>• <strong>WebP</strong> - Modern format, smaller file size</li>
+                  <li>• <strong>Maximum file size:</strong> 10MB per image</li>
+                  <li>• <strong>Minimum resolution:</strong> 800x600 pixels recommended</li>
+                  <li>• <strong>Maximum gallery images:</strong> 20 per venue</li>
+                </ul>
+              </div>
               <ul className="space-y-3">
                 <li className="flex items-start gap-3">
                   <span className="text-green-400 font-bold">✓</span>
@@ -166,17 +198,29 @@ export default function TermsPage() {
                 </li>
                 <li className="flex items-start gap-3">
                   <span className="text-green-400 font-bold">✓</span>
-                  <span>Images will be watermarked with &quot;BahrainNights&quot; branding</span>
+                  <span>Images will be automatically optimized and converted to WebP format</span>
                 </li>
                 <li className="flex items-start gap-3">
-                  <span className="text-green-400 font-bold">✓</span>
-                  <span>Maximum 20 gallery images per venue</span>
-                </li>
-                <li className="flex items-start gap-3">
-                  <span className="text-green-400 font-bold">✓</span>
-                  <span>Supported formats: JPG, PNG, WebP (max 25MB per image)</span>
+                  <span className="text-red-400 font-bold">✗</span>
+                  <span>HEIC, TIFF, BMP, GIF formats are NOT supported</span>
                 </li>
               </ul>
+            </div>
+
+            <div className="mt-6">
+              <h3 className="text-lg font-semibold text-white mb-3">3.4 AI Content Moderation</h3>
+              <div className="bg-purple-500/10 border border-purple-500/30 rounded-lg p-4">
+                <p className="text-purple-400 font-semibold mb-2">🤖 Automated Content Review</p>
+                <p className="text-gray-300 mb-3">
+                  All uploaded images are automatically scanned by our AI moderation system to ensure compliance
+                  with Bahrain laws and our content guidelines. Images that violate our policies will be
+                  automatically rejected or removed without notice.
+                </p>
+                <p className="text-gray-400 text-sm">
+                  Our AI detects: inappropriate content, excessive skin exposure, alcohol bottles/glasses,
+                  drug-related imagery, offensive symbols, and other prohibited content.
+                </p>
+              </div>
             </div>
 
           </div>
