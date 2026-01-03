@@ -87,7 +87,6 @@ export async function upsertPublicUser(user: {
         email: user.email,
         name: user.name,
         avatar_url: user.avatar_url,
-        last_login: new Date().toISOString(),
         updated_at: new Date().toISOString(),
       },
       {
@@ -127,14 +126,13 @@ export async function updatePublicUser(id: string, updates: PublicUserUpdate): P
   return data as PublicUser;
 }
 
-// Update last login
+// Update last login (updates updated_at as a proxy for login tracking)
 export async function updatePublicUserLastLogin(id: string): Promise<void> {
   const supabase = getUntypedClient();
 
   const { error } = await supabase
     .from('public_users')
     .update({
-      last_login: new Date().toISOString(),
       updated_at: new Date().toISOString(),
     })
     .eq('id', id);
