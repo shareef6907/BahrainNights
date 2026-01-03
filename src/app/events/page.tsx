@@ -75,11 +75,16 @@ async function getEvents(): Promise<Event[]> {
     }
   });
 
-  // Fetch published events ordered by event date (upcoming first)
+  // Get today's date in ISO format for filtering
+  const today = new Date().toISOString().split('T')[0];
+
+  // Fetch published events that are current or upcoming
+  // Filter: date >= today OR end_date >= today (for multi-day events)
   const { data, error } = await supabase
     .from('events')
     .select('*')
     .eq('status', 'published')
+    .or(`date.gte.${today},end_date.gte.${today}`)
     .order('date', { ascending: true });
 
   if (error) {

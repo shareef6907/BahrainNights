@@ -17,9 +17,20 @@ import PlaceShareModal from './PlaceShareModal';
 import type { Venue } from '@/types/database';
 import type { Place, OpeningHours } from './PlaceCard';
 
+interface VenueEvent {
+  id: string;
+  title: string;
+  slug: string;
+  date: string;
+  time: string;
+  image: string;
+  category: string;
+}
+
 interface PlaceDetailPageContentProps {
   venue: Venue;
   similarVenues: Venue[];
+  events?: VenueEvent[];
 }
 
 const categoryColors: Record<string, string> = {
@@ -73,7 +84,7 @@ function venueToPlace(venue: Venue): Place {
   };
 }
 
-export default function PlaceDetailPageContent({ venue, similarVenues }: PlaceDetailPageContentProps) {
+export default function PlaceDetailPageContent({ venue, similarVenues, events = [] }: PlaceDetailPageContentProps) {
   const [shareModalOpen, setShareModalOpen] = useState(false);
 
   // Parse opening hours from JSON
@@ -212,8 +223,15 @@ export default function PlaceDetailPageContent({ venue, similarVenues }: PlaceDe
               {venue.features && venue.features.length > 0 && (
                 <PlaceFeatures features={venue.features} />
               )}
-              {/* Events and Offers - will be empty for now until we fetch from database */}
-              <PlaceEvents events={[]} venueName={venue.name} venueSlug={venue.slug} />
+              {/* Upcoming Events at this venue */}
+              <PlaceEvents
+                events={events.map(e => ({
+                  ...e,
+                  categoryColor: categoryColors[e.category] || 'bg-purple-500',
+                }))}
+                venueName={venue.name}
+                venueSlug={venue.slug}
+              />
               <PlaceOffers offers={[]} />
             </div>
 

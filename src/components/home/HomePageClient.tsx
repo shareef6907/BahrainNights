@@ -618,65 +618,6 @@ export default function HomePageClient({ initialMovies, initialStats }: HomePage
         </div>
       </section>
 
-      {/* Happening Today */}
-      <section className="px-4 mb-24">
-        <div className="max-w-7xl mx-auto">
-          <motion.div
-            className="flex items-center justify-between mb-10"
-            initial="hidden"
-            whileInView="visible"
-            viewport={{ once: true, margin: "-100px" }}
-            variants={fadeIn}
-          >
-            <h2 className="text-3xl md:text-5xl font-bold flex items-center gap-3">
-              🔥 Happening Today
-            </h2>
-            <a href="/events/today" className="text-yellow-400 hover:text-yellow-300 flex items-center space-x-2 transition-colors group">
-              <span className="font-medium">View All</span>
-              <ChevronRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
-            </a>
-          </motion.div>
-
-          <motion.div
-            className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6"
-            variants={stagger}
-            initial="hidden"
-            whileInView="visible"
-            viewport={{ once: true, margin: "-100px" }}
-          >
-            {todayEvents.map(event => (
-              <motion.div
-                key={event.id}
-                className="group relative bg-white/5 backdrop-blur-sm border border-white/10 rounded-2xl overflow-hidden cursor-pointer hover:border-yellow-400/50 transition-colors"
-                variants={fadeIn}
-                whileHover={cardHover}
-              >
-                <div className="relative h-72 overflow-hidden">
-                  <img src={event.image} alt={event.title} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" />
-                  <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/30 to-transparent" />
-                  <div className="absolute top-4 right-4 px-4 py-1.5 bg-yellow-400 text-black text-xs font-bold rounded-full">
-                    {event.category}
-                  </div>
-                  <div className="absolute bottom-0 left-0 right-0 p-6">
-                    <h3 className="text-2xl font-bold mb-3">{event.title}</h3>
-                    <div className="flex items-center justify-between text-sm text-gray-300">
-                      <div className="flex items-center space-x-2">
-                        <MapPin className="w-4 h-4 text-yellow-400" />
-                        <span>{event.venue}</span>
-                      </div>
-                      <div className="flex items-center space-x-2">
-                        <Clock className="w-4 h-4 text-yellow-400" />
-                        <span>{event.time}</span>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              </motion.div>
-            ))}
-          </motion.div>
-        </div>
-      </section>
-
       {/* Cinema Section - NO LOADING STATE! Data pre-fetched on server */}
       <section className="px-4 mb-24">
         <div className="max-w-7xl mx-auto">
@@ -748,6 +689,65 @@ export default function HomePageClient({ initialMovies, initialStats }: HomePage
                 <a href="/cinema" className="text-yellow-400 hover:text-yellow-300 mt-2 inline-block">Browse all movies →</a>
               </div>
             )}
+          </motion.div>
+        </div>
+      </section>
+
+      {/* Happening Today */}
+      <section className="px-4 mb-24">
+        <div className="max-w-7xl mx-auto">
+          <motion.div
+            className="flex items-center justify-between mb-10"
+            initial="hidden"
+            whileInView="visible"
+            viewport={{ once: true, margin: "-100px" }}
+            variants={fadeIn}
+          >
+            <h2 className="text-3xl md:text-5xl font-bold flex items-center gap-3">
+              🔥 Happening Today
+            </h2>
+            <a href="/events/today" className="text-yellow-400 hover:text-yellow-300 flex items-center space-x-2 transition-colors group">
+              <span className="font-medium">View All</span>
+              <ChevronRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
+            </a>
+          </motion.div>
+
+          <motion.div
+            className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6"
+            variants={stagger}
+            initial="hidden"
+            whileInView="visible"
+            viewport={{ once: true, margin: "-100px" }}
+          >
+            {todayEvents.map(event => (
+              <motion.div
+                key={event.id}
+                className="group relative bg-white/5 backdrop-blur-sm border border-white/10 rounded-2xl overflow-hidden cursor-pointer hover:border-yellow-400/50 transition-colors"
+                variants={fadeIn}
+                whileHover={cardHover}
+              >
+                <div className="relative h-72 overflow-hidden">
+                  <img src={event.image} alt={event.title} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" />
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/30 to-transparent" />
+                  <div className="absolute top-4 right-4 px-4 py-1.5 bg-yellow-400 text-black text-xs font-bold rounded-full">
+                    {event.category}
+                  </div>
+                  <div className="absolute bottom-0 left-0 right-0 p-6">
+                    <h3 className="text-2xl font-bold mb-3">{event.title}</h3>
+                    <div className="flex items-center justify-between text-sm text-gray-300">
+                      <div className="flex items-center space-x-2">
+                        <MapPin className="w-4 h-4 text-yellow-400" />
+                        <span>{event.venue}</span>
+                      </div>
+                      <div className="flex items-center space-x-2">
+                        <Clock className="w-4 h-4 text-yellow-400" />
+                        <span>{event.time}</span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </motion.div>
+            ))}
           </motion.div>
         </div>
       </section>

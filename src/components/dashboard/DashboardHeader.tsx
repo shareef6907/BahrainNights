@@ -128,7 +128,7 @@ export default function DashboardHeader({ title, onMobileMenuToggle }: Dashboard
                       <span>My Account</span>
                     </Link>
                     <a
-                      href="mailto:support@bahrainnights.com"
+                      href="mailto:help@bahrainnights.com"
                       className="flex items-center gap-3 px-4 py-2.5 text-gray-300 hover:text-white hover:bg-white/5 transition-colors"
                     >
                       <HelpCircle className="w-4 h-4" />

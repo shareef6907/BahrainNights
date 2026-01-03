@@ -159,7 +159,7 @@ export const handler = async (event) => {
       let imageType = 'default';
       if (uploadKey.includes('/logo')) imageType = 'logo';
       else if (uploadKey.includes('/cover')) imageType = 'cover';
-      else if (uploadKey.includes('/banner') || uploadKey.includes('/ads/')) imageType = 'banner';
+      else if (uploadKey.includes('/banner') || uploadKey.includes('/ads/') || uploadKey.includes('/slider/')) imageType = 'banner';
       else if (uploadKey.includes('/gallery')) imageType = 'gallery';
 
       const settings = compressionSettings[imageType];
@@ -179,9 +179,9 @@ export const handler = async (event) => {
       // 4. Get dimensions
       const metadata = await sharp(resizedBuffer).metadata();
 
-      // 5. Apply watermark (skip for logos)
+      // 5. Apply watermark (skip for logos, banners, ads, sliders)
       let finalBuffer;
-      if (imageType === 'logo') {
+      if (imageType === 'logo' || imageType === 'banner') {
         finalBuffer = await sharp(resizedBuffer)
           .webp({ quality: quality })
           .toBuffer();

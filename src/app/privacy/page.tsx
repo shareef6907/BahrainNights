@@ -208,35 +208,13 @@ export default function PrivacyPage() {
           </div>
         </section>
 
-        {/* Third-Party Services */}
-        <section className="mb-12">
-          <div className="flex items-center gap-3 mb-4">
-            <div className="p-2 bg-pink-500/20 rounded-lg">
-              <Shield className="w-6 h-6 text-pink-400" />
-            </div>
-            <h2 className="text-2xl font-bold text-white">8. Third-Party Services</h2>
-          </div>
-          <div className="pl-12 space-y-4 text-gray-300">
-            <p>We use the following third-party services:</p>
-            <ul className="list-disc pl-6 space-y-2">
-              <li><strong>Google Authentication:</strong> For user sign-in</li>
-              <li><strong>Supabase:</strong> Database and authentication services</li>
-              <li><strong>Amazon Web Services (AWS):</strong> Image storage and email delivery</li>
-              <li><strong>Vercel:</strong> Website hosting</li>
-            </ul>
-            <p className="mt-4">
-              These services have their own privacy policies. We recommend reviewing them for complete information.
-            </p>
-          </div>
-        </section>
-
         {/* Children's Privacy */}
         <section className="mb-12">
           <div className="flex items-center gap-3 mb-4">
             <div className="p-2 bg-red-500/20 rounded-lg">
               <Shield className="w-6 h-6 text-red-400" />
             </div>
-            <h2 className="text-2xl font-bold text-white">9. Children&apos;s Privacy</h2>
+            <h2 className="text-2xl font-bold text-white">8. Children&apos;s Privacy</h2>
           </div>
           <div className="pl-12 space-y-4 text-gray-300">
             <p>
@@ -253,7 +231,7 @@ export default function PrivacyPage() {
             <div className="p-2 bg-amber-500/20 rounded-lg">
               <Eye className="w-6 h-6 text-amber-400" />
             </div>
-            <h2 className="text-2xl font-bold text-white">10. Changes to This Policy</h2>
+            <h2 className="text-2xl font-bold text-white">9. Changes to This Policy</h2>
           </div>
           <div className="pl-12 space-y-4 text-gray-300">
             <p>
@@ -272,7 +250,7 @@ export default function PrivacyPage() {
             <div className="p-2 bg-green-500/20 rounded-lg">
               <Mail className="w-6 h-6 text-green-400" />
             </div>
-            <h2 className="text-2xl font-bold text-white">11. Contact Us</h2>
+            <h2 className="text-2xl font-bold text-white">10. Contact Us</h2>
           </div>
           <div className="pl-12 space-y-4 text-gray-300">
             <p>For privacy-related questions or to exercise your rights, contact us:</p>

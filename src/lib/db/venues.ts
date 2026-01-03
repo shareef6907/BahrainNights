@@ -313,3 +313,46 @@ export async function countVenuesByStatus(): Promise<Record<string, number>> {
 
   return counts;
 }
+
+// Get upcoming events for a venue
+export async function getVenueEvents(venueName: string): Promise<{
+  id: string;
+  title: string;
+  slug: string;
+  date: string;
+  time: string;
+  image: string;
+  category: string;
+}[]> {
+  const supabase = getAdminClient();
+  const today = new Date().toISOString().split('T')[0];
+
+  const { data, error } = await supabase
+    .from('events')
+    .select('id, title, slug, date, time, cover_url, image_url, featured_image, category')
+    .eq('status', 'published')
+    .ilike('venue_name', `%${venueName}%`)
+    .or(`date.gte.${today},end_date.gte.${today}`)
+    .order('date', { ascending: true })
+    .limit(6);
+
+  if (error) {
+    console.error('Error fetching venue events:', error);
+    return [];
+  }
+
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  return (data || []).map((event: any) => ({
+    id: event.id,
+    title: event.title,
+    slug: event.slug,
+    date: event.date ? new Date(event.date).toLocaleDateString('en-US', {
+      weekday: 'short',
+      month: 'short',
+      day: 'numeric',
+    }) : 'Date TBA',
+    time: event.time || '',
+    image: event.cover_url || event.image_url || event.featured_image || '/images/event-placeholder.jpg',
+    category: event.category || 'general',
+  }));
+}

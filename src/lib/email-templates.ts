@@ -206,7 +206,7 @@ export function venueRegistrationConfirmation(venueName: string): string {
 
       <p style="color: ${COLORS.gray[500]}; font-size: 14px; line-height: 1.6; margin: 20px 0 0;">
         Questions? Contact us at
-        <a href="mailto:support@bahrainnights.com" style="color: ${COLORS.primary};">support@bahrainnights.com</a>
+        <a href="mailto:help@bahrainnights.com" style="color: ${COLORS.primary};">help@bahrainnights.com</a>
       </p>
     `)}
   `);
@@ -247,7 +247,7 @@ export function venueApprovalEmail(venueName: string, venueSlug: string): string
 
       <p style="color: ${COLORS.gray[500]}; font-size: 14px; line-height: 1.6; margin: 20px 0 0;">
         Questions? Contact us at
-        <a href="mailto:support@bahrainnights.com" style="color: ${COLORS.primary};">support@bahrainnights.com</a>
+        <a href="mailto:help@bahrainnights.com" style="color: ${COLORS.primary};">help@bahrainnights.com</a>
       </p>
     `)}
   `);
@@ -280,7 +280,7 @@ export function venueRejectionEmail(venueName: string, reason: string): string {
 
       <p style="color: ${COLORS.gray[500]}; font-size: 14px; line-height: 1.6; margin: 20px 0 0;">
         If you have questions about this decision, please contact us at
-        <a href="mailto:support@bahrainnights.com" style="color: ${COLORS.primary};">support@bahrainnights.com</a>
+        <a href="mailto:help@bahrainnights.com" style="color: ${COLORS.primary};">help@bahrainnights.com</a>
       </p>
     `)}
   `);
@@ -341,7 +341,7 @@ export function eventRejectionEmail(eventTitle: string, venueName: string, reaso
 
       <p style="color: ${COLORS.gray[500]}; font-size: 14px; line-height: 1.6; margin: 20px 0 0;">
         Need help? Contact us at
-        <a href="mailto:support@bahrainnights.com" style="color: ${COLORS.primary};">support@bahrainnights.com</a>
+        <a href="mailto:help@bahrainnights.com" style="color: ${COLORS.primary};">help@bahrainnights.com</a>
       </p>
     `)}
   `);
@@ -423,7 +423,7 @@ export function welcomeEmail(venueName: string): string {
 
       <p style="color: ${COLORS.gray[500]}; font-size: 14px; line-height: 1.6; margin: 20px 0 0; text-align: center;">
         Need help? Our team is here for you at
-        <a href="mailto:support@bahrainnights.com" style="color: ${COLORS.primary};">support@bahrainnights.com</a>
+        <a href="mailto:help@bahrainnights.com" style="color: ${COLORS.primary};">help@bahrainnights.com</a>
       </p>
     `)}
   `);

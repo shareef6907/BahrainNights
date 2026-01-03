@@ -232,14 +232,6 @@ export default function CinemaPageClient({
                   <Clock className="w-4 h-4" />
                   <span>Updated {formatLastUpdated(lastUpdated)}</span>
                 </div>
-                <span className="text-gray-600">•</span>
-                <a
-                  href="mailto:support@bahrainnights.com?subject=Cinema%20Data%20Correction&body=Please%20describe%20the%20incorrect%20information%3A%0A%0AMovie%20Title%3A%0ACinema%3A%0AWhat%20is%20incorrect%3A"
-                  className="flex items-center gap-1.5 text-yellow-400/70 hover:text-yellow-400 transition-colors"
-                >
-                  <AlertCircle className="w-4 h-4" />
-                  <span>Report incorrect info</span>
-                </a>
               </div>
             </motion.div>
 

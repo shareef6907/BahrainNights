@@ -499,7 +499,7 @@ export function sendWelcomeEmail(email: string, venueName: string): void {
     - Track your analytics
     - And much more!
 
-    Questions? Reply to this email or contact support@bahrainnights.com
+    Questions? Reply to this email or contact help@bahrainnights.com
 
     Best,
     The BahrainNights Team
@@ -541,7 +541,7 @@ export function sendPasswordChangedEmail(email: string): void {
     Your BahrainNights password has been successfully changed.
 
     If you didn't make this change, please contact us immediately at
-    support@bahrainnights.com
+    help@bahrainnights.com
 
     Best,
     The BahrainNights Team

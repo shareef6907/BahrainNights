@@ -170,11 +170,11 @@ export default function PendingApprovalPage() {
                 </p>
                 <div className="flex flex-col sm:flex-row gap-3 justify-center">
                   <a
-                    href="mailto:support@bahrainnights.com"
+                    href="mailto:help@bahrainnights.com"
                     className="flex items-center justify-center gap-2 px-4 py-2 bg-white/5 rounded-lg text-gray-300 hover:text-white hover:bg-white/10 transition-all"
                   >
                     <Mail className="w-4 h-4" />
-                    <span>support@bahrainnights.com</span>
+                    <span>help@bahrainnights.com</span>
                   </a>
                   <a
                     href="tel:+97317000000"

@@ -1,6 +1,6 @@
 import { notFound } from 'next/navigation';
 import { Metadata } from 'next';
-import { getVenueBySlug, getApprovedVenues } from '@/lib/db/venues';
+import { getVenueBySlug, getApprovedVenues, getVenueEvents } from '@/lib/db/venues';
 import PlaceDetailPageContent from '@/components/places/PlaceDetailPageContent';
 
 interface PageProps {
@@ -49,10 +49,14 @@ export default async function PlaceDetailPage({ params }: PageProps) {
   // Filter out current venue from similar venues
   const filteredSimilarVenues = similarVenues.filter(v => v.id !== venue.id);
 
+  // Fetch upcoming events for this venue
+  const venueEvents = await getVenueEvents(venue.name);
+
   return (
     <PlaceDetailPageContent
       venue={venue}
       similarVenues={filteredSimilarVenues}
+      events={venueEvents}
     />
   );
 }
