@@ -9,7 +9,8 @@ import {
 
 export const dynamic = 'force-dynamic';
 
-const MAX_FILE_SIZE = 10 * 1024 * 1024; // 10MB
+// Vercel serverless functions have a 4.5MB body size limit
+const MAX_FILE_SIZE = 4 * 1024 * 1024; // 4MB (Vercel limit)
 
 // Simple in-memory rate limiting (in production, use Redis)
 const uploadAttempts = new Map<string, { count: number; resetTime: number }>();

@@ -15,7 +15,8 @@ import { requireVenueOwnerOrAdmin } from '@/lib/api-auth';
 
 export const dynamic = 'force-dynamic';
 
-const MAX_FILE_SIZE = 10 * 1024 * 1024; // 10MB
+// Vercel serverless functions have a 4.5MB body size limit
+const MAX_FILE_SIZE = 4 * 1024 * 1024; // 4MB (Vercel limit)
 const MAX_GALLERY_IMAGES = 12;
 
 export async function POST(request: NextRequest) {

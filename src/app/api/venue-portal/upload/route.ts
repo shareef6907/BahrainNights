@@ -33,7 +33,9 @@ const VENUE_SESSION_SECRET = new TextEncoder().encode(
 
 // Allowed image types
 const ALLOWED_TYPES = ['image/jpeg', 'image/png', 'image/webp', 'image/gif'];
-const MAX_FILE_SIZE = 25 * 1024 * 1024; // 25MB
+// Vercel serverless functions have a 4.5MB body size limit
+// Setting to 4MB to leave room for form data overhead
+const MAX_FILE_SIZE = 4 * 1024 * 1024; // 4MB (Vercel limit)
 
 async function getVenueFromSession() {
   const cookieStore = await cookies();
@@ -252,10 +254,10 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Validate file size (25MB limit)
+    // Validate file size (4MB limit - Vercel constraint)
     if (file.size > MAX_FILE_SIZE) {
       return NextResponse.json(
-        { error: 'File too large. Maximum 25MB allowed' },
+        { error: 'File too large. Maximum 4MB allowed. Please compress your image before uploading.' },
         { status: 400 }
       );
     }
