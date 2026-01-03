@@ -147,24 +147,26 @@ export async function POST(request: NextRequest) {
     const slug = `${baseSlug}-${timestamp}`;
 
     // Create event with correct database column names
-    // Based on actual DB schema: id, title, slug, description, category, venue_name,
-    // venue_address, start_date, end_date, start_time, end_time, price, booking_url,
-    // featured_image, status, is_featured, views, contact_name, contact_email, contact_phone
+    // Based on actual DB schema: has both 'date' (required) and 'start_date' columns
     const eventData = {
       venue_name: venue.name,
+      venue_id: venueId,
       title: body.title.trim(),
       slug,
       description: body.description?.trim() || '',
       category: body.category,
+      date: body.start_date, // Required legacy column
       start_date: body.start_date,
       end_date: body.end_date || null,
       start_time: body.start_time || null,
       end_time: body.end_time || null,
       booking_url: body.booking_url || null,
+      google_maps_link: body.google_maps_link || null,
       featured_image: body.featured_image || null,
       status: 'pending',
       is_featured: false,
       views: 0,
+      view_count: 0,
     };
 
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
