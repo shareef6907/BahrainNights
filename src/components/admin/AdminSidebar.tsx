@@ -21,6 +21,7 @@ import {
   Sparkles,
   Heart,
   ClipboardCheck,
+  Target,
 } from 'lucide-react';
 import { useAuth } from '@/lib/auth-context';
 
@@ -65,6 +66,11 @@ const navItems = [
     name: 'Ads Manager',
     href: '/admin/ads',
     icon: Megaphone,
+  },
+  {
+    name: 'Prospects',
+    href: '/admin/prospects',
+    icon: Target,
   },
   {
     name: 'Analytics',
