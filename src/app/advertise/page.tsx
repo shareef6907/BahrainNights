@@ -258,7 +258,7 @@ export default function AdvertisePage() {
               </ul>
 
               <a
-                href="mailto:admin@bahrainnights.com?subject=Advertising Inquiry - ${option.name}"
+                href="mailto:sales@bahrainnights.com?subject=Advertising Inquiry - ${option.name}"
                 className={`block w-full text-center py-3 rounded-xl font-semibold transition-all ${
                   option.highlighted
                     ? 'bg-gradient-to-r from-orange-500 to-red-500 text-white hover:shadow-lg'
@@ -286,11 +286,18 @@ export default function AdvertisePage() {
 
           <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
             <a
-              href="mailto:admin@bahrainnights.com?subject=Advertising Inquiry"
+              href="mailto:sales@bahrainnights.com?subject=Advertising Inquiry"
               className="flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-orange-500 to-red-500 text-white font-semibold rounded-xl hover:shadow-lg transition-all"
             >
               <Mail className="w-5 h-5" />
-              admin@bahrainnights.com
+              sales@bahrainnights.com
+            </a>
+            <a
+              href="tel:+97339007750"
+              className="flex items-center gap-2 px-6 py-3 bg-white/10 text-white font-semibold rounded-xl hover:bg-white/20 transition-all"
+            >
+              <Phone className="w-5 h-5" />
+              +973 3900 7750
             </a>
           </div>
 
