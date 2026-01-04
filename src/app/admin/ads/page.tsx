@@ -118,6 +118,9 @@ interface SlotData {
   saving: boolean;
   tempLink: string;
   tempEndDate: string;
+  previewUrl: string; // For immediate preview after upload
+  imageError: boolean;
+  objectPosition: string; // For image repositioning
 }
 
 export default function AdminAdsPage() {
@@ -154,6 +157,9 @@ export default function AdminAdsPage() {
           saving: false,
           tempLink: ad?.target_url || '',
           tempEndDate: ad?.end_date ? ad.end_date.split('T')[0] : '',
+          previewUrl: '',
+          imageError: false,
+          objectPosition: 'center',
         };
       }
       setSlots(newSlots);
@@ -197,10 +203,18 @@ export default function AdminAdsPage() {
       showToast('Compressing image...', 'success');
       const compressedFile = await compressImage(file, 600, 1920);
 
+      // Create preview URL for immediate display
+      const previewUrl = URL.createObjectURL(compressedFile);
+      setSlots(prev => ({
+        ...prev,
+        [slotNumber]: { ...prev[slotNumber], previewUrl }
+      }));
+
       // Upload to S3 (direct, no watermark)
       const formData = new FormData();
       formData.append('file', compressedFile);
 
+      showToast('Uploading to S3...', 'success');
       const uploadResponse = await fetch('/api/upload/ads', {
         method: 'POST',
         body: formData,
@@ -212,6 +226,7 @@ export default function AdminAdsPage() {
       }
 
       const { url: imageUrl } = await uploadResponse.json();
+      console.log('Uploaded image URL:', imageUrl);
 
       // Create ad with image
       const defaultEndDate = new Date();
@@ -232,6 +247,7 @@ export default function AdminAdsPage() {
       if (!createResponse.ok) throw new Error('Failed to create ad');
 
       const { ad } = await createResponse.json();
+      console.log('Created ad:', ad);
 
       setSlots(prev => ({
         ...prev,
@@ -241,6 +257,9 @@ export default function AdminAdsPage() {
           saving: false,
           tempLink: '',
           tempEndDate: ad.end_date.split('T')[0],
+          previewUrl: '', // Clear preview, use actual URL
+          imageError: false,
+          objectPosition: 'center',
         }
       }));
 
@@ -249,7 +268,7 @@ export default function AdminAdsPage() {
       showToast('Failed to upload image', 'error');
       setSlots(prev => ({
         ...prev,
-        [slotNumber]: { ...prev[slotNumber], uploading: false }
+        [slotNumber]: { ...prev[slotNumber], uploading: false, previewUrl: '' }
       }));
     }
   };
@@ -317,6 +336,9 @@ export default function AdminAdsPage() {
           saving: false,
           tempLink: '',
           tempEndDate: '',
+          previewUrl: '',
+          imageError: false,
+          objectPosition: 'center',
         }
       }));
 
@@ -345,10 +367,18 @@ export default function AdminAdsPage() {
       showToast('Compressing image...', 'success');
       const compressedFile = await compressImage(file, 600, 1920);
 
+      // Create preview URL for immediate display
+      const previewUrl = URL.createObjectURL(compressedFile);
+      setSlots(prev => ({
+        ...prev,
+        [slotNumber]: { ...prev[slotNumber], previewUrl, imageError: false }
+      }));
+
       // Upload new image to S3 (direct, no watermark)
       const formData = new FormData();
       formData.append('file', compressedFile);
 
+      showToast('Uploading to S3...', 'success');
       const uploadResponse = await fetch('/api/upload/ads', {
         method: 'POST',
         body: formData,
@@ -360,6 +390,7 @@ export default function AdminAdsPage() {
       }
 
       const { url: imageUrl } = await uploadResponse.json();
+      console.log('Replaced image URL:', imageUrl);
 
       // Update ad with new image
       const response = await fetch(`/api/admin/ads/${slot.ad.id}`, {
@@ -371,6 +402,7 @@ export default function AdminAdsPage() {
       if (!response.ok) throw new Error('Failed to update');
 
       const { ad } = await response.json();
+      console.log('Updated ad:', ad);
 
       setSlots(prev => ({
         ...prev,
@@ -378,6 +410,8 @@ export default function AdminAdsPage() {
           ...prev[slotNumber],
           ad,
           uploading: false,
+          previewUrl: '', // Clear preview, use actual URL
+          imageError: false,
         }
       }));
 
@@ -386,7 +420,7 @@ export default function AdminAdsPage() {
       showToast('Failed to replace image', 'error');
       setSlots(prev => ({
         ...prev,
-        [slotNumber]: { ...prev[slotNumber], uploading: false }
+        [slotNumber]: { ...prev[slotNumber], uploading: false, previewUrl: '' }
       }));
     }
   };
@@ -497,7 +531,8 @@ export default function AdminAdsPage() {
 
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {[1, 2, 3, 4, 5].map((slotNumber) => {
-            const slot = slots[slotNumber] || { ad: null, uploading: false, saving: false, tempLink: '', tempEndDate: '' };
+            const slot = slots[slotNumber] || { ad: null, uploading: false, saving: false, tempLink: '', tempEndDate: '', previewUrl: '', imageError: false, objectPosition: 'center' };
+            const imageUrl = slot.previewUrl || slot.ad?.image_url;
 
             return (
               <div key={slotNumber} className="space-y-3">
@@ -535,38 +570,75 @@ export default function AdminAdsPage() {
                 />
 
                 <div
-                  onClick={() => handleSlotClick(slotNumber)}
+                  onClick={() => !imageUrl && handleSlotClick(slotNumber)}
                   className={`relative h-40 rounded-xl overflow-hidden border-2 transition-all ${
-                    slot.ad
+                    imageUrl
                       ? 'border-transparent'
                       : 'border-dashed border-white/20 hover:border-cyan-500/50 cursor-pointer hover:bg-white/5'
                   }`}
                 >
-                  {slot.uploading ? (
+                  {slot.uploading && !slot.previewUrl ? (
                     <div className="absolute inset-0 flex items-center justify-center bg-black/50">
                       <Loader2 className="w-8 h-8 text-cyan-400 animate-spin" />
                     </div>
-                  ) : slot.ad ? (
+                  ) : imageUrl ? (
                     <>
+                      {/* eslint-disable-next-line @next/next/no-img-element */}
                       <img
-                        src={slot.ad.image_url}
+                        src={imageUrl}
                         alt={`Slot ${slotNumber}`}
                         className="w-full h-full object-cover"
+                        style={{ objectPosition: slot.objectPosition }}
+                        onError={() => {
+                          console.error('Image failed to load:', imageUrl);
+                          setSlots(prev => ({
+                            ...prev,
+                            [slotNumber]: { ...prev[slotNumber], imageError: true }
+                          }));
+                        }}
+                        onLoad={() => {
+                          setSlots(prev => ({
+                            ...prev,
+                            [slotNumber]: { ...prev[slotNumber], imageError: false }
+                          }));
+                        }}
                       />
-                      <div className="absolute inset-0 bg-black/0 hover:bg-black/50 transition-colors group">
-                        <button
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            fileInputRefs.current[slotNumber]?.click();
-                          }}
-                          className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity"
-                        >
-                          <div className="flex items-center gap-2 px-3 py-2 bg-white/20 rounded-lg text-white text-sm">
-                            <Upload className="w-4 h-4" />
-                            Replace
+                      {slot.uploading && (
+                        <div className="absolute inset-0 flex items-center justify-center bg-black/50">
+                          <Loader2 className="w-8 h-8 text-cyan-400 animate-spin" />
+                        </div>
+                      )}
+                      {slot.imageError && (
+                        <div className="absolute inset-0 flex flex-col items-center justify-center bg-red-500/20 text-red-400">
+                          <AlertCircle className="w-8 h-8 mb-2" />
+                          <span className="text-sm">Failed to load</span>
+                          <button
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              fileInputRefs.current[slotNumber]?.click();
+                            }}
+                            className="mt-2 px-3 py-1 bg-red-500 text-white text-xs rounded"
+                          >
+                            Upload New
+                          </button>
+                        </div>
+                      )}
+                      {!slot.uploading && !slot.imageError && (
+                        <div className="absolute inset-0 bg-black/0 hover:bg-black/50 transition-colors group">
+                          <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity gap-2">
+                            <button
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                fileInputRefs.current[slotNumber]?.click();
+                              }}
+                              className="flex items-center gap-2 px-3 py-2 bg-white/20 rounded-lg text-white text-sm hover:bg-white/30"
+                            >
+                              <Upload className="w-4 h-4" />
+                              Replace
+                            </button>
                           </div>
-                        </button>
-                      </div>
+                        </div>
+                      )}
                     </>
                   ) : (
                     <div className="absolute inset-0 flex flex-col items-center justify-center text-gray-500">
@@ -575,6 +647,29 @@ export default function AdminAdsPage() {
                     </div>
                   )}
                 </div>
+
+                {/* Position Controls - Only show when image exists */}
+                {imageUrl && !slot.imageError && (
+                  <div className="flex items-center gap-1 justify-center">
+                    <span className="text-xs text-gray-500 mr-2">Position:</span>
+                    {['left', 'center', 'right'].map((pos) => (
+                      <button
+                        key={pos}
+                        onClick={() => setSlots(prev => ({
+                          ...prev,
+                          [slotNumber]: { ...prev[slotNumber], objectPosition: pos }
+                        }))}
+                        className={`px-2 py-1 text-xs rounded transition-colors ${
+                          slot.objectPosition === pos
+                            ? 'bg-cyan-500 text-white'
+                            : 'bg-white/5 text-gray-400 hover:bg-white/10'
+                        }`}
+                      >
+                        {pos.charAt(0).toUpperCase() + pos.slice(1)}
+                      </button>
+                    ))}
+                  </div>
+                )}
 
                 {/* Link Input */}
                 <div className="space-y-2">
