@@ -16,6 +16,9 @@ import {
   TrendingUp,
   ExternalLink,
   Move,
+  Type,
+  FileText,
+  MousePointerClick,
 } from 'lucide-react';
 import ImagePositioner from '@/components/admin/ImagePositioner';
 
@@ -113,6 +116,9 @@ interface Ad {
   impressions: number;
   clicks: number;
   image_settings?: string | { position: { x: number; y: number }; scale: number };
+  title?: string;
+  subtitle?: string;
+  cta_text?: string;
 }
 
 interface SlotData {
@@ -121,6 +127,9 @@ interface SlotData {
   saving: boolean;
   tempLink: string;
   tempEndDate: string;
+  tempTitle: string;
+  tempSubtitle: string;
+  tempCtaText: string;
   previewUrl: string; // For immediate preview after upload
   imageError: boolean;
   imagePosition: { x: number; y: number }; // For image repositioning
@@ -166,6 +175,9 @@ export default function AdminAdsPage() {
           saving: false,
           tempLink: ad?.target_url || '',
           tempEndDate: ad?.end_date ? ad.end_date.split('T')[0] : '',
+          tempTitle: ad?.title || '',
+          tempSubtitle: ad?.subtitle || '',
+          tempCtaText: ad?.cta_text || '',
           previewUrl: '',
           imageError: false,
           imagePosition: imageSettings?.position || { x: 50, y: 50 },
@@ -267,6 +279,9 @@ export default function AdminAdsPage() {
           saving: false,
           tempLink: '',
           tempEndDate: ad.end_date.split('T')[0],
+          tempTitle: ad.title || '',
+          tempSubtitle: ad.subtitle || '',
+          tempCtaText: ad.cta_text || '',
           previewUrl: '', // Clear preview, use actual URL
           imageError: false,
           imagePosition: { x: 50, y: 50 },
@@ -274,7 +289,7 @@ export default function AdminAdsPage() {
         }
       }));
 
-      showToast('Image uploaded! Add a link below.', 'success');
+      showToast('Image uploaded! Add details below.', 'success');
     } catch (error) {
       showToast('Failed to upload image', 'error');
       setSlots(prev => ({
@@ -300,6 +315,9 @@ export default function AdminAdsPage() {
         body: JSON.stringify({
           targetUrl: slot.tempLink,
           endDate: slot.tempEndDate,
+          title: slot.tempTitle,
+          subtitle: slot.tempSubtitle,
+          ctaText: slot.tempCtaText,
         }),
       });
 
@@ -392,6 +410,9 @@ export default function AdminAdsPage() {
           saving: false,
           tempLink: '',
           tempEndDate: '',
+          tempTitle: '',
+          tempSubtitle: '',
+          tempCtaText: '',
           previewUrl: '',
           imageError: false,
           imagePosition: { x: 50, y: 50 },
@@ -588,7 +609,7 @@ export default function AdminAdsPage() {
 
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {[1, 2, 3, 4, 5].map((slotNumber) => {
-            const slot = slots[slotNumber] || { ad: null, uploading: false, saving: false, tempLink: '', tempEndDate: '', previewUrl: '', imageError: false, imagePosition: { x: 50, y: 50 }, imageScale: 1 };
+            const slot = slots[slotNumber] || { ad: null, uploading: false, saving: false, tempLink: '', tempEndDate: '', tempTitle: '', tempSubtitle: '', tempCtaText: '', previewUrl: '', imageError: false, imagePosition: { x: 50, y: 50 }, imageScale: 1 };
             const imageUrl = slot.previewUrl || slot.ad?.image_url;
 
             return (
@@ -718,8 +739,57 @@ export default function AdminAdsPage() {
                   )}
                 </div>
 
-                {/* Link Input */}
+                {/* Ad Details */}
                 <div className="space-y-2">
+                  {/* Title */}
+                  <div className="flex items-center gap-2">
+                    <Type className="w-4 h-4 text-gray-500" />
+                    <input
+                      type="text"
+                      placeholder="Title (e.g., 50% Off Sale!)"
+                      value={slot.tempTitle}
+                      onChange={(e) => setSlots(prev => ({
+                        ...prev,
+                        [slotNumber]: { ...prev[slotNumber], tempTitle: e.target.value }
+                      }))}
+                      disabled={!slot.ad}
+                      className="flex-1 bg-white/5 border border-white/10 rounded-lg px-3 py-2 text-sm text-white placeholder-gray-500 focus:outline-none focus:border-cyan-500 disabled:opacity-50 disabled:cursor-not-allowed"
+                    />
+                  </div>
+
+                  {/* Subtitle */}
+                  <div className="flex items-center gap-2">
+                    <FileText className="w-4 h-4 text-gray-500" />
+                    <input
+                      type="text"
+                      placeholder="Subtitle (e.g., Limited time offer)"
+                      value={slot.tempSubtitle}
+                      onChange={(e) => setSlots(prev => ({
+                        ...prev,
+                        [slotNumber]: { ...prev[slotNumber], tempSubtitle: e.target.value }
+                      }))}
+                      disabled={!slot.ad}
+                      className="flex-1 bg-white/5 border border-white/10 rounded-lg px-3 py-2 text-sm text-white placeholder-gray-500 focus:outline-none focus:border-cyan-500 disabled:opacity-50 disabled:cursor-not-allowed"
+                    />
+                  </div>
+
+                  {/* CTA Button Text */}
+                  <div className="flex items-center gap-2">
+                    <MousePointerClick className="w-4 h-4 text-gray-500" />
+                    <input
+                      type="text"
+                      placeholder="Button text (e.g., Shop Now)"
+                      value={slot.tempCtaText}
+                      onChange={(e) => setSlots(prev => ({
+                        ...prev,
+                        [slotNumber]: { ...prev[slotNumber], tempCtaText: e.target.value }
+                      }))}
+                      disabled={!slot.ad}
+                      className="flex-1 bg-white/5 border border-white/10 rounded-lg px-3 py-2 text-sm text-white placeholder-gray-500 focus:outline-none focus:border-cyan-500 disabled:opacity-50 disabled:cursor-not-allowed"
+                    />
+                  </div>
+
+                  {/* Link */}
                   <div className="flex items-center gap-2">
                     <LinkIcon className="w-4 h-4 text-gray-500" />
                     <input

@@ -87,7 +87,9 @@ export async function PATCH(
 
     if (updates.advertiserName) updateData.advertiser_name = updates.advertiserName;
     if (updates.companyName !== undefined) updateData.company_name = updates.companyName;
-    if (updates.title) updateData.title = updates.title;
+    if (updates.title !== undefined) updateData.title = updates.title; // Allow empty string
+    if (updates.subtitle !== undefined) updateData.subtitle = updates.subtitle; // Allow empty string
+    if (updates.ctaText !== undefined) updateData.cta_text = updates.ctaText; // Allow empty string
     if (updates.imageUrl) updateData.image_url = updates.imageUrl;
     if (updates.targetUrl !== undefined) updateData.target_url = updates.targetUrl; // Allow empty string
     if (updates.slotPosition !== undefined) updateData.slot_position = updates.slotPosition;
