@@ -247,17 +247,6 @@ export default function PlaceFilters({
           onChange={(v) => updateFilter('sortBy', v)}
         />
 
-        {hasActiveFilters && (
-          <motion.button
-            initial={{ opacity: 0, scale: 0.9 }}
-            animate={{ opacity: 1, scale: 1 }}
-            onClick={onClearFilters}
-            className="flex items-center gap-1.5 px-3 py-2 text-sm text-red-400 hover:text-red-300 transition-colors"
-          >
-            <X className="w-4 h-4" />
-            Clear Filters
-          </motion.button>
-        )}
       </div>
 
       {/* Mobile Filter Button */}
