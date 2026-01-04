@@ -64,7 +64,7 @@ const createAdSchema = z.object({
   slotPosition: z.number().min(1).max(5).optional(),
   startDate: z.string(),
   endDate: z.string(),
-  priceBd: z.number().min(0),
+  priceBd: z.number().min(0).optional().default(0),
   paymentStatus: z.enum(['pending', 'paid', 'overdue']).optional(),
   status: z.enum(['pending', 'active', 'paused', 'expired']).optional(),
   notes: z.string().optional(),

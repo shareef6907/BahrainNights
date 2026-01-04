@@ -1,23 +1,26 @@
 'use client';
 
 import { useState } from 'react';
+import { useRouter } from 'next/navigation';
 import { motion } from 'framer-motion';
 import {
   ArrowLeft,
   Upload,
   Image as ImageIcon,
   Calendar,
-  DollarSign,
   User,
   Link as LinkIcon,
   Save,
   Eye,
-  X
+  X,
+  Monitor,
+  Loader2
 } from 'lucide-react';
 import Link from 'next/link';
 import AdminLayout from '@/components/admin/AdminLayout';
 
 export default function NewAdPage() {
+  const router = useRouter();
   const [formData, setFormData] = useState({
     // Advertiser Information
     advertiserName: '',
@@ -30,21 +33,19 @@ export default function NewAdPage() {
     ctaButtonText: 'Learn More',
     targetUrl: '',
     adImage: null as File | null,
-    // Schedule
+    // Schedule & Placement
     startDate: '',
     endDate: '',
     slotPosition: 1,
-    // Pricing & Payment
-    price: 300,
-    paymentStatus: 'pending',
-    invoiceNumber: '',
-    paymentDate: '',
-    notes: '',
+    targetPage: 'homepage',
+    placement: 'slider',
   });
 
   const [imagePreview, setImagePreview] = useState<string | null>(null);
   const [showPreview, setShowPreview] = useState(false);
   const [errors, setErrors] = useState<Record<string, string>>({});
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [uploadProgress, setUploadProgress] = useState<string>('');
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
     const { name, value } = e.target;
@@ -76,49 +77,120 @@ export default function NewAdPage() {
     if (!formData.targetUrl) newErrors.targetUrl = 'Target URL is required';
     if (!formData.startDate) newErrors.startDate = 'Start date is required';
     if (!formData.endDate) newErrors.endDate = 'End date is required';
-    if (!formData.price) newErrors.price = 'Price is required';
 
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (validateForm()) {
-      console.log('Form submitted:', formData);
-      // In production, this would save to database
-      alert('Ad created successfully!');
+    if (!validateForm()) return;
+
+    setIsSubmitting(true);
+    setUploadProgress('');
+
+    try {
+      let imageUrl = '';
+
+      // Step 1: Upload image to S3 if provided
+      if (formData.adImage) {
+        setUploadProgress('Uploading image to S3...');
+
+        const uploadFormData = new FormData();
+        uploadFormData.append('file', formData.adImage);
+        uploadFormData.append('entityType', 'ad');
+        uploadFormData.append('imageType', 'banner');
+        uploadFormData.append('processLocally', 'true');
+
+        const uploadResponse = await fetch('/api/upload/image', {
+          method: 'POST',
+          body: uploadFormData,
+        });
+
+        if (!uploadResponse.ok) {
+          const errorData = await uploadResponse.json();
+          throw new Error(errorData.error || 'Failed to upload image');
+        }
+
+        const uploadResult = await uploadResponse.json();
+        imageUrl = uploadResult.url;
+        setUploadProgress('Image uploaded successfully!');
+      } else {
+        throw new Error('Please upload an ad image');
+      }
+
+      // Step 2: Create ad in database
+      setUploadProgress('Creating advertisement...');
+
+      const adData = {
+        advertiserName: formData.advertiserName,
+        companyName: formData.companyName || undefined,
+        contactEmail: formData.contactEmail,
+        contactPhone: formData.contactPhone || undefined,
+        title: formData.adTitle || undefined,
+        subtitle: formData.subtitle || undefined,
+        ctaText: formData.ctaButtonText || undefined,
+        imageUrl,
+        targetUrl: formData.targetUrl,
+        slotPosition: formData.slotPosition,
+        startDate: formData.startDate,
+        endDate: formData.endDate,
+        targetPage: formData.targetPage,
+        placement: formData.placement,
+        status: 'active',
+      };
+
+      const createResponse = await fetch('/api/admin/ads', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(adData),
+      });
+
+      if (!createResponse.ok) {
+        const errorData = await createResponse.json();
+        throw new Error(errorData.error || 'Failed to create ad');
+      }
+
+      setUploadProgress('Ad created successfully!');
+
+      // Redirect to ads manager after short delay
+      setTimeout(() => {
+        router.push('/admin/ads');
+      }, 1500);
+    } catch (error) {
+      console.error('Error creating ad:', error);
+      setErrors({
+        submit: error instanceof Error ? error.message : 'Failed to create ad',
+      });
+      setUploadProgress('');
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
-  const slotPricing = [
-    { position: 1, label: 'Slot 1 (Primary)', price: 500 },
-    { position: 2, label: 'Slot 2', price: 400 },
-    { position: 3, label: 'Slot 3', price: 350 },
-    { position: 4, label: 'Slot 4', price: 300 },
-    { position: 5, label: 'Slot 5', price: 300 },
+  const slotOptions = [
+    { position: 1, label: 'Slot 1 (Primary)' },
+    { position: 2, label: 'Slot 2' },
+    { position: 3, label: 'Slot 3' },
+    { position: 4, label: 'Slot 4' },
+    { position: 5, label: 'Slot 5' },
   ];
 
-  // Company VAT Information
-  const companyInfo = {
-    name: 'BAHRAIN NIGHTS WHIZZ PRO FOR PRODUCTION',
-    crNumber: '113587-1',
-    vatNumber: '220026984300002',
-    website: 'www.BahrainNights.com',
-    paymentTerms: '100% in advance',
-    bank: {
-      name: 'Bank of Bahrain and Kuwait (BBK Adliya)',
-      accountName: 'Bahrain Nights Whizz Pro For Production',
-      accountNo: '200006283757',
-      iban: 'BH90-BBKU-0020-0006-2837-57',
-      swiftCode: 'BBKUBHBM',
-    },
-  };
+  const pageOptions = [
+    { value: 'homepage', label: 'Homepage' },
+    { value: 'events', label: 'Events Page' },
+    { value: 'cinema', label: 'Cinema Page' },
+    { value: 'places', label: 'Places Page' },
+  ];
 
-  // Calculate VAT (10%)
-  const subtotal = formData.price;
-  const vatAmount = subtotal * 0.10;
-  const totalWithVat = subtotal + vatAmount;
+  const placementOptions = [
+    { value: 'slider', label: 'Slider' },
+    { value: 'banner', label: 'Banner' },
+    { value: 'sidebar', label: 'Sidebar' },
+    { value: 'inline', label: 'Inline' },
+  ];
 
   return (
     <AdminLayout>
@@ -141,20 +213,40 @@ export default function NewAdPage() {
               <button
                 type="button"
                 onClick={() => setShowPreview(true)}
-                className="flex items-center gap-2 px-4 py-2 bg-gray-700 text-white rounded-lg hover:bg-gray-600 transition-colors"
+                disabled={isSubmitting}
+                className="flex items-center gap-2 px-4 py-2 bg-gray-700 text-white rounded-lg hover:bg-gray-600 transition-colors disabled:opacity-50"
               >
                 <Eye className="w-4 h-4" />
                 Preview
               </button>
               <button
                 onClick={handleSubmit}
-                className="flex items-center gap-2 px-4 py-2 bg-cyan-500 text-white rounded-lg hover:bg-cyan-600 transition-colors"
+                disabled={isSubmitting}
+                className="flex items-center gap-2 px-4 py-2 bg-cyan-500 text-white rounded-lg hover:bg-cyan-600 transition-colors disabled:opacity-50"
               >
-                <Save className="w-4 h-4" />
-                Create Ad
+                {isSubmitting ? (
+                  <>
+                    <Loader2 className="w-4 h-4 animate-spin" />
+                    Creating...
+                  </>
+                ) : (
+                  <>
+                    <Save className="w-4 h-4" />
+                    Create Ad
+                  </>
+                )}
               </button>
             </div>
           </div>
+
+          {/* Status Messages */}
+          {(errors.submit || uploadProgress) && (
+            <div className={`p-4 rounded-lg ${errors.submit ? 'bg-red-500/20 border border-red-500/30' : 'bg-green-500/20 border border-green-500/30'}`}>
+              <p className={errors.submit ? 'text-red-400' : 'text-green-400'}>
+                {errors.submit || uploadProgress}
+              </p>
+            </div>
+          )}
         </div>
 
         <form onSubmit={handleSubmit} className="space-y-6">
@@ -371,7 +463,7 @@ export default function NewAdPage() {
               <h2 className="text-lg font-semibold text-white">Schedule</h2>
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div>
                 <label className="block text-sm font-medium text-gray-300 mb-2">
                   Start Date <span className="text-red-400">*</span>
@@ -399,6 +491,45 @@ export default function NewAdPage() {
                 />
                 {errors.endDate && <p className="text-red-400 text-sm mt-1">{errors.endDate}</p>}
               </div>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mt-6">
+              <div>
+                <label className="block text-sm font-medium text-gray-300 mb-2">
+                  <Monitor className="w-4 h-4 inline mr-1" />
+                  Target Page
+                </label>
+                <select
+                  name="targetPage"
+                  value={formData.targetPage}
+                  onChange={handleInputChange}
+                  className="w-full px-4 py-3 bg-gray-700/50 border border-gray-600 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-cyan-500"
+                >
+                  {pageOptions.map(page => (
+                    <option key={page.value} value={page.value}>
+                      {page.label}
+                    </option>
+                  ))}
+                </select>
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-300 mb-2">
+                  Placement Type
+                </label>
+                <select
+                  name="placement"
+                  value={formData.placement}
+                  onChange={handleInputChange}
+                  className="w-full px-4 py-3 bg-gray-700/50 border border-gray-600 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-cyan-500"
+                >
+                  {placementOptions.map(placement => (
+                    <option key={placement.value} value={placement.value}>
+                      {placement.label}
+                    </option>
+                  ))}
+                </select>
+              </div>
 
               <div>
                 <label className="block text-sm font-medium text-gray-300 mb-2">
@@ -410,9 +541,9 @@ export default function NewAdPage() {
                   onChange={handleInputChange}
                   className="w-full px-4 py-3 bg-gray-700/50 border border-gray-600 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-cyan-500"
                 >
-                  {slotPricing.map(slot => (
+                  {slotOptions.map(slot => (
                     <option key={slot.position} value={slot.position}>
-                      {slot.label} - BD {slot.price}/mo + 10% VAT
+                      {slot.label}
                     </option>
                   ))}
                 </select>
@@ -433,188 +564,6 @@ export default function NewAdPage() {
               <p className="text-gray-500 text-xs mt-2 text-center">
                 Position {formData.slotPosition} of 5 in the homepage slider
               </p>
-            </div>
-          </motion.div>
-
-          {/* Section 4: Pricing & Payment */}
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.3 }}
-            className="bg-gray-800/50 rounded-xl p-6 border border-gray-700"
-          >
-            <div className="flex items-center gap-3 mb-6">
-              <div className="p-2 bg-amber-500/20 rounded-lg">
-                <DollarSign className="w-5 h-5 text-amber-400" />
-              </div>
-              <h2 className="text-lg font-semibold text-white">Pricing & Payment</h2>
-            </div>
-
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-              <div>
-                <label className="block text-sm font-medium text-gray-300 mb-2">
-                  Price (BD) <span className="text-red-400">*</span>
-                </label>
-                <div className="relative">
-                  <span className="absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-500">BD</span>
-                  <input
-                    type="number"
-                    name="price"
-                    value={formData.price}
-                    onChange={handleInputChange}
-                    min="0"
-                    step="10"
-                    className={`w-full pl-12 pr-4 py-3 bg-gray-700/50 border rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-cyan-500 ${errors.price ? 'border-red-500' : 'border-gray-600'}`}
-                  />
-                </div>
-                {errors.price && <p className="text-red-400 text-sm mt-1">{errors.price}</p>}
-              </div>
-
-              <div>
-                <label className="block text-sm font-medium text-gray-300 mb-2">
-                  Payment Status
-                </label>
-                <select
-                  name="paymentStatus"
-                  value={formData.paymentStatus}
-                  onChange={handleInputChange}
-                  className="w-full px-4 py-3 bg-gray-700/50 border border-gray-600 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-cyan-500"
-                >
-                  <option value="pending">Pending</option>
-                  <option value="paid">Paid</option>
-                  <option value="overdue">Overdue</option>
-                </select>
-              </div>
-
-              <div>
-                <label className="block text-sm font-medium text-gray-300 mb-2">
-                  Invoice Number
-                </label>
-                <input
-                  type="text"
-                  name="invoiceNumber"
-                  value={formData.invoiceNumber}
-                  onChange={handleInputChange}
-                  placeholder="INV-2025-001"
-                  className="w-full px-4 py-3 bg-gray-700/50 border border-gray-600 rounded-lg text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-cyan-500"
-                />
-              </div>
-
-              <div>
-                <label className="block text-sm font-medium text-gray-300 mb-2">
-                  Payment Date
-                </label>
-                <input
-                  type="date"
-                  name="paymentDate"
-                  value={formData.paymentDate}
-                  onChange={handleInputChange}
-                  className="w-full px-4 py-3 bg-gray-700/50 border border-gray-600 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-cyan-500"
-                />
-              </div>
-            </div>
-
-            <div className="mt-6">
-              <label className="block text-sm font-medium text-gray-300 mb-2">
-                Notes
-              </label>
-              <textarea
-                name="notes"
-                value={formData.notes}
-                onChange={handleInputChange}
-                rows={3}
-                placeholder="Any additional notes about this advertisement..."
-                className="w-full px-4 py-3 bg-gray-700/50 border border-gray-600 rounded-lg text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-cyan-500 resize-none"
-              />
-            </div>
-
-            {/* Pricing Summary with VAT */}
-            <div className="mt-6 p-4 bg-cyan-500/10 border border-cyan-500/30 rounded-lg">
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <div className="space-y-3">
-                  <div className="flex justify-between">
-                    <span className="text-gray-400">Subtotal</span>
-                    <span className="text-white">BD {subtotal.toFixed(2)}</span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span className="text-gray-400">VAT (10%)</span>
-                    <span className="text-white">BD {vatAmount.toFixed(2)}</span>
-                  </div>
-                  <div className="border-t border-gray-600 pt-3 flex justify-between">
-                    <span className="text-white font-semibold">Total Amount</span>
-                    <span className="text-2xl font-bold text-cyan-400">BD {totalWithVat.toFixed(2)}</span>
-                  </div>
-                </div>
-                <div className="text-right">
-                  <p className="text-gray-400 text-sm">Duration</p>
-                  <p className="text-white font-medium">
-                    {formData.startDate && formData.endDate
-                      ? `${Math.ceil((new Date(formData.endDate).getTime() - new Date(formData.startDate).getTime()) / (1000 * 60 * 60 * 24))} days`
-                      : 'Select dates'}
-                  </p>
-                </div>
-              </div>
-            </div>
-
-            {/* Company VAT Information with Logo Header */}
-            <div className="mt-6 bg-gray-900/50 border border-gray-700 rounded-lg overflow-hidden">
-              {/* Logo Header */}
-              <div className="bg-gradient-to-r from-cyan-500/10 to-purple-500/10 p-4 border-b border-gray-700 flex justify-center">
-                <img
-                  src="/logo.png"
-                  alt="Bahrain Nights"
-                  className="h-12 object-contain"
-                />
-              </div>
-
-              {/* Invoice Info */}
-              <div className="p-4">
-                <p className="text-gray-400 text-xs mb-3 uppercase tracking-wider text-center">Invoice will be issued by:</p>
-                <div className="text-center space-y-1">
-                  <p className="text-white font-semibold">{companyInfo.name}</p>
-                </div>
-              </div>
-
-              {/* Footer with Company Details */}
-              <div className="bg-gray-800/50 px-4 py-3 border-t border-gray-700">
-                <div className="flex flex-wrap justify-center gap-4 text-sm">
-                  <span className="text-gray-400">CR: <span className="text-white">{companyInfo.crNumber}</span></span>
-                  <span className="text-gray-400">VAT No: <span className="text-white">{companyInfo.vatNumber}</span></span>
-                  <span className="text-cyan-400">{companyInfo.website}</span>
-                </div>
-                <p className="text-center text-amber-400 text-sm mt-2 font-medium">
-                  Payment Terms: {companyInfo.paymentTerms}
-                </p>
-              </div>
-
-              {/* Bank Details - Highlighted in Yellow */}
-              <div className="bg-yellow-400 px-4 py-4 border-t-2 border-yellow-500">
-                <p className="text-yellow-900 text-xs mb-3 uppercase tracking-wider text-center font-bold">
-                  Bank Account Details
-                </p>
-                <div className="space-y-2 text-sm">
-                  <p className="text-yellow-900">
-                    <span className="text-yellow-800 font-medium">Bank Name: </span>
-                    <span className="font-semibold">{companyInfo.bank.name}</span>
-                  </p>
-                  <p className="text-yellow-900">
-                    <span className="text-yellow-800 font-medium">Account Name: </span>
-                    <span className="font-semibold">{companyInfo.bank.accountName}</span>
-                  </p>
-                  <p className="text-yellow-900">
-                    <span className="text-yellow-800 font-medium">Account No: </span>
-                    <span className="font-semibold">{companyInfo.bank.accountNo}</span>
-                  </p>
-                  <p className="text-yellow-900">
-                    <span className="text-yellow-800 font-medium">IBAN: </span>
-                    <span className="font-semibold">{companyInfo.bank.iban}</span>
-                  </p>
-                  <p className="text-yellow-900">
-                    <span className="text-yellow-800 font-medium">Swift Code: </span>
-                    <span className="font-semibold">{companyInfo.bank.swiftCode}</span>
-                  </p>
-                </div>
-              </div>
             </div>
           </motion.div>
 
@@ -696,8 +645,12 @@ export default function NewAdPage() {
                     <p className="text-white font-medium">{formData.advertiserName || '-'}</p>
                   </div>
                   <div className="bg-gray-700/50 p-4 rounded-lg">
-                    <p className="text-gray-400 text-sm">Slot Position</p>
-                    <p className="text-white font-medium">Slot {formData.slotPosition}</p>
+                    <p className="text-gray-400 text-sm">Target Page</p>
+                    <p className="text-white font-medium capitalize">{formData.targetPage}</p>
+                  </div>
+                  <div className="bg-gray-700/50 p-4 rounded-lg">
+                    <p className="text-gray-400 text-sm">Placement</p>
+                    <p className="text-white font-medium capitalize">{formData.placement} - Slot {formData.slotPosition}</p>
                   </div>
                   <div className="bg-gray-700/50 p-4 rounded-lg">
                     <p className="text-gray-400 text-sm">Duration</p>
@@ -706,10 +659,6 @@ export default function NewAdPage() {
                         ? `${formData.startDate} to ${formData.endDate}`
                         : 'Not set'}
                     </p>
-                  </div>
-                  <div className="bg-gray-700/50 p-4 rounded-lg">
-                    <p className="text-gray-400 text-sm">Price (incl. 10% VAT)</p>
-                    <p className="text-white font-medium">BD {totalWithVat.toFixed(2)}</p>
                   </div>
                 </div>
               </div>

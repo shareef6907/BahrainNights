@@ -96,6 +96,7 @@ export async function PATCH(
     if (updates.priceBd !== undefined) updateData.price_bd = updates.priceBd;
     if (updates.paymentStatus) updateData.payment_status = updates.paymentStatus;
     if (updates.status) updateData.status = updates.status;
+    if (updates.imageSettings !== undefined) updateData.image_settings = updates.imageSettings;
 
     if (Object.keys(updateData).length === 0) {
       return NextResponse.json(

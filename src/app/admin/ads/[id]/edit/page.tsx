@@ -8,16 +8,15 @@ import {
   Upload,
   Image as ImageIcon,
   Calendar,
-  DollarSign,
   User,
   Link as LinkIcon,
   Save,
   Eye,
   X,
   Trash2,
-  FileText,
   Pause,
-  Play
+  Play,
+  Monitor
 } from 'lucide-react';
 import Link from 'next/link';
 import AdminLayout from '@/components/admin/AdminLayout';
@@ -37,11 +36,8 @@ const mockAdData: Record<string, {
   startDate: string;
   endDate: string;
   slotPosition: number;
-  price: number;
-  paymentStatus: string;
-  invoiceNumber: string;
-  paymentDate: string;
-  notes: string;
+  targetPage: string;
+  placement: string;
   status: string;
   impressions: number;
   clicks: number;
@@ -60,11 +56,8 @@ const mockAdData: Record<string, {
     startDate: '2024-12-15',
     endDate: '2025-01-15',
     slotPosition: 1,
-    price: 500,
-    paymentStatus: 'paid',
-    invoiceNumber: 'INV-2024-001',
-    paymentDate: '2024-12-01',
-    notes: 'Premium placement for NYE event',
+    targetPage: 'homepage',
+    placement: 'slider',
     status: 'active',
     impressions: 45230,
     clicks: 1890,
@@ -83,11 +76,8 @@ const mockAdData: Record<string, {
     startDate: '2024-12-01',
     endDate: '2025-02-28',
     slotPosition: 2,
-    price: 400,
-    paymentStatus: 'paid',
-    invoiceNumber: 'INV-2024-002',
-    paymentDate: '2024-11-28',
-    notes: 'Long-term brunch promotion',
+    targetPage: 'events',
+    placement: 'banner',
     status: 'active',
     impressions: 38120,
     clicks: 1245,
@@ -112,11 +102,8 @@ export default function EditAdPage() {
     startDate: '',
     endDate: '',
     slotPosition: 1,
-    price: 300,
-    paymentStatus: 'pending',
-    invoiceNumber: '',
-    paymentDate: '',
-    notes: '',
+    targetPage: 'homepage',
+    placement: 'slider',
     status: 'active',
   });
 
@@ -144,11 +131,8 @@ export default function EditAdPage() {
         startDate: existingAd.startDate,
         endDate: existingAd.endDate,
         slotPosition: existingAd.slotPosition,
-        price: existingAd.price,
-        paymentStatus: existingAd.paymentStatus,
-        invoiceNumber: existingAd.invoiceNumber,
-        paymentDate: existingAd.paymentDate,
-        notes: existingAd.notes,
+        targetPage: existingAd.targetPage,
+        placement: existingAd.placement,
         status: existingAd.status,
       });
       setExistingImageUrl(existingAd.imageUrl);
@@ -187,7 +171,6 @@ export default function EditAdPage() {
     if (!formData.targetUrl) newErrors.targetUrl = 'Target URL is required';
     if (!formData.startDate) newErrors.startDate = 'Start date is required';
     if (!formData.endDate) newErrors.endDate = 'End date is required';
-    if (!formData.price) newErrors.price = 'Price is required';
 
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
@@ -212,12 +195,26 @@ export default function EditAdPage() {
     setShowDeleteModal(false);
   };
 
-  const slotPricing = [
-    { position: 1, label: 'Slot 1 (Primary)', price: 500 },
-    { position: 2, label: 'Slot 2', price: 400 },
-    { position: 3, label: 'Slot 3', price: 350 },
-    { position: 4, label: 'Slot 4', price: 300 },
-    { position: 5, label: 'Slot 5', price: 300 },
+  const slotOptions = [
+    { position: 1, label: 'Slot 1 (Primary)' },
+    { position: 2, label: 'Slot 2' },
+    { position: 3, label: 'Slot 3' },
+    { position: 4, label: 'Slot 4' },
+    { position: 5, label: 'Slot 5' },
+  ];
+
+  const pageOptions = [
+    { value: 'homepage', label: 'Homepage' },
+    { value: 'events', label: 'Events Page' },
+    { value: 'cinema', label: 'Cinema Page' },
+    { value: 'places', label: 'Places Page' },
+  ];
+
+  const placementOptions = [
+    { value: 'slider', label: 'Slider' },
+    { value: 'banner', label: 'Banner' },
+    { value: 'sidebar', label: 'Sidebar' },
+    { value: 'inline', label: 'Inline' },
   ];
 
   if (isLoading) {
@@ -278,13 +275,6 @@ export default function EditAdPage() {
                   </>
                 )}
               </button>
-              <Link
-                href={`/admin/ads/${adId}/invoice`}
-                className="flex items-center gap-2 px-4 py-2 bg-gray-700 text-white rounded-lg hover:bg-gray-600 transition-colors"
-              >
-                <FileText className="w-4 h-4" />
-                Generate Invoice
-              </Link>
               <button
                 type="button"
                 onClick={() => setShowPreview(true)}
@@ -551,7 +541,7 @@ export default function EditAdPage() {
               <h2 className="text-lg font-semibold text-white">Schedule</h2>
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div>
                 <label className="block text-sm font-medium text-gray-300 mb-2">
                   Start Date <span className="text-red-400">*</span>
@@ -579,6 +569,45 @@ export default function EditAdPage() {
                 />
                 {errors.endDate && <p className="text-red-400 text-sm mt-1">{errors.endDate}</p>}
               </div>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mt-6">
+              <div>
+                <label className="block text-sm font-medium text-gray-300 mb-2">
+                  <Monitor className="w-4 h-4 inline mr-1" />
+                  Target Page
+                </label>
+                <select
+                  name="targetPage"
+                  value={formData.targetPage}
+                  onChange={handleInputChange}
+                  className="w-full px-4 py-3 bg-gray-700/50 border border-gray-600 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-cyan-500"
+                >
+                  {pageOptions.map(page => (
+                    <option key={page.value} value={page.value}>
+                      {page.label}
+                    </option>
+                  ))}
+                </select>
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-300 mb-2">
+                  Placement Type
+                </label>
+                <select
+                  name="placement"
+                  value={formData.placement}
+                  onChange={handleInputChange}
+                  className="w-full px-4 py-3 bg-gray-700/50 border border-gray-600 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-cyan-500"
+                >
+                  {placementOptions.map(placement => (
+                    <option key={placement.value} value={placement.value}>
+                      {placement.label}
+                    </option>
+                  ))}
+                </select>
+              </div>
 
               <div>
                 <label className="block text-sm font-medium text-gray-300 mb-2">
@@ -590,9 +619,9 @@ export default function EditAdPage() {
                   onChange={handleInputChange}
                   className="w-full px-4 py-3 bg-gray-700/50 border border-gray-600 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-cyan-500"
                 >
-                  {slotPricing.map(slot => (
+                  {slotOptions.map(slot => (
                     <option key={slot.position} value={slot.position}>
-                      {slot.label} - BD {slot.price}/mo
+                      {slot.label}
                     </option>
                   ))}
                 </select>
@@ -610,97 +639,6 @@ export default function EditAdPage() {
                   />
                 ))}
               </div>
-            </div>
-          </motion.div>
-
-          {/* Section 4: Pricing & Payment */}
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.4 }}
-            className="bg-gray-800/50 rounded-xl p-6 border border-gray-700"
-          >
-            <div className="flex items-center gap-3 mb-6">
-              <div className="p-2 bg-amber-500/20 rounded-lg">
-                <DollarSign className="w-5 h-5 text-amber-400" />
-              </div>
-              <h2 className="text-lg font-semibold text-white">Pricing & Payment</h2>
-            </div>
-
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-              <div>
-                <label className="block text-sm font-medium text-gray-300 mb-2">
-                  Price (BD) <span className="text-red-400">*</span>
-                </label>
-                <div className="relative">
-                  <span className="absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-500">BD</span>
-                  <input
-                    type="number"
-                    name="price"
-                    value={formData.price}
-                    onChange={handleInputChange}
-                    min="0"
-                    step="10"
-                    className={`w-full pl-12 pr-4 py-3 bg-gray-700/50 border rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-cyan-500 ${errors.price ? 'border-red-500' : 'border-gray-600'}`}
-                  />
-                </div>
-                {errors.price && <p className="text-red-400 text-sm mt-1">{errors.price}</p>}
-              </div>
-
-              <div>
-                <label className="block text-sm font-medium text-gray-300 mb-2">
-                  Payment Status
-                </label>
-                <select
-                  name="paymentStatus"
-                  value={formData.paymentStatus}
-                  onChange={handleInputChange}
-                  className="w-full px-4 py-3 bg-gray-700/50 border border-gray-600 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-cyan-500"
-                >
-                  <option value="pending">Pending</option>
-                  <option value="paid">Paid</option>
-                  <option value="overdue">Overdue</option>
-                </select>
-              </div>
-
-              <div>
-                <label className="block text-sm font-medium text-gray-300 mb-2">
-                  Invoice Number
-                </label>
-                <input
-                  type="text"
-                  name="invoiceNumber"
-                  value={formData.invoiceNumber}
-                  onChange={handleInputChange}
-                  className="w-full px-4 py-3 bg-gray-700/50 border border-gray-600 rounded-lg text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-cyan-500"
-                />
-              </div>
-
-              <div>
-                <label className="block text-sm font-medium text-gray-300 mb-2">
-                  Payment Date
-                </label>
-                <input
-                  type="date"
-                  name="paymentDate"
-                  value={formData.paymentDate}
-                  onChange={handleInputChange}
-                  className="w-full px-4 py-3 bg-gray-700/50 border border-gray-600 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-cyan-500"
-                />
-              </div>
-            </div>
-
-            <div className="mt-6">
-              <label className="block text-sm font-medium text-gray-300 mb-2">
-                Notes
-              </label>
-              <textarea
-                name="notes"
-                value={formData.notes}
-                onChange={handleInputChange}
-                rows={3}
-                className="w-full px-4 py-3 bg-gray-700/50 border border-gray-600 rounded-lg text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-cyan-500 resize-none"
-              />
             </div>
           </motion.div>
 

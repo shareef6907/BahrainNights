@@ -8,6 +8,7 @@ import GlobalSearch from '@/components/search/GlobalSearch';
 import { SponsorsSection } from '@/components/sponsors';
 import { Movie } from '@/components/cinema/MovieCard';
 import LanguageSwitcher from '@/components/LanguageSwitcher';
+import AdBanner from '@/components/ads/AdBanner';
 
 // Lazy load modals - only loaded when user interacts with movies
 const MovieModal = dynamic(() => import('@/components/cinema/MovieModal'), {
@@ -200,7 +201,6 @@ export default function HomePageClient({ initialMovies, initialStats }: HomePage
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [activeDropdown, setActiveDropdown] = useState<string | null>(null);
   const [mobileAccordion, setMobileAccordion] = useState<string | null>(null);
-  const [currentSlide, setCurrentSlide] = useState(0);
   const [isScrolled, setIsScrolled] = useState(false);
 
   // Data from server - no loading needed!
@@ -247,12 +247,7 @@ export default function HomePageClient({ initialMovies, initialStats }: HomePage
     return () => document.removeEventListener('click', handleClickOutside);
   }, []);
 
-  // Data
-  const adSlides = [
-    { id: 1, title: "New Year's Eve at The Ritz", subtitle: "Ring in 2026 with elegance", cta: "Book Now", image: "https://images.unsplash.com/photo-1514525253161-7a46d19cd819?w=1920&h=600&fit=crop", gradient: "from-purple-600/40 to-pink-600/40" },
-    { id: 2, title: "Jazz Night Every Thursday", subtitle: "Live music at Cafe Lilou", cta: "Reserve Table", image: "https://images.unsplash.com/photo-1511735111819-9a3f7709049c?w=1920&h=600&fit=crop", gradient: "from-blue-600/40 to-cyan-600/40" },
-    { id: 3, title: "Bahrain Food Festival", subtitle: "50+ Local Vendors • Jan 15-20", cta: "Get Tickets", image: "https://images.unsplash.com/photo-1555939594-58d7cb561ad1?w=1920&h=600&fit=crop", gradient: "from-orange-600/40 to-red-600/40" }
-  ];
+  // Data - ads are now fetched via AdBanner component
 
   // Categories with real counts from API
   const categories = [
@@ -271,11 +266,7 @@ export default function HomePageClient({ initialMovies, initialStats }: HomePage
   ];
 
 
-  // Auto-advance slider
-  useEffect(() => {
-    const timer = setInterval(() => setCurrentSlide(prev => (prev + 1) % adSlides.length), 5000);
-    return () => clearInterval(timer);
-  }, [adSlides.length]);
+  // Auto-advance slider - handled by AdBanner component now
 
   // Quick filter buttons with direct page links (not search)
   const quickFilters = [
@@ -573,48 +564,15 @@ export default function HomePageClient({ initialMovies, initialStats }: HomePage
         </div>
       </section>
 
-      {/* Premium Ad Slider */}
+      {/* Premium Ad Slider - Fetches ads from database */}
       <section className="px-4 mb-24">
         <div className="max-w-7xl mx-auto">
-          <div className="relative h-[400px] md:h-[500px] rounded-3xl overflow-hidden">
-            <AnimatePresence mode="wait">
-              {adSlides.map((slide, index) => (
-                index === currentSlide && (
-                  <motion.div
-                    key={slide.id}
-                    className="absolute inset-0"
-                    initial={{ opacity: 0 }}
-                    animate={{ opacity: 1 }}
-                    exit={{ opacity: 0 }}
-                    transition={{ duration: 0.4 }}
-                  >
-                    <img src={slide.image} alt={slide.title} className="w-full h-full object-cover" />
-                    <div className={`absolute inset-0 bg-gradient-to-r ${slide.gradient}`} />
-                    <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent" />
-                    <div className="absolute inset-0 flex items-center justify-center text-center p-8">
-                      <div className="max-w-3xl">
-                        <h2 className="text-4xl md:text-6xl lg:text-7xl font-black mb-4 text-white drop-shadow-2xl">{slide.title}</h2>
-                        <p className="text-xl md:text-2xl text-white/90 mb-8 drop-shadow-lg">{slide.subtitle}</p>
-                        <button className="bg-white text-black px-10 py-4 rounded-full font-bold text-lg shadow-2xl hover:scale-105 transition-transform">
-                          {slide.cta}
-                        </button>
-                      </div>
-                    </div>
-                  </motion.div>
-                )
-              ))}
-            </AnimatePresence>
-
-            <div className="absolute bottom-6 left-1/2 transform -translate-x-1/2 flex space-x-3">
-              {adSlides.map((_, index) => (
-                <button
-                  key={index}
-                  onClick={() => setCurrentSlide(index)}
-                  className={`h-2 rounded-full transition-all duration-200 ${index === currentSlide ? 'bg-white w-8' : 'bg-white/50 w-2'}`}
-                />
-              ))}
-            </div>
-          </div>
+          <AdBanner
+            targetPage="homepage"
+            placement="slider"
+            limit={5}
+            className="h-[400px] md:h-[500px]"
+          />
         </div>
       </section>
 

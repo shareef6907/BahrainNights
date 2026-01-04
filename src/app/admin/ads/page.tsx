@@ -15,7 +15,9 @@ import {
   MousePointer,
   TrendingUp,
   ExternalLink,
+  Move,
 } from 'lucide-react';
+import ImagePositioner from '@/components/admin/ImagePositioner';
 
 // Client-side image compression function
 async function compressImage(file: File, maxSizeKB: number = 600, maxWidth: number = 1920): Promise<File> {
@@ -110,6 +112,7 @@ interface Ad {
   status: string;
   impressions: number;
   clicks: number;
+  image_settings?: string | { position: { x: number; y: number }; scale: number };
 }
 
 interface SlotData {
@@ -120,7 +123,8 @@ interface SlotData {
   tempEndDate: string;
   previewUrl: string; // For immediate preview after upload
   imageError: boolean;
-  objectPosition: string; // For image repositioning
+  imagePosition: { x: number; y: number }; // For image repositioning
+  imageScale: number; // For image zoom
 }
 
 export default function AdminAdsPage() {
@@ -130,6 +134,7 @@ export default function AdminAdsPage() {
   const [toast, setToast] = useState<{ message: string; type: 'success' | 'error' } | null>(null);
   const [slots, setSlots] = useState<Record<number, SlotData>>({});
   const [stats, setStats] = useState({ impressions: 0, clicks: 0 });
+  const [repositioningSlot, setRepositioningSlot] = useState<number | null>(null);
   const fileInputRefs = useRef<Record<number, HTMLInputElement | null>>({});
 
   const fetchAds = useCallback(async () => {
@@ -151,6 +156,10 @@ export default function AdminAdsPage() {
       const newSlots: Record<number, SlotData> = {};
       for (let i = 1; i <= 5; i++) {
         const ad = categoryAds.find((a: Ad) => a.slot_position === i);
+        // Parse image_settings if available (stored as JSON string in ad)
+        const imageSettings = ad?.image_settings ?
+          (typeof ad.image_settings === 'string' ? JSON.parse(ad.image_settings) : ad.image_settings) :
+          null;
         newSlots[i] = {
           ad: ad || null,
           uploading: false,
@@ -159,7 +168,8 @@ export default function AdminAdsPage() {
           tempEndDate: ad?.end_date ? ad.end_date.split('T')[0] : '',
           previewUrl: '',
           imageError: false,
-          objectPosition: 'center',
+          imagePosition: imageSettings?.position || { x: 50, y: 50 },
+          imageScale: imageSettings?.scale || 1,
         };
       }
       setSlots(newSlots);
@@ -259,7 +269,8 @@ export default function AdminAdsPage() {
           tempEndDate: ad.end_date.split('T')[0],
           previewUrl: '', // Clear preview, use actual URL
           imageError: false,
-          objectPosition: 'center',
+          imagePosition: { x: 50, y: 50 },
+          imageScale: 1,
         }
       }));
 
@@ -315,6 +326,51 @@ export default function AdminAdsPage() {
     }
   };
 
+  const handleSavePosition = async (slotNumber: number, position: { x: number; y: number }, scale: number) => {
+    const slot = slots[slotNumber];
+    if (!slot?.ad) return;
+
+    // Update local state immediately
+    setSlots(prev => ({
+      ...prev,
+      [slotNumber]: {
+        ...prev[slotNumber],
+        imagePosition: position,
+        imageScale: scale,
+        saving: true,
+      }
+    }));
+    setRepositioningSlot(null);
+
+    try {
+      const imageSettings = JSON.stringify({ position, scale });
+      const response = await fetch(`/api/admin/ads/${slot.ad.id}`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ imageSettings }),
+      });
+
+      if (!response.ok) throw new Error('Failed to save position');
+
+      setSlots(prev => ({
+        ...prev,
+        [slotNumber]: {
+          ...prev[slotNumber],
+          saving: false,
+        }
+      }));
+
+      showToast('Position saved!', 'success');
+    } catch (error) {
+      console.error('Failed to save position:', error);
+      showToast('Position updated locally. Run migration to persist.', 'error');
+      setSlots(prev => ({
+        ...prev,
+        [slotNumber]: { ...prev[slotNumber], saving: false }
+      }));
+    }
+  };
+
   const handleDeleteSlot = async (slotNumber: number) => {
     const slot = slots[slotNumber];
     if (!slot?.ad) return;
@@ -338,7 +394,8 @@ export default function AdminAdsPage() {
           tempEndDate: '',
           previewUrl: '',
           imageError: false,
-          objectPosition: 'center',
+          imagePosition: { x: 50, y: 50 },
+          imageScale: 1,
         }
       }));
 
@@ -531,7 +588,7 @@ export default function AdminAdsPage() {
 
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {[1, 2, 3, 4, 5].map((slotNumber) => {
-            const slot = slots[slotNumber] || { ad: null, uploading: false, saving: false, tempLink: '', tempEndDate: '', previewUrl: '', imageError: false, objectPosition: 'center' };
+            const slot = slots[slotNumber] || { ad: null, uploading: false, saving: false, tempLink: '', tempEndDate: '', previewUrl: '', imageError: false, imagePosition: { x: 50, y: 50 }, imageScale: 1 };
             const imageUrl = slot.previewUrl || slot.ad?.image_url;
 
             return (
@@ -587,8 +644,11 @@ export default function AdminAdsPage() {
                       <img
                         src={imageUrl}
                         alt={`Slot ${slotNumber}`}
-                        className="w-full h-full object-cover"
-                        style={{ objectPosition: slot.objectPosition }}
+                        className="w-full h-full object-cover transition-transform"
+                        style={{
+                          objectPosition: `${slot.imagePosition.x}% ${slot.imagePosition.y}%`,
+                          transform: `scale(${slot.imageScale})`,
+                        }}
                         onError={() => {
                           console.error('Image failed to load:', imageUrl);
                           setSlots(prev => ({
@@ -629,6 +689,16 @@ export default function AdminAdsPage() {
                             <button
                               onClick={(e) => {
                                 e.stopPropagation();
+                                setRepositioningSlot(slotNumber);
+                              }}
+                              className="flex items-center gap-2 px-3 py-2 bg-white/20 rounded-lg text-white text-sm hover:bg-white/30"
+                            >
+                              <Move className="w-4 h-4" />
+                              Reposition
+                            </button>
+                            <button
+                              onClick={(e) => {
+                                e.stopPropagation();
                                 fileInputRefs.current[slotNumber]?.click();
                               }}
                               className="flex items-center gap-2 px-3 py-2 bg-white/20 rounded-lg text-white text-sm hover:bg-white/30"
@@ -647,29 +717,6 @@ export default function AdminAdsPage() {
                     </div>
                   )}
                 </div>
-
-                {/* Position Controls - Only show when image exists */}
-                {imageUrl && !slot.imageError && (
-                  <div className="flex items-center gap-1 justify-center">
-                    <span className="text-xs text-gray-500 mr-2">Position:</span>
-                    {['left', 'center', 'right'].map((pos) => (
-                      <button
-                        key={pos}
-                        onClick={() => setSlots(prev => ({
-                          ...prev,
-                          [slotNumber]: { ...prev[slotNumber], objectPosition: pos }
-                        }))}
-                        className={`px-2 py-1 text-xs rounded transition-colors ${
-                          slot.objectPosition === pos
-                            ? 'bg-cyan-500 text-white'
-                            : 'bg-white/5 text-gray-400 hover:bg-white/10'
-                        }`}
-                      >
-                        {pos.charAt(0).toUpperCase() + pos.slice(1)}
-                      </button>
-                    ))}
-                  </div>
-                )}
 
                 {/* Link Input */}
                 <div className="space-y-2">
@@ -736,6 +783,17 @@ export default function AdminAdsPage() {
           })}
         </div>
       </div>
+
+      {/* Image Repositioner Modal */}
+      {repositioningSlot !== null && slots[repositioningSlot]?.ad && (
+        <ImagePositioner
+          imageUrl={slots[repositioningSlot].previewUrl || slots[repositioningSlot].ad!.image_url}
+          initialPosition={slots[repositioningSlot].imagePosition}
+          initialScale={slots[repositioningSlot].imageScale}
+          onSave={(position, scale) => handleSavePosition(repositioningSlot, position, scale)}
+          onCancel={() => setRepositioningSlot(null)}
+        />
+      )}
     </div>
   );
 }
