@@ -20,7 +20,7 @@ import {
 import ImagePositioner from '@/components/admin/ImagePositioner';
 
 // Client-side image compression function
-async function compressImage(file: File, maxSizeKB: number = 600, maxWidth: number = 1920): Promise<File> {
+async function compressImage(file: File, maxSizeKB: number = 1024, maxWidth: number = 1920): Promise<File> {
   return new Promise((resolve, reject) => {
     const reader = new FileReader();
     reader.onload = (e) => {
@@ -209,9 +209,9 @@ export default function AdminAdsPage() {
     }));
 
     try {
-      // Compress image to ~600KB and max 1920px width
+      // Compress image to ~1MB and max 1920px width
       showToast('Compressing image...', 'success');
-      const compressedFile = await compressImage(file, 600, 1920);
+      const compressedFile = await compressImage(file, 1024, 1920);
 
       // Create preview URL for immediate display
       const previewUrl = URL.createObjectURL(compressedFile);
@@ -420,9 +420,9 @@ export default function AdminAdsPage() {
     }));
 
     try {
-      // Compress image to ~600KB and max 1920px width
+      // Compress image to ~1MB and max 1920px width
       showToast('Compressing image...', 'success');
-      const compressedFile = await compressImage(file, 600, 1920);
+      const compressedFile = await compressImage(file, 1024, 1920);
 
       // Create preview URL for immediate display
       const previewUrl = URL.createObjectURL(compressedFile);

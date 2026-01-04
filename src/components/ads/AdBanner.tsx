@@ -5,6 +5,17 @@ import Link from 'next/link';
 import Image from 'next/image';
 import { motion } from 'framer-motion';
 
+// Ensure URL has protocol prefix for external links
+function ensureAbsoluteUrl(url: string): string {
+  if (!url) return '#';
+  // If already has protocol, return as-is
+  if (url.startsWith('http://') || url.startsWith('https://') || url.startsWith('/')) {
+    return url;
+  }
+  // Add https:// prefix for external URLs
+  return `https://${url}`;
+}
+
 interface Ad {
   id: string;
   title: string | null;
@@ -101,7 +112,7 @@ export default function AdBanner({
         className={`relative overflow-hidden rounded-2xl ${className}`}
       >
         <Link
-          href={currentAd.target_url}
+          href={ensureAbsoluteUrl(currentAd.target_url)}
           target="_blank"
           rel="noopener noreferrer sponsored"
           onClick={() => trackClick(currentAd.id)}
@@ -169,7 +180,7 @@ export default function AdBanner({
         className={`bg-white/5 border border-white/10 rounded-xl overflow-hidden ${className}`}
       >
         <Link
-          href={currentAd.target_url}
+          href={ensureAbsoluteUrl(currentAd.target_url)}
           target="_blank"
           rel="noopener noreferrer sponsored"
           onClick={() => trackClick(currentAd.id)}
@@ -217,7 +228,7 @@ export default function AdBanner({
         className={`bg-gradient-to-r from-amber-500/10 to-pink-500/10 border border-white/10 rounded-xl p-4 ${className}`}
       >
         <Link
-          href={currentAd.target_url}
+          href={ensureAbsoluteUrl(currentAd.target_url)}
           target="_blank"
           rel="noopener noreferrer sponsored"
           onClick={() => trackClick(currentAd.id)}
@@ -264,7 +275,7 @@ export default function AdBanner({
       className={`relative overflow-hidden rounded-2xl ${className}`}
     >
       <Link
-        href={currentAd.target_url}
+        href={ensureAbsoluteUrl(currentAd.target_url)}
         target="_blank"
         rel="noopener noreferrer sponsored"
         onClick={() => trackClick(currentAd.id)}
