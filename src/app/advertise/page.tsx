@@ -1,47 +1,88 @@
 'use client';
 
 import { motion } from 'framer-motion';
-import { Megaphone, Eye, Users, TrendingUp, Mail, Phone, CheckCircle } from 'lucide-react';
-import Link from 'next/link';
+import { Megaphone, Eye, Users, TrendingUp, Mail, Phone, CheckCircle, Sparkles, Target, BarChart3, Globe, Zap, Heart } from 'lucide-react';
 
-const adPackages = [
+const benefits = [
   {
-    name: 'Homepage Slider',
-    price: 'BD 300-500',
-    period: '/month',
-    description: 'Premium rotating banner on homepage',
+    icon: Eye,
+    title: 'Massive Reach',
+    description: 'Get your brand in front of thousands of active users looking for events, dining, and entertainment in Bahrain.',
+  },
+  {
+    icon: Target,
+    title: 'Targeted Audience',
+    description: 'Reach people actively searching for things to do - they\'re already interested and ready to engage.',
+  },
+  {
+    icon: TrendingUp,
+    title: 'High Engagement',
+    description: 'Our users don\'t just browse - they take action. Book tables, buy tickets, and visit venues.',
+  },
+  {
+    icon: BarChart3,
+    title: 'Measurable Results',
+    description: 'Track impressions, clicks, and conversions. Know exactly how your campaign is performing.',
+  },
+];
+
+const adOptions = [
+  {
+    name: 'Homepage Banner',
+    description: 'Premium rotating banner on our homepage - the first thing visitors see',
     features: [
-      '1920x600 high-quality banner',
-      'Rotating position (5 slots)',
-      'Link to your website/event',
-      'Average 50,000+ impressions/month',
-      'Mobile optimized display',
+      'Prime visibility on homepage slider',
+      'High-quality banner display (1920x600)',
+      'Direct link to your website or event',
+      'Mobile-optimized for all devices',
+      'Rotating position among premium spots',
     ],
     highlighted: true,
   },
   {
-    name: 'Featured Event',
-    price: 'BD 100',
-    period: '/week',
-    description: 'Highlighted in events section',
+    name: 'Featured Listing',
+    description: 'Stand out in our events and places sections with premium placement',
     features: [
-      'Featured badge on event listing',
-      'Priority placement in category',
-      'Included in weekly newsletter',
-      'Social media mention',
+      'Featured badge on your listing',
+      'Priority placement in search results',
+      'Highlighted in relevant categories',
+      'Included in our weekly newsletter',
+      'Social media mentions',
     ],
   },
   {
     name: 'Sponsored Content',
-    price: 'BD 200',
-    period: '/article',
-    description: 'Custom content about your brand',
+    description: 'Custom articles and reviews to tell your brand story',
     features: [
-      'Professional article/review',
-      'High-quality photography',
+      'Professional article or review',
+      'High-quality photography included',
       'Social media promotion',
-      'Permanent on-site placement',
+      'Permanent placement on site',
+      'SEO-optimized for search visibility',
     ],
+  },
+];
+
+const whyAdvertise = [
+  {
+    icon: Globe,
+    title: 'Free Platform for Venues',
+    description: 'We\'re building Bahrain\'s largest events and venues directory - completely free for businesses to list. Your ad reaches this growing community.',
+  },
+  {
+    icon: Users,
+    title: 'Growing Community',
+    description: 'Thousands of residents and tourists use BahrainNights to discover what\'s happening. Be where your customers are looking.',
+  },
+  {
+    icon: Zap,
+    title: 'AI-Powered Discovery',
+    description: 'Our AI ensures your content reaches the right audience at the right time. Smart recommendations drive engagement.',
+  },
+  {
+    icon: Heart,
+    title: 'Supporting Local Business',
+    description: 'We\'re passionate about promoting Bahrain\'s vibrant scene. Partner with us to grow together.',
   },
 ];
 
@@ -65,13 +106,13 @@ export default function AdvertisePage() {
               Reach Thousands in Bahrain
             </div>
             <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold text-white mb-4">
-              Advertise{' '}
+              Grow Your Business{' '}
               <span className="bg-gradient-to-r from-orange-400 via-red-500 to-pink-500 bg-clip-text text-transparent">
                 With Us
               </span>
             </h1>
             <p className="text-gray-400 text-lg md:text-xl max-w-2xl mx-auto">
-              Put your brand in front of Bahrain&apos;s most engaged audience
+              Put your brand in front of Bahrain&apos;s most engaged audience - thousands of people actively looking for events, dining, and entertainment
             </p>
           </motion.div>
 
@@ -86,8 +127,8 @@ export default function AdvertisePage() {
               { icon: Eye, label: 'Monthly Views', value: '100K+' },
               { icon: Users, label: 'Active Users', value: '25K+' },
               { icon: TrendingUp, label: 'Engagement Rate', value: '12%' },
-              { icon: Megaphone, label: 'Businesses Served', value: '500+' },
-            ].map((stat, index) => (
+              { icon: Megaphone, label: 'Businesses Listed', value: '500+' },
+            ].map((stat) => (
               <div
                 key={stat.label}
                 className="bg-white/5 backdrop-blur-sm border border-white/10 rounded-2xl p-6 text-center"
@@ -101,45 +142,114 @@ export default function AdvertisePage() {
         </div>
       </section>
 
-      {/* Packages Section */}
+      {/* Why Advertise Section */}
       <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pb-16">
-        <motion.h2
+        <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
-          className="text-3xl font-bold text-white text-center mb-12"
+          className="text-center mb-12"
         >
-          Advertising Packages
-        </motion.h2>
+          <h2 className="text-3xl font-bold text-white mb-4">Why Advertise on BahrainNights?</h2>
+          <p className="text-gray-400 max-w-2xl mx-auto">
+            We&apos;re not just another advertising platform. We&apos;re building the go-to destination for everything happening in Bahrain.
+          </p>
+        </motion.div>
+
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-16">
+          {whyAdvertise.map((item, index) => (
+            <motion.div
+              key={item.title}
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: index * 0.1 }}
+              className="bg-white/5 backdrop-blur-sm border border-white/10 rounded-2xl p-6 flex gap-4"
+            >
+              <div className="flex-shrink-0">
+                <div className="w-12 h-12 bg-orange-500/20 rounded-xl flex items-center justify-center">
+                  <item.icon className="w-6 h-6 text-orange-400" />
+                </div>
+              </div>
+              <div>
+                <h3 className="text-lg font-semibold text-white mb-2">{item.title}</h3>
+                <p className="text-gray-400 text-sm">{item.description}</p>
+              </div>
+            </motion.div>
+          ))}
+        </div>
+      </section>
+
+      {/* Benefits Section */}
+      <section className="bg-white/[0.02] py-16">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="text-center mb-12"
+          >
+            <h2 className="text-3xl font-bold text-white mb-4">What You Get</h2>
+            <p className="text-gray-400 max-w-2xl mx-auto">
+              Advertising with us means more than just visibility - it means results.
+            </p>
+          </motion.div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+            {benefits.map((benefit, index) => (
+              <motion.div
+                key={benefit.title}
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: index * 0.1 }}
+                className="text-center p-6"
+              >
+                <div className="w-14 h-14 bg-gradient-to-br from-orange-500/20 to-red-500/20 rounded-2xl flex items-center justify-center mx-auto mb-4">
+                  <benefit.icon className="w-7 h-7 text-orange-400" />
+                </div>
+                <h3 className="text-lg font-semibold text-white mb-2">{benefit.title}</h3>
+                <p className="text-gray-400 text-sm">{benefit.description}</p>
+              </motion.div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* Ad Options Section */}
+      <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="text-center mb-12"
+        >
+          <h2 className="text-3xl font-bold text-white mb-4">Advertising Options</h2>
+          <p className="text-gray-400 max-w-2xl mx-auto">
+            Flexible solutions tailored to your goals and budget. Contact us for custom packages.
+          </p>
+        </motion.div>
 
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-          {adPackages.map((pkg, index) => (
+          {adOptions.map((option, index) => (
             <motion.div
-              key={pkg.name}
+              key={option.name}
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: index * 0.1 }}
               className={`relative bg-white/5 backdrop-blur-sm border rounded-3xl p-8 ${
-                pkg.highlighted
+                option.highlighted
                   ? 'border-orange-500/50 shadow-lg shadow-orange-500/10'
                   : 'border-white/10'
               }`}
             >
-              {pkg.highlighted && (
-                <div className="absolute -top-4 left-1/2 -translate-x-1/2 px-4 py-1 bg-gradient-to-r from-orange-500 to-red-500 text-white text-sm font-bold rounded-full">
+              {option.highlighted && (
+                <div className="absolute -top-4 left-1/2 -translate-x-1/2 px-4 py-1 bg-gradient-to-r from-orange-500 to-red-500 text-white text-sm font-bold rounded-full flex items-center gap-1">
+                  <Sparkles className="w-3 h-3" />
                   Most Popular
                 </div>
               )}
 
-              <h3 className="text-xl font-bold text-white mb-2">{pkg.name}</h3>
-              <p className="text-gray-400 text-sm mb-4">{pkg.description}</p>
-
-              <div className="mb-6">
-                <span className="text-3xl font-bold text-orange-400">{pkg.price}</span>
-                <span className="text-gray-400">{pkg.period}</span>
-              </div>
+              <h3 className="text-xl font-bold text-white mb-2">{option.name}</h3>
+              <p className="text-gray-400 text-sm mb-6">{option.description}</p>
 
               <ul className="space-y-3 mb-8">
-                {pkg.features.map((feature) => (
+                {option.features.map((feature) => (
                   <li key={feature} className="flex items-start gap-2 text-sm text-gray-300">
                     <CheckCircle className="w-5 h-5 text-green-400 flex-shrink-0 mt-0.5" />
                     {feature}
@@ -148,48 +258,45 @@ export default function AdvertisePage() {
               </ul>
 
               <a
-                href="mailto:advertise@bahrainnights.com"
+                href="mailto:admin@bahrainnights.com?subject=Advertising Inquiry - ${option.name}"
                 className={`block w-full text-center py-3 rounded-xl font-semibold transition-all ${
-                  pkg.highlighted
+                  option.highlighted
                     ? 'bg-gradient-to-r from-orange-500 to-red-500 text-white hover:shadow-lg'
                     : 'bg-white/10 text-white hover:bg-white/20'
                 }`}
               >
-                Get Started
+                Get in Touch
               </a>
             </motion.div>
           ))}
         </div>
       </section>
 
-      {/* Contact Section */}
+      {/* CTA Section */}
       <section className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 pb-16">
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           className="bg-gradient-to-r from-orange-500/10 to-red-500/10 border border-orange-500/20 rounded-3xl p-8 text-center"
         >
-          <h3 className="text-2xl font-bold text-white mb-4">Ready to Get Started?</h3>
+          <h3 className="text-2xl font-bold text-white mb-4">Ready to Reach Thousands?</h3>
           <p className="text-gray-400 mb-8 max-w-md mx-auto">
-            Contact our advertising team to discuss custom packages and availability
+            Let&apos;s discuss how we can help grow your business. Custom packages available to fit your needs and budget.
           </p>
 
           <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
             <a
-              href="mailto:advertise@bahrainnights.com"
+              href="mailto:admin@bahrainnights.com?subject=Advertising Inquiry"
               className="flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-orange-500 to-red-500 text-white font-semibold rounded-xl hover:shadow-lg transition-all"
             >
               <Mail className="w-5 h-5" />
-              advertise@bahrainnights.com
-            </a>
-            <a
-              href="tel:+97317123456"
-              className="flex items-center gap-2 px-6 py-3 bg-white/10 text-white font-semibold rounded-xl hover:bg-white/20 transition-all"
-            >
-              <Phone className="w-5 h-5" />
-              +973 1712 3456
+              admin@bahrainnights.com
             </a>
           </div>
+
+          <p className="text-gray-500 text-sm mt-6">
+            We typically respond within 24 hours
+          </p>
         </motion.div>
       </section>
     </div>
