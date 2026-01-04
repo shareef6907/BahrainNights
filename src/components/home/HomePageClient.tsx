@@ -543,9 +543,9 @@ export default function HomePageClient({ initialMovies, initialStats, initialTod
       </nav>
 
       {/* Hero Section with Video Background */}
-      <section className="relative pt-32 pb-32 px-4 overflow-hidden">
-        {/* Video Background */}
-        <div className="absolute inset-0 w-full h-full bg-[#0a0a0f]">
+      <section className="relative pt-32 pb-32 px-4 min-h-[600px] md:min-h-[700px]">
+        {/* Video Background - full size, no cropping from top */}
+        <div className="absolute inset-0 w-full h-full">
           <video
             ref={videoRef}
             autoPlay
@@ -555,16 +555,19 @@ export default function HomePageClient({ initialMovies, initialStats, initialTod
             preload="auto"
             disablePictureInPicture
             className="absolute inset-0 w-full h-full object-cover"
-            style={{ objectPosition: 'center center' }}
+            style={{ objectPosition: 'top center' }}
           >
             <source src="/Header-Video1.mp4" type="video/mp4" />
           </video>
-          {/* Dark overlay for text readability - using navy blue tint */}
-          <div className="absolute inset-0 bg-[#0A0A0F]/40" />
-          {/* Gradient fade to navy background at bottom */}
-          <div className="absolute inset-0 bg-gradient-to-b from-transparent via-transparent via-50% to-[#0A0A0F]" />
-          {/* Strong navy fade at bottom edge for seamless blend */}
-          <div className="absolute bottom-0 left-0 right-0 h-48 bg-gradient-to-t from-[#0A0A0F] via-[#0A0A0F] to-transparent" />
+          {/* Dark overlay for text readability */}
+          <div className="absolute inset-0 bg-black/30" />
+          {/* Bottom gradient - fades to exact page background color */}
+          <div
+            className="absolute bottom-0 left-0 right-0 h-64"
+            style={{
+              background: 'linear-gradient(to top, #0A0A0F 0%, #0A0A0F 20%, rgba(10,10,15,0.8) 50%, transparent 100%)'
+            }}
+          />
         </div>
 
         <div className="relative z-10 max-w-7xl mx-auto text-center">
