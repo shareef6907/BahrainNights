@@ -17,6 +17,74 @@ import {
   ExternalLink,
 } from 'lucide-react';
 
+// Client-side image compression function
+async function compressImage(file: File, maxSizeKB: number = 600, maxWidth: number = 1920): Promise<File> {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = (e) => {
+      const img = new Image();
+      img.onload = () => {
+        const canvas = document.createElement('canvas');
+        let width = img.width;
+        let height = img.height;
+
+        // Resize if wider than maxWidth
+        if (width > maxWidth) {
+          height = (height * maxWidth) / width;
+          width = maxWidth;
+        }
+
+        canvas.width = width;
+        canvas.height = height;
+
+        const ctx = canvas.getContext('2d');
+        if (!ctx) {
+          reject(new Error('Failed to get canvas context'));
+          return;
+        }
+
+        ctx.drawImage(img, 0, 0, width, height);
+
+        // Try different quality levels to get under maxSizeKB
+        const tryCompress = (quality: number): void => {
+          canvas.toBlob(
+            (blob) => {
+              if (!blob) {
+                reject(new Error('Failed to compress image'));
+                return;
+              }
+
+              const sizeKB = blob.size / 1024;
+
+              // If still too large and quality > 0.1, try lower quality
+              if (sizeKB > maxSizeKB && quality > 0.1) {
+                tryCompress(quality - 0.1);
+                return;
+              }
+
+              // Create new file from blob
+              const compressedFile = new File([blob], file.name.replace(/\.[^.]+$/, '.jpg'), {
+                type: 'image/jpeg',
+                lastModified: Date.now(),
+              });
+
+              resolve(compressedFile);
+            },
+            'image/jpeg',
+            quality
+          );
+        };
+
+        tryCompress(0.9); // Start with 90% quality
+      };
+      img.onerror = () => reject(new Error('Failed to load image'));
+      img.src = e.target?.result as string;
+    };
+    reader.onerror = () => reject(new Error('Failed to read file'));
+    reader.readAsDataURL(file);
+  });
+}
+
 // Categories for ads
 const CATEGORIES = [
   { value: 'homepage', label: 'Homepage', slots: 5 },
@@ -113,14 +181,9 @@ export default function AdminAdsPage() {
   const handleFileSelect = async (slotNumber: number, file: File) => {
     if (!file) return;
 
-    // Validate file
+    // Validate file type
     if (!file.type.startsWith('image/')) {
       showToast('Please select an image file', 'error');
-      return;
-    }
-
-    if (file.size > 5 * 1024 * 1024) {
-      showToast('Image must be less than 5MB', 'error');
       return;
     }
 
@@ -130,17 +193,23 @@ export default function AdminAdsPage() {
     }));
 
     try {
-      // Upload to S3
-      const formData = new FormData();
-      formData.append('file', file);
-      formData.append('folder', 'ads');
+      // Compress image to ~600KB and max 1920px width
+      showToast('Compressing image...', 'success');
+      const compressedFile = await compressImage(file, 600, 1920);
 
-      const uploadResponse = await fetch('/api/upload', {
+      // Upload to S3 (direct, no watermark)
+      const formData = new FormData();
+      formData.append('file', compressedFile);
+
+      const uploadResponse = await fetch('/api/upload/ads', {
         method: 'POST',
         body: formData,
       });
 
-      if (!uploadResponse.ok) throw new Error('Failed to upload image');
+      if (!uploadResponse.ok) {
+        const errorData = await uploadResponse.json().catch(() => ({}));
+        throw new Error(errorData.error || 'Failed to upload image');
+      }
 
       const { url: imageUrl } = await uploadResponse.json();
 
@@ -272,17 +341,23 @@ export default function AdminAdsPage() {
     }));
 
     try {
-      // Upload new image to S3
-      const formData = new FormData();
-      formData.append('file', file);
-      formData.append('folder', 'ads');
+      // Compress image to ~600KB and max 1920px width
+      showToast('Compressing image...', 'success');
+      const compressedFile = await compressImage(file, 600, 1920);
 
-      const uploadResponse = await fetch('/api/upload', {
+      // Upload new image to S3 (direct, no watermark)
+      const formData = new FormData();
+      formData.append('file', compressedFile);
+
+      const uploadResponse = await fetch('/api/upload/ads', {
         method: 'POST',
         body: formData,
       });
 
-      if (!uploadResponse.ok) throw new Error('Failed to upload image');
+      if (!uploadResponse.ok) {
+        const errorData = await uploadResponse.json().catch(() => ({}));
+        throw new Error(errorData.error || 'Failed to upload image');
+      }
 
       const { url: imageUrl } = await uploadResponse.json();
 
