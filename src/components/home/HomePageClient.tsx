@@ -555,7 +555,7 @@ export default function HomePageClient({ initialMovies, initialStats, initialTod
             preload="auto"
             disablePictureInPicture
             className="absolute inset-0 w-full h-full object-cover"
-            style={{ objectPosition: 'top center' }}
+            style={{ objectPosition: 'center center' }}
           >
             <source src="/Header-Video1.mp4" type="video/mp4" />
           </video>
