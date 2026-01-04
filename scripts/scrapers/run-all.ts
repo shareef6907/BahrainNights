@@ -6,7 +6,7 @@ import { scrapeLinkedInAds } from './linkedin-ads';
 import { enrichProspectsWithAI } from './ai-enrichment';
 
 export async function runAllScrapers(): Promise<void> {
-  console.log('🚀 Starting daily prospect scraping...');
+  console.log('🚀 Starting hourly prospect scraping...');
   console.log('Time:', new Date().toISOString());
 
   // Run scrapers in sequence to avoid overwhelming resources
@@ -52,7 +52,7 @@ export async function runAllScrapers(): Promise<void> {
     console.error('AI enrichment error:', e);
   }
 
-  console.log('\n✅ Daily scraping complete!');
+  console.log('\n✅ Hourly scraping complete!');
 }
 
 // Run if called directly
