@@ -1,9 +1,21 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { cookies } from 'next/headers';
 import { getAdminClient } from '@/lib/supabase/server';
+import { verifyToken } from '@/lib/auth';
 
 // GET - List all public users (Google members)
 export async function GET(request: NextRequest) {
   try {
+    // Verify admin authentication
+    const cookieStore = await cookies();
+    const token = cookieStore.get('auth_token')?.value;
+    if (!token) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    }
+    const user = await verifyToken(token);
+    if (!user || user.role !== 'admin') {
+      return NextResponse.json({ error: 'Admin access required' }, { status: 403 });
+    }
     const supabase = getAdminClient() as any;
     const { searchParams } = new URL(request.url);
 
@@ -108,6 +120,17 @@ export async function GET(request: NextRequest) {
 // DELETE - Remove a public user
 export async function DELETE(request: NextRequest) {
   try {
+    // Verify admin authentication
+    const cookieStore = await cookies();
+    const token = cookieStore.get('auth_token')?.value;
+    if (!token) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    }
+    const user = await verifyToken(token);
+    if (!user || user.role !== 'admin') {
+      return NextResponse.json({ error: 'Admin access required' }, { status: 403 });
+    }
+
     const supabase = getAdminClient() as any;
     const { userId } = await request.json();
 

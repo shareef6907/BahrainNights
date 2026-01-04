@@ -1,5 +1,6 @@
 'use client';
 
+import React from 'react';
 import { motion } from 'framer-motion';
 import Image from 'next/image';
 import { MapPin, Clock, Calendar, Sparkles, Wine, UtensilsCrossed, Tag, Users, ChevronRight } from 'lucide-react';
@@ -76,7 +77,7 @@ const offerTypeConfig: Record<string, {
   },
 };
 
-export default function OfferCard({ offer, index, onClick }: OfferCardProps) {
+function OfferCard({ offer, index, onClick }: OfferCardProps) {
   const config = offerTypeConfig[offer.type] || offerTypeConfig.special;
   const IconComponent = config.icon;
 
@@ -216,3 +217,12 @@ export default function OfferCard({ offer, index, onClick }: OfferCardProps) {
     </motion.div>
   );
 }
+
+// Memoize to prevent unnecessary re-renders in lists
+export default React.memo(OfferCard, (prevProps, nextProps) => {
+  return (
+    prevProps.offer.id === nextProps.offer.id &&
+    prevProps.index === nextProps.index &&
+    prevProps.onClick === nextProps.onClick
+  );
+});

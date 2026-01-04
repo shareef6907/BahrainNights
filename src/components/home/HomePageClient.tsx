@@ -5,10 +5,19 @@ import dynamic from 'next/dynamic';
 import { motion, AnimatePresence } from 'framer-motion';
 import { MapPin, Clock, Star, ChevronRight, ChevronDown, Menu, X, Sparkles, Plus, Play, Building2, LogIn } from 'lucide-react';
 import GlobalSearch from '@/components/search/GlobalSearch';
-import { SponsorsSection } from '@/components/sponsors';
 import { Movie } from '@/components/cinema/MovieCard';
 import LanguageSwitcher from '@/components/LanguageSwitcher';
-import AdBanner from '@/components/ads/AdBanner';
+
+// Lazy load below-fold components for faster initial load
+const AdBanner = dynamic(() => import('@/components/ads/AdBanner'), {
+  loading: () => <div className="h-[400px] md:h-[500px] bg-slate-800/50 rounded-2xl animate-pulse" />,
+  ssr: false,
+});
+
+const SponsorsSection = dynamic(
+  () => import('@/components/sponsors').then(mod => ({ default: mod.SponsorsSection })),
+  { loading: () => null, ssr: false }
+);
 
 // Lazy load modals - only loaded when user interacts with movies
 const MovieModal = dynamic(() => import('@/components/cinema/MovieModal'), {

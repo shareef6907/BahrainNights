@@ -1,5 +1,6 @@
 'use client';
 
+import React from 'react';
 import { motion } from 'framer-motion';
 import { MapPin, Clock, Calendar } from 'lucide-react';
 import Image from 'next/image';
@@ -42,7 +43,7 @@ const cardVariants = {
   })
 };
 
-export default function EventCard({ event, view = 'grid', index = 0 }: EventCardProps) {
+function EventCard({ event, view = 'grid', index = 0 }: EventCardProps) {
   if (view === 'list') {
     return (
       <motion.div
@@ -184,3 +185,12 @@ export default function EventCard({ event, view = 'grid', index = 0 }: EventCard
     </motion.div>
   );
 }
+
+// Memoize to prevent unnecessary re-renders in lists
+export default React.memo(EventCard, (prevProps, nextProps) => {
+  return (
+    prevProps.event.id === nextProps.event.id &&
+    prevProps.view === nextProps.view &&
+    prevProps.index === nextProps.index
+  );
+});

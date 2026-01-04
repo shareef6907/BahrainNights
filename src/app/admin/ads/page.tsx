@@ -248,7 +248,6 @@ export default function AdminAdsPage() {
       }
 
       const { url: imageUrl } = await uploadResponse.json();
-      console.log('Uploaded image URL:', imageUrl);
 
       // Create ad with image
       const defaultEndDate = new Date();
@@ -269,7 +268,6 @@ export default function AdminAdsPage() {
       if (!createResponse.ok) throw new Error('Failed to create ad');
 
       const { ad } = await createResponse.json();
-      console.log('Created ad:', ad);
 
       setSlots(prev => ({
         ...prev,
@@ -468,7 +466,6 @@ export default function AdminAdsPage() {
       }
 
       const { url: imageUrl } = await uploadResponse.json();
-      console.log('Replaced image URL:', imageUrl);
 
       // Update ad with new image
       const response = await fetch(`/api/admin/ads/${slot.ad.id}`, {
@@ -480,7 +477,6 @@ export default function AdminAdsPage() {
       if (!response.ok) throw new Error('Failed to update');
 
       const { ad } = await response.json();
-      console.log('Updated ad:', ad);
 
       setSlots(prev => ({
         ...prev,

@@ -179,7 +179,6 @@ export default function EditAdPage() {
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (validateForm()) {
-      console.log('Form updated:', formData);
       alert('Ad updated successfully!');
     }
   };
@@ -190,7 +189,6 @@ export default function EditAdPage() {
   };
 
   const handleDelete = () => {
-    console.log('Deleting ad:', adId);
     alert('Ad deleted!');
     setShowDeleteModal(false);
   };

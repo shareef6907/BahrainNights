@@ -191,18 +191,14 @@ export default function AdminEventEditPage() {
       const uploadData = new FormData();
       uploadData.append('file', file);
 
-      console.log('[Edit Page] Starting upload for file:', file.name, file.size, file.type);
-
       const response = await fetch('/api/upload/admin', {
         method: 'POST',
         body: uploadData,
       });
 
       const data = await response.json();
-      console.log('[Edit Page] Upload response:', data);
 
       if (!response.ok) {
-        console.error('[Edit Page] Upload failed:', data);
         alert(data.details || data.error || 'Upload failed');
         return;
       }

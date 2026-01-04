@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
 import { motion } from 'framer-motion';
 import {
@@ -122,15 +122,15 @@ export default function EventForm({ initialData, isEditing = false, eventId }: E
     'media',
   ]);
 
-  const toggleSection = (section: string) => {
+  const toggleSection = useCallback((section: string) => {
     setExpandedSections((prev) =>
       prev.includes(section)
         ? prev.filter((s) => s !== section)
         : [...prev, section]
     );
-  };
+  }, []);
 
-  const handleChange = (
+  const handleChange = useCallback((
     e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>
   ) => {
     const { name, value, type } = e.target;
@@ -139,19 +139,22 @@ export default function EventForm({ initialData, isEditing = false, eventId }: E
       [name]: type === 'checkbox' ? (e.target as HTMLInputElement).checked : value,
     }));
     // Clear error when user starts typing
-    if (errors[name as keyof EventFormData]) {
-      setErrors((prev) => ({ ...prev, [name]: undefined }));
-    }
-  };
+    setErrors((prev) => {
+      if (prev[name as keyof EventFormData]) {
+        return { ...prev, [name]: undefined };
+      }
+      return prev;
+    });
+  }, []);
 
-  const handleDayToggle = (day: string) => {
+  const handleDayToggle = useCallback((day: string) => {
     setFormData((prev) => ({
       ...prev,
       recurringDays: prev.recurringDays.includes(day)
         ? prev.recurringDays.filter((d) => d !== day)
         : [...prev.recurringDays, day],
     }));
-  };
+  }, []);
 
   const validate = (): boolean => {
     const newErrors: Partial<Record<keyof EventFormData, string>> = {};

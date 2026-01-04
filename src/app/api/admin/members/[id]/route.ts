@@ -1,5 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { cookies } from 'next/headers';
 import { getAdminClient } from '@/lib/supabase/server';
+import { verifyToken } from '@/lib/auth';
 
 // GET - Get a specific member's details including their liked venues
 export async function GET(
@@ -7,24 +9,35 @@ export async function GET(
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {
+    // Verify admin authentication
+    const cookieStore = await cookies();
+    const token = cookieStore.get('auth_token')?.value;
+    if (!token) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    }
+    const adminUser = await verifyToken(token);
+    if (!adminUser || adminUser.role !== 'admin') {
+      return NextResponse.json({ error: 'Admin access required' }, { status: 403 });
+    }
+
     const { id } = await params;
     const supabase = getAdminClient() as any;
 
     // Get user details
-    const { data: user, error: userError } = await supabase
+    const { data: member, error: userError } = await supabase
       .from('public_users')
       .select('*')
       .eq('id', id)
       .single();
 
-    if (userError || !user) {
+    if (userError || !member) {
       return NextResponse.json(
         { error: 'Member not found' },
         { status: 404 }
       );
     }
 
-    // Get user's liked venues
+    // Get member's liked venues
     const { data: likes, error: likesError } = await supabase
       .from('venue_likes')
       .select(`
@@ -48,7 +61,7 @@ export async function GET(
     }
 
     return NextResponse.json({
-      member: user,
+      member: member,
       likes: likes || [],
       likesCount: (likes || []).length,
     });
@@ -67,10 +80,21 @@ export async function DELETE(
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {
+    // Verify admin authentication
+    const cookieStore = await cookies();
+    const token = cookieStore.get('auth_token')?.value;
+    if (!token) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    }
+    const adminUser = await verifyToken(token);
+    if (!adminUser || adminUser.role !== 'admin') {
+      return NextResponse.json({ error: 'Admin access required' }, { status: 403 });
+    }
+
     const { id } = await params;
     const supabase = getAdminClient() as any;
 
-    // First delete user's likes
+    // First delete member's likes
     await supabase
       .from('venue_likes')
       .delete()

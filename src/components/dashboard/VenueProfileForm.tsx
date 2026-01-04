@@ -204,14 +204,11 @@ export default function VenueProfileForm() {
 
     try {
       // TODO: Implement actual API call
-      console.log('Saving venue profile:', formData);
-
       // Simulate API delay
       await new Promise((resolve) => setTimeout(resolve, 1000));
 
       alert('Profile saved successfully!');
-    } catch (error) {
-      console.error('Save error:', error);
+    } catch {
       alert('Failed to save profile. Please try again.');
     } finally {
       setIsSubmitting(false);

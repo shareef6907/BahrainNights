@@ -1,5 +1,6 @@
 'use client';
 
+import React from 'react';
 import { motion } from 'framer-motion';
 import { Play, Star, Clock } from 'lucide-react';
 import Image from 'next/image';
@@ -29,7 +30,7 @@ interface MovieCardProps {
   onTrailerClick: (movie: Movie) => void;
 }
 
-export default function MovieCard({ movie, index = 0, onMovieClick, onTrailerClick }: MovieCardProps) {
+function MovieCard({ movie, index = 0, onMovieClick, onTrailerClick }: MovieCardProps) {
   return (
     <motion.div
       className="group cursor-pointer"
@@ -126,3 +127,13 @@ export default function MovieCard({ movie, index = 0, onMovieClick, onTrailerCli
     </motion.div>
   );
 }
+
+// Memoize to prevent unnecessary re-renders in lists
+export default React.memo(MovieCard, (prevProps, nextProps) => {
+  return (
+    prevProps.movie.id === nextProps.movie.id &&
+    prevProps.index === nextProps.index &&
+    prevProps.onMovieClick === nextProps.onMovieClick &&
+    prevProps.onTrailerClick === nextProps.onTrailerClick
+  );
+});

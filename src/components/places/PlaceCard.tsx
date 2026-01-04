@@ -1,5 +1,6 @@
 'use client';
 
+import React, { useCallback } from 'react';
 import { motion } from 'framer-motion';
 import Image from 'next/image';
 import Link from 'next/link';
@@ -56,7 +57,7 @@ const categoryLabels: Record<string, string> = {
   'beach-club': 'Beach Club',
 };
 
-export default function PlaceCard({ place, index }: PlaceCardProps) {
+function PlaceCard({ place, index }: PlaceCardProps) {
   const isOpenNow = () => {
     const now = new Date();
     const days = ['sunday', 'monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday'];
@@ -238,3 +239,11 @@ export default function PlaceCard({ place, index }: PlaceCardProps) {
     </motion.div>
   );
 }
+
+// Memoize to prevent unnecessary re-renders in lists
+export default React.memo(PlaceCard, (prevProps, nextProps) => {
+  return (
+    prevProps.place.id === nextProps.place.id &&
+    prevProps.index === nextProps.index
+  );
+});

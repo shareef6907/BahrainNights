@@ -733,7 +733,6 @@ export default function AdminEventsPage() {
           table: 'events',
         },
         (payload) => {
-          console.log('Real-time event update:', payload.eventType, payload);
           // Refetch events when any change occurs
           fetchEvents();
 
@@ -746,9 +745,7 @@ export default function AdminEventsPage() {
           }
         }
       )
-      .subscribe((status) => {
-        console.log('Supabase realtime subscription status:', status);
-      });
+      .subscribe();
 
     // Cleanup subscription on unmount
     return () => {
