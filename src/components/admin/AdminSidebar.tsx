@@ -22,6 +22,7 @@ import {
   Heart,
   ClipboardCheck,
   Target,
+  Star,
 } from 'lucide-react';
 import { useAuth } from '@/lib/auth-context';
 
@@ -66,6 +67,11 @@ const navItems = [
     name: 'Ads Manager',
     href: '/admin/ads',
     icon: Megaphone,
+  },
+  {
+    name: 'Featured Listings',
+    href: '/admin/featured',
+    icon: Star,
   },
   {
     name: 'Prospects',

@@ -1,7 +1,7 @@
 'use client';
 
 import { motion } from 'framer-motion';
-import { Megaphone, Eye, Users, TrendingUp, Mail, Phone, CheckCircle, Sparkles, Target, BarChart3, Globe, Zap, Heart } from 'lucide-react';
+import { Megaphone, Eye, Users, TrendingUp, Mail, Phone, CheckCircle, Sparkles, Target, Globe, Zap, Heart, Code } from 'lucide-react';
 
 const benefits = [
   {
@@ -20,9 +20,9 @@ const benefits = [
     description: 'Our users don\'t just browse - they take action. Book tables, buy tickets, and visit venues.',
   },
   {
-    icon: BarChart3,
-    title: 'Measurable Results',
-    description: 'Track impressions, clicks, and conversions. Know exactly how your campaign is performing.',
+    icon: Code,
+    title: 'Superior SEO Performance',
+    description: '100% custom-coded platform - not WordPress or Wix. Better search rankings, faster loading, and higher visibility on Google.',
   },
 ];
 

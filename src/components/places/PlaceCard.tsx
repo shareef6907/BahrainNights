@@ -4,7 +4,7 @@ import React, { useCallback } from 'react';
 import { motion } from 'framer-motion';
 import Image from 'next/image';
 import Link from 'next/link';
-import { MapPin, Phone, Navigation, Instagram } from 'lucide-react';
+import { MapPin, Phone, Navigation, Instagram, Star } from 'lucide-react';
 import { LikeButton } from '@/components/ui/LikeButton';
 
 export interface OpeningHours {
@@ -32,6 +32,7 @@ export interface Place {
   logo: string;
   upcomingEventsCount: number;
   likeCount?: number; // For sorting by popularity
+  is_featured?: boolean; // Featured venues appear at top with badge
 }
 
 interface PlaceCardProps {
@@ -129,6 +130,14 @@ function PlaceCard({ place, index }: PlaceCardProps) {
                 {categoryLabels[place.category]}
               </span>
             </div>
+
+            {/* Featured Badge */}
+            {place.is_featured && (
+              <div className="absolute top-3 right-3 px-3 py-1 bg-gradient-to-r from-yellow-400 to-amber-500 rounded-full flex items-center gap-1 shadow-lg">
+                <Star className="w-3 h-3 text-black fill-black" />
+                <span className="text-xs font-bold text-black">Featured</span>
+              </div>
+            )}
 
             {/* Logo */}
             <div className="absolute bottom-3 left-3 w-12 h-12 bg-white rounded-xl shadow-lg overflow-hidden">

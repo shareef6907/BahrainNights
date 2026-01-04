@@ -36,6 +36,7 @@ function venueToPlace(venue: Venue): Place {
     logo: venue.logo_url || '',
     upcomingEventsCount: 0,
     likeCount: venue.like_count || 0,
+    is_featured: venue.is_featured || false,
   };
 }
 
@@ -168,22 +169,40 @@ function PlacesPageContent() {
       );
     }
 
-    // Sort
+    // Sort - Featured venues always appear first, then by selected sort method
+    // Within featured and non-featured groups, sort by likes if same category
+    const sortByFeaturedThenLikes = (a: Place, b: Place) => {
+      // Featured venues first
+      if (a.is_featured && !b.is_featured) return -1;
+      if (!a.is_featured && b.is_featured) return 1;
+      // Within same featured status, sort by likes
+      return (b.likeCount || 0) - (a.likeCount || 0);
+    };
+
     switch (filters.sortBy) {
       case 'az':
-        result.sort((a, b) => a.name.localeCompare(b.name));
+        // For A-Z, still put featured first, then alphabetical
+        result.sort((a, b) => {
+          if (a.is_featured && !b.is_featured) return -1;
+          if (!a.is_featured && b.is_featured) return 1;
+          return a.name.localeCompare(b.name);
+        });
         break;
       case 'newest':
-        // Reverse to show newest first (assuming order from API)
-        result.reverse();
+        // For newest, featured first, then reverse order
+        result.sort((a, b) => {
+          if (a.is_featured && !b.is_featured) return -1;
+          if (!a.is_featured && b.is_featured) return 1;
+          return 0; // Keep original order for non-featured
+        });
         break;
       case 'popular':
-        // Sort by like count (most liked first)
-        result.sort((a, b) => (b.likeCount || 0) - (a.likeCount || 0));
+        // Featured first, then by likes
+        result.sort(sortByFeaturedThenLikes);
         break;
       default:
-        // Recommended: sort by likes as default
-        result.sort((a, b) => (b.likeCount || 0) - (a.likeCount || 0));
+        // Recommended: featured first, then by likes
+        result.sort(sortByFeaturedThenLikes);
         break;
     }
 
