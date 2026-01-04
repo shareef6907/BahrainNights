@@ -157,6 +157,18 @@ export interface HomepageMovie {
   scraped_from: string[];
 }
 
+// Today event type for "Happening Today" section
+export interface TodayEvent {
+  id: string;
+  title: string;
+  slug: string;
+  venue: string;
+  time: string;
+  image: string;
+  category: string;
+  date: string;
+}
+
 // Helper to convert homepage movie data to Movie format for modal
 function convertToMovieFormat(movie: HomepageMovie): Movie {
   const durationMins = movie.duration_minutes || 0;
@@ -204,9 +216,10 @@ function convertToMovieFormat(movie: HomepageMovie): Movie {
 interface HomePageClientProps {
   initialMovies: HomepageMovie[];
   initialStats: { events: number; venues: number; cinema: number; offers: number; explore: number };
+  initialTodayEvents: TodayEvent[];
 }
 
-export default function HomePageClient({ initialMovies, initialStats }: HomePageClientProps) {
+export default function HomePageClient({ initialMovies, initialStats, initialTodayEvents }: HomePageClientProps) {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [activeDropdown, setActiveDropdown] = useState<string | null>(null);
   const [mobileAccordion, setMobileAccordion] = useState<string | null>(null);
@@ -215,6 +228,7 @@ export default function HomePageClient({ initialMovies, initialStats }: HomePage
   // Data from server - no loading needed!
   const [movies] = useState<HomepageMovie[]>(initialMovies);
   const [stats] = useState(initialStats);
+  const [todayEvents] = useState<TodayEvent[]>(initialTodayEvents);
 
   // Movie modal states
   const [selectedMovie, setSelectedMovie] = useState<Movie | null>(null);
@@ -267,12 +281,6 @@ export default function HomePageClient({ initialMovies, initialStats }: HomePage
     { icon: "🧭", name: "Explore", description: "Hotels, spas & more", count: stats.explore, color: "from-indigo-500 to-purple-500", href: "/explore" }
   ];
 
-  const todayEvents = [
-    { id: 1, title: "Jazz Night", venue: "Cafe Lilou", time: "8:00 PM", image: "https://images.unsplash.com/photo-1511735111819-9a3f7709049c?w=400&h=500&fit=crop", category: "Live Music" },
-    { id: 2, title: "Ladies Night", venue: "The Orangery", time: "9:00 PM", image: "https://images.unsplash.com/photo-1566417713940-fe7c737a9ef2?w=400&h=500&fit=crop", category: "Nightlife" },
-    { id: 3, title: "Cinema Night", venue: "Cineco Seef", time: "7:00 PM", image: "https://images.unsplash.com/photo-1489599849927-2ee91cede3ba?w=400&h=500&fit=crop", category: "Entertainment" },
-    { id: 4, title: "Beach Party", venue: "Coral Bay", time: "12:00 PM", image: "https://images.unsplash.com/photo-1519046904884-53103b34b206?w=400&h=500&fit=crop", category: "Outdoor" }
-  ];
 
 
   // Auto-advance slider - handled by AdBanner component now
@@ -708,35 +716,43 @@ export default function HomePageClient({ initialMovies, initialStats }: HomePage
             whileInView="visible"
             viewport={{ once: true, margin: "-100px" }}
           >
-            {todayEvents.map(event => (
-              <motion.div
-                key={event.id}
-                className="group relative bg-white/5 backdrop-blur-sm border border-white/10 rounded-2xl overflow-hidden cursor-pointer hover:border-yellow-400/50 transition-colors"
-                variants={fadeIn}
-                whileHover={cardHover}
-              >
-                <div className="relative h-72 overflow-hidden">
-                  <img src={event.image} alt={event.title} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" />
-                  <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/30 to-transparent" />
-                  <div className="absolute top-4 right-4 px-4 py-1.5 bg-yellow-400 text-black text-xs font-bold rounded-full">
-                    {event.category}
-                  </div>
-                  <div className="absolute bottom-0 left-0 right-0 p-6">
-                    <h3 className="text-2xl font-bold mb-3">{event.title}</h3>
-                    <div className="flex items-center justify-between text-sm text-gray-300">
-                      <div className="flex items-center space-x-2">
-                        <MapPin className="w-4 h-4 text-yellow-400" />
-                        <span>{event.venue}</span>
-                      </div>
-                      <div className="flex items-center space-x-2">
-                        <Clock className="w-4 h-4 text-yellow-400" />
-                        <span>{event.time}</span>
+            {todayEvents.length > 0 ? (
+              todayEvents.map(event => (
+                <motion.a
+                  key={event.id}
+                  href={`/events/${event.slug}`}
+                  className="group relative bg-white/5 backdrop-blur-sm border border-white/10 rounded-2xl overflow-hidden cursor-pointer hover:border-yellow-400/50 transition-colors block"
+                  variants={fadeIn}
+                  whileHover={cardHover}
+                >
+                  <div className="relative h-72 overflow-hidden">
+                    <img src={event.image} alt={event.title} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" />
+                    <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/30 to-transparent" />
+                    <div className="absolute top-4 right-4 px-4 py-1.5 bg-yellow-400 text-black text-xs font-bold rounded-full">
+                      {event.category}
+                    </div>
+                    <div className="absolute bottom-0 left-0 right-0 p-6">
+                      <h3 className="text-xl font-bold mb-3 line-clamp-2">{event.title}</h3>
+                      <div className="flex items-center justify-between text-sm text-gray-300">
+                        <div className="flex items-center space-x-2">
+                          <MapPin className="w-4 h-4 text-yellow-400" />
+                          <span className="truncate max-w-[100px]">{event.venue}</span>
+                        </div>
+                        <div className="flex items-center space-x-2">
+                          <Clock className="w-4 h-4 text-yellow-400" />
+                          <span>{event.time}</span>
+                        </div>
                       </div>
                     </div>
                   </div>
-                </div>
-              </motion.div>
-            ))}
+                </motion.a>
+              ))
+            ) : (
+              <div className="col-span-4 text-center py-12">
+                <p className="text-gray-400">No upcoming events found. Check back soon!</p>
+                <a href="/events" className="text-yellow-400 hover:text-yellow-300 mt-2 inline-block">Browse all events →</a>
+              </div>
+            )}
           </motion.div>
         </div>
       </section>
