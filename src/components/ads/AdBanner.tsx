@@ -236,19 +236,19 @@ export default function AdBanner({
 
                 {/* Content Overlay */}
                 <div className="absolute inset-0 flex items-center">
-                  <div className="px-6 md:px-10">
+                  <div className="px-4 md:px-8 lg:px-10 py-4 max-w-[70%] md:max-w-[60%]">
                     {currentAd.title && (
-                      <h3 className="text-white text-lg md:text-2xl font-bold mb-1">
+                      <h3 className="text-white text-base md:text-xl lg:text-2xl font-bold mb-1 line-clamp-2">
                         {currentAd.title}
                       </h3>
                     )}
                     {currentAd.subtitle && (
-                      <p className="text-white/80 text-sm md:text-base mb-3">
+                      <p className="text-white/80 text-xs md:text-sm lg:text-base mb-2 md:mb-3 line-clamp-2">
                         {currentAd.subtitle}
                       </p>
                     )}
                     {currentAd.cta_text && (
-                      <span className="inline-block px-4 py-2 bg-amber-400 text-black text-sm font-semibold rounded-lg group-hover:bg-amber-300 transition-colors">
+                      <span className="inline-block px-3 py-1.5 md:px-4 md:py-2 bg-amber-400 text-black text-xs md:text-sm font-semibold rounded-lg group-hover:bg-amber-300 transition-colors">
                         {currentAd.cta_text}
                       </span>
                     )}
@@ -437,19 +437,19 @@ export default function AdBanner({
               <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent" />
 
               {/* Content */}
-              <div className="absolute bottom-0 left-0 right-0 p-6">
+              <div className="absolute bottom-0 left-0 right-0 p-6 pb-10 md:pb-8">
                 {currentAd.title && (
-                  <h3 className="text-white text-2xl md:text-3xl font-bold mb-2">
+                  <h3 className="text-white text-xl md:text-2xl lg:text-3xl font-bold mb-2">
                     {currentAd.title}
                   </h3>
                 )}
                 {currentAd.subtitle && (
-                  <p className="text-white/80 text-base mb-4 max-w-2xl">
+                  <p className="text-white/80 text-sm md:text-base mb-3 max-w-2xl line-clamp-2">
                     {currentAd.subtitle}
                   </p>
                 )}
                 {currentAd.cta_text && (
-                  <span className="inline-block px-6 py-3 bg-amber-400 text-black font-semibold rounded-lg group-hover:bg-amber-300 transition-colors">
+                  <span className="inline-block px-5 py-2.5 md:px-6 md:py-3 bg-amber-400 text-black text-sm md:text-base font-semibold rounded-lg group-hover:bg-amber-300 transition-colors">
                     {currentAd.cta_text}
                   </span>
                 )}
@@ -466,7 +466,7 @@ export default function AdBanner({
 
       {/* Dots indicator for multiple ads */}
       {ads.length > 1 && (
-        <div className="absolute bottom-4 right-4 flex gap-1 z-10">
+        <div className="absolute bottom-3 right-4 md:bottom-4 flex gap-1.5 z-10">
           {ads.map((_, index) => (
             <button
               key={index}
@@ -474,8 +474,8 @@ export default function AdBanner({
                 e.preventDefault();
                 goToSlide(index);
               }}
-              className={`w-2 h-2 rounded-full transition-colors ${
-                index === currentIndex ? 'bg-amber-400' : 'bg-white/30'
+              className={`w-2.5 h-2.5 rounded-full transition-colors ${
+                index === currentIndex ? 'bg-amber-400' : 'bg-white/40'
               }`}
             />
           ))}

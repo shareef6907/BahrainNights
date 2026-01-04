@@ -502,25 +502,27 @@ export default function HomePageClient({ initialMovies, initialStats }: HomePage
       </nav>
 
       {/* Hero Section with Video Background */}
-      <section className="relative pt-32 pb-40 px-4 overflow-visible isolate">
-        {/* Video Background - extends beyond section */}
-        <div className="absolute inset-0 w-full z-0" style={{ height: 'calc(100% + 60px)' }}>
+      <section className="relative pt-32 pb-32 px-4 overflow-hidden">
+        {/* Video Background */}
+        <div className="absolute inset-0 w-full h-full">
           <video
             autoPlay
             muted
             loop
             playsInline
             preload="auto"
+            poster="/Header-Video1-poster.jpg"
             className="absolute inset-0 w-full h-full object-cover"
+            style={{ objectPosition: 'center center' }}
           >
             <source src="/Header-Video1.mp4" type="video/mp4" />
           </video>
           {/* Dark overlay for text readability */}
-          <div className="absolute inset-0 bg-black/50" />
-          {/* Gradient fade to background - stronger and extends lower */}
-          <div className="absolute inset-0 bg-gradient-to-b from-transparent via-transparent via-50% to-[#0a0a0f]" />
-          {/* Extra tall fade at bottom for seamless blend */}
-          <div className="absolute bottom-0 left-0 right-0 h-48 bg-gradient-to-t from-[#0a0a0f] via-[#0a0a0f]/90 to-transparent" />
+          <div className="absolute inset-0 bg-black/40" />
+          {/* Gradient fade to background at bottom */}
+          <div className="absolute inset-0 bg-gradient-to-b from-[#0a0a0f]/30 via-transparent via-40% to-[#0a0a0f]" />
+          {/* Strong fade at bottom edge */}
+          <div className="absolute bottom-0 left-0 right-0 h-40 bg-gradient-to-t from-[#0a0a0f] via-[#0a0a0f]/95 to-transparent" />
         </div>
 
         <div className="relative z-10 max-w-7xl mx-auto text-center">
@@ -594,7 +596,7 @@ export default function HomePageClient({ initialMovies, initialStats }: HomePage
       </section>
 
       {/* Premium Ad Slider - Fetches ads from database */}
-      <section className="px-4 mb-10 md:mb-20">
+      <section className="relative z-10 px-4 mt-6 mb-10 md:mb-20 bg-[#0a0a0f]">
         <div className="max-w-7xl mx-auto">
           <AdBanner
             targetPage="homepage"
