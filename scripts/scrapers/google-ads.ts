@@ -1,4 +1,4 @@
-import { chromium } from 'playwright';
+import { chromium, Browser } from 'playwright';
 import { createClient } from '@supabase/supabase-js';
 
 const supabase = createClient(
@@ -14,11 +14,8 @@ const SEARCH_KEYWORDS = [
   'nightlife bahrain',
   'best restaurants manama',
   'bahrain events',
-  'bahrain concerts',
   'spa bahrain',
   'brunch bahrain',
-  'ladies night bahrain',
-  'happy hour bahrain',
   'beach club bahrain',
   'fine dining bahrain',
 ];
@@ -28,95 +25,128 @@ export async function scrapeGoogleAds(): Promise<void> {
   let totalFound = 0;
   let totalNew = 0;
 
-  const browser = await chromium.launch({ headless: true });
+  let browser: Browser | null = null;
 
   try {
+    browser = await chromium.launch({
+      headless: true,
+      args: ['--no-sandbox', '--disable-setuid-sandbox']
+    });
+
     const page = await browser.newPage();
 
-    // Set location to Bahrain
+    // Set a reasonable viewport and user agent
+    await page.setViewportSize({ width: 1920, height: 1080 });
     await page.setExtraHTTPHeaders({
       'Accept-Language': 'en-US,en;q=0.9',
     });
 
     for (const keyword of SEARCH_KEYWORDS) {
       try {
+        console.log(`  Searching for: ${keyword}`);
+
         // Search on Google
         await page.goto(`https://www.google.com/search?q=${encodeURIComponent(keyword)}&gl=bh`, {
-          waitUntil: 'networkidle',
+          waitUntil: 'domcontentloaded',
           timeout: 30000
         });
 
         await page.waitForTimeout(2000);
 
+        // Check for CAPTCHA or blocking
+        const pageContent = await page.content();
+        if (pageContent.includes('unusual traffic') || pageContent.includes('captcha')) {
+          console.log('  ⚠️ Google detected automation, skipping...');
+          break;
+        }
+
         // Extract sponsored results (ads)
         const sponsors = await page.evaluate(() => {
           const results: any[] = [];
 
-          // Google Ads have "Sponsored" or "Ad" label
-          const adContainers = document.querySelectorAll('[data-text-ad], [class*="commercial"], div[data-hveid]');
+          // Look for ads - they typically have "Sponsored" or "Ad" label
+          const allElements = document.querySelectorAll('div');
 
-          adContainers.forEach(container => {
-            const adText = container.textContent || '';
-            const isAd = adText.includes('Sponsored') || adText.includes('Ad ·');
+          allElements.forEach(element => {
+            const text = element.textContent || '';
+            const isAd = text.includes('Sponsored') && element.querySelector('a');
 
             if (isAd) {
-              const linkEl = container.querySelector('a[href*="http"]');
-              const titleEl = container.querySelector('h3, [role="heading"]');
+              const links = element.querySelectorAll('a[href*="http"]');
 
-              const url = linkEl?.getAttribute('href') || '';
-              const title = titleEl?.textContent || '';
+              links.forEach(link => {
+                const url = link.getAttribute('href') || '';
+                const titleEl = link.querySelector('h3, span[role="text"]');
+                const title = titleEl?.textContent || link.textContent || '';
 
-              // Extract domain from URL
-              let domain = '';
-              try {
-                if (url && url.startsWith('http')) {
-                  domain = new URL(url).hostname.replace('www.', '');
+                // Skip Google's own links
+                if (url.includes('google.com') || url.includes('gstatic.com')) return;
+
+                // Extract domain from URL
+                let domain = '';
+                try {
+                  if (url && url.startsWith('http')) {
+                    const urlObj = new URL(url);
+                    domain = urlObj.hostname.replace('www.', '');
+                  }
+                } catch (e) {}
+
+                // Only add if we have a valid domain
+                if (domain && domain.length > 3 && !domain.includes('google') && title.length > 2) {
+                  results.push({
+                    name: title.substring(0, 100),
+                    domain,
+                    url,
+                  });
                 }
-              } catch (e) {}
-
-              if (domain && domain.length > 3) {
-                results.push({
-                  name: title || domain,
-                  domain,
-                  url,
-                });
-              }
+              });
             }
           });
 
-          return results;
+          // Deduplicate by domain
+          const seen = new Set();
+          return results.filter(r => {
+            if (seen.has(r.domain)) return false;
+            seen.add(r.domain);
+            return true;
+          });
         });
 
         totalFound += sponsors.length;
+        console.log(`    Found ${sponsors.length} ads`);
 
         // Process sponsors
         for (const sponsor of sponsors) {
           if (!sponsor.name) continue;
 
-          const { data: existing } = await supabase
-            .from('prospects')
-            .select('id')
-            .eq('company_name', sponsor.name)
-            .single();
+          try {
+            const { data: existing } = await supabase
+              .from('prospects')
+              .select('id')
+              .eq('company_name', sponsor.name)
+              .single();
 
-          if (!existing) {
-            await supabase.from('prospects').insert({
-              company_name: sponsor.name,
-              website: sponsor.url,
-              source: 'google_ads',
-              source_url: `https://google.com/search?q=${encodeURIComponent(keyword)}`,
-              ad_content: `Bidding on: ${keyword}`,
-              relevance_score: 70, // High score - actively spending on relevant keywords
-            });
-            totalNew++;
+            if (!existing) {
+              await supabase.from('prospects').insert({
+                company_name: sponsor.name,
+                website: sponsor.url,
+                source: 'google_ads',
+                source_url: `https://google.com/search?q=${encodeURIComponent(keyword)}`,
+                ad_content: `Bidding on: ${keyword}`,
+                relevance_score: 70, // High score - actively spending on relevant keywords
+              });
+              totalNew++;
+            }
+          } catch (dbError) {
+            console.error(`  Error saving ${sponsor.name}:`, dbError);
           }
         }
 
-        // Don't hammer Google
-        await page.waitForTimeout(3000);
+        // Don't hammer Google - longer delay
+        await page.waitForTimeout(5000);
 
       } catch (e) {
-        console.log(`Failed to search: ${keyword}`);
+        console.log(`  Failed to search: ${keyword}`, e);
       }
     }
 
@@ -128,6 +158,8 @@ export async function scrapeGoogleAds(): Promise<void> {
       started_at: startTime.toISOString(),
     });
 
+    console.log(`Google Ads scrape complete: ${totalFound} found, ${totalNew} new`);
+
   } catch (error) {
     console.error('Google Ads scrape error:', error);
 
@@ -138,6 +170,8 @@ export async function scrapeGoogleAds(): Promise<void> {
       started_at: startTime.toISOString(),
     });
   } finally {
-    await browser.close();
+    if (browser) {
+      await browser.close();
+    }
   }
 }

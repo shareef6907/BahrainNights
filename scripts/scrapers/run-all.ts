@@ -1,61 +1,88 @@
 import { scrapeFacebookAds } from './facebook-ads';
-import { scrapeInstagramAds } from './instagram-ads';
-import { scrapeNewsSites } from './news-sites';
 import { scrapeGoogleAds } from './google-ads';
-import { scrapeLinkedInAds } from './linkedin-ads';
+import { scrapeNewsSites } from './news-sites';
 import { enrichProspectsWithAI } from './ai-enrichment';
+
+// Note: Instagram and LinkedIn scrapers disabled because they require login
+// The Facebook Ad Library is the primary reliable source
 
 export async function runAllScrapers(): Promise<void> {
   console.log('🚀 Starting hourly prospect scraping...');
   console.log('Time:', new Date().toISOString());
 
-  // Run scrapers in sequence to avoid overwhelming resources
-  console.log('\n📘 Scraping Facebook Ads...');
+  const results = {
+    facebook: { success: false, error: '' },
+    google: { success: false, error: '' },
+    newsSites: { success: false, error: '' },
+    aiEnrichment: { success: false, error: '' },
+  };
+
+  // Run Facebook scraper (PRIMARY SOURCE - most reliable)
+  console.log('\n📘 Scraping Facebook Ad Library...');
   try {
     await scrapeFacebookAds();
+    results.facebook.success = true;
+    console.log('✅ Facebook scraping completed');
   } catch (e) {
-    console.error('Facebook scraper error:', e);
+    results.facebook.error = (e as Error).message;
+    console.error('❌ Facebook scraper error:', e);
   }
 
-  console.log('\n📸 Scraping Instagram...');
-  try {
-    await scrapeInstagramAds();
-  } catch (e) {
-    console.error('Instagram scraper error:', e);
-  }
-
+  // Run Google Ads scraper (may get blocked)
   console.log('\n🔍 Scraping Google Ads...');
   try {
     await scrapeGoogleAds();
+    results.google.success = true;
+    console.log('✅ Google Ads scraping completed');
   } catch (e) {
-    console.error('Google Ads scraper error:', e);
+    results.google.error = (e as Error).message;
+    console.error('❌ Google Ads scraper error:', e);
   }
 
-  console.log('\n💼 Scraping LinkedIn...');
-  try {
-    await scrapeLinkedInAds();
-  } catch (e) {
-    console.error('LinkedIn scraper error:', e);
-  }
-
+  // Run News Sites scraper
   console.log('\n📰 Scraping News Sites...');
   try {
     await scrapeNewsSites();
+    results.newsSites.success = true;
+    console.log('✅ News sites scraping completed');
   } catch (e) {
-    console.error('News sites scraper error:', e);
+    results.newsSites.error = (e as Error).message;
+    console.error('❌ News sites scraper error:', e);
   }
 
+  // Run AI enrichment on new prospects
   console.log('\n🤖 Running AI enrichment...');
   try {
     await enrichProspectsWithAI();
+    results.aiEnrichment.success = true;
+    console.log('✅ AI enrichment completed');
   } catch (e) {
-    console.error('AI enrichment error:', e);
+    results.aiEnrichment.error = (e as Error).message;
+    console.error('❌ AI enrichment error:', e);
   }
 
-  console.log('\n✅ Hourly scraping complete!');
+  // Summary
+  console.log('\n📊 Scraping Summary:');
+  console.log(`  Facebook: ${results.facebook.success ? '✅' : '❌'} ${results.facebook.error || ''}`);
+  console.log(`  Google Ads: ${results.google.success ? '✅' : '❌'} ${results.google.error || ''}`);
+  console.log(`  News Sites: ${results.newsSites.success ? '✅' : '❌'} ${results.newsSites.error || ''}`);
+  console.log(`  AI Enrichment: ${results.aiEnrichment.success ? '✅' : '❌'} ${results.aiEnrichment.error || ''}`);
+
+  const successCount = Object.values(results).filter(r => r.success).length;
+  console.log(`\n✅ Hourly scraping complete! (${successCount}/4 sources successful)`);
+
+  // Don't throw error if at least one scraper succeeded
+  if (successCount === 0) {
+    throw new Error('All scrapers failed');
+  }
 }
 
 // Run if called directly
 if (require.main === module) {
-  runAllScrapers().catch(console.error);
+  runAllScrapers()
+    .then(() => process.exit(0))
+    .catch((err) => {
+      console.error('Fatal error:', err);
+      process.exit(1);
+    });
 }
