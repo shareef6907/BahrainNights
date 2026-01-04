@@ -1,9 +1,9 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useRef } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
-import { motion } from 'framer-motion';
+import { motion, AnimatePresence } from 'framer-motion';
 
 // Ensure URL has protocol prefix for external links
 function ensureAbsoluteUrl(url: string): string {
@@ -42,6 +42,33 @@ export default function AdBanner({
   const [ads, setAds] = useState<Ad[]>([]);
   const [loading, setLoading] = useState(true);
   const [currentIndex, setCurrentIndex] = useState(0);
+  const [direction, setDirection] = useState(1); // 1 = sliding left (next), -1 = sliding right (prev)
+
+  // Slide animation variants
+  const slideVariants = {
+    enter: (direction: number) => ({
+      x: direction > 0 ? '100%' : '-100%',
+      opacity: 0,
+    }),
+    center: {
+      x: 0,
+      opacity: 1,
+    },
+    exit: (direction: number) => ({
+      x: direction > 0 ? '-100%' : '100%',
+      opacity: 0,
+    }),
+  };
+
+  const goToSlide = (index: number) => {
+    setDirection(index > currentIndex ? 1 : -1);
+    setCurrentIndex(index);
+  };
+
+  const nextSlide = () => {
+    setDirection(1);
+    setCurrentIndex((prev) => (prev + 1) % ads.length);
+  };
 
   useEffect(() => {
     const fetchAds = async () => {
@@ -67,7 +94,7 @@ export default function AdBanner({
   useEffect(() => {
     if ((placement === 'slider' || placement === 'banner') && ads.length > 1) {
       const interval = setInterval(() => {
-        setCurrentIndex((prev) => (prev + 1) % ads.length);
+        nextSlide();
       }, 4000); // Rotate every 4 seconds
       return () => clearInterval(interval);
     }
@@ -111,55 +138,73 @@ export default function AdBanner({
         animate={{ opacity: 1, y: 0 }}
         className={`relative overflow-hidden rounded-2xl ${className}`}
       >
-        <Link
-          href={ensureAbsoluteUrl(currentAd.target_url)}
-          target="_blank"
-          rel="noopener noreferrer sponsored"
-          onClick={() => trackClick(currentAd.id)}
-          className="block relative aspect-[4/1] md:aspect-[6/1] group"
-        >
-          <Image
-            src={currentAd.image_url}
-            alt={currentAd.title || currentAd.advertiser_name}
-            fill
-            className="object-cover transition-transform duration-500 group-hover:scale-105"
-          />
-          <div className="absolute inset-0 bg-gradient-to-r from-black/60 via-transparent to-transparent" />
+        <div className="relative aspect-[3/1] md:aspect-[4/1] overflow-hidden">
+          <AnimatePresence initial={false} custom={direction}>
+            <motion.div
+              key={currentIndex}
+              custom={direction}
+              variants={slideVariants}
+              initial="enter"
+              animate="center"
+              exit="exit"
+              transition={{ duration: 0.4, ease: [0.4, 0, 0.2, 1] }}
+              className="absolute inset-0 w-full h-full"
+              style={{ position: 'absolute' }}
+            >
+              <Link
+                href={ensureAbsoluteUrl(currentAd.target_url)}
+                target="_blank"
+                rel="noopener noreferrer sponsored"
+                onClick={() => trackClick(currentAd.id)}
+                className="block relative w-full h-full group"
+              >
+                <div className="relative w-full h-full overflow-hidden">
+                  <Image
+                    src={currentAd.image_url}
+                    alt={currentAd.title || currentAd.advertiser_name}
+                    fill
+                    className="object-cover transition-transform duration-500 group-hover:scale-105"
+                  />
+                </div>
+                <div className="absolute inset-0 bg-gradient-to-r from-black/60 via-transparent to-transparent" />
 
-          {/* Content Overlay */}
-          <div className="absolute inset-0 flex items-center">
-            <div className="px-6 md:px-10">
-              {currentAd.title && (
-                <h3 className="text-white text-lg md:text-2xl font-bold mb-1">
-                  {currentAd.title}
-                </h3>
-              )}
-              {currentAd.subtitle && (
-                <p className="text-white/80 text-sm md:text-base mb-3">
-                  {currentAd.subtitle}
-                </p>
-              )}
-              {currentAd.cta_text && (
-                <span className="inline-block px-4 py-2 bg-amber-400 text-black text-sm font-semibold rounded-lg group-hover:bg-amber-300 transition-colors">
-                  {currentAd.cta_text}
+                {/* Content Overlay */}
+                <div className="absolute inset-0 flex items-center">
+                  <div className="px-6 md:px-10">
+                    {currentAd.title && (
+                      <h3 className="text-white text-lg md:text-2xl font-bold mb-1">
+                        {currentAd.title}
+                      </h3>
+                    )}
+                    {currentAd.subtitle && (
+                      <p className="text-white/80 text-sm md:text-base mb-3">
+                        {currentAd.subtitle}
+                      </p>
+                    )}
+                    {currentAd.cta_text && (
+                      <span className="inline-block px-4 py-2 bg-amber-400 text-black text-sm font-semibold rounded-lg group-hover:bg-amber-300 transition-colors">
+                        {currentAd.cta_text}
+                      </span>
+                    )}
+                  </div>
+                </div>
+
+                {/* Sponsored label */}
+                <span className="absolute top-3 right-3 px-2 py-1 text-xs bg-black/50 text-white/70 rounded">
+                  Sponsored
                 </span>
-              )}
-            </div>
-          </div>
-
-          {/* Sponsored label */}
-          <span className="absolute top-3 right-3 px-2 py-1 text-xs bg-black/50 text-white/70 rounded">
-            Sponsored
-          </span>
-        </Link>
+              </Link>
+            </motion.div>
+          </AnimatePresence>
+        </div>
 
         {/* Dots indicator for multiple ads */}
         {ads.length > 1 && (
-          <div className="absolute bottom-3 right-3 flex gap-1">
+          <div className="absolute bottom-3 right-3 flex gap-1 z-10">
             {ads.map((_, index) => (
               <button
                 key={index}
-                onClick={() => setCurrentIndex(index)}
+                onClick={() => goToSlide(index)}
                 className={`w-2 h-2 rounded-full transition-colors ${
                   index === currentIndex ? 'bg-amber-400' : 'bg-white/30'
                 }`}
@@ -274,55 +319,73 @@ export default function AdBanner({
       animate={{ opacity: 1, y: 0 }}
       className={`relative overflow-hidden rounded-2xl ${className}`}
     >
-      <Link
-        href={ensureAbsoluteUrl(currentAd.target_url)}
-        target="_blank"
-        rel="noopener noreferrer sponsored"
-        onClick={() => trackClick(currentAd.id)}
-        className="block relative aspect-[16/9] md:aspect-[21/9] group"
-      >
-        <Image
-          src={currentAd.image_url}
-          alt={currentAd.title || currentAd.advertiser_name}
-          fill
-          className="object-cover"
-        />
-        <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent" />
+      <div className="relative aspect-[16/9] md:aspect-[21/9] overflow-hidden">
+        <AnimatePresence initial={false} custom={direction}>
+          <motion.div
+            key={currentIndex}
+            custom={direction}
+            variants={slideVariants}
+            initial="enter"
+            animate="center"
+            exit="exit"
+            transition={{ duration: 0.4, ease: [0.4, 0, 0.2, 1] }}
+            className="absolute inset-0 w-full h-full"
+            style={{ position: 'absolute' }}
+          >
+            <Link
+              href={ensureAbsoluteUrl(currentAd.target_url)}
+              target="_blank"
+              rel="noopener noreferrer sponsored"
+              onClick={() => trackClick(currentAd.id)}
+              className="block relative w-full h-full group"
+            >
+              <div className="relative w-full h-full overflow-hidden">
+                <Image
+                  src={currentAd.image_url}
+                  alt={currentAd.title || currentAd.advertiser_name}
+                  fill
+                  className="object-cover transition-transform duration-500 group-hover:scale-105"
+                />
+              </div>
+              <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent" />
 
-        {/* Content */}
-        <div className="absolute bottom-0 left-0 right-0 p-6">
-          {currentAd.title && (
-            <h3 className="text-white text-2xl md:text-3xl font-bold mb-2">
-              {currentAd.title}
-            </h3>
-          )}
-          {currentAd.subtitle && (
-            <p className="text-white/80 text-base mb-4 max-w-2xl">
-              {currentAd.subtitle}
-            </p>
-          )}
-          {currentAd.cta_text && (
-            <span className="inline-block px-6 py-3 bg-amber-400 text-black font-semibold rounded-lg group-hover:bg-amber-300 transition-colors">
-              {currentAd.cta_text}
-            </span>
-          )}
-        </div>
+              {/* Content */}
+              <div className="absolute bottom-0 left-0 right-0 p-6">
+                {currentAd.title && (
+                  <h3 className="text-white text-2xl md:text-3xl font-bold mb-2">
+                    {currentAd.title}
+                  </h3>
+                )}
+                {currentAd.subtitle && (
+                  <p className="text-white/80 text-base mb-4 max-w-2xl">
+                    {currentAd.subtitle}
+                  </p>
+                )}
+                {currentAd.cta_text && (
+                  <span className="inline-block px-6 py-3 bg-amber-400 text-black font-semibold rounded-lg group-hover:bg-amber-300 transition-colors">
+                    {currentAd.cta_text}
+                  </span>
+                )}
+              </div>
 
-        {/* Sponsored label */}
-        <span className="absolute top-4 right-4 px-2 py-1 text-xs bg-black/50 text-white/70 rounded">
-          Sponsored
-        </span>
-      </Link>
+              {/* Sponsored label */}
+              <span className="absolute top-4 right-4 px-2 py-1 text-xs bg-black/50 text-white/70 rounded">
+                Sponsored
+              </span>
+            </Link>
+          </motion.div>
+        </AnimatePresence>
+      </div>
 
       {/* Dots indicator for multiple ads */}
       {ads.length > 1 && (
-        <div className="absolute bottom-4 right-4 flex gap-1">
+        <div className="absolute bottom-4 right-4 flex gap-1 z-10">
           {ads.map((_, index) => (
             <button
               key={index}
               onClick={(e) => {
                 e.preventDefault();
-                setCurrentIndex(index);
+                goToSlide(index);
               }}
               className={`w-2 h-2 rounded-full transition-colors ${
                 index === currentIndex ? 'bg-amber-400' : 'bg-white/30'
