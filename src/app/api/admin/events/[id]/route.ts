@@ -107,6 +107,16 @@ export async function PATCH(
       case 'update':
         updates = updateData;
         break;
+      case 'update_description':
+        // Handle description update specifically
+        if (body.description === undefined) {
+          return NextResponse.json(
+            { error: 'Description is required' },
+            { status: 400 }
+          );
+        }
+        updates = { description: body.description };
+        break;
       default:
         return NextResponse.json(
           { error: 'Invalid action' },

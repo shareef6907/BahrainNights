@@ -30,7 +30,10 @@ import {
   DollarSign,
   ExternalLink,
   X,
+  Sparkles,
+  Save,
 } from 'lucide-react';
+import AIWriterButton from '@/components/ai/AIWriterButton';
 
 interface Event {
   id: string;
@@ -102,6 +105,7 @@ function EventDetailsModal({
   onUnpublish,
   onDelete,
   onEdit,
+  onUpdateDescription,
   loading,
 }: {
   event: Event;
@@ -111,11 +115,33 @@ function EventDetailsModal({
   onUnpublish: () => void;
   onDelete: () => void;
   onEdit: () => void;
+  onUpdateDescription: (description: string) => Promise<void>;
   loading: boolean;
 }) {
+  const [isEditingDescription, setIsEditingDescription] = useState(false);
+  const [editedDescription, setEditedDescription] = useState(event.description || '');
+  const [isSavingDescription, setIsSavingDescription] = useState(false);
+
   const imageUrl = event.cover_url || event.featured_image;
   const bookingUrl = event.booking_url || event.booking_link;
   const isPast = new Date(event.start_date) < new Date();
+
+  const handleSaveDescription = async () => {
+    setIsSavingDescription(true);
+    try {
+      await onUpdateDescription(editedDescription);
+      setIsEditingDescription(false);
+    } catch (error) {
+      console.error('Failed to save description:', error);
+    } finally {
+      setIsSavingDescription(false);
+    }
+  };
+
+  const handleAIGenerated = (description: string) => {
+    setEditedDescription(description);
+    setIsEditingDescription(true);
+  };
 
   return (
     <motion.div
@@ -172,13 +198,85 @@ function EventDetailsModal({
             </span>
           </div>
 
-          {/* Description */}
-          {event.description && (
-            <div>
-              <h3 className="text-sm font-medium text-gray-400 mb-2">Description</h3>
-              <p className="text-gray-300">{event.description}</p>
+          {/* Description with AI Writer */}
+          <div>
+            <div className="flex items-center justify-between mb-2">
+              <h3 className="text-sm font-medium text-gray-400">Description</h3>
+              <div className="flex items-center gap-2">
+                {!isEditingDescription && (
+                  <>
+                    <AIWriterButton
+                      title={event.title}
+                      category={event.category}
+                      venue={event.venue_name || undefined}
+                      date={event.start_date}
+                      time={event.start_time || undefined}
+                      existingDescription={event.description || undefined}
+                      onGenerated={handleAIGenerated}
+                      disabled={isPast}
+                    />
+                    <button
+                      onClick={() => setIsEditingDescription(true)}
+                      className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium rounded-md bg-white/10 text-gray-300 hover:bg-white/20 transition-colors"
+                    >
+                      <Edit className="w-3 h-3" />
+                      Edit
+                    </button>
+                  </>
+                )}
+              </div>
             </div>
-          )}
+
+            {isEditingDescription ? (
+              <div className="space-y-3">
+                <textarea
+                  value={editedDescription}
+                  onChange={(e) => setEditedDescription(e.target.value)}
+                  rows={5}
+                  className="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-xl text-white placeholder:text-gray-500 focus:outline-none focus:border-cyan-500/50 resize-none"
+                  placeholder="Enter event description..."
+                />
+                <div className="flex items-center gap-2">
+                  <AIWriterButton
+                    title={event.title}
+                    category={event.category}
+                    venue={event.venue_name || undefined}
+                    date={event.start_date}
+                    time={event.start_time || undefined}
+                    existingDescription={editedDescription || undefined}
+                    onGenerated={setEditedDescription}
+                    disabled={isPast}
+                  />
+                  <div className="flex-1" />
+                  <button
+                    onClick={() => {
+                      setEditedDescription(event.description || '');
+                      setIsEditingDescription(false);
+                    }}
+                    className="px-4 py-2 text-sm text-gray-400 hover:text-white transition-colors"
+                  >
+                    Cancel
+                  </button>
+                  <button
+                    onClick={handleSaveDescription}
+                    disabled={isSavingDescription}
+                    className="inline-flex items-center gap-2 px-4 py-2 bg-green-500 text-white text-sm font-medium rounded-lg hover:bg-green-600 transition-colors disabled:opacity-50"
+                  >
+                    {isSavingDescription ? (
+                      <Loader2 className="w-4 h-4 animate-spin" />
+                    ) : (
+                      <Save className="w-4 h-4" />
+                    )}
+                    Save
+                  </button>
+                </div>
+              </div>
+            ) : (
+              <p className="text-gray-300">
+                {event.description || <span className="text-gray-500 italic">No description provided. Click &quot;Write with AI&quot; to generate one!</span>}
+              </p>
+            )}
+          </div>
 
           {/* Details Grid */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -840,6 +938,34 @@ export default function AdminEventsPage() {
     }
   };
 
+  const handleUpdateDescription = async (eventId: string, description: string) => {
+    try {
+      const response = await fetch(`/api/admin/events/${eventId}`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ action: 'update_description', description }),
+      });
+
+      const data = await response.json();
+
+      if (response.ok) {
+        // Update the selected event locally
+        if (selectedEvent && selectedEvent.id === eventId) {
+          setSelectedEvent({ ...selectedEvent, description });
+        }
+        // Refresh the events list
+        await fetchEvents();
+        showToast('Description updated successfully!', 'success');
+      } else {
+        showToast(data.error || 'Failed to update description', 'error');
+        throw new Error(data.error || 'Failed to update description');
+      }
+    } catch (error) {
+      console.error('Update description error:', error);
+      throw error;
+    }
+  };
+
   const getStatusBadge = (status: string, date: string) => {
     const isPast = new Date(date) < now;
     if (isPast) {
@@ -920,6 +1046,7 @@ export default function AdminEventsPage() {
               setSelectedEvent(null);
             }}
             onEdit={() => setSelectedEvent(null)}
+            onUpdateDescription={(description) => handleUpdateDescription(selectedEvent.id, description)}
             loading={actionLoading === selectedEvent.id}
           />
         )}

@@ -6,6 +6,7 @@ import { Calendar, MapPin, Send, CheckCircle, Sparkles, Upload, X, Loader2, Imag
 import Link from 'next/link';
 import { compressImage, validateImage, createPreviewUrl, revokePreviewUrl } from '@/lib/image-compress';
 import VenueSearch from '@/components/forms/VenueSearch';
+import AIWriterButton from '@/components/ai/AIWriterButton';
 
 interface VenueDetails {
   name: string;
@@ -407,16 +408,28 @@ export default function ListEventPage() {
 
             {/* Description */}
             <div>
-              <label className="block text-sm font-medium text-gray-300 mb-2">
-                Event Description
-              </label>
+              <div className="flex items-center justify-between mb-2">
+                <label className="block text-sm font-medium text-gray-300">
+                  Event Description
+                </label>
+                <AIWriterButton
+                  title={formData.eventName}
+                  category={formData.category}
+                  venue={venueDetails.name || formData.venueName}
+                  date={formData.date}
+                  time={formData.time}
+                  existingDescription={formData.description}
+                  onGenerated={(description) => setFormData(prev => ({ ...prev, description }))}
+                  disabled={!formData.eventName}
+                />
+              </div>
               <textarea
                 name="description"
                 value={formData.description}
                 onChange={handleChange}
                 rows={4}
                 className="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-xl text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-yellow-500/50"
-                placeholder="Tell us about your event..."
+                placeholder="Tell us about your event... or use AI to generate a description!"
               />
             </div>
 
