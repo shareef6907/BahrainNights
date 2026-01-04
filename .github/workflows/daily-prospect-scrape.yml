@@ -1,40 +1,21 @@
 name: Hourly Prospect Scraping
 
 on:
+  schedule:
+    - cron: '0 */6 * * *'
   workflow_dispatch:
 
 jobs:
-  scrape-prospects:
+  scrape:
     runs-on: ubuntu-latest
     timeout-minutes: 30
 
     steps:
-      - name: Checkout repository
-        uses: actions/checkout@v4
+      - uses: actions/checkout@v4
 
-      - name: Debug - Show files
-        run: |
-          echo "Current directory:"
-          pwd
-          echo ""
-          echo "Files in root:"
-          ls -la
-          echo ""
-          echo "Package.json exists:"
-          cat package.json | head -5
-
-      - name: Setup Node.js
-        uses: actions/setup-node@v4
+      - uses: actions/setup-node@v4
         with:
           node-version: '20'
-
-      - name: Check secrets
-        env:
-          HAS_SUPABASE_URL: ${{ secrets.NEXT_PUBLIC_SUPABASE_URL != '' }}
-          HAS_SUPABASE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY != '' }}
-        run: |
-          echo "NEXT_PUBLIC_SUPABASE_URL configured: $HAS_SUPABASE_URL"
-          echo "SUPABASE_SERVICE_ROLE_KEY configured: $HAS_SUPABASE_KEY"
 
       - name: Install dependencies
         run: npm ci
