@@ -502,7 +502,7 @@ export default function HomePageClient({ initialMovies, initialStats }: HomePage
       </nav>
 
       {/* Hero Section with Video Background */}
-      <section className="relative pt-32 pb-20 px-4 overflow-hidden isolate">
+      <section className="relative pt-32 pb-32 px-4 overflow-hidden isolate">
         {/* Video Background */}
         <div className="absolute inset-0 w-full h-full z-0">
           <video
@@ -516,9 +516,11 @@ export default function HomePageClient({ initialMovies, initialStats }: HomePage
             <source src="/Header-video.mp4" type="video/mp4" />
           </video>
           {/* Dark overlay for text readability */}
-          <div className="absolute inset-0 bg-black/60" />
-          {/* Gradient overlay for smooth transition to dark background */}
-          <div className="absolute inset-0 bg-gradient-to-b from-[#0a0a0f]/70 via-transparent to-[#0a0a0f]" />
+          <div className="absolute inset-0 bg-black/50" />
+          {/* Strong gradient fade to background at bottom */}
+          <div className="absolute inset-0 bg-gradient-to-b from-[#0a0a0f]/60 via-transparent via-60% to-[#0a0a0f]" />
+          {/* Extra fade at the very bottom for smooth blend */}
+          <div className="absolute bottom-0 left-0 right-0 h-32 bg-gradient-to-t from-[#0a0a0f] to-transparent" />
         </div>
 
         <div className="relative z-10 max-w-7xl mx-auto text-center">
@@ -592,7 +594,7 @@ export default function HomePageClient({ initialMovies, initialStats }: HomePage
       </section>
 
       {/* Premium Ad Slider - Fetches ads from database */}
-      <section className="px-4 mb-10 md:mb-20">
+      <section className="px-4 mt-8 mb-10 md:mb-20">
         <div className="max-w-7xl mx-auto">
           <AdBanner
             targetPage="homepage"
