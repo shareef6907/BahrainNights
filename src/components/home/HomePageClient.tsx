@@ -559,12 +559,12 @@ export default function HomePageClient({ initialMovies, initialStats, initialTod
           >
             <source src="/Header-Video1.mp4" type="video/mp4" />
           </video>
-          {/* Dark overlay for text readability */}
-          <div className="absolute inset-0 bg-black/40" />
-          {/* Gradient fade to background at bottom */}
-          <div className="absolute inset-0 bg-gradient-to-b from-[#0a0a0f]/30 via-transparent via-40% to-[#0a0a0f]" />
-          {/* Strong fade at bottom edge */}
-          <div className="absolute bottom-0 left-0 right-0 h-40 bg-gradient-to-t from-[#0a0a0f] via-[#0a0a0f]/95 to-transparent" />
+          {/* Dark overlay for text readability - using navy blue tint */}
+          <div className="absolute inset-0 bg-[#0A0A0F]/40" />
+          {/* Gradient fade to navy background at bottom */}
+          <div className="absolute inset-0 bg-gradient-to-b from-transparent via-transparent via-50% to-[#0A0A0F]" />
+          {/* Strong navy fade at bottom edge for seamless blend */}
+          <div className="absolute bottom-0 left-0 right-0 h-48 bg-gradient-to-t from-[#0A0A0F] via-[#0A0A0F] to-transparent" />
         </div>
 
         <div className="relative z-10 max-w-7xl mx-auto text-center">
@@ -659,7 +659,7 @@ export default function HomePageClient({ initialMovies, initialStats, initialTod
             viewport={{ once: true, margin: "-100px" }}
             variants={fadeIn}
           >
-            <h2 className="text-3xl md:text-5xl font-bold">🎬 Movies & Trailers</h2>
+            <h2 className="text-3xl md:text-5xl font-bold">🎬 New Movies & Trailers</h2>
             <a href="/cinema" className="text-yellow-400 hover:text-yellow-300 flex items-center space-x-2 transition-colors group">
               <span className="font-medium">View All</span>
               <ChevronRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
