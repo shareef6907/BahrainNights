@@ -22,11 +22,33 @@ jobs:
           node-version: '20'
           cache: 'npm'
 
+      - name: Verify secrets are configured
+        env:
+          SUPABASE_URL: ${{ secrets.NEXT_PUBLIC_SUPABASE_URL }}
+          SUPABASE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
+        run: |
+          echo "Checking environment variables..."
+          if [ -z "$SUPABASE_URL" ]; then
+            echo "ERROR: NEXT_PUBLIC_SUPABASE_URL secret is not set!"
+            exit 1
+          fi
+          if [ -z "$SUPABASE_KEY" ]; then
+            echo "ERROR: SUPABASE_SERVICE_ROLE_KEY secret is not set!"
+            exit 1
+          fi
+          echo "All required secrets are configured"
+
       - name: Install dependencies
-        run: npm ci
+        run: |
+          echo "Installing npm dependencies..."
+          npm ci
+          echo "Dependencies installed successfully"
 
       - name: Install Playwright browsers
-        run: npx playwright install chromium
+        run: |
+          echo "Installing Playwright Chromium..."
+          npx playwright install chromium --with-deps
+          echo "Playwright installed successfully"
 
       - name: Run prospect scrapers
         env:
@@ -35,7 +57,9 @@ jobs:
           ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
           CLAUDE_API_KEY: ${{ secrets.CLAUDE_API_KEY }}
         run: |
+          echo "Starting scrapers..."
           npx tsx scripts/scrapers/run-all.ts
+          echo "Scrapers completed"
 
       - name: Log completion
         run: |
