@@ -91,8 +91,8 @@ export default function ContactPage() {
                 </div>
                 <div>
                   <h3 className="text-white font-semibold">Email Us</h3>
-                  <a href="mailto:hello@bahrainnights.com" className="text-gray-400 hover:text-blue-400 transition-colors">
-                    hello@bahrainnights.com
+                  <a href="mailto:sales@bahrainnights.com" className="text-gray-400 hover:text-blue-400 transition-colors">
+                    sales@bahrainnights.com
                   </a>
                 </div>
               </div>
@@ -105,8 +105,8 @@ export default function ContactPage() {
                 </div>
                 <div>
                   <h3 className="text-white font-semibold">Call Us</h3>
-                  <a href="tel:+97317123456" className="text-gray-400 hover:text-purple-400 transition-colors">
-                    +973 1712 3456
+                  <a href="tel:+97339007750" className="text-gray-400 hover:text-purple-400 transition-colors">
+                    +973 3900 7750
                   </a>
                 </div>
               </div>
