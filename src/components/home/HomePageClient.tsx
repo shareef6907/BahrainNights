@@ -237,35 +237,28 @@ export default function HomePageClient({ initialMovies, initialStats, initialTod
   const [trailerMovie, setTrailerMovie] = useState<Movie | null>(null);
   const [isTrailerModalOpen, setIsTrailerModalOpen] = useState(false);
 
-  // Preload and play video immediately
+  // Play video immediately when ready
   useEffect(() => {
-    // Add preload link to head for faster video loading
-    const preloadLink = document.createElement('link');
-    preloadLink.rel = 'preload';
-    preloadLink.as = 'video';
-    preloadLink.href = '/Header-Video1.mp4';
-    preloadLink.type = 'video/mp4';
-    document.head.appendChild(preloadLink);
-
     const video = videoRef.current;
-    if (video) {
-      // Set playback rate slightly higher initially to catch up
-      video.playbackRate = 1.0;
-      // Force immediate load and play
-      video.load();
-      const playPromise = video.play();
-      if (playPromise !== undefined) {
-        playPromise.catch(() => {
-          // Autoplay may be blocked - try again with user interaction
-        });
-      }
+    if (!video) return;
+
+    // Play as soon as we have any data
+    const playVideo = () => {
+      video.play().catch(() => {});
+    };
+
+    // Try to play immediately if already loaded
+    if (video.readyState >= 2) {
+      playVideo();
     }
 
+    // Listen for when video can start playing
+    video.addEventListener('canplay', playVideo);
+    video.addEventListener('loadeddata', playVideo);
+
     return () => {
-      // Cleanup preload link
-      if (preloadLink.parentNode) {
-        preloadLink.parentNode.removeChild(preloadLink);
-      }
+      video.removeEventListener('canplay', playVideo);
+      video.removeEventListener('loadeddata', playVideo);
     };
   }, []);
 
@@ -546,6 +539,7 @@ export default function HomePageClient({ initialMovies, initialStats, initialTod
       <section className="relative pt-32 pb-32 px-4 min-h-[600px] md:min-h-[700px]">
         {/* Video Background - full size, no cropping from top */}
         <div className="absolute inset-0 w-full h-full">
+          {/* eslint-disable-next-line jsx-a11y/media-has-caption */}
           <video
             ref={videoRef}
             autoPlay
@@ -554,11 +548,12 @@ export default function HomePageClient({ initialMovies, initialStats, initialTod
             playsInline
             preload="auto"
             disablePictureInPicture
+            // @ts-expect-error fetchpriority is valid but not in React types yet
+            fetchpriority="high"
             className="absolute inset-0 w-full h-full object-cover"
             style={{ objectPosition: 'center center' }}
-          >
-            <source src="/Header-Video1.mp4" type="video/mp4" />
-          </video>
+            src="/Header-Video1.mp4"
+          />
           {/* Dark overlay for text readability */}
           <div className="absolute inset-0 bg-black/30" />
           {/* Bottom gradient - fades to exact page background color */}
