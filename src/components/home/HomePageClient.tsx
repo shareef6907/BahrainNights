@@ -501,8 +501,25 @@ export default function HomePageClient({ initialMovies, initialStats }: HomePage
         </AnimatePresence>
       </nav>
 
-      {/* Hero Section */}
-      <section className="relative pt-32 pb-20 px-4">
+      {/* Hero Section with Video Background */}
+      <section className="relative pt-32 pb-20 px-4 overflow-hidden">
+        {/* Video Background */}
+        <div className="absolute inset-0 w-full h-full -z-10">
+          <video
+            autoPlay
+            muted
+            loop
+            playsInline
+            preload="auto"
+            className="absolute inset-0 w-full h-full object-cover"
+            style={{ filter: 'brightness(0.4)' }}
+          >
+            <source src="/Header-video.mp4" type="video/mp4" />
+          </video>
+          {/* Gradient overlay for better text readability */}
+          <div className="absolute inset-0 bg-gradient-to-b from-[#0a0a0f]/80 via-[#0a0a0f]/50 to-[#0a0a0f]" />
+        </div>
+
         <div className="relative max-w-7xl mx-auto text-center">
           <motion.div
             className="inline-block mb-6 px-6 py-3 bg-white/5 backdrop-blur-sm rounded-full border border-white/10 hover:border-yellow-400/50 transition-colors"
