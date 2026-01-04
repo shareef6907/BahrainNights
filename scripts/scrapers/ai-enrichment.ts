@@ -1,18 +1,40 @@
 import Anthropic from '@anthropic-ai/sdk';
-import { createClient } from '@supabase/supabase-js';
+import { createClient, SupabaseClient } from '@supabase/supabase-js';
 
-const supabase = createClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL!,
-  process.env.SUPABASE_SERVICE_ROLE_KEY!
-);
+// Lazy initialization to avoid errors at module load time
+let supabase: SupabaseClient | null = null;
+let anthropic: Anthropic | null = null;
 
-const anthropic = new Anthropic({
-  apiKey: process.env.ANTHROPIC_API_KEY || process.env.CLAUDE_API_KEY!,
-});
+function getSupabase(): SupabaseClient {
+  if (!supabase) {
+    const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
+    const key = process.env.SUPABASE_SERVICE_ROLE_KEY;
+
+    if (!url || !key) {
+      throw new Error('Missing NEXT_PUBLIC_SUPABASE_URL or SUPABASE_SERVICE_ROLE_KEY environment variables');
+    }
+
+    supabase = createClient(url, key);
+  }
+  return supabase;
+}
+
+function getAnthropic(): Anthropic {
+  if (!anthropic) {
+    const apiKey = process.env.ANTHROPIC_API_KEY || process.env.CLAUDE_API_KEY;
+
+    if (!apiKey) {
+      throw new Error('Missing ANTHROPIC_API_KEY or CLAUDE_API_KEY environment variable');
+    }
+
+    anthropic = new Anthropic({ apiKey });
+  }
+  return anthropic;
+}
 
 export async function enrichProspectsWithAI(): Promise<void> {
   // Get prospects that haven't been AI enriched yet
-  const { data: prospects } = await supabase
+  const { data: prospects } = await getSupabase()
     .from('prospects')
     .select('*')
     .eq('ai_enriched', false)
@@ -51,7 +73,7 @@ Respond in JSON format:
   "contact_title_to_target": "string (e.g., Marketing Manager)"
 }`;
 
-      const response = await anthropic.messages.create({
+      const response = await getAnthropic().messages.create({
         model: 'claude-sonnet-4-20250514',
         max_tokens: 500,
         messages: [{ role: 'user', content: prompt }],
@@ -65,7 +87,7 @@ Respond in JSON format:
           const enrichment = JSON.parse(jsonMatch[0]);
 
           // Update prospect with AI enrichment
-          await supabase
+          await getSupabase()
             .from('prospects')
             .update({
               industry: enrichment.industry,
@@ -94,7 +116,7 @@ Respond in JSON format:
 
 // Enrich manual entries
 export async function enrichManualEntry(entryId: string): Promise<void> {
-  const { data: entry } = await supabase
+  const { data: entry } = await getSupabase()
     .from('prospect_manual_entries')
     .select('*')
     .eq('id', entryId)
@@ -132,7 +154,7 @@ Respond in JSON format:
 }`;
 
   try {
-    const response = await anthropic.messages.create({
+    const response = await getAnthropic().messages.create({
       model: 'claude-sonnet-4-20250514',
       max_tokens: 500,
       messages: [{ role: 'user', content: prompt }],
@@ -145,7 +167,7 @@ Respond in JSON format:
         const enrichment = JSON.parse(jsonMatch[0]);
 
         // Create prospect from manual entry
-        const { data: newProspect } = await supabase
+        const { data: newProspect } = await getSupabase()
           .from('prospects')
           .insert({
             company_name: enrichment.company_name || entry.company_name,
@@ -165,7 +187,7 @@ Respond in JSON format:
 
         // Mark manual entry as processed
         if (newProspect) {
-          await supabase
+          await getSupabase()
             .from('prospect_manual_entries')
             .update({
               processed: true,

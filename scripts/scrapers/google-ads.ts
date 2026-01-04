@@ -1,10 +1,22 @@
 import { chromium, Browser } from 'playwright';
-import { createClient } from '@supabase/supabase-js';
+import { createClient, SupabaseClient } from '@supabase/supabase-js';
 
-const supabase = createClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL!,
-  process.env.SUPABASE_SERVICE_ROLE_KEY!
-);
+// Lazy initialization to avoid errors at module load time
+let supabase: SupabaseClient | null = null;
+
+function getSupabase(): SupabaseClient {
+  if (!supabase) {
+    const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
+    const key = process.env.SUPABASE_SERVICE_ROLE_KEY;
+
+    if (!url || !key) {
+      throw new Error('Missing NEXT_PUBLIC_SUPABASE_URL or SUPABASE_SERVICE_ROLE_KEY environment variables');
+    }
+
+    supabase = createClient(url, key);
+  }
+  return supabase;
+}
 
 // Keywords that businesses in Bahrain would bid on
 const SEARCH_KEYWORDS = [
@@ -120,14 +132,14 @@ export async function scrapeGoogleAds(): Promise<void> {
           if (!sponsor.name) continue;
 
           try {
-            const { data: existing } = await supabase
+            const { data: existing } = await getSupabase()
               .from('prospects')
               .select('id')
               .eq('company_name', sponsor.name)
               .single();
 
             if (!existing) {
-              await supabase.from('prospects').insert({
+              await getSupabase().from('prospects').insert({
                 company_name: sponsor.name,
                 website: sponsor.url,
                 source: 'google_ads',
@@ -150,7 +162,7 @@ export async function scrapeGoogleAds(): Promise<void> {
       }
     }
 
-    await supabase.from('prospect_scrape_logs').insert({
+    await getSupabase().from('prospect_scrape_logs').insert({
       source: 'google_ads',
       status: 'success',
       prospects_found: totalFound,
@@ -163,7 +175,7 @@ export async function scrapeGoogleAds(): Promise<void> {
   } catch (error) {
     console.error('Google Ads scrape error:', error);
 
-    await supabase.from('prospect_scrape_logs').insert({
+    await getSupabase().from('prospect_scrape_logs').insert({
       source: 'google_ads',
       status: 'failed',
       error_message: (error as Error).message,

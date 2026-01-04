@@ -1,10 +1,22 @@
 import { chromium, Browser, Page } from 'playwright';
-import { createClient } from '@supabase/supabase-js';
+import { createClient, SupabaseClient } from '@supabase/supabase-js';
 
-const supabase = createClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL!,
-  process.env.SUPABASE_SERVICE_ROLE_KEY!
-);
+// Lazy initialization to avoid errors at module load time
+let supabase: SupabaseClient | null = null;
+
+function getSupabase(): SupabaseClient {
+  if (!supabase) {
+    const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
+    const key = process.env.SUPABASE_SERVICE_ROLE_KEY;
+
+    if (!url || !key) {
+      throw new Error('Missing NEXT_PUBLIC_SUPABASE_URL or SUPABASE_SERVICE_ROLE_KEY environment variables');
+    }
+
+    supabase = createClient(url, key);
+  }
+  return supabase;
+}
 
 interface FacebookAd {
   advertiser: string;
@@ -237,7 +249,7 @@ export async function scrapeFacebookAds(): Promise<void> {
 
       try {
         // Check if already exists
-        const { data: existing } = await supabase
+        const { data: existing } = await getSupabase()
           .from('prospects')
           .select('id')
           .eq('company_name', ad.advertiser)
@@ -245,12 +257,12 @@ export async function scrapeFacebookAds(): Promise<void> {
 
         if (existing) {
           // Update last_seen_at and add sighting
-          await supabase
+          await getSupabase()
             .from('prospects')
             .update({ last_seen_at: new Date().toISOString() })
             .eq('id', existing.id);
 
-          await supabase
+          await getSupabase()
             .from('prospect_sightings')
             .insert({
               prospect_id: existing.id,
@@ -260,7 +272,7 @@ export async function scrapeFacebookAds(): Promise<void> {
             });
         } else {
           // Create new prospect
-          const { data: newProspect } = await supabase
+          const { data: newProspect } = await getSupabase()
             .from('prospects')
             .insert({
               company_name: ad.advertiser,
@@ -283,7 +295,7 @@ export async function scrapeFacebookAds(): Promise<void> {
     }
 
     // Log the scrape
-    await supabase.from('prospect_scrape_logs').insert({
+    await getSupabase().from('prospect_scrape_logs').insert({
       source: 'facebook',
       status: 'success',
       prospects_found: totalProspectsFound,
@@ -296,7 +308,7 @@ export async function scrapeFacebookAds(): Promise<void> {
   } catch (error) {
     console.error('Facebook scrape error:', error);
 
-    await supabase.from('prospect_scrape_logs').insert({
+    await getSupabase().from('prospect_scrape_logs').insert({
       source: 'facebook',
       status: 'failed',
       error_message: (error as Error).message,

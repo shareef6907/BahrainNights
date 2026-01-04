@@ -1,10 +1,22 @@
 import { chromium } from 'playwright';
-import { createClient } from '@supabase/supabase-js';
+import { createClient, SupabaseClient } from '@supabase/supabase-js';
 
-const supabase = createClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL!,
-  process.env.SUPABASE_SERVICE_ROLE_KEY!
-);
+// Lazy initialization to avoid errors at module load time
+let supabase: SupabaseClient | null = null;
+
+function getSupabase(): SupabaseClient {
+  if (!supabase) {
+    const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
+    const key = process.env.SUPABASE_SERVICE_ROLE_KEY;
+
+    if (!url || !key) {
+      throw new Error('Missing NEXT_PUBLIC_SUPABASE_URL or SUPABASE_SERVICE_ROLE_KEY environment variables');
+    }
+
+    supabase = createClient(url, key);
+  }
+  return supabase;
+}
 
 const NEWS_SITES = [
   { name: 'GDN Online', url: 'https://www.gdnonline.com' },
@@ -90,14 +102,14 @@ export async function scrapeNewsSites(): Promise<void> {
 
           const cleanName = advertiser.trim().substring(0, 100);
 
-          const { data: existing } = await supabase
+          const { data: existing } = await getSupabase()
             .from('prospects')
             .select('id')
             .eq('company_name', cleanName)
             .single();
 
           if (!existing) {
-            await supabase.from('prospects').insert({
+            await getSupabase().from('prospects').insert({
               company_name: cleanName,
               source: 'news_site',
               source_url: site.url,
@@ -113,7 +125,7 @@ export async function scrapeNewsSites(): Promise<void> {
       }
     }
 
-    await supabase.from('prospect_scrape_logs').insert({
+    await getSupabase().from('prospect_scrape_logs').insert({
       source: 'news_sites',
       status: 'success',
       prospects_found: totalFound,
@@ -124,7 +136,7 @@ export async function scrapeNewsSites(): Promise<void> {
   } catch (error) {
     console.error('News sites scrape error:', error);
 
-    await supabase.from('prospect_scrape_logs').insert({
+    await getSupabase().from('prospect_scrape_logs').insert({
       source: 'news_sites',
       status: 'failed',
       error_message: (error as Error).message,
