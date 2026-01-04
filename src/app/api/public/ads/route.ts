@@ -25,6 +25,7 @@ export async function GET(request: NextRequest) {
       target_url: ad.target_url,
       advertiser_name: ad.advertiser_name,
       slot_position: ad.slot_position,
+      image_settings: ad.image_settings,
     }));
 
     return NextResponse.json({ ads: publicAds });

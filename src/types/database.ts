@@ -541,6 +541,7 @@ export interface Database {
           notes: string | null;
           target_page: 'homepage' | 'events' | 'cinema' | 'places' | 'restaurants' | 'cafes' | 'lounges' | 'nightclubs' | 'offers' | 'explore' | 'all';
           placement: 'slider' | 'banner' | 'sidebar' | 'inline';
+          image_settings: Json | null;
           created_at: string;
           updated_at: string;
         };
@@ -568,6 +569,7 @@ export interface Database {
           notes?: string | null;
           target_page?: 'homepage' | 'events' | 'cinema' | 'places' | 'restaurants' | 'cafes' | 'lounges' | 'nightclubs' | 'offers' | 'explore' | 'all';
           placement?: 'slider' | 'banner' | 'sidebar' | 'inline';
+          image_settings?: Json | null;
           created_at?: string;
           updated_at?: string;
         };
@@ -595,6 +597,7 @@ export interface Database {
           notes?: string | null;
           target_page?: 'homepage' | 'events' | 'cinema' | 'places' | 'restaurants' | 'cafes' | 'lounges' | 'nightclubs' | 'offers' | 'explore' | 'all';
           placement?: 'slider' | 'banner' | 'sidebar' | 'inline';
+          image_settings?: Json | null;
           created_at?: string;
           updated_at?: string;
         };

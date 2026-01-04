@@ -16,6 +16,28 @@ function ensureAbsoluteUrl(url: string): string {
   return `https://${url}`;
 }
 
+interface ImageSettings {
+  position: { x: number; y: number };
+  scale: number;
+}
+
+// Helper function to convert image settings to CSS object-position
+function getImageStyle(settings?: ImageSettings | string | null): React.CSSProperties {
+  if (!settings) {
+    return { objectPosition: '50% 50%' }; // Default center
+  }
+  // Parse if it's a JSON string (some databases return it as string)
+  const parsed = typeof settings === 'string' ? JSON.parse(settings) : settings;
+  if (!parsed.position) {
+    return { objectPosition: '50% 50%' };
+  }
+  // The ImagePositioner stores x/y as direct percentage values (0-100)
+  // that map directly to object-position
+  return {
+    objectPosition: `${parsed.position.x}% ${parsed.position.y}%`,
+  };
+}
+
 interface Ad {
   id: string;
   title: string | null;
@@ -24,6 +46,7 @@ interface Ad {
   image_url: string;
   target_url: string;
   advertiser_name: string;
+  image_settings?: ImageSettings | string | null;
 }
 
 interface AdBannerProps {
@@ -164,6 +187,7 @@ export default function AdBanner({
                     alt={currentAd.title || currentAd.advertiser_name}
                     fill
                     className="object-cover transition-transform duration-500 group-hover:scale-105"
+                    style={getImageStyle(currentAd.image_settings)}
                   />
                 </div>
                 <div className="absolute inset-0 bg-gradient-to-r from-black/60 via-transparent to-transparent" />
@@ -237,6 +261,7 @@ export default function AdBanner({
               alt={currentAd.title || currentAd.advertiser_name}
               fill
               className="object-cover transition-transform duration-500 group-hover:scale-105"
+              style={getImageStyle(currentAd.image_settings)}
             />
           </div>
           <div className="p-4">
@@ -285,6 +310,7 @@ export default function AdBanner({
               alt={currentAd.title || currentAd.advertiser_name}
               fill
               className="object-cover"
+              style={getImageStyle(currentAd.image_settings)}
             />
           </div>
           <div className="flex-1 min-w-0">
@@ -345,6 +371,7 @@ export default function AdBanner({
                   alt={currentAd.title || currentAd.advertiser_name}
                   fill
                   className="object-cover transition-transform duration-500 group-hover:scale-105"
+                  style={getImageStyle(currentAd.image_settings)}
                 />
               </div>
               <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent" />
