@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState, useRef } from 'react';
+import { useEffect, useState, useCallback } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -66,12 +66,13 @@ export default function AdBanner({
   const [loading, setLoading] = useState(true);
   const [currentIndex, setCurrentIndex] = useState(0);
   const [direction, setDirection] = useState(1); // 1 = sliding left (next), -1 = sliding right (prev)
+  const [imagesLoaded, setImagesLoaded] = useState(false);
 
-  // Slide animation variants
+  // Slide animation variants - faster for instant feel
   const slideVariants = {
     enter: (direction: number) => ({
       x: direction > 0 ? '100%' : '-100%',
-      opacity: 0,
+      opacity: 1,
     }),
     center: {
       x: 0,
@@ -79,19 +80,42 @@ export default function AdBanner({
     },
     exit: (direction: number) => ({
       x: direction > 0 ? '-100%' : '100%',
-      opacity: 0,
+      opacity: 1,
     }),
   };
 
-  const goToSlide = (index: number) => {
+  const goToSlide = useCallback((index: number) => {
     setDirection(index > currentIndex ? 1 : -1);
     setCurrentIndex(index);
-  };
+  }, [currentIndex]);
 
-  const nextSlide = () => {
+  const nextSlide = useCallback(() => {
     setDirection(1);
     setCurrentIndex((prev) => (prev + 1) % ads.length);
-  };
+  }, [ads.length]);
+
+  // Preload all images for instant switching
+  useEffect(() => {
+    if (ads.length > 0) {
+      let loadedCount = 0;
+      ads.forEach((ad) => {
+        const img = new window.Image();
+        img.onload = () => {
+          loadedCount++;
+          if (loadedCount === ads.length) {
+            setImagesLoaded(true);
+          }
+        };
+        img.onerror = () => {
+          loadedCount++;
+          if (loadedCount === ads.length) {
+            setImagesLoaded(true);
+          }
+        };
+        img.src = ad.image_url;
+      });
+    }
+  }, [ads]);
 
   useEffect(() => {
     const fetchAds = async () => {
@@ -121,7 +145,7 @@ export default function AdBanner({
       }, 4000); // Rotate every 4 seconds
       return () => clearInterval(interval);
     }
-  }, [ads.length, placement]);
+  }, [ads.length, placement, nextSlide]);
 
   // Track impression when ad is shown
   const trackImpression = async (adId: string) => {
@@ -161,8 +185,23 @@ export default function AdBanner({
         animate={{ opacity: 1, y: 0 }}
         className={`relative overflow-hidden rounded-2xl ${className}`}
       >
+        {/* Preload all images in hidden container for instant switching */}
+        <div className="hidden">
+          {ads.map((ad, index) => (
+            <Image
+              key={`preload-${ad.id}`}
+              src={ad.image_url}
+              alt=""
+              width={1920}
+              height={480}
+              priority={index < 2}
+              loading="eager"
+            />
+          ))}
+        </div>
+
         <div className="relative aspect-[3/1] md:aspect-[4/1] overflow-hidden">
-          <AnimatePresence initial={false} custom={direction}>
+          <AnimatePresence initial={false} custom={direction} mode="popLayout">
             <motion.div
               key={currentIndex}
               custom={direction}
@@ -170,7 +209,7 @@ export default function AdBanner({
               initial="enter"
               animate="center"
               exit="exit"
-              transition={{ duration: 0.4, ease: [0.4, 0, 0.2, 1] }}
+              transition={{ duration: 0.25, ease: 'easeOut' }}
               className="absolute inset-0 w-full h-full"
               style={{ position: 'absolute' }}
             >
@@ -186,7 +225,10 @@ export default function AdBanner({
                     src={currentAd.image_url}
                     alt={currentAd.title || currentAd.advertiser_name}
                     fill
-                    className="object-cover transition-transform duration-500 group-hover:scale-105"
+                    priority
+                    loading="eager"
+                    sizes="100vw"
+                    className="object-cover"
                     style={getImageStyle(currentAd.image_settings)}
                   />
                 </div>
@@ -345,8 +387,23 @@ export default function AdBanner({
       animate={{ opacity: 1, y: 0 }}
       className={`relative overflow-hidden rounded-2xl ${className}`}
     >
+      {/* Preload all images in hidden container for instant switching */}
+      <div className="hidden">
+        {ads.map((ad, index) => (
+          <Image
+            key={`preload-${ad.id}`}
+            src={ad.image_url}
+            alt=""
+            width={1920}
+            height={820}
+            priority={index < 2}
+            loading="eager"
+          />
+        ))}
+      </div>
+
       <div className="relative aspect-[16/9] md:aspect-[21/9] overflow-hidden">
-        <AnimatePresence initial={false} custom={direction}>
+        <AnimatePresence initial={false} custom={direction} mode="popLayout">
           <motion.div
             key={currentIndex}
             custom={direction}
@@ -354,7 +411,7 @@ export default function AdBanner({
             initial="enter"
             animate="center"
             exit="exit"
-            transition={{ duration: 0.4, ease: [0.4, 0, 0.2, 1] }}
+            transition={{ duration: 0.25, ease: 'easeOut' }}
             className="absolute inset-0 w-full h-full"
             style={{ position: 'absolute' }}
           >
@@ -370,7 +427,10 @@ export default function AdBanner({
                   src={currentAd.image_url}
                   alt={currentAd.title || currentAd.advertiser_name}
                   fill
-                  className="object-cover transition-transform duration-500 group-hover:scale-105"
+                  priority
+                  loading="eager"
+                  sizes="100vw"
+                  className="object-cover"
                   style={getImageStyle(currentAd.image_settings)}
                 />
               </div>
