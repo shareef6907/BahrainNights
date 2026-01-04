@@ -554,6 +554,8 @@ export default function HomePageClient({ initialMovies, initialStats, initialTod
             style={{ objectPosition: 'center center' }}
             src="/Header-Video1.mp4"
           />
+          {/* Subtle navy blue gradient at bottom to blend with background */}
+          <div className="absolute bottom-0 left-0 right-0 h-32 bg-gradient-to-t from-[#0A0A0F] to-transparent" />
         </div>
 
         <div className="relative z-10 max-w-7xl mx-auto text-center">
