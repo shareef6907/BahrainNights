@@ -502,9 +502,9 @@ export default function HomePageClient({ initialMovies, initialStats }: HomePage
       </nav>
 
       {/* Hero Section with Video Background */}
-      <section className="relative pt-32 pb-32 px-4 overflow-hidden isolate">
-        {/* Video Background */}
-        <div className="absolute inset-0 w-full h-full z-0">
+      <section className="relative pt-32 pb-40 px-4 overflow-visible isolate">
+        {/* Video Background - extends beyond section */}
+        <div className="absolute inset-0 w-full z-0" style={{ height: 'calc(100% + 60px)' }}>
           <video
             autoPlay
             muted
@@ -513,14 +513,14 @@ export default function HomePageClient({ initialMovies, initialStats }: HomePage
             preload="auto"
             className="absolute inset-0 w-full h-full object-cover"
           >
-            <source src="/Header-video.mp4" type="video/mp4" />
+            <source src="/Header-Video1.mp4" type="video/mp4" />
           </video>
           {/* Dark overlay for text readability */}
           <div className="absolute inset-0 bg-black/50" />
-          {/* Strong gradient fade to background at bottom */}
-          <div className="absolute inset-0 bg-gradient-to-b from-[#0a0a0f]/60 via-transparent via-60% to-[#0a0a0f]" />
-          {/* Extra fade at the very bottom for smooth blend */}
-          <div className="absolute bottom-0 left-0 right-0 h-32 bg-gradient-to-t from-[#0a0a0f] to-transparent" />
+          {/* Gradient fade to background - stronger and extends lower */}
+          <div className="absolute inset-0 bg-gradient-to-b from-transparent via-transparent via-50% to-[#0a0a0f]" />
+          {/* Extra tall fade at bottom for seamless blend */}
+          <div className="absolute bottom-0 left-0 right-0 h-48 bg-gradient-to-t from-[#0a0a0f] via-[#0a0a0f]/90 to-transparent" />
         </div>
 
         <div className="relative z-10 max-w-7xl mx-auto text-center">
@@ -594,7 +594,7 @@ export default function HomePageClient({ initialMovies, initialStats }: HomePage
       </section>
 
       {/* Premium Ad Slider - Fetches ads from database */}
-      <section className="px-4 mt-8 mb-10 md:mb-20">
+      <section className="px-4 mb-10 md:mb-20">
         <div className="max-w-7xl mx-auto">
           <AdBanner
             targetPage="homepage"
