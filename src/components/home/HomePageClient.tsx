@@ -10,7 +10,7 @@ import LanguageSwitcher from '@/components/LanguageSwitcher';
 
 // Lazy load below-fold components for faster initial load
 const AdBanner = dynamic(() => import('@/components/ads/AdBanner'), {
-  loading: () => <div className="h-[400px] md:h-[500px] bg-slate-800/50 rounded-2xl animate-pulse" />,
+  loading: () => <div className="h-[280px] md:h-[500px] bg-slate-800/50 rounded-2xl animate-pulse" />,
   ssr: false,
 });
 
@@ -574,19 +574,19 @@ export default function HomePageClient({ initialMovies, initialStats }: HomePage
       </section>
 
       {/* Premium Ad Slider - Fetches ads from database */}
-      <section className="px-4 mb-24">
+      <section className="px-4 mb-10 md:mb-20">
         <div className="max-w-7xl mx-auto">
           <AdBanner
             targetPage="homepage"
             placement="slider"
             limit={5}
-            className="h-[400px] md:h-[500px]"
+            className="h-[280px] md:h-[500px]"
           />
         </div>
       </section>
 
       {/* Cinema Section - NO LOADING STATE! Data pre-fetched on server */}
-      <section className="px-4 mb-24">
+      <section className="px-4 mb-12 md:mb-24">
         <div className="max-w-7xl mx-auto">
           <motion.div
             className="flex items-center justify-between mb-10"
@@ -621,7 +621,7 @@ export default function HomePageClient({ initialMovies, initialStats }: HomePage
                   <img
                     src={movie.poster_url?.startsWith('http') ? movie.poster_url : movie.poster_url ? `https://image.tmdb.org/t/p/w500${movie.poster_url}` : 'https://images.unsplash.com/photo-1489599849927-2ee91cede3ba?w=300&h=450&fit=crop'}
                     alt={movie.title}
-                    className="w-full h-[450px] object-cover group-hover:scale-105 transition-transform duration-300"
+                    className="w-full h-[280px] md:h-[450px] object-cover group-hover:scale-105 transition-transform duration-300"
                   />
                   <div className="absolute inset-0 bg-gradient-to-t from-black via-black/50 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-200">
                     <div className="absolute bottom-0 left-0 right-0 p-6">
@@ -661,7 +661,7 @@ export default function HomePageClient({ initialMovies, initialStats }: HomePage
       </section>
 
       {/* Happening Today */}
-      <section className="px-4 mb-24">
+      <section className="px-4 mb-12 md:mb-24">
         <div className="max-w-7xl mx-auto">
           <motion.div
             className="flex items-center justify-between mb-10"
@@ -720,7 +720,7 @@ export default function HomePageClient({ initialMovies, initialStats }: HomePage
       </section>
 
       {/* Categories Grid - Updated to match main menu */}
-      <section className="px-4 mb-24">
+      <section className="px-4 mb-12 md:mb-24">
         <div className="max-w-7xl mx-auto">
           <motion.h2
             className="text-3xl md:text-5xl font-bold mb-10"

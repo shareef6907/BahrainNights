@@ -290,7 +290,7 @@ export default function CinemaPageClient({
 
         {/* Featured Movie Banner - Only for Now Showing */}
         {activeTab === 'now-showing' && featuredMovies.length > 0 && (
-          <section className="px-4 mb-12">
+          <section className="px-4 mb-8 md:mb-12">
             <div className="max-w-7xl mx-auto">
               <FeaturedMovie
                 movies={featuredMovies}
@@ -329,7 +329,7 @@ export default function CinemaPageClient({
         </section>
 
         {/* Movies Grid */}
-        <section className="px-4 pb-20">
+        <section className="px-4 pb-12 md:pb-20">
           <div className="max-w-7xl mx-auto">
             {filteredMovies.length === 0 ? (
               <div className="text-center py-20">

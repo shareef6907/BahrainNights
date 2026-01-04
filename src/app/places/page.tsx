@@ -317,7 +317,7 @@ function PlacesPageContent() {
         </div>
 
         {/* Main Content */}
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 pb-20">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 pb-12 md:pb-20">
           {/* Category Tabs */}
           <div className="mb-6">
             <PlaceCategoryTabs
