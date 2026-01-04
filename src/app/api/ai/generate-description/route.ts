@@ -58,8 +58,8 @@ export async function POST(request: NextRequest) {
     // Build the prompt
     const prompt = buildPrompt({ title, category, venue, date, time, existingDescription });
 
-    // Generate with Gemini 1.5 Flash (free tier)
-    const model = genAI.getGenerativeModel({ model: 'gemini-1.5-flash' });
+    // Generate with Gemini 2.0 Flash (free tier)
+    const model = genAI.getGenerativeModel({ model: 'gemini-2.0-flash' });
 
     const result = await model.generateContent({
       contents: [{ role: 'user', parts: [{ text: prompt }] }],
@@ -90,7 +90,7 @@ export async function POST(request: NextRequest) {
 
     return NextResponse.json({
       description: cleanedDescription,
-      model: 'gemini-1.5-flash',
+      model: 'gemini-2.0-flash',
     });
 
   } catch (error) {
