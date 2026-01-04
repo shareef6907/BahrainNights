@@ -502,9 +502,9 @@ export default function HomePageClient({ initialMovies, initialStats }: HomePage
       </nav>
 
       {/* Hero Section with Video Background */}
-      <section className="relative pt-32 pb-20 px-4 overflow-hidden">
+      <section className="relative pt-32 pb-20 px-4 overflow-hidden isolate">
         {/* Video Background */}
-        <div className="absolute inset-0 w-full h-full -z-10">
+        <div className="absolute inset-0 w-full h-full z-0">
           <video
             autoPlay
             muted
@@ -512,15 +512,16 @@ export default function HomePageClient({ initialMovies, initialStats }: HomePage
             playsInline
             preload="auto"
             className="absolute inset-0 w-full h-full object-cover"
-            style={{ filter: 'brightness(0.4)' }}
           >
             <source src="/Header-video.mp4" type="video/mp4" />
           </video>
-          {/* Gradient overlay for better text readability */}
-          <div className="absolute inset-0 bg-gradient-to-b from-[#0a0a0f]/80 via-[#0a0a0f]/50 to-[#0a0a0f]" />
+          {/* Dark overlay for text readability */}
+          <div className="absolute inset-0 bg-black/60" />
+          {/* Gradient overlay for smooth transition to dark background */}
+          <div className="absolute inset-0 bg-gradient-to-b from-[#0a0a0f]/70 via-transparent to-[#0a0a0f]" />
         </div>
 
-        <div className="relative max-w-7xl mx-auto text-center">
+        <div className="relative z-10 max-w-7xl mx-auto text-center">
           <motion.div
             className="inline-block mb-6 px-6 py-3 bg-white/5 backdrop-blur-sm rounded-full border border-white/10 hover:border-yellow-400/50 transition-colors"
             initial={{ opacity: 0, y: 20 }}
