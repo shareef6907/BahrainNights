@@ -537,7 +537,7 @@ export default function AdminAdsPage() {
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-2xl font-bold text-white">Ads Manager</h1>
-          <p className="text-gray-400 mt-1">Click empty slots to upload ad images</p>
+          <p className="text-gray-400 mt-1">Upload images and add title, subtitle & CTA button</p>
         </div>
         <button
           onClick={() => fetchAds()}
