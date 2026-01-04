@@ -57,9 +57,10 @@ export async function POST(request: NextRequest) {
     const filename = `ad-${timestamp}-${randomId}.${ext}`;
 
     // Generate folder path with year-month
+    // Use 'processed/ads/' folder which is publicly accessible (not 'ads/' which may not be)
     const now = new Date();
     const yearMonth = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`;
-    const key = `ads/${yearMonth}/${filename}`;
+    const key = `processed/ads/${yearMonth}/${filename}`;
 
     // Convert file to buffer
     const arrayBuffer = await file.arrayBuffer();
