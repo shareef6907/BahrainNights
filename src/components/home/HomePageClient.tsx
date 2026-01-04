@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import dynamic from 'next/dynamic';
 import { motion, AnimatePresence } from 'framer-motion';
 import { MapPin, Clock, Star, ChevronRight, ChevronDown, Menu, X, Sparkles, Plus, Play, Building2, LogIn } from 'lucide-react';
@@ -224,6 +224,7 @@ export default function HomePageClient({ initialMovies, initialStats, initialTod
   const [activeDropdown, setActiveDropdown] = useState<string | null>(null);
   const [mobileAccordion, setMobileAccordion] = useState<string | null>(null);
   const [isScrolled, setIsScrolled] = useState(false);
+  const videoRef = useRef<HTMLVideoElement>(null);
 
   // Data from server - no loading needed!
   const [movies] = useState<HomepageMovie[]>(initialMovies);
@@ -235,6 +236,38 @@ export default function HomePageClient({ initialMovies, initialStats, initialTod
   const [isMovieModalOpen, setIsMovieModalOpen] = useState(false);
   const [trailerMovie, setTrailerMovie] = useState<Movie | null>(null);
   const [isTrailerModalOpen, setIsTrailerModalOpen] = useState(false);
+
+  // Preload and play video immediately
+  useEffect(() => {
+    // Add preload link to head for faster video loading
+    const preloadLink = document.createElement('link');
+    preloadLink.rel = 'preload';
+    preloadLink.as = 'video';
+    preloadLink.href = '/Header-Video1.mp4';
+    preloadLink.type = 'video/mp4';
+    document.head.appendChild(preloadLink);
+
+    const video = videoRef.current;
+    if (video) {
+      // Set playback rate slightly higher initially to catch up
+      video.playbackRate = 1.0;
+      // Force immediate load and play
+      video.load();
+      const playPromise = video.play();
+      if (playPromise !== undefined) {
+        playPromise.catch(() => {
+          // Autoplay may be blocked - try again with user interaction
+        });
+      }
+    }
+
+    return () => {
+      // Cleanup preload link
+      if (preloadLink.parentNode) {
+        preloadLink.parentNode.removeChild(preloadLink);
+      }
+    };
+  }, []);
 
   const handleMovieClick = (movie: HomepageMovie) => {
     const convertedMovie = convertToMovieFormat(movie);
@@ -512,14 +545,15 @@ export default function HomePageClient({ initialMovies, initialStats, initialTod
       {/* Hero Section with Video Background */}
       <section className="relative pt-32 pb-32 px-4 overflow-hidden">
         {/* Video Background */}
-        <div className="absolute inset-0 w-full h-full">
+        <div className="absolute inset-0 w-full h-full bg-[#0a0a0f]">
           <video
+            ref={videoRef}
             autoPlay
             muted
             loop
             playsInline
             preload="auto"
-            poster="/Header-Video1-poster.jpg"
+            disablePictureInPicture
             className="absolute inset-0 w-full h-full object-cover"
             style={{ objectPosition: 'center center' }}
           >
