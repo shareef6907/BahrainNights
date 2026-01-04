@@ -1,11 +1,7 @@
 name: Hourly Prospect Scraping
 
 on:
-  schedule:
-    # Run every hour at minute 0
-    - cron: '0 * * * *'
   workflow_dispatch:
-    # Allow manual triggering
 
 jobs:
   scrape-prospects:
@@ -16,52 +12,40 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
+      - name: Debug - Show files
+        run: |
+          echo "Current directory:"
+          pwd
+          echo ""
+          echo "Files in root:"
+          ls -la
+          echo ""
+          echo "Package.json exists:"
+          cat package.json | head -5
+
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
           node-version: '20'
-          cache: 'npm'
 
-      - name: Verify secrets are configured
+      - name: Check secrets
         env:
-          SUPABASE_URL: ${{ secrets.NEXT_PUBLIC_SUPABASE_URL }}
-          SUPABASE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
+          HAS_SUPABASE_URL: ${{ secrets.NEXT_PUBLIC_SUPABASE_URL != '' }}
+          HAS_SUPABASE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY != '' }}
         run: |
-          echo "Checking environment variables..."
-          if [ -z "$SUPABASE_URL" ]; then
-            echo "ERROR: NEXT_PUBLIC_SUPABASE_URL secret is not set!"
-            exit 1
-          fi
-          if [ -z "$SUPABASE_KEY" ]; then
-            echo "ERROR: SUPABASE_SERVICE_ROLE_KEY secret is not set!"
-            exit 1
-          fi
-          echo "All required secrets are configured"
+          echo "NEXT_PUBLIC_SUPABASE_URL configured: $HAS_SUPABASE_URL"
+          echo "SUPABASE_SERVICE_ROLE_KEY configured: $HAS_SUPABASE_KEY"
 
       - name: Install dependencies
-        run: |
-          echo "Installing npm dependencies..."
-          npm ci
-          echo "Dependencies installed successfully"
+        run: npm ci
 
-      - name: Install Playwright browsers
-        run: |
-          echo "Installing Playwright Chromium..."
-          npx playwright install chromium --with-deps
-          echo "Playwright installed successfully"
+      - name: Install Playwright
+        run: npx playwright install chromium --with-deps
 
-      - name: Run prospect scrapers
+      - name: Run scrapers
         env:
           NEXT_PUBLIC_SUPABASE_URL: ${{ secrets.NEXT_PUBLIC_SUPABASE_URL }}
           SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
           ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
           CLAUDE_API_KEY: ${{ secrets.CLAUDE_API_KEY }}
-        run: |
-          echo "Starting scrapers..."
-          npx tsx scripts/scrapers/run-all.ts
-          echo "Scrapers completed"
-
-      - name: Log completion
-        run: |
-          echo "Prospect scraping completed at $(date)"
-          echo "Check Supabase prospect_scrape_logs table for details"
+        run: npx tsx scripts/scrapers/run-all.ts
