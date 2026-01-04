@@ -366,6 +366,12 @@ export default function VenueImagesPage() {
                 src={url}
                 alt={`Gallery image ${index + 1}`}
                 className="w-full h-full object-cover"
+                onError={(e) => {
+                  // Fallback if S3 image fails to load
+                  const target = e.target as HTMLImageElement;
+                  target.onerror = null;
+                  target.src = 'https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?w=400&h=400&fit=crop';
+                }}
               />
               <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
                 <button

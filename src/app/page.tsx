@@ -17,12 +17,12 @@ const categoryDisplay: Record<string, { label: string; icon: string }> = {
   family: { label: 'Family', icon: '👨‍👩‍👧‍👦' },
 };
 
-// Fetch featured events from different categories for "Happening Today"
+// Fetch featured events for "Happening Today" - ONLY today's events
 async function getTodayEvents(): Promise<TodayEvent[]> {
-  const today = new Date().toISOString().split('T')[0];
+  const today = new Date().toISOString().split('T')[0]; // "2026-01-04"
 
-  // Get one featured/upcoming event from each category
-  const categories = ['music', 'sports', 'arts', 'dining', 'community', 'shopping'];
+  // Get events happening TODAY only from each category
+  const categories = ['music', 'sports', 'arts', 'dining', 'community', 'shopping', 'nightlife', 'special', 'family'];
   const events: TodayEvent[] = [];
 
   for (const category of categories) {
@@ -31,10 +31,9 @@ async function getTodayEvents(): Promise<TodayEvent[]> {
       .select('id, title, slug, venue_name, time, cover_url, category, date, is_featured, view_count')
       .eq('status', 'published')
       .eq('category', category)
-      .gte('date', today)
+      .eq('date', today) // Only TODAY's events
       .order('is_featured', { ascending: false })
       .order('view_count', { ascending: false })
-      .order('date', { ascending: true })
       .limit(1)
       .single();
 
@@ -56,14 +55,14 @@ async function getTodayEvents(): Promise<TodayEvent[]> {
     if (events.length >= 4) break;
   }
 
-  // If we don't have 4 events, fetch more from any category
+  // If we don't have 4 events happening TODAY, fetch more from any category (still only today)
   if (events.length < 4) {
     const existingIds = events.map(e => e.id);
     const { data: moreEvents } = await supabaseAdmin
       .from('events')
       .select('id, title, slug, venue_name, time, cover_url, category, date')
       .eq('status', 'published')
-      .gte('date', today)
+      .eq('date', today) // Only TODAY's events
       .not('id', 'in', `(${existingIds.length > 0 ? existingIds.map(id => `'${id}'`).join(',') : "''"})`)
       .order('is_featured', { ascending: false })
       .order('view_count', { ascending: false })
