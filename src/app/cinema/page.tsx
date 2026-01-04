@@ -152,12 +152,16 @@ export default async function CinemaPage() {
 
 // Metadata for SEO
 export const metadata = {
-  title: 'Cinema in Bahrain - Now Showing Movies | BahrainNights',
-  description: 'Find movies now showing in Bahrain cinemas. Check what\'s playing at Cineco, VOX, Cinépolis, and Mukta A2 Cinemas. Watch trailers and book tickets online.',
+  title: 'Cinema in Bahrain - Movies Now Showing & Coming Soon',
+  description: 'Find movies now showing in Bahrain cinemas. Check what\'s playing at Cineco, VOX, Cinépolis, and Mukta A2 Cinemas. Watch trailers, see showtimes, and book tickets online.',
+  keywords: ['cinema in Bahrain', 'movies in Bahrain', 'Bahrain cinema', 'now showing Bahrain', 'Cineco', 'VOX Bahrain', 'movie showtimes Bahrain'],
   openGraph: {
-    title: 'Cinema in Bahrain - Now Showing Movies',
-    description: 'Find movies now showing in Bahrain cinemas. Watch trailers and book tickets online.',
+    title: 'Cinema in Bahrain - Movies Now Showing & Coming Soon | BahrainNights',
+    description: 'Find movies now showing in Bahrain cinemas. Check what\'s playing at Cineco, VOX, Cinépolis, and Mukta A2 Cinemas.',
     url: 'https://bahrainnights.com/cinema',
     type: 'website',
+  },
+  alternates: {
+    canonical: 'https://bahrainnights.com/cinema',
   },
 };

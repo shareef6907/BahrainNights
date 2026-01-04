@@ -189,20 +189,49 @@ export default function CinemaPageClient({
     setSearchQuery('');
   };
 
+  // Generate JSON-LD for movies (limited to first 10 for performance)
+  const moviesJsonLd = {
+    '@context': 'https://schema.org',
+    '@graph': [
+      {
+        '@type': 'WebPage',
+        name: 'Cinema in Bahrain - Movies Now Showing & Coming Soon | BahrainNights',
+        description: 'Find movies now showing in Bahrain cinemas. Check what\'s playing at Cineco, VOX, Cinépolis, and Mukta A2 Cinemas.',
+        url: 'https://bahrainnights.com/cinema'
+      },
+      {
+        '@type': 'ItemList',
+        name: 'Movies Now Showing in Bahrain',
+        itemListElement: nowShowingMovies.slice(0, 10).map((movie, index) => ({
+          '@type': 'ListItem',
+          position: index + 1,
+          item: {
+            '@type': 'Movie',
+            name: movie.title,
+            description: movie.synopsis,
+            image: movie.poster,
+            datePublished: movie.releaseDate,
+            duration: movie.duration,
+            genre: movie.genres,
+            aggregateRating: movie.rating > 0 ? {
+              '@type': 'AggregateRating',
+              ratingValue: movie.rating,
+              bestRating: 10,
+              worstRating: 0
+            } : undefined,
+            url: `https://bahrainnights.com/cinema?movie=${movie.slug}`
+          }
+        }))
+      }
+    ]
+  };
+
   return (
     <>
       {/* JSON-LD Structured Data */}
       <script
         type="application/ld+json"
-        dangerouslySetInnerHTML={{
-          __html: JSON.stringify({
-            '@context': 'https://schema.org',
-            '@type': 'WebPage',
-            name: 'Cinema in Bahrain - Now Showing Movies | BahrainNights',
-            description: 'Find movies now showing in Bahrain cinemas. Check what\'s playing at Cineco, VOX, Cinépolis, and Mukta A2 Cinemas. Watch trailers and book tickets online.',
-            url: 'https://bahrainnights.com/cinema'
-          })
-        }}
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(moviesJsonLd) }}
       />
 
       <div className="bg-gradient-to-b from-slate-950 via-slate-900 to-slate-950 text-white min-h-screen">

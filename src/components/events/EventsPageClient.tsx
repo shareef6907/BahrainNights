@@ -209,8 +209,50 @@ export default function EventsPageClient({ initialEvents }: EventsPageClientProp
     setSelectedTime('all');
   };
 
+  // Generate JSON-LD for events (limited to first 10 for performance)
+  const eventsJsonLd = {
+    '@context': 'https://schema.org',
+    '@type': 'ItemList',
+    itemListElement: filteredEvents.slice(0, 10).map((event, index) => ({
+      '@type': 'ListItem',
+      position: index + 1,
+      item: {
+        '@type': 'Event',
+        name: event.title,
+        description: event.description,
+        startDate: event.rawDate,
+        endDate: event.rawEndDate || event.rawDate,
+        location: {
+          '@type': 'Place',
+          name: event.venue,
+          address: {
+            '@type': 'PostalAddress',
+            addressLocality: 'Bahrain'
+          }
+        },
+        image: event.image,
+        url: `https://bahrainnights.com/events/${event.slug}`,
+        offers: event.isFree ? {
+          '@type': 'Offer',
+          price: '0',
+          priceCurrency: 'BHD',
+          availability: 'https://schema.org/InStock'
+        } : undefined,
+        eventStatus: 'https://schema.org/EventScheduled',
+        eventAttendanceMode: 'https://schema.org/OfflineEventAttendanceMode'
+      }
+    }))
+  };
+
   return (
-    <div className="min-h-screen bg-slate-950">
+    <>
+      {/* JSON-LD Structured Data for Events */}
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(eventsJsonLd) }}
+      />
+
+      <div className="min-h-screen bg-slate-950">
       {/* Hero Section */}
       <section className="relative pt-24 pb-12 overflow-hidden">
         <div className="absolute inset-0">
@@ -507,5 +549,6 @@ export default function EventsPageClient({ initialEvents }: EventsPageClientProp
         </div>
       </section>
     </div>
+    </>
   );
 }

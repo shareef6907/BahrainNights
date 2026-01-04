@@ -583,16 +583,16 @@ export default function HomePageClient({ initialMovies, initialStats, initialTod
           </motion.div>
 
           <motion.h1
-            className="text-5xl md:text-7xl lg:text-8xl font-black mb-6 leading-tight"
+            className="text-4xl md:text-6xl lg:text-7xl font-black mb-6 leading-tight"
             initial={{ opacity: 0, y: 30 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.4 }}
           >
             <span className="bg-gradient-to-r from-yellow-400 via-orange-500 to-pink-500 bg-clip-text text-transparent">
-              Discover Bahrain&apos;s
+              Discover Events, Nightlife
             </span>
             <br />
-            <span className="text-white">Best Experiences</span>
+            <span className="text-white">&amp; Things to Do in Bahrain</span>
           </motion.h1>
 
           <motion.p
@@ -638,7 +638,7 @@ export default function HomePageClient({ initialMovies, initialStats, initialTod
       </section>
 
       {/* Premium Ad Slider - Fetches ads from database */}
-      <section className="relative z-10 px-4 mt-6 mb-10 md:mb-20 bg-[#0a0a0f]">
+      <section className="relative z-10 px-4 mt-6 mb-10 md:mb-20">
         <div className="max-w-7xl mx-auto">
           <AdBanner
             targetPage="homepage"
@@ -659,9 +659,9 @@ export default function HomePageClient({ initialMovies, initialStats, initialTod
             viewport={{ once: true, margin: "-100px" }}
             variants={fadeIn}
           >
-            <h2 className="text-3xl md:text-5xl font-bold">🎬 Now Showing in Cinemas</h2>
-            <a href="/cinema?filter=now-showing" className="text-yellow-400 hover:text-yellow-300 flex items-center space-x-2 transition-colors group">
-              <span className="font-medium">All Movies</span>
+            <h2 className="text-3xl md:text-5xl font-bold">🎬 Movies & Trailers</h2>
+            <a href="/cinema" className="text-yellow-400 hover:text-yellow-300 flex items-center space-x-2 transition-colors group">
+              <span className="font-medium">View All</span>
               <ChevronRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
             </a>
           </motion.div>

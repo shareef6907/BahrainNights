@@ -14,9 +14,26 @@ const inter = Inter({
 });
 
 export const metadata: Metadata = {
-  title: "Bahrain Nights | AI-Powered Cultural Discovery",
-  description: "Bahrain's first AI-powered guide to events, dining, and culture. Always updated, always alive.",
+  metadataBase: new URL('https://bahrainnights.com'),
+  title: {
+    default: "BahrainNights - Events, Nightlife & Things to Do in Bahrain",
+    template: "%s | BahrainNights"
+  },
+  description: "Discover the best events, restaurants, nightlife, cinema, and things to do in Bahrain. Your complete guide to happenings in Bahrain - from family activities to parties.",
+  keywords: [
+    "Bahrain events", "events in Bahrain", "Bahrain nightlife", "things to do in Bahrain",
+    "restaurants in Bahrain", "cafes in Bahrain", "lounges in Bahrain", "Bahrain parties",
+    "cinema in Bahrain", "movies in Bahrain", "kids activities in Bahrain", "family activities in Bahrain",
+    "hotels in Bahrain", "spas in Bahrain", "gyms in Bahrain", "Bahrain sports",
+    "BahrainNights", "Bahrain Nights"
+  ],
+  authors: [{ name: "BahrainNights" }],
+  creator: "BahrainNights",
+  publisher: "BahrainNights",
   manifest: "/site.webmanifest",
+  alternates: {
+    canonical: "https://bahrainnights.com",
+  },
   icons: {
     icon: [
       { url: "/favicon.ico", sizes: "any" },
@@ -29,16 +46,16 @@ export const metadata: Metadata = {
     ],
   },
   openGraph: {
-    title: "Bahrain Nights | AI-Powered Cultural Discovery",
-    description: "Bahrain's first AI-powered guide to events, dining, and culture. Always updated, always alive.",
+    title: "BahrainNights - Events, Nightlife & Things to Do in Bahrain",
+    description: "Discover the best events, restaurants, nightlife, cinema, and things to do in Bahrain. Your complete guide to happenings in Bahrain.",
     url: "https://bahrainnights.com",
-    siteName: "Bahrain Nights",
+    siteName: "BahrainNights",
     images: [
       {
-        url: "/og-icon.png",
-        width: 512,
-        height: 512,
-        alt: "Bahrain Nights",
+        url: "/og-image.png",
+        width: 1200,
+        height: 630,
+        alt: "BahrainNights - Events, Nightlife & Things to Do in Bahrain",
       },
     ],
     locale: "en_US",
@@ -46,9 +63,24 @@ export const metadata: Metadata = {
   },
   twitter: {
     card: "summary_large_image",
-    title: "Bahrain Nights | AI-Powered Cultural Discovery",
-    description: "Bahrain's first AI-powered guide to events, dining, and culture.",
-    images: ["/og-icon.png"],
+    title: "BahrainNights - Events, Nightlife & Things to Do in Bahrain",
+    description: "Discover the best events, restaurants, nightlife, cinema, and things to do in Bahrain.",
+    images: ["/og-image.png"],
+    creator: "@bahaborainNights",
+  },
+  robots: {
+    index: true,
+    follow: true,
+    googleBot: {
+      index: true,
+      follow: true,
+      'max-video-preview': -1,
+      'max-image-preview': 'large',
+      'max-snippet': -1,
+    },
+  },
+  verification: {
+    google: 'your-google-verification-code',
   },
 };
 
@@ -67,6 +99,57 @@ export default function RootLayout({
         <link rel="dns-prefetch" href="https://image.tmdb.org" />
         {/* Preload hero video for instant playback */}
         <link rel="preload" href="/Header-Video1.mp4" as="video" type="video/mp4" />
+        {/* Organization and WebSite Schema for SEO */}
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{
+            __html: JSON.stringify({
+              '@context': 'https://schema.org',
+              '@graph': [
+                {
+                  '@type': 'Organization',
+                  '@id': 'https://bahrainnights.com/#organization',
+                  name: 'BahrainNights',
+                  url: 'https://bahrainnights.com',
+                  logo: {
+                    '@type': 'ImageObject',
+                    url: 'https://bahrainnights.com/logo.png',
+                    width: 512,
+                    height: 512
+                  },
+                  sameAs: [
+                    'https://instagram.com/bahaborainnights',
+                    'https://facebook.com/bahaborainnights',
+                    'https://twitter.com/bahaborainnights'
+                  ],
+                  contactPoint: {
+                    '@type': 'ContactPoint',
+                    contactType: 'customer service',
+                    email: 'admin@bahrainnights.com'
+                  }
+                },
+                {
+                  '@type': 'WebSite',
+                  '@id': 'https://bahrainnights.com/#website',
+                  url: 'https://bahrainnights.com',
+                  name: 'BahrainNights',
+                  description: 'Discover the best events, restaurants, nightlife, cinema, and things to do in Bahrain',
+                  publisher: {
+                    '@id': 'https://bahrainnights.com/#organization'
+                  },
+                  potentialAction: {
+                    '@type': 'SearchAction',
+                    target: {
+                      '@type': 'EntryPoint',
+                      urlTemplate: 'https://bahrainnights.com/search?q={search_term_string}'
+                    },
+                    'query-input': 'required name=search_term_string'
+                  }
+                }
+              ]
+            })
+          }}
+        />
       </head>
       <body className={`${inter.variable} font-inter antialiased`}>
         <LanguageProvider>
