@@ -79,7 +79,7 @@ export async function scrapeNewsSites(): Promise<void> {
             });
           });
 
-          return [...new Set(ads)]; // Remove duplicates
+          return Array.from(new Set(ads)); // Remove duplicates
         });
 
         totalFound += advertisers.length;

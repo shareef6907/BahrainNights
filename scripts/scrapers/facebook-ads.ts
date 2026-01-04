@@ -232,7 +232,7 @@ export async function scrapeFacebookAds(): Promise<void> {
     console.log(`Total unique advertisers found: ${totalProspectsFound}`);
 
     // Process each ad and save to database
-    for (const ad of allAds.values()) {
+    for (const ad of Array.from(allAds.values())) {
       if (!ad.advertiser) continue;
 
       try {
