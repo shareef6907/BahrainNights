@@ -12,6 +12,7 @@ import {
   Star,
   StarOff,
 } from 'lucide-react';
+import AIWriterButton from '@/components/ai/AIWriterButton';
 
 interface Event {
   id: string;
@@ -425,12 +426,25 @@ export default function AdminEventEditPage() {
 
         {/* Description */}
         <div>
-          <label className="block text-sm font-medium text-white mb-2">Description</label>
+          <div className="flex items-center justify-between mb-2">
+            <label className="block text-sm font-medium text-white">Description</label>
+            <AIWriterButton
+              title={formData.title}
+              category={formData.category}
+              venue={formData.venue_name}
+              date={formData.date}
+              time={formData.time}
+              existingDescription={formData.description}
+              onGenerated={(description) => setFormData(prev => ({ ...prev, description }))}
+              disabled={!formData.title}
+            />
+          </div>
           <textarea
             name="description"
             value={formData.description}
             onChange={handleChange}
             rows={5}
+            placeholder="Enter event description or use AI to generate one..."
             className="w-full px-4 py-2 bg-white/5 border border-white/10 rounded-lg text-white placeholder:text-gray-500 focus:outline-none focus:border-cyan-500/50 resize-none"
           />
         </div>

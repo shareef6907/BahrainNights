@@ -17,6 +17,7 @@ import {
   X,
   MapPin,
 } from 'lucide-react';
+import AIWriterButton from '@/components/ai/AIWriterButton';
 
 const CATEGORIES = [
   { value: 'dining', label: 'Dining & Restaurants' },
@@ -264,16 +265,27 @@ export default function CreateEventPage() {
 
         {/* Description */}
         <div>
-          <label className="block text-sm font-medium text-gray-300 mb-2">
-            Description
-          </label>
+          <div className="flex items-center justify-between mb-2">
+            <label className="block text-sm font-medium text-gray-300">
+              Description
+            </label>
+            <AIWriterButton
+              title={formData.title}
+              category={formData.category}
+              date={formData.start_date}
+              time={formData.start_time}
+              existingDescription={formData.description}
+              onGenerated={(description) => setFormData(prev => ({ ...prev, description }))}
+              disabled={!formData.title}
+            />
+          </div>
           <textarea
             name="description"
             value={formData.description}
             onChange={handleChange}
             rows={4}
             className="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-xl text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-yellow-400/50 focus:border-transparent resize-none"
-            placeholder="Describe your event, what guests can expect, special offers..."
+            placeholder="Describe your event, what guests can expect, special offers... or use AI to generate!"
           />
         </div>
 
