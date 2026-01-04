@@ -554,15 +554,6 @@ export default function HomePageClient({ initialMovies, initialStats, initialTod
             style={{ objectPosition: 'center center' }}
             src="/Header-Video1.mp4"
           />
-          {/* Dark overlay for text readability */}
-          <div className="absolute inset-0 bg-black/30" />
-          {/* Bottom gradient - fades to exact page background color */}
-          <div
-            className="absolute bottom-0 left-0 right-0 h-64"
-            style={{
-              background: 'linear-gradient(to top, #0A0A0F 0%, #0A0A0F 20%, rgba(10,10,15,0.8) 50%, transparent 100%)'
-            }}
-          />
         </div>
 
         <div className="relative z-10 max-w-7xl mx-auto text-center">
