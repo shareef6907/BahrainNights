@@ -29,6 +29,10 @@ export async function POST(request: NextRequest) {
     // Generate invoice number
     const invoiceNumber = await generateInvoiceNumber();
 
+    // Determine placement based on target page
+    // Homepage uses slider, other pages use banner
+    const placement = targetPage === 'homepage' ? 'slider' : 'banner';
+
     // Create ad with minimal required fields
     const ad = await createAd({
       advertiser_name: 'Quick Ad',
@@ -49,7 +53,7 @@ export async function POST(request: NextRequest) {
       invoice_number: invoiceNumber,
       notes: null,
       target_page: targetPage || 'homepage',
-      placement: 'slider',
+      placement: placement,
     });
 
     return NextResponse.json({ ad, message: 'Ad created successfully' }, { status: 201 });

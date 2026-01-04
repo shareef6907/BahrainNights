@@ -11,6 +11,7 @@ import OffersByDay from '@/components/offers/OffersByDay';
 import TodaysOffers from '@/components/offers/TodaysOffers';
 import OfferModal from '@/components/offers/OfferModal';
 import { Offer } from '@/components/offers/OfferCard';
+import AdBanner from '@/components/ads/AdBanner';
 
 // Sample Offers Data (16 offers across 4 categories)
 const sampleOffers: Offer[] = [
@@ -615,6 +616,11 @@ function OffersPageContent() {
           onViewModeChange={setViewMode}
           totalResults={filteredOffers.length}
         />
+      </section>
+
+      {/* Ad Banner */}
+      <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mb-8">
+        <AdBanner targetPage="offers" placement="banner" limit={5} />
       </section>
 
       {/* Main Content */}
