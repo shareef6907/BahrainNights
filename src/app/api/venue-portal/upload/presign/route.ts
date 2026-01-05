@@ -126,16 +126,16 @@ export async function POST(request: NextRequest) {
 
     switch (imageType) {
       case 'logo':
-        // Profile photos go directly to final location - NO watermark
-        s3Key = `venues/${venue.venueSlug}/logo.${extension}`;
+        // Profile photos go directly to processed folder (publicly accessible) - NO watermark
+        s3Key = `processed/venues/${venue.venueSlug}/logo.${extension}`;
         break;
       case 'cover':
-        // Cover photos go directly to final location - NO watermark
-        s3Key = `venues/${venue.venueSlug}/cover.${extension}`;
+        // Cover photos go directly to processed folder (publicly accessible) - NO watermark
+        s3Key = `processed/venues/${venue.venueSlug}/cover.${extension}`;
         break;
       case 'event':
         const eventSlug = body.eventSlug || `event-${timestamp}`;
-        s3Key = `events/${venue.venueSlug}/${eventSlug}/cover.${extension}`;
+        s3Key = `processed/events/${venue.venueSlug}/${eventSlug}/cover.${extension}`;
         break;
       case 'gallery':
       default:

@@ -172,23 +172,29 @@ export default function VenueProfilePage() {
       console.log(`[Photo Upload] Got presigned URL, uploading directly to S3...`);
 
       // Step 2: Upload directly to S3 using presigned URL
+      console.log(`[Photo Upload] Uploading to S3 with presigned URL...`);
       const uploadResponse = await fetch(presignedUrl, {
         method: 'PUT',
         body: file,
         headers: {
           'Content-Type': file.type,
         },
+        mode: 'cors',
       });
 
       if (!uploadResponse.ok) {
-        console.error('[Photo Upload] S3 upload failed:', uploadResponse.status);
-        throw new Error('Failed to upload to storage');
+        const errorText = await uploadResponse.text().catch(() => 'Unknown error');
+        console.error('[Photo Upload] S3 upload failed:', uploadResponse.status, errorText);
+        throw new Error(`Failed to upload to storage: ${uploadResponse.status}`);
       }
 
       console.log(`[Photo Upload] S3 upload successful, URL: ${finalUrl}`);
 
-      // Update pending photo state to show immediately
-      setPendingPhoto(finalUrl);
+      // Add cache buster to force browser to load fresh image
+      const cacheBustedUrl = `${finalUrl}?t=${Date.now()}`;
+
+      // Update pending photo state to show immediately (with cache buster)
+      setPendingPhoto(cacheBustedUrl);
 
       // Step 3: Submit the photo URL change for admin approval
       const fieldName = type === 'profile' ? 'logo_url' : 'cover_image_url';
