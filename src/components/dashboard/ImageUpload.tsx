@@ -2,7 +2,8 @@
 
 import { useState, useRef, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Upload, X, Image as ImageIcon, Loader2 } from 'lucide-react';
+import { Upload, X, Image as ImageIcon, Loader2, CheckCircle } from 'lucide-react';
+import { compressImage } from '@/lib/image-compress';
 
 interface ImageUploadProps {
   value?: string;
@@ -12,6 +13,8 @@ interface ImageUploadProps {
   maxSize?: number; // in MB
   required?: boolean;
   error?: string;
+  entityType?: 'venue' | 'event' | 'offer' | 'sponsor' | 'ad';
+  imageType?: 'logo' | 'cover' | 'gallery' | 'banner';
 }
 
 export default function ImageUpload({
@@ -19,13 +22,17 @@ export default function ImageUpload({
   onChange,
   label = 'Upload Image',
   aspectRatio = '16:9',
-  maxSize = 5,
+  maxSize = 10,
   required = false,
   error,
+  entityType = 'event',
+  imageType = 'cover',
 }: ImageUploadProps) {
   const [isDragging, setIsDragging] = useState(false);
   const [isUploading, setIsUploading] = useState(false);
+  const [uploadStatus, setUploadStatus] = useState<'idle' | 'compressing' | 'uploading' | 'success' | 'error'>('idle');
   const [previewUrl, setPreviewUrl] = useState<string | undefined>(value);
+  const [uploadError, setUploadError] = useState<string | null>(null);
   const inputRef = useRef<HTMLInputElement>(null);
 
   const aspectRatioClass = {
@@ -38,45 +45,82 @@ export default function ImageUpload({
     async (file: File) => {
       // Validate file type
       if (!file.type.startsWith('image/')) {
-        alert('Please upload an image file');
+        setUploadError('Please upload an image file');
         return;
       }
 
       // Validate file size
       if (file.size > maxSize * 1024 * 1024) {
-        alert(`File size must be less than ${maxSize}MB`);
+        setUploadError(`File size must be less than ${maxSize}MB`);
         return;
       }
 
       setIsUploading(true);
+      setUploadError(null);
+      setUploadStatus('compressing');
 
       try {
-        // Create local preview
+        // Create local preview immediately for better UX
         const reader = new FileReader();
         reader.onload = (e) => {
-          const result = e.target?.result as string;
-          setPreviewUrl(result);
-          onChange(result);
+          setPreviewUrl(e.target?.result as string);
         };
         reader.readAsDataURL(file);
 
-        // TODO: Implement actual S3 upload
-        // const formData = new FormData();
-        // formData.append('file', file);
-        // const response = await fetch('/api/upload/image', {
-        //   method: 'POST',
-        //   body: formData,
-        // });
-        // const data = await response.json();
-        // onChange(data.url);
+        // Compress image to target 600KB-1MB
+        console.log(`[ImageUpload] Original size: ${(file.size / 1024).toFixed(0)}KB`);
+        let fileToUpload: File | Blob = file;
+
+        try {
+          fileToUpload = await compressImage(file);
+          console.log(`[ImageUpload] Compressed size: ${(fileToUpload.size / 1024).toFixed(0)}KB`);
+        } catch (compressError) {
+          console.warn('[ImageUpload] Compression failed, using original:', compressError);
+          // Continue with original file if compression fails
+        }
+
+        setUploadStatus('uploading');
+
+        // Upload to S3 via API
+        const formData = new FormData();
+        formData.append('file', fileToUpload);
+        formData.append('entityType', entityType);
+        formData.append('imageType', imageType);
+        formData.append('processLocally', 'true');
+
+        const response = await fetch('/api/upload/image', {
+          method: 'POST',
+          body: formData,
+        });
+
+        if (!response.ok) {
+          const errorData = await response.json();
+          throw new Error(errorData.error || 'Failed to upload image');
+        }
+
+        const data = await response.json();
+        console.log(`[ImageUpload] Upload successful: ${data.url}`);
+
+        // Update preview with the actual S3 URL
+        setPreviewUrl(data.url);
+        onChange(data.url);
+        setUploadStatus('success');
+
+        // Reset status after showing success
+        setTimeout(() => {
+          setUploadStatus('idle');
+        }, 2000);
       } catch (err) {
-        console.error('Upload error:', err);
-        alert('Failed to upload image');
+        console.error('[ImageUpload] Upload error:', err);
+        setUploadError(err instanceof Error ? err.message : 'Failed to upload image');
+        setUploadStatus('error');
+        // Clear the preview on error
+        setPreviewUrl(value);
       } finally {
         setIsUploading(false);
       }
     },
-    [maxSize, onChange]
+    [maxSize, onChange, entityType, imageType, value]
   );
 
   const handleDragOver = useCallback((e: React.DragEvent) => {
@@ -115,10 +159,27 @@ export default function ImageUpload({
   const handleRemove = useCallback(() => {
     setPreviewUrl(undefined);
     onChange(undefined);
+    setUploadError(null);
+    setUploadStatus('idle');
     if (inputRef.current) {
       inputRef.current.value = '';
     }
   }, [onChange]);
+
+  const getStatusMessage = () => {
+    switch (uploadStatus) {
+      case 'compressing':
+        return 'Compressing image...';
+      case 'uploading':
+        return 'Uploading to cloud...';
+      case 'success':
+        return 'Upload complete!';
+      case 'error':
+        return uploadError || 'Upload failed';
+      default:
+        return '';
+    }
+  };
 
   return (
     <div className="space-y-2">
@@ -131,7 +192,7 @@ export default function ImageUpload({
 
       <div
         className={`relative ${aspectRatioClass} rounded-xl border-2 border-dashed transition-all duration-200 overflow-hidden ${
-          error
+          error || uploadError
             ? 'border-red-400/50 bg-red-500/5'
             : isDragging
             ? 'border-yellow-400 bg-yellow-400/10'
@@ -158,15 +219,36 @@ export default function ImageUpload({
                 className="w-full h-full object-cover"
               />
               <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent" />
+
+              {/* Upload status overlay */}
+              {isUploading && (
+                <div className="absolute inset-0 bg-black/50 flex flex-col items-center justify-center">
+                  <Loader2 className="w-10 h-10 text-yellow-400 animate-spin mb-2" />
+                  <p className="text-white text-sm">{getStatusMessage()}</p>
+                </div>
+              )}
+
+              {/* Success indicator */}
+              {uploadStatus === 'success' && !isUploading && (
+                <div className="absolute top-3 left-3 flex items-center gap-2 bg-green-500/80 px-3 py-1.5 rounded-full">
+                  <CheckCircle className="w-4 h-4 text-white" />
+                  <span className="text-white text-sm font-medium">Uploaded</span>
+                </div>
+              )}
+
               <button
+                type="button"
                 onClick={handleRemove}
-                className="absolute top-3 right-3 p-2 bg-black/50 hover:bg-black/70 rounded-full text-white transition-colors"
+                disabled={isUploading}
+                className="absolute top-3 right-3 p-2 bg-black/50 hover:bg-black/70 rounded-full text-white transition-colors disabled:opacity-50"
               >
                 <X className="w-4 h-4" />
               </button>
               <button
+                type="button"
                 onClick={() => inputRef.current?.click()}
-                className="absolute bottom-3 right-3 px-4 py-2 bg-white/20 hover:bg-white/30 backdrop-blur-sm rounded-lg text-white text-sm font-medium transition-colors"
+                disabled={isUploading}
+                className="absolute bottom-3 right-3 px-4 py-2 bg-white/20 hover:bg-white/30 backdrop-blur-sm rounded-lg text-white text-sm font-medium transition-colors disabled:opacity-50"
               >
                 Change Image
               </button>
@@ -177,11 +259,14 @@ export default function ImageUpload({
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
-              onClick={() => inputRef.current?.click()}
+              onClick={() => !isUploading && inputRef.current?.click()}
               className="absolute inset-0 flex flex-col items-center justify-center cursor-pointer p-6 text-center"
             >
               {isUploading ? (
-                <Loader2 className="w-10 h-10 text-yellow-400 animate-spin" />
+                <>
+                  <Loader2 className="w-10 h-10 text-yellow-400 animate-spin mb-2" />
+                  <p className="text-gray-300 text-sm">{getStatusMessage()}</p>
+                </>
               ) : (
                 <>
                   <div className="p-4 rounded-full bg-white/10 mb-4">
@@ -214,10 +299,14 @@ export default function ImageUpload({
           accept="image/*"
           onChange={handleInputChange}
           className="hidden"
+          disabled={isUploading}
         />
       </div>
 
-      {error && <p className="text-sm text-red-400">{error}</p>}
+      {/* Error message */}
+      {(error || uploadError) && (
+        <p className="text-sm text-red-400">{error || uploadError}</p>
+      )}
     </div>
   );
 }

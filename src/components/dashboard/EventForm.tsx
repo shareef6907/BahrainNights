@@ -683,6 +683,8 @@ export default function EventForm({ initialData, isEditing = false, eventId }: E
               }
               required
               error={errors.featuredImage}
+              entityType="event"
+              imageType="cover"
             />
           </div>
         )}

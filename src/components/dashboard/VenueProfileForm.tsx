@@ -643,6 +643,8 @@ export default function VenueProfileForm() {
                 onChange={(url) => setFormData((prev) => ({ ...prev, logo: url || '' }))}
                 aspectRatio="1:1"
                 required
+                entityType="venue"
+                imageType="logo"
               />
               <div className="md:col-span-1">
                 <ImageUpload
@@ -653,6 +655,8 @@ export default function VenueProfileForm() {
                   }
                   aspectRatio="16:9"
                   required
+                  entityType="venue"
+                  imageType="cover"
                 />
               </div>
             </div>

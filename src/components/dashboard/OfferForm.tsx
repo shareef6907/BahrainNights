@@ -548,6 +548,8 @@ export default function OfferForm({ initialData, isEditing = false }: OfferFormP
               onChange={(url) =>
                 setFormData((prev) => ({ ...prev, featuredImage: url || '' }))
               }
+              entityType="offer"
+              imageType="cover"
             />
           </div>
         )}
