@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { revalidatePath } from 'next/cache';
 import { verifyToken } from '@/lib/auth';
 import { cookies } from 'next/headers';
 import { getAdminClient } from '@/lib/supabase/server';
@@ -12,6 +13,10 @@ interface ChangeRequest {
   venue_id: string;
   changes: Record<string, unknown>;
   status: string;
+}
+
+interface VenueSlug {
+  slug: string;
 }
 
 // Approve a venue change request
@@ -135,6 +140,23 @@ export async function POST(request: NextRequest, context: RouteContext) {
         { error: 'Failed to update change request status' },
         { status: 500 }
       );
+    }
+
+    // Revalidate the venue's public page to clear cache
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const { data: venueSlugData } = await (supabase
+      .from('venues') as any)
+      .select('slug')
+      .eq('id', request_data.venue_id)
+      .single();
+
+    const venueSlug = (venueSlugData as VenueSlug | null)?.slug;
+    if (venueSlug) {
+      // Revalidate the specific venue page
+      revalidatePath(`/places/${venueSlug}`);
+      // Also revalidate the places listing page
+      revalidatePath('/places');
+      console.log(`Revalidated cache for venue: ${venueSlug}`);
     }
 
     return NextResponse.json({
