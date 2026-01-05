@@ -394,10 +394,12 @@ function PlacesPageContent() {
             </p>
           </div>
 
-          {/* Ad Banner */}
-          <div className="mb-8">
-            <AdBanner targetPage="places" placement="banner" limit={5} />
-          </div>
+          {/* Ad Banner - Only show on "All Places" tab */}
+          {selectedCategory === 'all' && (
+            <div className="mb-8">
+              <AdBanner targetPage="places" placement="banner" limit={5} />
+            </div>
+          )}
 
           {/* Empty State */}
           {placesData.length === 0 && !loading && (
@@ -437,8 +439,10 @@ function PlacesPageContent() {
                     tonightOffers={[]}
                   />
 
-                  {/* Sidebar Ad */}
-                  <AdBanner targetPage="places" placement="sidebar" />
+                  {/* Sidebar Ad - Only show on "All Places" tab */}
+                  {selectedCategory === 'all' && (
+                    <AdBanner targetPage="places" placement="sidebar" />
+                  )}
                 </div>
               )}
             </div>
