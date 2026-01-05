@@ -1,10 +1,11 @@
 /**
  * Client-side image compression utility
- * Compresses images to a target size while maintaining resolution
+ * Compresses images to a target size range (600KB-1MB) while maintaining resolution
  */
 
 export interface CompressionOptions {
   maxSizeKB?: number;
+  minSizeKB?: number;
   maxWidth?: number;
   maxHeight?: number;
   quality?: number;
@@ -12,21 +13,39 @@ export interface CompressionOptions {
 }
 
 const DEFAULT_OPTIONS: CompressionOptions = {
-  maxSizeKB: 600,
+  minSizeKB: 600,
+  maxSizeKB: 1024,
+  maxWidth: 2000,
+  maxHeight: 2000,
   quality: 0.9,
   format: 'image/jpeg',
 };
 
 /**
- * Compress an image file to a target size
- * Uses iterative quality reduction to achieve target size without losing resolution
+ * Compress an image file to a target size range (600KB-1MB)
+ * Uses binary search for optimal quality to hit the target range
  */
 export async function compressImage(
   file: File,
   options: CompressionOptions = {}
 ): Promise<Blob> {
   const opts = { ...DEFAULT_OPTIONS, ...options };
-  const maxBytes = (opts.maxSizeKB || 600) * 1024;
+  const minBytes = (opts.minSizeKB || 600) * 1024;
+  const maxBytes = (opts.maxSizeKB || 1024) * 1024;
+
+  // If file is already in the target range, return as-is
+  if (file.size >= minBytes && file.size <= maxBytes) {
+    console.log(`[Compress] File already in range: ${(file.size / 1024).toFixed(0)}KB`);
+    return file;
+  }
+
+  // If file is smaller than minimum, return as-is (don't upscale)
+  if (file.size < minBytes) {
+    console.log(`[Compress] File below minimum (${(file.size / 1024).toFixed(0)}KB), keeping original`);
+    return file;
+  }
+
+  console.log(`[Compress] Starting: ${(file.size / 1024).toFixed(0)}KB -> target: ${opts.minSizeKB}KB-${opts.maxSizeKB}KB`);
 
   return new Promise((resolve, reject) => {
     const reader = new FileReader();
@@ -34,19 +53,17 @@ export async function compressImage(
     reader.onload = (event) => {
       const img = new Image();
 
-      img.onload = () => {
+      img.onload = async () => {
         const canvas = document.createElement('canvas');
         let width = img.width;
         let height = img.height;
 
-        // Optionally resize if dimensions exceed max
-        if (opts.maxWidth && width > opts.maxWidth) {
-          height = (height * opts.maxWidth) / width;
-          width = opts.maxWidth;
-        }
-        if (opts.maxHeight && height > opts.maxHeight) {
-          width = (width * opts.maxHeight) / height;
-          height = opts.maxHeight;
+        // Resize if dimensions exceed max
+        const maxDim = Math.max(opts.maxWidth || 2000, opts.maxHeight || 2000);
+        if (width > maxDim || height > maxDim) {
+          const ratio = Math.min(maxDim / width, maxDim / height);
+          width = Math.round(width * ratio);
+          height = Math.round(height * ratio);
         }
 
         canvas.width = width;
@@ -58,37 +75,59 @@ export async function compressImage(
           return;
         }
 
-        // Draw image on canvas
         ctx.drawImage(img, 0, 0, width, height);
 
-        // Start with initial quality and reduce until target size is met
-        let quality = opts.quality || 0.9;
         const format = opts.format || 'image/jpeg';
 
-        const compress = () => {
-          canvas.toBlob(
-            (blob) => {
-              if (!blob) {
-                reject(new Error('Compression failed - could not create blob'));
-                return;
-              }
+        // Binary search for optimal quality
+        let minQuality = 0.1;
+        let maxQuality = 0.95;
+        let bestBlob: Blob | null = null;
+        let attempts = 0;
+        const maxAttempts = 10;
 
-              // If under target size or quality is too low, return the result
-              if (blob.size <= maxBytes || quality <= 0.1) {
-                console.log(`Compressed image: ${(blob.size / 1024).toFixed(1)}KB at quality ${quality.toFixed(2)}`);
-                resolve(blob);
-              } else {
-                // Reduce quality and try again
-                quality -= 0.1;
-                compress();
-              }
-            },
-            format,
-            quality
-          );
+        const toBlob = (quality: number): Promise<Blob | null> => {
+          return new Promise((res) => {
+            canvas.toBlob((b) => res(b), format, quality);
+          });
         };
 
-        compress();
+        while (attempts < maxAttempts) {
+          const quality = (minQuality + maxQuality) / 2;
+          const blob = await toBlob(quality);
+
+          if (!blob) {
+            reject(new Error('Compression failed - could not create blob'));
+            return;
+          }
+
+          console.log(`[Compress] Attempt ${attempts + 1}: quality=${quality.toFixed(2)}, size=${(blob.size / 1024).toFixed(0)}KB`);
+
+          if (blob.size >= minBytes && blob.size <= maxBytes) {
+            bestBlob = blob;
+            break;
+          } else if (blob.size > maxBytes) {
+            maxQuality = quality;
+            bestBlob = blob;
+          } else {
+            minQuality = quality;
+            bestBlob = blob;
+          }
+
+          attempts++;
+        }
+
+        if (!bestBlob) {
+          bestBlob = await toBlob(0.8);
+        }
+
+        if (!bestBlob) {
+          reject(new Error('Failed to compress image'));
+          return;
+        }
+
+        console.log(`[Compress] Complete: ${(file.size / 1024).toFixed(0)}KB -> ${(bestBlob.size / 1024).toFixed(0)}KB`);
+        resolve(bestBlob);
       };
 
       img.onerror = () => {

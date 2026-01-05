@@ -105,9 +105,9 @@ export default function ListEventPage() {
     setIsSubmitting(true);
 
     try {
-      // Step 1: Compress and upload cover image
+      // Step 1: Compress and upload cover image (target: 600KB-1MB)
       setUploadProgress('Compressing image...');
-      const compressedBlob = await compressImage(coverFile, { maxSizeKB: 600 });
+      const compressedBlob = await compressImage(coverFile);
 
       setUploadProgress('Uploading image...');
       const uploadFormData = new FormData();

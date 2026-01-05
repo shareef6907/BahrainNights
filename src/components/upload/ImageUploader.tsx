@@ -3,6 +3,7 @@
 import { useState, useRef, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import Image from 'next/image';
+import { compressImage } from '@/lib/image-compression';
 
 type EntityType = 'venue' | 'event' | 'offer' | 'sponsor' | 'ad';
 type ImageType = 'logo' | 'cover' | 'gallery' | 'banner';
@@ -108,6 +109,11 @@ export function ImageUploader({
     reader.readAsDataURL(file);
 
     try {
+      // Compress image to target 600KB-1MB
+      console.log(`[ImageUploader] Original size: ${(file.size / 1024).toFixed(0)}KB`);
+      const compressedFile = await compressImage(file);
+      console.log(`[ImageUploader] Compressed size: ${(compressedFile.size / 1024).toFixed(0)}KB`);
+
       // Simulate upload progress
       const progressInterval = setInterval(() => {
         setProgress((prev) => {
@@ -120,7 +126,7 @@ export function ImageUploader({
       }, 200);
 
       const formData = new FormData();
-      formData.append('file', file);
+      formData.append('file', compressedFile);
       formData.append('entityType', entityType);
       formData.append('imageType', imageType);
       if (venueSlug) formData.append('venueSlug', venueSlug);

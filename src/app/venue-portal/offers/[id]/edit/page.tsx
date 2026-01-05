@@ -379,16 +379,6 @@ export default function EditOfferPage() {
 
       {/* Form */}
       <form onSubmit={handleSubmit} className="space-y-8">
-        {error && (
-          <motion.div
-            initial={{ opacity: 0, y: -10 }}
-            animate={{ opacity: 1, y: 0 }}
-            className="p-4 bg-red-500/20 border border-red-500/50 rounded-xl text-red-400"
-          >
-            {error}
-          </motion.div>
-        )}
-
         {/* Status */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
@@ -728,6 +718,17 @@ export default function EditOfferPage() {
             )}
           </div>
         </motion.div>
+
+        {/* Error Display */}
+        {error && (
+          <motion.div
+            initial={{ opacity: 0, y: -10 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="p-4 bg-red-500/20 border border-red-500/50 rounded-xl text-red-400"
+          >
+            {error}
+          </motion.div>
+        )}
 
         {/* Submit */}
         <motion.div

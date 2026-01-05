@@ -12,6 +12,7 @@ import {
   Trash2,
   Image as ImageIcon,
 } from 'lucide-react';
+import { compressImage } from '@/lib/image-compression';
 
 const MAX_IMAGES = 20;
 
@@ -85,22 +86,38 @@ export default function VenueImagesPage() {
           continue;
         }
 
-        // Validate file size (max 25MB)
-        if (file.size > 25 * 1024 * 1024) {
-          setMessage({ type: 'error', text: `${file.name} is too large (max 25MB)` });
+        // Validate file size (max 10MB before compression)
+        if (file.size > 10 * 1024 * 1024) {
+          setMessage({ type: 'error', text: `${file.name} is too large (max 10MB)` });
           setUploadProgress(prev => prev.map((p, idx) =>
             idx === i ? { ...p, status: 'error', progress: 100 } : p
           ));
           continue;
         }
 
+        // Update progress to show compressing
+        setUploadProgress(prev => prev.map((p, idx) =>
+          idx === i ? { ...p, progress: 20 } : p
+        ));
+
+        // Compress image to target 600KB-1MB
+        let compressedFile: File;
+        try {
+          console.log(`[Gallery] Compressing ${file.name}: ${(file.size / 1024).toFixed(0)}KB`);
+          compressedFile = await compressImage(file);
+          console.log(`[Gallery] Compressed to: ${(compressedFile.size / 1024).toFixed(0)}KB`);
+        } catch (compressError) {
+          console.error(`[Gallery] Compression failed for ${file.name}:`, compressError);
+          compressedFile = file; // Fall back to original if compression fails
+        }
+
         // Update progress to show uploading
         setUploadProgress(prev => prev.map((p, idx) =>
-          idx === i ? { ...p, progress: 30 } : p
+          idx === i ? { ...p, progress: 40 } : p
         ));
 
         const formData = new FormData();
-        formData.append('file', file);
+        formData.append('file', compressedFile);
         formData.append('imageType', 'gallery');
 
         // Update progress to show processing
@@ -267,7 +284,7 @@ export default function VenueImagesPage() {
                       : 'Click to upload images'}
                   </p>
                   <p className="text-gray-500 text-sm mt-1">
-                    PNG, JPG up to 25MB
+                    PNG, JPG up to 10MB (auto-compressed)
                   </p>
                 </div>
               </>

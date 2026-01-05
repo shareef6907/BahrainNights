@@ -18,6 +18,7 @@ import {
 } from 'lucide-react';
 import Link from 'next/link';
 import AdminLayout from '@/components/admin/AdminLayout';
+import { compressImage } from '@/lib/image-compression';
 
 export default function NewAdPage() {
   const router = useRouter();
@@ -92,12 +93,25 @@ export default function NewAdPage() {
     try {
       let imageUrl = '';
 
-      // Step 1: Upload image to S3 if provided
+      // Step 1: Compress and upload image to S3 if provided
       if (formData.adImage) {
+        setUploadProgress('Compressing image...');
+
+        // Compress image to target 600KB-1MB
+        let fileToUpload: File = formData.adImage;
+        try {
+          console.log(`[Ad] Compressing: ${(formData.adImage.size / 1024).toFixed(0)}KB`);
+          fileToUpload = await compressImage(formData.adImage);
+          console.log(`[Ad] Compressed to: ${(fileToUpload.size / 1024).toFixed(0)}KB`);
+        } catch (compressError) {
+          console.error('[Ad] Compression failed:', compressError);
+          // Continue with original file if compression fails
+        }
+
         setUploadProgress('Uploading image to S3...');
 
         const uploadFormData = new FormData();
-        uploadFormData.append('file', formData.adImage);
+        uploadFormData.append('file', fileToUpload);
         uploadFormData.append('entityType', 'ad');
         uploadFormData.append('imageType', 'banner');
         uploadFormData.append('processLocally', 'true');

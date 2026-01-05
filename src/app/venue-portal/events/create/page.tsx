@@ -18,6 +18,7 @@ import {
   MapPin,
 } from 'lucide-react';
 import AIWriterButton from '@/components/ai/AIWriterButton';
+import { compressImage } from '@/lib/image-compression';
 
 const CATEGORIES = [
   { value: 'dining', label: 'Dining & Restaurants' },
@@ -69,9 +70,9 @@ export default function CreateEventPage() {
       return;
     }
 
-    // Validate file size (max 25MB - will be compressed to 600KB)
-    if (file.size > 25 * 1024 * 1024) {
-      setMessage({ type: 'error', text: 'Image must be less than 25MB' });
+    // Validate file size (max 10MB before compression)
+    if (file.size > 10 * 1024 * 1024) {
+      setMessage({ type: 'error', text: 'Image must be less than 10MB' });
       return;
     }
 
@@ -79,8 +80,19 @@ export default function CreateEventPage() {
     setMessage(null);
 
     try {
+      // Compress image to target 600KB-1MB
+      console.log(`[Event] Compressing ${file.name}: ${(file.size / 1024).toFixed(0)}KB`);
+      let compressedFile: File;
+      try {
+        compressedFile = await compressImage(file);
+        console.log(`[Event] Compressed to: ${(compressedFile.size / 1024).toFixed(0)}KB`);
+      } catch (compressError) {
+        console.error('[Event] Compression failed:', compressError);
+        compressedFile = file; // Fall back to original if compression fails
+      }
+
       const formDataUpload = new FormData();
-      formDataUpload.append('file', file);
+      formDataUpload.append('file', compressedFile);
       formDataUpload.append('imageType', 'event');
 
       const response = await fetch('/api/venue-portal/upload', {
@@ -239,7 +251,7 @@ export default function CreateEventPage() {
                   </div>
                   <div className="text-center">
                     <p className="text-gray-400">Click to upload image</p>
-                    <p className="text-gray-500 text-sm">PNG, JPG up to 25MB</p>
+                    <p className="text-gray-500 text-sm">PNG, JPG up to 10MB (auto-compressed)</p>
                   </div>
                 </>
               )}

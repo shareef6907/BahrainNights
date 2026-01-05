@@ -21,6 +21,7 @@ import {
 } from 'lucide-react';
 import Link from 'next/link';
 import AIWriterButton from '@/components/ai/AIWriterButton';
+import { compressImage } from '@/lib/image-compression';
 
 interface VenueProfile {
   id: string;
@@ -149,15 +150,20 @@ export default function VenueProfilePage() {
     setPhotoError(false);
 
     try {
-      // Step 1: Get presigned URL for direct S3 upload
+      // Step 1: Compress image (target: 600KB-1MB)
+      console.log(`[Photo Upload] Original size: ${(file.size / 1024).toFixed(0)}KB`);
+      const compressedFile = await compressImage(file);
+      console.log(`[Photo Upload] Compressed size: ${(compressedFile.size / 1024).toFixed(0)}KB`);
+
+      // Step 2: Get presigned URL for direct S3 upload
       console.log(`[Photo Upload] Requesting presigned URL for ${imageType}...`);
       const presignResponse = await fetch('/api/venue-portal/upload/presign', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          fileName: file.name,
-          fileType: file.type,
-          fileSize: file.size,
+          fileName: compressedFile.name,
+          fileType: compressedFile.type,
+          fileSize: compressedFile.size,
           imageType: imageType,
         }),
       });
@@ -171,13 +177,13 @@ export default function VenueProfilePage() {
       const { presignedUrl, finalUrl } = await presignResponse.json();
       console.log(`[Photo Upload] Got presigned URL, uploading directly to S3...`);
 
-      // Step 2: Upload directly to S3 using presigned URL
+      // Step 3: Upload compressed file directly to S3 using presigned URL
       console.log(`[Photo Upload] Uploading to S3 with presigned URL...`);
       const uploadResponse = await fetch(presignedUrl, {
         method: 'PUT',
-        body: file,
+        body: compressedFile,
         headers: {
-          'Content-Type': file.type,
+          'Content-Type': compressedFile.type,
         },
         mode: 'cors',
       });

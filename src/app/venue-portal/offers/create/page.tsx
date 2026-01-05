@@ -18,6 +18,7 @@ import {
   CheckCircle,
 } from 'lucide-react';
 import AIWriterButton from '@/components/ai/AIWriterButton';
+import { compressImage } from '@/lib/image-compression';
 
 const offerTypes = [
   { value: 'ladies-night', label: 'Ladies Night', icon: Sparkles, color: 'pink' },
@@ -103,12 +104,29 @@ export default function CreateOfferPage() {
     const file = e.target.files?.[0];
     if (!file) return;
 
+    // Validate file size (max 10MB before compression)
+    if (file.size > 10 * 1024 * 1024) {
+      setError('Image must be less than 10MB');
+      return;
+    }
+
     setIsUploading(true);
     setError('');
 
     try {
+      // Compress image to target 600KB-1MB
+      console.log(`[Offer] Compressing ${file.name}: ${(file.size / 1024).toFixed(0)}KB`);
+      let compressedFile: File;
+      try {
+        compressedFile = await compressImage(file);
+        console.log(`[Offer] Compressed to: ${(compressedFile.size / 1024).toFixed(0)}KB`);
+      } catch (compressError) {
+        console.error('[Offer] Compression failed:', compressError);
+        compressedFile = file; // Fall back to original if compression fails
+      }
+
       const uploadFormData = new FormData();
-      uploadFormData.append('file', file);
+      uploadFormData.append('file', compressedFile);
 
       const response = await fetch('/api/venue-portal/upload', {
         method: 'POST',
@@ -221,16 +239,6 @@ export default function CreateOfferPage() {
 
       {/* Form */}
       <form onSubmit={handleSubmit} className="space-y-8">
-        {error && (
-          <motion.div
-            initial={{ opacity: 0, y: -10 }}
-            animate={{ opacity: 1, y: 0 }}
-            className="p-4 bg-red-500/20 border border-red-500/50 rounded-xl text-red-400"
-          >
-            {error}
-          </motion.div>
-        )}
-
         {/* Basic Info */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
@@ -544,6 +552,17 @@ export default function CreateOfferPage() {
             )}
           </div>
         </motion.div>
+
+        {/* Error Display */}
+        {error && (
+          <motion.div
+            initial={{ opacity: 0, y: -10 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="p-4 bg-red-500/20 border border-red-500/50 rounded-xl text-red-400"
+          >
+            {error}
+          </motion.div>
+        )}
 
         {/* Submit */}
         <motion.div
