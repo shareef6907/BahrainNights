@@ -170,6 +170,10 @@ export default function AdminVenueChangesPage() {
     return String(value);
   };
 
+  const isImageField = (field: string): boolean => {
+    return ['logo_url', 'cover_image_url'].includes(field);
+  };
+
   if (error === 'Unauthorized access') {
     return (
       <div className="flex flex-col items-center justify-center min-h-[400px] text-center">
@@ -308,13 +312,31 @@ export default function AdminVenueChangesPage() {
                     <h4 className="text-sm font-medium text-gray-300 mb-3">Requested Changes</h4>
                     <div className="bg-white/5 rounded-xl p-4 space-y-3">
                       {Object.entries(request.changes).map(([field, value]) => (
-                        <div key={field} className="flex flex-col sm:flex-row sm:items-start gap-2">
-                          <span className="text-sm font-medium text-yellow-400 min-w-[150px]">
+                        <div key={field} className="flex flex-col gap-2">
+                          <span className="text-sm font-medium text-yellow-400">
                             {formatFieldName(field)}:
                           </span>
-                          <span className="text-sm text-gray-300 break-all">
-                            {formatValue(value)}
-                          </span>
+                          {isImageField(field) && typeof value === 'string' ? (
+                            <div className="flex flex-col gap-2">
+                              <div className={`relative ${field === 'logo_url' ? 'w-24 h-24' : 'w-full max-w-md h-32'} rounded-xl bg-white/5 border border-white/10 overflow-hidden`}>
+                                <img
+                                  src={value}
+                                  alt={formatFieldName(field)}
+                                  className="w-full h-full object-cover"
+                                  onError={(e) => {
+                                    const target = e.target as HTMLImageElement;
+                                    target.style.display = 'none';
+                                    target.parentElement!.innerHTML = '<span class="flex items-center justify-center w-full h-full text-xs text-gray-500">Image not available</span>';
+                                  }}
+                                />
+                              </div>
+                              <span className="text-xs text-gray-500 break-all">{value}</span>
+                            </div>
+                          ) : (
+                            <span className="text-sm text-gray-300 break-all">
+                              {formatValue(value)}
+                            </span>
+                          )}
                         </div>
                       ))}
                     </div>

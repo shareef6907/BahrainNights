@@ -72,6 +72,8 @@ export default function VenueProfilePage() {
   // Photo upload states
   const [profilePhoto, setProfilePhoto] = useState<string | null>(null);
   const [coverPhoto, setCoverPhoto] = useState<string | null>(null);
+  const [pendingProfilePhoto, setPendingProfilePhoto] = useState<string | null>(null);
+  const [pendingCoverPhoto, setPendingCoverPhoto] = useState<string | null>(null);
   const [isUploadingProfile, setIsUploadingProfile] = useState(false);
   const [isUploadingCover, setIsUploadingCover] = useState(false);
   const [uploadMessage, setUploadMessage] = useState<{ type: 'success' | 'error'; text: string } | null>(null);
@@ -108,6 +110,17 @@ export default function VenueProfilePage() {
         if (pendingResponse.ok) {
           const pendingData = await pendingResponse.json();
           setPendingRequest(pendingData.pendingRequest);
+
+          // Load pending photos from change request
+          if (pendingData.pendingRequest?.changes) {
+            const changes = pendingData.pendingRequest.changes;
+            if (changes.logo_url) {
+              setPendingProfilePhoto(changes.logo_url as string);
+            }
+            if (changes.cover_image_url) {
+              setPendingCoverPhoto(changes.cover_image_url as string);
+            }
+          }
         }
       } catch (error) {
         console.error('Failed to load profile:', error);
@@ -126,48 +139,71 @@ export default function VenueProfilePage() {
 
   const handlePhotoUpload = async (file: File, type: 'profile' | 'cover') => {
     const setUploading = type === 'profile' ? setIsUploadingProfile : setIsUploadingCover;
-    const setPhoto = type === 'profile' ? setProfilePhoto : setCoverPhoto;
+    const setPendingPhoto = type === 'profile' ? setPendingProfilePhoto : setPendingCoverPhoto;
     const setPhotoError = type === 'profile' ? setProfilePhotoError : setCoverPhotoError;
     const imageType = type === 'profile' ? 'logo' : 'cover';
 
+    console.log(`[Photo Upload] Starting ${type} photo upload...`);
     setUploading(true);
     setUploadMessage(null);
-    setPhotoError(false); // Reset error state for new upload
+    setPhotoError(false);
 
     try {
-      // Upload to S3
-      const uploadFormData = new FormData();
-      uploadFormData.append('file', file);
-      uploadFormData.append('imageType', imageType);
-
-      const uploadResponse = await fetch('/api/venue-portal/upload', {
+      // Step 1: Get presigned URL for direct S3 upload
+      console.log(`[Photo Upload] Requesting presigned URL for ${imageType}...`);
+      const presignResponse = await fetch('/api/venue-portal/upload/presign', {
         method: 'POST',
-        body: uploadFormData,
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          fileName: file.name,
+          fileType: file.type,
+          fileSize: file.size,
+          imageType: imageType,
+        }),
+      });
+
+      if (!presignResponse.ok) {
+        const error = await presignResponse.json();
+        console.error('[Photo Upload] Presign failed:', error);
+        throw new Error(error.error || 'Failed to prepare upload');
+      }
+
+      const { presignedUrl, finalUrl } = await presignResponse.json();
+      console.log(`[Photo Upload] Got presigned URL, uploading directly to S3...`);
+
+      // Step 2: Upload directly to S3 using presigned URL
+      const uploadResponse = await fetch(presignedUrl, {
+        method: 'PUT',
+        body: file,
+        headers: {
+          'Content-Type': file.type,
+        },
       });
 
       if (!uploadResponse.ok) {
-        const error = await uploadResponse.json();
-        throw new Error(error.error || 'Upload failed');
+        console.error('[Photo Upload] S3 upload failed:', uploadResponse.status);
+        throw new Error('Failed to upload to storage');
       }
 
-      const uploadData = await uploadResponse.json();
-      const imageUrl = uploadData.url;
+      console.log(`[Photo Upload] S3 upload successful, URL: ${finalUrl}`);
 
-      // Update local state with new photo
-      setPhoto(imageUrl);
+      // Update pending photo state to show immediately
+      setPendingPhoto(finalUrl);
 
-      // Submit the photo URL change for admin approval
+      // Step 3: Submit the photo URL change for admin approval
       const fieldName = type === 'profile' ? 'logo_url' : 'cover_image_url';
+      console.log(`[Photo Upload] Submitting change request for field: ${fieldName}`);
       const changeResponse = await fetch('/api/venue-portal/profile/request-change', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          changes: { [fieldName]: imageUrl }
+          changes: { [fieldName]: finalUrl }
         }),
       });
 
       if (changeResponse.ok) {
         const changeData = await changeResponse.json();
+        console.log('[Photo Upload] Change request submitted:', changeData);
         setPendingRequest(changeData.request);
         setUploadMessage({
           type: 'success',
@@ -175,10 +211,11 @@ export default function VenueProfilePage() {
         });
       } else {
         const error = await changeResponse.json();
+        console.error('[Photo Upload] Change request failed:', error);
         throw new Error(error.error || 'Failed to submit photo change');
       }
     } catch (error) {
-      console.error('Photo upload error:', error);
+      console.error('[Photo Upload] Error:', error);
       setUploadMessage({
         type: 'error',
         text: error instanceof Error ? error.message : 'Failed to upload photo'
@@ -201,11 +238,11 @@ export default function VenueProfilePage() {
         return;
       }
 
-      // Validate file size (4MB max)
-      if (file.size > 4 * 1024 * 1024) {
+      // Validate file size (20MB max - direct S3 upload)
+      if (file.size > 20 * 1024 * 1024) {
         setUploadMessage({
           type: 'error',
-          text: 'File too large. Maximum 4MB allowed.'
+          text: 'File too large. Maximum 20MB allowed.'
         });
         return;
       }
@@ -371,13 +408,22 @@ export default function VenueProfilePage() {
             </label>
             <div className="relative">
               <div className="w-32 h-32 rounded-2xl bg-white/5 border border-white/10 overflow-hidden flex items-center justify-center relative">
-                {profilePhoto && !profilePhotoError ? (
-                  <img
-                    src={profilePhoto}
-                    alt="Profile"
-                    className="w-full h-full object-cover"
-                    onError={() => setProfilePhotoError(true)}
-                  />
+                {(pendingProfilePhoto || profilePhoto) && !profilePhotoError ? (
+                  <>
+                    <img
+                      src={pendingProfilePhoto || profilePhoto || ''}
+                      alt="Profile"
+                      className="w-full h-full object-cover"
+                      onError={() => setProfilePhotoError(true)}
+                    />
+                    {pendingProfilePhoto && (
+                      <div className="absolute top-1 left-1 right-1">
+                        <span className="px-1.5 py-0.5 bg-yellow-500/90 text-black text-[10px] font-bold rounded">
+                          PENDING
+                        </span>
+                      </div>
+                    )}
+                  </>
                 ) : (
                   <Camera className="w-10 h-10 text-gray-500" />
                 )}
@@ -402,7 +448,7 @@ export default function VenueProfilePage() {
               </label>
             </div>
             <p className="text-xs text-gray-500 mt-2">
-              Square image recommended. Max 4MB.
+              Square image recommended. Max 20MB.
             </p>
           </div>
 
@@ -413,13 +459,22 @@ export default function VenueProfilePage() {
             </label>
             <div className="relative">
               <div className="w-full h-32 rounded-2xl bg-white/5 border border-white/10 overflow-hidden flex items-center justify-center relative">
-                {coverPhoto && !coverPhotoError ? (
-                  <img
-                    src={coverPhoto}
-                    alt="Cover"
-                    className="w-full h-full object-cover"
-                    onError={() => setCoverPhotoError(true)}
-                  />
+                {(pendingCoverPhoto || coverPhoto) && !coverPhotoError ? (
+                  <>
+                    <img
+                      src={pendingCoverPhoto || coverPhoto || ''}
+                      alt="Cover"
+                      className="w-full h-full object-cover"
+                      onError={() => setCoverPhotoError(true)}
+                    />
+                    {pendingCoverPhoto && (
+                      <div className="absolute top-1 left-1">
+                        <span className="px-1.5 py-0.5 bg-yellow-500/90 text-black text-[10px] font-bold rounded">
+                          PENDING
+                        </span>
+                      </div>
+                    )}
+                  </>
                 ) : (
                   <Camera className="w-10 h-10 text-gray-500" />
                 )}
@@ -444,7 +499,7 @@ export default function VenueProfilePage() {
               </label>
             </div>
             <p className="text-xs text-gray-500 mt-2">
-              Landscape image (16:9) recommended. Max 4MB.
+              Landscape image (16:9) recommended. Max 20MB.
             </p>
           </div>
         </div>

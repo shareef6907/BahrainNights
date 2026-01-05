@@ -183,12 +183,15 @@ export async function POST(request: NextRequest) {
     // Lambda adds: logo watermark, compression, WebP conversion, content moderation
     await uploadToS3(buffer, uploadKey, file.type);
 
-    // Return the processed URL (Lambda will create this file)
+    // Return the raw upload URL for immediate preview
+    // The processed URL will be available after Lambda finishes (within seconds)
+    const rawUrl = `${S3_BASE_URL}/${uploadKey}`;
     const processedUrl = `${S3_BASE_URL}/${processedKey}`;
 
     return NextResponse.json({
       success: true,
-      url: processedUrl,        // Final URL after Lambda processing
+      url: rawUrl,              // Use raw URL for immediate availability
+      processedUrl: processedUrl, // Will be available after Lambda processing
       uploadKey: uploadKey,     // Where we uploaded the raw file
       processedKey: processedKey,
       width,
