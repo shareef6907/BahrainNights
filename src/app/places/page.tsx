@@ -394,12 +394,21 @@ function PlacesPageContent() {
             </p>
           </div>
 
-          {/* Ad Banner - Only show on "All Places" tab */}
-          {selectedCategory === 'all' && (
-            <div className="mb-8">
-              <AdBanner targetPage="places" placement="banner" limit={5} />
-            </div>
-          )}
+          {/* Ad Banner - Show category-specific ads */}
+          <div className="mb-8">
+            <AdBanner
+              targetPage={
+                selectedCategory === 'all' ? 'places' :
+                selectedCategory === 'restaurant' ? 'restaurants' :
+                selectedCategory === 'cafe' ? 'cafes' :
+                selectedCategory === 'lounge' ? 'lounges' :
+                selectedCategory === 'nightclub' ? 'nightclubs' :
+                'places'
+              }
+              placement="banner"
+              limit={5}
+            />
+          </div>
 
           {/* Empty State */}
           {placesData.length === 0 && !loading && (
@@ -439,10 +448,18 @@ function PlacesPageContent() {
                     tonightOffers={[]}
                   />
 
-                  {/* Sidebar Ad - Only show on "All Places" tab */}
-                  {selectedCategory === 'all' && (
-                    <AdBanner targetPage="places" placement="sidebar" />
-                  )}
+                  {/* Sidebar Ad - Show category-specific ads */}
+                  <AdBanner
+                    targetPage={
+                      selectedCategory === 'all' ? 'places' :
+                      selectedCategory === 'restaurant' ? 'restaurants' :
+                      selectedCategory === 'cafe' ? 'cafes' :
+                      selectedCategory === 'lounge' ? 'lounges' :
+                      selectedCategory === 'nightclub' ? 'nightclubs' :
+                      'places'
+                    }
+                    placement="sidebar"
+                  />
                 </div>
               )}
             </div>
