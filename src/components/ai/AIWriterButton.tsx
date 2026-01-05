@@ -3,19 +3,33 @@
 import { useState } from 'react';
 import { Sparkles, Loader2, AlertCircle, Check } from 'lucide-react';
 
+type ContentType = 'event' | 'venue' | 'offer';
+
 interface AIWriterButtonProps {
-  title: string;
-  category?: string;
-  venue?: string;
-  date?: string;
-  time?: string;
+  // Common props
+  contentType?: ContentType;
   existingDescription?: string;
   onGenerated: (description: string) => void;
   disabled?: boolean;
   className?: string;
+  // Event props
+  title?: string;
+  category?: string;
+  venue?: string;
+  date?: string;
+  time?: string;
+  // Venue props
+  venueName?: string;
+  venueCategory?: string;
+  location?: string;
+  // Offer props
+  offerType?: string;
+  daysAvailable?: string[];
+  whatsIncluded?: string[];
 }
 
 export default function AIWriterButton({
+  contentType = 'event',
   title,
   category,
   venue,
@@ -25,14 +39,33 @@ export default function AIWriterButton({
   onGenerated,
   disabled = false,
   className = '',
+  venueName,
+  venueCategory,
+  location,
+  offerType,
+  daysAvailable,
+  whatsIncluded,
 }: AIWriterButtonProps) {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState(false);
 
+  const getRequiredFieldError = () => {
+    switch (contentType) {
+      case 'venue':
+        return !venueName?.trim() ? 'Please enter venue name first' : null;
+      case 'offer':
+        return !title?.trim() ? 'Please enter offer title first' : null;
+      case 'event':
+      default:
+        return !title?.trim() ? 'Please enter event title first' : null;
+    }
+  };
+
   const handleGenerate = async () => {
-    if (!title.trim()) {
-      setError('Please enter an event title first');
+    const fieldError = getRequiredFieldError();
+    if (fieldError) {
+      setError(fieldError);
       setTimeout(() => setError(null), 3000);
       return;
     }
@@ -48,12 +81,22 @@ export default function AIWriterButton({
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
+          contentType,
+          // Event fields
           title,
           category,
           venue,
           date,
           time,
           existingDescription,
+          // Venue fields
+          venueName,
+          venueCategory,
+          location,
+          // Offer fields
+          offerType,
+          daysAvailable,
+          whatsIncluded,
         }),
       });
 
@@ -136,6 +179,7 @@ export default function AIWriterButton({
 
 // Compact version for inline use
 export function AIWriterButtonCompact({
+  contentType = 'event',
   title,
   category,
   venue,
@@ -144,13 +188,32 @@ export function AIWriterButtonCompact({
   existingDescription,
   onGenerated,
   disabled = false,
+  venueName,
+  venueCategory,
+  location,
+  offerType,
+  daysAvailable,
+  whatsIncluded,
 }: Omit<AIWriterButtonProps, 'className'>) {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
+  const getRequiredFieldError = () => {
+    switch (contentType) {
+      case 'venue':
+        return !venueName?.trim() ? 'Enter venue name' : null;
+      case 'offer':
+        return !title?.trim() ? 'Enter offer title' : null;
+      case 'event':
+      default:
+        return !title?.trim() ? 'Enter title first' : null;
+    }
+  };
+
   const handleGenerate = async () => {
-    if (!title.trim()) {
-      setError('Enter title first');
+    const fieldError = getRequiredFieldError();
+    if (fieldError) {
+      setError(fieldError);
       setTimeout(() => setError(null), 2000);
       return;
     }
@@ -162,7 +225,21 @@ export function AIWriterButtonCompact({
       const response = await fetch('/api/ai/generate-description', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ title, category, venue, date, time, existingDescription }),
+        body: JSON.stringify({
+          contentType,
+          title,
+          category,
+          venue,
+          date,
+          time,
+          existingDescription,
+          venueName,
+          venueCategory,
+          location,
+          offerType,
+          daysAvailable,
+          whatsIncluded,
+        }),
       });
 
       const data = await response.json();
@@ -190,14 +267,14 @@ export function AIWriterButtonCompact({
           : 'bg-purple-500/20 text-purple-300 hover:bg-purple-500/30 border border-purple-500/30'
         }
       `}
-      title={error || (existingDescription ? 'Enhance with AI' : 'Generate with AI')}
+      title={error || (existingDescription ? 'Enhance with AI (SEO Optimized)' : 'Write with AI (SEO Optimized)')}
     >
       {isLoading ? (
         <Loader2 className="w-3 h-3 animate-spin" />
       ) : (
         <Sparkles className="w-3 h-3" />
       )}
-      <span>{error || (isLoading ? 'Writing...' : 'AI')}</span>
+      <span>{error || (isLoading ? 'Writing...' : 'AI SEO')}</span>
     </button>
   );
 }

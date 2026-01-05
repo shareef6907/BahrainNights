@@ -353,7 +353,7 @@ export interface Database {
           title: string;
           slug: string;
           description: string;
-          offer_type: 'ladies-night' | 'brunch' | 'happy-hour' | 'special-deal';
+          offer_type: 'ladies-night' | 'brunch' | 'happy-hour' | 'special-deal' | 'buy1get1' | 'buffet';
           days_available: string[];
           start_time: string;
           end_time: string;
@@ -376,7 +376,7 @@ export interface Database {
           title: string;
           slug: string;
           description: string;
-          offer_type: 'ladies-night' | 'brunch' | 'happy-hour' | 'special-deal';
+          offer_type: 'ladies-night' | 'brunch' | 'happy-hour' | 'special-deal' | 'buy1get1' | 'buffet';
           days_available: string[];
           start_time: string;
           end_time: string;
@@ -399,7 +399,7 @@ export interface Database {
           title?: string;
           slug?: string;
           description?: string;
-          offer_type?: 'ladies-night' | 'brunch' | 'happy-hour' | 'special-deal';
+          offer_type?: 'ladies-night' | 'brunch' | 'happy-hour' | 'special-deal' | 'buy1get1' | 'buffet';
           days_available?: string[];
           start_time?: string;
           end_time?: string;

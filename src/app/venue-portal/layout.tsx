@@ -15,6 +15,7 @@ import {
   ChevronRight,
   Clock,
   MapPin,
+  Tag,
 } from 'lucide-react';
 
 interface VenueSession {
@@ -32,6 +33,7 @@ const sidebarLinks = [
   { href: '/venue-portal/location', label: 'Location', icon: MapPin },
   { href: '/venue-portal/images', label: 'Gallery Images', icon: Images },
   { href: '/venue-portal/events', label: 'My Events', icon: Calendar },
+  { href: '/venue-portal/offers', label: 'My Offers', icon: Tag },
 ];
 
 export default function VenuePortalLayout({

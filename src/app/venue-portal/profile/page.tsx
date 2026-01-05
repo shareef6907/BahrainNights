@@ -18,6 +18,7 @@ import {
   Info,
 } from 'lucide-react';
 import Link from 'next/link';
+import AIWriterButton from '@/components/ai/AIWriterButton';
 
 interface VenueProfile {
   id: string;
@@ -239,9 +240,19 @@ export default function VenueProfilePage() {
       >
         {/* Description */}
         <div>
-          <label className="block text-sm font-medium text-gray-300 mb-2">
-            Description
-          </label>
+          <div className="flex items-center justify-between mb-2">
+            <label className="block text-sm font-medium text-gray-300">
+              Description
+            </label>
+            <AIWriterButton
+              contentType="venue"
+              venueName={venue?.name}
+              venueCategory={venue?.slug?.includes('restaurant') ? 'restaurant' : venue?.slug?.includes('cafe') ? 'cafe' : venue?.slug?.includes('bar') ? 'bar' : 'venue'}
+              location={formData.area}
+              existingDescription={formData.description}
+              onGenerated={(description) => setFormData(prev => ({ ...prev, description }))}
+            />
+          </div>
           <textarea
             name="description"
             value={formData.description}
