@@ -579,11 +579,11 @@ export default function HomePageClient({ initialMovies, initialStats, initialTod
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.4 }}
           >
-            <span className="bg-gradient-to-r from-yellow-400 via-orange-500 to-pink-500 bg-clip-text text-transparent">
-              Discover Events, Nightlife
-            </span>
+            <span className="text-white">Your Guide to</span>
             <br />
-            <span className="text-white">&amp; Things to Do in Bahrain</span>
+            <span className="bg-gradient-to-r from-yellow-400 via-orange-500 to-pink-500 bg-clip-text text-transparent">
+              What&apos;s Happening in Bahrain
+            </span>
           </motion.h1>
 
           <motion.p
