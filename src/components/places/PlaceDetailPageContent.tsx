@@ -27,10 +27,20 @@ interface VenueEvent {
   category: string;
 }
 
+interface VenueOffer {
+  id: string;
+  title: string;
+  day: string;
+  description: string;
+  validUntil?: string;
+  type?: 'ladies-night' | 'happy-hour' | 'brunch' | 'special';
+}
+
 interface PlaceDetailPageContentProps {
   venue: Venue;
   similarVenues: Venue[];
   events?: VenueEvent[];
+  offers?: VenueOffer[];
 }
 
 const categoryColors: Record<string, string> = {
@@ -84,7 +94,7 @@ function venueToPlace(venue: Venue): Place {
   };
 }
 
-export default function PlaceDetailPageContent({ venue, similarVenues, events = [] }: PlaceDetailPageContentProps) {
+export default function PlaceDetailPageContent({ venue, similarVenues, events = [], offers = [] }: PlaceDetailPageContentProps) {
   const [shareModalOpen, setShareModalOpen] = useState(false);
 
   // Parse opening hours from JSON
@@ -223,6 +233,8 @@ export default function PlaceDetailPageContent({ venue, similarVenues, events = 
               {venue.features && venue.features.length > 0 && (
                 <PlaceFeatures features={venue.features} />
               )}
+              {/* Current Offers - shown before events */}
+              <PlaceOffers offers={offers} />
               {/* Upcoming Events at this venue */}
               <PlaceEvents
                 events={events.map(e => ({
@@ -232,7 +244,6 @@ export default function PlaceDetailPageContent({ venue, similarVenues, events = 
                 venueName={venue.name}
                 venueSlug={venue.slug}
               />
-              <PlaceOffers offers={[]} />
             </div>
 
             {/* Right Column */}

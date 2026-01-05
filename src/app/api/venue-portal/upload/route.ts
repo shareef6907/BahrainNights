@@ -2,8 +2,8 @@ import { NextRequest, NextResponse } from 'next/server';
 import { cookies } from 'next/headers';
 import { jwtVerify } from 'jose';
 import { S3Client, PutObjectCommand } from '@aws-sdk/client-s3';
-import sharp from 'sharp';
 import { getAdminClient } from '@/lib/supabase/server';
+import { processImage } from '@/lib/image-processing';
 
 export const dynamic = 'force-dynamic';
 export const maxDuration = 60;
@@ -69,38 +69,6 @@ async function getVenueFromSession() {
   }
 }
 
-/**
- * Upload image to S3
- */
-async function uploadToS3(
-  buffer: Buffer,
-  key: string,
-  contentType: string
-): Promise<string> {
-  await s3Client.send(
-    new PutObjectCommand({
-      Bucket: BUCKET,
-      Key: key,
-      Body: buffer,
-      ContentType: contentType,
-    })
-  );
-
-  return `${S3_BASE_URL}/${key}`;
-}
-
-/**
- * Get file extension from MIME type
- */
-function getExtension(mimeType: string): string {
-  const map: Record<string, string> = {
-    'image/jpeg': 'jpg',
-    'image/png': 'png',
-    'image/webp': 'webp',
-    'image/gif': 'gif',
-  };
-  return map[mimeType] || 'jpg';
-}
 
 export async function POST(request: NextRequest) {
   try {
@@ -143,61 +111,63 @@ export async function POST(request: NextRequest) {
     const arrayBuffer = await file.arrayBuffer();
     const buffer = Buffer.from(arrayBuffer);
 
-    // Get image dimensions for response
-    const metadata = await sharp(buffer).metadata();
-    const width = metadata.width || 0;
-    const height = metadata.height || 0;
-
-    // Get file extension
-    const extension = getExtension(file.type);
+    // Get timestamp for unique filenames
     const timestamp = Date.now();
 
-    // Generate S3 keys - upload to 'uploads/' folder to trigger Lambda processing
-    // Lambda will process and move to 'processed/' folder with logo watermark
-    let uploadKey: string;
+    // Generate S3 key - upload directly to 'processed/' folder
     let processedKey: string;
 
     switch (imageType) {
       case 'logo':
-        // Logos don't get watermarked by Lambda, so upload directly to processed
-        uploadKey = `uploads/venues/${venue.venueSlug}/logo.${extension}`;
         processedKey = `processed/venues/${venue.venueSlug}/logo.webp`;
         break;
       case 'cover':
-        uploadKey = `uploads/venues/${venue.venueSlug}/cover.${extension}`;
         processedKey = `processed/venues/${venue.venueSlug}/cover.webp`;
         break;
       case 'event':
         const eventSlug = formData.get('eventSlug') as string || `event-${timestamp}`;
-        uploadKey = `uploads/events/${venue.venueSlug}/${eventSlug}/cover.${extension}`;
         processedKey = `processed/events/${venue.venueSlug}/${eventSlug}/cover.webp`;
+        break;
+      case 'offer':
+        const offerSlug = formData.get('offerSlug') as string || `offer-${timestamp}`;
+        processedKey = `processed/offers/${venue.venueSlug}/${offerSlug}.webp`;
         break;
       case 'gallery':
       default:
-        uploadKey = `uploads/venues/${venue.venueSlug}/gallery/${timestamp}.${extension}`;
         processedKey = `processed/venues/${venue.venueSlug}/gallery/${timestamp}.webp`;
         break;
     }
 
-    // Upload raw file to S3 - Lambda will process it
-    // Lambda adds: logo watermark, compression, WebP conversion, content moderation
-    await uploadToS3(buffer, uploadKey, file.type);
+    // Process image locally with Sharp (compression, resize, convert to WebP)
+    const processed = await processImage(buffer, {
+      addWatermark: false,
+      format: 'webp',
+      quality: 80,
+      maxWidth: 1920,
+      maxHeight: 1080,
+    });
 
-    // Return the raw upload URL for immediate preview
-    // The processed URL will be available after Lambda finishes (within seconds)
-    const rawUrl = `${S3_BASE_URL}/${uploadKey}`;
+    // Upload processed image directly to S3
+    await s3Client.send(
+      new PutObjectCommand({
+        Bucket: BUCKET,
+        Key: processedKey,
+        Body: processed.buffer,
+        ContentType: 'image/webp',
+        CacheControl: 'public, max-age=31536000',
+      })
+    );
+
     const processedUrl = `${S3_BASE_URL}/${processedKey}`;
 
     return NextResponse.json({
       success: true,
-      url: rawUrl,              // Use raw URL for immediate availability
-      processedUrl: processedUrl, // Will be available after Lambda processing
-      uploadKey: uploadKey,     // Where we uploaded the raw file
-      processedKey: processedKey,
-      width,
-      height,
+      url: processedUrl,
+      key: processedKey,
+      width: processed.width,
+      height: processed.height,
       originalSize: file.size,
-      processing: true,         // Indicates Lambda is processing async
+      processedSize: processed.size,
     });
   } catch (error) {
     console.error('Venue upload error:', error);

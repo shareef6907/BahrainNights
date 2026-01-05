@@ -356,3 +356,60 @@ export async function getVenueEvents(venueName: string): Promise<{
     category: event.category || 'general',
   }));
 }
+
+// Get active offers for a venue
+export async function getVenueOffers(venueId: string): Promise<{
+  id: string;
+  title: string;
+  day: string;
+  description: string;
+  validUntil?: string;
+  type?: 'ladies-night' | 'happy-hour' | 'brunch' | 'special';
+}[]> {
+  const supabase = getAdminClient();
+  const today = new Date().toISOString().split('T')[0];
+
+  const { data, error } = await supabase
+    .from('offers')
+    .select('id, title, description, offer_type, days_available, valid_until, is_ongoing')
+    .eq('venue_id', venueId)
+    .eq('status', 'active')
+    .or(`is_ongoing.eq.true,valid_until.gte.${today}`)
+    .order('created_at', { ascending: false })
+    .limit(10);
+
+  if (error) {
+    console.error('Error fetching venue offers:', error);
+    return [];
+  }
+
+  // Map offer_type to PlaceOffer type
+  const typeMap: Record<string, 'ladies-night' | 'happy-hour' | 'brunch' | 'special'> = {
+    'ladies-night': 'ladies-night',
+    'happy-hour': 'happy-hour',
+    'brunch': 'brunch',
+    'special-deal': 'special',
+    'buy1get1': 'special',
+    'buffet': 'special',
+  };
+
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  return (data || []).map((offer: any) => ({
+    id: offer.id,
+    title: offer.title,
+    description: offer.description || '',
+    day: Array.isArray(offer.days_available) && offer.days_available.length > 0
+      ? offer.days_available.join(', ')
+      : 'Daily',
+    validUntil: offer.is_ongoing
+      ? undefined
+      : offer.valid_until
+        ? new Date(offer.valid_until).toLocaleDateString('en-US', {
+            month: 'short',
+            day: 'numeric',
+            year: 'numeric',
+          })
+        : undefined,
+    type: typeMap[offer.offer_type] || 'special',
+  }));
+}
