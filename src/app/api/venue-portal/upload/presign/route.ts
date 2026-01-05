@@ -122,20 +122,23 @@ export async function POST(request: NextRequest) {
     // Generate S3 key based on image type
     // For logo and cover, upload directly to final location (no Lambda processing needed)
     // These don't get watermarked
+    // IMPORTANT: Include timestamp in filename to bust browser/CDN cache on updates
     let s3Key: string;
 
     switch (imageType) {
       case 'logo':
         // Profile photos go directly to processed folder (publicly accessible) - NO watermark
-        s3Key = `processed/venues/${venue.venueSlug}/logo.${extension}`;
+        // Include timestamp to bust cache when logo is updated
+        s3Key = `processed/venues/${venue.venueSlug}/logo-${timestamp}.${extension}`;
         break;
       case 'cover':
         // Cover photos go directly to processed folder (publicly accessible) - NO watermark
-        s3Key = `processed/venues/${venue.venueSlug}/cover.${extension}`;
+        // Include timestamp to bust cache when cover is updated
+        s3Key = `processed/venues/${venue.venueSlug}/cover-${timestamp}.${extension}`;
         break;
       case 'event':
         const eventSlug = body.eventSlug || `event-${timestamp}`;
-        s3Key = `processed/events/${venue.venueSlug}/${eventSlug}/cover.${extension}`;
+        s3Key = `processed/events/${venue.venueSlug}/${eventSlug}/cover-${timestamp}.${extension}`;
         break;
       case 'gallery':
       default:
