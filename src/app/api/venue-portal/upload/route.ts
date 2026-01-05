@@ -114,60 +114,71 @@ export async function POST(request: NextRequest) {
     // Get timestamp for unique filenames
     const timestamp = Date.now();
 
-    // Generate S3 key - upload directly to 'processed/' folder
-    let processedKey: string;
+    // For gallery images: upload to 'uploads/' folder so Lambda can add watermark
+    // For other types: upload directly to 'processed/' folder (no watermark needed)
+    const isGallery = imageType === 'gallery';
+
+    let s3Key: string;
 
     switch (imageType) {
       case 'logo':
-        processedKey = `processed/venues/${venue.venueSlug}/logo.webp`;
+        s3Key = `processed/venues/${venue.venueSlug}/logo.webp`;
         break;
       case 'cover':
-        processedKey = `processed/venues/${venue.venueSlug}/cover.webp`;
+        s3Key = `processed/venues/${venue.venueSlug}/cover.webp`;
         break;
       case 'event':
         const eventSlug = formData.get('eventSlug') as string || `event-${timestamp}`;
-        processedKey = `processed/events/${venue.venueSlug}/${eventSlug}/cover.webp`;
+        s3Key = `processed/events/${venue.venueSlug}/${eventSlug}/cover.webp`;
         break;
       case 'offer':
         const offerSlug = formData.get('offerSlug') as string || `offer-${timestamp}`;
-        processedKey = `processed/offers/${venue.venueSlug}/${offerSlug}.webp`;
+        s3Key = `processed/offers/${venue.venueSlug}/${offerSlug}.webp`;
         break;
       case 'gallery':
       default:
-        processedKey = `processed/venues/${venue.venueSlug}/gallery/${timestamp}.webp`;
+        // Gallery images go to uploads/ folder for Lambda watermarking
+        s3Key = `uploads/venues/${venue.venueSlug}/gallery/${timestamp}.webp`;
         break;
     }
 
     // Process image locally with Sharp (compression, resize, convert to WebP)
     const processed = await processImage(buffer, {
-      addWatermark: false,
+      addWatermark: false, // Watermark is added by Lambda for gallery images
       format: 'webp',
       quality: 80,
       maxWidth: 1920,
       maxHeight: 1080,
     });
 
-    // Upload processed image directly to S3
+    // Upload image to S3
     await s3Client.send(
       new PutObjectCommand({
         Bucket: BUCKET,
-        Key: processedKey,
+        Key: s3Key,
         Body: processed.buffer,
         ContentType: 'image/webp',
         CacheControl: 'public, max-age=31536000',
       })
     );
 
-    const processedUrl = `${S3_BASE_URL}/${processedKey}`;
+    // For gallery images, Lambda will process and move to 'processed/' folder
+    // Return the final URL where the image will be available
+    const finalKey = isGallery
+      ? s3Key.replace('uploads/', 'processed/')
+      : s3Key;
+    const finalUrl = `${S3_BASE_URL}/${finalKey}`;
 
     return NextResponse.json({
       success: true,
-      url: processedUrl,
-      key: processedKey,
+      url: finalUrl,
+      key: finalKey,
       width: processed.width,
       height: processed.height,
       originalSize: file.size,
       processedSize: processed.size,
+      // Let client know if Lambda processing is pending
+      lambdaProcessing: isGallery,
     });
   } catch (error) {
     console.error('Venue upload error:', error);

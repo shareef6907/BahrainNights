@@ -179,9 +179,12 @@ export const handler = async (event) => {
       // 4. Get dimensions
       const metadata = await sharp(resizedBuffer).metadata();
 
-      // 5. Apply watermark (skip for logos, banners, ads, sliders)
+      // 5. Apply watermark ONLY for gallery images
+      // Logo, cover, banner, event, offer - NO watermark
+      // Gallery - YES watermark (venue portal gallery uploads)
       let finalBuffer;
-      if (imageType === 'logo' || imageType === 'banner') {
+      if (imageType !== 'gallery') {
+        // No watermark for non-gallery images
         finalBuffer = await sharp(resizedBuffer)
           .webp({ quality: quality })
           .toBuffer();
