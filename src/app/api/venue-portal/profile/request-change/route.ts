@@ -131,12 +131,24 @@ export async function POST(request: NextRequest) {
     const existing = existingRequest as ExistingRequest | null;
 
     if (existing) {
-      // Update the existing pending request
+      // Get the existing changes to merge with new ones
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const { data: existingData } = await (supabase
+        .from('venue_change_requests') as any)
+        .select('changes')
+        .eq('id', existing.id)
+        .single();
+
+      // Merge existing changes with new changes (new changes take precedence)
+      const existingChanges = (existingData as { changes?: Record<string, unknown> })?.changes || {};
+      const mergedChanges = { ...existingChanges, ...filteredChanges };
+
+      // Update the existing pending request with merged changes
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       const { data: updatedRequest, error: updateError } = await (supabase
         .from('venue_change_requests') as any)
         .update({
-          changes: filteredChanges,
+          changes: mergedChanges,
         })
         .eq('id', existing.id)
         .select()
