@@ -152,11 +152,13 @@ export async function POST(request: NextRequest, context: RouteContext) {
 
     const venueSlug = (venueSlugData as VenueSlug | null)?.slug;
     if (venueSlug) {
-      // Revalidate the specific venue page
-      revalidatePath(`/places/${venueSlug}`);
+      // Revalidate the specific venue page with layout
+      revalidatePath(`/places/${venueSlug}`, 'page');
+      revalidatePath(`/places/${venueSlug}`, 'layout');
       // Also revalidate the places listing page
-      revalidatePath('/places');
-      console.log(`Revalidated cache for venue: ${venueSlug}`);
+      revalidatePath('/places', 'page');
+      console.log(`[Venue Approval] Revalidated cache for venue: ${venueSlug}`);
+      console.log(`[Venue Approval] Changes applied:`, Object.keys(filteredChanges).join(', '));
     }
 
     return NextResponse.json({

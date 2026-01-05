@@ -3,6 +3,9 @@ import { Metadata } from 'next';
 import { getVenueBySlug, getApprovedVenues, getVenueEvents } from '@/lib/db/venues';
 import PlaceDetailPageContent from '@/components/places/PlaceDetailPageContent';
 
+// Force dynamic rendering to ensure fresh data after admin approval
+export const dynamic = 'force-dynamic';
+
 interface PageProps {
   params: Promise<{ slug: string }>;
 }
