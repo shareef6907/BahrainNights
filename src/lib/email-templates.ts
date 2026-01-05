@@ -291,7 +291,7 @@ export function venueRejectionEmail(venueName: string, reason: string): string {
  */
 export function eventApprovalEmail(eventTitle: string, eventSlug: string, venueName: string): string {
   const eventUrl = `${SITE_URL}/events/${eventSlug}`;
-  const dashboardUrl = `${SITE_URL}/dashboard/events`;
+  const dashboardUrl = `${SITE_URL}/venue-portal/events`;
 
   return baseLayout(`
     ${gradientHeader('Event Published!', 'Your event is now live', '🎊')}
@@ -322,7 +322,7 @@ export function eventApprovalEmail(eventTitle: string, eventSlug: string, venueN
  * Event Rejection Email
  */
 export function eventRejectionEmail(eventTitle: string, venueName: string, reason: string): string {
-  const dashboardUrl = `${SITE_URL}/dashboard/events`;
+  const dashboardUrl = `${SITE_URL}/venue-portal/events`;
 
   return baseLayout(`
     ${simpleHeader('Event Submission Update')}
@@ -386,8 +386,8 @@ export function passwordResetEmail(resetToken: string, expiresIn: string = '1 ho
  * Welcome Email (after first login)
  */
 export function welcomeEmail(venueName: string): string {
-  const dashboardUrl = `${SITE_URL}/dashboard`;
-  const addEventUrl = `${SITE_URL}/dashboard/events/new`;
+  const dashboardUrl = `${SITE_URL}/venue-portal/dashboard`;
+  const addEventUrl = `${SITE_URL}/venue-portal/events/create`;
 
   return baseLayout(`
     ${gradientHeader('Welcome to BahrainNights!', `${venueName} is ready to shine`, '🌟')}

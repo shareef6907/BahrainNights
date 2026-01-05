@@ -3,7 +3,7 @@ import type { NextRequest } from 'next/server';
 import { jwtVerify } from 'jose';
 
 // Routes that require authentication
-const protectedRoutes = ['/dashboard', '/admin'];
+const protectedRoutes = ['/admin'];
 
 // Routes only for guests (not logged in) - exact paths only
 const guestOnlyRoutes = ['/login', '/forgot-password', '/reset-password'];
@@ -91,7 +91,7 @@ export async function middleware(request: NextRequest) {
           return NextResponse.redirect(new URL('/admin', request.url));
         }
         if (payload.venue?.status === 'approved') {
-          return NextResponse.redirect(new URL('/dashboard', request.url));
+          return NextResponse.redirect(new URL('/venue-portal/dashboard', request.url));
         }
         // Pending or rejected venues go to pending-approval
         if (payload.venue) {
@@ -104,21 +104,7 @@ export async function middleware(request: NextRequest) {
       // Admin route protection
       if (isAdminRoute && payload.role !== 'admin') {
         // Non-admin trying to access admin routes
-        return NextResponse.redirect(new URL('/dashboard', request.url));
-      }
-
-      // Dashboard route protection for pending venues
-      if (pathname.startsWith('/dashboard')) {
-        if (payload.venue?.status === 'pending') {
-          return NextResponse.redirect(new URL('/pending-approval', request.url));
-        }
-        if (payload.venue?.status === 'rejected') {
-          return NextResponse.redirect(new URL('/pending-approval', request.url));
-        }
-        // Admin trying to access dashboard
-        if (payload.role === 'admin' && !payload.venue) {
-          return NextResponse.redirect(new URL('/admin', request.url));
-        }
+        return NextResponse.redirect(new URL('/venue-portal/dashboard', request.url));
       }
     }
   }

@@ -565,7 +565,7 @@ export function sendVenueApprovedEmail(email: string, venueName: string): void {
     - Upload photos
     - Set your opening hours
 
-    Get started: ${process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:3000'}/dashboard
+    Get started: ${process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:3000'}/venue-portal/dashboard
 
     Best,
     The BahrainNights Team

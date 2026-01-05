@@ -66,8 +66,8 @@ export default function LoginForm() {
       );
 
       if (success) {
-        // Redirect to original destination or dashboard
-        const redirect = searchParams?.get('redirect') || '/dashboard';
+        // Redirect to original destination or venue portal
+        const redirect = searchParams?.get('redirect') || '/venue-portal/dashboard';
         router.push(redirect);
       } else {
         setGeneralError(error || 'Invalid email or password');

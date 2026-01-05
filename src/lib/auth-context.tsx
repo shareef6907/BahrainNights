@@ -190,7 +190,7 @@ export function useRequireAuth(redirectTo = '/login') {
 }
 
 // Hook for guest-only pages (login, register)
-export function useRequireGuest(redirectTo = '/dashboard') {
+export function useRequireGuest(redirectTo = '/venue-portal/dashboard') {
   const { user, isLoading, isAuthenticated } = useAuth();
   const router = useRouter();
 

@@ -83,7 +83,7 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
   // Check if user is admin
   useEffect(() => {
     if (!isLoading && user && user.role !== 'admin') {
-      router.push('/dashboard');
+      router.push('/venue-portal/dashboard');
     }
   }, [user, isLoading, router]);
 

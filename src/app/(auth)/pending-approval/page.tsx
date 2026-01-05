@@ -19,9 +19,9 @@ export default function PendingApprovalPage() {
         return;
       }
 
-      // If venue is approved, redirect to dashboard
+      // If venue is approved, redirect to venue portal
       if (user.venue?.status === 'approved') {
-        router.push('/dashboard');
+        router.push('/venue-portal/dashboard');
         return;
       }
 
