@@ -82,6 +82,8 @@ export async function POST(request: NextRequest) {
       'google_maps_url',
       'price_range',
       'avg_cost_per_person',
+      'menu_url',
+      'booking_url',
     ];
 
     const filteredChanges: Record<string, unknown> = {};

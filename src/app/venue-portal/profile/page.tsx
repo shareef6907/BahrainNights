@@ -16,6 +16,8 @@ import {
   Clock,
   Navigation,
   Info,
+  Camera,
+  Upload,
 } from 'lucide-react';
 import Link from 'next/link';
 import AIWriterButton from '@/components/ai/AIWriterButton';
@@ -35,6 +37,8 @@ interface VenueProfile {
   booking_url?: string;
   cuisine_type?: string;
   features?: string[];
+  logo_url?: string;
+  cover_image_url?: string;
 }
 
 interface PendingChangeRequest {
@@ -65,6 +69,13 @@ export default function VenueProfilePage() {
     features: '',
   });
 
+  // Photo upload states
+  const [profilePhoto, setProfilePhoto] = useState<string | null>(null);
+  const [coverPhoto, setCoverPhoto] = useState<string | null>(null);
+  const [isUploadingProfile, setIsUploadingProfile] = useState(false);
+  const [isUploadingCover, setIsUploadingCover] = useState(false);
+  const [uploadMessage, setUploadMessage] = useState<{ type: 'success' | 'error'; text: string } | null>(null);
+
   useEffect(() => {
     async function loadProfile() {
       try {
@@ -85,6 +96,9 @@ export default function VenueProfilePage() {
             cuisine_type: data.venue.cuisine_type || '',
             features: data.venue.features?.join(', ') || '',
           });
+          // Load existing photos
+          setProfilePhoto(data.venue.logo_url || null);
+          setCoverPhoto(data.venue.cover_image_url || null);
         }
 
         // Check for pending change request
@@ -106,6 +120,96 @@ export default function VenueProfilePage() {
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
     const { name, value } = e.target;
     setFormData((prev) => ({ ...prev, [name]: value }));
+  };
+
+  const handlePhotoUpload = async (file: File, type: 'profile' | 'cover') => {
+    const setUploading = type === 'profile' ? setIsUploadingProfile : setIsUploadingCover;
+    const setPhoto = type === 'profile' ? setProfilePhoto : setCoverPhoto;
+    const imageType = type === 'profile' ? 'logo' : 'cover';
+
+    setUploading(true);
+    setUploadMessage(null);
+
+    try {
+      // Upload to S3
+      const uploadFormData = new FormData();
+      uploadFormData.append('file', file);
+      uploadFormData.append('imageType', imageType);
+
+      const uploadResponse = await fetch('/api/venue-portal/upload', {
+        method: 'POST',
+        body: uploadFormData,
+      });
+
+      if (!uploadResponse.ok) {
+        const error = await uploadResponse.json();
+        throw new Error(error.error || 'Upload failed');
+      }
+
+      const uploadData = await uploadResponse.json();
+      const imageUrl = uploadData.url;
+
+      // Update local state with new photo
+      setPhoto(imageUrl);
+
+      // Submit the photo URL change for admin approval
+      const fieldName = type === 'profile' ? 'logo_url' : 'cover_image_url';
+      const changeResponse = await fetch('/api/venue-portal/profile/request-change', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          changes: { [fieldName]: imageUrl }
+        }),
+      });
+
+      if (changeResponse.ok) {
+        const changeData = await changeResponse.json();
+        setPendingRequest(changeData.request);
+        setUploadMessage({
+          type: 'success',
+          text: `${type === 'profile' ? 'Profile photo' : 'Cover photo'} uploaded and submitted for approval.`
+        });
+      } else {
+        const error = await changeResponse.json();
+        throw new Error(error.error || 'Failed to submit photo change');
+      }
+    } catch (error) {
+      console.error('Photo upload error:', error);
+      setUploadMessage({
+        type: 'error',
+        text: error instanceof Error ? error.message : 'Failed to upload photo'
+      });
+    } finally {
+      setUploading(false);
+    }
+  };
+
+  const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>, type: 'profile' | 'cover') => {
+    const file = e.target.files?.[0];
+    if (file) {
+      // Validate file type
+      const validTypes = ['image/jpeg', 'image/png', 'image/webp', 'image/gif'];
+      if (!validTypes.includes(file.type)) {
+        setUploadMessage({
+          type: 'error',
+          text: 'Invalid file type. Please use JPG, PNG, WebP, or GIF.'
+        });
+        return;
+      }
+
+      // Validate file size (4MB max)
+      if (file.size > 4 * 1024 * 1024) {
+        setUploadMessage({
+          type: 'error',
+          text: 'File too large. Maximum 4MB allowed.'
+        });
+        return;
+      }
+
+      handlePhotoUpload(file, type);
+    }
+    // Reset input value to allow re-uploading same file
+    e.target.value = '';
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -227,6 +331,120 @@ export default function VenueProfilePage() {
         </div>
         <p className="text-xs text-gray-500 mt-3">
           To change your venue name, please contact support.
+        </p>
+      </motion.div>
+
+      {/* Photo Upload Section */}
+      <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ delay: 0.05 }}
+        className="bg-white/5 border border-white/10 rounded-2xl p-6"
+      >
+        <h2 className="text-lg font-semibold text-white mb-4">Venue Photos</h2>
+
+        {/* Upload Message */}
+        {uploadMessage && (
+          <div className={`flex items-center gap-2 p-3 rounded-lg mb-4 ${
+            uploadMessage.type === 'success'
+              ? 'bg-green-500/20 text-green-400'
+              : 'bg-red-500/20 text-red-400'
+          }`}>
+            {uploadMessage.type === 'success' ? (
+              <CheckCircle className="w-4 h-4" />
+            ) : (
+              <AlertCircle className="w-4 h-4" />
+            )}
+            <span className="text-sm">{uploadMessage.text}</span>
+          </div>
+        )}
+
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          {/* Profile Photo */}
+          <div>
+            <label className="block text-sm font-medium text-gray-300 mb-3">
+              Profile Photo
+            </label>
+            <div className="relative">
+              <div className="w-32 h-32 rounded-2xl bg-white/5 border border-white/10 overflow-hidden flex items-center justify-center">
+                {profilePhoto ? (
+                  <img
+                    src={profilePhoto}
+                    alt="Profile"
+                    className="w-full h-full object-cover"
+                  />
+                ) : (
+                  <Camera className="w-10 h-10 text-gray-500" />
+                )}
+                {isUploadingProfile && (
+                  <div className="absolute inset-0 bg-black/50 flex items-center justify-center">
+                    <Loader2 className="w-6 h-6 text-yellow-400 animate-spin" />
+                  </div>
+                )}
+              </div>
+              <label className="mt-3 flex items-center gap-2 px-4 py-2 bg-white/10 hover:bg-white/15 rounded-lg cursor-pointer transition-colors w-fit">
+                <Upload className="w-4 h-4 text-gray-300" />
+                <span className="text-sm text-gray-300">
+                  {profilePhoto ? 'Change Photo' : 'Upload Photo'}
+                </span>
+                <input
+                  type="file"
+                  accept="image/jpeg,image/png,image/webp,image/gif"
+                  onChange={(e) => handleFileSelect(e, 'profile')}
+                  className="hidden"
+                  disabled={isUploadingProfile}
+                />
+              </label>
+            </div>
+            <p className="text-xs text-gray-500 mt-2">
+              Square image recommended. Max 4MB.
+            </p>
+          </div>
+
+          {/* Cover Photo */}
+          <div>
+            <label className="block text-sm font-medium text-gray-300 mb-3">
+              Cover Photo
+            </label>
+            <div className="relative">
+              <div className="w-full h-32 rounded-2xl bg-white/5 border border-white/10 overflow-hidden flex items-center justify-center">
+                {coverPhoto ? (
+                  <img
+                    src={coverPhoto}
+                    alt="Cover"
+                    className="w-full h-full object-cover"
+                  />
+                ) : (
+                  <Camera className="w-10 h-10 text-gray-500" />
+                )}
+                {isUploadingCover && (
+                  <div className="absolute inset-0 bg-black/50 flex items-center justify-center">
+                    <Loader2 className="w-6 h-6 text-yellow-400 animate-spin" />
+                  </div>
+                )}
+              </div>
+              <label className="mt-3 flex items-center gap-2 px-4 py-2 bg-white/10 hover:bg-white/15 rounded-lg cursor-pointer transition-colors w-fit">
+                <Upload className="w-4 h-4 text-gray-300" />
+                <span className="text-sm text-gray-300">
+                  {coverPhoto ? 'Change Cover' : 'Upload Cover'}
+                </span>
+                <input
+                  type="file"
+                  accept="image/jpeg,image/png,image/webp,image/gif"
+                  onChange={(e) => handleFileSelect(e, 'cover')}
+                  className="hidden"
+                  disabled={isUploadingCover}
+                />
+              </label>
+            </div>
+            <p className="text-xs text-gray-500 mt-2">
+              Landscape image (16:9) recommended. Max 4MB.
+            </p>
+          </div>
+        </div>
+
+        <p className="text-xs text-gray-500 mt-4 pt-4 border-t border-white/10">
+          Photo changes require admin approval before going live.
         </p>
       </motion.div>
 
