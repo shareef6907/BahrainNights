@@ -128,7 +128,7 @@ export default function PlaceHero({
               src={logo}
               alt={`${name} logo`}
               fill
-              className="object-contain p-2"
+              className="object-cover"
               sizes="(max-width: 768px) 80px, 128px"
             />
           </motion.div>
