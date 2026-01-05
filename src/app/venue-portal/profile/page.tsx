@@ -75,6 +75,8 @@ export default function VenueProfilePage() {
   const [isUploadingProfile, setIsUploadingProfile] = useState(false);
   const [isUploadingCover, setIsUploadingCover] = useState(false);
   const [uploadMessage, setUploadMessage] = useState<{ type: 'success' | 'error'; text: string } | null>(null);
+  const [profilePhotoError, setProfilePhotoError] = useState(false);
+  const [coverPhotoError, setCoverPhotoError] = useState(false);
 
   useEffect(() => {
     async function loadProfile() {
@@ -125,10 +127,12 @@ export default function VenueProfilePage() {
   const handlePhotoUpload = async (file: File, type: 'profile' | 'cover') => {
     const setUploading = type === 'profile' ? setIsUploadingProfile : setIsUploadingCover;
     const setPhoto = type === 'profile' ? setProfilePhoto : setCoverPhoto;
+    const setPhotoError = type === 'profile' ? setProfilePhotoError : setCoverPhotoError;
     const imageType = type === 'profile' ? 'logo' : 'cover';
 
     setUploading(true);
     setUploadMessage(null);
+    setPhotoError(false); // Reset error state for new upload
 
     try {
       // Upload to S3
@@ -366,12 +370,13 @@ export default function VenueProfilePage() {
               Profile Photo
             </label>
             <div className="relative">
-              <div className="w-32 h-32 rounded-2xl bg-white/5 border border-white/10 overflow-hidden flex items-center justify-center">
-                {profilePhoto ? (
+              <div className="w-32 h-32 rounded-2xl bg-white/5 border border-white/10 overflow-hidden flex items-center justify-center relative">
+                {profilePhoto && !profilePhotoError ? (
                   <img
                     src={profilePhoto}
                     alt="Profile"
                     className="w-full h-full object-cover"
+                    onError={() => setProfilePhotoError(true)}
                   />
                 ) : (
                   <Camera className="w-10 h-10 text-gray-500" />
@@ -407,12 +412,13 @@ export default function VenueProfilePage() {
               Cover Photo
             </label>
             <div className="relative">
-              <div className="w-full h-32 rounded-2xl bg-white/5 border border-white/10 overflow-hidden flex items-center justify-center">
-                {coverPhoto ? (
+              <div className="w-full h-32 rounded-2xl bg-white/5 border border-white/10 overflow-hidden flex items-center justify-center relative">
+                {coverPhoto && !coverPhotoError ? (
                   <img
                     src={coverPhoto}
                     alt="Cover"
                     className="w-full h-full object-cover"
+                    onError={() => setCoverPhotoError(true)}
                   />
                 ) : (
                   <Camera className="w-10 h-10 text-gray-500" />

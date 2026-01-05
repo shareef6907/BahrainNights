@@ -191,8 +191,8 @@ export default function PlaceDetailPageContent({ venue, similarVenues, events = 
           categoryColor={categoryColors[venue.category] || 'bg-gray-500'}
           subcategory={venue.subcategories || []}
           area={venue.area}
-          coverImage={venue.cover_image_url || images[0] || '/placeholder-venue.jpg'}
-          logo={venue.logo_url || '/placeholder-logo.jpg'}
+          coverImage={venue.cover_image_url || images[0] || '/placeholder-venue.svg'}
+          logo={venue.logo_url || '/placeholder-logo.svg'}
           isOpen={isOpen}
           todayHours={todayHours}
           onShareClick={() => setShareModalOpen(true)}
