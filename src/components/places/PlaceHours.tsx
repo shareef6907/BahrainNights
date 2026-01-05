@@ -1,7 +1,7 @@
 'use client';
 
 import { motion } from 'framer-motion';
-import { Clock, Phone, Mail, Globe, Instagram, Facebook } from 'lucide-react';
+import { Clock, Phone, Mail, Globe, Instagram, Facebook, MapPin, Navigation, ExternalLink } from 'lucide-react';
 import { OpeningHours } from './PlaceCard';
 
 interface PlaceHoursProps {
@@ -11,6 +11,12 @@ interface PlaceHoursProps {
   website?: string;
   instagram?: string;
   facebook?: string;
+  latitude?: number | null;
+  longitude?: number | null;
+  address?: string;
+  area?: string;
+  venueName?: string;
+  googleMapsUrl?: string | null;
 }
 
 const dayOrder = ['sunday', 'monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday'];
@@ -31,6 +37,12 @@ export default function PlaceHours({
   website,
   instagram,
   facebook,
+  latitude,
+  longitude,
+  address,
+  area,
+  venueName,
+  googleMapsUrl,
 }: PlaceHoursProps) {
   const today = dayOrder[new Date().getDay()];
 
@@ -191,6 +203,63 @@ export default function PlaceHours({
               </a>
             )}
           </div>
+        </div>
+      )}
+
+      {/* Location Map */}
+      {(latitude && longitude) && (
+        <div className="border-t border-white/10 pt-6 mt-6">
+          <h3 className="text-lg font-bold text-white mb-4">Location</h3>
+
+          {/* Map Embed */}
+          <div className="relative h-40 bg-slate-800 rounded-xl overflow-hidden mb-4">
+            <iframe
+              src={`https://www.openstreetmap.org/export/embed.html?bbox=${longitude - 0.005},${latitude - 0.005},${longitude + 0.005},${latitude + 0.005}&layer=mapnik&marker=${latitude},${longitude}`}
+              className="w-full h-full border-0"
+              style={{ filter: 'invert(100%) hue-rotate(180deg) brightness(95%) contrast(90%)' }}
+              title={`Map showing ${venueName || 'venue location'}`}
+            />
+
+            {/* Map Overlay for click */}
+            <button
+              onClick={() => window.open(`https://www.google.com/maps/search/?api=1&query=${latitude},${longitude}`, '_blank')}
+              className="absolute inset-0 bg-transparent hover:bg-white/5 transition-colors flex items-center justify-center opacity-0 hover:opacity-100"
+              aria-label="Open in Google Maps"
+            >
+              <div className="px-4 py-2 bg-black/80 backdrop-blur-sm rounded-xl text-white text-sm font-medium flex items-center gap-2">
+                <ExternalLink className="w-4 h-4" />
+                Open in Google Maps
+              </div>
+            </button>
+          </div>
+
+          {/* Address */}
+          {address && (
+            <div className="flex items-start gap-3 mb-4">
+              <div className="p-2 bg-red-500/10 rounded-lg">
+                <MapPin className="w-4 h-4 text-red-400" />
+              </div>
+              <div>
+                <p className="text-gray-300 text-sm">{address}</p>
+                {area && <p className="text-gray-500 text-xs mt-0.5">{area}, Bahrain</p>}
+              </div>
+            </div>
+          )}
+
+          {/* Get Directions Button */}
+          <button
+            onClick={() => {
+              const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent);
+              const mapsUrl = isIOS
+                ? `maps://maps.apple.com/?daddr=${latitude},${longitude}&q=${encodeURIComponent(venueName || '')}`
+                : `https://www.google.com/maps/dir/?api=1&destination=${latitude},${longitude}`;
+              window.open(mapsUrl, '_blank');
+            }}
+            className="w-full flex items-center justify-center gap-2 px-4 py-3 bg-gradient-to-r from-blue-500 to-indigo-600 rounded-xl text-white font-semibold hover:shadow-lg hover:shadow-blue-500/25 transition-all"
+          >
+            <Navigation className="w-5 h-5" />
+            <span>Get Directions</span>
+          </button>
         </div>
       )}
     </motion.div>

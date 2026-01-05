@@ -10,7 +10,6 @@ import PlaceGallery from './PlaceGallery';
 import PlaceFeatures from './PlaceFeatures';
 import PlaceOffers from './PlaceOffers';
 import PlaceHours from './PlaceHours';
-import PlaceMap from './PlaceMap';
 import PlaceEvents from './PlaceEvents';
 import SimilarPlaces from './SimilarPlaces';
 import PlaceShareModal from './PlaceShareModal';
@@ -255,16 +254,13 @@ export default function PlaceDetailPageContent({ venue, similarVenues, events = 
                 website={venue.website || undefined}
                 instagram={venue.instagram || undefined}
                 facebook={venue.facebook || undefined}
+                latitude={venue.latitude}
+                longitude={venue.longitude}
+                address={venue.address}
+                area={venue.area}
+                venueName={venue.name}
+                googleMapsUrl={venue.google_maps_url}
               />
-              {venue.latitude && venue.longitude && (
-                <PlaceMap
-                  name={venue.name}
-                  address={venue.address}
-                  latitude={venue.latitude}
-                  longitude={venue.longitude}
-                  area={venue.area}
-                />
-              )}
 
               {/* Like Count Card */}
               <motion.div
