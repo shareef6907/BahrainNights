@@ -29,6 +29,7 @@ interface Venue {
   area: string;
   email: string | null;
   phone: string | null;
+  cr_number: string | null;
   status: 'pending' | 'approved' | 'rejected' | 'suspended';
   created_at: string;
   view_count: number;
@@ -460,6 +461,7 @@ export default function AdminVenuesPage() {
                   <th className="text-left p-4 text-sm font-medium text-gray-400">Category</th>
                   <th className="text-left p-4 text-sm font-medium text-gray-400">Area</th>
                   <th className="text-left p-4 text-sm font-medium text-gray-400">Contact</th>
+                  <th className="text-left p-4 text-sm font-medium text-gray-400">CR</th>
                   <th className="text-left p-4 text-sm font-medium text-gray-400">Stats</th>
                   <th className="text-left p-4 text-sm font-medium text-gray-400">Status</th>
                   <th className="text-left p-4 text-sm font-medium text-gray-400">Registered</th>
@@ -504,6 +506,9 @@ export default function AdminVenuesPage() {
                     <td className="p-4 text-gray-400 text-sm">
                       <div>{venue.email || '-'}</div>
                       <div className="text-xs">{venue.phone || '-'}</div>
+                    </td>
+                    <td className="p-4 text-gray-400 text-sm">
+                      {venue.cr_number || '-'}
                     </td>
                     <td className="p-4 text-gray-400 text-sm">
                       <div>{venue.view_count} views</div>
@@ -621,6 +626,7 @@ export default function AdminVenuesPage() {
                     <div className="mt-2 text-xs text-gray-500">
                       <p>{venue.area} &middot; {venue.view_count} views &middot; {venue.like_count} likes</p>
                       <p className="mt-1">{venue.email || venue.phone || 'No contact'}</p>
+                      {venue.cr_number && <p className="mt-1">CR: {venue.cr_number}</p>}
                     </div>
                     <div className="mt-3 flex gap-2">
                       <Link

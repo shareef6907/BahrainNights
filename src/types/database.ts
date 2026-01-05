@@ -60,6 +60,7 @@ export interface Database {
           phone: string | null;
           email: string | null;
           password_hash: string | null;
+          cr_number: string | null;
           website: string | null;
           whatsapp: string | null;
           instagram: string | null;
@@ -103,6 +104,7 @@ export interface Database {
           phone?: string | null;
           email?: string | null;
           password_hash?: string | null;
+          cr_number?: string | null;
           website?: string | null;
           whatsapp?: string | null;
           instagram?: string | null;
@@ -146,6 +148,7 @@ export interface Database {
           phone?: string | null;
           email?: string | null;
           password_hash?: string | null;
+          cr_number?: string | null;
           website?: string | null;
           whatsapp?: string | null;
           instagram?: string | null;
