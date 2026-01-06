@@ -68,7 +68,7 @@ const exploreCategories = [
     image: 'https://images.unsplash.com/photo-1555529669-e69e7aa0ba9a?w=800',
     color: '#F59E0B',
     gradient: 'from-amber-600/80 to-amber-900/90',
-    categoryPath: '/places?category=shopping',
+    categoryPath: '/explore/shopping',
   },
   {
     id: 'tours',
@@ -79,7 +79,7 @@ const exploreCategories = [
     image: 'https://images.unsplash.com/photo-1559128010-7c1ad6e1b6a5?w=800',
     color: '#14B8A6',
     gradient: 'from-teal-600/80 to-teal-900/90',
-    categoryPath: '/places?category=tour',
+    categoryPath: '/explore/tours',
   },
   {
     id: 'kids',
@@ -90,7 +90,7 @@ const exploreCategories = [
     image: 'https://images.unsplash.com/photo-1503454537195-1dcabb73ffb9?w=800',
     color: '#22C55E',
     gradient: 'from-green-600/80 to-green-900/90',
-    categoryPath: '/places?category=kids',
+    categoryPath: '/explore/kids',
   },
   {
     id: 'community',
@@ -101,7 +101,7 @@ const exploreCategories = [
     image: 'https://images.unsplash.com/photo-1529156069898-49953e39b3ac?w=800',
     color: '#F97316',
     gradient: 'from-orange-600/80 to-orange-900/90',
-    categoryPath: '/places?category=community',
+    categoryPath: '/explore/community',
   },
 ];
 
