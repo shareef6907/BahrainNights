@@ -1,6 +1,6 @@
 import { Suspense } from 'react';
 import { createClient } from '@supabase/supabase-js';
-import EventsPageClient, { Event } from '@/components/events/EventsPageClient';
+import EventsPageClient, { Event, Attraction } from '@/components/events/EventsPageClient';
 
 // Force dynamic rendering to ensure fresh data on every request
 export const dynamic = 'force-dynamic';
@@ -152,14 +152,60 @@ async function getEvents(): Promise<Event[]> {
   });
 }
 
+// Fetch Family & Kids attractions for display in the family category
+async function getAttractions(): Promise<Attraction[]> {
+  const supabase = createClient(supabaseUrl, supabaseServiceKey, {
+    auth: {
+      autoRefreshToken: false,
+      persistSession: false
+    }
+  });
+
+  const { data, error } = await supabase
+    .from('attractions')
+    .select('*')
+    .eq('is_active', true)
+    .order('is_featured', { ascending: false })
+    .order('tripadvisor_rating', { ascending: false, nullsFirst: false });
+
+  if (error) {
+    console.error('Error fetching attractions:', error);
+    return [];
+  }
+
+  if (!data || data.length === 0) {
+    return [];
+  }
+
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  return data.map((attraction: any) => ({
+    id: attraction.id,
+    name: attraction.name,
+    slug: attraction.slug || attraction.id,
+    description: attraction.short_description || attraction.description?.substring(0, 200) || '',
+    image: attraction.image_url || '/images/event-placeholder.jpg',
+    area: attraction.area || 'Bahrain',
+    priceFrom: attraction.price_from,
+    priceRange: attraction.price_range,
+    rating: attraction.tripadvisor_rating || attraction.rating,
+    duration: attraction.duration,
+    ageRange: attraction.suitable_for?.includes('kids') ? 'Kids' : 'All Ages',
+    tags: attraction.tags || [],
+    isFeatured: attraction.is_featured || false,
+  }));
+}
+
 // Server Component - data is fetched BEFORE the page renders
 export default async function EventsPage() {
   // Fetch all data on the server - NO loading state needed!
-  const events = await getEvents();
+  const [events, attractions] = await Promise.all([
+    getEvents(),
+    getAttractions()
+  ]);
 
   return (
     <Suspense fallback={null}>
-      <EventsPageClient initialEvents={events} />
+      <EventsPageClient initialEvents={events} familyAttractions={attractions} />
     </Suspense>
   );
 }

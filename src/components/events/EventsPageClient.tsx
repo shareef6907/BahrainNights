@@ -29,6 +29,23 @@ export interface Event {
   isFeatured?: boolean;
 }
 
+// Attraction interface for Family & Kids
+export interface Attraction {
+  id: string;
+  name: string;
+  slug: string;
+  description: string;
+  image: string;
+  area: string;
+  priceFrom?: number;
+  priceRange?: string;
+  rating?: number;
+  duration?: string;
+  ageRange?: string;
+  tags: string[];
+  isFeatured: boolean;
+}
+
 // Category filters
 const categories = [
   { id: 'all', name: 'All Events', icon: '🎭' },
@@ -55,9 +72,10 @@ const timeFilters = [
 
 interface EventsPageClientProps {
   initialEvents: Event[];
+  familyAttractions?: Attraction[];
 }
 
-export default function EventsPageClient({ initialEvents }: EventsPageClientProps) {
+export default function EventsPageClient({ initialEvents, familyAttractions = [] }: EventsPageClientProps) {
   const searchParams = useSearchParams();
   const router = useRouter();
   const [searchQuery, setSearchQuery] = useState('');
@@ -423,7 +441,10 @@ export default function EventsPageClient({ initialEvents }: EventsPageClientProp
             <div className="flex items-center justify-between mb-6">
               <div className="flex items-center gap-4">
                 <p className="text-gray-400">
-                  {filteredEvents.length} events found
+                  {selectedCategory === 'family'
+                    ? `${filteredEvents.length} events + ${familyAttractions.length} activities found`
+                    : `${filteredEvents.length} events found`
+                  }
                 </p>
               </div>
               <div className="flex items-center gap-2">
@@ -445,6 +466,102 @@ export default function EventsPageClient({ initialEvents }: EventsPageClientProp
                 </button>
               </div>
             </div>
+
+            {/* Family & Kids Attractions Section */}
+            {selectedCategory === 'family' && familyAttractions.length > 0 && (
+              <div className="mb-8">
+                <div className="flex items-center justify-between mb-4">
+                  <h2 className="text-xl font-bold text-white flex items-center gap-2">
+                    <span className="text-2xl">👨‍👩‍👧‍👦</span>
+                    Family Activities & Attractions
+                  </h2>
+                  <Link
+                    href="/explore/kids"
+                    className="text-green-400 hover:text-green-300 text-sm font-medium transition-colors"
+                  >
+                    View All →
+                  </Link>
+                </div>
+                <motion.div
+                  className="grid gap-6 grid-cols-1 md:grid-cols-2 lg:grid-cols-3"
+                  initial="hidden"
+                  animate="visible"
+                  variants={{
+                    visible: { transition: { staggerChildren: 0.05 } }
+                  }}
+                >
+                  {familyAttractions.map((attraction) => (
+                    <motion.div
+                      key={attraction.id}
+                      variants={{
+                        hidden: { opacity: 0, y: 20 },
+                        visible: { opacity: 1, y: 0 }
+                      }}
+                      whileHover={{ y: -6 }}
+                      className="group"
+                    >
+                      <Link href={`/explore/kids/${attraction.slug}`} className="block">
+                        <div className="relative bg-white/5 backdrop-blur-sm border border-white/10 rounded-2xl overflow-hidden hover:border-green-400/50 transition-all duration-300">
+                          <div className="relative aspect-video overflow-hidden">
+                            <Image
+                              src={attraction.image}
+                              alt={attraction.name}
+                              fill
+                              className="object-cover object-top group-hover:scale-105 transition-transform duration-300"
+                              sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
+                            />
+                            <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent" />
+                            <div className="absolute top-3 left-3 px-3 py-1 bg-green-500 text-white text-xs font-bold rounded-full">
+                              Activity
+                            </div>
+                            {attraction.rating && (
+                              <div className="absolute top-3 right-3 px-2 py-1 bg-black/70 text-white text-xs rounded-full flex items-center gap-1">
+                                ⭐ {attraction.rating.toFixed(1)}
+                              </div>
+                            )}
+                            {attraction.isFeatured && (
+                              <div className="absolute bottom-3 left-3 px-2 py-1 bg-yellow-500 text-black text-xs font-bold rounded-full">
+                                ⭐ Featured
+                              </div>
+                            )}
+                          </div>
+                          <div className="p-4">
+                            <h3 className="text-lg font-bold text-white group-hover:text-green-400 transition-colors line-clamp-2 mb-2">
+                              {attraction.name}
+                            </h3>
+                            <div className="space-y-2 text-sm text-gray-400">
+                              <div className="flex items-center gap-2">
+                                <MapPin className="w-4 h-4 text-green-400" />
+                                <span className="line-clamp-1">{attraction.area}</span>
+                              </div>
+                              {attraction.duration && (
+                                <div className="flex items-center gap-2">
+                                  <Clock className="w-4 h-4 text-green-400" />
+                                  <span>{attraction.duration}</span>
+                                </div>
+                              )}
+                              {attraction.priceFrom && (
+                                <div className="text-green-400 font-medium">
+                                  From BD {attraction.priceFrom}
+                                </div>
+                              )}
+                            </div>
+                          </div>
+                        </div>
+                      </Link>
+                    </motion.div>
+                  ))}
+                </motion.div>
+              </div>
+            )}
+
+            {/* Events Section Header when in Family category */}
+            {selectedCategory === 'family' && filteredEvents.length > 0 && (
+              <h2 className="text-xl font-bold text-white mb-4 flex items-center gap-2">
+                <span className="text-2xl">🎭</span>
+                Family Events
+              </h2>
+            )}
 
             {filteredEvents.length > 0 ? (
               <motion.div
@@ -516,6 +633,13 @@ export default function EventsPageClient({ initialEvents }: EventsPageClientProp
                   </motion.div>
                 ))}
               </motion.div>
+            ) : selectedCategory === 'family' && familyAttractions.length > 0 ? (
+              /* No events but we have attractions - show "no events" message only */
+              <div className="text-center py-8 border-t border-white/10 mt-4">
+                <p className="text-gray-400">
+                  No family events scheduled right now. Check out the activities above!
+                </p>
+              </div>
             ) : (
               /* Empty State */
               <div className="text-center py-16">
