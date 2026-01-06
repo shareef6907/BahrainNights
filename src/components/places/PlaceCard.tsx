@@ -140,12 +140,12 @@ function PlaceCard({ place, index }: PlaceCardProps) {
             )}
 
             {/* Logo */}
-            <div className="absolute bottom-3 left-3 w-12 h-12 bg-white rounded-xl shadow-lg overflow-hidden">
+            <div className="absolute bottom-3 left-3 w-12 h-12 rounded-xl shadow-lg overflow-hidden ring-2 ring-white/20">
               <Image
                 src={place.logo}
                 alt={`${place.name} logo`}
                 fill
-                className="object-contain p-1"
+                className="object-cover"
                 sizes="48px"
               />
             </div>
