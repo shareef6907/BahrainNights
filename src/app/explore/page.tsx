@@ -10,10 +10,10 @@ import {
   Ship,
   Baby,
   Users,
-  Send,
   ArrowRight,
   Star,
   MapPin,
+  Heart,
 } from 'lucide-react';
 import Link from 'next/link';
 import Image from 'next/image';
@@ -45,8 +45,7 @@ const exploreCategories = [
     emoji: '🏨',
     image: 'https://images.unsplash.com/photo-1566073771259-6a8506099945?w=800',
     color: '#3B82F6',
-    gradient: 'from-blue-600 to-blue-800',
-    description: 'List your hotel, resort, or vacation rental on BahrainNights and reach thousands of visitors looking for the perfect stay.',
+    gradient: 'from-blue-600/80 to-blue-900/90',
     categoryPath: '/places?category=hotel',
   },
   {
@@ -57,8 +56,7 @@ const exploreCategories = [
     emoji: '💆‍♀️',
     image: 'https://images.unsplash.com/photo-1544161515-4ab6ce6db874?w=800',
     color: '#A855F7',
-    gradient: 'from-purple-600 to-purple-800',
-    description: 'Showcase your spa, wellness center, or fitness studio to health-conscious visitors seeking relaxation.',
+    gradient: 'from-purple-600/80 to-purple-900/90',
     categoryPath: '/places?category=spa',
   },
   {
@@ -68,9 +66,8 @@ const exploreCategories = [
     icon: ShoppingBag,
     emoji: '🛍️',
     image: 'https://images.unsplash.com/photo-1555529669-e69e7aa0ba9a?w=800',
-    color: '#D97706',
-    gradient: 'from-amber-600 to-amber-800',
-    description: 'Promote your retail store, market stall, or shopping experience to shoppers across Bahrain.',
+    color: '#F59E0B',
+    gradient: 'from-amber-600/80 to-amber-900/90',
     categoryPath: '/places?category=shopping',
   },
   {
@@ -81,8 +78,7 @@ const exploreCategories = [
     emoji: '🚤',
     image: 'https://images.unsplash.com/photo-1559128010-7c1ad6e1b6a5?w=800',
     color: '#14B8A6',
-    gradient: 'from-teal-600 to-teal-800',
-    description: 'Share your tours, adventures, and unique experiences with travelers exploring Bahrain.',
+    gradient: 'from-teal-600/80 to-teal-900/90',
     categoryPath: '/places?category=tour',
   },
   {
@@ -93,8 +89,7 @@ const exploreCategories = [
     emoji: '👶',
     image: 'https://images.unsplash.com/photo-1503454537195-1dcabb73ffb9?w=800',
     color: '#22C55E',
-    gradient: 'from-green-600 to-green-800',
-    description: 'Reach families looking for fun activities, entertainment, and educational experiences for children.',
+    gradient: 'from-green-600/80 to-green-900/90',
     categoryPath: '/places?category=kids',
   },
   {
@@ -105,15 +100,13 @@ const exploreCategories = [
     emoji: '🤝',
     image: 'https://images.unsplash.com/photo-1529156069898-49953e39b3ac?w=800',
     color: '#F97316',
-    gradient: 'from-orange-600 to-orange-800',
-    description: 'Promote your community initiatives, charity events, and social gatherings to engaged locals.',
+    gradient: 'from-orange-600/80 to-orange-900/90',
     categoryPath: '/places?category=community',
   },
 ];
 
 export default function ExplorePage() {
   const [searchQuery, setSearchQuery] = useState('');
-  const [email, setEmail] = useState('');
   const [featuredData, setFeaturedData] = useState<FeaturedData | null>(null);
   const [loadingFeatured, setLoadingFeatured] = useState(true);
 
@@ -134,10 +127,17 @@ export default function ExplorePage() {
     fetchFeatured();
   }, []);
 
+  // Filter categories based on search
+  const filteredCategories = exploreCategories.filter(
+    (cat) =>
+      cat.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      cat.tagline.toLowerCase().includes(searchQuery.toLowerCase())
+  );
+
   return (
     <div className="min-h-screen bg-slate-950">
       {/* Hero Section */}
-      <section className="relative pt-24 pb-16 overflow-hidden">
+      <section className="relative pt-24 pb-12 overflow-hidden">
         {/* Animated Background */}
         <div className="absolute inset-0">
           <div className="absolute inset-0 bg-gradient-to-b from-indigo-500/10 via-purple-500/5 to-transparent" />
@@ -148,7 +148,7 @@ export default function ExplorePage() {
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
-            className="text-center mb-10"
+            className="text-center mb-8"
           >
             <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold text-white mb-4">
               Explore{' '}
@@ -166,7 +166,7 @@ export default function ExplorePage() {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.1 }}
-            className="max-w-2xl mx-auto"
+            className="max-w-xl mx-auto"
           >
             <div className="relative">
               <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
@@ -174,7 +174,7 @@ export default function ExplorePage() {
                 type="text"
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                placeholder="What are you looking for?"
+                placeholder="Search categories..."
                 className="w-full pl-12 pr-4 py-4 bg-white/10 border border-white/10 rounded-2xl text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-purple-500/50 focus:border-purple-500/50 transition-all"
               />
             </div>
@@ -182,12 +182,13 @@ export default function ExplorePage() {
         </div>
       </section>
 
-      {/* Category Cards Section with Featured Venues */}
-      <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mb-16">
-        <div className="space-y-12">
-          {exploreCategories.map((category, index) => {
+      {/* Categories Grid */}
+      <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pb-12">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+          {filteredCategories.map((category, index) => {
+            const IconComponent = category.icon;
             const featuredVenues = featuredData?.byCategory[category.id] || [];
-            const hasFeatured = featuredVenues.length > 0;
+            const hasVenues = featuredVenues.length > 0;
 
             return (
               <motion.div
@@ -196,139 +197,134 @@ export default function ExplorePage() {
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: index * 0.1 }}
               >
-                {/* Category Header */}
-                <div className="flex items-center gap-3 mb-4">
-                  <div
-                    className="w-10 h-10 rounded-xl flex items-center justify-center"
-                    style={{ backgroundColor: `${category.color}20` }}
-                  >
-                    <span className="text-xl">{category.emoji}</span>
-                  </div>
-                  <div>
-                    <h2 className="text-xl md:text-2xl font-bold text-white">{category.name}</h2>
-                    <p className="text-gray-400 text-sm">{category.tagline}</p>
-                  </div>
-                </div>
-
-                {/* Featured Venues Grid */}
-                {hasFeatured ? (
-                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 mb-4">
-                    {featuredVenues.slice(0, 3).map((venue) => (
-                      <Link
-                        key={venue.id}
-                        href={`/places/${venue.slug}`}
-                        className="group block"
-                      >
-                        <div className="relative h-48 rounded-2xl overflow-hidden bg-white/5 border border-white/10 hover:border-white/20 transition-all">
-                          {/* Background Image */}
-                          <div className="absolute inset-0">
-                            {venue.cover_image_url || venue.logo_url ? (
-                              <Image
-                                src={venue.cover_image_url || venue.logo_url || ''}
-                                alt={venue.name}
-                                fill
-                                className="object-cover transition-transform duration-500 group-hover:scale-110"
-                              />
-                            ) : (
-                              <div className="w-full h-full bg-gradient-to-br from-gray-800 to-gray-900" />
-                            )}
-                          </div>
-
-                          {/* Gradient Overlay */}
-                          <div
-                            className="absolute inset-0"
-                            style={{
-                              background: `linear-gradient(to top, ${category.color}E6 0%, ${category.color}80 30%, transparent 70%)`,
-                            }}
-                          />
-
-                          {/* Featured Badge */}
-                          <div className="absolute top-3 left-3">
-                            <span className="inline-flex items-center gap-1 px-2 py-1 bg-yellow-400 text-black text-xs font-semibold rounded-lg">
-                              <Star className="w-3 h-3 fill-black" />
-                              Featured
-                            </span>
-                          </div>
-
-                          {/* Content */}
-                          <div className="absolute inset-x-0 bottom-0 p-4">
-                            <h3 className="text-white font-semibold text-lg group-hover:text-yellow-300 transition-colors line-clamp-1">
-                              {venue.name}
-                            </h3>
-                            <div className="flex items-center gap-2 text-white/80 text-sm mt-1">
-                              <MapPin className="w-3 h-3" />
-                              <span>{venue.area}</span>
-                            </div>
-                          </div>
-                        </div>
-                      </Link>
-                    ))}
-                  </div>
-                ) : (
-                  /* Empty State - Register CTA Card */
-                  <div className="relative h-48 rounded-2xl overflow-hidden mb-4">
+                <Link href={category.categoryPath} className="group block">
+                  <div className="relative h-64 rounded-2xl overflow-hidden">
                     {/* Background Image */}
-                    <div className="absolute inset-0">
-                      <Image
-                        src={category.image}
-                        alt={category.name}
-                        fill
-                        className="object-cover"
-                      />
-                    </div>
-
-                    {/* Gradient Overlay */}
-                    <div
-                      className="absolute inset-0"
-                      style={{
-                        background: `linear-gradient(to right, ${category.color}F0 0%, ${category.color}CC 50%, ${category.color}66 100%)`,
-                      }}
+                    <Image
+                      src={category.image}
+                      alt={category.name}
+                      fill
+                      className="object-cover transition-transform duration-500 group-hover:scale-110"
                     />
 
+                    {/* Gradient Overlay */}
+                    <div className={`absolute inset-0 bg-gradient-to-t ${category.gradient}`} />
+
                     {/* Content */}
-                    <div className="absolute inset-0 p-6 flex flex-col justify-center">
-                      <p className="text-white/90 text-sm mb-3 max-w-md">
-                        {category.description}
-                      </p>
-                      <Link
-                        href="/venues/register"
-                        className="inline-flex items-center gap-2 px-5 py-2.5 bg-white text-gray-900 font-semibold rounded-xl hover:bg-yellow-400 transition-all w-fit"
-                      >
-                        <span>Register for Free</span>
-                        <ArrowRight className="w-4 h-4" />
-                      </Link>
+                    <div className="absolute inset-0 p-6 flex flex-col justify-between">
+                      {/* Top - Icon */}
+                      <div className="flex items-center justify-between">
+                        <div
+                          className="w-12 h-12 rounded-xl flex items-center justify-center backdrop-blur-sm"
+                          style={{ backgroundColor: 'rgba(255,255,255,0.2)' }}
+                        >
+                          <IconComponent className="w-6 h-6 text-white" />
+                        </div>
+                        {hasVenues && (
+                          <div className="flex items-center gap-1 px-3 py-1 bg-yellow-400/90 text-black text-xs font-semibold rounded-full">
+                            <Star className="w-3 h-3 fill-black" />
+                            {featuredVenues.length} Featured
+                          </div>
+                        )}
+                      </div>
+
+                      {/* Bottom - Text */}
+                      <div>
+                        <h3 className="text-xl font-bold text-white mb-1 group-hover:text-yellow-300 transition-colors">
+                          {category.name}
+                        </h3>
+                        <p className="text-white/80 text-sm">{category.tagline}</p>
+
+                        {/* View button */}
+                        <div className="mt-3 flex items-center gap-2 text-white/90 text-sm font-medium group-hover:text-yellow-300 transition-colors">
+                          <span>Explore</span>
+                          <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
+                        </div>
+                      </div>
                     </div>
                   </div>
-                )}
-
-                {/* View All / Register Link */}
-                <div className="flex items-center justify-between">
-                  {hasFeatured && (
-                    <Link
-                      href={category.categoryPath}
-                      className="text-sm text-gray-400 hover:text-white transition-colors flex items-center gap-1"
-                    >
-                      View all {category.name.toLowerCase()}
-                      <ArrowRight className="w-4 h-4" />
-                    </Link>
-                  )}
-                  {!hasFeatured && <div />}
-                  <Link
-                    href="/venues/register"
-                    className="text-sm font-medium hover:text-yellow-400 transition-colors"
-                    style={{ color: category.color }}
-                  >
-                    + List your business
-                  </Link>
-                </div>
+                </Link>
               </motion.div>
             );
           })}
         </div>
       </section>
 
-      {/* CTA Section */}
-      <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mb-16">
+      {/* Featured Venues Section */}
+      {featuredData && featuredData.all.length > 0 && (
+        <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pb-16">
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="mb-8"
+          >
+            <div className="flex items-center gap-3 mb-2">
+              <Star className="w-6 h-6 text-yellow-400 fill-yellow-400" />
+              <h2 className="text-2xl font-bold text-white">Featured Places</h2>
+            </div>
+            <p className="text-gray-400">Hand-picked venues for the best experiences</p>
+          </motion.div>
+
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+            {featuredData.all.slice(0, 8).map((venue, index) => (
+              <motion.div
+                key={venue.id}
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: index * 0.05 }}
+              >
+                <Link href={`/places/${venue.slug}`} className="group block">
+                  <div className="relative h-48 rounded-xl overflow-hidden bg-white/5">
+                    {venue.cover_image_url || venue.logo_url ? (
+                      <Image
+                        src={venue.cover_image_url || venue.logo_url || ''}
+                        alt={venue.name}
+                        fill
+                        className="object-cover transition-transform duration-500 group-hover:scale-110"
+                      />
+                    ) : (
+                      <div className="w-full h-full bg-gradient-to-br from-gray-700 to-gray-900" />
+                    )}
+
+                    {/* Gradient Overlay */}
+                    <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent" />
+
+                    {/* Featured Badge */}
+                    <div className="absolute top-3 left-3">
+                      <span className="inline-flex items-center gap-1 px-2 py-1 bg-yellow-400 text-black text-xs font-semibold rounded-lg">
+                        <Star className="w-3 h-3 fill-black" />
+                        Featured
+                      </span>
+                    </div>
+
+                    {/* Likes */}
+                    <div className="absolute top-3 right-3">
+                      <span className="inline-flex items-center gap-1 px-2 py-1 bg-black/50 backdrop-blur-sm text-white text-xs rounded-lg">
+                        <Heart className="w-3 h-3 fill-red-500 text-red-500" />
+                        {venue.like_count}
+                      </span>
+                    </div>
+
+                    {/* Content */}
+                    <div className="absolute inset-x-0 bottom-0 p-4">
+                      <h3 className="text-white font-semibold group-hover:text-yellow-300 transition-colors line-clamp-1">
+                        {venue.name}
+                      </h3>
+                      <div className="flex items-center gap-1 text-gray-300 text-sm mt-1">
+                        <MapPin className="w-3 h-3" />
+                        <span>{venue.area}</span>
+                      </div>
+                    </div>
+                  </div>
+                </Link>
+              </motion.div>
+            ))}
+          </div>
+        </section>
+      )}
+
+      {/* Register CTA Section */}
+      <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pb-16">
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
@@ -349,67 +345,20 @@ export default function ExplorePage() {
 
               <div className="flex flex-col sm:flex-row gap-4 justify-center">
                 <Link
-                  href="/venues/register"
+                  href="/register"
                   className="inline-flex items-center justify-center gap-2 px-8 py-4 bg-black text-white font-semibold rounded-xl hover:bg-gray-900 transition-colors"
                 >
                   <span>Register Your Venue</span>
                   <ArrowRight className="w-5 h-5" />
                 </Link>
                 <Link
-                  href="/venues/login"
+                  href="/login"
                   className="inline-flex items-center justify-center gap-2 px-8 py-4 bg-white/20 text-black font-semibold rounded-xl hover:bg-white/30 transition-colors border border-black/20"
                 >
                   Already Registered? Login
                 </Link>
               </div>
             </div>
-          </div>
-        </motion.div>
-      </section>
-
-      {/* Newsletter Section */}
-      <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mb-16">
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          className="relative overflow-hidden rounded-3xl"
-        >
-          {/* Background */}
-          <div className="absolute inset-0 bg-gradient-to-r from-purple-600 to-blue-600" />
-          <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_right,_var(--tw-gradient-stops))] from-white/20 via-transparent to-transparent" />
-
-          <div className="relative z-10 py-12 px-6 md:px-12 text-center">
-            <h2 className="text-2xl md:text-3xl font-bold text-white mb-3">
-              Discover More Every Week
-            </h2>
-            <p className="text-white/80 mb-8 max-w-xl mx-auto">
-              Get personalized recommendations, exclusive deals, and insider tips delivered to your inbox
-            </p>
-
-            <form
-              onSubmit={(e) => {
-                e.preventDefault();
-                // Handle newsletter signup
-                setEmail('');
-              }}
-              className="flex flex-col sm:flex-row gap-3 max-w-md mx-auto"
-            >
-              <input
-                type="email"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                placeholder="Enter your email"
-                className="flex-1 px-4 py-3 bg-white/20 border border-white/30 rounded-xl text-white placeholder-white/60 focus:outline-none focus:ring-2 focus:ring-white/50"
-                required
-              />
-              <button
-                type="submit"
-                className="flex items-center justify-center gap-2 px-6 py-3 bg-white text-purple-600 font-semibold rounded-xl hover:bg-white/90 transition-colors"
-              >
-                <Send className="w-4 h-4" />
-                Subscribe
-              </button>
-            </form>
           </div>
         </motion.div>
       </section>
