@@ -415,11 +415,18 @@ export default function VenueProfilePage() {
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           {/* Profile Photo */}
           <div>
-            <label className="block text-sm font-medium text-gray-300 mb-3">
+            <span className="block text-sm font-medium text-gray-300 mb-3">
               Profile Photo
-            </label>
-            <div className="relative">
-              <div className="w-32 h-32 rounded-2xl bg-white/5 border border-white/10 overflow-hidden flex items-center justify-center relative">
+            </span>
+            <label className="block cursor-pointer group">
+              <input
+                type="file"
+                accept="image/jpeg,image/png,image/webp,image/gif"
+                onChange={(e) => handleFileSelect(e, 'profile')}
+                className="sr-only"
+                disabled={isUploadingProfile}
+              />
+              <div className="w-32 h-32 rounded-2xl bg-white/5 border-2 border-dashed border-white/20 hover:border-yellow-400/50 overflow-hidden flex items-center justify-center relative transition-colors">
                 {(pendingProfilePhoto || profilePhoto) && !profilePhotoError ? (
                   <>
                     <img
@@ -435,9 +442,19 @@ export default function VenueProfilePage() {
                         </span>
                       </div>
                     )}
+                    {/* Hover overlay */}
+                    <div className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+                      <div className="text-center">
+                        <Camera className="w-6 h-6 text-white mx-auto mb-1" />
+                        <span className="text-xs text-white font-medium">Change</span>
+                      </div>
+                    </div>
                   </>
                 ) : (
-                  <Camera className="w-10 h-10 text-gray-500" />
+                  <div className="text-center">
+                    <Camera className="w-10 h-10 text-gray-500 mx-auto mb-2" />
+                    <span className="text-xs text-gray-500">Click to upload</span>
+                  </div>
                 )}
                 {isUploadingProfile && (
                   <div className="absolute inset-0 bg-black/50 flex items-center justify-center">
@@ -445,20 +462,7 @@ export default function VenueProfilePage() {
                   </div>
                 )}
               </div>
-              <label className="mt-3 flex items-center gap-2 px-4 py-2 bg-white/10 hover:bg-white/15 rounded-lg cursor-pointer transition-colors w-fit">
-                <Upload className="w-4 h-4 text-gray-300" />
-                <span className="text-sm text-gray-300">
-                  {profilePhoto ? 'Change Photo' : 'Upload Photo'}
-                </span>
-                <input
-                  type="file"
-                  accept="image/jpeg,image/png,image/webp,image/gif"
-                  onChange={(e) => handleFileSelect(e, 'profile')}
-                  className="hidden"
-                  disabled={isUploadingProfile}
-                />
-              </label>
-            </div>
+            </label>
             <p className="text-xs text-gray-500 mt-2">
               Square image recommended. Max 20MB.
             </p>
@@ -466,11 +470,18 @@ export default function VenueProfilePage() {
 
           {/* Cover Photo */}
           <div>
-            <label className="block text-sm font-medium text-gray-300 mb-3">
+            <span className="block text-sm font-medium text-gray-300 mb-3">
               Cover Photo
-            </label>
-            <div className="relative">
-              <div className="w-full h-32 rounded-2xl bg-white/5 border border-white/10 overflow-hidden flex items-center justify-center relative">
+            </span>
+            <label className="block cursor-pointer group">
+              <input
+                type="file"
+                accept="image/jpeg,image/png,image/webp,image/gif"
+                onChange={(e) => handleFileSelect(e, 'cover')}
+                className="sr-only"
+                disabled={isUploadingCover}
+              />
+              <div className="w-full h-32 rounded-2xl bg-white/5 border-2 border-dashed border-white/20 hover:border-yellow-400/50 overflow-hidden flex items-center justify-center relative transition-colors">
                 {(pendingCoverPhoto || coverPhoto) && !coverPhotoError ? (
                   <>
                     <img
@@ -486,9 +497,19 @@ export default function VenueProfilePage() {
                         </span>
                       </div>
                     )}
+                    {/* Hover overlay */}
+                    <div className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+                      <div className="text-center">
+                        <Camera className="w-6 h-6 text-white mx-auto mb-1" />
+                        <span className="text-xs text-white font-medium">Change</span>
+                      </div>
+                    </div>
                   </>
                 ) : (
-                  <Camera className="w-10 h-10 text-gray-500" />
+                  <div className="text-center">
+                    <Camera className="w-10 h-10 text-gray-500 mx-auto mb-2" />
+                    <span className="text-xs text-gray-500">Click to upload</span>
+                  </div>
                 )}
                 {isUploadingCover && (
                   <div className="absolute inset-0 bg-black/50 flex items-center justify-center">
@@ -496,20 +517,7 @@ export default function VenueProfilePage() {
                   </div>
                 )}
               </div>
-              <label className="mt-3 flex items-center gap-2 px-4 py-2 bg-white/10 hover:bg-white/15 rounded-lg cursor-pointer transition-colors w-fit">
-                <Upload className="w-4 h-4 text-gray-300" />
-                <span className="text-sm text-gray-300">
-                  {coverPhoto ? 'Change Cover' : 'Upload Cover'}
-                </span>
-                <input
-                  type="file"
-                  accept="image/jpeg,image/png,image/webp,image/gif"
-                  onChange={(e) => handleFileSelect(e, 'cover')}
-                  className="hidden"
-                  disabled={isUploadingCover}
-                />
-              </label>
-            </div>
+            </label>
             <p className="text-xs text-gray-500 mt-2">
               Landscape image (16:9) recommended. Max 20MB.
             </p>
