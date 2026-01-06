@@ -322,15 +322,18 @@ export default function AdminVenueEditPage({ params }: { params: Promise<{ id: s
     try {
       const uploadFormData = new FormData();
       uploadFormData.append('file', file);
-      uploadFormData.append('folder', `venues/${resolvedParams.id}`);
+      uploadFormData.append('entityType', 'venue');
+      uploadFormData.append('imageType', type);
+      uploadFormData.append('venueSlug', venue?.slug || resolvedParams.id);
 
-      const response = await fetch('/api/upload/s3', {
+      const response = await fetch('/api/upload', {
         method: 'POST',
         body: uploadFormData,
       });
 
       if (!response.ok) {
-        throw new Error('Failed to upload image');
+        const errorData = await response.json().catch(() => ({}));
+        throw new Error(errorData.error || 'Failed to upload image');
       }
 
       const data = await response.json();
@@ -345,7 +348,7 @@ export default function AdminVenueEditPage({ params }: { params: Promise<{ id: s
       setToast({ message: 'Image uploaded successfully', type: 'success' });
     } catch (error) {
       console.error('Error uploading image:', error);
-      setToast({ message: 'Failed to upload image', type: 'error' });
+      setToast({ message: error instanceof Error ? error.message : 'Failed to upload image', type: 'error' });
     } finally {
       if (type === 'logo') setUploadingLogo(false);
       else setUploadingCover(false);
@@ -859,19 +862,39 @@ export default function AdminVenueEditPage({ params }: { params: Promise<{ id: s
             <h3 className="text-lg font-semibold text-white mb-4">Logo</h3>
             <div className="relative">
               {formData.logo_url ? (
-                <div className="relative aspect-square rounded-xl overflow-hidden">
+                <div className="relative aspect-square rounded-xl overflow-hidden group">
                   <Image
                     src={formData.logo_url}
                     alt="Logo"
                     fill
                     className="object-cover"
                   />
-                  <button
-                    onClick={() => setFormData((prev) => ({ ...prev, logo_url: '' }))}
-                    className="absolute top-2 right-2 p-1 bg-red-500 rounded-lg text-white hover:bg-red-600"
-                  >
-                    <XCircle className="w-4 h-4" />
-                  </button>
+                  {/* Overlay with actions on hover */}
+                  <div className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-2">
+                    <label className="p-2 bg-cyan-500 rounded-lg text-white hover:bg-cyan-600 cursor-pointer">
+                      <Upload className="w-5 h-5" />
+                      <input
+                        type="file"
+                        accept="image/*"
+                        className="hidden"
+                        onChange={(e) => {
+                          const file = e.target.files?.[0];
+                          if (file) handleImageUpload(file, 'logo');
+                        }}
+                      />
+                    </label>
+                    <button
+                      onClick={() => setFormData((prev) => ({ ...prev, logo_url: '' }))}
+                      className="p-2 bg-red-500 rounded-lg text-white hover:bg-red-600"
+                    >
+                      <Trash2 className="w-5 h-5" />
+                    </button>
+                  </div>
+                  {uploadingLogo && (
+                    <div className="absolute inset-0 bg-black/60 flex items-center justify-center">
+                      <Loader2 className="w-8 h-8 animate-spin text-cyan-500" />
+                    </div>
+                  )}
                 </div>
               ) : (
                 <label className="flex flex-col items-center justify-center aspect-square border-2 border-dashed border-white/20 rounded-xl cursor-pointer hover:border-cyan-500/50 transition-colors">
@@ -881,6 +904,7 @@ export default function AdminVenueEditPage({ params }: { params: Promise<{ id: s
                     <>
                       <Upload className="w-8 h-8 text-gray-400 mb-2" />
                       <span className="text-gray-400 text-sm">Upload Logo</span>
+                      <span className="text-gray-500 text-xs mt-1">Max 10MB, compressed to 1MB</span>
                     </>
                   )}
                   <input
@@ -902,19 +926,39 @@ export default function AdminVenueEditPage({ params }: { params: Promise<{ id: s
             <h3 className="text-lg font-semibold text-white mb-4">Cover Image</h3>
             <div className="relative">
               {formData.cover_image_url ? (
-                <div className="relative aspect-video rounded-xl overflow-hidden">
+                <div className="relative aspect-video rounded-xl overflow-hidden group">
                   <Image
                     src={formData.cover_image_url}
                     alt="Cover"
                     fill
                     className="object-cover"
                   />
-                  <button
-                    onClick={() => setFormData((prev) => ({ ...prev, cover_image_url: '' }))}
-                    className="absolute top-2 right-2 p-1 bg-red-500 rounded-lg text-white hover:bg-red-600"
-                  >
-                    <XCircle className="w-4 h-4" />
-                  </button>
+                  {/* Overlay with actions on hover */}
+                  <div className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-2">
+                    <label className="p-2 bg-cyan-500 rounded-lg text-white hover:bg-cyan-600 cursor-pointer">
+                      <Upload className="w-5 h-5" />
+                      <input
+                        type="file"
+                        accept="image/*"
+                        className="hidden"
+                        onChange={(e) => {
+                          const file = e.target.files?.[0];
+                          if (file) handleImageUpload(file, 'cover');
+                        }}
+                      />
+                    </label>
+                    <button
+                      onClick={() => setFormData((prev) => ({ ...prev, cover_image_url: '' }))}
+                      className="p-2 bg-red-500 rounded-lg text-white hover:bg-red-600"
+                    >
+                      <Trash2 className="w-5 h-5" />
+                    </button>
+                  </div>
+                  {uploadingCover && (
+                    <div className="absolute inset-0 bg-black/60 flex items-center justify-center">
+                      <Loader2 className="w-8 h-8 animate-spin text-cyan-500" />
+                    </div>
+                  )}
                 </div>
               ) : (
                 <label className="flex flex-col items-center justify-center aspect-video border-2 border-dashed border-white/20 rounded-xl cursor-pointer hover:border-cyan-500/50 transition-colors">
@@ -924,6 +968,7 @@ export default function AdminVenueEditPage({ params }: { params: Promise<{ id: s
                     <>
                       <Upload className="w-8 h-8 text-gray-400 mb-2" />
                       <span className="text-gray-400 text-sm">Upload Cover</span>
+                      <span className="text-gray-500 text-xs mt-1">Max 10MB, compressed to 1MB</span>
                     </>
                   )}
                   <input

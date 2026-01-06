@@ -91,30 +91,40 @@ async function checkContentModeration(bucket, key) {
   }
 }
 
-// Always fetch fresh watermark (no caching to ensure updates are reflected)
-async function getWatermark() {
-  const command = new GetObjectCommand({
-    Bucket: BUCKET,
-    Key: 'logo.png'
-  });
-  const response = await s3Client.send(command);
-  return Buffer.from(await response.Body.transformToByteArray());
-}
+// Note: Watermarks removed from all uploads per user request
 
 // Compression settings
 const compressionSettings = {
-  cover: { maxWidth: 1920, maxHeight: 1080, quality: 75 },
-  gallery: { maxWidth: 1200, maxHeight: 800, quality: 75 },
-  logo: { maxWidth: 400, maxHeight: 400, quality: 85 },
-  banner: { maxWidth: 1920, maxHeight: 600, quality: 75 },
-  default: { maxWidth: 1200, maxHeight: 800, quality: 75 }
+  cover: { maxWidth: 1920, maxHeight: 1080, quality: 85 },
+  gallery: { maxWidth: 1200, maxHeight: 800, quality: 80 },
+  logo: { maxWidth: 400, maxHeight: 400, quality: 90 },
+  banner: { maxWidth: 1920, maxHeight: 600, quality: 85 },
+  default: { maxWidth: 1200, maxHeight: 800, quality: 80 }
 };
+
+// Maximum file size in bytes (1MB)
+const MAX_FILE_SIZE = 1024 * 1024;
+
+/**
+ * Compress image to target file size (1MB max)
+ * Iteratively reduces quality until under target size
+ */
+async function compressToTargetSize(sharpInstance, initialQuality, maxSize = MAX_FILE_SIZE) {
+  let quality = initialQuality;
+  let buffer = await sharpInstance.webp({ quality }).toBuffer();
+
+  // Iterate down quality until under max size (min quality 50)
+  while (buffer.length > maxSize && quality > 50) {
+    quality -= 5;
+    buffer = await sharpInstance.webp({ quality }).toBuffer();
+    console.log(`  Reducing quality to ${quality}%, size: ${(buffer.length / 1024).toFixed(0)}KB`);
+  }
+
+  return { buffer, quality };
+}
 
 export const handler = async (event) => {
   console.log('Processing event:', JSON.stringify(event, null, 2));
-
-  // Fetch watermark once
-  const watermark = await getWatermark();
 
   for (const record of event.Records) {
     const uploadKey = decodeURIComponent(record.s3.object.key.replace(/\+/g, ' '));
@@ -164,10 +174,6 @@ export const handler = async (event) => {
 
       const settings = compressionSettings[imageType];
 
-      // Use high quality (95) for files under 600KB to preserve quality
-      const fileSizeKB = imageBuffer.length / 1024;
-      const quality = fileSizeKB < 600 ? 95 : settings.quality;
-
       // 3. Resize image
       const resizedBuffer = await sharp(imageBuffer)
         .resize(settings.maxWidth, settings.maxHeight, {
@@ -179,51 +185,15 @@ export const handler = async (event) => {
       // 4. Get dimensions
       const metadata = await sharp(resizedBuffer).metadata();
 
-      // 5. Apply watermark ONLY for gallery images
-      // Logo, cover, banner, event, offer - NO watermark
-      // Gallery - YES watermark (venue portal gallery uploads)
-      let finalBuffer;
-      if (imageType !== 'gallery') {
-        // No watermark for non-gallery images
-        finalBuffer = await sharp(resizedBuffer)
-          .webp({ quality: quality })
-          .toBuffer();
-      } else {
-        // Resize watermark to ~35% of image width with high quality
-        const watermarkWidth = Math.floor(metadata.width * 0.35);
-        const resizedWm = await sharp(watermark)
-          .resize(watermarkWidth, null, { kernel: 'lanczos3' })
-          .ensureAlpha()
-          .raw()
-          .toBuffer({ resolveWithObject: true });
+      // 5. NO watermark for ANY image type (logo, cover, banner, gallery)
+      // Compress to max 1MB using iterative quality reduction
+      const { buffer: finalBuffer, quality: finalQuality } = await compressToTargetSize(
+        sharp(resizedBuffer),
+        settings.quality,
+        MAX_FILE_SIZE
+      );
 
-        // Apply 60% opacity to alpha channel
-        const { data, info } = resizedWm;
-        for (let i = 3; i < data.length; i += 4) {
-          data[i] = Math.round(data[i] * 0.6);
-        }
-
-        const resizedWatermark = await sharp(data, {
-          raw: { width: info.width, height: info.height, channels: info.channels }
-        })
-          .png()
-          .toBuffer();
-
-        // Get watermark dimensions for positioning (lower - only 10px from bottom)
-        const wmMeta = await sharp(resizedWatermark).metadata();
-        const left = Math.floor((metadata.width - wmMeta.width) / 2);
-        const top = metadata.height - wmMeta.height - 10;
-
-        finalBuffer = await sharp(resizedBuffer)
-          .composite([{
-            input: resizedWatermark,
-            left: left,
-            top: top,
-            blend: 'over'
-          }])
-          .webp({ quality: quality })
-          .toBuffer();
-      }
+      console.log(`   Final quality: ${finalQuality}%, size: ${(finalBuffer.length / 1024).toFixed(0)}KB`);
 
       // 6. Generate processed key
       const processedKey = uploadKey

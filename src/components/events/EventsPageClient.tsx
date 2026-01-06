@@ -500,7 +500,7 @@ export default function EventsPageClient({ initialEvents, familyAttractions = []
                       whileHover={{ y: -6 }}
                       className="group"
                     >
-                      <Link href={`/explore/kids/${attraction.slug}`} className="block">
+                      <Link href={`/attractions/${attraction.slug}`} className="block">
                         <div className="relative bg-white/5 backdrop-blur-sm border border-white/10 rounded-2xl overflow-hidden hover:border-green-400/50 transition-all duration-300">
                           <div className="relative aspect-video overflow-hidden">
                             <Image

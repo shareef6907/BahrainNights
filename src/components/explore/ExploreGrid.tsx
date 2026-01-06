@@ -49,6 +49,16 @@ export default function ExploreGrid({
 }: ExploreGridProps) {
   const color = categoryColors[category] || '#6B7280';
 
+  // Determine the correct URL path based on category
+  const getItemUrl = (item: ExploreItem) => {
+    // Kids/Family attractions use the /attractions/ route
+    if (category === 'kids') {
+      return `/attractions/${item.slug}`;
+    }
+    // Other categories use /explore/{category}/ route
+    return `/explore/${category}/${item.slug}`;
+  };
+
   if (items.length === 0) {
     return (
       <div className="text-center py-16">
@@ -67,7 +77,7 @@ export default function ExploreGrid({
           transition={{ delay: index * 0.05 }}
         >
           <Link
-            href={`/explore/${category}/${item.slug}`}
+            href={getItemUrl(item)}
             className="block group"
           >
             <div className="bg-white/5 border border-white/10 rounded-2xl overflow-hidden hover:border-white/20 transition-all hover:bg-white/10">
