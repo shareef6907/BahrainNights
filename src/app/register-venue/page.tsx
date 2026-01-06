@@ -1,9 +1,10 @@
 'use client';
 
-import { useState } from 'react';
-import { motion } from 'framer-motion';
-import { Building2, MapPin, Phone, Mail, Globe, Instagram, Upload, CheckCircle, Loader2, ArrowLeft, Lock, Eye, EyeOff } from 'lucide-react';
+import { useState, useRef } from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
+import { Building2, MapPin, Phone, Mail, Globe, Instagram, Upload, CheckCircle, Loader2, ArrowLeft, Lock, Eye, EyeOff, Link as LinkIcon, ExternalLink, Images, Trash2, AlertCircle } from 'lucide-react';
 import Link from 'next/link';
+import { compressImage } from '@/lib/image-compression';
 
 const VENUE_CATEGORIES = [
   'Restaurant',
@@ -39,6 +40,8 @@ const BAHRAIN_AREAS = [
   'Other'
 ];
 
+const MAX_GALLERY_IMAGES = 20;
+
 interface FormData {
   venueName: string;
   crNumber: string;
@@ -56,6 +59,15 @@ interface FormData {
   coverImage: File | null;
   logoUrl: string | null;
   coverImageUrl: string | null;
+  googleMapsUrl: string;
+  gallery: string[];
+}
+
+interface GalleryUploadProgress {
+  fileName: string;
+  previewUrl: string;
+  progress: number;
+  status: 'uploading' | 'success' | 'error';
 }
 
 export default function RegisterVenuePage() {
@@ -75,7 +87,9 @@ export default function RegisterVenuePage() {
     logo: null,
     coverImage: null,
     logoUrl: null,
-    coverImageUrl: null
+    coverImageUrl: null,
+    googleMapsUrl: '',
+    gallery: []
   });
 
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -87,6 +101,9 @@ export default function RegisterVenuePage() {
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [logoUploading, setLogoUploading] = useState(false);
   const [coverUploading, setCoverUploading] = useState(false);
+  const [galleryUploading, setGalleryUploading] = useState(false);
+  const [galleryUploadProgress, setGalleryUploadProgress] = useState<GalleryUploadProgress[]>([]);
+  const galleryInputRef = useRef<HTMLInputElement>(null);
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target;
@@ -178,6 +195,123 @@ export default function RegisterVenuePage() {
     }
   };
 
+  // Google Maps URL validation
+  const isValidGoogleMapsUrl = (url: string): boolean => {
+    if (!url) return false;
+    return (
+      url.includes('google.com/maps') ||
+      url.includes('goo.gl/maps') ||
+      url.includes('maps.app.goo.gl') ||
+      url.includes('maps.google.com')
+    );
+  };
+
+  // Gallery image upload handler
+  const handleGallerySelect = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const files = e.target.files;
+    if (!files || files.length === 0) return;
+
+    const remainingSlots = MAX_GALLERY_IMAGES - formData.gallery.length;
+    if (remainingSlots === 0) {
+      setError(`Maximum ${MAX_GALLERY_IMAGES} gallery images allowed`);
+      return;
+    }
+
+    const filesToUpload = Array.from(files).slice(0, remainingSlots);
+    setGalleryUploading(true);
+    setError('');
+
+    // Create preview URLs and initial progress state
+    const initialProgress: GalleryUploadProgress[] = filesToUpload.map(file => ({
+      fileName: file.name,
+      previewUrl: URL.createObjectURL(file),
+      progress: 0,
+      status: 'uploading' as const,
+    }));
+    setGalleryUploadProgress(initialProgress);
+
+    try {
+      const uploadedUrls: string[] = [];
+
+      for (let i = 0; i < filesToUpload.length; i++) {
+        const file = filesToUpload[i];
+
+        // Validate file type
+        if (!file.type.startsWith('image/')) {
+          setGalleryUploadProgress(prev => prev.map((p, idx) =>
+            idx === i ? { ...p, status: 'error', progress: 100 } : p
+          ));
+          continue;
+        }
+
+        // Validate file size (max 10MB before compression)
+        if (file.size > 10 * 1024 * 1024) {
+          setError(`${file.name} is too large (max 10MB)`);
+          setGalleryUploadProgress(prev => prev.map((p, idx) =>
+            idx === i ? { ...p, status: 'error', progress: 100 } : p
+          ));
+          continue;
+        }
+
+        // Update progress to show compressing
+        setGalleryUploadProgress(prev => prev.map((p, idx) =>
+          idx === i ? { ...p, progress: 20 } : p
+        ));
+
+        // Compress image
+        let compressedFile: File;
+        try {
+          compressedFile = await compressImage(file);
+        } catch (compressError) {
+          console.error(`Compression failed for ${file.name}:`, compressError);
+          compressedFile = file;
+        }
+
+        // Update progress to show uploading
+        setGalleryUploadProgress(prev => prev.map((p, idx) =>
+          idx === i ? { ...p, progress: 50 } : p
+        ));
+
+        try {
+          const s3Url = await uploadToS3(compressedFile, 'cover'); // Use 'cover' type for gallery images
+          if (s3Url) {
+            uploadedUrls.push(s3Url);
+            setGalleryUploadProgress(prev => prev.map((p, idx) =>
+              idx === i ? { ...p, status: 'success', progress: 100 } : p
+            ));
+          }
+        } catch (uploadErr) {
+          setGalleryUploadProgress(prev => prev.map((p, idx) =>
+            idx === i ? { ...p, status: 'error', progress: 100 } : p
+          ));
+        }
+      }
+
+      if (uploadedUrls.length > 0) {
+        setFormData(prev => ({ ...prev, gallery: [...prev.gallery, ...uploadedUrls] }));
+      }
+    } catch (err) {
+      console.error('Gallery upload error:', err);
+      setError('Failed to upload gallery images');
+    } finally {
+      setGalleryUploading(false);
+      setTimeout(() => {
+        setGalleryUploadProgress([]);
+      }, 2000);
+      if (galleryInputRef.current) {
+        galleryInputRef.current.value = '';
+      }
+    }
+  };
+
+  // Remove gallery image
+  const handleRemoveGalleryImage = (index: number) => {
+    setFormData(prev => ({
+      ...prev,
+      gallery: prev.gallery.filter((_, i) => i !== index)
+    }));
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsSubmitting(true);
@@ -204,8 +338,15 @@ export default function RegisterVenuePage() {
     }
 
     // Check if images are still uploading
-    if (logoUploading || coverUploading) {
+    if (logoUploading || coverUploading || galleryUploading) {
       setError('Please wait for images to finish uploading');
+      setIsSubmitting(false);
+      return;
+    }
+
+    // Validate Google Maps URL if provided
+    if (formData.googleMapsUrl && !isValidGoogleMapsUrl(formData.googleMapsUrl)) {
+      setError('Please enter a valid Google Maps link');
       setIsSubmitting(false);
       return;
     }
@@ -225,7 +366,9 @@ export default function RegisterVenuePage() {
         instagram: formData.instagram || null,
         description: formData.description || null,
         logoUrl: formData.logoUrl,
-        coverImageUrl: formData.coverImageUrl
+        coverImageUrl: formData.coverImageUrl,
+        googleMapsUrl: formData.googleMapsUrl || null,
+        gallery: formData.gallery.length > 0 ? formData.gallery : null
       };
 
       const response = await fetch('/api/venues/register', {
@@ -400,6 +543,52 @@ export default function RegisterVenuePage() {
                   placeholder="Building, street, block"
                 />
               </div>
+            </div>
+
+            {/* Google Maps Link */}
+            <div className="mt-4">
+              <label className="block text-sm text-gray-400 mb-2">
+                <LinkIcon className="w-4 h-4 inline mr-2" />
+                Google Maps Link
+              </label>
+              <input
+                type="url"
+                name="googleMapsUrl"
+                value={formData.googleMapsUrl}
+                onChange={handleInputChange}
+                className="w-full bg-gray-900/50 border border-gray-700 rounded-lg px-4 py-3 text-white placeholder-gray-500 focus:border-orange-500 focus:ring-1 focus:ring-orange-500 outline-none transition-all"
+                placeholder="https://maps.google.com/..."
+              />
+              <p className="text-gray-500 text-xs mt-2">
+                Share your Google Maps location link so customers can find you easily
+              </p>
+
+              {/* Google Maps Link Preview */}
+              {formData.googleMapsUrl && isValidGoogleMapsUrl(formData.googleMapsUrl) && (
+                <motion.div
+                  initial={{ opacity: 0, height: 0 }}
+                  animate={{ opacity: 1, height: 'auto' }}
+                  className="mt-3 p-3 bg-green-500/10 border border-green-500/20 rounded-lg"
+                >
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-2">
+                      <div className="p-1.5 bg-green-500/20 rounded-lg">
+                        <MapPin className="w-4 h-4 text-green-400" />
+                      </div>
+                      <span className="text-green-400 text-sm font-medium">Location link added</span>
+                    </div>
+                    <a
+                      href={formData.googleMapsUrl}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="flex items-center gap-1 px-3 py-1.5 bg-white/10 rounded-lg text-white text-xs hover:bg-white/20 transition-colors"
+                    >
+                      <ExternalLink className="w-3 h-3" />
+                      Test
+                    </a>
+                  </div>
+                </motion.div>
+              )}
             </div>
           </div>
 
@@ -617,6 +806,151 @@ export default function RegisterVenuePage() {
                 </label>
               </div>
             </div>
+          </div>
+
+          {/* Gallery Images */}
+          <div className="mb-8">
+            <div className="flex items-center justify-between mb-4">
+              <h3 className="text-lg font-semibold text-white flex items-center gap-2">
+                <Images className="w-5 h-5 text-orange-500" />
+                Gallery Images
+              </h3>
+              <div className="flex items-center gap-2 px-3 py-1.5 bg-gray-900/50 rounded-lg">
+                <Images className="w-4 h-4 text-orange-400" />
+                <span className="text-white text-sm font-medium">{formData.gallery.length}/{MAX_GALLERY_IMAGES}</span>
+              </div>
+            </div>
+            <p className="text-gray-500 text-sm mb-4">
+              Upload up to {MAX_GALLERY_IMAGES} images to showcase your venue. These will appear on your venue page.
+            </p>
+
+            {/* Upload Area */}
+            <input
+              ref={galleryInputRef}
+              type="file"
+              accept="image/*"
+              multiple
+              onChange={handleGallerySelect}
+              className="hidden"
+              disabled={galleryUploading || formData.gallery.length >= MAX_GALLERY_IMAGES}
+            />
+            <button
+              type="button"
+              onClick={() => galleryInputRef.current?.click()}
+              disabled={galleryUploading || formData.gallery.length >= MAX_GALLERY_IMAGES}
+              className={`w-full border-2 border-dashed rounded-lg p-6 transition-all mb-4 ${
+                formData.gallery.length >= MAX_GALLERY_IMAGES
+                  ? 'border-gray-700 bg-gray-900/30 cursor-not-allowed'
+                  : 'border-gray-700 hover:border-orange-500/50 cursor-pointer'
+              }`}
+            >
+              <div className="flex flex-col items-center gap-2">
+                {galleryUploading ? (
+                  <>
+                    <Loader2 className="w-10 h-10 text-orange-400 animate-spin" />
+                    <p className="text-white font-medium">Uploading...</p>
+                  </>
+                ) : (
+                  <>
+                    <div className="w-12 h-12 rounded-full bg-gradient-to-r from-yellow-400/20 to-orange-500/20 flex items-center justify-center">
+                      <Upload className="w-6 h-6 text-orange-400" />
+                    </div>
+                    <div className="text-center">
+                      <p className="text-white font-medium">
+                        {formData.gallery.length >= MAX_GALLERY_IMAGES
+                          ? 'Maximum images reached'
+                          : 'Click to upload gallery images'}
+                      </p>
+                      <p className="text-gray-500 text-xs mt-1">
+                        PNG, JPG up to 10MB each (auto-compressed)
+                      </p>
+                    </div>
+                  </>
+                )}
+              </div>
+            </button>
+
+            {/* Upload Progress */}
+            <AnimatePresence>
+              {galleryUploadProgress.length > 0 && (
+                <motion.div
+                  initial={{ opacity: 0, y: 10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, y: -10 }}
+                  className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-5 gap-3 mb-4"
+                >
+                  {galleryUploadProgress.map((item, index) => (
+                    <motion.div
+                      key={item.fileName + index}
+                      initial={{ opacity: 0, scale: 0.8 }}
+                      animate={{ opacity: 1, scale: 1 }}
+                      className="relative aspect-square rounded-lg overflow-hidden bg-gray-900/50"
+                    >
+                      <img
+                        src={item.previewUrl}
+                        alt={`Uploading ${item.fileName}`}
+                        className={`w-full h-full object-cover transition-opacity ${
+                          item.status === 'uploading' ? 'opacity-40' : 'opacity-100'
+                        }`}
+                      />
+                      {item.status === 'uploading' && (
+                        <div className="absolute inset-0 flex flex-col items-center justify-center bg-black/30">
+                          <Loader2 className="w-6 h-6 text-orange-400 animate-spin mb-1" />
+                          <p className="text-white text-xs">{item.progress}%</p>
+                        </div>
+                      )}
+                      {item.status === 'success' && (
+                        <div className="absolute inset-0 flex items-center justify-center bg-green-500/20">
+                          <CheckCircle className="w-8 h-8 text-green-400" />
+                        </div>
+                      )}
+                      {item.status === 'error' && (
+                        <div className="absolute inset-0 flex items-center justify-center bg-red-500/20">
+                          <AlertCircle className="w-8 h-8 text-red-400" />
+                        </div>
+                      )}
+                    </motion.div>
+                  ))}
+                </motion.div>
+              )}
+            </AnimatePresence>
+
+            {/* Gallery Grid */}
+            {formData.gallery.length > 0 && (
+              <motion.div
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-5 gap-3"
+              >
+                {formData.gallery.map((url, index) => (
+                  <motion.div
+                    key={url}
+                    layout
+                    initial={{ opacity: 0, scale: 0.8 }}
+                    animate={{ opacity: 1, scale: 1 }}
+                    className="relative group aspect-square rounded-lg overflow-hidden bg-gray-900/50"
+                  >
+                    <img
+                      src={url}
+                      alt={`Gallery image ${index + 1}`}
+                      className="w-full h-full object-cover"
+                    />
+                    <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+                      <button
+                        type="button"
+                        onClick={() => handleRemoveGalleryImage(index)}
+                        className="p-2 bg-red-500 rounded-full hover:bg-red-600 transition-colors"
+                      >
+                        <Trash2 className="w-4 h-4 text-white" />
+                      </button>
+                    </div>
+                    <div className="absolute bottom-1 left-1 px-1.5 py-0.5 bg-black/70 rounded text-xs text-white">
+                      {index + 1}
+                    </div>
+                  </motion.div>
+                ))}
+              </motion.div>
+            )}
           </div>
 
           {/* Submit */}

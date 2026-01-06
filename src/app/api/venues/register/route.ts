@@ -41,6 +41,8 @@ interface RegisterData {
   description?: string | null;
   logoUrl?: string | null;
   coverImageUrl?: string | null;
+  googleMapsUrl?: string | null;
+  gallery?: string[] | null;
 }
 
 export async function POST(request: NextRequest) {
@@ -62,7 +64,9 @@ export async function POST(request: NextRequest) {
       instagram,
       description,
       logoUrl,
-      coverImageUrl
+      coverImageUrl,
+      googleMapsUrl,
+      gallery
     } = body;
 
     // Validate required fields
@@ -191,6 +195,8 @@ export async function POST(request: NextRequest) {
       instagram: instagram || null,
       logo_url: logoUrl,
       cover_image_url: coverImageUrl,
+      google_maps_url: googleMapsUrl || null,
+      gallery: gallery || null,
       status: 'pending', // All registrations start as pending for admin approval
       is_verified: false,
       is_featured: false,
@@ -257,6 +263,6 @@ export async function GET() {
   return NextResponse.json({
     message: 'POST to this endpoint to register a venue',
     required_fields: ['venueName', 'crNumber', 'category', 'area', 'address', 'phone', 'email', 'password'],
-    optional_fields: ['website', 'instagram', 'description', 'logo', 'coverImage'],
+    optional_fields: ['website', 'instagram', 'description', 'logoUrl', 'coverImageUrl', 'googleMapsUrl', 'gallery'],
   });
 }
