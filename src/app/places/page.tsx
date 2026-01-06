@@ -419,7 +419,7 @@ function PlacesPageContent() {
                 Be the first to register your venue on BahrainNights!
               </p>
               <a
-                href="/register"
+                href="/register-venue"
                 className="inline-block px-6 py-3 bg-gradient-to-r from-yellow-400 to-orange-500 text-black font-semibold rounded-xl hover:shadow-lg transition-all"
               >
                 Register Your Venue
@@ -433,7 +433,7 @@ function PlacesPageContent() {
               {/* Main Content */}
               <div className="flex-1">
                 {viewMode === 'grid' ? (
-                  <PlaceGrid places={filteredPlaces} />
+                  <PlaceGrid places={filteredPlaces} selectedCategory={selectedCategory} />
                 ) : (
                   <PlaceMapView places={filteredPlaces} />
                 )}
