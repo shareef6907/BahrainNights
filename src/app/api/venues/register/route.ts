@@ -41,6 +41,7 @@ interface RegisterData {
   description?: string | null;
   logoUrl?: string | null;
   coverImageUrl?: string | null;
+  galleryUrls?: string[] | null;
 }
 
 export async function POST(request: NextRequest) {
@@ -62,7 +63,8 @@ export async function POST(request: NextRequest) {
       instagram,
       description,
       logoUrl,
-      coverImageUrl
+      coverImageUrl,
+      galleryUrls
     } = body;
 
     // Validate required fields
@@ -191,6 +193,7 @@ export async function POST(request: NextRequest) {
       instagram: instagram || null,
       logo_url: logoUrl,
       cover_image_url: coverImageUrl,
+      gallery: galleryUrls || null, // Gallery images uploaded during registration
       status: 'pending', // All registrations start as pending for admin approval
       is_verified: false,
       is_featured: false,

@@ -1,8 +1,8 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useRef } from 'react';
 import { motion } from 'framer-motion';
-import { Building2, MapPin, Phone, Mail, Globe, Instagram, Upload, CheckCircle, Loader2, ArrowLeft, Lock, Eye, EyeOff } from 'lucide-react';
+import { Building2, MapPin, Phone, Mail, Globe, Instagram, Upload, CheckCircle, Loader2, ArrowLeft, Lock, Eye, EyeOff, X, ImageIcon } from 'lucide-react';
 import Link from 'next/link';
 
 const VENUE_CATEGORIES = [
@@ -39,6 +39,15 @@ const BAHRAIN_AREAS = [
   'Other'
 ];
 
+interface GalleryImage {
+  id: string;
+  file: File;
+  preview: string;
+  url: string | null;
+  uploading: boolean;
+  error: string | null;
+}
+
 interface FormData {
   venueName: string;
   crNumber: string;
@@ -56,6 +65,7 @@ interface FormData {
   coverImage: File | null;
   logoUrl: string | null;
   coverImageUrl: string | null;
+  galleryImages: GalleryImage[];
 }
 
 export default function RegisterVenuePage() {
@@ -75,8 +85,13 @@ export default function RegisterVenuePage() {
     logo: null,
     coverImage: null,
     logoUrl: null,
-    coverImageUrl: null
+    coverImageUrl: null,
+    galleryImages: []
   });
+
+  // Unique registration ID for this session
+  const registrationIdRef = useRef(`${Date.now()}`);
+  const galleryInputRef = useRef<HTMLInputElement>(null);
 
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isSuccess, setIsSuccess] = useState(false);
@@ -178,6 +193,113 @@ export default function RegisterVenuePage() {
     }
   };
 
+  // Upload gallery image to S3 via registration upload endpoint
+  const uploadGalleryImage = async (file: File, imageId: string): Promise<string | null> => {
+    try {
+      const formData = new FormData();
+      formData.append('file', file);
+      formData.append('imageType', 'gallery');
+      formData.append('registrationId', registrationIdRef.current);
+
+      const response = await fetch('/api/upload/registration', {
+        method: 'POST',
+        body: formData
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.error || 'Failed to upload image');
+      }
+
+      const data = await response.json();
+      return data.url;
+    } catch (err) {
+      console.error('Gallery upload error:', err);
+      throw err;
+    }
+  };
+
+  // Handle gallery image selection
+  const handleGallerySelect = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const files = Array.from(e.target.files || []);
+    if (files.length === 0) return;
+
+    // Limit to 10 images total
+    const remainingSlots = 10 - formData.galleryImages.length;
+    const filesToAdd = files.slice(0, remainingSlots);
+
+    if (files.length > remainingSlots) {
+      setError(`Maximum 10 gallery images allowed. Only adding first ${remainingSlots} images.`);
+    }
+
+    // Create preview entries for each file
+    const newImages: GalleryImage[] = filesToAdd.map(file => ({
+      id: `${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
+      file,
+      preview: URL.createObjectURL(file),
+      url: null,
+      uploading: true,
+      error: null
+    }));
+
+    // Add to state immediately with loading state
+    setFormData(prev => ({
+      ...prev,
+      galleryImages: [...prev.galleryImages, ...newImages]
+    }));
+
+    // Upload each image
+    for (const image of newImages) {
+      try {
+        // Validate file size (4MB limit)
+        if (image.file.size > 4 * 1024 * 1024) {
+          setFormData(prev => ({
+            ...prev,
+            galleryImages: prev.galleryImages.map(img =>
+              img.id === image.id
+                ? { ...img, uploading: false, error: 'File too large (max 4MB)' }
+                : img
+            )
+          }));
+          continue;
+        }
+
+        const url = await uploadGalleryImage(image.file, image.id);
+
+        setFormData(prev => ({
+          ...prev,
+          galleryImages: prev.galleryImages.map(img =>
+            img.id === image.id
+              ? { ...img, url, uploading: false }
+              : img
+          )
+        }));
+      } catch (err) {
+        setFormData(prev => ({
+          ...prev,
+          galleryImages: prev.galleryImages.map(img =>
+            img.id === image.id
+              ? { ...img, uploading: false, error: err instanceof Error ? err.message : 'Upload failed' }
+              : img
+          )
+        }));
+      }
+    }
+
+    // Reset input
+    if (galleryInputRef.current) {
+      galleryInputRef.current.value = '';
+    }
+  };
+
+  // Remove a gallery image
+  const removeGalleryImage = (imageId: string) => {
+    setFormData(prev => ({
+      ...prev,
+      galleryImages: prev.galleryImages.filter(img => img.id !== imageId)
+    }));
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsSubmitting(true);
@@ -204,13 +326,19 @@ export default function RegisterVenuePage() {
     }
 
     // Check if images are still uploading
-    if (logoUploading || coverUploading) {
+    const galleryUploading = formData.galleryImages.some(img => img.uploading);
+    if (logoUploading || coverUploading || galleryUploading) {
       setError('Please wait for images to finish uploading');
       setIsSubmitting(false);
       return;
     }
 
     try {
+      // Collect successfully uploaded gallery URLs
+      const galleryUrls = formData.galleryImages
+        .filter(img => img.url && !img.error)
+        .map(img => img.url);
+
       // Send JSON with S3 URLs instead of FormData with files
       const submitData = {
         venueName: formData.venueName,
@@ -225,7 +353,8 @@ export default function RegisterVenuePage() {
         instagram: formData.instagram || null,
         description: formData.description || null,
         logoUrl: formData.logoUrl,
-        coverImageUrl: formData.coverImageUrl
+        coverImageUrl: formData.coverImageUrl,
+        galleryUrls: galleryUrls.length > 0 ? galleryUrls : null
       };
 
       const response = await fetch('/api/venues/register', {
@@ -616,6 +745,81 @@ export default function RegisterVenuePage() {
                   />
                 </label>
               </div>
+            </div>
+
+            {/* Gallery Images */}
+            <div className="mt-6">
+              <label className="block text-sm text-gray-400 mb-2">
+                Gallery Images <span className="text-gray-500">(up to 10 images)</span>
+              </label>
+              <p className="text-xs text-gray-500 mb-3">
+                These images will be watermarked with the BahrainNights logo for protection.
+              </p>
+
+              {/* Gallery Grid */}
+              <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3 mb-3">
+                {formData.galleryImages.map((image) => (
+                  <div key={image.id} className="relative aspect-square rounded-lg overflow-hidden border border-gray-700 group">
+                    <img
+                      src={image.preview}
+                      alt="Gallery preview"
+                      className="w-full h-full object-cover"
+                    />
+
+                    {/* Loading overlay */}
+                    {image.uploading && (
+                      <div className="absolute inset-0 bg-gray-900/80 flex items-center justify-center">
+                        <Loader2 className="w-6 h-6 text-orange-500 animate-spin" />
+                      </div>
+                    )}
+
+                    {/* Error overlay */}
+                    {image.error && (
+                      <div className="absolute inset-0 bg-red-900/80 flex items-center justify-center p-2">
+                        <p className="text-xs text-red-200 text-center">{image.error}</p>
+                      </div>
+                    )}
+
+                    {/* Success indicator */}
+                    {image.url && !image.uploading && !image.error && (
+                      <div className="absolute top-1 right-1 bg-green-500 rounded-full p-0.5">
+                        <CheckCircle className="w-3 h-3 text-white" />
+                      </div>
+                    )}
+
+                    {/* Remove button */}
+                    <button
+                      type="button"
+                      onClick={() => removeGalleryImage(image.id)}
+                      className="absolute top-1 left-1 bg-red-500/80 hover:bg-red-500 rounded-full p-1 opacity-0 group-hover:opacity-100 transition-opacity"
+                    >
+                      <X className="w-3 h-3 text-white" />
+                    </button>
+                  </div>
+                ))}
+
+                {/* Add more button */}
+                {formData.galleryImages.length < 10 && (
+                  <label className="aspect-square rounded-lg border-2 border-dashed border-gray-700 hover:border-orange-500/50 cursor-pointer flex flex-col items-center justify-center transition-colors">
+                    <ImageIcon className="w-6 h-6 text-gray-500 mb-1" />
+                    <span className="text-xs text-gray-500">Add Images</span>
+                    <input
+                      ref={galleryInputRef}
+                      type="file"
+                      accept="image/*"
+                      multiple
+                      onChange={handleGallerySelect}
+                      className="hidden"
+                    />
+                  </label>
+                )}
+              </div>
+
+              {formData.galleryImages.length > 0 && (
+                <p className="text-xs text-gray-500">
+                  {formData.galleryImages.filter(img => img.url).length} of {formData.galleryImages.length} uploaded
+                </p>
+              )}
             </div>
           </div>
 
