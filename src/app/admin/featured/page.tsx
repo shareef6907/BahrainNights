@@ -34,6 +34,7 @@ export default function FeaturedListingsPage() {
   const [updating, setUpdating] = useState<string | null>(null);
   const [message, setMessage] = useState<{ type: 'success' | 'error'; text: string } | null>(null);
 
+  // All venue categories including explore categories
   const categories = [
     'all',
     'restaurant',
@@ -45,8 +46,32 @@ export default function FeaturedListingsPage() {
     'spa',
     'gym',
     'salon',
+    'shopping',
+    'tour',
+    'kids',
+    'community',
     'other',
   ];
+
+  // Mapping for explore page categories
+  const exploreCategoryMapping: Record<string, string[]> = {
+    hotels: ['hotel', 'resort', 'staycation'],
+    spas: ['spa', 'wellness', 'massage', 'gym', 'salon'],
+    shopping: ['shopping', 'market', 'mall', 'retail'],
+    tours: ['tour', 'experience', 'adventure'],
+    kids: ['kids', 'family', 'entertainment', 'waterpark'],
+    community: ['community', 'charity', 'volunteer'],
+  };
+
+  // Get explore category for a venue
+  const getExploreCategory = (venueCategory: string): string | null => {
+    for (const [exploreCategory, venueCategories] of Object.entries(exploreCategoryMapping)) {
+      if (venueCategories.includes(venueCategory.toLowerCase())) {
+        return exploreCategory;
+      }
+    }
+    return null;
+  };
 
   useEffect(() => {
     fetchVenues();
@@ -169,9 +194,21 @@ export default function FeaturedListingsPage() {
         <h3 className="text-blue-400 font-semibold mb-2">How Featured Listings Work</h3>
         <ul className="text-gray-400 text-sm space-y-1">
           <li>• Featured venues appear at the top of their category on the Places page</li>
+          <li>• Featured venues also appear on the <strong className="text-blue-300">Explore page</strong> under their category</li>
           <li>• Featured venues display a special badge on their listing</li>
           <li>• If multiple venues are featured in the same category, they are sorted by likes</li>
         </ul>
+        <div className="mt-3 pt-3 border-t border-blue-500/20">
+          <p className="text-blue-300 text-sm font-medium mb-2">Explore Page Categories:</p>
+          <div className="flex flex-wrap gap-2 text-xs">
+            <span className="px-2 py-1 bg-blue-500/20 text-blue-300 rounded">Hotels: hotel, resort</span>
+            <span className="px-2 py-1 bg-purple-500/20 text-purple-300 rounded">Spa: spa, gym, salon</span>
+            <span className="px-2 py-1 bg-amber-500/20 text-amber-300 rounded">Shopping: shopping, market</span>
+            <span className="px-2 py-1 bg-teal-500/20 text-teal-300 rounded">Tours: tour, experience</span>
+            <span className="px-2 py-1 bg-green-500/20 text-green-300 rounded">Kids: kids, family</span>
+            <span className="px-2 py-1 bg-orange-500/20 text-orange-300 rounded">Community: community, charity</span>
+          </div>
+        </div>
       </div>
 
       {/* Filters */}
@@ -210,6 +247,7 @@ export default function FeaturedListingsPage() {
               <tr className="border-b border-white/10">
                 <th className="text-left text-gray-400 font-medium px-6 py-4">Venue</th>
                 <th className="text-left text-gray-400 font-medium px-6 py-4">Category</th>
+                <th className="text-left text-gray-400 font-medium px-6 py-4">Explore</th>
                 <th className="text-left text-gray-400 font-medium px-6 py-4">Area</th>
                 <th className="text-center text-gray-400 font-medium px-6 py-4">Likes</th>
                 <th className="text-center text-gray-400 font-medium px-6 py-4">Status</th>
@@ -254,6 +292,25 @@ export default function FeaturedListingsPage() {
                     <span className="px-2 py-1 bg-white/10 rounded text-sm text-gray-300 capitalize">
                       {venue.category}
                     </span>
+                  </td>
+                  <td className="px-6 py-4">
+                    {(() => {
+                      const exploreCategory = getExploreCategory(venue.category);
+                      if (!exploreCategory) return <span className="text-gray-600">-</span>;
+                      const colors: Record<string, string> = {
+                        hotels: 'bg-blue-500/20 text-blue-300',
+                        spas: 'bg-purple-500/20 text-purple-300',
+                        shopping: 'bg-amber-500/20 text-amber-300',
+                        tours: 'bg-teal-500/20 text-teal-300',
+                        kids: 'bg-green-500/20 text-green-300',
+                        community: 'bg-orange-500/20 text-orange-300',
+                      };
+                      return (
+                        <span className={`px-2 py-1 rounded text-xs font-medium capitalize ${colors[exploreCategory] || 'bg-gray-500/20 text-gray-300'}`}>
+                          {exploreCategory}
+                        </span>
+                      );
+                    })()}
                   </td>
                   <td className="px-6 py-4 text-gray-400">{venue.area}</td>
                   <td className="px-6 py-4 text-center">

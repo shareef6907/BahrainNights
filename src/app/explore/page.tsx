@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import {
   Search,
@@ -12,9 +12,28 @@ import {
   Users,
   Send,
   ArrowRight,
+  Star,
+  MapPin,
 } from 'lucide-react';
 import Link from 'next/link';
 import Image from 'next/image';
+
+interface FeaturedVenue {
+  id: string;
+  name: string;
+  slug: string;
+  category: string;
+  area: string;
+  logo_url: string | null;
+  cover_image_url: string | null;
+  like_count: number;
+  description: string | null;
+}
+
+interface FeaturedData {
+  byCategory: Record<string, FeaturedVenue[]>;
+  all: FeaturedVenue[];
+}
 
 // Category data
 const exploreCategories = [
@@ -28,6 +47,7 @@ const exploreCategories = [
     color: '#3B82F6',
     gradient: 'from-blue-600 to-blue-800',
     description: 'List your hotel, resort, or vacation rental on BahrainNights and reach thousands of visitors looking for the perfect stay.',
+    categoryPath: '/places?category=hotel',
   },
   {
     id: 'spas',
@@ -39,6 +59,7 @@ const exploreCategories = [
     color: '#A855F7',
     gradient: 'from-purple-600 to-purple-800',
     description: 'Showcase your spa, wellness center, or fitness studio to health-conscious visitors seeking relaxation.',
+    categoryPath: '/places?category=spa',
   },
   {
     id: 'shopping',
@@ -50,6 +71,7 @@ const exploreCategories = [
     color: '#D97706',
     gradient: 'from-amber-600 to-amber-800',
     description: 'Promote your retail store, market stall, or shopping experience to shoppers across Bahrain.',
+    categoryPath: '/places?category=shopping',
   },
   {
     id: 'tours',
@@ -61,6 +83,7 @@ const exploreCategories = [
     color: '#14B8A6',
     gradient: 'from-teal-600 to-teal-800',
     description: 'Share your tours, adventures, and unique experiences with travelers exploring Bahrain.',
+    categoryPath: '/places?category=tour',
   },
   {
     id: 'kids',
@@ -72,6 +95,7 @@ const exploreCategories = [
     color: '#22C55E',
     gradient: 'from-green-600 to-green-800',
     description: 'Reach families looking for fun activities, entertainment, and educational experiences for children.',
+    categoryPath: '/places?category=kids',
   },
   {
     id: 'community',
@@ -83,12 +107,32 @@ const exploreCategories = [
     color: '#F97316',
     gradient: 'from-orange-600 to-orange-800',
     description: 'Promote your community initiatives, charity events, and social gatherings to engaged locals.',
+    categoryPath: '/places?category=community',
   },
 ];
 
 export default function ExplorePage() {
   const [searchQuery, setSearchQuery] = useState('');
   const [email, setEmail] = useState('');
+  const [featuredData, setFeaturedData] = useState<FeaturedData | null>(null);
+  const [loadingFeatured, setLoadingFeatured] = useState(true);
+
+  useEffect(() => {
+    async function fetchFeatured() {
+      try {
+        const response = await fetch('/api/explore/featured');
+        if (response.ok) {
+          const data = await response.json();
+          setFeaturedData(data);
+        }
+      } catch (error) {
+        console.error('Failed to fetch featured venues:', error);
+      } finally {
+        setLoadingFeatured(false);
+      }
+    }
+    fetchFeatured();
+  }, []);
 
   return (
     <div className="min-h-screen bg-slate-950">
@@ -138,72 +182,144 @@ export default function ExplorePage() {
         </div>
       </section>
 
-      {/* Category Cards Section */}
+      {/* Category Cards Section with Featured Venues */}
       <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mb-16">
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+        <div className="space-y-12">
           {exploreCategories.map((category, index) => {
-            const Icon = category.icon;
+            const featuredVenues = featuredData?.byCategory[category.id] || [];
+            const hasFeatured = featuredVenues.length > 0;
+
             return (
               <motion.div
                 key={category.id}
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: index * 0.1 }}
-                className="group"
               >
-                <div className="relative h-80 rounded-2xl overflow-hidden">
-                  {/* Background Image */}
-                  <div className="absolute inset-0">
-                    <Image
-                      src={category.image}
-                      alt={category.name}
-                      fill
-                      className="object-cover transition-transform duration-500 group-hover:scale-110"
-                    />
-                  </div>
-
-                  {/* Gradient Overlay */}
+                {/* Category Header */}
+                <div className="flex items-center gap-3 mb-4">
                   <div
-                    className="absolute inset-0 transition-opacity duration-300"
-                    style={{
-                      background: `linear-gradient(to top, ${category.color}F0 0%, ${category.color}CC 40%, ${category.color}66 70%, transparent 100%)`,
-                    }}
-                  />
+                    className="w-10 h-10 rounded-xl flex items-center justify-center"
+                    style={{ backgroundColor: `${category.color}20` }}
+                  >
+                    <span className="text-xl">{category.emoji}</span>
+                  </div>
+                  <div>
+                    <h2 className="text-xl md:text-2xl font-bold text-white">{category.name}</h2>
+                    <p className="text-gray-400 text-sm">{category.tagline}</p>
+                  </div>
+                </div>
 
-                  {/* Content */}
-                  <div className="absolute inset-0 p-6 flex flex-col justify-end">
-                    {/* Icon and Emoji */}
-                    <div className="flex items-center gap-3 mb-3">
-                      <div
-                        className="w-12 h-12 rounded-xl flex items-center justify-center backdrop-blur-sm"
-                        style={{ backgroundColor: `${category.color}40` }}
+                {/* Featured Venues Grid */}
+                {hasFeatured ? (
+                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 mb-4">
+                    {featuredVenues.slice(0, 3).map((venue) => (
+                      <Link
+                        key={venue.id}
+                        href={`/places/${venue.slug}`}
+                        className="group block"
                       >
-                        <span className="text-2xl">{category.emoji}</span>
-                      </div>
+                        <div className="relative h-48 rounded-2xl overflow-hidden bg-white/5 border border-white/10 hover:border-white/20 transition-all">
+                          {/* Background Image */}
+                          <div className="absolute inset-0">
+                            {venue.cover_image_url || venue.logo_url ? (
+                              <Image
+                                src={venue.cover_image_url || venue.logo_url || ''}
+                                alt={venue.name}
+                                fill
+                                className="object-cover transition-transform duration-500 group-hover:scale-110"
+                              />
+                            ) : (
+                              <div className="w-full h-full bg-gradient-to-br from-gray-800 to-gray-900" />
+                            )}
+                          </div>
+
+                          {/* Gradient Overlay */}
+                          <div
+                            className="absolute inset-0"
+                            style={{
+                              background: `linear-gradient(to top, ${category.color}E6 0%, ${category.color}80 30%, transparent 70%)`,
+                            }}
+                          />
+
+                          {/* Featured Badge */}
+                          <div className="absolute top-3 left-3">
+                            <span className="inline-flex items-center gap-1 px-2 py-1 bg-yellow-400 text-black text-xs font-semibold rounded-lg">
+                              <Star className="w-3 h-3 fill-black" />
+                              Featured
+                            </span>
+                          </div>
+
+                          {/* Content */}
+                          <div className="absolute inset-x-0 bottom-0 p-4">
+                            <h3 className="text-white font-semibold text-lg group-hover:text-yellow-300 transition-colors line-clamp-1">
+                              {venue.name}
+                            </h3>
+                            <div className="flex items-center gap-2 text-white/80 text-sm mt-1">
+                              <MapPin className="w-3 h-3" />
+                              <span>{venue.area}</span>
+                            </div>
+                          </div>
+                        </div>
+                      </Link>
+                    ))}
+                  </div>
+                ) : (
+                  /* Empty State - Register CTA Card */
+                  <div className="relative h-48 rounded-2xl overflow-hidden mb-4">
+                    {/* Background Image */}
+                    <div className="absolute inset-0">
+                      <Image
+                        src={category.image}
+                        alt={category.name}
+                        fill
+                        className="object-cover"
+                      />
                     </div>
 
-                    {/* Title */}
-                    <h3 className="text-xl md:text-2xl font-bold text-white mb-2">
-                      {category.name}
-                    </h3>
+                    {/* Gradient Overlay */}
+                    <div
+                      className="absolute inset-0"
+                      style={{
+                        background: `linear-gradient(to right, ${category.color}F0 0%, ${category.color}CC 50%, ${category.color}66 100%)`,
+                      }}
+                    />
 
-                    {/* Description */}
-                    <p className="text-white/80 text-sm mb-4 line-clamp-2">
-                      {category.description}
-                    </p>
-
-                    {/* Register CTA */}
-                    <Link
-                      href="/venues/register"
-                      className="inline-flex items-center justify-center gap-2 px-5 py-3 bg-white text-gray-900 font-semibold rounded-xl hover:bg-yellow-400 transition-all group/btn"
-                    >
-                      <span>Register for Free</span>
-                      <ArrowRight className="w-4 h-4 transition-transform group-hover/btn:translate-x-1" />
-                    </Link>
+                    {/* Content */}
+                    <div className="absolute inset-0 p-6 flex flex-col justify-center">
+                      <p className="text-white/90 text-sm mb-3 max-w-md">
+                        {category.description}
+                      </p>
+                      <Link
+                        href="/venues/register"
+                        className="inline-flex items-center gap-2 px-5 py-2.5 bg-white text-gray-900 font-semibold rounded-xl hover:bg-yellow-400 transition-all w-fit"
+                      >
+                        <span>Register for Free</span>
+                        <ArrowRight className="w-4 h-4" />
+                      </Link>
+                    </div>
                   </div>
+                )}
 
-                  {/* Hover Border Effect */}
-                  <div className="absolute inset-0 rounded-2xl border-2 border-transparent group-hover:border-white/30 transition-colors pointer-events-none" />
+                {/* View All / Register Link */}
+                <div className="flex items-center justify-between">
+                  {hasFeatured && (
+                    <Link
+                      href={category.categoryPath}
+                      className="text-sm text-gray-400 hover:text-white transition-colors flex items-center gap-1"
+                    >
+                      View all {category.name.toLowerCase()}
+                      <ArrowRight className="w-4 h-4" />
+                    </Link>
+                  )}
+                  {!hasFeatured && <div />}
+                  <Link
+                    href="/venues/register"
+                    className="text-sm font-medium hover:text-yellow-400 transition-colors"
+                    style={{ color: category.color }}
+                  >
+                    + List your business
+                  </Link>
                 </div>
               </motion.div>
             );
