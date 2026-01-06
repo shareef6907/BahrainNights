@@ -17,6 +17,9 @@ const updateAttractionSchema = z.object({
   description: z.string().optional(),
   shortDescription: z.string().max(500).optional(),
   imageUrl: z.string().url().optional(),
+  imagePositionX: z.number().min(0).max(100).optional(),
+  imagePositionY: z.number().min(0).max(100).optional(),
+  imageScale: z.number().min(1).max(2).optional(),
   area: z.string().optional(),
   priceFrom: z.number().min(0).optional(),
   priceRange: z.string().optional(),
@@ -137,6 +140,9 @@ export async function PATCH(
     if (data.description !== undefined) updateData.description = data.description;
     if (data.shortDescription !== undefined) updateData.short_description = data.shortDescription;
     if (data.imageUrl !== undefined) updateData.image_url = data.imageUrl;
+    if (data.imagePositionX !== undefined) updateData.image_position_x = data.imagePositionX;
+    if (data.imagePositionY !== undefined) updateData.image_position_y = data.imagePositionY;
+    if (data.imageScale !== undefined) updateData.image_scale = data.imageScale;
     if (data.area !== undefined) updateData.area = data.area;
     if (data.priceFrom !== undefined) updateData.price_from = data.priceFrom;
     if (data.priceRange !== undefined) updateData.price_range = data.priceRange;

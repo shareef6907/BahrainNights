@@ -16,10 +16,13 @@ import {
   Tag,
   Users,
   Star,
-  RefreshCw
+  RefreshCw,
+  Move,
+  Sparkles
 } from 'lucide-react';
 import Link from 'next/link';
 import AdminLayout from '@/components/admin/AdminLayout';
+import ImagePositioner from '@/components/admin/ImagePositioner';
 import { compressImage } from '@/lib/image-compression';
 
 const PRICE_RANGES = ['Free', 'Budget (Under 5 BD)', 'Mid-Range (5-20 BD)', 'Premium (20+ BD)'];
@@ -34,6 +37,9 @@ interface Attraction {
   description: string | null;
   short_description: string | null;
   image_url: string | null;
+  image_position_x: number | null;
+  image_position_y: number | null;
+  image_scale: number | null;
   area: string | null;
   price_from: number | null;
   price_range: string | null;
@@ -77,8 +83,12 @@ export default function EditAttractionPage({ params }: { params: Promise<{ id: s
   const [imageFile, setImageFile] = useState<File | null>(null);
   const [imagePreview, setImagePreview] = useState<string | null>(null);
   const [existingImageUrl, setExistingImageUrl] = useState<string | null>(null);
+  const [showPositioner, setShowPositioner] = useState(false);
+  const [imagePosition, setImagePosition] = useState({ x: 50, y: 50 });
+  const [imageScale, setImageScale] = useState(1);
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isRewriting, setIsRewriting] = useState(false);
   const [uploadProgress, setUploadProgress] = useState('');
 
   // Fetch attraction data
@@ -112,6 +122,13 @@ export default function EditAttractionPage({ params }: { params: Promise<{ id: s
         });
 
         setExistingImageUrl(attr.image_url);
+        // Set image position if available
+        if (attr.image_position_x !== null && attr.image_position_y !== null) {
+          setImagePosition({ x: attr.image_position_x, y: attr.image_position_y });
+        }
+        if (attr.image_scale !== null) {
+          setImageScale(attr.image_scale);
+        }
       } catch (error) {
         console.error('Error fetching attraction:', error);
         setErrors({ fetch: 'Failed to load attraction' });
@@ -144,6 +161,43 @@ export default function EditAttractionPage({ params }: { params: Promise<{ id: s
         ? prev.suitableFor.filter(s => s !== option)
         : [...prev.suitableFor, option]
     }));
+  };
+
+  const handleAIRewrite = async () => {
+    if (!formData.description && !formData.name) return;
+
+    setIsRewriting(true);
+    try {
+      const response = await fetch('/api/ai/generate-description', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          name: formData.name,
+          currentDescription: formData.description,
+          category: formData.category,
+          area: formData.area,
+          type: 'attraction'
+        }),
+      });
+
+      if (!response.ok) throw new Error('Failed to generate description');
+
+      const data = await response.json();
+      if (data.description) {
+        setFormData(prev => ({ ...prev, description: data.description }));
+      }
+    } catch (error) {
+      console.error('AI rewrite failed:', error);
+      setErrors(prev => ({ ...prev, ai: 'Failed to generate description' }));
+    } finally {
+      setIsRewriting(false);
+    }
+  };
+
+  const handlePositionSave = (position: { x: number; y: number }, scale: number) => {
+    setImagePosition(position);
+    setImageScale(scale);
+    setShowPositioner(false);
   };
 
   const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -225,6 +279,9 @@ export default function EditAttractionPage({ params }: { params: Promise<{ id: s
         description: formData.description || undefined,
         shortDescription: formData.shortDescription || undefined,
         imageUrl: imageUrl || undefined,
+        imagePositionX: imagePosition.x,
+        imagePositionY: imagePosition.y,
+        imageScale: imageScale,
         area: formData.area || undefined,
         priceFrom: formData.priceFrom ? parseFloat(formData.priceFrom) : undefined,
         priceRange: formData.priceRange || undefined,
@@ -411,9 +468,29 @@ export default function EditAttractionPage({ params }: { params: Promise<{ id: s
               </div>
 
               <div className="md:col-span-2">
-                <label className="block text-sm font-medium text-gray-300 mb-2">
-                  Full Description
-                </label>
+                <div className="flex items-center justify-between mb-2">
+                  <label className="block text-sm font-medium text-gray-300">
+                    Full Description
+                  </label>
+                  <button
+                    type="button"
+                    onClick={handleAIRewrite}
+                    disabled={isRewriting || !formData.name}
+                    className="flex items-center gap-2 px-3 py-1.5 bg-gradient-to-r from-purple-500/20 to-pink-500/20 text-purple-400 rounded-lg hover:from-purple-500/30 hover:to-pink-500/30 transition-all text-sm disabled:opacity-50"
+                  >
+                    {isRewriting ? (
+                      <>
+                        <Loader2 className="w-4 h-4 animate-spin" />
+                        Rewriting...
+                      </>
+                    ) : (
+                      <>
+                        <Sparkles className="w-4 h-4" />
+                        AI Rewrite
+                      </>
+                    )}
+                  </button>
+                </div>
                 <textarea
                   name="description"
                   value={formData.description}
@@ -422,6 +499,7 @@ export default function EditAttractionPage({ params }: { params: Promise<{ id: s
                   rows={4}
                   className="w-full px-4 py-3 bg-gray-800 border border-gray-700 rounded-lg text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-amber-500/50 resize-none"
                 />
+                {errors.ai && <p className="text-red-400 text-sm mt-1">{errors.ai}</p>}
               </div>
             </div>
           </motion.div>
@@ -443,13 +521,30 @@ export default function EditAttractionPage({ params }: { params: Promise<{ id: s
             {/* Current Image */}
             {existingImageUrl && !imagePreview && (
               <div className="mb-4">
-                <p className="text-gray-400 text-sm mb-2">Current Image:</p>
-                <div className="relative inline-block">
+                <div className="flex items-center justify-between mb-2">
+                  <p className="text-gray-400 text-sm">Current Image:</p>
+                  <button
+                    type="button"
+                    onClick={() => setShowPositioner(true)}
+                    className="flex items-center gap-2 px-3 py-1.5 bg-purple-500/20 text-purple-400 rounded-lg hover:bg-purple-500/30 transition-colors text-sm"
+                  >
+                    <Move className="w-4 h-4" />
+                    Reposition
+                  </button>
+                </div>
+                <div className="relative inline-block rounded-lg overflow-hidden">
                   <img
                     src={existingImageUrl}
                     alt="Current cover"
-                    className="max-h-48 rounded-lg object-cover"
+                    className="max-h-48 object-cover"
+                    style={{
+                      objectPosition: `${imagePosition.x}% ${imagePosition.y}%`,
+                      transform: `scale(${imageScale})`,
+                    }}
                   />
+                  <div className="absolute bottom-2 left-2 bg-black/70 text-white text-xs px-2 py-1 rounded">
+                    Position: {Math.round(imagePosition.x)}%, {Math.round(imagePosition.y)}%
+                  </div>
                 </div>
               </div>
             )}
@@ -712,6 +807,17 @@ export default function EditAttractionPage({ params }: { params: Promise<{ id: s
             </button>
           </div>
         </form>
+
+        {/* Image Positioner Modal */}
+        {showPositioner && existingImageUrl && (
+          <ImagePositioner
+            imageUrl={existingImageUrl}
+            initialPosition={imagePosition}
+            initialScale={imageScale}
+            onSave={handlePositionSave}
+            onCancel={() => setShowPositioner(false)}
+          />
+        )}
       </div>
     </AdminLayout>
   );
