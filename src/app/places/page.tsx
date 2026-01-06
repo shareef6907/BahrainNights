@@ -32,7 +32,9 @@ function venueToPlace(venue: Venue): Place {
     instagram: venue.instagram || undefined,
     openingHours: (venue.opening_hours as OpeningHours) || {},
     features: venue.features || [],
-    images: venue.gallery || (venue.cover_image_url ? [venue.cover_image_url] : []),
+    images: venue.cover_image_url
+      ? [venue.cover_image_url, ...(venue.gallery || [])]
+      : (venue.gallery || []),
     logo: venue.logo_url || '',
     upcomingEventsCount: 0,
     likeCount: venue.like_count || 0,
