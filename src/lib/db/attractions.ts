@@ -4,23 +4,50 @@ import { getAdminClient } from '@/lib/supabase/server';
 export interface Attraction {
   id: string;
   name: string;
+  name_arabic: string | null;
   slug: string;
   description: string | null;
+  description_arabic: string | null;
   short_description: string | null;
   image_url: string | null;
+  images: string[] | null;
+  video_url: string | null;
   area: string | null;
+  address: string | null;
+  latitude: number | null;
+  longitude: number | null;
+  google_maps_url: string | null;
   price_from: number | null;
+  price_to: number | null;
   price_range: string | null;
+  currency: string | null;
   tripadvisor_rating: number | null;
+  tripadvisor_reviews: number | null;
   tripadvisor_url: string | null;
+  rating: number | null;
+  review_count: number;
   duration: string | null;
+  best_time: string | null;
   suitable_for: string[] | null;
+  age_restriction: string | null;
+  accessibility: string | null;
   tags: string[] | null;
   category: string | null;
   subcategory: string | null;
+  phone: string | null;
+  email: string | null;
+  website: string | null;
+  booking_url: string | null;
   is_featured: boolean;
   is_active: boolean;
+  display_order: number;
+  seo_title: string | null;
+  seo_description: string | null;
   source: string | null;
+  source_id: string | null;
+  image_position_x: number | null;
+  image_position_y: number | null;
+  image_scale: number | null;
   created_at: string;
   updated_at: string;
 }
@@ -142,6 +169,49 @@ export async function getAttractionById(id: string): Promise<Attraction | null> 
   }
 
   return data as Attraction;
+}
+
+// Get attraction by slug
+export async function getAttractionBySlug(slug: string): Promise<Attraction | null> {
+  const supabase = getAdminClient();
+
+  const { data, error } = await (supabase as any)
+    .from('attractions')
+    .select('*')
+    .eq('slug', slug)
+    .eq('is_active', true)
+    .single();
+
+  if (error) {
+    if (error.code === 'PGRST116') {
+      return null;
+    }
+    console.error('Error fetching attraction by slug:', error);
+    throw new Error('Failed to fetch attraction');
+  }
+
+  return data as Attraction;
+}
+
+// Get similar attractions (same category, excluding current)
+export async function getSimilarAttractions(category: string, excludeId: string, limit: number = 4): Promise<Attraction[]> {
+  const supabase = getAdminClient();
+
+  const { data, error } = await (supabase as any)
+    .from('attractions')
+    .select('*')
+    .eq('category', category)
+    .eq('is_active', true)
+    .neq('id', excludeId)
+    .order('tripadvisor_rating', { ascending: false, nullsFirst: false })
+    .limit(limit);
+
+  if (error) {
+    console.error('Error fetching similar attractions:', error);
+    return [];
+  }
+
+  return (data || []) as Attraction[];
 }
 
 // Create attraction
