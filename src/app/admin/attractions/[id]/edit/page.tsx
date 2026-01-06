@@ -164,23 +164,27 @@ export default function EditAttractionPage({ params }: { params: Promise<{ id: s
   };
 
   const handleAIRewrite = async () => {
-    if (!formData.description && !formData.name) return;
+    if (!formData.name) return;
 
     setIsRewriting(true);
+    setErrors(prev => ({ ...prev, ai: '' }));
     try {
       const response = await fetch('/api/ai/generate-description', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          name: formData.name,
-          currentDescription: formData.description,
-          category: formData.category,
-          area: formData.area,
-          type: 'attraction'
+          contentType: 'venue',
+          venueName: formData.name,
+          venueCategory: 'attraction',
+          location: formData.area || 'Bahrain',
+          existingDescription: formData.description || '',
         }),
       });
 
-      if (!response.ok) throw new Error('Failed to generate description');
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.error || 'Failed to generate description');
+      }
 
       const data = await response.json();
       if (data.description) {
@@ -188,7 +192,7 @@ export default function EditAttractionPage({ params }: { params: Promise<{ id: s
       }
     } catch (error) {
       console.error('AI rewrite failed:', error);
-      setErrors(prev => ({ ...prev, ai: 'Failed to generate description' }));
+      setErrors(prev => ({ ...prev, ai: error instanceof Error ? error.message : 'Failed to generate description' }));
     } finally {
       setIsRewriting(false);
     }
