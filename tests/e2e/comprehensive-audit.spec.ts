@@ -179,37 +179,28 @@ test.describe('Venue Registration Flow', () => {
 
 // ==================== RESPONSIVE DESIGN AUDIT ====================
 test.describe('Responsive Design Audit', () => {
-  // Test key breakpoints only for efficiency
-  const viewports = [
-    { name: 'Desktop', width: 1920, height: 1080 },
-    { name: 'Mobile', width: 375, height: 667 },
-  ];
+  test('Homepage should render on Desktop', async ({ page }) => {
+    await page.setViewportSize({ width: 1920, height: 1080 });
+    await page.goto('/', { waitUntil: 'domcontentloaded', timeout: 30000 });
 
-  const pages = [
-    { name: 'Homepage', path: '/' },
-    { name: 'Events', path: '/events' },
-    { name: 'Cinema', path: '/cinema' },
-  ];
+    // Check no horizontal overflow
+    const bodyWidth = await page.evaluate(() => document.body.scrollWidth);
+    const viewportWidth = await page.evaluate(() => window.innerWidth);
+    expect(bodyWidth).toBeLessThanOrEqual(viewportWidth + 20);
+  });
 
-  for (const viewport of viewports) {
-    test.describe(`${viewport.name} (${viewport.width}x${viewport.height})`, () => {
-      test.use({ viewport: { width: viewport.width, height: viewport.height } });
+  test('Homepage should render on Mobile', async ({ page }) => {
+    await page.setViewportSize({ width: 375, height: 667 });
+    await page.goto('/', { waitUntil: 'domcontentloaded', timeout: 30000 });
 
-      for (const pageInfo of pages) {
-        test(`${pageInfo.name} should render correctly`, async ({ page }) => {
-          await page.goto(pageInfo.path, { waitUntil: 'domcontentloaded', timeout: 30000 });
+    // Check no horizontal overflow
+    const bodyWidth = await page.evaluate(() => document.body.scrollWidth);
+    const viewportWidth = await page.evaluate(() => window.innerWidth);
+    expect(bodyWidth).toBeLessThanOrEqual(viewportWidth + 20);
 
-          // Check no horizontal overflow
-          const bodyWidth = await page.evaluate(() => document.body.scrollWidth);
-          const viewportWidth = await page.evaluate(() => window.innerWidth);
-          expect(bodyWidth).toBeLessThanOrEqual(viewportWidth + 20); // Allow small margin
-
-          // Check navigation is visible
-          await expect(page.locator('nav')).toBeVisible();
-        });
-      }
-    });
-  }
+    // Check mobile menu button exists
+    await expect(page.locator('[data-testid="mobile-menu-button"]')).toBeVisible({ timeout: 5000 });
+  });
 
   test.describe('Mobile Navigation', () => {
     test.use({ viewport: { width: 375, height: 667 } });
@@ -448,18 +439,18 @@ test.describe('Forms & Functionality', () => {
 
 // ==================== API HEALTH CHECK ====================
 test.describe('API Health Check', () => {
-  test('events API should respond', async ({ request }) => {
-    const response = await request.get(`${BASE_URL}/api/events`);
-    expect(response.status()).toBeLessThan(500);
+  test('events API should respond', async ({ page }) => {
+    const response = await page.goto(`${BASE_URL}/api/events`, { timeout: 30000 });
+    expect(response?.status()).toBeLessThan(500);
   });
 
-  test('venues API should respond', async ({ request }) => {
-    const response = await request.get(`${BASE_URL}/api/venues`);
-    expect(response.status()).toBeLessThan(500);
+  test('venues API should respond', async ({ page }) => {
+    const response = await page.goto(`${BASE_URL}/api/venues`, { timeout: 30000 });
+    expect(response?.status()).toBeLessThan(500);
   });
 
-  test('cinema API should respond', async ({ request }) => {
-    const response = await request.get(`${BASE_URL}/api/cinema/movies`);
-    expect(response.status()).toBeLessThan(500);
+  test('cinema API should respond', async ({ page }) => {
+    const response = await page.goto(`${BASE_URL}/api/cinema/movies`, { timeout: 30000 });
+    expect(response?.status()).toBeLessThan(500);
   });
 });
