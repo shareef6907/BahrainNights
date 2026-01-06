@@ -345,14 +345,14 @@ export default function ExplorePage() {
 
               <div className="flex flex-col sm:flex-row gap-4 justify-center">
                 <Link
-                  href="/register"
+                  href="/register-venue"
                   className="inline-flex items-center justify-center gap-2 px-8 py-4 bg-black text-white font-semibold rounded-xl hover:bg-gray-900 transition-colors"
                 >
                   <span>Register Your Venue</span>
                   <ArrowRight className="w-5 h-5" />
                 </Link>
                 <Link
-                  href="/login"
+                  href="/venue-portal/login"
                   className="inline-flex items-center justify-center gap-2 px-8 py-4 bg-white/20 text-black font-semibold rounded-xl hover:bg-white/30 transition-colors border border-black/20"
                 >
                   Already Registered? Login

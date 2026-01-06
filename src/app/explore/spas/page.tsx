@@ -1,169 +1,10 @@
 'use client';
 
-import { useState, useMemo } from 'react';
 import { motion } from 'framer-motion';
-import { ArrowLeft } from 'lucide-react';
+import { ArrowLeft, Sparkles, Plus } from 'lucide-react';
 import Link from 'next/link';
-import ExploreGrid, { ExploreItem } from '@/components/explore/ExploreGrid';
-import ExploreFilters, { FilterConfig } from '@/components/explore/ExploreFilters';
-
-// Sample spas data
-const spasData: ExploreItem[] = [
-  {
-    id: 'spa-1',
-    name: 'The Spa at Ritz-Carlton',
-    slug: 'spa-ritz-carlton',
-    type: 'Hotel Spa',
-    category: 'spas',
-    image: 'https://images.unsplash.com/photo-1600334089648-b0d9d3028eb2?w=800',
-    area: 'Seef',
-    price: 'BD 85',
-    rating: 4.9,
-    description: 'Signature: Royal Hammam Experience',
-    features: ['Hammam', 'Couples Rooms', 'Pool Access'],
-    isFeatured: true,
-  },
-  {
-    id: 'spa-2',
-    name: 'Drift Spa at Four Seasons',
-    slug: 'drift-spa-four-seasons',
-    type: 'Hotel Spa',
-    category: 'spas',
-    image: 'https://images.unsplash.com/photo-1540555700478-4be289fbecef?w=800',
-    area: 'Manama',
-    price: 'BD 95',
-    rating: 4.9,
-    description: 'Signature: Bahraini Pearl Journey',
-    features: ['Pearl Treatments', 'Private Suites', 'Sea View'],
-    isFeatured: true,
-  },
-  {
-    id: 'spa-3',
-    name: 'Serenity Wellness Center',
-    slug: 'serenity-wellness',
-    type: 'Day Spa',
-    category: 'spas',
-    image: 'https://images.unsplash.com/photo-1544161515-4ab6ce6db874?w=800',
-    area: 'Adliya',
-    price: 'BD 65',
-    rating: 4.7,
-    description: 'Signature: Full Day Retreat',
-    features: ['Yoga Studio', 'Meditation', 'Organic Products'],
-  },
-  {
-    id: 'spa-4',
-    name: 'Thai Harmony Spa',
-    slug: 'thai-harmony-spa',
-    type: 'Day Spa',
-    category: 'spas',
-    image: 'https://images.unsplash.com/photo-1519823551278-64ac92734fb1?w=800',
-    area: 'Juffair',
-    price: 'BD 35',
-    rating: 4.6,
-    description: 'Signature: Traditional Thai Massage',
-    features: ['Thai Massage', 'Foot Reflexology', 'Hot Stone'],
-  },
-  {
-    id: 'spa-5',
-    name: 'Heavenly Spa by Westin',
-    slug: 'heavenly-spa-westin',
-    type: 'Hotel Spa',
-    category: 'spas',
-    image: 'https://images.unsplash.com/photo-1507652313519-d4e9174996dd?w=800',
-    area: 'Seef',
-    price: 'BD 75',
-    rating: 4.5,
-    description: 'Signature: Heavenly Body Treatment',
-    features: ['Aromatherapy', 'Body Wraps', 'Facials'],
-  },
-  {
-    id: 'spa-6',
-    name: 'Zen Garden Wellness',
-    slug: 'zen-garden-wellness',
-    type: 'Wellness Center',
-    category: 'spas',
-    image: 'https://images.unsplash.com/photo-1552693673-1bf958298935?w=800',
-    area: 'Riffa',
-    price: 'BD 45',
-    rating: 4.4,
-    description: 'Signature: Holistic Healing Package',
-    features: ['Acupuncture', 'Cupping', 'Herbal Therapy'],
-  },
-];
-
-// Filter configurations
-const filterConfigs: FilterConfig[] = [
-  {
-    id: 'type',
-    label: 'Type',
-    type: 'multi',
-    options: [
-      { id: 'hotel-spa', label: 'Hotel Spa' },
-      { id: 'day-spa', label: 'Day Spa' },
-      { id: 'wellness-center', label: 'Wellness Center' },
-    ],
-  },
-  {
-    id: 'area',
-    label: 'Area',
-    type: 'multi',
-    options: [
-      { id: 'manama', label: 'Manama' },
-      { id: 'seef', label: 'Seef' },
-      { id: 'juffair', label: 'Juffair' },
-      { id: 'adliya', label: 'Adliya' },
-      { id: 'riffa', label: 'Riffa' },
-    ],
-  },
-  {
-    id: 'services',
-    label: 'Services',
-    type: 'multi',
-    options: [
-      { id: 'massage', label: 'Massage' },
-      { id: 'hammam', label: 'Hammam' },
-      { id: 'facials', label: 'Facials' },
-      { id: 'yoga', label: 'Yoga' },
-    ],
-  },
-];
 
 export default function SpasPage() {
-  const [activeFilters, setActiveFilters] = useState<Record<string, string[]>>({});
-
-  const handleFilterChange = (filterId: string, value: string[]) => {
-    setActiveFilters((prev) => ({
-      ...prev,
-      [filterId]: value,
-    }));
-  };
-
-  const handleClearAll = () => {
-    setActiveFilters({});
-  };
-
-  const filteredSpas = useMemo(() => {
-    let result = [...spasData];
-
-    if (activeFilters.type?.length) {
-      result = result.filter((spa) =>
-        activeFilters.type.some(
-          (type) => spa.type.toLowerCase().replace(' ', '-') === type
-        )
-      );
-    }
-
-    if (activeFilters.area?.length) {
-      result = result.filter((spa) =>
-        activeFilters.area.some(
-          (area) => spa.area.toLowerCase() === area
-        )
-      );
-    }
-
-    return result;
-  }, [activeFilters]);
-
   return (
     <div className="min-h-screen bg-slate-950">
       {/* Hero */}
@@ -189,10 +30,10 @@ export default function SpasPage() {
               </div>
               <div>
                 <h1 className="text-3xl md:text-4xl font-bold text-white">
-                  Spas & Wellness
+                  Spa & Wellness
                 </h1>
                 <p className="text-gray-400">
-                  {filteredSpas.length} relaxation destinations
+                  Relax, rejuvenate, and unwind
                 </p>
               </div>
             </div>
@@ -200,26 +41,76 @@ export default function SpasPage() {
         </div>
       </section>
 
-      {/* Filters */}
-      <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mb-8">
-        <div className="py-4 border-b border-white/10">
-          <ExploreFilters
-            filters={filterConfigs}
-            activeFilters={activeFilters}
-            onFilterChange={handleFilterChange}
-            onClearAll={handleClearAll}
-            categoryColor="#A855F7"
-          />
-        </div>
-      </section>
-
-      {/* Grid */}
+      {/* Empty State with Registration CTA */}
       <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pb-16">
-        <ExploreGrid
-          items={filteredSpas}
-          category="spas"
-          emptyMessage="No spas match your filters"
-        />
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.2 }}
+          className="text-center py-16"
+        >
+          <div className="w-24 h-24 mx-auto mb-6 rounded-full bg-purple-500/10 flex items-center justify-center">
+            <Sparkles className="w-12 h-12 text-purple-500" />
+          </div>
+
+          <h2 className="text-2xl font-bold text-white mb-4">
+            Coming Soon
+          </h2>
+
+          <p className="text-gray-400 max-w-md mx-auto mb-8">
+            We&apos;re building the best directory of spas and wellness centers in Bahrain.
+            Own a spa, salon, or wellness center? Be among the first to list!
+          </p>
+
+          <div className="flex flex-col sm:flex-row gap-4 justify-center">
+            <Link
+              href="/register-venue"
+              className="inline-flex items-center justify-center gap-2 px-8 py-4 bg-gradient-to-r from-purple-500 to-purple-600 text-white font-bold rounded-xl hover:from-purple-400 hover:to-purple-500 transition-all shadow-lg shadow-purple-500/25"
+            >
+              <Plus className="w-5 h-5" />
+              Register Your Venue
+            </Link>
+
+            <Link
+              href="/explore"
+              className="inline-flex items-center justify-center gap-2 px-8 py-4 bg-white/5 border border-white/10 text-white font-semibold rounded-xl hover:bg-white/10 transition-all"
+            >
+              Explore Other Categories
+            </Link>
+          </div>
+        </motion.div>
+
+        {/* Benefits Section */}
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.4 }}
+          className="mt-16 grid grid-cols-1 md:grid-cols-3 gap-6"
+        >
+          <div className="bg-white/5 border border-white/10 rounded-2xl p-6 text-center">
+            <div className="text-3xl mb-3">🆓</div>
+            <h3 className="text-lg font-semibold text-white mb-2">100% Free</h3>
+            <p className="text-gray-400 text-sm">
+              List your venue at no cost. We believe in equal visibility for all businesses.
+            </p>
+          </div>
+
+          <div className="bg-white/5 border border-white/10 rounded-2xl p-6 text-center">
+            <div className="text-3xl mb-3">📍</div>
+            <h3 className="text-lg font-semibold text-white mb-2">Get Discovered</h3>
+            <p className="text-gray-400 text-sm">
+              Reach thousands of visitors looking for the best places in Bahrain.
+            </p>
+          </div>
+
+          <div className="bg-white/5 border border-white/10 rounded-2xl p-6 text-center">
+            <div className="text-3xl mb-3">📅</div>
+            <h3 className="text-lg font-semibold text-white mb-2">Promote Offers</h3>
+            <p className="text-gray-400 text-sm">
+              Share your special packages, treatments, and promotions with our community.
+            </p>
+          </div>
+        </motion.div>
       </section>
     </div>
   );
