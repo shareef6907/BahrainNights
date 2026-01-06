@@ -127,6 +127,7 @@ export default function CreateOfferPage() {
 
       const uploadFormData = new FormData();
       uploadFormData.append('file', compressedFile);
+      uploadFormData.append('imageType', 'offer');
 
       const response = await fetch('/api/venue-portal/upload', {
         method: 'POST',
