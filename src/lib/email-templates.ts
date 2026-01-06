@@ -383,6 +383,42 @@ export function passwordResetEmail(resetToken: string, expiresIn: string = '1 ho
 }
 
 /**
+ * Event Submission Confirmation Email (when venue submits an event)
+ */
+export function eventSubmissionConfirmation(eventTitle: string, venueName: string): string {
+  const dashboardUrl = `${SITE_URL}/venue-portal/events`;
+
+  return baseLayout(`
+    ${gradientHeader('Event Submitted!', 'We received your event', '📅')}
+    ${contentBody(`
+      <p style="color: ${COLORS.gray[700]}; font-size: 16px; line-height: 1.6; margin: 0 0 20px;">
+        Thank you for submitting <strong>${eventTitle}</strong> from ${venueName}!
+      </p>
+
+      <p style="color: ${COLORS.gray[700]}; font-size: 16px; line-height: 1.6; margin: 0 0 20px;">
+        Your event is now under review. Our team will check the details and you'll receive an email once it's published.
+      </p>
+
+      ${infoBox(`
+        <p style="color: ${COLORS.gray[500]}; font-size: 14px; margin: 0 0 8px;"><strong>What happens next?</strong></p>
+        <ul style="color: ${COLORS.gray[700]}; font-size: 14px; margin: 0; padding-left: 20px;">
+          <li>Our team reviews your event (usually within 24 hours)</li>
+          <li>You'll receive an email when it's published</li>
+          <li>Your event will be visible to thousands of visitors!</li>
+        </ul>
+      `)}
+
+      ${primaryButton('View Your Events', dashboardUrl)}
+
+      <p style="color: ${COLORS.gray[500]}; font-size: 14px; line-height: 1.6; margin: 20px 0 0;">
+        Questions? Contact us at
+        <a href="mailto:help@bahrainnights.com" style="color: ${COLORS.primary};">help@bahrainnights.com</a>
+      </p>
+    `)}
+  `);
+}
+
+/**
  * Welcome Email (after first login)
  */
 export function welcomeEmail(venueName: string): string {
@@ -434,6 +470,7 @@ export default {
   venueRegistrationConfirmation,
   venueApprovalEmail,
   venueRejectionEmail,
+  eventSubmissionConfirmation,
   eventApprovalEmail,
   eventRejectionEmail,
   passwordResetEmail,

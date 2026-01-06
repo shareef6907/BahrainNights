@@ -2,10 +2,12 @@ import { NextRequest, NextResponse } from 'next/server';
 import { cookies } from 'next/headers';
 import { jwtVerify } from 'jose';
 import { getAdminClient } from '@/lib/supabase/server';
+import { sendEventSubmissionEmail } from '@/lib/email';
 
 interface VenueBasicData {
   name: string;
   slug: string;
+  email: string;
 }
 
 const VENUE_SESSION_SECRET = new TextEncoder().encode(
@@ -128,7 +130,7 @@ export async function POST(request: NextRequest) {
     const supabase = getAdminClient();
     const { data: venueData } = await supabase
       .from('venues')
-      .select('name, slug')
+      .select('name, slug, email')
       .eq('id', venueId)
       .single();
 
@@ -184,9 +186,28 @@ export async function POST(request: NextRequest) {
       );
     }
 
+    // Send event submission confirmation email
+    let emailSent = false;
+    if (venue.email) {
+      try {
+        const emailResult = await sendEventSubmissionEmail(
+          venue.email,
+          body.title.trim(),
+          venue.name
+        );
+        emailSent = emailResult.success;
+        if (!emailSent) {
+          console.error('Failed to send event submission email:', emailResult.error);
+        }
+      } catch (emailError) {
+        console.error('Error sending event submission email:', emailError);
+      }
+    }
+
     return NextResponse.json({
       success: true,
       event,
+      emailSent,
     });
   } catch (error) {
     console.error('Create event error:', error);

@@ -8,6 +8,7 @@ import {
   venueRegistrationConfirmation,
   venueApprovalEmail,
   venueRejectionEmail,
+  eventSubmissionConfirmation,
   eventApprovalEmail,
   eventRejectionEmail,
   passwordResetEmail,
@@ -55,6 +56,21 @@ export async function sendVenueRejectionEmail(
     to: email,
     subject: `Update on your ${venueName} registration`,
     html: venueRejectionEmail(venueName, reason),
+  });
+}
+
+/**
+ * Send event submission confirmation email (when venue submits an event)
+ */
+export async function sendEventSubmissionEmail(
+  email: string,
+  eventTitle: string,
+  venueName: string
+): Promise<EmailResult> {
+  return sendEmail({
+    to: email,
+    subject: `Event Submitted - ${eventTitle}`,
+    html: eventSubmissionConfirmation(eventTitle, venueName),
   });
 }
 
