@@ -104,6 +104,8 @@ export default function RegisterVenuePage() {
   const [galleryUploading, setGalleryUploading] = useState(false);
   const [galleryUploadProgress, setGalleryUploadProgress] = useState<GalleryUploadProgress[]>([]);
   const galleryInputRef = useRef<HTMLInputElement>(null);
+  // Generate a unique registration ID once for consistent file paths
+  const [registrationId] = useState(() => `${Date.now()}-${Math.random().toString(36).substr(2, 9)}`);
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target;
@@ -206,6 +208,22 @@ export default function RegisterVenuePage() {
     );
   };
 
+  // Wait for an image URL to become available (Lambda processing)
+  const waitForImage = async (url: string, maxAttempts = 30, delayMs = 2000): Promise<boolean> => {
+    for (let attempt = 0; attempt < maxAttempts; attempt++) {
+      try {
+        const response = await fetch(url, { method: 'HEAD' });
+        if (response.ok) {
+          return true;
+        }
+      } catch {
+        // Image not ready yet
+      }
+      await new Promise(resolve => setTimeout(resolve, delayMs));
+    }
+    return false;
+  };
+
   // Gallery image upload handler
   const handleGallerySelect = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = e.target.files;
@@ -255,7 +273,7 @@ export default function RegisterVenuePage() {
 
         // Update progress to show compressing
         setGalleryUploadProgress(prev => prev.map((p, idx) =>
-          idx === i ? { ...p, progress: 20 } : p
+          idx === i ? { ...p, progress: 10 } : p
         ));
 
         // Compress image
@@ -269,18 +287,52 @@ export default function RegisterVenuePage() {
 
         // Update progress to show uploading
         setGalleryUploadProgress(prev => prev.map((p, idx) =>
-          idx === i ? { ...p, progress: 50 } : p
+          idx === i ? { ...p, progress: 30 } : p
         ));
 
         try {
-          const s3Url = await uploadToS3(compressedFile, 'cover'); // Use 'cover' type for gallery images
-          if (s3Url) {
-            uploadedUrls.push(s3Url);
+          // Upload via the registration upload endpoint (with Sharp processing)
+          const uploadFormData = new FormData();
+          uploadFormData.append('file', compressedFile);
+          uploadFormData.append('imageType', 'gallery');
+          uploadFormData.append('registrationId', registrationId);
+
+          const uploadResponse = await fetch('/api/upload/registration', {
+            method: 'POST',
+            body: uploadFormData,
+          });
+
+          if (!uploadResponse.ok) {
+            const errorData = await uploadResponse.json();
+            throw new Error(errorData.error || 'Upload failed');
+          }
+
+          const uploadData = await uploadResponse.json();
+          const finalUrl = uploadData.url;
+
+          // Update progress to show waiting for watermark
+          setGalleryUploadProgress(prev => prev.map((p, idx) =>
+            idx === i ? { ...p, progress: 60 } : p
+          ));
+
+          // Wait for Lambda to process and add watermark
+          const isReady = await waitForImage(finalUrl, 30, 2000);
+
+          if (isReady) {
+            uploadedUrls.push(finalUrl);
+            setGalleryUploadProgress(prev => prev.map((p, idx) =>
+              idx === i ? { ...p, status: 'success', progress: 100 } : p
+            ));
+          } else {
+            // Timeout waiting for watermark, but still add the URL
+            // The image might become available later
+            uploadedUrls.push(finalUrl);
             setGalleryUploadProgress(prev => prev.map((p, idx) =>
               idx === i ? { ...p, status: 'success', progress: 100 } : p
             ));
           }
         } catch (uploadErr) {
+          console.error('Upload error:', uploadErr);
           setGalleryUploadProgress(prev => prev.map((p, idx) =>
             idx === i ? { ...p, status: 'error', progress: 100 } : p
           ));
