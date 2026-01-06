@@ -11,39 +11,34 @@ import {
   Baby,
   Users,
   Send,
+  ArrowRight,
 } from 'lucide-react';
-import ExploreCategoryCard, { ExploreCategory } from '@/components/explore/ExploreCategoryCard';
-import FeaturedExperiences, { FeaturedItem } from '@/components/explore/FeaturedExperiences';
-import AreasSection, { Area } from '@/components/explore/AreaCard';
-import SeasonalSection, { SeasonalItem } from '@/components/explore/SeasonalSection';
 import Link from 'next/link';
 import Image from 'next/image';
 
 // Category data
-const exploreCategories: ExploreCategory[] = [
+const exploreCategories = [
   {
     id: 'hotels',
     name: 'Hotels & Staycations',
     tagline: 'Luxury stays and weekend getaways',
     icon: Hotel,
     emoji: '🏨',
-    href: '/explore/hotels',
     image: 'https://images.unsplash.com/photo-1566073771259-6a8506099945?w=800',
-    itemCount: 24,
     color: '#3B82F6',
     gradient: 'from-blue-600 to-blue-800',
+    description: 'List your hotel, resort, or vacation rental on BahrainNights and reach thousands of visitors looking for the perfect stay.',
   },
   {
     id: 'spas',
-    name: 'Spas & Wellness',
+    name: 'Spa & Wellness',
     tagline: 'Relax, rejuvenate, and unwind',
     icon: Sparkles,
     emoji: '💆‍♀️',
-    href: '/explore/spas',
     image: 'https://images.unsplash.com/photo-1544161515-4ab6ce6db874?w=800',
-    itemCount: 18,
     color: '#A855F7',
     gradient: 'from-purple-600 to-purple-800',
+    description: 'Showcase your spa, wellness center, or fitness studio to health-conscious visitors seeking relaxation.',
   },
   {
     id: 'shopping',
@@ -51,11 +46,10 @@ const exploreCategories: ExploreCategory[] = [
     tagline: 'Malls, souqs, and pop-up markets',
     icon: ShoppingBag,
     emoji: '🛍️',
-    href: '/explore/shopping',
     image: 'https://images.unsplash.com/photo-1555529669-e69e7aa0ba9a?w=800',
-    itemCount: 32,
     color: '#D97706',
     gradient: 'from-amber-600 to-amber-800',
+    description: 'Promote your retail store, market stall, or shopping experience to shoppers across Bahrain.',
   },
   {
     id: 'tours',
@@ -63,11 +57,10 @@ const exploreCategories: ExploreCategory[] = [
     tagline: 'Adventures and cultural discoveries',
     icon: Ship,
     emoji: '🚤',
-    href: '/explore/tours',
     image: 'https://images.unsplash.com/photo-1559128010-7c1ad6e1b6a5?w=800',
-    itemCount: 15,
     color: '#14B8A6',
     gradient: 'from-teal-600 to-teal-800',
+    description: 'Share your tours, adventures, and unique experiences with travelers exploring Bahrain.',
   },
   {
     id: 'kids',
@@ -75,11 +68,10 @@ const exploreCategories: ExploreCategory[] = [
     tagline: 'Fun for the whole family',
     icon: Baby,
     emoji: '👶',
-    href: '/explore/kids',
     image: 'https://images.unsplash.com/photo-1503454537195-1dcabb73ffb9?w=800',
-    itemCount: 22,
     color: '#22C55E',
     gradient: 'from-green-600 to-green-800',
+    description: 'Reach families looking for fun activities, entertainment, and educational experiences for children.',
   },
   {
     id: 'community',
@@ -87,237 +79,12 @@ const exploreCategories: ExploreCategory[] = [
     tagline: 'Connect, volunteer, and give back',
     icon: Users,
     emoji: '🤝',
-    href: '/explore/community',
     image: 'https://images.unsplash.com/photo-1529156069898-49953e39b3ac?w=800',
-    itemCount: 12,
     color: '#F97316',
     gradient: 'from-orange-600 to-orange-800',
+    description: 'Promote your community initiatives, charity events, and social gatherings to engaged locals.',
   },
 ];
-
-// Featured items
-const featuredItems: FeaturedItem[] = [
-  {
-    id: 'feat-1',
-    name: 'The Ritz-Carlton Bahrain',
-    slug: 'ritz-carlton-bahrain',
-    category: 'hotels',
-    categoryLabel: 'Hotel',
-    image: 'https://images.unsplash.com/photo-1582719478250-c89cae4dc85b?w=800',
-    area: 'Seef',
-    price: 'BD 120+/night',
-    rating: 4.9,
-  },
-  {
-    id: 'feat-2',
-    name: 'Pearl Diving Experience',
-    slug: 'pearl-diving-experience',
-    category: 'tours',
-    categoryLabel: 'Tour',
-    image: 'https://images.unsplash.com/photo-1544551763-46a013bb70d5?w=800',
-    area: 'Muharraq',
-    price: 'BD 45',
-    rating: 4.8,
-  },
-  {
-    id: 'feat-3',
-    name: 'The Spa at Ritz-Carlton',
-    slug: 'spa-ritz-carlton',
-    category: 'spas',
-    categoryLabel: 'Spa',
-    image: 'https://images.unsplash.com/photo-1600334089648-b0d9d3028eb2?w=800',
-    area: 'Seef',
-    price: 'BD 85',
-    rating: 4.9,
-  },
-  {
-    id: 'feat-4',
-    name: 'Wahooo! Waterpark',
-    slug: 'wahooo-waterpark',
-    category: 'kids',
-    categoryLabel: 'Kids',
-    image: 'https://images.unsplash.com/photo-1526401485004-46910ecc8e51?w=800',
-    area: 'Seef',
-    price: 'BD 15',
-    rating: 4.6,
-  },
-  {
-    id: 'feat-5',
-    name: 'Manama Souq',
-    slug: 'manama-souq',
-    category: 'shopping',
-    categoryLabel: 'Shopping',
-    image: 'https://images.unsplash.com/photo-1555529669-2269763671c0?w=800',
-    area: 'Manama',
-    rating: 4.5,
-  },
-  {
-    id: 'feat-6',
-    name: 'Bahrain Running Club',
-    slug: 'bahrain-running-club',
-    category: 'community',
-    categoryLabel: 'Community',
-    image: 'https://images.unsplash.com/photo-1552674605-db6ffd4facb5?w=800',
-    area: 'Manama',
-  },
-];
-
-// Popular items
-const popularItems = [
-  {
-    id: 'pop-1',
-    name: 'Four Seasons Hotel',
-    slug: 'four-seasons-bahrain',
-    category: 'hotels' as const,
-    categoryLabel: 'Hotel',
-    image: 'https://images.unsplash.com/photo-1571896349842-33c89424de2d?w=800',
-    area: 'Manama',
-    price: 'BD 150+/night',
-    views: 2847,
-  },
-  {
-    id: 'pop-2',
-    name: 'Desert Safari Adventure',
-    slug: 'desert-safari',
-    category: 'tours' as const,
-    categoryLabel: 'Tour',
-    image: 'https://images.unsplash.com/photo-1451337516015-6b6e9a44a8a3?w=800',
-    area: 'Desert',
-    price: 'BD 35',
-    views: 1923,
-  },
-  {
-    id: 'pop-3',
-    name: 'City Centre Bahrain',
-    slug: 'city-centre-bahrain',
-    category: 'shopping' as const,
-    categoryLabel: 'Shopping',
-    image: 'https://images.unsplash.com/photo-1519567241046-7f570eee3ce6?w=800',
-    area: 'Seef',
-    views: 1654,
-  },
-  {
-    id: 'pop-4',
-    name: 'Drift Spa at Four Seasons',
-    slug: 'drift-spa-four-seasons',
-    category: 'spas' as const,
-    categoryLabel: 'Spa',
-    image: 'https://images.unsplash.com/photo-1540555700478-4be289fbecef?w=800',
-    area: 'Manama',
-    price: 'BD 95',
-    views: 1432,
-  },
-];
-
-// Areas data
-const areas: Area[] = [
-  {
-    id: 'manama',
-    name: 'Manama',
-    slug: 'manama',
-    image: 'https://images.unsplash.com/photo-1578895101408-1a36b834405b?w=600',
-    placeCount: 48,
-  },
-  {
-    id: 'seef',
-    name: 'Seef',
-    slug: 'seef',
-    image: 'https://images.unsplash.com/photo-1486406146926-c627a92ad1ab?w=600',
-    placeCount: 35,
-  },
-  {
-    id: 'juffair',
-    name: 'Juffair',
-    slug: 'juffair',
-    image: 'https://images.unsplash.com/photo-1449824913935-59a10b8d2000?w=600',
-    placeCount: 28,
-  },
-  {
-    id: 'amwaj',
-    name: 'Amwaj Islands',
-    slug: 'amwaj-islands',
-    image: 'https://images.unsplash.com/photo-1507525428034-b723cf961d3e?w=600',
-    placeCount: 15,
-  },
-  {
-    id: 'adliya',
-    name: 'Adliya',
-    slug: 'adliya',
-    image: 'https://images.unsplash.com/photo-1514924013411-cbf25faa35bb?w=600',
-    placeCount: 22,
-  },
-  {
-    id: 'riffa',
-    name: 'Riffa',
-    slug: 'riffa',
-    image: 'https://images.unsplash.com/photo-1464938050520-ef2571f24ae5?w=600',
-    placeCount: 18,
-  },
-  {
-    id: 'muharraq',
-    name: 'Muharraq',
-    slug: 'muharraq',
-    image: 'https://images.unsplash.com/photo-1467269204594-9661b134dd2b?w=600',
-    placeCount: 24,
-  },
-];
-
-// Seasonal items (Festive Season)
-const seasonalItems: SeasonalItem[] = [
-  {
-    id: 'seasonal-1',
-    name: 'New Year Gala at Ritz-Carlton',
-    slug: 'nye-gala-ritz',
-    category: 'Hotel',
-    categorySlug: 'hotels',
-    image: 'https://images.unsplash.com/photo-1467810563316-b5476525c0f9?w=800',
-    area: 'Seef',
-    description: 'Ring in 2026 with a spectacular gala dinner and fireworks',
-    badge: 'NYE Special',
-  },
-  {
-    id: 'seasonal-2',
-    name: 'Winter Wonderland at City Centre',
-    slug: 'winter-wonderland',
-    category: 'Kids',
-    categorySlug: 'kids',
-    image: 'https://images.unsplash.com/photo-1482517967863-00e15c9b44be?w=800',
-    area: 'Seef',
-    description: 'Snow, Santa, and festive fun for the whole family',
-    badge: 'Family Fun',
-  },
-  {
-    id: 'seasonal-3',
-    name: 'Holiday Spa Retreat',
-    slug: 'holiday-spa-retreat',
-    category: 'Spa',
-    categorySlug: 'spas',
-    image: 'https://images.unsplash.com/photo-1544161515-4ab6ce6db874?w=800',
-    area: 'Manama',
-    description: 'Unwind with our special winter wellness packages',
-    badge: '20% OFF',
-  },
-  {
-    id: 'seasonal-4',
-    name: 'Festive Market at Block 338',
-    slug: 'festive-market',
-    category: 'Shopping',
-    categorySlug: 'shopping',
-    image: 'https://images.unsplash.com/photo-1512389142860-9c449e58a814?w=800',
-    area: 'Adliya',
-    description: 'Local crafts, gifts, and holiday treats',
-    badge: 'This Weekend',
-  },
-];
-
-const categoryColors: Record<string, string> = {
-  hotels: '#3B82F6',
-  spas: '#A855F7',
-  shopping: '#D97706',
-  tours: '#14B8A6',
-  kids: '#22C55E',
-  community: '#F97316',
-};
 
 export default function ExplorePage() {
   const [searchQuery, setSearchQuery] = useState('');
@@ -331,13 +98,6 @@ export default function ExplorePage() {
         <div className="absolute inset-0">
           <div className="absolute inset-0 bg-gradient-to-b from-indigo-500/10 via-purple-500/5 to-transparent" />
           <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-blue-500/10 via-transparent to-transparent" />
-          {/* Bahrain skyline silhouette effect */}
-          <div
-            className="absolute bottom-0 left-0 right-0 h-32 opacity-20"
-            style={{
-              background: 'linear-gradient(to top, rgba(0,0,0,0.5), transparent)',
-            }}
-          />
         </div>
 
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
@@ -380,99 +140,115 @@ export default function ExplorePage() {
 
       {/* Category Cards Section */}
       <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mb-16">
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6">
-          {exploreCategories.map((category, index) => (
-            <ExploreCategoryCard
-              key={category.id}
-              category={category}
-              index={index}
-            />
-          ))}
-        </div>
-      </section>
-
-      {/* Featured Experiences */}
-      <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mb-16">
-        <FeaturedExperiences title="Featured This Week" items={featuredItems} />
-      </section>
-
-      {/* What's Popular */}
-      <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mb-16">
-        <h2 className="text-2xl md:text-3xl font-bold text-white mb-6">
-          Popular Right Now
-        </h2>
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          {popularItems.map((item, index) => (
-            <motion.div
-              key={item.id}
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: index * 0.1 }}
-            >
-              <Link
-                href={`/explore/${item.category}/${item.slug}`}
-                className="block group"
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+          {exploreCategories.map((category, index) => {
+            const Icon = category.icon;
+            return (
+              <motion.div
+                key={category.id}
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: index * 0.1 }}
+                className="group"
               >
-                <div className="flex gap-4 p-4 bg-white/5 border border-white/10 rounded-2xl hover:bg-white/10 transition-all">
-                  {/* Image */}
-                  <div className="relative w-24 h-24 md:w-32 md:h-32 rounded-xl overflow-hidden flex-shrink-0">
+                <div className="relative h-80 rounded-2xl overflow-hidden">
+                  {/* Background Image */}
+                  <div className="absolute inset-0">
                     <Image
-                      src={item.image}
-                      alt={item.name}
+                      src={category.image}
+                      alt={category.name}
                       fill
                       className="object-cover transition-transform duration-500 group-hover:scale-110"
                     />
                   </div>
 
+                  {/* Gradient Overlay */}
+                  <div
+                    className="absolute inset-0 transition-opacity duration-300"
+                    style={{
+                      background: `linear-gradient(to top, ${category.color}F0 0%, ${category.color}CC 40%, ${category.color}66 70%, transparent 100%)`,
+                    }}
+                  />
+
                   {/* Content */}
-                  <div className="flex-1 min-w-0">
-                    <div
-                      className="inline-block px-2 py-0.5 rounded text-xs font-medium mb-2"
-                      style={{
-                        backgroundColor: `${categoryColors[item.category]}20`,
-                        color: categoryColors[item.category],
-                      }}
-                    >
-                      {item.categoryLabel}
+                  <div className="absolute inset-0 p-6 flex flex-col justify-end">
+                    {/* Icon and Emoji */}
+                    <div className="flex items-center gap-3 mb-3">
+                      <div
+                        className="w-12 h-12 rounded-xl flex items-center justify-center backdrop-blur-sm"
+                        style={{ backgroundColor: `${category.color}40` }}
+                      >
+                        <span className="text-2xl">{category.emoji}</span>
+                      </div>
                     </div>
-                    <h3 className="text-white font-semibold group-hover:text-yellow-400 transition-colors mb-1 truncate">
-                      {item.name}
+
+                    {/* Title */}
+                    <h3 className="text-xl md:text-2xl font-bold text-white mb-2">
+                      {category.name}
                     </h3>
-                    <p className="text-gray-400 text-sm mb-2">{item.area}</p>
-                    <div className="flex items-center justify-between">
-                      {item.price && (
-                        <span
-                          className="text-sm font-medium"
-                          style={{ color: categoryColors[item.category] }}
-                        >
-                          {item.price}
-                        </span>
-                      )}
-                      <span className="text-gray-500 text-xs">
-                        {item.views.toLocaleString()} views
-                      </span>
-                    </div>
+
+                    {/* Description */}
+                    <p className="text-white/80 text-sm mb-4 line-clamp-2">
+                      {category.description}
+                    </p>
+
+                    {/* Register CTA */}
+                    <Link
+                      href="/venues/register"
+                      className="inline-flex items-center justify-center gap-2 px-5 py-3 bg-white text-gray-900 font-semibold rounded-xl hover:bg-yellow-400 transition-all group/btn"
+                    >
+                      <span>Register for Free</span>
+                      <ArrowRight className="w-4 h-4 transition-transform group-hover/btn:translate-x-1" />
+                    </Link>
                   </div>
+
+                  {/* Hover Border Effect */}
+                  <div className="absolute inset-0 rounded-2xl border-2 border-transparent group-hover:border-white/30 transition-colors pointer-events-none" />
                 </div>
-              </Link>
-            </motion.div>
-          ))}
+              </motion.div>
+            );
+          })}
         </div>
       </section>
 
-      {/* Seasonal Section */}
+      {/* CTA Section */}
       <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mb-16">
-        <SeasonalSection
-          title="Festive Season Specials"
-          subtitle="Make the most of the holiday season with these special experiences"
-          items={seasonalItems}
-          accentColor="#EF4444"
-        />
-      </section>
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="relative overflow-hidden rounded-3xl"
+        >
+          {/* Background */}
+          <div className="absolute inset-0 bg-gradient-to-r from-yellow-500 to-orange-500" />
+          <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_right,_var(--tw-gradient-stops))] from-white/20 via-transparent to-transparent" />
 
-      {/* Areas to Explore */}
-      <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mb-16">
-        <AreasSection areas={areas} />
+          <div className="relative z-10 py-12 px-6 md:px-12">
+            <div className="max-w-3xl mx-auto text-center">
+              <h2 className="text-2xl md:text-4xl font-bold text-black mb-4">
+                Own a Business in Bahrain?
+              </h2>
+              <p className="text-black/80 text-lg mb-8 max-w-xl mx-auto">
+                Join BahrainNights for FREE and showcase your venue, events, and offers to thousands of visitors every month.
+              </p>
+
+              <div className="flex flex-col sm:flex-row gap-4 justify-center">
+                <Link
+                  href="/venues/register"
+                  className="inline-flex items-center justify-center gap-2 px-8 py-4 bg-black text-white font-semibold rounded-xl hover:bg-gray-900 transition-colors"
+                >
+                  <span>Register Your Venue</span>
+                  <ArrowRight className="w-5 h-5" />
+                </Link>
+                <Link
+                  href="/venues/login"
+                  className="inline-flex items-center justify-center gap-2 px-8 py-4 bg-white/20 text-black font-semibold rounded-xl hover:bg-white/30 transition-colors border border-black/20"
+                >
+                  Already Registered? Login
+                </Link>
+              </div>
+            </div>
+          </div>
+        </motion.div>
       </section>
 
       {/* Newsletter Section */}
