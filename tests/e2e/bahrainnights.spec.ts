@@ -16,17 +16,17 @@ test.describe('BahrainNights Website Tests', () => {
       await expect(page.locator('nav')).toBeVisible();
     });
 
-    test('should display Now Showing in Cinemas section', async ({ page }) => {
+    test('should display New Movies & Trailers section', async ({ page }) => {
       await page.goto('/');
       // Check for cinema section heading specifically
-      const cinemaHeading = page.getByRole('heading', { name: /Now Showing in Cinemas/i });
+      const cinemaHeading = page.getByRole('heading', { name: /New Movies.*Trailers/i });
       await expect(cinemaHeading).toBeVisible({ timeout: 10000 });
     });
 
     test('should display movie posters on homepage', async ({ page }) => {
       await page.goto('/');
-      // Wait for movies in the Now Showing section
-      const movieSection = page.locator('text=Now Showing in Cinemas').locator('..').locator('..');
+      // Wait for movies in the New Movies section
+      const movieSection = page.locator('text=New Movies').locator('..').locator('..');
       await expect(movieSection.locator('img').first()).toBeVisible({ timeout: 10000 });
     });
 
