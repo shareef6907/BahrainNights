@@ -187,11 +187,18 @@ export default function AdminAttractionsPage() {
           </button>
           <button
             onClick={() => window.open('/family-kids', '_blank')}
-            className="flex items-center gap-2 px-4 py-2 bg-amber-500 hover:bg-amber-400 rounded-lg text-black font-medium transition-colors"
+            className="flex items-center gap-2 px-4 py-2 bg-gray-700 hover:bg-gray-600 rounded-lg text-white transition-colors"
           >
             <Eye className="w-4 h-4" />
             View Page
           </button>
+          <a
+            href="/admin/attractions/new"
+            className="flex items-center gap-2 px-4 py-2 bg-amber-500 hover:bg-amber-400 rounded-lg text-black font-medium transition-colors"
+          >
+            <Plus className="w-4 h-4" />
+            Add New
+          </a>
         </div>
       </div>
 
@@ -331,6 +338,13 @@ export default function AdminAttractionsPage() {
                   </td>
                   <td className="p-4">
                     <div className="flex items-center justify-end gap-2">
+                      <a
+                        href={`/admin/attractions/${attraction.id}/edit`}
+                        className="p-2 hover:bg-white/10 rounded-lg transition-colors"
+                        title="Edit"
+                      >
+                        <Edit className="w-4 h-4 text-blue-400" />
+                      </a>
                       <button
                         onClick={() => toggleFeatured(attraction)}
                         className="p-2 hover:bg-white/10 rounded-lg transition-colors"

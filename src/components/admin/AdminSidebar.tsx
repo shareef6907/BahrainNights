@@ -23,6 +23,7 @@ import {
   ClipboardCheck,
   Target,
   Star,
+  MapPin,
 } from 'lucide-react';
 import { useAuth } from '@/lib/auth-context';
 
@@ -72,6 +73,11 @@ const navItems = [
     name: 'Featured Listings',
     href: '/admin/featured',
     icon: Star,
+  },
+  {
+    name: 'Attractions',
+    href: '/admin/attractions',
+    icon: MapPin,
   },
   {
     name: 'Prospects',
