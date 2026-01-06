@@ -5,6 +5,7 @@ import { AuthProvider } from "@/lib/auth-context";
 import { LanguageProvider } from "@/context/LanguageContext";
 import { PublicAuthProvider } from "@/context/PublicAuthContext";
 import { PageTracker } from "@/components/analytics/PageTracker";
+import FloatingHomeButton from "@/components/ui/FloatingHomeButton";
 
 const inter = Inter({
   variable: "--font-inter",
@@ -157,6 +158,7 @@ export default function RootLayout({
             <AuthProvider>
               <PageTracker />
               {children}
+              <FloatingHomeButton />
             </AuthProvider>
           </PublicAuthProvider>
         </LanguageProvider>
