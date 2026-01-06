@@ -28,6 +28,8 @@ const SUITABLE_FOR = ['Kids', 'Families', 'Teens', 'Adults', 'Couples', 'Groups'
 
 export default function NewAttractionPage() {
   const router = useRouter();
+  // Generate a unique ID for this new attraction (used for S3 path)
+  const [attractionId] = useState(() => crypto.randomUUID());
   const [formData, setFormData] = useState({
     name: '',
     description: '',
@@ -124,6 +126,7 @@ export default function NewAttractionPage() {
         uploadFormData.append('file', fileToUpload);
         uploadFormData.append('entityType', 'attraction');
         uploadFormData.append('imageType', 'cover');
+        uploadFormData.append('attractionId', attractionId);
         uploadFormData.append('processLocally', 'true');
 
         const uploadResponse = await fetch('/api/upload/image', {

@@ -23,7 +23,7 @@ const S3_BASE_URL = `https://${BUCKET}.s3.${REGION}.amazonaws.com`;
 // Keep PUBLIC_URL for backwards compatibility but derive from S3_BASE_URL
 const PUBLIC_URL = `${S3_BASE_URL}/processed`;
 
-export type EntityType = 'venue' | 'event' | 'offer' | 'sponsor' | 'ad';
+export type EntityType = 'venue' | 'event' | 'offer' | 'sponsor' | 'ad' | 'attraction';
 export type ImageType = 'logo' | 'cover' | 'gallery' | 'banner';
 
 interface FolderOptions {
@@ -32,6 +32,7 @@ interface FolderOptions {
   offerSlug?: string;
   sponsorSlug?: string;
   adSlug?: string;
+  attractionId?: string;
 }
 
 interface UploadResult {
@@ -172,6 +173,10 @@ export function generateFolderPath(
 
     case 'ad':
       return `ads/${yearMonth}`;
+
+    case 'attraction':
+      if (!options.attractionId) throw new Error('attractionId is required for attraction uploads');
+      return `attractions/${options.attractionId}`;
 
     default:
       return 'general';

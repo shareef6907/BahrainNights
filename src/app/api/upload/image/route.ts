@@ -38,6 +38,7 @@ interface UploadOptions {
   venueSlug?: string;
   eventSlug?: string;
   adSlug?: string;
+  attractionId?: string;
   addWatermark?: boolean;
   processLocally?: boolean;
   createThumb?: boolean;
@@ -73,6 +74,7 @@ export async function POST(request: NextRequest) {
     const venueSlug = formData.get('venueSlug') as string | null;
     const eventSlug = formData.get('eventSlug') as string | null;
     const adSlug = formData.get('adSlug') as string | null;
+    const attractionId = formData.get('attractionId') as string | null;
     const addWatermark = formData.get('addWatermark') === 'true';
     const processLocally = formData.get('processLocally') !== 'false'; // Default true
     const createThumb = formData.get('createThumbnail') === 'true';
@@ -105,6 +107,7 @@ export async function POST(request: NextRequest) {
       venueSlug: venueSlug || undefined,
       eventSlug: eventSlug || undefined,
       adSlug: adSlug || undefined,
+      attractionId: attractionId || undefined,
     });
 
     // Generate filename

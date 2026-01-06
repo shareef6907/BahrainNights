@@ -200,6 +200,7 @@ export default function EditAttractionPage({ params }: { params: Promise<{ id: s
         uploadFormData.append('file', fileToUpload);
         uploadFormData.append('entityType', 'attraction');
         uploadFormData.append('imageType', 'cover');
+        uploadFormData.append('attractionId', resolvedParams.id);
         uploadFormData.append('processLocally', 'true');
 
         const uploadResponse = await fetch('/api/upload/image', {
