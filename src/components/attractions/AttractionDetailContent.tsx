@@ -39,10 +39,10 @@ export default function AttractionDetailContent({
   const [isLiked, setIsLiked] = useState(false);
   const [showShareModal, setShowShareModal] = useState(false);
 
-  // Generate Google Maps embed URL using attraction name and area
+  // Generate Google Maps embed URL using attraction name and area (no API key required)
   const getGoogleMapsEmbedUrl = () => {
     const query = encodeURIComponent(`${attraction.name}, ${attraction.area || ''}, Bahrain`);
-    return `https://www.google.com/maps/embed/v1/place?key=${process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY || 'AIzaSyBFw0Qbyq9zTFTd-tUY6dZWTgaQzuU17R8'}&q=${query}`;
+    return `https://maps.google.com/maps?q=${query}&t=&z=15&ie=UTF8&iwloc=&output=embed`;
   };
 
   // Generate Google Maps directions URL
