@@ -2,7 +2,7 @@
 
 import React from 'react';
 import { motion } from 'framer-motion';
-import { MapPin, Clock, Calendar } from 'lucide-react';
+import { MapPin, Clock, Calendar, Star } from 'lucide-react';
 import Image from 'next/image';
 import Link from 'next/link';
 
@@ -55,7 +55,7 @@ function EventCard({ event, view = 'grid', index = 0 }: EventCardProps) {
         className="group"
       >
         <Link href={`/events/${event.slug}`} className="block">
-          <div className="flex gap-4 bg-white/5 backdrop-blur-sm border border-white/10 rounded-2xl overflow-hidden hover:border-yellow-400/50 transition-all duration-300">
+          <div className={`flex gap-4 bg-white/5 backdrop-blur-sm border ${event.isFeatured ? 'border-yellow-400/50 ring-1 ring-yellow-400/20' : 'border-white/10'} rounded-2xl overflow-hidden hover:border-yellow-400/50 transition-all duration-300`}>
             {/* Image */}
             <div className="relative w-48 h-32 flex-shrink-0 overflow-hidden">
               <Image
@@ -68,6 +68,13 @@ function EventCard({ event, view = 'grid', index = 0 }: EventCardProps) {
               <div className={`absolute top-2 left-2 px-2 py-1 ${event.categoryColor} text-white text-xs font-bold rounded-full`}>
                 {event.category}
               </div>
+              {/* Featured Badge */}
+              {event.isFeatured && (
+                <div className="absolute top-2 right-2 px-2 py-1 bg-yellow-400 text-black text-xs font-bold rounded-full flex items-center gap-1 shadow-lg">
+                  <Star className="w-3 h-3 fill-current" />
+                  Featured
+                </div>
+              )}
             </div>
 
             {/* Content */}
@@ -121,7 +128,7 @@ function EventCard({ event, view = 'grid', index = 0 }: EventCardProps) {
       className="group"
     >
       <Link href={`/events/${event.slug}`} className="block">
-        <div className="relative bg-white/5 backdrop-blur-sm border border-white/10 rounded-2xl overflow-hidden hover:border-yellow-400/50 transition-all duration-300">
+        <div className={`relative bg-white/5 backdrop-blur-sm border ${event.isFeatured ? 'border-yellow-400/50 ring-1 ring-yellow-400/20' : 'border-white/10'} rounded-2xl overflow-hidden hover:border-yellow-400/50 transition-all duration-300`}>
           {/* Image Container */}
           <div className="relative aspect-video overflow-hidden">
             <Image
@@ -140,8 +147,16 @@ function EventCard({ event, view = 'grid', index = 0 }: EventCardProps) {
               {event.category}
             </div>
 
-            {/* Date Badge */}
-            <div className="absolute top-3 right-3 px-3 py-1 bg-black/70 backdrop-blur-sm text-white text-xs font-medium rounded-full">
+            {/* Featured Badge */}
+            {event.isFeatured && (
+              <div className="absolute top-3 right-3 px-3 py-1 bg-yellow-400 text-black text-xs font-bold rounded-full flex items-center gap-1 shadow-lg z-10">
+                <Star className="w-3 h-3 fill-current" />
+                Featured
+              </div>
+            )}
+
+            {/* Date Badge - moved below featured if present */}
+            <div className={`absolute ${event.isFeatured ? 'top-10' : 'top-3'} right-3 px-3 py-1 bg-black/70 backdrop-blur-sm text-white text-xs font-medium rounded-full`}>
               {event.endDate ? `${event.date} - ${event.endDate}` : event.date}
             </div>
 
@@ -190,6 +205,7 @@ function EventCard({ event, view = 'grid', index = 0 }: EventCardProps) {
 export default React.memo(EventCard, (prevProps, nextProps) => {
   return (
     prevProps.event.id === nextProps.event.id &&
+    prevProps.event.isFeatured === nextProps.event.isFeatured &&
     prevProps.view === nextProps.view &&
     prevProps.index === nextProps.index
   );

@@ -3,10 +3,11 @@
 import { useState, useMemo, useEffect } from 'react';
 import { useSearchParams, useRouter } from 'next/navigation';
 import { motion } from 'framer-motion';
-import { Search, Calendar, MapPin, Clock, Filter, Grid3X3, List, ChevronRight } from 'lucide-react';
+import { Search, Calendar, MapPin, Clock, Filter, Grid3X3, List, ChevronRight, Star } from 'lucide-react';
 import Link from 'next/link';
 import Image from 'next/image';
 import AdBanner from '@/components/ads/AdBanner';
+import { sortEventsWithFeatured } from '@/lib/utils/eventSorting';
 
 // Event interface
 export interface Event {
@@ -98,7 +99,7 @@ export default function EventsPageClient({ initialEvents, familyAttractions = []
 
   // Filter events based on search, category, and time
   const filteredEvents = useMemo(() => {
-    return events.filter((event) => {
+    const filtered = events.filter((event) => {
       // Search filter
       if (searchQuery) {
         const query = searchQuery.toLowerCase();
@@ -219,6 +220,9 @@ export default function EventsPageClient({ initialEvents, familyAttractions = []
 
       return true;
     });
+
+    // Always sort with featured events first (alphabetically), then non-featured by date
+    return sortEventsWithFeatured(filtered);
   }, [events, searchQuery, selectedCategory, selectedTime]);
 
   const handleClearFilters = () => {
@@ -588,7 +592,7 @@ export default function EventsPageClient({ initialEvents, familyAttractions = []
                     className="group"
                   >
                     <Link href={`/events/${event.slug}`} className="block">
-                      <div className="relative bg-white/5 backdrop-blur-sm border border-white/10 rounded-2xl overflow-hidden hover:border-yellow-400/50 transition-all duration-300">
+                      <div className={`relative bg-white/5 backdrop-blur-sm border ${event.isFeatured ? 'border-yellow-400/50 ring-1 ring-yellow-400/20' : 'border-white/10'} rounded-2xl overflow-hidden hover:border-yellow-400/50 transition-all duration-300`}>
                         <div className="relative aspect-video overflow-hidden">
                           <Image
                             src={event.image}
@@ -601,14 +605,17 @@ export default function EventsPageClient({ initialEvents, familyAttractions = []
                           <div className={`absolute top-3 left-3 px-3 py-1 ${event.categoryColor} text-white text-xs font-bold rounded-full capitalize`}>
                             {event.category}
                           </div>
-                          <div className="absolute top-3 right-3 px-3 py-1 bg-black/70 text-white text-xs rounded-full">
-                            {event.endDate ? `${event.date} - ${event.endDate}` : event.date}
-                          </div>
+                          {/* Featured Badge - prominent at top right */}
                           {event.isFeatured && (
-                            <div className="absolute bottom-3 left-3 px-2 py-1 bg-yellow-500 text-black text-xs font-bold rounded-full">
-                              ⭐ Featured
+                            <div className="absolute top-3 right-3 px-3 py-1 bg-yellow-400 text-black text-xs font-bold rounded-full flex items-center gap-1 shadow-lg z-10">
+                              <Star className="w-3 h-3 fill-current" />
+                              Featured
                             </div>
                           )}
+                          {/* Date Badge - moved below featured if present */}
+                          <div className={`absolute ${event.isFeatured ? 'top-10' : 'top-3'} right-3 px-3 py-1 bg-black/70 text-white text-xs rounded-full`}>
+                            {event.endDate ? `${event.date} - ${event.endDate}` : event.date}
+                          </div>
                         </div>
                         <div className="p-4">
                           <h3 className="text-lg font-bold text-white group-hover:text-yellow-400 transition-colors line-clamp-2 mb-2">

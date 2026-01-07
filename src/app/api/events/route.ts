@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { supabaseAdmin } from '@/lib/supabase';
+import { sortEventsWithFeatured } from '@/lib/utils/eventSorting';
 
 export const dynamic = 'force-dynamic';
 
@@ -120,14 +121,18 @@ export async function GET(request: NextRequest) {
         price: formatPrice(event.price, event.booking_method),
         isFree: !event.price || event.price === 'Free' || event.price.toLowerCase() === 'free',
         isFeatured: event.is_featured || false,
+        is_featured: event.is_featured || false,
         viewCount: event.views || event.view_count || 0,
       };
     });
 
+    // Sort events: Featured first (alphabetically), then non-featured by date
+    const sortedEvents = sortEventsWithFeatured(transformedEvents);
+
     // Cache public event data for 5 minutes
     return NextResponse.json({
-      events: transformedEvents,
-      total: transformedEvents.length,
+      events: sortedEvents,
+      total: sortedEvents.length,
     }, {
       headers: {
         'Cache-Control': 'public, s-maxage=300, stale-while-revalidate=600',
