@@ -6,7 +6,6 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { MapPin, Clock, Star, ChevronRight, ChevronDown, Menu, X, Sparkles, Plus, Play, Building2, LogIn } from 'lucide-react';
 import GlobalSearch from '@/components/search/GlobalSearch';
 import { Movie } from '@/components/cinema/MovieCard';
-import LanguageSwitcher from '@/components/LanguageSwitcher';
 
 // Lazy load below-fold components for faster initial load
 const AdBanner = dynamic(() => import('@/components/ads/AdBanner'), {
@@ -401,7 +400,6 @@ export default function HomePageClient({ initialMovies, initialStats, initialTod
             {/* Right Side Actions */}
             <div className="hidden lg:flex items-center space-x-2">
               <GlobalSearch variant="navbar" />
-              <LanguageSwitcher variant="desktop" />
               <a
                 href="/list-event"
                 className="flex items-center space-x-1.5 bg-gradient-to-r from-yellow-400 via-orange-500 to-pink-500 text-black px-3 py-2 rounded-full text-sm font-semibold hover:shadow-lg hover:shadow-orange-500/25 hover:scale-105 transition-all duration-200"
@@ -501,9 +499,8 @@ export default function HomePageClient({ initialMovies, initialStats, initialTod
                   </div>
                 ))}
 
-                {/* Mobile Language & CTA */}
+                {/* Mobile CTA */}
                 <div className="pt-4 space-y-3">
-                  <LanguageSwitcher variant="mobile" />
                   <a
                     href="/list-event"
                     className="w-full flex items-center justify-center space-x-2 bg-gradient-to-r from-yellow-400 via-orange-500 to-pink-500 text-black px-6 py-4 rounded-xl font-semibold"

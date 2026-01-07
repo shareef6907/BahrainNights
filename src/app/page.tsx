@@ -88,12 +88,16 @@ async function getTodayEvents(): Promise<TodayEvent[]> {
   return events;
 }
 
-// Fetch now showing movies
+// Fetch now showing movies (excluding Indian language films)
 async function getMovies(): Promise<HomepageMovie[]> {
+  // Indian language codes to exclude: hi=Hindi, ml=Malayalam, ta=Tamil, te=Telugu, kn=Kannada
+  const indianLanguages = ['hi', 'ml', 'ta', 'te', 'kn'];
+
   const { data, error } = await supabaseAdmin
     .from('movies')
     .select('*')
     .eq('is_now_showing', true)
+    .not('language', 'in', `(${indianLanguages.join(',')})`)
     .order('tmdb_rating', { ascending: false })
     .limit(4);
 
