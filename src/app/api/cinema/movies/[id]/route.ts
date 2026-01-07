@@ -59,7 +59,7 @@ export async function GET(
   }
 }
 
-// PATCH /api/cinema/movies/[id] - Update a movie
+// PATCH /api/cinema/movies/[id] - Update a movie (ALL fields editable)
 export async function PATCH(
   request: NextRequest,
   { params }: { params: Promise<{ id: string }> }
@@ -69,20 +69,79 @@ export async function PATCH(
     const body = await request.json();
     const supabase = getSupabaseAdmin();
 
-    // Only allow certain fields to be updated
+    // All editable fields - admin can edit everything
     const allowedFields = [
+      'title',
+      'slug',
+      'poster_url',
+      'backdrop_url',
+      'trailer_url',
+      'trailer_key',
+      'synopsis',
+      'genre',
+      'duration_minutes',
+      'rating',
+      'tmdb_rating',
+      'release_date',
+      'director',
+      'movie_cast',
+      'language',
       'is_now_showing',
       'is_coming_soon',
       'display_order',
-      'rating',
-      'synopsis',
+      'scraped_from',
     ];
 
     const updates: Record<string, unknown> = {};
+
     for (const field of allowedFields) {
       if (body[field] !== undefined) {
-        updates[field] = body[field];
+        // Handle field name mappings
+        if (field === 'duration' && body.duration !== undefined) {
+          updates['duration_minutes'] = body.duration;
+        } else if (field === 'imdb_rating' && body.imdb_rating !== undefined) {
+          updates['tmdb_rating'] = body.imdb_rating;
+        } else if (field === 'cast' && body.cast !== undefined) {
+          updates['movie_cast'] = body.cast;
+        } else if (field === 'description' && body.description !== undefined) {
+          updates['synopsis'] = body.description;
+        } else {
+          updates[field] = body[field];
+        }
       }
+    }
+
+    // Also handle alternative field names from frontend
+    if (body.duration !== undefined && !updates['duration_minutes']) {
+      updates['duration_minutes'] = body.duration;
+    }
+    if (body.imdb_rating !== undefined && !updates['tmdb_rating']) {
+      updates['tmdb_rating'] = body.imdb_rating;
+    }
+    if (body.cast !== undefined && !updates['movie_cast']) {
+      updates['movie_cast'] = body.cast;
+    }
+    if (body.description !== undefined && !updates['synopsis']) {
+      updates['synopsis'] = body.description;
+    }
+
+    // If title changed, update slug
+    if (body.title && !body.slug) {
+      const newSlug = body.title
+        .toLowerCase()
+        .replace(/[^a-z0-9]+/g, '-')
+        .replace(/^-|-$/g, '')
+        .substring(0, 100);
+
+      // Check if slug is taken by another movie
+      const { data: existing } = await supabase
+        .from('movies')
+        .select('id, slug')
+        .eq('slug', newSlug)
+        .neq('id', id)
+        .single();
+
+      updates['slug'] = existing ? `${newSlug}-${Date.now()}` : newSlug;
     }
 
     if (Object.keys(updates).length === 0) {
@@ -108,11 +167,16 @@ export async function PATCH(
           { status: 404 }
         );
       }
+      console.error('Update movie error:', error);
       throw error;
     }
 
-    // Revalidate the public cinema page to show changes immediately
+    // Revalidate cinema pages
     revalidatePath('/cinema');
+    revalidatePath('/admin/cinema');
+    if (movie?.slug) {
+      revalidatePath(`/cinema/${movie.slug}`);
+    }
 
     return NextResponse.json({ success: true, movie });
   } catch (error) {
@@ -142,8 +206,9 @@ export async function DELETE(
       throw error;
     }
 
-    // Revalidate the public cinema page
+    // Revalidate cinema pages
     revalidatePath('/cinema');
+    revalidatePath('/admin/cinema');
 
     return NextResponse.json({ success: true });
   } catch (error) {

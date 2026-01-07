@@ -12,7 +12,9 @@
     "test:e2e": "playwright test",
     "test:e2e:ui": "playwright test --ui",
     "test:e2e:headed": "playwright test --headed",
-    "test:e2e:report": "playwright show-report"
+    "test:e2e:report": "playwright show-report",
+    "test:cinema": "playwright test tests/e2e/cinema-admin.spec.ts --project=chromium",
+    "test:cinema:headed": "playwright test tests/e2e/cinema-admin.spec.ts --project=chromium --headed"
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^0.71.2",
