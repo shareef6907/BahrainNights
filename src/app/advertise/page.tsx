@@ -66,8 +66,8 @@ const adOptions = [
 const whyAdvertise = [
   {
     icon: Globe,
-    title: 'Free Platform for Venues',
-    description: 'We\'re building Bahrain\'s largest events and venues directory - completely free for businesses to list. Your ad reaches this growing community.',
+    title: 'Growing Platform',
+    description: 'We\'re building Bahrain\'s largest events and venues directory. Your ad reaches this growing community of engaged users.',
   },
   {
     icon: Users,

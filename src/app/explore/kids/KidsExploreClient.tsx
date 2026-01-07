@@ -177,7 +177,7 @@ export default function KidsExploreClient({ initialKids }: KidsExploreClientProp
                 Have a Family-Friendly Venue?
               </h2>
               <p className="text-white/90 text-lg mb-8 max-w-xl mx-auto">
-                List your attraction, play area, or family activity for FREE on BahrainNights and reach thousands of families.
+                List your attraction, play area, or family activity on BahrainNights and reach thousands of families.
               </p>
 
               <Link

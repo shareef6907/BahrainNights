@@ -57,6 +57,7 @@ interface RegisterData {
   category: string;
   area: string;
   address: string;
+  googleMapsUrl?: string | null;
   phone: string;
   email: string;
   password: string;
@@ -80,6 +81,7 @@ export async function POST(request: NextRequest) {
       category,
       area,
       address,
+      googleMapsUrl,
       phone,
       email,
       password,
@@ -210,6 +212,7 @@ export async function POST(request: NextRequest) {
       category,
       area,
       address,
+      google_maps_url: googleMapsUrl || null,
       phone,
       email: email.toLowerCase(),
       password_hash: passwordHash, // Store hashed password for venue portal login
@@ -284,6 +287,6 @@ export async function GET() {
   return NextResponse.json({
     message: 'POST to this endpoint to register a venue',
     required_fields: ['venueName', 'crNumber', 'category', 'area', 'address', 'phone', 'email', 'password'],
-    optional_fields: ['website', 'instagram', 'description', 'logo', 'coverImage'],
+    optional_fields: ['website', 'instagram', 'description', 'googleMapsUrl', 'logo', 'coverImage'],
   });
 }

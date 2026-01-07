@@ -2,8 +2,9 @@
 
 import { useState, useRef } from 'react';
 import { motion } from 'framer-motion';
-import { Building2, MapPin, Phone, Mail, Globe, Instagram, Upload, CheckCircle, Loader2, ArrowLeft, Lock, Eye, EyeOff, X, ImageIcon } from 'lucide-react';
+import { Building2, MapPin, Phone, Mail, Globe, Instagram, Upload, CheckCircle, Loader2, ArrowLeft, Lock, Eye, EyeOff, X, ImageIcon, Map } from 'lucide-react';
 import Link from 'next/link';
+import AIWriterButton from '@/components/ai/AIWriterButton';
 
 const VENUE_CATEGORIES = [
   'Restaurant',
@@ -54,6 +55,7 @@ interface FormData {
   category: string;
   area: string;
   address: string;
+  googleMapsUrl: string;
   phone: string;
   email: string;
   password: string;
@@ -75,6 +77,7 @@ export default function RegisterVenuePage() {
     category: '',
     area: '',
     address: '',
+    googleMapsUrl: '',
     phone: '',
     email: '',
     password: '',
@@ -346,6 +349,7 @@ export default function RegisterVenuePage() {
         category: formData.category,
         area: formData.area,
         address: formData.address,
+        googleMapsUrl: formData.googleMapsUrl || null,
         phone: formData.phone,
         email: formData.email,
         password: formData.password,
@@ -433,9 +437,9 @@ export default function RegisterVenuePage() {
           animate={{ opacity: 1, y: 0 }}
           className="text-center mb-10"
         >
-          <h1 className="text-4xl font-bold text-white mb-4">Register Your Venue</h1>
+          <h1 className="text-4xl font-bold text-white mb-4">Join BahrainNights</h1>
           <p className="text-gray-400 text-lg max-w-2xl mx-auto">
-            Join BahrainNights and get free exposure to thousands of locals and visitors looking for the best places in Bahrain.
+            Showcase your venue to thousands of residents and visitors discovering Bahrain's best experiences.
           </p>
         </motion.div>
 
@@ -528,6 +532,23 @@ export default function RegisterVenuePage() {
                   className="w-full bg-gray-900/50 border border-gray-700 rounded-lg px-4 py-3 text-white placeholder-gray-500 focus:border-orange-500 focus:ring-1 focus:ring-orange-500 outline-none transition-all"
                   placeholder="Building, street, block"
                 />
+              </div>
+              <div className="md:col-span-2">
+                <label className="block text-sm text-gray-400 mb-2">Google Maps Link</label>
+                <div className="relative">
+                  <Map className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-500" />
+                  <input
+                    type="url"
+                    name="googleMapsUrl"
+                    value={formData.googleMapsUrl}
+                    onChange={handleInputChange}
+                    className="w-full bg-gray-900/50 border border-gray-700 rounded-lg pl-10 pr-4 py-3 text-white placeholder-gray-500 focus:border-orange-500 focus:ring-1 focus:ring-orange-500 outline-none transition-all"
+                    placeholder="https://maps.google.com/..."
+                  />
+                </div>
+                <p className="text-xs text-gray-500 mt-1">
+                  Paste your Google Maps link so visitors can get directions
+                </p>
               </div>
             </div>
           </div>
@@ -659,7 +680,18 @@ export default function RegisterVenuePage() {
 
           {/* Description */}
           <div className="mb-8">
-            <label className="block text-sm text-gray-400 mb-2">Description</label>
+            <div className="flex items-center justify-between mb-2">
+              <label className="block text-sm text-gray-400">Description</label>
+              <AIWriterButton
+                contentType="venue"
+                venueName={formData.venueName}
+                venueCategory={formData.category}
+                location={formData.area}
+                existingDescription={formData.description}
+                onGenerated={(description) => setFormData(prev => ({ ...prev, description }))}
+                disabled={!formData.venueName}
+              />
+            </div>
             <textarea
               name="description"
               value={formData.description}
@@ -864,8 +896,8 @@ export default function RegisterVenuePage() {
           className="mt-12 grid md:grid-cols-2 gap-6 max-w-2xl mx-auto"
         >
           {[
-            { icon: '🎯', title: 'Free Exposure', desc: 'Get your venue in front of thousands of potential customers' },
-            { icon: '📅', title: 'Event Promotion', desc: 'List your events for free and reach a wider audience' },
+            { icon: '🎯', title: 'Get Discovered', desc: 'Showcase your venue to thousands of potential customers' },
+            { icon: '📅', title: 'Event Promotion', desc: 'Promote your events and reach a wider audience' },
           ].map((benefit, i) => (
             <div key={i} className="bg-gray-800/30 rounded-xl p-6 text-center border border-gray-700/50">
               <div className="text-4xl mb-4">{benefit.icon}</div>

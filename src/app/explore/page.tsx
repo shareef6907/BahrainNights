@@ -340,7 +340,7 @@ export default function ExplorePage() {
                 Own a Business in Bahrain?
               </h2>
               <p className="text-black/80 text-lg mb-8 max-w-xl mx-auto">
-                Join BahrainNights for FREE and showcase your venue, events, and offers to thousands of visitors every month.
+                Join BahrainNights and showcase your venue, events, and offers to thousands of visitors every month.
               </p>
 
               <div className="flex flex-col sm:flex-row gap-4 justify-center">

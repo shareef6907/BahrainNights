@@ -53,8 +53,8 @@
   },
   "home": {
     "tagline": "Your Nightlife. Our Spotlight.",
-    "supportingLocal": "Supporting Local Businesses",
-    "alwaysFree": "Always Free",
+    "supportingLocal": "Showcasing Bahrain's Finest",
+    "alwaysFree": "",
     "aiPowered": "AI-Powered",
     "discover": "Discover Bahrain's",
     "bestExperiences": "Best Experiences",
@@ -67,8 +67,8 @@
   },
   "listEvent": {
     "title": "List Your Event",
-    "subtitle": "Reach thousands of people in Bahrain. Free promotion for all local businesses.",
-    "freeForAll": "100% Free for All Businesses",
+    "subtitle": "Reach thousands of people in Bahrain. All submissions reviewed by our team.",
+    "freeForAll": "Submit Your Event",
     "coverImage": "Event Cover Image",
     "coverImageHelp": "Upload an eye-catching cover image. Recommended size: 1200x630px. Max 10MB.",
     "dragDrop": "Drag & drop or click to upload",

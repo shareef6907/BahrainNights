@@ -174,7 +174,7 @@ export default function ToursExploreClient({ initialTours }: ToursExploreClientP
                 Offer Tours & Experiences?
               </h2>
               <p className="text-white/90 text-lg mb-8 max-w-xl mx-auto">
-                List your tours, experiences, and adventures for FREE on BahrainNights and reach thousands of visitors.
+                List your tours, experiences, and adventures on BahrainNights and reach thousands of visitors.
               </p>
 
               <Link

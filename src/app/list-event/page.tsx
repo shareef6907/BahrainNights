@@ -212,7 +212,7 @@ export default function ListEventPage() {
           >
             <div className="inline-flex items-center gap-2 px-4 py-2 bg-yellow-500/10 rounded-full text-yellow-400 text-sm font-medium mb-6">
               <Sparkles className="w-4 h-4" />
-              100% Free for All Businesses
+              Submit Your Event
             </div>
             <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold text-white mb-4">
               List Your{' '}
@@ -221,7 +221,7 @@ export default function ListEventPage() {
               </span>
             </h1>
             <p className="text-gray-400 text-lg md:text-xl max-w-2xl mx-auto">
-              Reach thousands of people in Bahrain. Free promotion for all local businesses.
+              Reach thousands of people in Bahrain. All submissions are reviewed by our team.
             </p>
           </motion.div>
         </div>

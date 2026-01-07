@@ -567,9 +567,7 @@ export default function HomePageClient({ initialMovies, initialStats, initialTod
           >
             <span className="text-sm text-gray-300 flex items-center gap-2">
               <span className="text-xl">🇧🇭</span>
-              Supporting Local Businesses
-              <span className="text-yellow-400">•</span>
-              Always Free
+              Showcasing Bahrain's Finest Experiences
             </span>
           </motion.div>
 

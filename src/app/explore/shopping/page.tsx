@@ -88,10 +88,10 @@ export default function ShoppingPage() {
           className="mt-16 grid grid-cols-1 md:grid-cols-3 gap-6"
         >
           <div className="bg-white/5 border border-white/10 rounded-2xl p-6 text-center">
-            <div className="text-3xl mb-3">🆓</div>
-            <h3 className="text-lg font-semibold text-white mb-2">100% Free</h3>
+            <div className="text-3xl mb-3">✨</div>
+            <h3 className="text-lg font-semibold text-white mb-2">Get Visibility</h3>
             <p className="text-gray-400 text-sm">
-              List your venue at no cost. We believe in equal visibility for all businesses.
+              List your venue and reach thousands. Equal visibility for all businesses.
             </p>
           </div>
 

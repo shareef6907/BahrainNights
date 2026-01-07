@@ -50,8 +50,8 @@ export default function TermsPage() {
               with the best venues, events, entertainment, and experiences across the Kingdom of Bahrain.
             </p>
             <p>
-              Our platform provides free listings for venues and events, helping businesses reach a wider
-              audience while offering users a comprehensive guide to what&apos;s happening in Bahrain.
+              Our platform helps businesses reach a wider audience while offering users a comprehensive
+              guide to what&apos;s happening in Bahrain.
             </p>
           </div>
         </section>
@@ -258,9 +258,9 @@ export default function TermsPage() {
           </div>
           <div className="pl-12 space-y-4 text-gray-300">
 
-            <h3 className="text-lg font-semibold text-white">5.1 Free Listings</h3>
+            <h3 className="text-lg font-semibold text-white">5.1 Venue Listings</h3>
             <p>
-              BahrainNights offers free venue listings to support local businesses in Bahrain. This includes:
+              BahrainNights provides venue listings to support local businesses in Bahrain. This includes:
             </p>
             <ul className="list-disc pl-6 space-y-2">
               <li>Venue profile with description, contact information, and location</li>

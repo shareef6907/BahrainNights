@@ -52,8 +52,8 @@ const benefits = [
   },
   {
     icon: Globe,
-    title: 'Free Listing',
-    description: 'Your profile is completely free - no subscription fees',
+    title: 'Global Reach',
+    description: 'Connect with travelers from around the world through our platform',
   },
   {
     icon: Star,
@@ -367,8 +367,8 @@ export default function BecomeAGuidePage() {
         <div className="space-y-4">
           {[
             {
-              q: 'Is it free to become a guide?',
-              a: 'Yes! Listing yourself as a guide on BahrainNights is completely free. We believe in supporting local guides and tourism.',
+              q: 'How do I become a guide?',
+              a: 'Simply fill out the application form above. We review all applications and will get back to you within 2-3 business days.',
             },
             {
               q: 'How do I get paid?',

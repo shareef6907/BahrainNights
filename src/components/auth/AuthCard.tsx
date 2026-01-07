@@ -14,7 +14,7 @@ const brandingContent = {
   login: {
     tagline: 'Your Nightlife. Our Spotlight.',
     benefits: [
-      'Post unlimited events for free',
+      'Post unlimited events',
       'Reach thousands of visitors daily',
       'Equal visibility for all venues',
       'AI-powered promotion',
@@ -23,7 +23,7 @@ const brandingContent = {
   register: {
     tagline: 'Join Bahrain\'s #1 Events Platform',
     benefits: [
-      'List your venue for FREE',
+      'Get your venue discovered',
       'Reach thousands of customers',
       'Post unlimited events',
       'Equal visibility for all',

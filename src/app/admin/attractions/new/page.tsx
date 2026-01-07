@@ -19,6 +19,7 @@ import {
 } from 'lucide-react';
 import Link from 'next/link';
 import AdminLayout from '@/components/admin/AdminLayout';
+import AIWriterButton from '@/components/ai/AIWriterButton';
 import { compressImage } from '@/lib/image-compression';
 
 const PRICE_RANGES = ['Free', 'Budget (Under 5 BD)', 'Mid-Range (5-20 BD)', 'Premium (20+ BD)'];
@@ -312,9 +313,20 @@ export default function NewAttractionPage() {
               </div>
 
               <div className="md:col-span-2">
-                <label className="block text-sm font-medium text-gray-300 mb-2">
-                  Full Description
-                </label>
+                <div className="flex items-center justify-between mb-2">
+                  <label className="block text-sm font-medium text-gray-300">
+                    Full Description
+                  </label>
+                  <AIWriterButton
+                    contentType="venue"
+                    venueName={formData.name}
+                    venueCategory={formData.category}
+                    location={formData.area}
+                    existingDescription={formData.description}
+                    onGenerated={(description) => setFormData(prev => ({ ...prev, description }))}
+                    disabled={!formData.name}
+                  />
+                </div>
                 <textarea
                   name="description"
                   value={formData.description}

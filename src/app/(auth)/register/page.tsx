@@ -5,7 +5,7 @@ import RegisterForm from '@/components/auth/RegisterForm';
 
 export const metadata: Metadata = {
   title: 'Register Your Venue | BahrainNights',
-  description: 'Join BahrainNights.com and promote your venue to thousands of visitors for free.',
+  description: 'Join BahrainNights.com and promote your venue to thousands of visitors.',
 };
 
 export default function RegisterPage() {

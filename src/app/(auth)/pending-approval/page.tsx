@@ -156,7 +156,7 @@ export default function PendingApprovalPage() {
                         <span className="w-6 h-6 rounded-full bg-yellow-400/20 flex items-center justify-center flex-shrink-0 mt-0.5">
                           <span className="text-yellow-400 text-sm font-bold">3</span>
                         </span>
-                        <span>Start posting events and promoting your venue for FREE!</span>
+                        <span>Start posting events and promoting your venue!</span>
                       </li>
                     </ul>
                   </div>

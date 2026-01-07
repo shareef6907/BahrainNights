@@ -671,7 +671,7 @@ export default function EventsPageClient({ initialEvents, familyAttractions = []
                     href="/list-event"
                     className="inline-flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-cyan-500 to-blue-500 text-white font-semibold rounded-xl hover:shadow-lg transition-all"
                   >
-                    List Your Event Free
+                    List Your Event
                   </Link>
                 </div>
               </div>
