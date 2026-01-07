@@ -31,11 +31,7 @@ export default function PlaceActionBar({
   };
 
   const handleDirections = () => {
-    // Check if iOS
-    const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent);
-    const mapsUrl = isIOS
-      ? `maps://maps.apple.com/?daddr=${latitude},${longitude}&q=${encodeURIComponent(name)}`
-      : `https://www.google.com/maps/dir/?api=1&destination=${latitude},${longitude}&destination_place_id=${encodeURIComponent(name)}`;
+    const mapsUrl = `https://www.google.com/maps/dir/?api=1&destination=${latitude},${longitude}`;
     window.open(mapsUrl, '_blank');
   };
 

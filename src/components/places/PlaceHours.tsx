@@ -255,10 +255,7 @@ export default function PlaceHours({
           {/* Get Directions Button */}
           <button
             onClick={() => {
-              const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent);
-              const mapsUrl = isIOS
-                ? `maps://maps.apple.com/?daddr=${latitude},${longitude}&q=${encodeURIComponent(venueName || '')}`
-                : `https://www.google.com/maps/dir/?api=1&destination=${latitude},${longitude}`;
+              const mapsUrl = `https://www.google.com/maps/dir/?api=1&destination=${latitude},${longitude}`;
               window.open(mapsUrl, '_blank');
             }}
             className="w-full flex items-center justify-center gap-2 px-4 py-3 bg-gradient-to-r from-blue-500 to-indigo-600 rounded-xl text-white font-semibold hover:shadow-lg hover:shadow-blue-500/25 transition-all"

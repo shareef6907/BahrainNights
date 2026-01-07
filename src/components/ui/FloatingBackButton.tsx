@@ -23,16 +23,15 @@ export default function FloatingBackButton() {
   return (
     <button
       onClick={handleBack}
-      className="fixed bottom-6 left-6 z-50 lg:hidden
-        w-14 h-14 rounded-full
-        bg-gradient-to-r from-yellow-400 via-orange-500 to-pink-500
+      className="fixed top-4 left-4 z-50 lg:hidden
+        w-10 h-10 rounded-full
+        bg-black/30 backdrop-blur-sm
         flex items-center justify-center
-        shadow-lg shadow-orange-500/30
-        hover:scale-110 active:scale-95
-        transition-transform duration-200"
+        hover:bg-black/50 active:scale-95
+        transition-all duration-200"
       aria-label="Go back"
     >
-      <ArrowLeft className="w-6 h-6 text-white" />
+      <ArrowLeft className="w-5 h-5 text-white" />
     </button>
   );
 }
