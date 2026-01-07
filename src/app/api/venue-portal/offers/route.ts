@@ -27,13 +27,32 @@ async function getVenueFromSession() {
 }
 
 function generateSlug(title: string): string {
-  return title
-    .toLowerCase()
+  const transliterations: Record<string, string> = {
+    'à': 'a', 'á': 'a', 'â': 'a', 'ã': 'a', 'ä': 'a', 'å': 'a', 'æ': 'ae',
+    'ç': 'c', 'è': 'e', 'é': 'e', 'ê': 'e', 'ë': 'e',
+    'ì': 'i', 'í': 'i', 'î': 'i', 'ï': 'i',
+    'ñ': 'n', 'ò': 'o', 'ó': 'o', 'ô': 'o', 'õ': 'o', 'ö': 'o', 'ø': 'o',
+    'ù': 'u', 'ú': 'u', 'û': 'u', 'ü': 'u', 'ý': 'y', 'ÿ': 'y',
+    'ß': 'ss', 'œ': 'oe',
+  };
+
+  let slug = title.toLowerCase();
+  for (const [char, replacement] of Object.entries(transliterations)) {
+    slug = slug.replace(new RegExp(char, 'g'), replacement);
+  }
+
+  slug = slug
     .replace(/[^a-z0-9\s-]/g, '')
     .replace(/\s+/g, '-')
     .replace(/-+/g, '-')
     .trim()
     .substring(0, 100);
+
+  if (!slug) {
+    slug = 'offer-' + Date.now().toString(36);
+  }
+
+  return slug;
 }
 
 export async function GET() {
