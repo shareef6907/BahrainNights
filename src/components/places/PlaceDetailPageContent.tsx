@@ -131,7 +131,9 @@ export default function PlaceDetailPageContent({ venue, similarVenues, events = 
     const closeTime = parseInt(hours.close.replace(':', ''));
 
     const formatTime = (time: string) => {
+      if (!time || !time.includes(':')) return 'N/A';
       const [h, m] = time.split(':').map(Number);
+      if (isNaN(h) || isNaN(m)) return 'N/A';
       const period = h >= 12 ? 'PM' : 'AM';
       const displayHours = h % 12 || 12;
       return `${displayHours}:${m.toString().padStart(2, '0')} ${period}`;

@@ -48,11 +48,14 @@ export default function PlaceHours({
 
   const formatHours = (hours: { open: string; close: string } | 'closed' | undefined) => {
     if (!hours || hours === 'closed') return 'Closed';
+    if (!hours.open || !hours.close) return 'Hours not set';
     return `${formatTime(hours.open)} - ${formatTime(hours.close)}`;
   };
 
   const formatTime = (time: string) => {
+    if (!time || !time.includes(':')) return 'N/A';
     const [hours, minutes] = time.split(':').map(Number);
+    if (isNaN(hours) || isNaN(minutes)) return 'N/A';
     const period = hours >= 12 ? 'PM' : 'AM';
     const displayHours = hours % 12 || 12;
     return `${displayHours}:${minutes.toString().padStart(2, '0')} ${period}`;
@@ -62,10 +65,13 @@ export default function PlaceHours({
     const now = new Date();
     const hours = openingHours[today];
     if (!hours || hours === 'closed') return false;
+    if (!hours.open || !hours.close) return false;
 
     const currentTime = now.getHours() * 100 + now.getMinutes();
     const openTime = parseInt(hours.open.replace(':', ''));
     let closeTime = parseInt(hours.close.replace(':', ''));
+
+    if (isNaN(openTime) || isNaN(closeTime)) return false;
 
     if (closeTime < openTime) {
       return currentTime >= openTime || currentTime <= closeTime;
@@ -94,7 +100,7 @@ export default function PlaceHours({
         <div className={`flex items-center gap-2 mb-4 pb-4 border-b border-white/10 ${open ? 'text-green-400' : 'text-red-400'}`}>
           <div className={`w-2.5 h-2.5 rounded-full ${open ? 'bg-green-400 animate-pulse' : 'bg-red-400'}`} />
           <span className="font-semibold">{open ? 'Open Now' : 'Closed'}</span>
-          {todayHours && todayHours !== 'closed' && (
+          {todayHours && todayHours !== 'closed' && todayHours.open && todayHours.close && (
             <span className="text-gray-400">• {open ? `Closes at ${formatTime(todayHours.close)}` : `Opens at ${formatTime(todayHours.open)}`}</span>
           )}
         </div>
