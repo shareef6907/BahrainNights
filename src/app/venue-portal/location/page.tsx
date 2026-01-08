@@ -10,10 +10,20 @@ import {
   AlertCircle,
   ExternalLink,
   Link as LinkIcon,
+  Navigation,
 } from 'lucide-react';
+
+interface VenueLocation {
+  latitude: number | null;
+  longitude: number | null;
+  address: string | null;
+  area: string | null;
+  google_maps_url: string | null;
+}
 
 export default function VenueLocationPage() {
   const [googleMapsUrl, setGoogleMapsUrl] = useState<string>('');
+  const [venueLocation, setVenueLocation] = useState<VenueLocation | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [isSaving, setIsSaving] = useState(false);
   const [message, setMessage] = useState<{ type: 'success' | 'error'; text: string } | null>(null);
@@ -30,6 +40,13 @@ export default function VenueLocationPage() {
         if (data.venue.google_maps_url) {
           setGoogleMapsUrl(data.venue.google_maps_url);
         }
+        setVenueLocation({
+          latitude: data.venue.latitude,
+          longitude: data.venue.longitude,
+          address: data.venue.address,
+          area: data.venue.area,
+          google_maps_url: data.venue.google_maps_url,
+        });
       }
     } catch (error) {
       console.error('Failed to load location:', error);
@@ -201,11 +218,105 @@ export default function VenueLocationPage() {
         </button>
       </motion.form>
 
+      {/* Map Preview Section */}
+      {venueLocation && (venueLocation.latitude && venueLocation.longitude) && (
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.1 }}
+          className="bg-white/5 border border-white/10 rounded-2xl p-6"
+        >
+          <h3 className="text-white font-semibold mb-4 flex items-center gap-2">
+            <MapPin className="w-5 h-5 text-yellow-400" />
+            Your Location on Map
+          </h3>
+
+          {/* Map Embed */}
+          <div className="relative h-48 bg-slate-800 rounded-xl overflow-hidden mb-4">
+            <iframe
+              src={`https://www.openstreetmap.org/export/embed.html?bbox=${venueLocation.longitude - 0.005},${venueLocation.latitude - 0.005},${venueLocation.longitude + 0.005},${venueLocation.latitude + 0.005}&layer=mapnik&marker=${venueLocation.latitude},${venueLocation.longitude}`}
+              className="w-full h-full border-0"
+              style={{ filter: 'invert(100%) hue-rotate(180deg) brightness(95%) contrast(90%)' }}
+              title="Venue location map"
+            />
+
+            {/* Map Overlay */}
+            <button
+              onClick={() => {
+                if (venueLocation.google_maps_url) {
+                  window.open(venueLocation.google_maps_url, '_blank');
+                } else {
+                  window.open(`https://www.google.com/maps/search/?api=1&query=${venueLocation.latitude},${venueLocation.longitude}`, '_blank');
+                }
+              }}
+              className="absolute inset-0 bg-transparent hover:bg-white/5 transition-colors flex items-center justify-center opacity-0 hover:opacity-100"
+              aria-label="Open in Google Maps"
+            >
+              <div className="px-4 py-2 bg-black/80 backdrop-blur-sm rounded-xl text-white text-sm font-medium flex items-center gap-2">
+                <ExternalLink className="w-4 h-4" />
+                Open in Google Maps
+              </div>
+            </button>
+          </div>
+
+          {/* Address */}
+          {venueLocation.address && (
+            <div className="flex items-start gap-3 mb-4">
+              <div className="p-2 bg-red-500/10 rounded-lg">
+                <MapPin className="w-4 h-4 text-red-400" />
+              </div>
+              <div>
+                <p className="text-gray-300 text-sm">{venueLocation.address}</p>
+                {venueLocation.area && <p className="text-gray-500 text-xs mt-0.5">{venueLocation.area}, Bahrain</p>}
+              </div>
+            </div>
+          )}
+
+          {/* Get Directions Button */}
+          <button
+            onClick={() => {
+              if (venueLocation.google_maps_url) {
+                window.open(venueLocation.google_maps_url, '_blank');
+              } else if (venueLocation.latitude && venueLocation.longitude) {
+                const mapsUrl = `https://www.google.com/maps/dir/?api=1&destination=${venueLocation.latitude},${venueLocation.longitude}`;
+                window.open(mapsUrl, '_blank');
+              }
+            }}
+            className="w-full flex items-center justify-center gap-2 px-4 py-3 bg-gradient-to-r from-blue-500 to-indigo-600 rounded-xl text-white font-semibold hover:shadow-lg hover:shadow-blue-500/25 transition-all"
+          >
+            <Navigation className="w-5 h-5" />
+            <span>Get Directions</span>
+          </button>
+        </motion.div>
+      )}
+
+      {/* No Location Message */}
+      {venueLocation && !venueLocation.latitude && !venueLocation.longitude && (
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.1 }}
+          className="bg-orange-500/10 border border-orange-500/20 rounded-2xl p-6"
+        >
+          <div className="flex items-start gap-3">
+            <div className="p-2 bg-orange-500/20 rounded-lg">
+              <AlertCircle className="w-5 h-5 text-orange-400" />
+            </div>
+            <div>
+              <h3 className="text-white font-semibold mb-1">Map Preview Not Available</h3>
+              <p className="text-gray-400 text-sm">
+                Your venue coordinates haven&apos;t been set yet. Add your Google Maps link above and our team will update your map coordinates.
+              </p>
+            </div>
+          </div>
+        </motion.div>
+      )}
+
       {/* How to Get Link */}
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
-        transition={{ delay: 0.1 }}
+        transition={{ delay: 0.2 }}
         className="bg-white/5 border border-white/10 rounded-2xl p-6"
       >
         <h3 className="text-white font-semibold mb-4">How to get your Google Maps link:</h3>

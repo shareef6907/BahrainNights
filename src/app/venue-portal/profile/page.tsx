@@ -18,6 +18,7 @@ import {
   Info,
   Camera,
   Upload,
+  ExternalLink,
 } from 'lucide-react';
 import Link from 'next/link';
 import AIWriterButton from '@/components/ai/AIWriterButton';
@@ -40,6 +41,9 @@ interface VenueProfile {
   features?: string[];
   logo_url?: string;
   cover_image_url?: string;
+  latitude?: number;
+  longitude?: number;
+  google_maps_url?: string;
 }
 
 interface PendingChangeRequest {
@@ -528,6 +532,117 @@ export default function VenueProfilePage() {
           Photo changes require admin approval before going live.
         </p>
       </motion.div>
+
+      {/* Map Preview Section */}
+      {venue && venue.latitude && venue.longitude && (
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.08 }}
+          className="bg-white/5 border border-white/10 rounded-2xl p-6"
+        >
+          <div className="flex items-center justify-between mb-4">
+            <h2 className="text-lg font-semibold text-white flex items-center gap-2">
+              <MapPin className="w-5 h-5 text-yellow-400" />
+              Your Location
+            </h2>
+            <Link
+              href="/venue-portal/location"
+              className="text-sm text-yellow-400 hover:text-yellow-300 flex items-center gap-1"
+            >
+              Edit
+              <ChevronRight className="w-4 h-4" />
+            </Link>
+          </div>
+
+          {/* Map Embed */}
+          <div className="relative h-48 bg-slate-800 rounded-xl overflow-hidden mb-4">
+            <iframe
+              src={`https://www.openstreetmap.org/export/embed.html?bbox=${venue.longitude - 0.005},${venue.latitude - 0.005},${venue.longitude + 0.005},${venue.latitude + 0.005}&layer=mapnik&marker=${venue.latitude},${venue.longitude}`}
+              className="w-full h-full border-0"
+              style={{ filter: 'invert(100%) hue-rotate(180deg) brightness(95%) contrast(90%)' }}
+              title="Venue location map"
+            />
+
+            {/* Map Overlay */}
+            <button
+              onClick={() => {
+                if (venue.google_maps_url) {
+                  window.open(venue.google_maps_url, '_blank');
+                } else {
+                  window.open(`https://www.google.com/maps/search/?api=1&query=${venue.latitude},${venue.longitude}`, '_blank');
+                }
+              }}
+              className="absolute inset-0 bg-transparent hover:bg-white/5 transition-colors flex items-center justify-center opacity-0 hover:opacity-100"
+              aria-label="Open in Google Maps"
+            >
+              <div className="px-4 py-2 bg-black/80 backdrop-blur-sm rounded-xl text-white text-sm font-medium flex items-center gap-2">
+                <ExternalLink className="w-4 h-4" />
+                Open in Google Maps
+              </div>
+            </button>
+          </div>
+
+          {/* Address */}
+          {venue.address && (
+            <div className="flex items-start gap-3 mb-4">
+              <div className="p-2 bg-red-500/10 rounded-lg">
+                <MapPin className="w-4 h-4 text-red-400" />
+              </div>
+              <div>
+                <p className="text-gray-300 text-sm">{venue.address}</p>
+                {venue.area && <p className="text-gray-500 text-xs mt-0.5">{venue.area}, Bahrain</p>}
+              </div>
+            </div>
+          )}
+
+          {/* Get Directions Button */}
+          <button
+            onClick={() => {
+              if (venue.google_maps_url) {
+                window.open(venue.google_maps_url, '_blank');
+              } else if (venue.latitude && venue.longitude) {
+                const mapsUrl = `https://www.google.com/maps/dir/?api=1&destination=${venue.latitude},${venue.longitude}`;
+                window.open(mapsUrl, '_blank');
+              }
+            }}
+            className="w-full flex items-center justify-center gap-2 px-4 py-3 bg-gradient-to-r from-blue-500 to-indigo-600 rounded-xl text-white font-semibold hover:shadow-lg hover:shadow-blue-500/25 transition-all"
+          >
+            <Navigation className="w-5 h-5" />
+            <span>Get Directions</span>
+          </button>
+        </motion.div>
+      )}
+
+      {/* No Location Set - Prompt to add */}
+      {venue && !venue.latitude && !venue.longitude && (
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.08 }}
+          className="bg-orange-500/10 border border-orange-500/20 rounded-2xl p-6"
+        >
+          <div className="flex items-start gap-4">
+            <div className="p-3 bg-orange-500/20 rounded-xl">
+              <MapPin className="w-6 h-6 text-orange-400" />
+            </div>
+            <div className="flex-1">
+              <h3 className="text-white font-semibold mb-1">Add Your Location</h3>
+              <p className="text-gray-400 text-sm mb-4">
+                Help customers find your venue by adding your Google Maps location. This will enable the &quot;Get Directions&quot; feature on your venue page.
+              </p>
+              <Link
+                href="/venue-portal/location"
+                className="inline-flex items-center gap-2 px-4 py-2 bg-orange-500/20 text-orange-400 rounded-xl hover:bg-orange-500/30 transition-colors font-medium text-sm"
+              >
+                <Navigation className="w-4 h-4" />
+                Set Location
+                <ChevronRight className="w-4 h-4" />
+              </Link>
+            </div>
+          </div>
+        </motion.div>
+      )}
 
       {/* Profile Form */}
       <motion.form
