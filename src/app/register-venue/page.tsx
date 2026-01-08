@@ -18,6 +18,7 @@ const VENUE_CATEGORIES = [
   'Fitness Center',
   'Entertainment Venue',
   'Shopping Mall',
+  'Mall Outlet',
   'Cultural Center',
   'Other'
 ];
