@@ -30,7 +30,7 @@ interface AuthContextType {
   user: User | null;
   isLoading: boolean;
   isAuthenticated: boolean;
-  login: (email: string, password: string, rememberMe?: boolean) => Promise<{ success: boolean; error?: string }>;
+  login: (email: string, password: string, rememberMe?: boolean) => Promise<{ success: boolean; error?: string; user?: User }>;
   logout: () => Promise<void>;
   register: (data: RegisterData) => Promise<{ success: boolean; error?: string }>;
   refreshUser: () => Promise<void>;
@@ -87,7 +87,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     email: string,
     password: string,
     rememberMe = false
-  ): Promise<{ success: boolean; error?: string }> => {
+  ): Promise<{ success: boolean; error?: string; user?: User }> => {
     try {
       const response = await fetch('/api/auth/login', {
         method: 'POST',
@@ -102,7 +102,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
       if (response.ok) {
         setUser(data.user);
-        return { success: true };
+        return { success: true, user: data.user };
       } else {
         return { success: false, error: data.error || 'Login failed' };
       }

@@ -59,16 +59,32 @@ export default function LoginForm() {
     setIsLoading(true);
 
     try {
-      const { success, error } = await login(
+      const { success, error, user } = await login(
         formData.email,
         formData.password,
         formData.rememberMe
       );
 
-      if (success) {
-        // Redirect to original destination or venue portal
-        const redirect = searchParams?.get('redirect') || '/venue-portal/dashboard';
-        router.push(redirect);
+      if (success && user) {
+        // Determine redirect based on user role
+        const customRedirect = searchParams?.get('redirect');
+        let redirectUrl: string;
+
+        if (customRedirect) {
+          // Use custom redirect if provided
+          redirectUrl = customRedirect;
+        } else if (user.role === 'admin') {
+          // Admin users go to admin panel
+          redirectUrl = '/admin';
+        } else if (user.venue?.status === 'pending') {
+          // Pending venues go to pending approval page
+          redirectUrl = '/pending-approval';
+        } else {
+          // Default for venue owners
+          redirectUrl = '/venue-portal/dashboard';
+        }
+
+        router.push(redirectUrl);
       } else {
         setGeneralError(error || 'Invalid email or password');
       }
