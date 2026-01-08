@@ -73,18 +73,22 @@ function convertToMovieFormat(dbMovie: DBMovie): Movie {
   };
 }
 
-// Fetch all movies on the server
+// Fetch all movies on the server (excluding Mukta-only movies)
 async function getMovies() {
   const [nowShowingRes, comingSoonRes] = await Promise.all([
     supabaseAdmin
       .from('movies')
       .select('*')
       .eq('is_now_showing', true)
+      // Exclude movies that are ONLY from Mukta - only show VOX, Cineco, Seef, or manual entries
+      .or('scraped_from.is.null,scraped_from.cs.{vox},scraped_from.cs.{cineco},scraped_from.cs.{seef}')
       .order('tmdb_rating', { ascending: false }),
     supabaseAdmin
       .from('movies')
       .select('*')
       .eq('is_coming_soon', true)
+      // Exclude movies that are ONLY from Mukta - only show VOX, Cineco, Seef, or manual entries
+      .or('scraped_from.is.null,scraped_from.cs.{vox},scraped_from.cs.{cineco},scraped_from.cs.{seef}')
       .order('release_date', { ascending: true })
   ]);
 

@@ -11,7 +11,6 @@ import {
   Star,
   ExternalLink,
   Eye,
-  EyeOff,
   Edit2,
   MoreVertical,
   CheckCircle,
@@ -27,7 +26,6 @@ import {
   X,
   GripVertical,
   Image as ImageIcon,
-  RefreshCw,
   FileText,
 } from 'lucide-react';
 
@@ -83,20 +81,7 @@ export default function AdminCinemaPage() {
   const [editingMovie, setEditingMovie] = useState<Movie | null>(null);
   const [showAddModal, setShowAddModal] = useState(false);
   const [dragging, setDragging] = useState<string | null>(null);
-  const [syncing, setSyncing] = useState(false);
-  const [lastSyncResult, setLastSyncResult] = useState<{
-    success: boolean;
-    message: string;
-    data?: {
-      moviesFound: number;
-      moviesUpdated: number;
-      comingSoonCount: number;
-      comingSoonTitles: string[];
-      nowShowingCount: number;
-      nowShowingTitles: string[];
-    };
-    errors?: string[];
-  } | null>(null);
+  // Mukta sync removed - Mukta A2 Cinema no longer on platform
 
   // Fetch movies
   const fetchMovies = useCallback(async () => {
@@ -201,31 +186,6 @@ export default function AdminCinemaPage() {
     setDragging(null);
   };
 
-  // Sync Mukta A2 Cinema
-  const syncMuktaCinema = async () => {
-    setSyncing(true);
-    setLastSyncResult(null);
-
-    try {
-      const res = await fetch('/api/admin/cinema/sync-mukta', {
-        method: 'POST',
-      });
-      const data = await res.json();
-      setLastSyncResult(data);
-
-      if (data.success) {
-        fetchMovies(); // Refresh the list
-      }
-    } catch (error) {
-      setLastSyncResult({
-        success: false,
-        message: 'Failed to sync Mukta Cinema',
-        errors: [error instanceof Error ? error.message : 'Unknown error'],
-      });
-    } finally {
-      setSyncing(false);
-    }
-  };
 
   // Filter movies
   const filteredMovies = movies.filter(movie => {
@@ -270,14 +230,6 @@ export default function AdminCinemaPage() {
         </div>
 
         <div className="flex flex-wrap gap-3">
-          <button
-            onClick={syncMuktaCinema}
-            disabled={syncing}
-            className="flex items-center gap-2 px-4 py-2.5 bg-blue-600 text-white rounded-xl hover:bg-blue-500 disabled:opacity-50 transition-colors"
-          >
-            <RefreshCw className={`w-4 h-4 ${syncing ? 'animate-spin' : ''}`} />
-            {syncing ? 'Syncing...' : 'Sync Mukta A2'}
-          </button>
           <Link
             href="/admin/cinema/logs"
             className="flex items-center gap-2 px-4 py-2.5 bg-white/5 border border-white/10 text-gray-300 rounded-xl hover:bg-white/10 transition-colors"
@@ -320,58 +272,6 @@ export default function AdminCinemaPage() {
         </div>
       </motion.div>
 
-      {/* Sync Result */}
-      {lastSyncResult && (
-        <motion.div
-          initial={{ opacity: 0, y: -10 }}
-          animate={{ opacity: 1, y: 0 }}
-          className={`p-4 rounded-xl flex items-start justify-between gap-3 ${
-            lastSyncResult.success
-              ? 'bg-green-500/10 border border-green-500/20'
-              : 'bg-red-500/10 border border-red-500/20'
-          }`}
-        >
-          <div className="flex items-start gap-3">
-            {lastSyncResult.success ? (
-              <CheckCircle className="w-5 h-5 text-green-400 flex-shrink-0 mt-0.5" />
-            ) : (
-              <XCircle className="w-5 h-5 text-red-400 flex-shrink-0 mt-0.5" />
-            )}
-            <div>
-              <p className={`font-medium ${lastSyncResult.success ? 'text-green-400' : 'text-red-400'}`}>
-                {lastSyncResult.message}
-              </p>
-              {lastSyncResult.data && (
-                <div className="text-sm text-gray-400 mt-1">
-                  Found {lastSyncResult.data.moviesFound} movies
-                  {lastSyncResult.data.moviesUpdated > 0 && (
-                    <span className="text-green-400"> • Updated {lastSyncResult.data.moviesUpdated}</span>
-                  )}
-                  {lastSyncResult.data.comingSoonCount > 0 && (
-                    <span className="text-amber-400"> • {lastSyncResult.data.comingSoonCount} Coming Soon</span>
-                  )}
-                </div>
-              )}
-              {lastSyncResult.data?.comingSoonTitles && lastSyncResult.data.comingSoonTitles.length > 0 && (
-                <p className="text-sm text-gray-500 mt-1">
-                  Coming Soon: {lastSyncResult.data.comingSoonTitles.join(', ')}
-                </p>
-              )}
-              {lastSyncResult.errors && lastSyncResult.errors.length > 0 && (
-                <p className="text-sm text-red-400 mt-1">
-                  {lastSyncResult.errors.join(', ')}
-                </p>
-              )}
-            </div>
-          </div>
-          <button
-            onClick={() => setLastSyncResult(null)}
-            className="text-gray-500 hover:text-gray-300 p-1"
-          >
-            <X className="w-4 h-4" />
-          </button>
-        </motion.div>
-      )}
 
       {/* Stats Cards */}
       <motion.div

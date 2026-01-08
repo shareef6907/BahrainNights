@@ -88,7 +88,7 @@ async function getTodayEvents(): Promise<TodayEvent[]> {
   return events;
 }
 
-// Fetch now showing movies (excluding Indian language films)
+// Fetch now showing movies (excluding Indian language films and Mukta-only movies)
 async function getMovies(): Promise<HomepageMovie[]> {
   // Indian language codes to exclude: hi=Hindi, ml=Malayalam, ta=Tamil, te=Telugu, kn=Kannada
   const indianLanguages = ['hi', 'ml', 'ta', 'te', 'kn'];
@@ -98,6 +98,8 @@ async function getMovies(): Promise<HomepageMovie[]> {
     .select('*')
     .eq('is_now_showing', true)
     .not('language', 'in', `(${indianLanguages.join(',')})`)
+    // Exclude movies that are ONLY from Mukta - only show VOX, Cineco, Seef, or manual entries
+    .or('scraped_from.is.null,scraped_from.cs.{vox},scraped_from.cs.{cineco},scraped_from.cs.{seef}')
     .order('tmdb_rating', { ascending: false })
     .limit(4);
 
