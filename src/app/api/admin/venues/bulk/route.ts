@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { verifyToken } from '@/lib/auth';
 import { approveVenue, rejectVenue, deleteVenue } from '@/lib/db/venues';
+import { sendVenueApprovalEmail, sendVenueRejectionEmail } from '@/lib/email';
 import { cookies } from 'next/headers';
 
 // Bulk actions for venues
@@ -32,6 +33,8 @@ export async function POST(request: NextRequest) {
     const results = {
       success: 0,
       failed: 0,
+      emailsSent: 0,
+      emailsFailed: 0,
       errors: [] as string[],
     };
 
@@ -39,8 +42,27 @@ export async function POST(request: NextRequest) {
       try {
         switch (action) {
           case 'approve':
-            await approveVenue(id);
+            const approvedVenue = await approveVenue(id);
             results.success++;
+            // Send approval email
+            if (approvedVenue && approvedVenue.email) {
+              try {
+                const emailResult = await sendVenueApprovalEmail(
+                  approvedVenue.email,
+                  approvedVenue.name,
+                  approvedVenue.slug
+                );
+                if (emailResult.success) {
+                  results.emailsSent++;
+                } else {
+                  results.emailsFailed++;
+                  console.error(`Failed to send approval email to ${approvedVenue.email}:`, emailResult.error);
+                }
+              } catch (emailError) {
+                results.emailsFailed++;
+                console.error(`Error sending approval email to ${approvedVenue.email}:`, emailError);
+              }
+            }
             break;
           case 'reject':
             if (!reason) {
@@ -48,8 +70,27 @@ export async function POST(request: NextRequest) {
               results.errors.push(`Venue ${id}: Rejection reason required`);
               continue;
             }
-            await rejectVenue(id, reason);
+            const rejectedVenue = await rejectVenue(id, reason);
             results.success++;
+            // Send rejection email
+            if (rejectedVenue && rejectedVenue.email) {
+              try {
+                const emailResult = await sendVenueRejectionEmail(
+                  rejectedVenue.email,
+                  rejectedVenue.name,
+                  reason
+                );
+                if (emailResult.success) {
+                  results.emailsSent++;
+                } else {
+                  results.emailsFailed++;
+                  console.error(`Failed to send rejection email to ${rejectedVenue.email}:`, emailResult.error);
+                }
+              } catch (emailError) {
+                results.emailsFailed++;
+                console.error(`Error sending rejection email to ${rejectedVenue.email}:`, emailError);
+              }
+            }
             break;
           case 'delete':
             await deleteVenue(id);
