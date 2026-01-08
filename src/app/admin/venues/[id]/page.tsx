@@ -137,6 +137,7 @@ export default function AdminVenueEditPage({ params }: { params: Promise<{ id: s
   const [uploadingLogo, setUploadingLogo] = useState(false);
   const [uploadingCover, setUploadingCover] = useState(false);
   const [deletingGalleryPhoto, setDeletingGalleryPhoto] = useState<string | null>(null);
+  const [uploadingGallery, setUploadingGallery] = useState(false);
   const [toast, setToast] = useState<{ message: string; type: 'success' | 'error' } | null>(null);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [showRejectModal, setShowRejectModal] = useState(false);
@@ -474,6 +475,60 @@ export default function AdminVenueEditPage({ params }: { params: Promise<{ id: s
       setToast({ message: error instanceof Error ? error.message : 'Failed to delete photo', type: 'error' });
     } finally {
       setDeletingGalleryPhoto(null);
+    }
+  };
+
+  const handleGalleryUpload = async (file: File) => {
+    // Check gallery limit
+    const currentGalleryCount = venue?.gallery?.length || 0;
+    if (currentGalleryCount >= 12) {
+      setToast({ message: 'Maximum 12 gallery images allowed', type: 'error' });
+      return;
+    }
+
+    setUploadingGallery(true);
+    try {
+      // Step 1: Upload to S3 with watermark via the existing upload API
+      const uploadFormData = new FormData();
+      uploadFormData.append('file', file);
+      uploadFormData.append('entityType', 'venue');
+      uploadFormData.append('imageType', 'gallery');
+      uploadFormData.append('venueSlug', venue?.slug || resolvedParams.id);
+
+      const uploadResponse = await fetch('/api/upload', {
+        method: 'POST',
+        body: uploadFormData,
+      });
+
+      if (!uploadResponse.ok) {
+        const errorData = await uploadResponse.json().catch(() => ({}));
+        throw new Error(errorData.error || 'Failed to upload image');
+      }
+
+      const uploadData = await uploadResponse.json();
+      const imageUrl = uploadData.url;
+
+      // Step 2: Add the uploaded photo URL to venue's gallery array
+      const galleryResponse = await fetch(`/api/admin/venues/${resolvedParams.id}/gallery`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ photoUrl: imageUrl }),
+      });
+
+      if (!galleryResponse.ok) {
+        const errorData = await galleryResponse.json().catch(() => ({}));
+        throw new Error(errorData.error || 'Failed to add photo to gallery');
+      }
+
+      const galleryData = await galleryResponse.json();
+      // Update local venue state with new gallery
+      setVenue((prev) => prev ? { ...prev, gallery: galleryData.venue.gallery } : null);
+      setToast({ message: 'Photo uploaded successfully', type: 'success' });
+    } catch (error) {
+      console.error('Error uploading gallery photo:', error);
+      setToast({ message: error instanceof Error ? error.message : 'Failed to upload photo', type: 'error' });
+    } finally {
+      setUploadingGallery(false);
     }
   };
 
@@ -1013,11 +1068,51 @@ export default function AdminVenueEditPage({ params }: { params: Promise<{ id: s
           </div>
 
           {/* Gallery Management */}
-          {venue.gallery && venue.gallery.length > 0 && (
-            <div className="bg-[#1A1A2E] rounded-xl p-6 border border-white/10">
-              <h3 className="text-lg font-semibold text-white mb-4">
-                Gallery ({venue.gallery.length} photos)
-              </h3>
+          <div className="bg-[#1A1A2E] rounded-xl p-6 border border-white/10">
+            <h3 className="text-lg font-semibold text-white mb-4">
+              Gallery ({venue.gallery?.length || 0}/12 photos)
+            </h3>
+
+            {/* Upload Button */}
+            <label className={`flex flex-col items-center justify-center aspect-video border-2 border-dashed rounded-xl mb-4 transition-colors ${
+              (venue.gallery?.length || 0) >= 12
+                ? 'border-gray-600 cursor-not-allowed opacity-50'
+                : 'border-white/20 cursor-pointer hover:border-cyan-500/50'
+            }`}>
+              {uploadingGallery ? (
+                <div className="flex flex-col items-center">
+                  <Loader2 className="w-8 h-8 animate-spin text-cyan-500 mb-2" />
+                  <span className="text-gray-400 text-sm">Uploading...</span>
+                </div>
+              ) : (venue.gallery?.length || 0) >= 12 ? (
+                <>
+                  <Upload className="w-8 h-8 text-gray-500 mb-2" />
+                  <span className="text-gray-500 text-sm">Gallery Full</span>
+                </>
+              ) : (
+                <>
+                  <Upload className="w-8 h-8 text-gray-400 mb-2" />
+                  <span className="text-gray-400 text-sm">Add Gallery Photo</span>
+                  <span className="text-gray-500 text-xs mt-1">Max 10MB per image</span>
+                </>
+              )}
+              <input
+                type="file"
+                accept="image/*"
+                className="hidden"
+                disabled={uploadingGallery || (venue.gallery?.length || 0) >= 12}
+                onChange={(e) => {
+                  const file = e.target.files?.[0];
+                  if (file) {
+                    handleGalleryUpload(file);
+                    e.target.value = ''; // Reset input
+                  }
+                }}
+              />
+            </label>
+
+            {/* Existing Gallery Photos */}
+            {venue.gallery && venue.gallery.length > 0 && (
               <div className="grid grid-cols-2 gap-3">
                 {venue.gallery.map((photoUrl, index) => (
                   <div
@@ -1048,8 +1143,8 @@ export default function AdminVenueEditPage({ params }: { params: Promise<{ id: s
                   </div>
                 ))}
               </div>
-            </div>
-          )}
+            )}
+          </div>
 
           {/* Stats */}
           <div className="bg-[#1A1A2E] rounded-xl p-6 border border-white/10">
