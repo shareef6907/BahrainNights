@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useMemo } from 'react';
 import { motion } from 'framer-motion';
 import {
   MapPin,
@@ -21,12 +21,96 @@ interface VenueLocation {
   google_maps_url: string | null;
 }
 
+/**
+ * Extract coordinates from Google Maps URL (client-side version)
+ */
+function extractCoordinatesFromUrl(url: string): { latitude: number; longitude: number } | null {
+  if (!url) return null;
+
+  try {
+    // Pattern 1: /@lat,lng,zoom format
+    const atPattern = /@(-?\d+\.?\d*),(-?\d+\.?\d*)/;
+    const atMatch = url.match(atPattern);
+    if (atMatch) {
+      const lat = parseFloat(atMatch[1]);
+      const lng = parseFloat(atMatch[2]);
+      if (lat >= -90 && lat <= 90 && lng >= -180 && lng <= 180) {
+        return { latitude: lat, longitude: lng };
+      }
+    }
+
+    // Pattern 2: ?q=lat,lng format
+    const qPattern = /[?&]q=(-?\d+\.?\d*),(-?\d+\.?\d*)/;
+    const qMatch = url.match(qPattern);
+    if (qMatch) {
+      const lat = parseFloat(qMatch[1]);
+      const lng = parseFloat(qMatch[2]);
+      if (lat >= -90 && lat <= 90 && lng >= -180 && lng <= 180) {
+        return { latitude: lat, longitude: lng };
+      }
+    }
+
+    // Pattern 3: query=lat,lng format
+    const queryPattern = /[?&]query=(-?\d+\.?\d*),(-?\d+\.?\d*)/;
+    const queryMatch = url.match(queryPattern);
+    if (queryMatch) {
+      const lat = parseFloat(queryMatch[1]);
+      const lng = parseFloat(queryMatch[2]);
+      if (lat >= -90 && lat <= 90 && lng >= -180 && lng <= 180) {
+        return { latitude: lat, longitude: lng };
+      }
+    }
+
+    // Pattern 4: ll=lat,lng format
+    const llPattern = /[?&]ll=(-?\d+\.?\d*),(-?\d+\.?\d*)/;
+    const llMatch = url.match(llPattern);
+    if (llMatch) {
+      const lat = parseFloat(llMatch[1]);
+      const lng = parseFloat(llMatch[2]);
+      if (lat >= -90 && lat <= 90 && lng >= -180 && lng <= 180) {
+        return { latitude: lat, longitude: lng };
+      }
+    }
+
+    // Pattern 5: destination=lat,lng format
+    const destPattern = /[?&]destination=(-?\d+\.?\d*),(-?\d+\.?\d*)/;
+    const destMatch = url.match(destPattern);
+    if (destMatch) {
+      const lat = parseFloat(destMatch[1]);
+      const lng = parseFloat(destMatch[2]);
+      if (lat >= -90 && lat <= 90 && lng >= -180 && lng <= 180) {
+        return { latitude: lat, longitude: lng };
+      }
+    }
+
+    return null;
+  } catch {
+    return null;
+  }
+}
+
 export default function VenueLocationPage() {
   const [googleMapsUrl, setGoogleMapsUrl] = useState<string>('');
   const [venueLocation, setVenueLocation] = useState<VenueLocation | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [isSaving, setIsSaving] = useState(false);
   const [message, setMessage] = useState<{ type: 'success' | 'error'; text: string } | null>(null);
+
+  // Extract coordinates from URL in real-time
+  const extractedCoords = useMemo(() => {
+    return extractCoordinatesFromUrl(googleMapsUrl);
+  }, [googleMapsUrl]);
+
+  // Use extracted coordinates OR database coordinates
+  const displayCoords = useMemo(() => {
+    if (extractedCoords) {
+      return extractedCoords;
+    }
+    if (venueLocation?.latitude && venueLocation?.longitude) {
+      return { latitude: venueLocation.latitude, longitude: venueLocation.longitude };
+    }
+    return null;
+  }, [extractedCoords, venueLocation]);
 
   useEffect(() => {
     loadLocation();
@@ -93,6 +177,8 @@ export default function VenueLocationPage() {
 
       if (response.ok) {
         setMessage({ type: 'success', text: 'Location saved successfully!' });
+        // Reload to get the extracted coordinates from server
+        await loadLocation();
       } else {
         const data = await response.json();
         setMessage({ type: 'error', text: data.error || 'Failed to save location' });
@@ -218,8 +304,8 @@ export default function VenueLocationPage() {
         </button>
       </motion.form>
 
-      {/* Map Preview Section */}
-      {venueLocation && (venueLocation.latitude && venueLocation.longitude) && (
+      {/* Map Preview Section - shows when we have coordinates (from DB or extracted from URL) */}
+      {displayCoords && (
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
@@ -234,7 +320,7 @@ export default function VenueLocationPage() {
           {/* Map Embed */}
           <div className="relative h-48 bg-slate-800 rounded-xl overflow-hidden mb-4">
             <iframe
-              src={`https://www.openstreetmap.org/export/embed.html?bbox=${venueLocation.longitude - 0.005},${venueLocation.latitude - 0.005},${venueLocation.longitude + 0.005},${venueLocation.latitude + 0.005}&layer=mapnik&marker=${venueLocation.latitude},${venueLocation.longitude}`}
+              src={`https://www.openstreetmap.org/export/embed.html?bbox=${displayCoords.longitude - 0.005},${displayCoords.latitude - 0.005},${displayCoords.longitude + 0.005},${displayCoords.latitude + 0.005}&layer=mapnik&marker=${displayCoords.latitude},${displayCoords.longitude}`}
               className="w-full h-full border-0"
               style={{ filter: 'invert(100%) hue-rotate(180deg) brightness(95%) contrast(90%)' }}
               title="Venue location map"
@@ -243,10 +329,10 @@ export default function VenueLocationPage() {
             {/* Map Overlay */}
             <button
               onClick={() => {
-                if (venueLocation.google_maps_url) {
-                  window.open(venueLocation.google_maps_url, '_blank');
+                if (googleMapsUrl) {
+                  window.open(googleMapsUrl, '_blank');
                 } else {
-                  window.open(`https://www.google.com/maps/search/?api=1&query=${venueLocation.latitude},${venueLocation.longitude}`, '_blank');
+                  window.open(`https://www.google.com/maps/search/?api=1&query=${displayCoords.latitude},${displayCoords.longitude}`, '_blank');
                 }
               }}
               className="absolute inset-0 bg-transparent hover:bg-white/5 transition-colors flex items-center justify-center opacity-0 hover:opacity-100"
@@ -260,7 +346,7 @@ export default function VenueLocationPage() {
           </div>
 
           {/* Address */}
-          {venueLocation.address && (
+          {venueLocation?.address && (
             <div className="flex items-start gap-3 mb-4">
               <div className="p-2 bg-red-500/10 rounded-lg">
                 <MapPin className="w-4 h-4 text-red-400" />
@@ -275,10 +361,10 @@ export default function VenueLocationPage() {
           {/* Get Directions Button */}
           <button
             onClick={() => {
-              if (venueLocation.google_maps_url) {
-                window.open(venueLocation.google_maps_url, '_blank');
-              } else if (venueLocation.latitude && venueLocation.longitude) {
-                const mapsUrl = `https://www.google.com/maps/dir/?api=1&destination=${venueLocation.latitude},${venueLocation.longitude}`;
+              if (googleMapsUrl) {
+                window.open(googleMapsUrl, '_blank');
+              } else {
+                const mapsUrl = `https://www.google.com/maps/dir/?api=1&destination=${displayCoords.latitude},${displayCoords.longitude}`;
                 window.open(mapsUrl, '_blank');
               }
             }}
@@ -290,8 +376,8 @@ export default function VenueLocationPage() {
         </motion.div>
       )}
 
-      {/* No Location Message */}
-      {venueLocation && !venueLocation.latitude && !venueLocation.longitude && (
+      {/* No Location Message - only shows when we can't get coordinates from anywhere */}
+      {!displayCoords && googleMapsUrl && isValidGoogleMapsUrl(googleMapsUrl) && (
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
@@ -305,7 +391,7 @@ export default function VenueLocationPage() {
             <div>
               <h3 className="text-white font-semibold mb-1">Map Preview Not Available</h3>
               <p className="text-gray-400 text-sm">
-                Your venue coordinates haven&apos;t been set yet. Add your Google Maps link above and our team will update your map coordinates.
+                We couldn&apos;t extract coordinates from this URL. Try using the full Google Maps link (not a shortened URL). Click &quot;Save Location&quot; and the map will appear after our system processes it.
               </p>
             </div>
           </div>
