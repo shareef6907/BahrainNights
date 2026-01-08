@@ -136,6 +136,7 @@ export default function AdminVenueEditPage({ params }: { params: Promise<{ id: s
   const [aiRewriting, setAiRewriting] = useState(false);
   const [uploadingLogo, setUploadingLogo] = useState(false);
   const [uploadingCover, setUploadingCover] = useState(false);
+  const [deletingGalleryPhoto, setDeletingGalleryPhoto] = useState<string | null>(null);
   const [toast, setToast] = useState<{ message: string; type: 'success' | 'error' } | null>(null);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [showRejectModal, setShowRejectModal] = useState(false);
@@ -447,6 +448,32 @@ export default function AdminVenueEditPage({ params }: { params: Promise<{ id: s
     } finally {
       setSaving(false);
       setShowDeleteModal(false);
+    }
+  };
+
+  const handleDeleteGalleryPhoto = async (photoUrl: string) => {
+    setDeletingGalleryPhoto(photoUrl);
+    try {
+      const response = await fetch(`/api/admin/venues/${resolvedParams.id}/gallery`, {
+        method: 'DELETE',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ photoUrl }),
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => ({}));
+        throw new Error(errorData.error || 'Failed to delete photo');
+      }
+
+      const data = await response.json();
+      // Update local venue state with new gallery
+      setVenue((prev) => prev ? { ...prev, gallery: data.venue.gallery } : null);
+      setToast({ message: 'Photo deleted successfully', type: 'success' });
+    } catch (error) {
+      console.error('Error deleting gallery photo:', error);
+      setToast({ message: error instanceof Error ? error.message : 'Failed to delete photo', type: 'error' });
+    } finally {
+      setDeletingGalleryPhoto(null);
     }
   };
 
@@ -984,6 +1011,45 @@ export default function AdminVenueEditPage({ params }: { params: Promise<{ id: s
               )}
             </div>
           </div>
+
+          {/* Gallery Management */}
+          {venue.gallery && venue.gallery.length > 0 && (
+            <div className="bg-[#1A1A2E] rounded-xl p-6 border border-white/10">
+              <h3 className="text-lg font-semibold text-white mb-4">
+                Gallery ({venue.gallery.length} photos)
+              </h3>
+              <div className="grid grid-cols-2 gap-3">
+                {venue.gallery.map((photoUrl, index) => (
+                  <div
+                    key={index}
+                    className="relative aspect-square rounded-lg overflow-hidden group"
+                  >
+                    <Image
+                      src={photoUrl}
+                      alt={`Gallery photo ${index + 1}`}
+                      fill
+                      className="object-cover"
+                    />
+                    {/* Delete overlay on hover */}
+                    <div className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+                      <button
+                        onClick={() => handleDeleteGalleryPhoto(photoUrl)}
+                        disabled={deletingGalleryPhoto === photoUrl}
+                        className="p-2 bg-red-500 rounded-lg text-white hover:bg-red-600 disabled:opacity-50 transition-colors"
+                        title="Delete photo"
+                      >
+                        {deletingGalleryPhoto === photoUrl ? (
+                          <Loader2 className="w-5 h-5 animate-spin" />
+                        ) : (
+                          <Trash2 className="w-5 h-5" />
+                        )}
+                      </button>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
 
           {/* Stats */}
           <div className="bg-[#1A1A2E] rounded-xl p-6 border border-white/10">
