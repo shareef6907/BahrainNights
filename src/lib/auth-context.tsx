@@ -58,22 +58,40 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [isLoading, setIsLoading] = useState(true);
   const router = useRouter();
 
-  // Check authentication status on mount
-  const checkAuth = useCallback(async () => {
+  // Check authentication status on mount with retry for mobile reliability
+  const checkAuth = useCallback(async (retryCount = 0) => {
+    const maxRetries = 2;
+
     try {
       const response = await fetch('/api/auth/me', {
         credentials: 'include',
+        // Add cache control to prevent stale responses on mobile
+        headers: {
+          'Cache-Control': 'no-cache',
+        },
       });
 
       if (response.ok) {
         const data = await response.json();
         setUser(data.user);
+        setIsLoading(false);
       } else {
+        // On mobile, sometimes the first request fails - retry
+        if (retryCount < maxRetries && response.status !== 401) {
+          await new Promise(resolve => setTimeout(resolve, 500));
+          return checkAuth(retryCount + 1);
+        }
         setUser(null);
+        setIsLoading(false);
       }
-    } catch {
+    } catch (error) {
+      // Network error - retry on mobile
+      if (retryCount < maxRetries) {
+        await new Promise(resolve => setTimeout(resolve, 500));
+        return checkAuth(retryCount + 1);
+      }
+      console.error('Auth check failed after retries:', error);
       setUser(null);
-    } finally {
       setIsLoading(false);
     }
   }, []);
