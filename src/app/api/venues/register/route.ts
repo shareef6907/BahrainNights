@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@supabase/supabase-js';
 import { getAdminClient } from '@/lib/supabase/server';
 import { sendVenueRegistrationEmail } from '@/lib/email';
+import { extractCoordinatesFromGoogleMapsUrl } from '@/lib/utils';
 import bcrypt from 'bcryptjs';
 
 // Create Supabase admin client for auth operations
@@ -200,6 +201,17 @@ export async function POST(request: NextRequest) {
     // Hash the password for venue portal login
     const passwordHash = await bcrypt.hash(password, 12);
 
+    // Extract coordinates from Google Maps URL if provided
+    let latitude: number | null = null;
+    let longitude: number | null = null;
+    if (googleMapsUrl) {
+      const coords = extractCoordinatesFromGoogleMapsUrl(googleMapsUrl);
+      if (coords) {
+        latitude = coords.latitude;
+        longitude = coords.longitude;
+      }
+    }
+
     // Create venue in database
     // Note: owner_id is set to null for now since the foreign key references 'users' table
     // which uses a different auth system. The venue email can be used to link them later.
@@ -213,6 +225,8 @@ export async function POST(request: NextRequest) {
       area,
       address,
       google_maps_url: googleMapsUrl || null,
+      latitude, // Auto-extracted from Google Maps URL
+      longitude, // Auto-extracted from Google Maps URL
       phone,
       email: email.toLowerCase(),
       password_hash: passwordHash, // Store hashed password for venue portal login

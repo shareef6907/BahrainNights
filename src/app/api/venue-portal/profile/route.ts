@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { cookies } from 'next/headers';
 import { jwtVerify } from 'jose';
 import { getAdminClient } from '@/lib/supabase/server';
+import { extractCoordinatesFromGoogleMapsUrl } from '@/lib/utils';
 
 interface OpeningHoursDay {
   open: string;
@@ -160,6 +161,20 @@ export async function PATCH(request: NextRequest) {
     for (const field of allowedFields) {
       if (body[field] !== undefined) {
         updates[field] = body[field];
+      }
+    }
+
+    // Auto-extract coordinates from Google Maps URL if provided
+    if (updates.google_maps_url && typeof updates.google_maps_url === 'string') {
+      const coords = extractCoordinatesFromGoogleMapsUrl(updates.google_maps_url);
+      if (coords) {
+        // Only update coordinates if not explicitly provided
+        if (updates.latitude === undefined) {
+          updates.latitude = coords.latitude;
+        }
+        if (updates.longitude === undefined) {
+          updates.longitude = coords.longitude;
+        }
       }
     }
 
