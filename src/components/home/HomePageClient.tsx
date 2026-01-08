@@ -6,6 +6,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { MapPin, Clock, Star, ChevronRight, ChevronDown, Menu, X, Sparkles, Plus, Play, Building2, LogIn } from 'lucide-react';
 import GlobalSearch from '@/components/search/GlobalSearch';
 import { LanguageToggle } from '@/components/LanguageToggle';
+import { useTranslation } from '@/lib/i18n/TranslationContext';
 import { Movie } from '@/components/cinema/MovieCard';
 
 // Lazy load below-fold components for faster initial load
@@ -220,6 +221,7 @@ interface HomePageClientProps {
 }
 
 export default function HomePageClient({ initialMovies, initialStats, initialTodayEvents }: HomePageClientProps) {
+  const { t } = useTranslation();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [activeDropdown, setActiveDropdown] = useState<string | null>(null);
   const [mobileAccordion, setMobileAccordion] = useState<string | null>(null);
@@ -300,11 +302,11 @@ export default function HomePageClient({ initialMovies, initialStats, initialTod
 
   // Categories with real counts from API
   const categories = [
-    { icon: "🎭", name: "Events", description: "Concerts, shows & more", count: stats.events, color: "from-purple-500 to-pink-500", href: "/events" },
-    { icon: "🍽️", name: "Dining & Nightlife", description: "Restaurants & clubs", count: stats.venues, color: "from-orange-500 to-red-500", href: "/places" },
-    { icon: "🎬", name: "Cinema", description: "Movies & showtimes", count: stats.cinema, color: "from-blue-500 to-cyan-500", href: "/cinema" },
-    { icon: "🏷️", name: "Offers", description: "Deals & promotions", count: stats.offers, color: "from-green-500 to-emerald-500", href: "/offers" },
-    { icon: "🧭", name: "Explore", description: "Hotels, spas & more", count: stats.explore, color: "from-indigo-500 to-purple-500", href: "/explore" }
+    { icon: "🎭", name: t.categories.events, description: t.categories.eventsDesc, count: stats.events, color: "from-purple-500 to-pink-500", href: "/events" },
+    { icon: "🍽️", name: t.categories.dining, description: t.categories.diningDesc, count: stats.venues, color: "from-orange-500 to-red-500", href: "/places" },
+    { icon: "🎬", name: t.categories.cinema, description: t.categories.cinemaDesc, count: stats.cinema, color: "from-blue-500 to-cyan-500", href: "/cinema" },
+    { icon: "🏷️", name: t.categories.offers, description: t.categories.offersDesc, count: stats.offers, color: "from-green-500 to-emerald-500", href: "/offers" },
+    { icon: "🧭", name: t.categories.explore, description: t.categories.exploreDesc, count: stats.explore, color: "from-indigo-500 to-purple-500", href: "/explore" }
   ];
 
 
@@ -407,21 +409,21 @@ export default function HomePageClient({ initialMovies, initialStats, initialTod
                 className="flex items-center space-x-1.5 bg-gradient-to-r from-yellow-400 via-orange-500 to-pink-500 text-black px-3 py-2 rounded-full text-sm font-semibold hover:shadow-lg hover:shadow-orange-500/25 hover:scale-105 transition-all duration-200"
               >
                 <Plus className="w-4 h-4" />
-                <span>List Event</span>
+                <span>{t.nav.listEvent}</span>
               </a>
               <a
                 href="/register-venue"
                 className="flex items-center space-x-1.5 bg-white/10 border border-white/20 text-white px-3 py-2 rounded-full text-sm font-medium hover:bg-white/20 hover:border-yellow-400/50 transition-all duration-200"
               >
                 <Building2 className="w-4 h-4" />
-                <span>Register Venue</span>
+                <span>{t.nav.registerVenue}</span>
               </a>
               <a
                 href="/venue-portal/login"
                 className="flex items-center space-x-1.5 text-gray-400 hover:text-white px-2 py-2 text-xs transition-all duration-200"
               >
                 <LogIn className="w-3 h-3" />
-                <span>Login</span>
+                <span>{t.nav.login}</span>
               </a>
             </div>
 
@@ -514,7 +516,7 @@ export default function HomePageClient({ initialMovies, initialStats, initialTod
                     onClick={() => setMobileMenuOpen(false)}
                   >
                     <Plus className="w-5 h-5" />
-                    <span>List Your Event</span>
+                    <span>{t.footer.listYourEvent}</span>
                   </a>
                   <a
                     href="/register-venue"
@@ -522,7 +524,7 @@ export default function HomePageClient({ initialMovies, initialStats, initialTod
                     onClick={() => setMobileMenuOpen(false)}
                   >
                     <Building2 className="w-5 h-5" />
-                    <span>Register Your Venue</span>
+                    <span>{t.footer.registerYourVenue}</span>
                   </a>
                   <a
                     href="/venue-portal/login"
@@ -530,7 +532,7 @@ export default function HomePageClient({ initialMovies, initialStats, initialTod
                     onClick={() => setMobileMenuOpen(false)}
                   >
                     <LogIn className="w-4 h-4" />
-                    <span>Venue Login</span>
+                    <span>{t.footer.venueLogin}</span>
                   </a>
                 </div>
               </div>
@@ -571,7 +573,7 @@ export default function HomePageClient({ initialMovies, initialStats, initialTod
           >
             <span className="text-sm text-gray-300 flex items-center gap-2">
               <span className="text-xl">🇧🇭</span>
-              Showcasing Bahrain's Finest Experiences
+              {t.home.hero.tagline}
             </span>
           </motion.div>
 
@@ -581,10 +583,8 @@ export default function HomePageClient({ initialMovies, initialStats, initialTod
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.4 }}
           >
-            <span className="text-white">Your Guide to</span>
-            <br />
             <span className="bg-gradient-to-r from-yellow-400 via-orange-500 to-pink-500 bg-clip-text text-transparent">
-              What&apos;s Happening in Bahrain
+              {t.home.hero.title}
             </span>
           </motion.h1>
 
@@ -594,9 +594,9 @@ export default function HomePageClient({ initialMovies, initialStats, initialTod
             animate={{ opacity: 1 }}
             transition={{ duration: 0.3, delay: 0.1 }}
           >
-            <span className="text-yellow-400">AI-powered</span> • Always updated •
-            <span className="text-white font-semibold"> {stats.events > 0 ? stats.events.toLocaleString() : '1,247'} events</span> •
-            <span className="text-white font-semibold"> {stats.venues > 0 ? stats.venues.toLocaleString() : '847'} venues</span>
+            {t.home.hero.subtitle} •
+            <span className="text-white font-semibold"> {stats.events > 0 ? stats.events.toLocaleString() : '1,247'} {t.nav.events.toLowerCase()}</span> •
+            <span className="text-white font-semibold"> {stats.venues > 0 ? stats.venues.toLocaleString() : '847'} {t.nav.venues.toLowerCase()}</span>
           </motion.p>
 
           {/* Search Bar */}
@@ -652,9 +652,9 @@ export default function HomePageClient({ initialMovies, initialStats, initialTod
             viewport={{ once: true, margin: "-100px" }}
             variants={fadeIn}
           >
-            <h2 className="text-3xl md:text-5xl font-bold">🎬 New Movies & Trailers</h2>
+            <h2 className="text-3xl md:text-5xl font-bold">🎬 {t.home.sections.nowShowing}</h2>
             <a href="/cinema" className="text-yellow-400 hover:text-yellow-300 flex items-center space-x-2 transition-colors group">
-              <span className="font-medium">View All</span>
+              <span className="font-medium">{t.home.sections.viewAll}</span>
               <ChevronRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
             </a>
           </motion.div>
@@ -728,10 +728,10 @@ export default function HomePageClient({ initialMovies, initialStats, initialTod
             variants={fadeIn}
           >
             <h2 className="text-3xl md:text-5xl font-bold flex items-center gap-3">
-              🔥 Happening Today
+              🔥 {t.home.sections.happeningToday}
             </h2>
             <a href="/events/today" className="text-yellow-400 hover:text-yellow-300 flex items-center space-x-2 transition-colors group">
-              <span className="font-medium">View All</span>
+              <span className="font-medium">{t.home.sections.viewAll}</span>
               <ChevronRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
             </a>
           </motion.div>
@@ -794,7 +794,7 @@ export default function HomePageClient({ initialMovies, initialStats, initialTod
             viewport={{ once: true, margin: "-100px" }}
             variants={fadeIn}
           >
-            Explore by Category
+            {t.home.sections.exploreByCategory}
           </motion.h2>
 
           <motion.div
@@ -818,7 +818,7 @@ export default function HomePageClient({ initialMovies, initialStats, initialTod
                   <h3 className="text-xl font-bold mb-1">{category.name}</h3>
                   <p className="text-sm text-gray-400 mb-2">{category.description}</p>
                   <p className="text-yellow-400 font-semibold">
-                    {category.count > 0 ? `${category.count} listings` : 'Coming soon'}
+                    {category.count > 0 ? `${category.count} ${t.categories.listings}` : t.categories.comingSoon}
                   </p>
                 </div>
               </motion.a>
@@ -838,7 +838,7 @@ export default function HomePageClient({ initialMovies, initialStats, initialTod
               <div className="text-3xl font-black bg-gradient-to-r from-yellow-400 via-orange-500 to-pink-500 bg-clip-text text-transparent mb-4">
                 BahrainNights
               </div>
-              <p className="text-gray-400 mb-6">Bahrain&apos;s first AI-powered guide to events, dining, and culture. Always updated, always alive.</p>
+              <p className="text-gray-400 mb-6">{t.footer.tagline}</p>
               <div className="flex space-x-4">
                 <a href="#" className="w-10 h-10 bg-white/5 rounded-full flex items-center justify-center hover:bg-white/10 transition-colors">
                   <span className="text-xl">📸</span>
@@ -852,9 +852,9 @@ export default function HomePageClient({ initialMovies, initialStats, initialTod
               </div>
             </div>
             {[
-              { title: 'Events', links: [{ name: "Today's Events", href: '/events?filter=today' }, { name: 'This Weekend', href: '/events?filter=weekend' }, { name: 'Concerts', href: '/events?category=concerts' }, { name: 'Full Calendar', href: '/events/calendar' }] },
-              { title: 'Dining', links: [{ name: 'Restaurants', href: '/places?category=restaurant' }, { name: 'Cafes', href: '/places?category=cafe' }, { name: 'Nightlife', href: '/places?category=nightclub' }, { name: 'View All', href: '/places' }] },
-              { title: 'For Businesses', links: [{ name: 'Register Your Venue', href: '/register-venue' }, { name: 'Venue Login', href: '/venue-portal/login' }, { name: 'List Your Event', href: '/list-event' }, { name: 'Advertise', href: '/advertise' }, { name: 'Contact', href: '/contact' }] }
+              { title: t.footer.events, links: [{ name: t.footer.todaysEvents, href: '/events?filter=today' }, { name: t.footer.thisWeekend, href: '/events?filter=weekend' }, { name: t.footer.concerts, href: '/events?category=concerts' }, { name: t.footer.fullCalendar, href: '/events/calendar' }] },
+              { title: t.footer.dining, links: [{ name: t.footer.restaurants, href: '/places?category=restaurant' }, { name: t.footer.cafes, href: '/places?category=cafe' }, { name: t.footer.nightlife, href: '/places?category=nightclub' }, { name: t.footer.viewAll, href: '/places' }] },
+              { title: t.footer.forBusinesses, links: [{ name: t.footer.registerYourVenue, href: '/register-venue' }, { name: t.footer.venueLogin, href: '/venue-portal/login' }, { name: t.footer.listYourEvent, href: '/list-event' }, { name: t.footer.advertise, href: '/advertise' }, { name: t.footer.contact, href: '/contact' }] }
             ].map(section => (
               <div key={section.title}>
                 <h4 className="font-bold text-lg mb-4">{section.title}</h4>
@@ -869,7 +869,7 @@ export default function HomePageClient({ initialMovies, initialStats, initialTod
             ))}
           </div>
           <div className="pt-10 border-t border-white/10 text-center text-gray-400">
-            <p>© 2025 BahrainNights.com • Powered by AI • Made with ❤️ in Bahrain</p>
+            <p>{t.footer.copyright}</p>
           </div>
         </div>
       </footer>

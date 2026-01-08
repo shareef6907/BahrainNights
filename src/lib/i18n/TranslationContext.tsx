@@ -43,13 +43,6 @@ export function TranslationProvider({ children }: { children: ReactNode }) {
     // Update document direction and lang attribute
     document.documentElement.dir = isRTL(language) ? 'rtl' : 'ltr';
     document.documentElement.lang = language;
-
-    // Add/remove RTL class for styling
-    if (isRTL(language)) {
-      document.documentElement.classList.add('rtl');
-    } else {
-      document.documentElement.classList.remove('rtl');
-    }
   }, [language, mounted]);
 
   const setLanguage = (lang: LanguageCode) => {
