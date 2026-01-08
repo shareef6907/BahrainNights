@@ -10,6 +10,7 @@ import MovieFilters from '@/components/cinema/MovieFilters';
 import MovieGrid from '@/components/cinema/MovieGrid';
 import { Movie } from '@/components/cinema/MovieCard';
 import AdBanner from '@/components/ads/AdBanner';
+import { useTranslation } from '@/lib/i18n';
 
 // Lazy load modals - only loaded when user clicks a movie
 const MovieModal = dynamic(() => import('@/components/cinema/MovieModal'), {
@@ -58,7 +59,7 @@ interface CinemaPageClientProps {
 }
 
 // Format the last updated timestamp
-function formatLastUpdated(timestamp: string | null | undefined): string {
+function formatLastUpdated(timestamp: string | null | undefined, t: { cinema: { minuteAgo: string; minutesAgo: string; hourAgo: string; hoursAgo: string } }, language: string): string {
   if (!timestamp) return 'Unknown';
   const date = new Date(timestamp);
   const now = new Date();
@@ -67,11 +68,11 @@ function formatLastUpdated(timestamp: string | null | undefined): string {
   const diffMins = Math.floor(diffMs / (1000 * 60));
 
   if (diffMins < 60) {
-    return `${diffMins} minute${diffMins !== 1 ? 's' : ''} ago`;
+    return `${diffMins} ${diffMins === 1 ? t.cinema.minuteAgo : t.cinema.minutesAgo}`;
   } else if (diffHours < 24) {
-    return `${diffHours} hour${diffHours !== 1 ? 's' : ''} ago`;
+    return `${diffHours} ${diffHours === 1 ? t.cinema.hourAgo : t.cinema.hoursAgo}`;
   } else {
-    return date.toLocaleDateString('en-US', {
+    return date.toLocaleDateString(language === 'ar' ? 'ar-BH' : 'en-US', {
       month: 'short',
       day: 'numeric',
       hour: 'numeric',
@@ -86,6 +87,7 @@ export default function CinemaPageClient({
   initialCinemas = defaultCinemas,
   lastUpdated
 }: CinemaPageClientProps) {
+  const { t, language } = useTranslation();
   const searchParams = useSearchParams();
   const filterParam = searchParams?.get('filter') ?? null;
 
@@ -247,20 +249,20 @@ export default function CinemaPageClient({
                 <Film className="w-8 h-8 text-yellow-400" />
                 <h1 className="text-4xl md:text-5xl font-black">
                   <span className="bg-gradient-to-r from-yellow-400 via-orange-500 to-pink-500 bg-clip-text text-transparent">
-                    Now Showing
+                    {t.cinema.hero.title}
                   </span>{' '}
-                  in Bahrain
+                  {t.cinema.hero.titleSuffix}
                 </h1>
               </div>
               <p className="text-xl text-gray-400">
-                Find movies, watch trailers, and book tickets at Bahrain cinemas
+                {t.cinema.hero.subtitle}
               </p>
 
               {/* Last Updated & Report Link */}
               <div className="flex items-center justify-center gap-4 mt-3 text-sm">
                 <div className="flex items-center gap-1.5 text-gray-500">
                   <Clock className="w-4 h-4" />
-                  <span>Updated {formatLastUpdated(lastUpdated)}</span>
+                  <span>{t.cinema.updated} {formatLastUpdated(lastUpdated, t, language)}</span>
                 </div>
               </div>
             </motion.div>
@@ -276,7 +278,7 @@ export default function CinemaPageClient({
                 <Search className="absolute left-5 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
                 <input
                   type="text"
-                  placeholder="Search movies..."
+                  placeholder={t.cinema.search.placeholder}
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
                   className="w-full pl-14 pr-5 py-4 bg-white/5 border border-white/10 rounded-2xl text-white placeholder-gray-400 focus:outline-none focus:border-yellow-400/50 transition-colors"
@@ -300,7 +302,7 @@ export default function CinemaPageClient({
                       : 'text-gray-400 hover:text-white'
                   }`}
                 >
-                  Now Showing ({nowShowingMovies.length})
+                  {t.cinema.tabs.nowShowing} ({nowShowingMovies.length})
                 </button>
                 <button
                   onClick={() => setActiveTab('coming-soon')}
@@ -310,7 +312,7 @@ export default function CinemaPageClient({
                       : 'text-gray-400 hover:text-white'
                   }`}
                 >
-                  Coming Soon ({comingSoonMovies.length})
+                  {t.cinema.tabs.comingSoon} ({comingSoonMovies.length})
                 </button>
               </div>
             </motion.div>
@@ -363,18 +365,18 @@ export default function CinemaPageClient({
             {filteredMovies.length === 0 ? (
               <div className="text-center py-20">
                 <Film className="w-16 h-16 text-gray-600 mx-auto mb-4" />
-                <h3 className="text-xl font-semibold text-white mb-2">No movies found</h3>
+                <h3 className="text-xl font-semibold text-white mb-2">{t.cinema.emptyState.title}</h3>
                 <p className="text-gray-400 mb-4">
                   {nowShowingMovies.length === 0 && comingSoonMovies.length === 0
-                    ? 'Movies will be available after syncing with TMDB'
-                    : 'Try adjusting your filters'}
+                    ? t.cinema.emptyState.willBeAvailable
+                    : t.cinema.emptyState.tryAdjusting}
                 </p>
                 {searchQuery || selectedGenre !== 'all' || selectedLanguage !== 'all' ? (
                   <button
                     onClick={handleClearFilters}
                     className="px-4 py-2 bg-yellow-400 text-black rounded-lg hover:bg-yellow-500 transition-colors"
                   >
-                    Clear Filters
+                    {t.cinema.emptyState.clearFilters}
                   </button>
                 ) : null}
               </div>

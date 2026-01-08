@@ -12,8 +12,10 @@ import TodaysOffers from '@/components/offers/TodaysOffers';
 import OfferModal from '@/components/offers/OfferModal';
 import { Offer } from '@/components/offers/OfferCard';
 import AdBanner from '@/components/ads/AdBanner';
+import { useTranslation } from '@/lib/i18n';
 
 function OffersPageContent() {
+  const { t } = useTranslation();
   const router = useRouter();
   const searchParams = useSearchParams();
 
@@ -200,16 +202,16 @@ function OffersPageContent() {
           >
             <div className="inline-flex items-center gap-2 px-4 py-2 bg-yellow-500/10 border border-yellow-500/30 rounded-full mb-4">
               <Tag className="w-4 h-4 text-yellow-400" />
-              <span className="text-yellow-400 font-medium text-sm">Exclusive Deals</span>
+              <span className="text-yellow-400 font-medium text-sm">{t.offers.hero.badge}</span>
             </div>
             <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold text-white mb-4">
-              Best Offers in{' '}
+              {t.offers.hero.title}{' '}
               <span className="bg-gradient-to-r from-yellow-400 via-orange-400 to-red-400 bg-clip-text text-transparent">
-                Bahrain
+                {t.offers.hero.titleHighlight}
               </span>
             </h1>
             <p className="text-gray-400 text-lg md:text-xl max-w-2xl mx-auto">
-              Discover ladies nights, brunches, happy hours, and special deals at the best venues
+              {t.offers.hero.subtitle}
             </p>
           </motion.div>
 
@@ -224,7 +226,7 @@ function OffersPageContent() {
               <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
               <input
                 type="text"
-                placeholder="Search offers, venues, or deals..."
+                placeholder={t.offers.search.placeholder}
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
                 className="w-full pl-12 pr-12 py-4 bg-white/5 border border-white/10 rounded-2xl text-white placeholder:text-gray-500 focus:outline-none focus:border-yellow-500/50 focus:ring-2 focus:ring-yellow-500/20 transition-all"
@@ -272,14 +274,14 @@ function OffersPageContent() {
         {isLoadingOffers ? (
           <div className="flex flex-col items-center justify-center py-20">
             <Loader2 className="w-8 h-8 text-yellow-400 animate-spin mb-4" />
-            <p className="text-gray-400">Loading offers...</p>
+            <p className="text-gray-400">{t.offers.loading}</p>
           </div>
         ) : offers.length === 0 ? (
           <div className="flex flex-col items-center justify-center py-20">
             <Tag className="w-16 h-16 text-gray-600 mb-4" />
-            <h3 className="text-xl font-semibold text-white mb-2">No Offers Yet</h3>
+            <h3 className="text-xl font-semibold text-white mb-2">{t.offers.emptyState.title}</h3>
             <p className="text-gray-400 text-center max-w-md">
-              Check back soon! Venues are adding new offers every day.
+              {t.offers.emptyState.subtitle}
             </p>
           </div>
         ) : (
@@ -320,11 +322,12 @@ function OffersPageContent() {
 
 // Loading component for Suspense fallback
 function OffersLoading() {
+  const { t } = useTranslation();
   return (
     <div className="min-h-screen bg-slate-950 flex items-center justify-center">
       <div className="flex flex-col items-center gap-4">
         <Loader2 className="w-8 h-8 text-yellow-400 animate-spin" />
-        <p className="text-gray-400">Loading offers...</p>
+        <p className="text-gray-400">{t.offers.loading}</p>
       </div>
     </div>
   );

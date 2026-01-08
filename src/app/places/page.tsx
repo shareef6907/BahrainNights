@@ -12,6 +12,7 @@ import TrendingPlaces from '@/components/places/TrendingPlaces';
 import { Place, OpeningHours } from '@/components/places/PlaceCard';
 import type { Venue } from '@/types/database';
 import AdBanner from '@/components/ads/AdBanner';
+import { useTranslation } from '@/lib/i18n';
 
 // Convert database venue to Place type
 function venueToPlace(venue: Venue): Place {
@@ -43,6 +44,7 @@ function venueToPlace(venue: Venue): Place {
 }
 
 function PlacesPageContent() {
+  const { t } = useTranslation();
   const searchParams = useSearchParams();
 
   // State
@@ -112,14 +114,14 @@ function PlacesPageContent() {
   }, [placesData]);
 
   const categories = [
-    { category: 'all' as PlaceCategory, label: 'All Places', count: counts('all'), icon: '🌟' },
-    { category: 'restaurant' as PlaceCategory, label: 'Restaurants', count: counts('restaurant'), icon: '🍽️' },
-    { category: 'cafe' as PlaceCategory, label: 'Cafes', count: counts('cafe'), icon: '☕' },
-    { category: 'lounge' as PlaceCategory, label: 'Lounges & Bars', count: counts('lounge') + counts('bar'), icon: '🍸' },
-    { category: 'nightclub' as PlaceCategory, label: 'Nightclubs', count: counts('nightclub'), icon: '🎵' },
-    { category: 'beach-club' as PlaceCategory, label: 'Beach Clubs', count: counts('beach-club'), icon: '🏖️' },
-    { category: 'hotel' as PlaceCategory, label: 'Hotels', count: counts('hotel'), icon: '🏨' },
-    { category: 'spa' as PlaceCategory, label: 'Spa & Wellness', count: counts('spa'), icon: '💆' },
+    { category: 'all' as PlaceCategory, label: t.places.categories.all, count: counts('all'), icon: '🌟' },
+    { category: 'restaurant' as PlaceCategory, label: t.places.categories.restaurants, count: counts('restaurant'), icon: '🍽️' },
+    { category: 'cafe' as PlaceCategory, label: t.places.categories.cafes, count: counts('cafe'), icon: '☕' },
+    { category: 'lounge' as PlaceCategory, label: t.places.categories.lounges, count: counts('lounge') + counts('bar'), icon: '🍸' },
+    { category: 'nightclub' as PlaceCategory, label: t.places.categories.nightclubs, count: counts('nightclub'), icon: '🎵' },
+    { category: 'beach-club' as PlaceCategory, label: t.places.categories.beachClubs, count: counts('beach-club'), icon: '🏖️' },
+    { category: 'hotel' as PlaceCategory, label: t.places.categories.hotels, count: counts('hotel'), icon: '🏨' },
+    { category: 'spa' as PlaceCategory, label: t.places.categories.spa, count: counts('spa'), icon: '💆' },
   ];
 
   function counts(cat: string): number {
@@ -251,7 +253,7 @@ function PlacesPageContent() {
         <div className="flex items-center justify-center min-h-[60vh]">
           <div className="text-center">
             <Loader2 className="w-12 h-12 text-yellow-400 animate-spin mx-auto mb-4" />
-            <p className="text-gray-400">Loading venues...</p>
+            <p className="text-gray-400">{t.places.loading}</p>
           </div>
         </div>
       </div>
@@ -268,7 +270,7 @@ function PlacesPageContent() {
               onClick={() => window.location.reload()}
               className="px-4 py-2 bg-yellow-400 text-black rounded-lg hover:bg-yellow-500"
             >
-              Try Again
+              {t.places.tryAgain}
             </button>
           </div>
         </div>
@@ -298,13 +300,13 @@ function PlacesPageContent() {
               className="text-center mb-8"
             >
               <h1 className="text-3xl md:text-5xl font-black text-white mb-4">
-                Dining & Nightlife in{' '}
+                {t.places.hero.title}{' '}
                 <span className="text-transparent bg-clip-text bg-gradient-to-r from-yellow-400 via-orange-500 to-pink-500">
-                  Bahrain
+                  {t.places.hero.titleHighlight}
                 </span>
               </h1>
               <p className="text-gray-400 text-lg max-w-2xl mx-auto">
-                Discover the best restaurants, cafes, lounges, and nightclubs
+                {t.places.hero.subtitle}
               </p>
             </motion.div>
 
@@ -319,7 +321,7 @@ function PlacesPageContent() {
                 <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
                 <input
                   type="text"
-                  placeholder="Search places..."
+                  placeholder={t.places.search.placeholder}
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
                   className="w-full pl-12 pr-12 py-4 bg-white/5 border border-white/10 rounded-2xl text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-yellow-400/50 focus:border-transparent"
@@ -367,7 +369,7 @@ function PlacesPageContent() {
                 }`}
               >
                 <Grid3X3 className="w-4 h-4" />
-                <span className="hidden sm:inline">Grid</span>
+                <span className="hidden sm:inline">{t.places.view.grid}</span>
               </button>
               <button
                 onClick={() => setViewMode('map')}
@@ -378,7 +380,7 @@ function PlacesPageContent() {
                 }`}
               >
                 <MapIcon className="w-4 h-4" />
-                <span className="hidden sm:inline">Map</span>
+                <span className="hidden sm:inline">{t.places.view.map}</span>
               </button>
             </div>
           </div>
@@ -386,11 +388,11 @@ function PlacesPageContent() {
           {/* Results Count */}
           <div className="mb-6">
             <p className="text-gray-400">
-              Showing <span className="text-white font-semibold">{filteredPlaces.length}</span>{' '}
-              {filteredPlaces.length === 1 ? 'place' : 'places'}
+              {t.places.results.showing} <span className="text-white font-semibold">{filteredPlaces.length}</span>{' '}
+              {filteredPlaces.length === 1 ? t.places.results.place : t.places.results.places}
               {placesData.length > 0 && (
                 <span className="ml-2 text-sm">
-                  (sorted by most popular)
+                  ({t.places.results.sortedByPopular})
                 </span>
               )}
             </p>
@@ -416,15 +418,15 @@ function PlacesPageContent() {
           {placesData.length === 0 && !loading && (
             <div className="text-center py-20">
               <div className="text-6xl mb-4">🏢</div>
-              <h3 className="text-xl font-semibold text-white mb-2">No venues yet</h3>
+              <h3 className="text-xl font-semibold text-white mb-2">{t.places.emptyState.title}</h3>
               <p className="text-gray-400 mb-6">
-                Be the first to register your venue on BahrainNights!
+                {t.places.emptyState.subtitle}
               </p>
               <a
                 href="/register-venue"
                 className="inline-block px-6 py-3 bg-gradient-to-r from-yellow-400 to-orange-500 text-black font-semibold rounded-xl hover:shadow-lg transition-all"
               >
-                Register Your Venue
+                {t.places.emptyState.registerVenue}
               </a>
             </div>
           )}
@@ -514,12 +516,13 @@ function PlacesPageContent() {
 
 // Loading fallback for Suspense
 function PlacesPageLoading() {
+  const { t } = useTranslation();
   return (
     <div className="min-h-screen bg-gradient-to-b from-slate-950 via-slate-900 to-slate-950">
       <div className="flex items-center justify-center min-h-[60vh]">
         <div className="text-center">
           <Loader2 className="w-12 h-12 text-yellow-400 animate-spin mx-auto mb-4" />
-          <p className="text-gray-400">Loading places...</p>
+          <p className="text-gray-400">{t.places.loading}</p>
         </div>
       </div>
     </div>

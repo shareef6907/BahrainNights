@@ -8,6 +8,7 @@ import Link from 'next/link';
 import Image from 'next/image';
 import AdBanner from '@/components/ads/AdBanner';
 import { sortEventsWithFeatured } from '@/lib/utils/eventSorting';
+import { useTranslation } from '@/lib/i18n';
 
 // Event interface
 export interface Event {
@@ -47,29 +48,6 @@ export interface Attraction {
   isFeatured: boolean;
 }
 
-// Category filters
-const categories = [
-  { id: 'all', name: 'All Events', icon: '🎭' },
-  { id: 'music', name: 'Music & Concerts', icon: '🎵' },
-  { id: 'dining', name: 'Dining & Food', icon: '🍽️' },
-  { id: 'family', name: 'Family & Kids', icon: '👨‍👩‍👧‍👦' },
-  { id: 'arts', name: 'Arts & Culture', icon: '🎨' },
-  { id: 'sports', name: 'Sports & Fitness', icon: '⚽' },
-  { id: 'nightlife', name: 'Nightlife', icon: '🌙' },
-  { id: 'business', name: 'Business', icon: '💼' },
-  { id: 'wellness', name: 'Wellness', icon: '🧘' },
-  { id: 'shopping', name: 'Shopping', icon: '🛍️' },
-  { id: 'community', name: 'Community', icon: '🤝' },
-];
-
-// Time filters
-const timeFilters = [
-  { id: 'all', name: 'All Dates' },
-  { id: 'today', name: "Today" },
-  { id: 'weekend', name: 'This Weekend' },
-  { id: 'week', name: 'This Week' },
-  { id: 'month', name: 'This Month' },
-];
 
 interface EventsPageClientProps {
   initialEvents: Event[];
@@ -77,12 +55,37 @@ interface EventsPageClientProps {
 }
 
 export default function EventsPageClient({ initialEvents, familyAttractions = [] }: EventsPageClientProps) {
+  const { t } = useTranslation();
   const searchParams = useSearchParams();
   const router = useRouter();
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedCategory, setSelectedCategory] = useState(searchParams?.get('category') || 'all');
   const [selectedTime, setSelectedTime] = useState(searchParams?.get('filter') || 'all');
   const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
+
+  // Translated categories
+  const categories = [
+    { id: 'all', name: t.events.categories.all, icon: '🎭' },
+    { id: 'music', name: t.events.categories.music, icon: '🎵' },
+    { id: 'dining', name: t.events.categories.dining, icon: '🍽️' },
+    { id: 'family', name: t.events.categories.family, icon: '👨‍👩‍👧‍👦' },
+    { id: 'arts', name: t.events.categories.arts, icon: '🎨' },
+    { id: 'sports', name: t.events.categories.sports, icon: '⚽' },
+    { id: 'nightlife', name: t.events.categories.nightlife, icon: '🌙' },
+    { id: 'business', name: t.events.categories.business, icon: '💼' },
+    { id: 'wellness', name: t.events.categories.wellness, icon: '🧘' },
+    { id: 'shopping', name: t.events.categories.shopping, icon: '🛍️' },
+    { id: 'community', name: t.events.categories.community, icon: '🤝' },
+  ];
+
+  // Translated time filters
+  const timeFilters = [
+    { id: 'all', name: t.events.filters.allDates },
+    { id: 'today', name: t.events.filters.today },
+    { id: 'weekend', name: t.events.filters.thisWeekend },
+    { id: 'week', name: t.events.filters.thisWeek },
+    { id: 'month', name: t.events.filters.thisMonth },
+  ];
 
   // Use initialEvents directly - SSR ensures data is already available
   const events = initialEvents || [];
@@ -288,13 +291,13 @@ export default function EventsPageClient({ initialEvents, familyAttractions = []
             className="text-center mb-8"
           >
             <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold text-white mb-4">
-              Discover{' '}
+              {t.events.hero.title}{' '}
               <span className="bg-gradient-to-r from-purple-400 via-pink-400 to-orange-400 bg-clip-text text-transparent">
-                Events
+                {t.events.hero.titleHighlight}
               </span>
             </h1>
             <p className="text-gray-400 text-lg md:text-xl max-w-2xl mx-auto">
-              Find the best concerts, shows, and experiences happening in Bahrain
+              {t.events.hero.subtitle}
             </p>
           </motion.div>
 
@@ -311,7 +314,7 @@ export default function EventsPageClient({ initialEvents, familyAttractions = []
                 type="text"
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                placeholder="Search events, venues, or artists..."
+                placeholder={t.events.search.placeholder}
                 className="w-full pl-12 pr-4 py-4 bg-white/10 border border-white/10 rounded-2xl text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-purple-500/50 focus:border-purple-500/50 transition-all"
               />
             </div>
@@ -355,7 +358,7 @@ export default function EventsPageClient({ initialEvents, familyAttractions = []
               }`}
             >
               <span>{category.icon}</span>
-              <span>{category.id === 'all' ? 'All' : category.name.split(' ')[0]}</span>
+              <span>{category.id === 'all' ? t.events.categories.allShort : category.name.split(' ')[0]}</span>
             </button>
           ))}
         </div>
@@ -367,13 +370,13 @@ export default function EventsPageClient({ initialEvents, familyAttractions = []
             className="flex-1 flex items-center justify-center gap-2 px-3 py-2.5 bg-white/5 border border-white/10 rounded-xl text-yellow-400 text-sm font-medium"
           >
             <Calendar className="w-4 h-4" />
-            Calendar
+            {t.events.calendar}
           </Link>
           <Link
             href="/list-event"
             className="flex-1 flex items-center justify-center gap-2 px-3 py-2.5 bg-gradient-to-r from-cyan-500 to-blue-500 rounded-xl text-white text-sm font-medium"
           >
-            List Event
+            {t.nav.listEvent}
           </Link>
         </div>
       </section>
@@ -391,7 +394,7 @@ export default function EventsPageClient({ initialEvents, familyAttractions = []
             <div className="sticky top-24 bg-white/5 backdrop-blur-sm border border-white/10 rounded-2xl p-4">
               <h3 className="text-lg font-semibold text-white mb-4 flex items-center gap-2">
                 <Filter className="w-5 h-5" />
-                Categories
+                {t.events.sidebar.categories}
               </h3>
               <div className="space-y-2">
                 {categories.map((category) => (
@@ -417,7 +420,7 @@ export default function EventsPageClient({ initialEvents, familyAttractions = []
                   className="flex items-center gap-2 text-yellow-400 hover:text-yellow-300 transition-colors"
                 >
                   <Calendar className="w-5 h-5" />
-                  <span className="font-medium">View Full Calendar</span>
+                  <span className="font-medium">{t.events.sidebar.viewFullCalendar}</span>
                   <ChevronRight className="w-4 h-4" />
                 </Link>
               </div>
@@ -428,7 +431,7 @@ export default function EventsPageClient({ initialEvents, familyAttractions = []
                   href="/list-event"
                   className="block w-full text-center px-4 py-3 bg-gradient-to-r from-cyan-500 to-blue-500 text-white font-semibold rounded-xl hover:shadow-lg hover:shadow-cyan-500/25 transition-all"
                 >
-                  List Your Event
+                  {t.events.sidebar.listYourEvent}
                 </Link>
               </div>
 
@@ -446,8 +449,8 @@ export default function EventsPageClient({ initialEvents, familyAttractions = []
               <div className="flex items-center gap-4">
                 <p className="text-gray-400">
                   {selectedCategory === 'family'
-                    ? `${filteredEvents.length} events + ${familyAttractions.length} activities found`
-                    : `${filteredEvents.length} events found`
+                    ? `${filteredEvents.length} ${t.events.results.eventsPlus} ${familyAttractions.length} ${t.events.results.activitiesFound}`
+                    : `${filteredEvents.length} ${t.events.results.eventsFound}`
                   }
                 </p>
               </div>
@@ -477,13 +480,13 @@ export default function EventsPageClient({ initialEvents, familyAttractions = []
                 <div className="flex items-center justify-between mb-4">
                   <h2 className="text-xl font-bold text-white flex items-center gap-2">
                     <span className="text-2xl">👨‍👩‍👧‍👦</span>
-                    Family Activities & Attractions
+                    {t.events.familySection.title}
                   </h2>
                   <Link
                     href="/explore/kids"
                     className="text-green-400 hover:text-green-300 text-sm font-medium transition-colors"
                   >
-                    View All →
+                    {t.events.familySection.viewAll}
                   </Link>
                 </div>
                 <motion.div
@@ -516,7 +519,7 @@ export default function EventsPageClient({ initialEvents, familyAttractions = []
                             />
                             <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent" />
                             <div className="absolute top-3 left-3 px-3 py-1 bg-green-500 text-white text-xs font-bold rounded-full">
-                              Activity
+                              {t.events.familySection.activity}
                             </div>
                             {attraction.rating && (
                               <div className="absolute top-3 right-3 px-2 py-1 bg-black/70 text-white text-xs rounded-full flex items-center gap-1">
@@ -525,7 +528,7 @@ export default function EventsPageClient({ initialEvents, familyAttractions = []
                             )}
                             {attraction.isFeatured && (
                               <div className="absolute bottom-3 left-3 px-2 py-1 bg-yellow-500 text-black text-xs font-bold rounded-full">
-                                ⭐ Featured
+                                ⭐ {t.common.featured}
                               </div>
                             )}
                           </div>
@@ -546,7 +549,7 @@ export default function EventsPageClient({ initialEvents, familyAttractions = []
                               )}
                               {attraction.priceFrom && (
                                 <div className="text-green-400 font-medium">
-                                  From BD {attraction.priceFrom}
+                                  {t.common.from} {t.common.bd} {attraction.priceFrom}
                                 </div>
                               )}
                             </div>
@@ -563,7 +566,7 @@ export default function EventsPageClient({ initialEvents, familyAttractions = []
             {selectedCategory === 'family' && filteredEvents.length > 0 && (
               <h2 className="text-xl font-bold text-white mb-4 flex items-center gap-2">
                 <span className="text-2xl">🎭</span>
-                Family Events
+                {t.events.familySection.familyEvents}
               </h2>
             )}
 
@@ -609,7 +612,7 @@ export default function EventsPageClient({ initialEvents, familyAttractions = []
                           {event.isFeatured && (
                             <div className="absolute top-3 right-3 px-3 py-1 bg-yellow-400 text-black text-xs font-bold rounded-full flex items-center gap-1 shadow-lg z-10">
                               <Star className="w-3 h-3 fill-current" />
-                              Featured
+                              {t.common.featured}
                             </div>
                           )}
                           {/* Date Badge - moved below featured if present */}
@@ -644,34 +647,34 @@ export default function EventsPageClient({ initialEvents, familyAttractions = []
               /* No events but we have attractions - show "no events" message only */
               <div className="text-center py-8 border-t border-white/10 mt-4">
                 <p className="text-gray-400">
-                  No family events scheduled right now. Check out the activities above!
+                  {t.events.familySection.noEventsMessage}
                 </p>
               </div>
             ) : (
               /* Empty State */
               <div className="text-center py-16">
                 <div className="text-6xl mb-4">🎭</div>
-                <h3 className="text-2xl font-bold text-white mb-2">No events found</h3>
+                <h3 className="text-2xl font-bold text-white mb-2">{t.events.emptyState.title}</h3>
                 <p className="text-gray-400 mb-6">
                   {searchQuery || selectedCategory !== 'all'
-                    ? 'Try adjusting your search or filters'
-                    : 'Check back soon for upcoming events!'}
+                    ? t.events.emptyState.tryAdjusting
+                    : t.events.emptyState.checkBackSoon}
                 </p>
                 {(searchQuery || selectedCategory !== 'all' || selectedTime !== 'all') && (
                   <button
                     onClick={handleClearFilters}
                     className="inline-flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-purple-500 to-pink-500 text-white font-semibold rounded-xl hover:shadow-lg transition-all"
                   >
-                    Clear Filters
+                    {t.events.emptyState.clearFilters}
                   </button>
                 )}
                 <div className="mt-8">
-                  <p className="text-gray-500 mb-4">Have an event to share?</p>
+                  <p className="text-gray-500 mb-4">{t.events.emptyState.haveEvent}</p>
                   <Link
                     href="/list-event"
                     className="inline-flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-cyan-500 to-blue-500 text-white font-semibold rounded-xl hover:shadow-lg transition-all"
                   >
-                    List Your Event
+                    {t.events.sidebar.listYourEvent}
                   </Link>
                 </div>
               </div>

@@ -40,24 +40,63 @@ export const en = {
     },
   },
 
-  // Events
+  // Events Page
   events: {
     title: 'Events in Bahrain',
     subtitle: 'Discover what\'s happening across the Kingdom',
+    hero: {
+      title: 'Discover',
+      titleHighlight: 'Events',
+      subtitle: 'Find the best concerts, shows, and experiences happening in Bahrain',
+    },
+    search: {
+      placeholder: 'Search events, venues, or artists...',
+    },
     filters: {
       all: 'All Events',
       today: 'Today',
       thisWeek: 'This Week',
       thisMonth: 'This Month',
+      thisWeekend: 'This Weekend',
+      allDates: 'All Dates',
     },
     categories: {
-      all: 'All Categories',
-      nightlife: 'Nightlife',
-      dining: 'Dining',
-      sports: 'Sports',
+      all: 'All Events',
+      allShort: 'All',
+      music: 'Music & Concerts',
+      dining: 'Dining & Food',
+      family: 'Family & Kids',
       arts: 'Arts & Culture',
-      music: 'Music',
-      family: 'Family',
+      sports: 'Sports & Fitness',
+      nightlife: 'Nightlife',
+      business: 'Business',
+      wellness: 'Wellness',
+      shopping: 'Shopping',
+      community: 'Community',
+    },
+    sidebar: {
+      categories: 'Categories',
+      viewFullCalendar: 'View Full Calendar',
+      listYourEvent: 'List Your Event',
+    },
+    results: {
+      eventsFound: 'events found',
+      activitiesFound: 'activities found',
+      eventsPlus: 'events +',
+    },
+    familySection: {
+      title: 'Family Activities & Attractions',
+      viewAll: 'View All →',
+      activity: 'Activity',
+      familyEvents: 'Family Events',
+      noEventsMessage: 'No family events scheduled right now. Check out the activities above!',
+    },
+    emptyState: {
+      title: 'No events found',
+      tryAdjusting: 'Try adjusting your search or filters',
+      checkBackSoon: 'Check back soon for upcoming events!',
+      clearFilters: 'Clear Filters',
+      haveEvent: 'Have an event to share?',
     },
     card: {
       free: 'Free',
@@ -66,11 +105,51 @@ export const en = {
       getTickets: 'Get Tickets',
       learnMore: 'Learn More',
     },
+    calendar: 'Calendar',
     noEvents: 'No upcoming events found. Check back soon!',
     browseAll: 'Browse all events',
   },
 
-  // Venues / Places
+  // Places / Venues Page
+  places: {
+    hero: {
+      title: 'Dining & Nightlife in',
+      titleHighlight: 'Bahrain',
+      subtitle: 'Discover the best restaurants, cafes, lounges, and nightclubs',
+    },
+    search: {
+      placeholder: 'Search places...',
+    },
+    categories: {
+      all: 'All Places',
+      restaurants: 'Restaurants',
+      cafes: 'Cafes',
+      lounges: 'Lounges & Bars',
+      nightclubs: 'Nightclubs',
+      beachClubs: 'Beach Clubs',
+      hotels: 'Hotels',
+      spa: 'Spa & Wellness',
+    },
+    view: {
+      grid: 'Grid',
+      map: 'Map',
+    },
+    results: {
+      showing: 'Showing',
+      place: 'place',
+      places: 'places',
+      sortedByPopular: 'sorted by most popular',
+    },
+    emptyState: {
+      title: 'No venues yet',
+      subtitle: 'Be the first to register your venue on BahrainNights!',
+      registerVenue: 'Register Your Venue',
+    },
+    loading: 'Loading venues...',
+    tryAgain: 'Try Again',
+  },
+
+  // Venues (detail pages)
   venues: {
     title: 'Venues in Bahrain',
     subtitle: 'Discover the best places to dine, drink, and unwind',
@@ -91,10 +170,22 @@ export const en = {
     },
   },
 
-  // Cinema
+  // Cinema Page
   cinema: {
     title: 'Cinema in Bahrain',
     subtitle: 'Find movies, watch trailers, and book tickets',
+    hero: {
+      title: 'Now Showing',
+      titleSuffix: 'in Bahrain',
+      subtitle: 'Find movies, watch trailers, and book tickets at Bahrain cinemas',
+    },
+    search: {
+      placeholder: 'Search movies...',
+    },
+    tabs: {
+      nowShowing: 'Now Showing',
+      comingSoon: 'Coming Soon',
+    },
     filters: {
       nowShowing: 'Now Showing',
       comingSoon: 'Coming Soon',
@@ -103,6 +194,32 @@ export const en = {
       allLanguages: 'All Languages',
       popular: 'Popular',
     },
+    genres: {
+      all: 'All Genres',
+      action: 'Action',
+      comedy: 'Comedy',
+      drama: 'Drama',
+      horror: 'Horror',
+      animation: 'Animation',
+      sciFi: 'Sci-Fi',
+      family: 'Family',
+      adventure: 'Adventure',
+      thriller: 'Thriller',
+      romance: 'Romance',
+      fantasy: 'Fantasy',
+    },
+    languages: {
+      all: 'All Languages',
+      english: 'English',
+      arabic: 'Arabic',
+      hindi: 'Hindi',
+    },
+    emptyState: {
+      title: 'No movies found',
+      tryAdjusting: 'Try adjusting your filters',
+      willBeAvailable: 'Movies will be available after syncing with TMDB',
+      clearFilters: 'Clear Filters',
+    },
     card: {
       bookNow: 'Book Now',
       bookTickets: 'Book Tickets',
@@ -110,7 +227,36 @@ export const en = {
       trailer: 'Watch Trailer',
     },
     updated: 'Updated',
+    minuteAgo: 'minute ago',
+    minutesAgo: 'minutes ago',
+    hourAgo: 'hour ago',
+    hoursAgo: 'hours ago',
     searchMovies: 'Search movies...',
+  },
+
+  // Offers Page
+  offers: {
+    hero: {
+      badge: 'Exclusive Deals',
+      title: 'Best Offers in',
+      titleHighlight: 'Bahrain',
+      subtitle: 'Discover ladies nights, brunches, happy hours, and special deals at the best venues',
+    },
+    search: {
+      placeholder: 'Search offers, venues, or deals...',
+    },
+    categories: {
+      all: 'All Offers',
+      ladiesNight: 'Ladies Night',
+      happyHour: 'Happy Hour',
+      brunch: 'Brunch',
+      special: 'Special Deals',
+    },
+    emptyState: {
+      title: 'No Offers Yet',
+      subtitle: 'Check back soon! Venues are adding new offers every day.',
+    },
+    loading: 'Loading offers...',
   },
 
   // Categories
@@ -153,6 +299,8 @@ export const en = {
     price: 'Price',
     category: 'Category',
     featured: 'Featured',
+    from: 'From',
+    bd: 'BD',
   },
 
   // Footer
