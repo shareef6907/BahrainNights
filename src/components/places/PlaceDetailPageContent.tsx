@@ -217,6 +217,7 @@ export default function PlaceDetailPageContent({ venue, similarVenues, events = 
           phone={venue.phone || undefined}
           latitude={venue.latitude || undefined}
           longitude={venue.longitude || undefined}
+          googleMapsUrl={venue.google_maps_url}
           bookingUrl={venue.booking_url || undefined}
           menuUrl={venue.menu_url || undefined}
           instagram={venue.instagram || undefined}
@@ -314,11 +315,17 @@ export default function PlaceDetailPageContent({ venue, similarVenues, events = 
                 Call
               </motion.a>
             )}
-            {venue.latitude && venue.longitude && (
+            {/* Directions button - show if lat/lng OR googleMapsUrl available */}
+            {(venue.google_maps_url || (venue.latitude && venue.longitude)) && (
               <motion.button
                 onClick={() => {
-                  const mapsUrl = `https://www.google.com/maps/dir/?api=1&destination=${venue.latitude},${venue.longitude}`;
-                  window.open(mapsUrl, '_blank');
+                  // Use googleMapsUrl if provided, otherwise construct from lat/lng
+                  if (venue.google_maps_url) {
+                    window.open(venue.google_maps_url, '_blank');
+                  } else if (venue.latitude && venue.longitude) {
+                    const mapsUrl = `https://www.google.com/maps/dir/?api=1&destination=${venue.latitude},${venue.longitude}`;
+                    window.open(mapsUrl, '_blank');
+                  }
                 }}
                 className="flex-1 flex items-center justify-center gap-2 px-4 py-3 bg-gradient-to-r from-blue-500 to-indigo-600 rounded-xl text-white font-semibold"
                 whileTap={{ scale: 0.98 }}

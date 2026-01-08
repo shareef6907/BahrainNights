@@ -7,6 +7,7 @@ interface PlaceActionBarProps {
   phone?: string;
   latitude?: number;
   longitude?: number;
+  googleMapsUrl?: string | null;
   bookingUrl?: string;
   menuUrl?: string;
   instagram?: string;
@@ -18,6 +19,7 @@ export default function PlaceActionBar({
   phone,
   latitude,
   longitude,
+  googleMapsUrl,
   bookingUrl,
   menuUrl,
   instagram,
@@ -31,8 +33,13 @@ export default function PlaceActionBar({
   };
 
   const handleDirections = () => {
-    const mapsUrl = `https://www.google.com/maps/dir/?api=1&destination=${latitude},${longitude}`;
-    window.open(mapsUrl, '_blank');
+    // Use googleMapsUrl if provided, otherwise construct from lat/lng
+    if (googleMapsUrl) {
+      window.open(googleMapsUrl, '_blank');
+    } else if (latitude && longitude) {
+      const mapsUrl = `https://www.google.com/maps/dir/?api=1&destination=${latitude},${longitude}`;
+      window.open(mapsUrl, '_blank');
+    }
   };
 
   const handleBooking = () => {
@@ -76,8 +83,8 @@ export default function PlaceActionBar({
             </motion.button>
           )}
 
-          {/* Directions Button */}
-          {latitude && longitude && (
+          {/* Directions Button - show if lat/lng OR googleMapsUrl available */}
+          {(googleMapsUrl || (latitude && longitude)) && (
             <motion.button
               onClick={handleDirections}
               className="flex items-center gap-2 px-5 py-3 bg-gradient-to-r from-blue-500 to-indigo-600 rounded-xl text-white font-semibold whitespace-nowrap hover:shadow-lg hover:shadow-blue-500/25 transition-all"
