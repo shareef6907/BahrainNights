@@ -1,11 +1,20 @@
 'use client';
 
+import { useState, useEffect } from 'react';
 import { ArrowLeft } from 'lucide-react';
 import { usePathname, useRouter } from 'next/navigation';
 
 export default function FloatingBackButton() {
   const pathname = usePathname();
   const router = useRouter();
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
+
+  // Don't show until mounted (prevents hydration flash)
+  if (!mounted) return null;
 
   // Don't show on homepage
   if (pathname === '/') return null;

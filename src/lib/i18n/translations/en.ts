@@ -1,0 +1,187 @@
+export const en = {
+  // Navigation
+  nav: {
+    home: 'Home',
+    events: 'Events',
+    venues: 'Venues',
+    cinema: 'Cinema',
+    attractions: 'Attractions',
+    explore: 'Explore',
+    familyKids: 'Family & Kids',
+    about: 'About',
+    contact: 'Contact',
+    search: 'Search',
+    login: 'Login',
+    register: 'Register',
+    diningNightlife: 'Dining & Nightlife',
+    offers: 'Offers',
+    listEvent: 'List Event',
+    registerVenue: 'Register Venue',
+  },
+
+  // Homepage
+  home: {
+    hero: {
+      title: 'Your Guide to What\'s Happening in Bahrain',
+      subtitle: 'AI-powered • Always updated',
+      tagline: 'Showcasing Bahrain\'s Finest Experiences',
+      searchPlaceholder: 'Search events, venues, movies...',
+      cta: 'Explore Now',
+    },
+    sections: {
+      featuredEvents: 'Featured Events',
+      upcomingEvents: 'Upcoming Events',
+      popularVenues: 'Popular Venues',
+      nowShowing: 'New Movies & Trailers',
+      topAttractions: 'Top Attractions',
+      viewAll: 'View All',
+      happeningToday: 'Happening Today',
+      exploreByCategory: 'Explore by Category',
+    },
+  },
+
+  // Events
+  events: {
+    title: 'Events in Bahrain',
+    subtitle: 'Discover what\'s happening across the Kingdom',
+    filters: {
+      all: 'All Events',
+      today: 'Today',
+      thisWeek: 'This Week',
+      thisMonth: 'This Month',
+    },
+    categories: {
+      all: 'All Categories',
+      nightlife: 'Nightlife',
+      dining: 'Dining',
+      sports: 'Sports',
+      arts: 'Arts & Culture',
+      music: 'Music',
+      family: 'Family',
+    },
+    card: {
+      free: 'Free',
+      featured: 'Featured',
+      soldOut: 'Sold Out',
+      getTickets: 'Get Tickets',
+      learnMore: 'Learn More',
+    },
+    noEvents: 'No upcoming events found. Check back soon!',
+    browseAll: 'Browse all events',
+  },
+
+  // Venues / Places
+  venues: {
+    title: 'Venues in Bahrain',
+    subtitle: 'Discover the best places to dine, drink, and unwind',
+    filters: {
+      all: 'All Venues',
+      restaurants: 'Restaurants',
+      cafes: 'Cafes',
+      bars: 'Bars',
+      clubs: 'Clubs',
+      lounges: 'Lounges',
+    },
+    card: {
+      open: 'Open Now',
+      closed: 'Closed',
+      viewMenu: 'View Menu',
+      getDirections: 'Get Directions',
+      callNow: 'Call Now',
+    },
+  },
+
+  // Cinema
+  cinema: {
+    title: 'Cinema in Bahrain',
+    subtitle: 'Find movies, watch trailers, and book tickets',
+    filters: {
+      nowShowing: 'Now Showing',
+      comingSoon: 'Coming Soon',
+      allCinemas: 'All Cinemas',
+      allGenres: 'All Genres',
+      allLanguages: 'All Languages',
+      popular: 'Popular',
+    },
+    card: {
+      bookNow: 'Book Now',
+      bookTickets: 'Book Tickets',
+      showtimes: 'Showtimes',
+      trailer: 'Watch Trailer',
+    },
+    updated: 'Updated',
+    searchMovies: 'Search movies...',
+  },
+
+  // Categories
+  categories: {
+    events: 'Events',
+    eventsDesc: 'Concerts, shows & more',
+    dining: 'Dining & Nightlife',
+    diningDesc: 'Restaurants & clubs',
+    cinema: 'Cinema',
+    cinemaDesc: 'Movies & showtimes',
+    offers: 'Offers',
+    offersDesc: 'Deals & promotions',
+    explore: 'Explore',
+    exploreDesc: 'Hotels, spas & more',
+    listings: 'listings',
+    comingSoon: 'Coming soon',
+  },
+
+  // Common
+  common: {
+    loading: 'Loading...',
+    error: 'Something went wrong',
+    retry: 'Try Again',
+    back: 'Back',
+    next: 'Next',
+    previous: 'Previous',
+    submit: 'Submit',
+    cancel: 'Cancel',
+    save: 'Save',
+    delete: 'Delete',
+    edit: 'Edit',
+    share: 'Share',
+    readMore: 'Read More',
+    showLess: 'Show Less',
+    seeAll: 'See All',
+    noResults: 'No results found',
+    date: 'Date',
+    time: 'Time',
+    location: 'Location',
+    price: 'Price',
+    category: 'Category',
+    featured: 'Featured',
+  },
+
+  // Footer
+  footer: {
+    tagline: 'Bahrain\'s first AI-powered guide to events, dining, and culture. Always updated, always alive.',
+    quickLinks: 'Quick Links',
+    categories: 'Categories',
+    support: 'Support',
+    legal: 'Legal',
+    privacy: 'Privacy Policy',
+    terms: 'Terms of Service',
+    contact: 'Contact Us',
+    copyright: '© 2025 BahrainNights.com • Powered by AI • Made with ❤️ in Bahrain',
+    events: 'Events',
+    todaysEvents: 'Today\'s Events',
+    thisWeekend: 'This Weekend',
+    concerts: 'Concerts',
+    fullCalendar: 'Full Calendar',
+    dining: 'Dining',
+    restaurants: 'Restaurants',
+    cafes: 'Cafes',
+    nightlife: 'Nightlife',
+    viewAll: 'View All',
+    forBusinesses: 'For Businesses',
+    registerYourVenue: 'Register Your Venue',
+    venueLogin: 'Venue Login',
+    listYourEvent: 'List Your Event',
+    advertise: 'Advertise',
+  },
+};
+
+export default en;

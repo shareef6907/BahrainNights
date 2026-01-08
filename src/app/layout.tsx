@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import { Inter } from "next/font/google";
 import "./globals.css";
 import { AuthProvider } from "@/lib/auth-context";
-import { LanguageProvider } from "@/context/LanguageContext";
+import { TranslationProvider } from "@/lib/i18n/TranslationContext";
 import { PublicAuthProvider } from "@/context/PublicAuthContext";
 import { PageTracker } from "@/components/analytics/PageTracker";
 import FloatingBackButton from "@/components/ui/FloatingBackButton";
@@ -153,7 +153,7 @@ export default function RootLayout({
         />
       </head>
       <body className={`${inter.variable} font-inter antialiased`}>
-        <LanguageProvider>
+        <TranslationProvider>
           <PublicAuthProvider>
             <AuthProvider>
               <PageTracker />
@@ -161,7 +161,7 @@ export default function RootLayout({
               <FloatingBackButton />
             </AuthProvider>
           </PublicAuthProvider>
-        </LanguageProvider>
+        </TranslationProvider>
       </body>
     </html>
   );

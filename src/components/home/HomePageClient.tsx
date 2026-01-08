@@ -5,6 +5,7 @@ import dynamic from 'next/dynamic';
 import { motion, AnimatePresence } from 'framer-motion';
 import { MapPin, Clock, Star, ChevronRight, ChevronDown, Menu, X, Sparkles, Plus, Play, Building2, LogIn } from 'lucide-react';
 import GlobalSearch from '@/components/search/GlobalSearch';
+import { LanguageToggle } from '@/components/LanguageToggle';
 import { Movie } from '@/components/cinema/MovieCard';
 
 // Lazy load below-fold components for faster initial load
@@ -331,13 +332,14 @@ export default function HomePageClient({ initialMovies, initialStats, initialTod
       <nav className={`fixed top-0 w-full z-50 transition-all duration-300 ${isScrolled ? 'bg-slate-950/95 backdrop-blur-xl border-b border-white/10 shadow-xl shadow-black/20' : ''}`}>
         <div className="w-full px-4 sm:px-6 lg:px-8">
           <div className="flex items-center justify-between h-20">
-            {/* Logo */}
-            <div className="flex items-center flex-shrink-0">
+            {/* Logo and Language Toggle */}
+            <div className="flex items-center gap-3 flex-shrink-0">
               <a href="/" className="flex items-center">
                 <span className="text-2xl lg:text-3xl font-black bg-gradient-to-r from-yellow-400 via-orange-500 to-pink-500 bg-clip-text text-transparent">
                   BahrainNights
                 </span>
               </a>
+              <LanguageToggle variant="pill" />
             </div>
 
             {/* Desktop Navigation - Centered */}
@@ -498,6 +500,11 @@ export default function HomePageClient({ initialMovies, initialStats, initialTod
                     </AnimatePresence>
                   </div>
                 ))}
+
+                {/* Mobile Language Toggle */}
+                <div className="flex justify-center py-4 border-b border-white/5">
+                  <LanguageToggle variant="default" />
+                </div>
 
                 {/* Mobile CTA */}
                 <div className="pt-4 space-y-3">
