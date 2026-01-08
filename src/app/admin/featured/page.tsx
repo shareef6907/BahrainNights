@@ -56,11 +56,11 @@ export default function FeaturedListingsPage() {
   // Mapping for explore page categories
   const exploreCategoryMapping: Record<string, string[]> = {
     hotels: ['hotel', 'resort', 'staycation'],
-    spas: ['spa', 'wellness', 'massage', 'gym', 'salon'],
-    shopping: ['shopping', 'market', 'mall', 'retail'],
+    spas: ['spa', 'wellness', 'massage', 'gym', 'salon', 'spa & wellness', 'fitness center'],
+    shopping: ['shopping', 'market', 'mall', 'retail', 'shopping mall', 'mall outlet'],
     tours: ['tour', 'experience', 'adventure'],
-    kids: ['kids', 'family', 'entertainment', 'waterpark'],
-    community: ['community', 'charity', 'volunteer'],
+    kids: ['kids', 'family', 'entertainment', 'waterpark', 'entertainment venue'],
+    community: ['community', 'charity', 'volunteer', 'cultural center'],
   };
 
   // Get explore category for a venue
