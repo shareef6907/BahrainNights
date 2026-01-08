@@ -80,10 +80,16 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
     setMobileMenuOpen(false);
   }, [pathname]);
 
-  // Check if user is admin
+  // Check if user is admin - redirect if not authenticated or not admin
   useEffect(() => {
-    if (!isLoading && user && user.role !== 'admin') {
-      router.push('/venue-portal/dashboard');
+    if (!isLoading) {
+      if (!user) {
+        // Not authenticated - redirect to login
+        router.push('/login');
+      } else if (user.role !== 'admin') {
+        // Authenticated but not admin - redirect to venue portal
+        router.push('/venue-portal/dashboard');
+      }
     }
   }, [user, isLoading, router]);
 
