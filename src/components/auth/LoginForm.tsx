@@ -84,7 +84,9 @@ export default function LoginForm() {
           redirectUrl = '/venue-portal/dashboard';
         }
 
-        router.push(redirectUrl);
+        // Use window.location for hard redirect to ensure cookies are properly sent
+        // This fixes mobile browser issues where router.push() doesn't sync cookies
+        window.location.href = redirectUrl;
       } else {
         setGeneralError(error || 'Invalid email or password');
       }
