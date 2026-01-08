@@ -152,23 +152,21 @@ function PlaceCard({ place, index }: PlaceCardProps) {
 
             {/* Hover Overlay */}
             <div className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center justify-center gap-3">
-              <motion.button
-                className="px-4 py-2 bg-white text-black font-semibold rounded-lg"
+              <motion.div
+                className="px-4 py-2 bg-white text-black font-semibold rounded-lg cursor-pointer"
                 whileHover={{ scale: 1.05 }}
                 whileTap={{ scale: 0.95 }}
-                onClick={(e) => e.preventDefault()}
               >
                 View Details
-              </motion.button>
+              </motion.div>
               {place.upcomingEventsCount > 0 && (
-                <motion.button
-                  className="px-4 py-2 bg-gradient-to-r from-yellow-400 to-orange-500 text-black font-semibold rounded-lg"
+                <motion.div
+                  className="px-4 py-2 bg-gradient-to-r from-yellow-400 to-orange-500 text-black font-semibold rounded-lg cursor-pointer"
                   whileHover={{ scale: 1.05 }}
                   whileTap={{ scale: 0.95 }}
-                  onClick={(e) => e.preventDefault()}
                 >
                   {place.upcomingEventsCount} Events
-                </motion.button>
+                </motion.div>
               )}
             </div>
           </div>
