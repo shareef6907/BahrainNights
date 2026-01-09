@@ -57,7 +57,7 @@ export const ar = {
       title: 'دليلك لما يحدث في البحرين',
       subtitle: 'مدعوم بالذكاء الاصطناعي • محدّث دائماً',
       tagline: 'نعرض أفضل التجارب في البحرين',
-      searchPlaceholder: 'ابحث عن الفعاليات والأماكن والأفلام...',
+      searchPlaceholder: 'ماذا تبحث عنه الليلة؟',
       cta: 'استكشف الآن',
     },
     sections: {
@@ -69,6 +69,13 @@ export const ar = {
       viewAll: 'عرض الكل',
       happeningToday: 'يحدث اليوم',
       exploreByCategory: 'استكشف حسب الفئة',
+    },
+    quickFilters: {
+      events: 'الفعاليات',
+      dining: 'المطاعم',
+      cinema: 'السينما',
+      offers: 'العروض',
+      explore: 'استكشف',
     },
   },
 

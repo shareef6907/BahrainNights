@@ -318,11 +318,11 @@ export default function HomePageClient({ initialMovies, initialStats, initialTod
 
   // Quick filter buttons with direct page links (not search)
   const quickFilters = [
-    { label: '🎭 Events', href: '/events' },
-    { label: '🍽️ Dining', href: '/places' },
-    { label: '🎬 Cinema', href: '/cinema' },
-    { label: '🏷️ Offers', href: '/offers' },
-    { label: '🧭 Explore', href: '/explore' },
+    { label: `🎭 ${t.home.quickFilters.events}`, href: '/events' },
+    { label: `🍽️ ${t.home.quickFilters.dining}`, href: '/places' },
+    { label: `🎬 ${t.home.quickFilters.cinema}`, href: '/cinema' },
+    { label: `🏷️ ${t.home.quickFilters.offers}`, href: '/offers' },
+    { label: `🧭 ${t.home.quickFilters.explore}`, href: '/explore' },
   ];
 
   return (
@@ -611,7 +611,7 @@ export default function HomePageClient({ initialMovies, initialStats, initialTod
           >
             <GlobalSearch
               variant="hero"
-              placeholder="What are you looking for tonight?"
+              placeholder={t.home.hero.searchPlaceholder}
             />
 
             {/* Quick Filters */}
@@ -702,7 +702,7 @@ export default function HomePageClient({ initialMovies, initialStats, initialTod
                           className="mt-3 flex items-center gap-2 px-4 py-2 bg-yellow-400 text-black rounded-full font-medium hover:bg-yellow-300 transition-colors"
                         >
                           <Play className="w-4 h-4 fill-current" />
-                          Watch Trailer
+                          {t.movieModal.watchTrailer}
                         </button>
                       )}
                     </div>

@@ -54,7 +54,7 @@ export const en = {
       title: 'Your Guide to What\'s Happening in Bahrain',
       subtitle: 'AI-powered • Always updated',
       tagline: 'Showcasing Bahrain\'s Finest Experiences',
-      searchPlaceholder: 'Search events, venues, movies...',
+      searchPlaceholder: 'What are you looking for tonight?',
       cta: 'Explore Now',
     },
     sections: {
@@ -66,6 +66,13 @@ export const en = {
       viewAll: 'View All',
       happeningToday: 'Happening Today',
       exploreByCategory: 'Explore by Category',
+    },
+    quickFilters: {
+      events: 'Events',
+      dining: 'Dining',
+      cinema: 'Cinema',
+      offers: 'Offers',
+      explore: 'Explore',
     },
   },
 
