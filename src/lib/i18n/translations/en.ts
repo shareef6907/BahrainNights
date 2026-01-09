@@ -51,10 +51,10 @@ export const en = {
   // Homepage
   home: {
     hero: {
-      title: 'Your Guide to What\'s Happening in Bahrain',
-      subtitle: 'AI-powered • Always updated',
-      tagline: 'Showcasing Bahrain\'s Finest Experiences',
-      searchPlaceholder: 'What are you looking for tonight?',
+      title: 'Bahrain Nights — Discover Events, Venues & Experiences',
+      subtitle: 'Your guide to things to do in Bahrain',
+      tagline: 'Events • Nightlife • Cinema • Dining',
+      searchPlaceholder: 'Search events in Bahrain, venues, cinema...',
       cta: 'Explore Now',
     },
     sections: {
