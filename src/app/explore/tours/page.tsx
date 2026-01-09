@@ -11,21 +11,22 @@ export const revalidate = 0;
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!;
 const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY!;
 
-// Fetch tours from database
+// Fetch tours/attractions from database (same as kids page - attractions table)
 async function getTours(): Promise<ExploreItem[]> {
   const supabase = createClient(supabaseUrl, supabaseServiceKey, {
     auth: { autoRefreshToken: false, persistSession: false }
   });
 
+  // Fetch from attractions table (same data source as kids page)
   const { data, error } = await supabase
-    .from('tours')
+    .from('attractions')
     .select('*')
     .eq('is_active', true)
     .order('is_featured', { ascending: false })
     .order('tripadvisor_rating', { ascending: false, nullsFirst: false });
 
   if (error) {
-    console.error('Error fetching tours:', error);
+    console.error('Error fetching attractions for tours:', error);
     return [];
   }
 
@@ -35,21 +36,29 @@ async function getTours(): Promise<ExploreItem[]> {
 
   // Map database fields to ExploreItem interface
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  return data.map((tour: any) => ({
-    id: tour.id,
-    name: tour.name,
-    slug: tour.slug || tour.id,
-    type: tour.tour_type || 'Day Tour',
-    category: 'tours' as const,
-    image: tour.image_url || 'https://images.unsplash.com/photo-1469474968028-56623f02e42e?w=800',
-    area: tour.areas_covered?.[0] || tour.meeting_point || 'Bahrain',
-    description: tour.short_description || tour.description?.substring(0, 150) || '',
-    price: tour.price_from ? `BD ${tour.price_from}` : undefined,
-    rating: tour.tripadvisor_rating || tour.rating || undefined,
-    duration: tour.duration || undefined,
-    features: tour.highlights || tour.includes || [],
-    isFeatured: tour.is_featured || false,
-  }));
+  return data.map((attraction: any) => {
+    // Derive type from category or subcategory
+    let type = attraction.subcategory || attraction.category || 'Experience';
+    if (type === 'Family & Kids') {
+      type = attraction.subcategory || 'Activity';
+    }
+
+    return {
+      id: attraction.id,
+      name: attraction.name,
+      slug: attraction.slug || attraction.id,
+      type: type,
+      category: 'tours' as const,
+      image: attraction.image_url || 'https://images.unsplash.com/photo-1469474968028-56623f02e42e?w=800',
+      area: attraction.area || 'Bahrain',
+      description: attraction.short_description || attraction.description?.substring(0, 150) || '',
+      price: attraction.price_from ? `BD ${attraction.price_from}` : (attraction.price_range === 'Free' ? 'Free' : undefined),
+      rating: attraction.tripadvisor_rating || attraction.rating || undefined,
+      duration: attraction.duration || undefined,
+      features: attraction.tags || [],
+      isFeatured: attraction.is_featured || false,
+    };
+  });
 }
 
 // Server Component

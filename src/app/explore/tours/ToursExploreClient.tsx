@@ -6,52 +6,55 @@ import { ArrowLeft, Plus } from 'lucide-react';
 import Link from 'next/link';
 import ExploreGrid, { ExploreItem } from '@/components/explore/ExploreGrid';
 import ExploreFilters, { FilterConfig } from '@/components/explore/ExploreFilters';
+import { useTranslation } from '@/lib/i18n';
 
 interface ToursExploreClientProps {
   initialTours: ExploreItem[];
 }
 
-// Filter configurations
-const filterConfigs: FilterConfig[] = [
-  {
-    id: 'type',
-    label: 'Type',
-    type: 'multi',
-    options: [
-      { id: 'cultural', label: 'Cultural' },
-      { id: 'food', label: 'Food & Culinary' },
-      { id: 'desert', label: 'Desert Safari' },
-      { id: 'boat', label: 'Boat Tours' },
-      { id: 'walking', label: 'Walking Tours' },
-      { id: 'private', label: 'Private Tours' },
-      { id: 'photography', label: 'Photography' },
-      { id: 'day tours', label: 'Day Tours' },
-    ],
-  },
-  {
-    id: 'duration',
-    label: 'Duration',
-    type: 'single',
-    options: [
-      { id: 'short', label: 'Under 3 hours' },
-      { id: 'medium', label: '3-5 hours' },
-      { id: 'full-day', label: 'Full day (5+ hours)' },
-    ],
-  },
-  {
-    id: 'price',
-    label: 'Price Range',
-    type: 'single',
-    options: [
-      { id: 'budget', label: 'Under BD 35' },
-      { id: 'mid', label: 'BD 35 - 50' },
-      { id: 'premium', label: 'BD 50+' },
-    ],
-  },
-];
-
 export default function ToursExploreClient({ initialTours }: ToursExploreClientProps) {
+  const { t } = useTranslation();
   const [activeFilters, setActiveFilters] = useState<Record<string, string[]>>({});
+
+  // Filter configurations - same as kids page since we're showing attractions
+  const filterConfigs: FilterConfig[] = [
+    {
+      id: 'type',
+      label: t.familyKids.filters.type,
+      type: 'multi',
+      options: [
+        { id: 'water-park', label: t.familyKids.types.waterParks },
+        { id: 'theme-park', label: t.familyKids.types.themeParks },
+        { id: 'museum', label: t.familyKids.types.museums },
+        { id: 'playground', label: t.familyKids.types.playgrounds },
+        { id: 'entertainment', label: t.familyKids.types.entertainment },
+        { id: 'educational', label: t.familyKids.types.educational },
+        { id: 'outdoor', label: t.familyKids.types.outdoor },
+      ],
+    },
+    {
+      id: 'ageRange',
+      label: t.familyKids.filters.ageRange,
+      type: 'single',
+      options: [
+        { id: 'toddlers', label: t.familyKids.ages.toddlers },
+        { id: 'kids', label: t.familyKids.ages.kids },
+        { id: 'teens', label: t.familyKids.ages.teens },
+        { id: 'all', label: t.familyKids.ages.allAges },
+      ],
+    },
+    {
+      id: 'price',
+      label: t.familyKids.filters.priceRange,
+      type: 'single',
+      options: [
+        { id: 'free', label: t.familyKids.prices.free },
+        { id: 'budget', label: t.familyKids.prices.budget },
+        { id: 'mid', label: t.familyKids.prices.mid },
+        { id: 'premium', label: t.familyKids.prices.premium },
+      ],
+    },
+  ];
 
   const handleFilterChange = (filterId: string, value: string[]) => {
     setActiveFilters((prev) => ({
@@ -68,30 +71,32 @@ export default function ToursExploreClient({ initialTours }: ToursExploreClientP
     let result = [...initialTours];
 
     if (activeFilters.type?.length) {
-      result = result.filter((tour) =>
+      result = result.filter((item) =>
         activeFilters.type.some(
-          (type) => tour.type.toLowerCase().includes(type.toLowerCase())
+          (type) => item.type.toLowerCase().includes(type.toLowerCase().replace('-', ' '))
         )
       );
     }
 
-    if (activeFilters.duration?.length) {
-      result = result.filter((tour) => {
-        const durationStr = tour.duration || '';
-        const hours = parseInt(durationStr.replace(/[^0-9]/g, '') || '0');
-        if (activeFilters.duration.includes('short')) return hours < 3;
-        if (activeFilters.duration.includes('medium')) return hours >= 3 && hours <= 5;
-        if (activeFilters.duration.includes('full-day')) return hours > 5;
+    if (activeFilters.ageRange?.length) {
+      result = result.filter((item) => {
+        const ageRange = item.ageRange?.toLowerCase() || 'all ages';
+        if (activeFilters.ageRange.includes('toddlers')) return ageRange.includes('toddler') || ageRange.includes('all');
+        if (activeFilters.ageRange.includes('kids')) return ageRange.includes('kid') || ageRange.includes('all');
+        if (activeFilters.ageRange.includes('teens')) return ageRange.includes('teen') || ageRange.includes('all');
+        if (activeFilters.ageRange.includes('all')) return ageRange.includes('all');
         return true;
       });
     }
 
     if (activeFilters.price?.length) {
-      result = result.filter((tour) => {
-        const priceNum = parseInt(tour.price?.replace(/[^0-9]/g, '') || '0');
-        if (activeFilters.price.includes('budget')) return priceNum < 35;
-        if (activeFilters.price.includes('mid')) return priceNum >= 35 && priceNum <= 50;
-        if (activeFilters.price.includes('premium')) return priceNum > 50;
+      result = result.filter((item) => {
+        const priceStr = item.price?.toLowerCase() || '';
+        if (activeFilters.price.includes('free')) return priceStr === 'free';
+        const priceNum = parseInt(priceStr.replace(/[^0-9]/g, '') || '0');
+        if (activeFilters.price.includes('budget')) return priceNum > 0 && priceNum < 10;
+        if (activeFilters.price.includes('mid')) return priceNum >= 10 && priceNum <= 20;
+        if (activeFilters.price.includes('premium')) return priceNum > 20;
         return true;
       });
     }
@@ -111,7 +116,7 @@ export default function ToursExploreClient({ initialTours }: ToursExploreClientP
             className="inline-flex items-center gap-2 text-gray-400 hover:text-white mb-6 transition-colors"
           >
             <ArrowLeft className="w-4 h-4" />
-            Back to Explore
+            {t.familyKids.backToExplore}
           </Link>
 
           <motion.div
@@ -124,10 +129,10 @@ export default function ToursExploreClient({ initialTours }: ToursExploreClientP
               </div>
               <div>
                 <h1 className="text-3xl md:text-4xl font-bold text-white">
-                  Tours & Adventures
+                  {t.explore.categories.tours}
                 </h1>
                 <p className="text-gray-400">
-                  {filteredTours.length} unique experiences
+                  {t.familyKids.activitiesCount.replace('{count}', filteredTours.length.toString())}
                 </p>
               </div>
             </div>
@@ -153,7 +158,7 @@ export default function ToursExploreClient({ initialTours }: ToursExploreClientP
         <ExploreGrid
           items={filteredTours}
           category="tours"
-          emptyMessage="No tours match your filters"
+          emptyMessage={t.familyKids.emptyMessage}
         />
       </section>
 
@@ -171,10 +176,10 @@ export default function ToursExploreClient({ initialTours }: ToursExploreClientP
           <div className="relative z-10 py-12 px-6 md:px-12">
             <div className="max-w-3xl mx-auto text-center">
               <h2 className="text-2xl md:text-3xl font-bold text-white mb-4">
-                Offer Tours & Experiences?
+                {t.familyKids.haveFamilyVenue}
               </h2>
               <p className="text-white/90 text-lg mb-8 max-w-xl mx-auto">
-                List your tours, experiences, and adventures on BahrainNights and reach thousands of visitors.
+                {t.familyKids.listYourAttraction}
               </p>
 
               <Link
@@ -182,7 +187,7 @@ export default function ToursExploreClient({ initialTours }: ToursExploreClientP
                 className="inline-flex items-center justify-center gap-2 px-8 py-4 bg-white text-teal-600 font-bold rounded-xl hover:bg-gray-100 transition-colors shadow-lg"
               >
                 <Plus className="w-5 h-5" />
-                Register Your Business
+                {t.explore.registerYourVenue}
               </Link>
             </div>
           </div>
