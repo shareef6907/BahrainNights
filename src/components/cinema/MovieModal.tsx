@@ -5,6 +5,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { X, Star, Clock, Play, ExternalLink, Ticket } from 'lucide-react';
 import Image from 'next/image';
 import { Movie } from './MovieCard';
+import { useTranslation } from '@/lib/i18n';
 
 // Bahrain cinema booking URLs
 const BAHRAIN_CINEMAS = [
@@ -63,6 +64,8 @@ export default function MovieModal({
   onClose,
   onTrailerClick,
 }: MovieModalProps) {
+  const { t } = useTranslation();
+
   useEffect(() => {
     if (isOpen) {
       document.body.style.overflow = 'hidden';
@@ -188,7 +191,7 @@ export default function MovieModal({
                           className="flex items-center gap-2 mx-auto md:mx-0 px-5 py-2.5 bg-white/10 border border-white/20 rounded-xl text-white hover:bg-white/20 transition-colors"
                         >
                           <Play className="w-5 h-5 fill-current" />
-                          Watch Trailer
+                          {t.movieModal.watchTrailer}
                         </button>
                       )}
                     </div>
@@ -196,14 +199,14 @@ export default function MovieModal({
 
                   {/* Synopsis */}
                   <div className="mt-6 p-4 bg-white/5 rounded-xl">
-                    <h3 className="text-lg font-bold text-white mb-2">Synopsis</h3>
+                    <h3 className="text-lg font-bold text-white mb-2">{t.movieModal.synopsis}</h3>
                     <p className="text-gray-300 leading-relaxed">{movie.synopsis}</p>
                   </div>
 
                   {/* Cast */}
                   {movie.cast && movie.cast.length > 0 && (
                     <div className="mt-4 p-4 bg-white/5 rounded-xl">
-                      <h3 className="text-lg font-bold text-white mb-2">Cast</h3>
+                      <h3 className="text-lg font-bold text-white mb-2">{t.movieModal.cast}</h3>
                       <p className="text-gray-300">{movie.cast.join(', ')}</p>
                     </div>
                   )}
@@ -213,7 +216,7 @@ export default function MovieModal({
                     <div className="mt-6">
                       <div className="flex items-center gap-2 mb-4">
                         <Ticket className="w-6 h-6 text-yellow-400" />
-                        <h3 className="text-xl font-bold text-white">Book Tickets</h3>
+                        <h3 className="text-xl font-bold text-white">{t.movieModal.bookTickets}</h3>
                       </div>
 
                       {/* Cinema Grid - Filter by scraped_from to show only cinemas where movie is playing */}
@@ -226,7 +229,7 @@ export default function MovieModal({
                           return (
                             <div className="p-4 bg-white/5 rounded-xl text-center">
                               <p className="text-gray-400">
-                                Check cinema websites for availability
+                                {t.movieModal.checkCinemaWebsites}
                               </p>
                               <div className="flex flex-wrap justify-center gap-3 mt-3">
                                 {BAHRAIN_CINEMAS.map((cinema) => (
@@ -249,8 +252,8 @@ export default function MovieModal({
                           <>
                             <p className="text-gray-400 mb-4">
                               {availableCinemas.length === 1
-                                ? `Available at ${availableCinemas[0].name}`
-                                : `Available at ${availableCinemas.length} cinemas`}
+                                ? `${t.movieModal.availableAtOneCinema} ${availableCinemas[0].name}`
+                                : t.movieModal.availableAtCinemas.replace('{count}', availableCinemas.length.toString())}
                             </p>
                             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                               {availableCinemas.map((cinema) => (
@@ -281,7 +284,7 @@ export default function MovieModal({
 
                                     <div className="flex items-center gap-2 px-4 py-2 bg-white/10 rounded-lg group-hover:bg-yellow-400 group-hover:text-black transition-all">
                                       <span className="font-medium text-white group-hover:text-black">
-                                        Book Now
+                                        {t.movieModal.bookNow}
                                       </span>
                                       <ExternalLink className="w-4 h-4 text-white group-hover:text-black" />
                                     </div>
@@ -299,7 +302,7 @@ export default function MovieModal({
                   {!movie.isNowShowing && (
                     <div className="mt-6">
                       <div className="p-6 bg-gradient-to-r from-orange-500/10 to-yellow-500/10 border border-orange-500/20 rounded-xl text-center">
-                        <p className="text-orange-400 font-medium mb-1">Coming to cinemas</p>
+                        <p className="text-orange-400 font-medium mb-1">{t.movieModal.comingToCinemas}</p>
                         <p className="text-2xl font-bold text-white">{movie.releaseDate}</p>
                       </div>
 
@@ -314,7 +317,7 @@ export default function MovieModal({
                             <div className="mt-4">
                               <div className="flex items-center gap-2 mb-3">
                                 <Ticket className="w-5 h-5 text-orange-400" />
-                                <h4 className="text-lg font-bold text-white">Coming to</h4>
+                                <h4 className="text-lg font-bold text-white">{t.movieModal.comingTo}</h4>
                               </div>
                               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                                 {availableCinemas.map((cinema) => (

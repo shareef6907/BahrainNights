@@ -4,6 +4,7 @@ import { useState } from 'react';
 import { motion } from 'framer-motion';
 import { Calendar, Clock, Users, Shirt, ChevronDown, ChevronUp, Tag } from 'lucide-react';
 import Link from 'next/link';
+import { useTranslation } from '@/lib/i18n';
 
 interface PriceTier {
   tier: string;
@@ -33,6 +34,7 @@ export default function EventDetails({
   dressCode,
   tags
 }: EventDetailsProps) {
+  const { t } = useTranslation();
   const [isExpanded, setIsExpanded] = useState(false);
   const maxLength = 400;
   const shouldTruncate = description.length > maxLength;
@@ -52,7 +54,7 @@ export default function EventDetails({
         whileInView="visible"
         viewport={{ once: true }}
       >
-        <h2 className="text-2xl font-bold text-white mb-4">About This Event</h2>
+        <h2 className="text-2xl font-bold text-white mb-4">{t.eventDetail.aboutThisEvent}</h2>
         <div className="text-gray-300 leading-relaxed whitespace-pre-line">
           {shouldTruncate && !isExpanded
             ? `${description.slice(0, maxLength)}...`
@@ -65,11 +67,11 @@ export default function EventDetails({
           >
             {isExpanded ? (
               <>
-                Read Less <ChevronUp className="w-4 h-4" />
+                {t.eventDetail.readLess} <ChevronUp className="w-4 h-4" />
               </>
             ) : (
               <>
-                Read More <ChevronDown className="w-4 h-4" />
+                {t.eventDetail.readMore} <ChevronDown className="w-4 h-4" />
               </>
             )}
           </button>
@@ -84,7 +86,7 @@ export default function EventDetails({
         whileInView="visible"
         viewport={{ once: true }}
       >
-        <h2 className="text-2xl font-bold text-white mb-6">Event Details</h2>
+        <h2 className="text-2xl font-bold text-white mb-6">{t.eventDetail.eventDetails}</h2>
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
           {/* Date & Time */}
           <div className="flex items-start gap-4 p-4 bg-white/5 rounded-xl">
@@ -92,7 +94,7 @@ export default function EventDetails({
               <Calendar className="w-6 h-6 text-yellow-400" />
             </div>
             <div>
-              <p className="text-sm text-gray-400">Date & Time</p>
+              <p className="text-sm text-gray-400">{t.eventDetail.dateTime}</p>
               <p className="text-white font-medium">{dayOfWeek}, {date}</p>
               {time && !time.toLowerCase().includes('tba') && (
                 <p className="text-gray-300">{time}</p>
@@ -107,7 +109,7 @@ export default function EventDetails({
                 <Clock className="w-6 h-6 text-yellow-400" />
               </div>
               <div>
-                <p className="text-sm text-gray-400">Duration</p>
+                <p className="text-sm text-gray-400">{t.eventDetail.duration}</p>
                 <p className="text-white font-medium">{duration}</p>
               </div>
             </div>
@@ -120,7 +122,7 @@ export default function EventDetails({
                 <Users className="w-6 h-6 text-yellow-400" />
               </div>
               <div>
-                <p className="text-sm text-gray-400">Age Restriction</p>
+                <p className="text-sm text-gray-400">{t.eventDetail.ageRestriction}</p>
                 <p className="text-white font-medium">{ageRestriction}</p>
               </div>
             </div>
@@ -133,7 +135,7 @@ export default function EventDetails({
                 <Shirt className="w-6 h-6 text-yellow-400" />
               </div>
               <div>
-                <p className="text-sm text-gray-400">Dress Code</p>
+                <p className="text-sm text-gray-400">{t.eventDetail.dressCode}</p>
                 <p className="text-white font-medium">{dressCode}</p>
               </div>
             </div>

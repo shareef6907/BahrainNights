@@ -17,6 +17,7 @@ import {
 } from 'lucide-react';
 import Link from 'next/link';
 import Image from 'next/image';
+import { useTranslation } from '@/lib/i18n';
 
 interface FeaturedVenue {
   id: string;
@@ -35,12 +36,12 @@ interface FeaturedData {
   all: FeaturedVenue[];
 }
 
-// Category data
-const exploreCategories = [
+// Category data (static structure, names/taglines come from translations)
+const exploreCategoriesConfig = [
   {
     id: 'hotels',
-    name: 'Hotels & Staycations',
-    tagline: 'Luxury stays and weekend getaways',
+    nameKey: 'hotels',
+    taglineKey: 'hotelsTagline',
     icon: Hotel,
     emoji: '🏨',
     image: 'https://images.unsplash.com/photo-1566073771259-6a8506099945?w=800',
@@ -50,8 +51,8 @@ const exploreCategories = [
   },
   {
     id: 'spas',
-    name: 'Spa & Wellness',
-    tagline: 'Relax, rejuvenate, and unwind',
+    nameKey: 'spas',
+    taglineKey: 'spasTagline',
     icon: Sparkles,
     emoji: '💆‍♀️',
     image: 'https://images.unsplash.com/photo-1544161515-4ab6ce6db874?w=800',
@@ -61,8 +62,8 @@ const exploreCategories = [
   },
   {
     id: 'shopping',
-    name: 'Shopping & Markets',
-    tagline: 'Malls, souqs, and pop-up markets',
+    nameKey: 'shopping',
+    taglineKey: 'shoppingTagline',
     icon: ShoppingBag,
     emoji: '🛍️',
     image: 'https://images.unsplash.com/photo-1555529669-e69e7aa0ba9a?w=800',
@@ -72,8 +73,8 @@ const exploreCategories = [
   },
   {
     id: 'tours',
-    name: 'Tours & Experiences',
-    tagline: 'Adventures and cultural discoveries',
+    nameKey: 'tours',
+    taglineKey: 'toursTagline',
     icon: Ship,
     emoji: '🚤',
     image: 'https://images.unsplash.com/photo-1559128010-7c1ad6e1b6a5?w=800',
@@ -83,8 +84,8 @@ const exploreCategories = [
   },
   {
     id: 'kids',
-    name: 'Kids Activities',
-    tagline: 'Fun for the whole family',
+    nameKey: 'kids',
+    taglineKey: 'kidsTagline',
     icon: Baby,
     emoji: '👶',
     image: 'https://images.unsplash.com/photo-1503454537195-1dcabb73ffb9?w=800',
@@ -94,8 +95,8 @@ const exploreCategories = [
   },
   {
     id: 'community',
-    name: 'Community Events',
-    tagline: 'Connect, volunteer, and give back',
+    nameKey: 'community',
+    taglineKey: 'communityTagline',
     icon: Users,
     emoji: '🤝',
     image: 'https://images.unsplash.com/photo-1529156069898-49953e39b3ac?w=800',
@@ -106,9 +107,17 @@ const exploreCategories = [
 ];
 
 export default function ExplorePage() {
+  const { t } = useTranslation();
   const [searchQuery, setSearchQuery] = useState('');
   const [featuredData, setFeaturedData] = useState<FeaturedData | null>(null);
   const [loadingFeatured, setLoadingFeatured] = useState(true);
+
+  // Build translated categories
+  const exploreCategories = exploreCategoriesConfig.map((cat) => ({
+    ...cat,
+    name: t.explore.categories[cat.nameKey as keyof typeof t.explore.categories] || cat.nameKey,
+    tagline: t.explore.categories[cat.taglineKey as keyof typeof t.explore.categories] || cat.taglineKey,
+  }));
 
   useEffect(() => {
     async function fetchFeatured() {
@@ -151,13 +160,13 @@ export default function ExplorePage() {
             className="text-center mb-8"
           >
             <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold text-white mb-4">
-              Explore{' '}
+              {t.explore.title}{' '}
               <span className="bg-gradient-to-r from-blue-400 via-purple-400 to-pink-400 bg-clip-text text-transparent">
-                Bahrain
+                {t.explore.titleHighlight}
               </span>
             </h1>
             <p className="text-gray-400 text-lg md:text-xl max-w-2xl mx-auto">
-              Discover hidden gems, unique experiences, and local favorites
+              {t.explore.subtitle}
             </p>
           </motion.div>
 
@@ -174,7 +183,7 @@ export default function ExplorePage() {
                 type="text"
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                placeholder="Search categories..."
+                placeholder={t.explore.searchPlaceholder}
                 className="w-full pl-12 pr-4 py-4 bg-white/10 border border-white/10 rounded-2xl text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-purple-500/50 focus:border-purple-500/50 transition-all"
               />
             </div>
@@ -223,7 +232,7 @@ export default function ExplorePage() {
                         {hasVenues && (
                           <div className="flex items-center gap-1 px-3 py-1 bg-yellow-400/90 text-black text-xs font-semibold rounded-full">
                             <Star className="w-3 h-3 fill-black" />
-                            {featuredVenues.length} Featured
+                            {featuredVenues.length} {t.explore.featured}
                           </div>
                         )}
                       </div>
@@ -237,7 +246,7 @@ export default function ExplorePage() {
 
                         {/* View button */}
                         <div className="mt-3 flex items-center gap-2 text-white/90 text-sm font-medium group-hover:text-yellow-300 transition-colors">
-                          <span>Explore</span>
+                          <span>{t.explore.exploreButton}</span>
                           <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
                         </div>
                       </div>
@@ -260,9 +269,9 @@ export default function ExplorePage() {
           >
             <div className="flex items-center gap-3 mb-2">
               <Star className="w-6 h-6 text-yellow-400 fill-yellow-400" />
-              <h2 className="text-2xl font-bold text-white">Featured Places</h2>
+              <h2 className="text-2xl font-bold text-white">{t.explore.featuredPlaces}</h2>
             </div>
-            <p className="text-gray-400">Hand-picked venues for the best experiences</p>
+            <p className="text-gray-400">{t.explore.featuredPlacesSubtitle}</p>
           </motion.div>
 
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
@@ -293,7 +302,7 @@ export default function ExplorePage() {
                     <div className="absolute top-3 left-3">
                       <span className="inline-flex items-center gap-1 px-2 py-1 bg-yellow-400 text-black text-xs font-semibold rounded-lg">
                         <Star className="w-3 h-3 fill-black" />
-                        Featured
+                        {t.explore.featured}
                       </span>
                     </div>
 
@@ -337,10 +346,10 @@ export default function ExplorePage() {
           <div className="relative z-10 py-12 px-6 md:px-12">
             <div className="max-w-3xl mx-auto text-center">
               <h2 className="text-2xl md:text-4xl font-bold text-black mb-4">
-                Own a Business in Bahrain?
+                {t.explore.ownBusiness}
               </h2>
               <p className="text-black/80 text-lg mb-8 max-w-xl mx-auto">
-                Join BahrainNights and showcase your venue, events, and offers to thousands of visitors every month.
+                {t.explore.joinBahrainNights}
               </p>
 
               <div className="flex flex-col sm:flex-row gap-4 justify-center">
@@ -348,14 +357,14 @@ export default function ExplorePage() {
                   href="/register-venue"
                   className="inline-flex items-center justify-center gap-2 px-8 py-4 bg-black text-white font-semibold rounded-xl hover:bg-gray-900 transition-colors"
                 >
-                  <span>Register Your Venue</span>
+                  <span>{t.explore.registerYourVenue}</span>
                   <ArrowRight className="w-5 h-5" />
                 </Link>
                 <Link
                   href="/venue-portal/login"
                   className="inline-flex items-center justify-center gap-2 px-8 py-4 bg-white/20 text-black font-semibold rounded-xl hover:bg-white/30 transition-colors border border-black/20"
                 >
-                  Already Registered? Login
+                  {t.explore.alreadyRegistered}
                 </Link>
               </div>
             </div>

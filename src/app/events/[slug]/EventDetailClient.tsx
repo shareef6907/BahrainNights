@@ -12,6 +12,7 @@ import ShareModal from '@/components/events/ShareModal';
 import AddToCalendar from '@/components/events/AddToCalendar';
 import SimilarEvents from '@/components/events/SimilarEvents';
 import { Event } from '@/components/events/EventCard';
+import { useTranslation } from '@/lib/i18n';
 
 interface HostedByVenue {
   id: string;
@@ -71,6 +72,7 @@ interface EventDetailClientProps {
 }
 
 export default function EventDetailClient({ event, similarEvents }: EventDetailClientProps) {
+  const { t } = useTranslation();
   const [shareModalOpen, setShareModalOpen] = useState(false);
   const [isSaved, setIsSaved] = useState(false);
 
@@ -156,7 +158,7 @@ export default function EventDetailClient({ event, similarEvents }: EventDetailC
                     className="flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-yellow-400 via-orange-500 to-pink-500 rounded-xl text-black font-bold hover:shadow-lg hover:shadow-orange-500/25 hover:scale-105 transition-all"
                   >
                     <Ticket className="w-5 h-5" />
-                    <span>Book Now</span>
+                    <span>{t.eventDetail.bookNow}</span>
                     <ExternalLink className="w-4 h-4" />
                   </a>
                 ) : event.sourceUrl ? (
@@ -167,7 +169,7 @@ export default function EventDetailClient({ event, similarEvents }: EventDetailC
                     className="flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-yellow-400 via-orange-500 to-pink-500 rounded-xl text-black font-bold hover:shadow-lg hover:shadow-orange-500/25 hover:scale-105 transition-all"
                   >
                     <Ticket className="w-5 h-5" />
-                    <span>View Event</span>
+                    <span>{t.eventDetail.viewEvent}</span>
                     <ExternalLink className="w-4 h-4" />
                   </a>
                 ) : null}
@@ -199,7 +201,7 @@ export default function EventDetailClient({ event, similarEvents }: EventDetailC
                   onClick={() => setShareModalOpen(true)}
                   className="hidden sm:flex items-center gap-2 px-4 py-3 bg-white/5 border border-white/10 rounded-xl text-white hover:bg-white/10 hover:border-yellow-400/50 transition-all"
                 >
-                  Share
+                  {t.eventDetail.share}
                 </button>
               </div>
             </div>
@@ -241,7 +243,7 @@ export default function EventDetailClient({ event, similarEvents }: EventDetailC
                 >
                   <h3 className="text-lg font-bold text-white mb-4 flex items-center gap-2">
                     <Building2 className="w-5 h-5 text-yellow-400" />
-                    Hosted By
+                    {t.eventDetail.hostedBy}
                   </h3>
                   <Link
                     href={`/places/${event.hostedByVenue.slug}`}
@@ -265,7 +267,7 @@ export default function EventDetailClient({ event, similarEvents }: EventDetailC
                       <p className="font-bold text-white group-hover:text-yellow-400 transition-colors">
                         {event.hostedByVenue.name}
                       </p>
-                      <p className="text-sm text-yellow-400/80">View venue profile →</p>
+                      <p className="text-sm text-yellow-400/80">{t.eventDetail.viewVenueProfile}</p>
                     </div>
                   </Link>
 
@@ -297,7 +299,7 @@ export default function EventDetailClient({ event, similarEvents }: EventDetailC
                         className="flex items-center gap-3 text-gray-300 hover:text-yellow-400 transition-colors"
                       >
                         <Globe className="w-4 h-4 text-yellow-400" />
-                        <span className="text-sm">Visit Website</span>
+                        <span className="text-sm">{t.eventDetail.visitWebsite}</span>
                         <ExternalLink className="w-3 h-3" />
                       </a>
                     )}
@@ -312,7 +314,7 @@ export default function EventDetailClient({ event, similarEvents }: EventDetailC
                       className="mt-4 w-full flex items-center justify-center gap-2 px-4 py-3 bg-gradient-to-r from-yellow-400 to-orange-500 rounded-xl text-black font-bold hover:shadow-lg hover:shadow-orange-500/25 transition-all"
                     >
                       <Ticket className="w-4 h-4" />
-                      Book via Venue
+                      {t.eventDetail.bookViaVenue}
                       <ExternalLink className="w-3 h-3" />
                     </a>
                   )}
@@ -326,7 +328,7 @@ export default function EventDetailClient({ event, similarEvents }: EventDetailC
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: 0.1 }}
               >
-                <h3 className="text-lg font-bold text-white mb-4">Location</h3>
+                <h3 className="text-lg font-bold text-white mb-4">{t.eventDetail.location}</h3>
                 <a
                   href={`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(event.venueDetails.name + ', Bahrain')}`}
                   target="_blank"
@@ -343,7 +345,7 @@ export default function EventDetailClient({ event, similarEvents }: EventDetailC
                     {event.venueDetails.address && event.venueDetails.address !== event.venueDetails.name && (
                       <p className="text-sm text-gray-400">{event.venueDetails.address}</p>
                     )}
-                    <p className="text-xs text-gray-500 mt-1">Click to open in Google Maps</p>
+                    <p className="text-xs text-gray-500 mt-1">{t.eventDetail.clickToOpenMaps}</p>
                   </div>
                 </a>
 
@@ -379,7 +381,7 @@ export default function EventDetailClient({ event, similarEvents }: EventDetailC
             <div className="mt-16 space-y-8">
               {/* Similar Events */}
               <SimilarEvents
-                title="Similar Events You May Like"
+                title={t.eventDetail.similarEvents}
                 events={similarEvents}
               />
             </div>
@@ -398,7 +400,7 @@ export default function EventDetailClient({ event, similarEvents }: EventDetailC
                   className="flex items-center gap-2 px-8 py-4 bg-gradient-to-r from-yellow-400 via-orange-500 to-pink-500 rounded-xl text-black font-bold w-full justify-center"
                 >
                   <Ticket className="w-5 h-5" />
-                  Book Now
+                  {t.eventDetail.bookNow}
                 </a>
               ) : (
                 <a
@@ -408,7 +410,7 @@ export default function EventDetailClient({ event, similarEvents }: EventDetailC
                   className="flex items-center gap-2 px-8 py-4 bg-gradient-to-r from-yellow-400 via-orange-500 to-pink-500 rounded-xl text-black font-bold w-full justify-center"
                 >
                   <Ticket className="w-5 h-5" />
-                  View Event
+                  {t.eventDetail.viewEvent}
                 </a>
               )}
             </div>

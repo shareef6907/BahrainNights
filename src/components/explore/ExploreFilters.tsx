@@ -3,6 +3,7 @@
 import { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { ChevronDown, X, SlidersHorizontal } from 'lucide-react';
+import { useTranslation } from '@/lib/i18n';
 
 export interface FilterOption {
   id: string;
@@ -31,6 +32,7 @@ export default function ExploreFilters({
   onClearAll,
   categoryColor = '#3B82F6',
 }: ExploreFiltersProps) {
+  const { t } = useTranslation();
   const [openDropdown, setOpenDropdown] = useState<string | null>(null);
   const [showMobileFilters, setShowMobileFilters] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
@@ -164,7 +166,7 @@ export default function ExploreFilters({
             className="flex items-center gap-1.5 px-3 py-2 text-sm text-gray-400 hover:text-white transition-colors"
           >
             <X className="w-4 h-4" />
-            Clear all
+            {t.exploreFilters.clearAll}
           </button>
         )}
       </div>
@@ -176,7 +178,7 @@ export default function ExploreFilters({
           className="flex items-center gap-2 px-4 py-2 bg-white/10 rounded-full text-sm font-medium text-white"
         >
           <SlidersHorizontal className="w-4 h-4" />
-          Filters
+          {t.exploreFilters.filters}
           {activeCount > 0 && (
             <span
               className="px-1.5 py-0.5 text-xs rounded-full text-white"
@@ -216,14 +218,14 @@ export default function ExploreFilters({
 
               {/* Header */}
               <div className="flex items-center justify-between px-4 pb-4 border-b border-white/10">
-                <h3 className="text-lg font-semibold text-white">Filters</h3>
+                <h3 className="text-lg font-semibold text-white">{t.exploreFilters.filters}</h3>
                 <div className="flex items-center gap-3">
                   {activeCount > 0 && (
                     <button
                       onClick={onClearAll}
                       className="text-sm text-gray-400"
                     >
-                      Clear all
+                      {t.exploreFilters.clearAll}
                     </button>
                   )}
                   <button
@@ -273,7 +275,7 @@ export default function ExploreFilters({
                   className="w-full py-3 rounded-xl font-semibold text-black transition-colors"
                   style={{ backgroundColor: categoryColor }}
                 >
-                  Apply Filters
+                  {t.exploreFilters.applyFilters}
                 </button>
               </div>
             </motion.div>

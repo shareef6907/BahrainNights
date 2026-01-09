@@ -291,6 +291,119 @@ export const ar = {
     loading: 'جارٍ تحميل العروض...',
   },
 
+  // Event Detail Page
+  eventDetail: {
+    aboutThisEvent: 'عن هذه الفعالية',
+    eventDetails: 'تفاصيل الفعالية',
+    dateTime: 'التاريخ والوقت',
+    duration: 'المدة',
+    ageRestriction: 'الفئة العمرية',
+    dressCode: 'قواعد اللباس',
+    readMore: 'اقرأ المزيد',
+    readLess: 'عرض أقل',
+    bookNow: 'احجز الآن',
+    viewEvent: 'عرض الفعالية',
+    share: 'مشاركة',
+    hostedBy: 'بتنظيم',
+    viewVenueProfile: 'عرض صفحة المكان ←',
+    visitWebsite: 'زيارة الموقع',
+    bookViaVenue: 'احجز عبر المكان',
+    location: 'الموقع',
+    clickToOpenMaps: 'اضغط لفتح خرائط جوجل',
+    similarEvents: 'فعاليات مشابهة قد تعجبك',
+  },
+
+  // Movie Modal
+  movieModal: {
+    watchTrailer: 'شاهد الإعلان',
+    synopsis: 'القصة',
+    cast: 'طاقم التمثيل',
+    bookTickets: 'احجز التذاكر',
+    availableAtOneCinema: 'متوفر في',
+    availableAtCinemas: 'متوفر في {count} سينمات',
+    checkCinemaWebsites: 'تفقّد مواقع السينما للتوفر',
+    bookNow: 'احجز الآن',
+    comingToCinemas: 'قريباً في السينمات',
+    comingTo: 'قريباً في',
+  },
+
+  // Explore Page
+  explore: {
+    title: 'استكشف',
+    titleHighlight: 'البحرين',
+    subtitle: 'اكتشف الجواهر المخفية والتجارب الفريدة والمفضلات المحلية',
+    searchPlaceholder: 'ابحث في الفئات...',
+    featuredPlaces: 'أماكن مميزة',
+    featuredPlacesSubtitle: 'أماكن مختارة بعناية لأفضل التجارب',
+    featured: 'مميز',
+    exploreButton: 'استكشف',
+    ownBusiness: 'لديك مشروع في البحرين؟',
+    joinBahrainNights: 'انضم إلى بحرين نايتس واعرض مكانك وفعالياتك وعروضك لآلاف الزوار شهرياً.',
+    registerYourVenue: 'سجّل مكانك',
+    alreadyRegistered: 'مسجّل مسبقاً؟ سجّل الدخول',
+    categories: {
+      hotels: 'الفنادق والإقامات',
+      hotelsTagline: 'إقامات فاخرة وعطلات نهاية الأسبوع',
+      spas: 'السبا والعافية',
+      spasTagline: 'استرخِ وجدّد نشاطك',
+      shopping: 'التسوق والأسواق',
+      shoppingTagline: 'المجمعات والأسواق الشعبية',
+      tours: 'الجولات والتجارب',
+      toursTagline: 'مغامرات واكتشافات ثقافية',
+      kids: 'أنشطة الأطفال',
+      kidsTagline: 'متعة لكل العائلة',
+      community: 'فعاليات المجتمع',
+      communityTagline: 'تواصل وتطوّع وساهم',
+    },
+  },
+
+  // Family & Kids Page
+  familyKids: {
+    backToExplore: 'العودة للاستكشاف',
+    title: 'العائلة والأطفال',
+    activitiesCount: '{count} نشاط عائلي',
+    filters: {
+      type: 'النوع',
+      ageRange: 'الفئة العمرية',
+      priceRange: 'نطاق السعر',
+    },
+    types: {
+      waterParks: 'الحدائق المائية',
+      themeParks: 'المدن الترفيهية',
+      museums: 'المتاحف',
+      playgrounds: 'الملاعب',
+      entertainment: 'الترفيه',
+      educational: 'تعليمي',
+      outdoor: 'أنشطة خارجية',
+    },
+    ages: {
+      toddlers: 'الرضّع (٠-٣)',
+      kids: 'الأطفال (٤-١٢)',
+      teens: 'المراهقون (+١٣)',
+      allAges: 'جميع الأعمار',
+    },
+    prices: {
+      free: 'مجاني',
+      budget: 'أقل من ١٠ د.ب',
+      mid: '١٠ - ٢٠ د.ب',
+      premium: 'أكثر من ٢٠ د.ب',
+    },
+    emptyMessage: 'لا توجد أنشطة تطابق الفلاتر',
+    haveFamilyVenue: 'لديك مكان عائلي؟',
+    listYourAttraction: 'أضف معلمك أو منطقة اللعب أو النشاط العائلي على بحرين نايتس وتواصل مع آلاف العائلات.',
+  },
+
+  // Explore Filters & Grid
+  exploreFilters: {
+    filters: 'الفلاتر',
+    clearAll: 'مسح الكل',
+    applyFilters: 'تطبيق الفلاتر',
+  },
+  exploreGrid: {
+    viewDetails: 'عرض التفاصيل',
+    by: 'بواسطة',
+  },
+
   // Categories
   categories: {
     events: 'الفعاليات',

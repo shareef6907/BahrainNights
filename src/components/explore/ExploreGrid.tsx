@@ -4,6 +4,7 @@ import { motion } from 'framer-motion';
 import Link from 'next/link';
 import Image from 'next/image';
 import { MapPin, Star, Clock, Users, ChevronRight } from 'lucide-react';
+import { useTranslation } from '@/lib/i18n';
 
 export interface ExploreItem {
   id: string;
@@ -47,6 +48,7 @@ export default function ExploreGrid({
   category,
   emptyMessage = 'No items found',
 }: ExploreGridProps) {
+  const { t } = useTranslation();
   const color = categoryColors[category] || '#6B7280';
 
   // Determine the correct URL path based on category
@@ -93,7 +95,7 @@ export default function ExploreGrid({
                 {/* Featured Badge */}
                 {item.isFeatured && (
                   <div className="absolute top-3 left-3 px-3 py-1 bg-yellow-500 text-black text-xs font-bold rounded-full">
-                    Featured
+                    {t.explore.featured}
                   </div>
                 )}
 
@@ -177,7 +179,7 @@ export default function ExploreGrid({
                 {/* Organization for community */}
                 {item.organization && (
                   <div className="text-sm text-gray-400 mb-3">
-                    by {item.organization}
+                    {t.exploreGrid.by} {item.organization}
                   </div>
                 )}
 
@@ -198,7 +200,7 @@ export default function ExploreGrid({
                       {item.price}
                     </span>
                   ) : (
-                    <span className="text-gray-500 text-sm">View details</span>
+                    <span className="text-gray-500 text-sm">{t.exploreGrid.viewDetails}</span>
                   )}
                   <ChevronRight className="w-5 h-5 text-gray-500 group-hover:text-yellow-400 transition-colors" />
                 </div>

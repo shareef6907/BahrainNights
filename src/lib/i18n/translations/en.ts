@@ -288,6 +288,119 @@ export const en = {
     loading: 'Loading offers...',
   },
 
+  // Event Detail Page
+  eventDetail: {
+    aboutThisEvent: 'About This Event',
+    eventDetails: 'Event Details',
+    dateTime: 'Date & Time',
+    duration: 'Duration',
+    ageRestriction: 'Age Restriction',
+    dressCode: 'Dress Code',
+    readMore: 'Read More',
+    readLess: 'Read Less',
+    bookNow: 'Book Now',
+    viewEvent: 'View Event',
+    share: 'Share',
+    hostedBy: 'Hosted By',
+    viewVenueProfile: 'View venue profile →',
+    visitWebsite: 'Visit Website',
+    bookViaVenue: 'Book via Venue',
+    location: 'Location',
+    clickToOpenMaps: 'Click to open in Google Maps',
+    similarEvents: 'Similar Events You May Like',
+  },
+
+  // Movie Modal
+  movieModal: {
+    watchTrailer: 'Watch Trailer',
+    synopsis: 'Synopsis',
+    cast: 'Cast',
+    bookTickets: 'Book Tickets',
+    availableAtOneCinema: 'Available at',
+    availableAtCinemas: 'Available at {count} cinemas',
+    checkCinemaWebsites: 'Check cinema websites for availability',
+    bookNow: 'Book Now',
+    comingToCinemas: 'Coming to cinemas',
+    comingTo: 'Coming to',
+  },
+
+  // Explore Page
+  explore: {
+    title: 'Explore',
+    titleHighlight: 'Bahrain',
+    subtitle: 'Discover hidden gems, unique experiences, and local favorites',
+    searchPlaceholder: 'Search categories...',
+    featuredPlaces: 'Featured Places',
+    featuredPlacesSubtitle: 'Hand-picked venues for the best experiences',
+    featured: 'Featured',
+    exploreButton: 'Explore',
+    ownBusiness: 'Own a Business in Bahrain?',
+    joinBahrainNights: 'Join BahrainNights and showcase your venue, events, and offers to thousands of visitors every month.',
+    registerYourVenue: 'Register Your Venue',
+    alreadyRegistered: 'Already Registered? Login',
+    categories: {
+      hotels: 'Hotels & Staycations',
+      hotelsTagline: 'Luxury stays and weekend getaways',
+      spas: 'Spa & Wellness',
+      spasTagline: 'Relax, rejuvenate, and unwind',
+      shopping: 'Shopping & Markets',
+      shoppingTagline: 'Malls, souqs, and pop-up markets',
+      tours: 'Tours & Experiences',
+      toursTagline: 'Adventures and cultural discoveries',
+      kids: 'Kids Activities',
+      kidsTagline: 'Fun for the whole family',
+      community: 'Community Events',
+      communityTagline: 'Connect, volunteer, and give back',
+    },
+  },
+
+  // Family & Kids Page
+  familyKids: {
+    backToExplore: 'Back to Explore',
+    title: 'Family & Kids',
+    activitiesCount: '{count} family-friendly activities',
+    filters: {
+      type: 'Type',
+      ageRange: 'Age Range',
+      priceRange: 'Price Range',
+    },
+    types: {
+      waterParks: 'Water Parks',
+      themeParks: 'Theme Parks',
+      museums: 'Museums',
+      playgrounds: 'Playgrounds',
+      entertainment: 'Entertainment',
+      educational: 'Educational',
+      outdoor: 'Outdoor Activities',
+    },
+    ages: {
+      toddlers: 'Toddlers (0-3)',
+      kids: 'Kids (4-12)',
+      teens: 'Teens (13+)',
+      allAges: 'All Ages',
+    },
+    prices: {
+      free: 'Free',
+      budget: 'Under BD 10',
+      mid: 'BD 10 - 20',
+      premium: 'BD 20+',
+    },
+    emptyMessage: 'No family activities match your filters',
+    haveFamilyVenue: 'Have a Family-Friendly Venue?',
+    listYourAttraction: 'List your attraction, play area, or family activity on BahrainNights and reach thousands of families.',
+  },
+
+  // Explore Filters & Grid
+  exploreFilters: {
+    filters: 'Filters',
+    clearAll: 'Clear all',
+    applyFilters: 'Apply Filters',
+  },
+  exploreGrid: {
+    viewDetails: 'View details',
+    by: 'by',
+  },
+
   // Categories
   categories: {
     events: 'Events',

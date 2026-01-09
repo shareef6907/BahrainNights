@@ -6,53 +6,55 @@ import { ArrowLeft, Plus } from 'lucide-react';
 import Link from 'next/link';
 import ExploreGrid, { ExploreItem } from '@/components/explore/ExploreGrid';
 import ExploreFilters, { FilterConfig } from '@/components/explore/ExploreFilters';
+import { useTranslation } from '@/lib/i18n';
 
 interface KidsExploreClientProps {
   initialKids: ExploreItem[];
 }
 
-// Filter configurations
-const filterConfigs: FilterConfig[] = [
-  {
-    id: 'type',
-    label: 'Type',
-    type: 'multi',
-    options: [
-      { id: 'water-park', label: 'Water Parks' },
-      { id: 'theme-park', label: 'Theme Parks' },
-      { id: 'museum', label: 'Museums' },
-      { id: 'playground', label: 'Playgrounds' },
-      { id: 'entertainment', label: 'Entertainment' },
-      { id: 'educational', label: 'Educational' },
-      { id: 'outdoor', label: 'Outdoor Activities' },
-    ],
-  },
-  {
-    id: 'ageRange',
-    label: 'Age Range',
-    type: 'single',
-    options: [
-      { id: 'toddlers', label: 'Toddlers (0-3)' },
-      { id: 'kids', label: 'Kids (4-12)' },
-      { id: 'teens', label: 'Teens (13+)' },
-      { id: 'all', label: 'All Ages' },
-    ],
-  },
-  {
-    id: 'price',
-    label: 'Price Range',
-    type: 'single',
-    options: [
-      { id: 'free', label: 'Free' },
-      { id: 'budget', label: 'Under BD 10' },
-      { id: 'mid', label: 'BD 10 - 20' },
-      { id: 'premium', label: 'BD 20+' },
-    ],
-  },
-];
-
 export default function KidsExploreClient({ initialKids }: KidsExploreClientProps) {
+  const { t } = useTranslation();
   const [activeFilters, setActiveFilters] = useState<Record<string, string[]>>({});
+
+  // Filter configurations with translations
+  const filterConfigs: FilterConfig[] = [
+    {
+      id: 'type',
+      label: t.familyKids.filters.type,
+      type: 'multi',
+      options: [
+        { id: 'water-park', label: t.familyKids.types.waterParks },
+        { id: 'theme-park', label: t.familyKids.types.themeParks },
+        { id: 'museum', label: t.familyKids.types.museums },
+        { id: 'playground', label: t.familyKids.types.playgrounds },
+        { id: 'entertainment', label: t.familyKids.types.entertainment },
+        { id: 'educational', label: t.familyKids.types.educational },
+        { id: 'outdoor', label: t.familyKids.types.outdoor },
+      ],
+    },
+    {
+      id: 'ageRange',
+      label: t.familyKids.filters.ageRange,
+      type: 'single',
+      options: [
+        { id: 'toddlers', label: t.familyKids.ages.toddlers },
+        { id: 'kids', label: t.familyKids.ages.kids },
+        { id: 'teens', label: t.familyKids.ages.teens },
+        { id: 'all', label: t.familyKids.ages.allAges },
+      ],
+    },
+    {
+      id: 'price',
+      label: t.familyKids.filters.priceRange,
+      type: 'single',
+      options: [
+        { id: 'free', label: t.familyKids.prices.free },
+        { id: 'budget', label: t.familyKids.prices.budget },
+        { id: 'mid', label: t.familyKids.prices.mid },
+        { id: 'premium', label: t.familyKids.prices.premium },
+      ],
+    },
+  ];
 
   const handleFilterChange = (filterId: string, value: string[]) => {
     setActiveFilters((prev) => ({
@@ -114,7 +116,7 @@ export default function KidsExploreClient({ initialKids }: KidsExploreClientProp
             className="inline-flex items-center gap-2 text-gray-400 hover:text-white mb-6 transition-colors"
           >
             <ArrowLeft className="w-4 h-4" />
-            Back to Explore
+            {t.familyKids.backToExplore}
           </Link>
 
           <motion.div
@@ -127,10 +129,10 @@ export default function KidsExploreClient({ initialKids }: KidsExploreClientProp
               </div>
               <div>
                 <h1 className="text-3xl md:text-4xl font-bold text-white">
-                  Family & Kids
+                  {t.familyKids.title}
                 </h1>
                 <p className="text-gray-400">
-                  {filteredKids.length} family-friendly activities
+                  {t.familyKids.activitiesCount.replace('{count}', filteredKids.length.toString())}
                 </p>
               </div>
             </div>
@@ -156,7 +158,7 @@ export default function KidsExploreClient({ initialKids }: KidsExploreClientProp
         <ExploreGrid
           items={filteredKids}
           category="kids"
-          emptyMessage="No family activities match your filters"
+          emptyMessage={t.familyKids.emptyMessage}
         />
       </section>
 
@@ -174,10 +176,10 @@ export default function KidsExploreClient({ initialKids }: KidsExploreClientProp
           <div className="relative z-10 py-12 px-6 md:px-12">
             <div className="max-w-3xl mx-auto text-center">
               <h2 className="text-2xl md:text-3xl font-bold text-white mb-4">
-                Have a Family-Friendly Venue?
+                {t.familyKids.haveFamilyVenue}
               </h2>
               <p className="text-white/90 text-lg mb-8 max-w-xl mx-auto">
-                List your attraction, play area, or family activity on BahrainNights and reach thousands of families.
+                {t.familyKids.listYourAttraction}
               </p>
 
               <Link
@@ -185,7 +187,7 @@ export default function KidsExploreClient({ initialKids }: KidsExploreClientProp
                 className="inline-flex items-center justify-center gap-2 px-8 py-4 bg-white text-green-600 font-bold rounded-xl hover:bg-gray-100 transition-colors shadow-lg"
               >
                 <Plus className="w-5 h-5" />
-                Register Your Venue
+                {t.explore.registerYourVenue}
               </Link>
             </div>
           </div>
