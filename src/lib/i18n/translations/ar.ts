@@ -20,6 +20,35 @@ export const ar = {
     offers: 'العروض',
     listEvent: 'أضف فعالية',
     registerVenue: 'سجّل مكانك',
+    viewAll: 'عرض الكل',
+    // Events dropdown
+    todaysEvents: 'فعاليات اليوم',
+    thisWeekend: 'نهاية الأسبوع',
+    concertsLiveMusic: 'الحفلات والموسيقى',
+    culturalArts: 'الثقافة والفنون',
+    sports: 'الرياضة',
+    fullCalendar: 'التقويم الكامل',
+    // Dining dropdown
+    restaurants: 'المطاعم',
+    cafesCoffeeShops: 'المقاهي',
+    loungesBars: 'الصالات والبارات',
+    nightclubs: 'النوادي الليلية',
+    beachPoolClubs: 'نوادي الشاطئ والمسابح',
+    viewAllPlaces: 'عرض كل الأماكن',
+    // Cinema dropdown
+    nowShowing: 'يُعرض الآن',
+    comingSoon: 'قريباً',
+    // Offers dropdown
+    ladiesNights: 'ليالي السيدات',
+    brunches: 'البرانش',
+    happyHours: 'الساعات السعيدة',
+    specialDeals: 'عروض خاصة',
+    // Explore dropdown
+    hotelsStaycations: 'الفنادق والإقامات',
+    spasWellness: 'السبا والعافية',
+    shoppingMarkets: 'التسوق والأسواق',
+    toursExperiences: 'الجولات والتجارب',
+    communityEvents: 'فعاليات المجتمع',
   },
 
   // Homepage

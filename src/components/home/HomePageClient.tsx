@@ -76,68 +76,7 @@ const accordionVariants = {
   }
 };
 
-// Navigation menu data
-const menuItems = [
-  {
-    name: 'Events',
-    icon: '🎭',
-    href: '/events',
-    dropdown: [
-      { name: "Today's Events", icon: '📅', href: '/events?filter=today' },
-      { name: 'This Weekend', icon: '🗓️', href: '/events?filter=weekend' },
-      { name: 'Concerts & Live Music', icon: '🎵', href: '/events?category=concerts' },
-      { name: 'Family & Kids', icon: '👨‍👩‍👧‍👦', href: '/events?category=family' },
-      { name: 'Cultural & Arts', icon: '🎨', href: '/events?category=cultural' },
-      { name: 'Sports', icon: '⚽', href: '/events?category=sports' },
-      { name: 'Full Calendar', icon: '📆', href: '/events/calendar' },
-    ]
-  },
-  {
-    name: 'Dining & Nightlife',
-    icon: '🍽️',
-    href: '/places',
-    dropdown: [
-      { name: 'Restaurants', icon: '🍴', href: '/places?category=restaurant' },
-      { name: 'Cafes & Coffee Shops', icon: '☕', href: '/places?category=cafe' },
-      { name: 'Lounges & Bars', icon: '🍸', href: '/places?category=lounge' },
-      { name: 'Nightclubs', icon: '🎶', href: '/places?category=nightclub' },
-      { name: 'Beach & Pool Clubs', icon: '🏖️', href: '/places?category=beach-club' },
-      { name: 'View All Places', icon: '📍', href: '/places' },
-    ]
-  },
-  {
-    name: 'Cinema',
-    icon: '🎬',
-    href: '/cinema',
-    dropdown: [
-      { name: 'Now Showing', icon: '🎞️', href: '/cinema?filter=now-showing' },
-      { name: 'Coming Soon', icon: '🔜', href: '/cinema?filter=coming-soon' },
-    ]
-  },
-  {
-    name: 'Offers',
-    icon: '🏷️',
-    href: '/offers',
-    dropdown: [
-      { name: 'Ladies Nights', icon: '👠', href: '/offers?type=ladies-night' },
-      { name: 'Brunches', icon: '🥂', href: '/offers?type=brunch' },
-      { name: 'Happy Hours', icon: '🍻', href: '/offers?type=happy-hour' },
-      { name: 'Special Deals', icon: '💎', href: '/offers?type=special' },
-    ]
-  },
-  {
-    name: 'Explore',
-    icon: '🧭',
-    href: '/explore',
-    dropdown: [
-      { name: 'Hotels & Staycations', icon: '🏨', href: '/explore?category=hotels' },
-      { name: 'Spas & Wellness', icon: '💆', href: '/explore?category=spas' },
-      { name: 'Shopping & Markets', icon: '🛍️', href: '/explore?category=shopping' },
-      { name: 'Tours & Experiences', icon: '🗺️', href: '/explore?category=tours' },
-      { name: 'Community Events', icon: '🤝', href: '/explore?category=community' },
-    ]
-  }
-];
+// Navigation menu data - moved to component to use translations
 
 // Movie type for the cinema section (full data for modal)
 export interface HomepageMovie {
@@ -222,6 +161,70 @@ interface HomePageClientProps {
 
 export default function HomePageClient({ initialMovies, initialStats, initialTodayEvents }: HomePageClientProps) {
   const { t } = useTranslation();
+
+  // Navigation menu data with translations
+  const menuItems = [
+    {
+      name: t.nav.events,
+      icon: '🎭',
+      href: '/events',
+      dropdown: [
+        { name: t.nav.todaysEvents, icon: '📅', href: '/events?filter=today' },
+        { name: t.nav.thisWeekend, icon: '🗓️', href: '/events?filter=weekend' },
+        { name: t.nav.concertsLiveMusic, icon: '🎵', href: '/events?category=concerts' },
+        { name: t.nav.familyKids, icon: '👨‍👩‍👧‍👦', href: '/events?category=family' },
+        { name: t.nav.culturalArts, icon: '🎨', href: '/events?category=cultural' },
+        { name: t.nav.sports, icon: '⚽', href: '/events?category=sports' },
+        { name: t.nav.fullCalendar, icon: '📆', href: '/events/calendar' },
+      ]
+    },
+    {
+      name: t.nav.diningNightlife,
+      icon: '🍽️',
+      href: '/places',
+      dropdown: [
+        { name: t.nav.restaurants, icon: '🍴', href: '/places?category=restaurant' },
+        { name: t.nav.cafesCoffeeShops, icon: '☕', href: '/places?category=cafe' },
+        { name: t.nav.loungesBars, icon: '🍸', href: '/places?category=lounge' },
+        { name: t.nav.nightclubs, icon: '🎶', href: '/places?category=nightclub' },
+        { name: t.nav.beachPoolClubs, icon: '🏖️', href: '/places?category=beach-club' },
+        { name: t.nav.viewAllPlaces, icon: '📍', href: '/places' },
+      ]
+    },
+    {
+      name: t.nav.cinema,
+      icon: '🎬',
+      href: '/cinema',
+      dropdown: [
+        { name: t.nav.nowShowing, icon: '🎞️', href: '/cinema?filter=now-showing' },
+        { name: t.nav.comingSoon, icon: '🔜', href: '/cinema?filter=coming-soon' },
+      ]
+    },
+    {
+      name: t.nav.offers,
+      icon: '🏷️',
+      href: '/offers',
+      dropdown: [
+        { name: t.nav.ladiesNights, icon: '👠', href: '/offers?type=ladies-night' },
+        { name: t.nav.brunches, icon: '🥂', href: '/offers?type=brunch' },
+        { name: t.nav.happyHours, icon: '🍻', href: '/offers?type=happy-hour' },
+        { name: t.nav.specialDeals, icon: '💎', href: '/offers?type=special' },
+      ]
+    },
+    {
+      name: t.nav.explore,
+      icon: '🧭',
+      href: '/explore',
+      dropdown: [
+        { name: t.nav.hotelsStaycations, icon: '🏨', href: '/explore?category=hotels' },
+        { name: t.nav.spasWellness, icon: '💆', href: '/explore?category=spas' },
+        { name: t.nav.shoppingMarkets, icon: '🛍️', href: '/explore?category=shopping' },
+        { name: t.nav.toursExperiences, icon: '🗺️', href: '/explore?category=tours' },
+        { name: t.nav.communityEvents, icon: '🤝', href: '/explore?category=community' },
+      ]
+    }
+  ];
+
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [activeDropdown, setActiveDropdown] = useState<string | null>(null);
   const [mobileAccordion, setMobileAccordion] = useState<string | null>(null);
@@ -390,7 +393,7 @@ export default function HomePageClient({ initialMovies, initialStats, initialTod
                             href={item.href}
                             className="flex items-center justify-center space-x-2 py-2 text-yellow-400 hover:text-yellow-300 font-medium transition-colors"
                           >
-                            <span>View All {item.name}</span>
+                            <span>{t.nav.viewAll} {item.name}</span>
                             <ChevronRight className="w-4 h-4" />
                           </a>
                         </div>
@@ -493,7 +496,7 @@ export default function HomePageClient({ initialMovies, initialStats, initialTod
                               className="flex items-center space-x-2 py-3 px-4 text-yellow-400 font-medium"
                               onClick={() => setMobileMenuOpen(false)}
                             >
-                              <span>View All</span>
+                              <span>{t.nav.viewAll}</span>
                               <ChevronRight className="w-4 h-4" />
                             </a>
                           </div>

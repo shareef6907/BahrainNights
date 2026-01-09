@@ -2,14 +2,12 @@
 
 import { motion } from 'framer-motion';
 import { Sparkles, Wine, UtensilsCrossed, Tag, LucideIcon } from 'lucide-react';
+import { useTranslation } from '@/lib/i18n';
 
 export type OfferType = 'all' | 'ladies-night' | 'happy-hour' | 'brunch' | 'special';
 
-interface CategoryTab {
+interface CategoryTabConfig {
   id: OfferType;
-  label: string;
-  shortLabel: string;
-  description: string;
   icon: LucideIcon;
   gradient: string;
   count?: number;
@@ -21,47 +19,12 @@ interface OfferCategoryTabsProps {
   counts: Record<OfferType, number>;
 }
 
-const categories: CategoryTab[] = [
-  {
-    id: 'all',
-    label: 'All Offers',
-    shortLabel: 'All',
-    description: 'Browse all current deals',
-    icon: Tag,
-    gradient: 'from-white/10 to-white/5',
-  },
-  {
-    id: 'ladies-night',
-    label: 'Ladies Nights',
-    shortLabel: 'Ladies',
-    description: 'Exclusive offers for ladies',
-    icon: Sparkles,
-    gradient: 'from-pink-500/20 to-purple-500/20',
-  },
-  {
-    id: 'brunch',
-    label: 'Brunches',
-    shortLabel: 'Brunch',
-    description: 'Weekend brunch specials',
-    icon: UtensilsCrossed,
-    gradient: 'from-orange-500/20 to-amber-500/20',
-  },
-  {
-    id: 'happy-hour',
-    label: 'Happy Hours',
-    shortLabel: 'Happy Hr',
-    description: 'Drink & food specials',
-    icon: Wine,
-    gradient: 'from-yellow-500/20 to-orange-500/20',
-  },
-  {
-    id: 'special',
-    label: 'Special Deals',
-    shortLabel: 'Deals',
-    description: 'Limited-time promotions',
-    icon: Tag,
-    gradient: 'from-blue-500/20 to-indigo-500/20',
-  },
+const categoryConfigs: CategoryTabConfig[] = [
+  { id: 'all', icon: Tag, gradient: 'from-white/10 to-white/5' },
+  { id: 'ladies-night', icon: Sparkles, gradient: 'from-pink-500/20 to-purple-500/20' },
+  { id: 'brunch', icon: UtensilsCrossed, gradient: 'from-orange-500/20 to-amber-500/20' },
+  { id: 'happy-hour', icon: Wine, gradient: 'from-yellow-500/20 to-orange-500/20' },
+  { id: 'special', icon: Tag, gradient: 'from-blue-500/20 to-indigo-500/20' },
 ];
 
 const activeGradients: Record<OfferType, string> = {
@@ -73,6 +36,15 @@ const activeGradients: Record<OfferType, string> = {
 };
 
 export default function OfferCategoryTabs({ activeCategory, onCategoryChange, counts }: OfferCategoryTabsProps) {
+  const { t } = useTranslation();
+
+  // Build categories with translated labels
+  const categories = categoryConfigs.map(config => ({
+    ...config,
+    label: t.offers.categories[config.id === 'ladies-night' ? 'ladiesNight' : config.id === 'happy-hour' ? 'happyHour' : config.id] as string,
+    shortLabel: t.offers.categories[config.id === 'ladies-night' ? 'ladiesNight' : config.id === 'happy-hour' ? 'happyHour' : config.id] as string,
+  }));
+
   return (
     <div className="w-full">
       {/* Desktop/Tablet View */}
@@ -128,19 +100,12 @@ export default function OfferCategoryTabs({ activeCategory, onCategoryChange, co
                 </div>
 
                 <h3
-                  className={`font-bold text-left mb-1 ${
+                  className={`font-bold text-left ${
                     isActive ? 'text-white' : 'text-gray-300'
                   }`}
                 >
                   {category.label}
                 </h3>
-                <p
-                  className={`text-xs text-left ${
-                    isActive ? 'text-white/80' : 'text-gray-500'
-                  }`}
-                >
-                  {category.description}
-                </p>
               </div>
 
               {/* Active Indicator */}

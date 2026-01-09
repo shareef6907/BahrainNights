@@ -17,6 +17,35 @@ export const en = {
     offers: 'Offers',
     listEvent: 'List Event',
     registerVenue: 'Register Venue',
+    viewAll: 'View All',
+    // Events dropdown
+    todaysEvents: "Today's Events",
+    thisWeekend: 'This Weekend',
+    concertsLiveMusic: 'Concerts & Live Music',
+    culturalArts: 'Cultural & Arts',
+    sports: 'Sports',
+    fullCalendar: 'Full Calendar',
+    // Dining dropdown
+    restaurants: 'Restaurants',
+    cafesCoffeeShops: 'Cafes & Coffee Shops',
+    loungesBars: 'Lounges & Bars',
+    nightclubs: 'Nightclubs',
+    beachPoolClubs: 'Beach & Pool Clubs',
+    viewAllPlaces: 'View All Places',
+    // Cinema dropdown
+    nowShowing: 'Now Showing',
+    comingSoon: 'Coming Soon',
+    // Offers dropdown
+    ladiesNights: 'Ladies Nights',
+    brunches: 'Brunches',
+    happyHours: 'Happy Hours',
+    specialDeals: 'Special Deals',
+    // Explore dropdown
+    hotelsStaycations: 'Hotels & Staycations',
+    spasWellness: 'Spas & Wellness',
+    shoppingMarkets: 'Shopping & Markets',
+    toursExperiences: 'Tours & Experiences',
+    communityEvents: 'Community Events',
   },
 
   // Homepage

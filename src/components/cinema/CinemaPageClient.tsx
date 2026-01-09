@@ -23,32 +23,9 @@ const TrailerModal = dynamic(() => import('@/components/cinema/TrailerModal'), {
   ssr: false,
 });
 
-// Filter options
+// Default cinemas (will be overridden with translated label)
 const defaultCinemas = [
   { value: 'all', label: 'All Cinemas' },
-];
-
-const genres = [
-  { value: 'all', label: 'All Genres' },
-  { value: 'action', label: 'Action' },
-  { value: 'comedy', label: 'Comedy' },
-  { value: 'drama', label: 'Drama' },
-  { value: 'horror', label: 'Horror' },
-  { value: 'animation', label: 'Animation' },
-  { value: 'sci-fi', label: 'Sci-Fi' },
-  { value: 'science fiction', label: 'Sci-Fi' },
-  { value: 'family', label: 'Family' },
-  { value: 'adventure', label: 'Adventure' },
-  { value: 'thriller', label: 'Thriller' },
-  { value: 'romance', label: 'Romance' },
-  { value: 'fantasy', label: 'Fantasy' },
-];
-
-const languages = [
-  { value: 'all', label: 'All Languages' },
-  { value: 'english', label: 'English' },
-  { value: 'arabic', label: 'Arabic' },
-  { value: 'hindi', label: 'Hindi' },
 ];
 
 interface CinemaPageClientProps {
@@ -91,6 +68,30 @@ export default function CinemaPageClient({
   const searchParams = useSearchParams();
   const filterParam = searchParams?.get('filter') ?? null;
 
+  // Translated filter options
+  const genres = [
+    { value: 'all', label: t.cinema.genres.all },
+    { value: 'action', label: t.cinema.genres.action },
+    { value: 'comedy', label: t.cinema.genres.comedy },
+    { value: 'drama', label: t.cinema.genres.drama },
+    { value: 'horror', label: t.cinema.genres.horror },
+    { value: 'animation', label: t.cinema.genres.animation },
+    { value: 'sci-fi', label: t.cinema.genres.sciFi },
+    { value: 'science fiction', label: t.cinema.genres.sciFi },
+    { value: 'family', label: t.cinema.genres.family },
+    { value: 'adventure', label: t.cinema.genres.adventure },
+    { value: 'thriller', label: t.cinema.genres.thriller },
+    { value: 'romance', label: t.cinema.genres.romance },
+    { value: 'fantasy', label: t.cinema.genres.fantasy },
+  ];
+
+  const languages = [
+    { value: 'all', label: t.cinema.languages.all },
+    { value: 'english', label: t.cinema.languages.english },
+    { value: 'arabic', label: t.cinema.languages.arabic },
+    { value: 'hindi', label: t.cinema.languages.hindi },
+  ];
+
   // Set initial tab based on URL parameter
   const initialTab = filterParam === 'coming-soon' ? 'coming-soon' : 'now-showing';
 
@@ -109,7 +110,12 @@ export default function CinemaPageClient({
   // Data from server - no loading needed!
   const [nowShowingMovies] = useState<Movie[]>(initialNowShowing);
   const [comingSoonMovies] = useState<Movie[]>(initialComingSoon);
-  const [cinemas] = useState(initialCinemas);
+  // Override cinema labels with translations
+  const translatedCinemas = initialCinemas.map(cinema => ({
+    ...cinema,
+    label: cinema.value === 'all' ? t.cinema.filters.allCinemas : cinema.label
+  }));
+  const [cinemas] = useState(translatedCinemas);
 
   // Update tab when URL parameter changes
   useEffect(() => {
