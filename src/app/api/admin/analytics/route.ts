@@ -296,9 +296,9 @@ export async function GET() {
         .select('*', { count: 'exact', head: true });
       totalPageViews = pageViewCount || 0;
 
-      // Today's stats
-      const todayStart = new Date();
-      todayStart.setHours(0, 0, 0, 0);
+      // Today's stats - use UTC for consistency
+      const now = new Date();
+      const todayStart = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate(), 0, 0, 0, 0));
 
       const { data: todayViews } = await supabase
         .from('page_views')
@@ -308,9 +308,8 @@ export async function GET() {
       const todayUniqueIPs = new Set((todayViews as { ip_hash: string | null }[] | null)?.map(v => v.ip_hash).filter(Boolean) || []);
       visitorsToday = todayUniqueIPs.size;
 
-      // This week's stats
-      const weekStart = new Date();
-      weekStart.setDate(weekStart.getDate() - 7);
+      // This week's stats - last 7 days with hours reset to 0 for consistency
+      const weekStart = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate() - 7, 0, 0, 0, 0));
 
       const { data: weekViews } = await supabase
         .from('page_views')
@@ -320,11 +319,13 @@ export async function GET() {
       const weekUniqueIPs = new Set((weekViews as { ip_hash: string | null }[] | null)?.map(v => v.ip_hash).filter(Boolean) || []);
       visitorsThisWeek = weekUniqueIPs.size;
 
-      // This month's stats
+      // This month's stats - from 1st of current month UTC
+      const monthStartUTC = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), 1, 0, 0, 0, 0));
+
       const { data: monthViews } = await supabase
         .from('page_views')
         .select('ip_hash')
-        .gte('created_at', startOfMonth.toISOString());
+        .gte('created_at', monthStartUTC.toISOString());
 
       const monthUniqueIPs = new Set((monthViews as { ip_hash: string | null }[] | null)?.map(v => v.ip_hash).filter(Boolean) || []);
       visitorsThisMonth = monthUniqueIPs.size;
@@ -361,9 +362,8 @@ export async function GET() {
           .slice(0, 10)
       );
 
-      // Daily traffic for last 30 days
-      const thirtyDaysAgo = new Date();
-      thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
+      // Daily traffic for last 30 days - use UTC for consistency
+      const thirtyDaysAgo = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate() - 30, 0, 0, 0, 0));
 
       const { data: dailyViews } = await supabase
         .from('page_views')

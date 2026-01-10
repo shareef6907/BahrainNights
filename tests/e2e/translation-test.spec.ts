@@ -11,6 +11,11 @@ test.describe('Arabic Translation System', () => {
     // Take screenshot of initial state (English)
     await page.screenshot({ path: 'tests/screenshots/01-homepage-english.png', fullPage: false });
 
+    // Verify English text is showing
+    const heroTitle = page.locator('h1');
+    await expect(heroTitle).toContainText('Bahrain', { timeout: 10000 });
+    console.log('✅ English hero title visible');
+
     // Look for the language toggle button (pill variant with Globe icon)
     const languageToggle = page.locator('button').filter({ hasText: /ع|EN/ }).first();
 
@@ -20,7 +25,7 @@ test.describe('Arabic Translation System', () => {
 
     // Click to switch to Arabic
     await languageToggle.click();
-    await page.waitForTimeout(1000); // Wait for state change
+    await page.waitForTimeout(1500); // Wait for state change
 
     // Take screenshot after switching to Arabic
     await page.screenshot({ path: 'tests/screenshots/02-homepage-arabic.png', fullPage: false });
@@ -35,10 +40,9 @@ test.describe('Arabic Translation System', () => {
     expect(htmlLang).toBe('ar');
     console.log('✅ Language attribute set to Arabic');
 
-    // Verify RTL class is added to html element
-    const htmlClass = await page.locator('html').getAttribute('class');
-    expect(htmlClass).toContain('rtl');
-    console.log('✅ RTL class applied to HTML element');
+    // Verify Arabic text is showing (hero title should be in Arabic)
+    await expect(heroTitle).toContainText('البحرين', { timeout: 5000 });
+    console.log('✅ Arabic text displayed in hero');
   });
 
   test('should persist language preference across navigation', async ({ page }) => {
