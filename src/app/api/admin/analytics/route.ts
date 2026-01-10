@@ -346,7 +346,6 @@ export async function GET() {
         .select('country, ip_hash', { count: 'exact' })
         .limit(100000);
 
-      console.log(`Fetched ${countryViews?.length} of ${countryViewsCount} country views`);
 
       const countryStats: Record<string, { pageViews: number; uniqueIPs: Set<string> }> = {};
       (countryViews as { country: string | null; ip_hash: string | null }[] | null)?.forEach((v) => {
