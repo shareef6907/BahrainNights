@@ -1,0 +1,44 @@
+name: SEO Agent
+
+# Daily SEO optimization agent
+# Runs at 3:00 AM UTC (6:00 AM Bahrain time)
+# Optimizes meta descriptions, keywords, and SEO scores for new content
+
+on:
+  schedule:
+    - cron: '0 3 * * *'  # 3 AM UTC = 6 AM Bahrain
+  workflow_dispatch:  # Allow manual runs from GitHub Actions UI
+
+jobs:
+  run-seo-agent:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Trigger SEO Agent
+        run: |
+          echo "Starting SEO Agent at $(date -u)"
+
+          response=$(curl -s -w "\n%{http_code}" -X GET \
+            "https://www.bahrainnights.com/api/cron/seo-agent" \
+            -H "Authorization: Bearer ${{ secrets.CRON_SECRET }}" \
+            -H "Content-Type: application/json")
+
+          http_code=$(echo "$response" | tail -n1)
+          body=$(echo "$response" | sed '$d')
+
+          echo "Response Code: $http_code"
+          echo "Response Body: $body"
+
+          if [ "$http_code" -ge 200 ] && [ "$http_code" -lt 300 ]; then
+            echo "✅ SEO Agent completed successfully"
+          else
+            echo "❌ SEO Agent failed with status $http_code"
+            exit 1
+          fi
+
+      - name: Summary
+        if: always()
+        run: |
+          echo "## SEO Agent Run Complete" >> $GITHUB_STEP_SUMMARY
+          echo "Time: $(date -u)" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "Check the SEO Dashboard at https://www.bahrainnights.com/admin/seo for details." >> $GITHUB_STEP_SUMMARY
