@@ -338,28 +338,31 @@ export async function GET() {
       const allUniqueIPs = new Set((allViews as { ip_hash: string | null }[] | null)?.map(v => v.ip_hash).filter(Boolean) || []);
       uniqueVisitors = allUniqueIPs.size;
 
-      // Visitors by country
+      // Visitors by country - count both page views and unique visitors
       const { data: countryViews } = await supabase
         .from('page_views')
-        .select('country, ip_hash')
-        .not('country', 'is', null);
+        .select('country, ip_hash');
 
-      const countryVisitors: Record<string, Set<string>> = {};
+      const countryStats: Record<string, { pageViews: number; uniqueIPs: Set<string> }> = {};
       (countryViews as { country: string | null; ip_hash: string | null }[] | null)?.forEach((v) => {
         const country = v.country || 'Unknown';
-        if (!countryVisitors[country]) {
-          countryVisitors[country] = new Set();
+        if (!countryStats[country]) {
+          countryStats[country] = { pageViews: 0, uniqueIPs: new Set() };
         }
+        countryStats[country].pageViews++;
         if (v.ip_hash) {
-          countryVisitors[country].add(v.ip_hash);
+          countryStats[country].uniqueIPs.add(v.ip_hash);
         }
       });
 
-      // Show ALL countries, sorted by visitor count (no limit)
+      // Show ALL countries with both page views and unique visitors
       visitorsByCountry = Object.fromEntries(
-        Object.entries(countryVisitors)
-          .map(([country, ips]) => [country, ips.size])
-          .sort((a, b) => (b[1] as number) - (a[1] as number))
+        Object.entries(countryStats)
+          .map(([country, stats]) => [country, {
+            pageViews: stats.pageViews,
+            uniqueVisitors: stats.uniqueIPs.size
+          }])
+          .sort((a, b) => (b[1] as { pageViews: number }).pageViews - (a[1] as { pageViews: number }).pageViews)
       );
 
       // Daily traffic for last 30 days - use UTC for consistency
