@@ -339,25 +339,35 @@ export async function GET() {
       uniqueVisitors = allUniqueIPs.size;
 
       // Visitors by country - count both page views and unique visitors
-      // Supabase has 1000 row default limit - we need to fetch in batches or use count
-      // For now, use a high limit to get all records
-      const { data: countryViews, count: countryViewsCount } = await supabase
-        .from('page_views')
-        .select('country, ip_hash', { count: 'exact' })
-        .limit(100000);
-
-
+      // Supabase has 1000 row default limit - we need to fetch in batches
       const countryStats: Record<string, { pageViews: number; uniqueIPs: Set<string> }> = {};
-      (countryViews as { country: string | null; ip_hash: string | null }[] | null)?.forEach((v) => {
-        const country = v.country || 'Unknown';
-        if (!countryStats[country]) {
-          countryStats[country] = { pageViews: 0, uniqueIPs: new Set() };
-        }
-        countryStats[country].pageViews++;
-        if (v.ip_hash) {
-          countryStats[country].uniqueIPs.add(v.ip_hash);
-        }
-      });
+
+      // First get total count
+      const { count: totalRows } = await supabase
+        .from('page_views')
+        .select('*', { count: 'exact', head: true });
+
+      // Fetch in batches of 1000 to get all records
+      const batchSize = 1000;
+      const batches = Math.ceil((totalRows || 0) / batchSize);
+
+      for (let i = 0; i < batches; i++) {
+        const { data: batchData } = await supabase
+          .from('page_views')
+          .select('country, ip_hash')
+          .range(i * batchSize, (i + 1) * batchSize - 1);
+
+        (batchData as { country: string | null; ip_hash: string | null }[] | null)?.forEach((v) => {
+          const country = v.country || 'Unknown';
+          if (!countryStats[country]) {
+            countryStats[country] = { pageViews: 0, uniqueIPs: new Set() };
+          }
+          countryStats[country].pageViews++;
+          if (v.ip_hash) {
+            countryStats[country].uniqueIPs.add(v.ip_hash);
+          }
+        });
+      }
 
       // Show ALL countries with both page views and unique visitors
       visitorsByCountry = Object.fromEntries(
