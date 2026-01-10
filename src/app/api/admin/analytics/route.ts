@@ -355,11 +355,11 @@ export async function GET() {
         }
       });
 
+      // Show ALL countries, sorted by visitor count (no limit)
       visitorsByCountry = Object.fromEntries(
         Object.entries(countryVisitors)
           .map(([country, ips]) => [country, ips.size])
           .sort((a, b) => (b[1] as number) - (a[1] as number))
-          .slice(0, 10)
       );
 
       // Daily traffic for last 30 days - use UTC for consistency
