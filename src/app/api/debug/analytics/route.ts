@@ -12,14 +12,21 @@ export async function GET() {
       .select('country, country_code, ip_hash')
       .order('created_at', { ascending: false });
 
-    // Count by country (including null)
-    const countryCount: Record<string, number> = {};
+    // Count by country (including null) - both page views and unique visitors
+    const countryPageViews: Record<string, number> = {};
+    const countryUniqueIPs: Record<string, Set<string>> = {};
     const countryCodeMap: Record<string, string> = {};
 
     allCountries?.forEach((row: { country: string | null; country_code: string | null; ip_hash: string | null }) => {
       const country = row.country || 'NULL/MISSING';
       const code = row.country_code || 'XX';
-      countryCount[country] = (countryCount[country] || 0) + 1;
+      countryPageViews[country] = (countryPageViews[country] || 0) + 1;
+      if (!countryUniqueIPs[country]) {
+        countryUniqueIPs[country] = new Set();
+      }
+      if (row.ip_hash) {
+        countryUniqueIPs[country].add(row.ip_hash);
+      }
       if (!countryCodeMap[country]) {
         countryCodeMap[country] = code;
       }
@@ -46,12 +53,13 @@ export async function GET() {
     return NextResponse.json({
       totalRecords,
       nullCountryCount,
-      countryCounts: Object.entries(countryCount)
+      countryCounts: Object.entries(countryPageViews)
         .sort((a, b) => b[1] - a[1])
-        .map(([country, count]) => ({
+        .map(([country, pageViews]) => ({
           country,
           code: countryCodeMap[country],
-          pageViews: count
+          pageViews,
+          uniqueVisitors: countryUniqueIPs[country]?.size || 0
         })),
       recentRecords,
     });
