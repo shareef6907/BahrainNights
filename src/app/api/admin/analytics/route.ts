@@ -339,11 +339,14 @@ export async function GET() {
       uniqueVisitors = allUniqueIPs.size;
 
       // Visitors by country - count both page views and unique visitors
-      // Note: order() forces Supabase to return all rows without implicit limit
-      const { data: countryViews } = await supabase
+      // Supabase has 1000 row default limit - we need to fetch in batches or use count
+      // For now, use a high limit to get all records
+      const { data: countryViews, count: countryViewsCount } = await supabase
         .from('page_views')
-        .select('country, ip_hash')
-        .order('created_at', { ascending: false });
+        .select('country, ip_hash', { count: 'exact' })
+        .limit(100000);
+
+      console.log(`Fetched ${countryViews?.length} of ${countryViewsCount} country views`);
 
       const countryStats: Record<string, { pageViews: number; uniqueIPs: Set<string> }> = {};
       (countryViews as { country: string | null; ip_hash: string | null }[] | null)?.forEach((v) => {
