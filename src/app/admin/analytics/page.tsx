@@ -79,7 +79,7 @@ interface AnalyticsData {
       thisMonth: number;
     };
   };
-  visitorsByCountry: Record<string, number>;
+  visitorsByCountry: Record<string, { pageViews: number; uniqueVisitors: number }>;
   dailyTraffic: Array<{
     date: string;
     views: number;
@@ -409,22 +409,25 @@ export default function AnalyticsPage() {
             ) : (
               <div className="space-y-3">
                 {Object.entries(visitorsByCountry)
-                  .sort((a, b) => b[1] - a[1])
-                  .slice(0, 8)
-                  .map(([country, count]) => {
-                    const maxCount = Math.max(...Object.values(visitorsByCountry), 1);
+                  .sort((a, b) => b[1].pageViews - a[1].pageViews)
+                  .slice(0, 10)
+                  .map(([country, stats]) => {
+                    const maxCount = Math.max(...Object.values(visitorsByCountry).map(s => s.pageViews), 1);
                     return (
                       <div key={country}>
                         <div className="flex items-center justify-between mb-1">
-                          <span className="text-gray-300 text-sm truncate max-w-[180px]">
+                          <span className="text-gray-300 text-sm truncate max-w-[150px]">
                             {country}
                           </span>
-                          <span className="text-white font-medium">{formatNumber(count)}</span>
+                          <div className="flex items-center gap-3 text-sm">
+                            <span className="text-white font-medium">{formatNumber(stats.pageViews)} <span className="text-gray-500 text-xs">views</span></span>
+                            <span className="text-green-400">{formatNumber(stats.uniqueVisitors)} <span className="text-gray-500 text-xs">unique</span></span>
+                          </div>
                         </div>
                         <div className="h-2 bg-gray-700 rounded-full overflow-hidden">
                           <div
                             className="h-full bg-green-500 rounded-full"
-                            style={{ width: `${(count / maxCount) * 100}%` }}
+                            style={{ width: `${(stats.pageViews / maxCount) * 100}%` }}
                           />
                         </div>
                       </div>
