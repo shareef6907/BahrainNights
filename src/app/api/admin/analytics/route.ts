@@ -286,7 +286,7 @@ export async function GET() {
     let visitorsToday = 0;
     let visitorsThisWeek = 0;
     let visitorsThisMonth = 0;
-    let visitorsByCountry: Record<string, number> = {};
+    let visitorsByCountry: Record<string, { pageViews: number; uniqueVisitors: number }> = {};
     let dailyTraffic: { date: string; views: number; visitors: number }[] = [];
 
     try {
@@ -339,9 +339,11 @@ export async function GET() {
       uniqueVisitors = allUniqueIPs.size;
 
       // Visitors by country - count both page views and unique visitors
+      // Use range to get all rows (Supabase defaults to 1000)
       const { data: countryViews } = await supabase
         .from('page_views')
-        .select('country, ip_hash');
+        .select('country, ip_hash')
+        .range(0, 50000);
 
       const countryStats: Record<string, { pageViews: number; uniqueIPs: Set<string> }> = {};
       (countryViews as { country: string | null; ip_hash: string | null }[] | null)?.forEach((v) => {
