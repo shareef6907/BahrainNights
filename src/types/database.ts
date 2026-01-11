@@ -82,6 +82,8 @@ export interface Database {
           is_featured: boolean;
           view_count: number;
           like_count: number;
+          is_hidden: boolean;
+          youtube_url: string | null;
           created_at: string;
           updated_at: string;
           approved_at: string | null;
@@ -126,6 +128,8 @@ export interface Database {
           is_featured?: boolean;
           view_count?: number;
           like_count?: number;
+          is_hidden?: boolean;
+          youtube_url?: string | null;
           created_at?: string;
           updated_at?: string;
           approved_at?: string | null;
@@ -170,6 +174,8 @@ export interface Database {
           is_featured?: boolean;
           view_count?: number;
           like_count?: number;
+          is_hidden?: boolean;
+          youtube_url?: string | null;
           created_at?: string;
           updated_at?: string;
           approved_at?: string | null;

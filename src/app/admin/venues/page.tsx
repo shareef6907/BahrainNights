@@ -8,6 +8,7 @@ import {
   Search,
   MoreVertical,
   Eye,
+  EyeOff,
   Edit,
   CheckCircle,
   XCircle,
@@ -36,6 +37,7 @@ interface Venue {
   like_count: number;
   is_verified: boolean;
   is_featured: boolean;
+  is_hidden: boolean;
 }
 
 interface VenueCounts {
@@ -45,6 +47,7 @@ interface VenueCounts {
   approved: number;
   rejected: number;
   suspended: number;
+  hidden: number;
 }
 
 type VenueStatus = 'all' | 'pending' | 'approved' | 'rejected' | 'suspended';
@@ -58,12 +61,14 @@ export default function AdminVenuesPage() {
     approved: 0,
     rejected: 0,
     suspended: 0,
+    hidden: 0,
   });
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [activeTab, setActiveTab] = useState<VenueStatus>('all');
   const [searchQuery, setSearchQuery] = useState('');
   const [categoryFilter, setCategoryFilter] = useState('all');
+  const [showHiddenOnly, setShowHiddenOnly] = useState(false);
   const [openActionMenu, setOpenActionMenu] = useState<string | null>(null);
   const [selectedVenues, setSelectedVenues] = useState<string[]>([]);
   const [actionLoading, setActionLoading] = useState<string | null>(null);
@@ -93,15 +98,27 @@ export default function AdminVenuesPage() {
       }
 
       const data = await response.json();
-      setVenues(data.venues || []);
+      let venuesList = data.venues || [];
+
+      // Filter by hidden status if showHiddenOnly is true
+      if (showHiddenOnly) {
+        venuesList = venuesList.filter((v: Venue) => v.is_hidden);
+      }
+
+      setVenues(venuesList);
+
+      // Count hidden venues
+      const allVenues = data.venues || [];
+      const hiddenCount = allVenues.filter((v: Venue) => v.is_hidden).length;
+
       const countsData = data.counts || { total: 0, pending: 0, approved: 0, rejected: 0, suspended: 0 };
-      setCounts({ ...countsData, all: countsData.total });
+      setCounts({ ...countsData, all: countsData.total, hidden: hiddenCount });
     } catch (err) {
       setError(err instanceof Error ? err.message : 'An error occurred');
     } finally {
       setIsLoading(false);
     }
-  }, [activeTab, categoryFilter, searchQuery]);
+  }, [activeTab, categoryFilter, searchQuery, showHiddenOnly]);
 
   useEffect(() => {
     fetchVenues();
@@ -177,6 +194,26 @@ export default function AdminVenuesPage() {
       setOpenActionMenu(null);
     } catch (err) {
       console.error('Error deleting venue:', err);
+    } finally {
+      setActionLoading(null);
+    }
+  };
+
+  const handleToggleVisibility = async (venueId: string, currentHidden: boolean) => {
+    setActionLoading(venueId);
+    try {
+      const response = await fetch(`/api/admin/venues/${venueId}`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ is_hidden: !currentHidden }),
+      });
+
+      if (!response.ok) throw new Error('Failed to update venue visibility');
+
+      await fetchVenues();
+      setOpenActionMenu(null);
+    } catch (err) {
+      console.error('Error toggling venue visibility:', err);
     } finally {
       setActionLoading(null);
     }
@@ -381,6 +418,19 @@ export default function AdminVenuesPage() {
           <ArrowUpDown className="w-4 h-4" />
           <span className="text-sm">Sort</span>
         </button>
+
+        {/* Hidden Filter Toggle */}
+        <button
+          onClick={() => setShowHiddenOnly(!showHiddenOnly)}
+          className={`flex items-center gap-2 px-4 py-2.5 border rounded-xl text-sm transition-colors ${
+            showHiddenOnly
+              ? 'bg-purple-500/20 border-purple-500/50 text-purple-400'
+              : 'bg-white/5 border-white/10 text-gray-400 hover:text-white'
+          }`}
+        >
+          <EyeOff className="w-4 h-4" />
+          <span>Hidden ({counts.hidden})</span>
+        </button>
       </motion.div>
 
       {/* Bulk Actions */}
@@ -494,10 +544,17 @@ export default function AdminVenuesPage() {
                           />
                         </div>
                         <div>
-                          <span className="font-medium text-white">{venue.name}</span>
-                          {venue.is_verified && (
-                            <span className="ml-2 text-xs text-blue-400">Verified</span>
-                          )}
+                          <div className="flex items-center gap-2">
+                            <span className="font-medium text-white">{venue.name}</span>
+                            {venue.is_verified && (
+                              <span className="text-xs text-blue-400">Verified</span>
+                            )}
+                            {venue.is_hidden && (
+                              <span className="px-1.5 py-0.5 text-xs font-medium bg-purple-500/20 text-purple-400 rounded">
+                                Hidden
+                              </span>
+                            )}
+                          </div>
                         </div>
                       </div>
                     </td>
@@ -555,6 +612,25 @@ export default function AdminVenuesPage() {
                                 <Edit className="w-4 h-4" />
                                 Edit Details
                               </Link>
+                              <button
+                                onClick={() => handleToggleVisibility(venue.id, venue.is_hidden)}
+                                disabled={actionLoading === venue.id}
+                                className={`w-full flex items-center gap-2 px-4 py-2 text-sm hover:bg-white/5 disabled:opacity-50 ${
+                                  venue.is_hidden ? 'text-green-400' : 'text-purple-400'
+                                }`}
+                              >
+                                {venue.is_hidden ? (
+                                  <>
+                                    <Eye className="w-4 h-4" />
+                                    Show on Public
+                                  </>
+                                ) : (
+                                  <>
+                                    <EyeOff className="w-4 h-4" />
+                                    Hide from Public
+                                  </>
+                                )}
+                              </button>
                               {venue.status === 'pending' && (
                                 <>
                                   <button
@@ -618,7 +694,14 @@ export default function AdminVenuesPage() {
                   <div className="flex-1 min-w-0">
                     <div className="flex items-start justify-between">
                       <div>
-                        <h3 className="font-medium text-white">{venue.name}</h3>
+                        <div className="flex items-center gap-2 flex-wrap">
+                          <h3 className="font-medium text-white">{venue.name}</h3>
+                          {venue.is_hidden && (
+                            <span className="px-1.5 py-0.5 text-xs font-medium bg-purple-500/20 text-purple-400 rounded">
+                              Hidden
+                            </span>
+                          )}
+                        </div>
                         <p className="text-sm text-gray-400">{venue.category}</p>
                       </div>
                       {getStatusBadge(venue.status)}
@@ -628,13 +711,24 @@ export default function AdminVenuesPage() {
                       <p className="mt-1">{venue.email || venue.phone || 'No contact'}</p>
                       {venue.cr_number && <p className="mt-1">CR: {venue.cr_number}</p>}
                     </div>
-                    <div className="mt-3 flex gap-2">
+                    <div className="mt-3 flex gap-2 flex-wrap">
                       <Link
                         href={`/admin/venues/${venue.id}`}
                         className="px-3 py-1.5 text-xs bg-cyan-500/20 text-cyan-400 rounded-lg"
                       >
                         View
                       </Link>
+                      <button
+                        onClick={() => handleToggleVisibility(venue.id, venue.is_hidden)}
+                        disabled={actionLoading === venue.id}
+                        className={`px-3 py-1.5 text-xs rounded-lg disabled:opacity-50 ${
+                          venue.is_hidden
+                            ? 'bg-green-500/20 text-green-400'
+                            : 'bg-purple-500/20 text-purple-400'
+                        }`}
+                      >
+                        {venue.is_hidden ? 'Show' : 'Hide'}
+                      </button>
                       {venue.status === 'pending' && (
                         <>
                           <button

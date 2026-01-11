@@ -15,7 +15,7 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
   const { slug } = await params;
   const venue = await getVenueBySlug(slug);
 
-  if (!venue || venue.status !== 'approved') {
+  if (!venue || venue.status !== 'approved' || venue.is_hidden) {
     return {
       title: 'Venue Not Found | BahrainNights',
     };
@@ -38,8 +38,8 @@ export default async function PlaceDetailPage({ params }: PageProps) {
   // Fetch venue from database
   const venue = await getVenueBySlug(slug);
 
-  // Return 404 if venue not found or not approved
-  if (!venue || venue.status !== 'approved') {
+  // Return 404 if venue not found, not approved, or hidden
+  if (!venue || venue.status !== 'approved' || venue.is_hidden) {
     notFound();
   }
 

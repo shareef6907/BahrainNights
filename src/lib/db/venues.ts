@@ -60,8 +60,49 @@ export async function getVenues(filters: VenueFilters = {}): Promise<Venue[]> {
 }
 
 // Get approved venues only (for public pages)
+// Excludes hidden venues from public display
 export async function getApprovedVenues(filters: Omit<VenueFilters, 'status'> = {}): Promise<Venue[]> {
-  return getVenues({ ...filters, status: 'approved' });
+  const supabase = getAdminClient();
+
+  let query = supabase
+    .from('venues')
+    .select('*')
+    .eq('status', 'approved')
+    .eq('is_hidden', false)
+    .order('created_at', { ascending: false });
+
+  if (filters.category) {
+    query = query.eq('category', filters.category);
+  }
+
+  if (filters.area) {
+    query = query.eq('area', filters.area);
+  }
+
+  if (filters.featured !== undefined) {
+    query = query.eq('is_featured', filters.featured);
+  }
+
+  if (filters.search) {
+    query = query.or(`name.ilike.%${filters.search}%,description.ilike.%${filters.search}%`);
+  }
+
+  if (filters.limit) {
+    query = query.limit(filters.limit);
+  }
+
+  if (filters.offset) {
+    query = query.range(filters.offset, filters.offset + (filters.limit || 10) - 1);
+  }
+
+  const { data, error } = await query;
+
+  if (error) {
+    console.error('Error fetching approved venues:', error);
+    throw new Error(`Failed to fetch venues: ${error.message || error.code || JSON.stringify(error)}`);
+  }
+
+  return (data || []) as Venue[];
 }
 
 // Get pending venues (for admin)

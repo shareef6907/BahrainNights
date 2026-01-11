@@ -19,12 +19,13 @@ export async function GET(
 
     const supabase = getAdminClient();
 
-    // Fetch venue by slug - only approved venues for public access
+    // Fetch venue by slug - only approved and visible venues for public access
     const { data, error } = await supabase
       .from('venues')
       .select('*')
       .eq('slug', slug)
       .eq('status', 'approved')
+      .eq('is_hidden', false)
       .single();
 
     if (error) {

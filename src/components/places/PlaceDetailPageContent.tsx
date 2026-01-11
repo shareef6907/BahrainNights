@@ -13,6 +13,7 @@ import PlaceHours from './PlaceHours';
 import PlaceEvents from './PlaceEvents';
 import SimilarPlaces from './SimilarPlaces';
 import PlaceShareModal from './PlaceShareModal';
+import PlaceYouTubeVideo from './PlaceYouTubeVideo';
 import type { Venue } from '@/types/database';
 import type { Place, OpeningHours } from './PlaceCard';
 
@@ -231,6 +232,9 @@ export default function PlaceDetailPageContent({ venue, similarVenues, events = 
             {/* Left Column */}
             <div className="lg:col-span-2 space-y-8">
               <PlaceInfo description={venue.description || 'No description available.'} />
+              {venue.youtube_url && (
+                <PlaceYouTubeVideo youtubeUrl={venue.youtube_url} venueName={venue.name} />
+              )}
               {images.length > 0 && (
                 <PlaceGallery images={images} name={venue.name} />
               )}

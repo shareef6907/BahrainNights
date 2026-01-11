@@ -15,11 +15,12 @@ export async function GET(request: NextRequest) {
 
     const supabase = getAdminClient();
 
-    // Build query for approved venues only
+    // Build query for approved venues only (exclude hidden venues)
     let query = supabase
       .from('venues')
       .select('*')
-      .eq('status', 'approved');
+      .eq('status', 'approved')
+      .eq('is_hidden', false);
 
     // Apply filters
     if (category) {
@@ -69,11 +70,12 @@ export async function GET(request: NextRequest) {
       );
     }
 
-    // Get total count for pagination
+    // Get total count for pagination (exclude hidden venues)
     const { count } = await supabase
       .from('venues')
       .select('*', { count: 'exact', head: true })
-      .eq('status', 'approved');
+      .eq('status', 'approved')
+      .eq('is_hidden', false);
 
     return NextResponse.json({
       venues: venues || [],

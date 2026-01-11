@@ -62,6 +62,8 @@ interface Venue {
   rejection_reason: string | null;
   is_verified: boolean;
   is_featured: boolean;
+  is_hidden: boolean;
+  youtube_url: string | null;
   view_count: number;
   like_count: number;
   created_at: string;
@@ -166,8 +168,10 @@ export default function AdminVenueEditPage({ params }: { params: Promise<{ id: s
     features: '',
     logo_url: '',
     cover_image_url: '',
+    youtube_url: '',
     is_featured: false,
     is_verified: false,
+    is_hidden: false,
   });
 
   const fetchVenue = useCallback(async () => {
@@ -204,8 +208,10 @@ export default function AdminVenueEditPage({ params }: { params: Promise<{ id: s
         features: v.features?.join(', ') || '',
         logo_url: v.logo_url || '',
         cover_image_url: v.cover_image_url || '',
+        youtube_url: v.youtube_url || '',
         is_featured: v.is_featured || false,
         is_verified: v.is_verified || false,
+        is_hidden: v.is_hidden || false,
       });
     } catch (error) {
       console.error('Error fetching venue:', error);
@@ -254,8 +260,10 @@ export default function AdminVenueEditPage({ params }: { params: Promise<{ id: s
         features: formData.features ? formData.features.split(',').map((f) => f.trim()).filter(Boolean) : null,
         logo_url: formData.logo_url || null,
         cover_image_url: formData.cover_image_url || null,
+        youtube_url: formData.youtube_url || null,
         is_featured: formData.is_featured,
         is_verified: formData.is_verified,
+        is_hidden: formData.is_hidden,
       };
 
       const response = await fetch(`/api/admin/venues/${resolvedParams.id}`, {
@@ -625,6 +633,12 @@ export default function AdminVenueEditPage({ params }: { params: Promise<{ id: s
               <div className="flex items-center gap-3">
                 <h1 className="text-2xl font-bold text-white">{formData.name || 'Edit Venue'}</h1>
                 {getStatusBadge(venue.status)}
+                {formData.is_hidden && (
+                  <span className="px-3 py-1 text-sm font-medium bg-purple-500/20 text-purple-400 rounded-full flex items-center gap-1">
+                    <EyeOff className="w-3 h-3" />
+                    Hidden
+                  </span>
+                )}
                 {formData.is_featured && (
                   <Star className="w-5 h-5 text-amber-400 fill-current" />
                 )}
@@ -918,6 +932,27 @@ export default function AdminVenueEditPage({ params }: { params: Promise<{ id: s
                   className="w-full px-4 py-2 bg-white/5 border border-white/10 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-cyan-500/50"
                 />
               </div>
+              <div className="md:col-span-2">
+                <label className="block text-sm text-gray-400 mb-1">
+                  <span className="inline-flex items-center gap-1">
+                    <svg className="w-4 h-4" viewBox="0 0 24 24" fill="currentColor">
+                      <path d="M23.498 6.186a3.016 3.016 0 0 0-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 0 0 .502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 0 0 2.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 0 0 2.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z"/>
+                    </svg>
+                    YouTube Video URL
+                  </span>
+                </label>
+                <input
+                  type="url"
+                  name="youtube_url"
+                  value={formData.youtube_url}
+                  onChange={handleInputChange}
+                  placeholder="https://www.youtube.com/watch?v=... or https://youtu.be/..."
+                  className="w-full px-4 py-2 bg-white/5 border border-white/10 rounded-lg text-white placeholder:text-gray-500 focus:outline-none focus:ring-2 focus:ring-cyan-500/50"
+                />
+                <p className="text-xs text-gray-500 mt-1">
+                  Add a YouTube video to display on the venue page. Supports youtube.com/watch, youtu.be, and embed URLs.
+                </p>
+              </div>
               <div>
                 <label className="block text-sm text-gray-400 mb-1">Price Range (1-4)</label>
                 <select
@@ -1144,6 +1179,48 @@ export default function AdminVenueEditPage({ params }: { params: Promise<{ id: s
                 ))}
               </div>
             )}
+          </div>
+
+          {/* Visibility Control */}
+          <div className="bg-[#1A1A2E] rounded-xl p-6 border border-white/10">
+            <h3 className="text-lg font-semibold text-white mb-4">Visibility</h3>
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-3">
+                {formData.is_hidden ? (
+                  <EyeOff className="w-5 h-5 text-purple-400" />
+                ) : (
+                  <Eye className="w-5 h-5 text-green-400" />
+                )}
+                <div>
+                  <p className="text-white font-medium">
+                    {formData.is_hidden ? 'Hidden' : 'Visible'}
+                  </p>
+                  <p className="text-xs text-gray-400">
+                    {formData.is_hidden
+                      ? 'Venue is hidden from public pages'
+                      : 'Venue is visible to the public'
+                    }
+                  </p>
+                </div>
+              </div>
+              <button
+                type="button"
+                onClick={() => setFormData(prev => ({ ...prev, is_hidden: !prev.is_hidden }))}
+                className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${
+                  formData.is_hidden ? 'bg-purple-500' : 'bg-green-500'
+                }`}
+              >
+                <span
+                  className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${
+                    formData.is_hidden ? 'translate-x-6' : 'translate-x-1'
+                  }`}
+                />
+              </button>
+            </div>
+            <p className="text-xs text-gray-500 mt-3">
+              Hidden venues won&apos;t appear in search results, listings, or the homepage.
+              Remember to click &quot;Save Changes&quot; to apply.
+            </p>
           </div>
 
           {/* Stats */}
