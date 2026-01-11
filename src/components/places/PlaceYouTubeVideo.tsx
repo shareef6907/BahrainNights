@@ -67,6 +67,13 @@ export default function PlaceYouTubeVideo({ youtubeUrl, venueName }: PlaceYouTub
         return;
       }
 
+      // Ensure DOM element exists before creating player
+      const element = document.getElementById(containerRef.current);
+      if (!element) {
+        setTimeout(initPlayer, 100);
+        return;
+      }
+
       playerRef.current = new window.YT.Player(containerRef.current, {
         videoId: videoId,
         playerVars: {
@@ -90,7 +97,8 @@ export default function PlaceYouTubeVideo({ youtubeUrl, venueName }: PlaceYouTub
     };
 
     if (window.YT && window.YT.Player) {
-      initPlayer();
+      // Small delay to ensure DOM is ready after render
+      setTimeout(initPlayer, 100);
     } else {
       window.onYouTubeIframeAPIReady = initPlayer;
     }
