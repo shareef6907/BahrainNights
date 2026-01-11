@@ -63,6 +63,7 @@ interface FormData {
   confirmPassword: string;
   website: string;
   instagram: string;
+  youtubeUrl: string;
   description: string;
   logo: File | null;
   coverImage: File | null;
@@ -85,6 +86,7 @@ export default function RegisterVenuePage() {
     confirmPassword: '',
     website: '',
     instagram: '',
+    youtubeUrl: '',
     description: '',
     logo: null,
     coverImage: null,
@@ -356,6 +358,7 @@ export default function RegisterVenuePage() {
         password: formData.password,
         website: formData.website ? `https://${formData.website}` : null,
         instagram: formData.instagram || null,
+        youtubeUrl: formData.youtubeUrl || null,
         description: formData.description || null,
         logoUrl: formData.logoUrl,
         coverImageUrl: formData.coverImageUrl,
@@ -616,6 +619,25 @@ export default function RegisterVenuePage() {
                     placeholder="@yourvenue"
                   />
                 </div>
+              </div>
+              <div className="md:col-span-2">
+                <label className="block text-sm text-gray-400 mb-2">YouTube Video URL</label>
+                <div className="relative">
+                  <svg className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-500" viewBox="0 0 24 24" fill="currentColor">
+                    <path d="M23.498 6.186a3.016 3.016 0 0 0-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 0 0 .502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 0 0 2.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 0 0 2.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z"/>
+                  </svg>
+                  <input
+                    type="url"
+                    name="youtubeUrl"
+                    value={formData.youtubeUrl}
+                    onChange={handleInputChange}
+                    className="w-full bg-gray-900/50 border border-gray-700 rounded-lg pl-10 pr-4 py-3 text-white placeholder-gray-500 focus:border-orange-500 focus:ring-1 focus:ring-orange-500 outline-none transition-all"
+                    placeholder="https://www.youtube.com/watch?v=..."
+                  />
+                </div>
+                <p className="text-xs text-gray-500 mt-1">
+                  Add a promotional video for your venue (will autoplay muted on your profile)
+                </p>
               </div>
             </div>
           </div>

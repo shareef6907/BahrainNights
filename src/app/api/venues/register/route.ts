@@ -64,6 +64,7 @@ interface RegisterData {
   password: string;
   website?: string | null;
   instagram?: string | null;
+  youtubeUrl?: string | null;
   description?: string | null;
   logoUrl?: string | null;
   coverImageUrl?: string | null;
@@ -88,6 +89,7 @@ export async function POST(request: NextRequest) {
       password,
       website,
       instagram,
+      youtubeUrl,
       description,
       logoUrl,
       coverImageUrl,
@@ -232,6 +234,7 @@ export async function POST(request: NextRequest) {
       password_hash: passwordHash, // Store hashed password for venue portal login
       website: website || null,
       instagram: instagram || null,
+      youtube_url: youtubeUrl || null,
       logo_url: logoUrl,
       cover_image_url: coverImageUrl,
       gallery: galleryUrls || null, // Gallery images uploaded during registration
@@ -301,6 +304,6 @@ export async function GET() {
   return NextResponse.json({
     message: 'POST to this endpoint to register a venue',
     required_fields: ['venueName', 'crNumber', 'category', 'area', 'address', 'phone', 'email', 'password'],
-    optional_fields: ['website', 'instagram', 'description', 'googleMapsUrl', 'logo', 'coverImage'],
+    optional_fields: ['website', 'instagram', 'youtubeUrl', 'description', 'googleMapsUrl', 'logo', 'coverImage'],
   });
 }
