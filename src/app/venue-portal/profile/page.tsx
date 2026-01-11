@@ -37,6 +37,7 @@ interface VenueProfile {
   instagram?: string;
   menu_url?: string;
   booking_url?: string;
+  youtube_url?: string;
   cuisine_type?: string;
   features?: string[];
   logo_url?: string;
@@ -70,6 +71,7 @@ export default function VenueProfilePage() {
     instagram: '',
     menu_url: '',
     booking_url: '',
+    youtube_url: '',
     cuisine_type: '',
     features: '',
   });
@@ -102,6 +104,7 @@ export default function VenueProfilePage() {
             instagram: data.venue.instagram || '',
             menu_url: data.venue.menu_url || '',
             booking_url: data.venue.booking_url || '',
+            youtube_url: data.venue.youtube_url || '',
             cuisine_type: data.venue.cuisine_type || '',
             features: data.venue.features?.join(', ') || '',
           });
@@ -851,6 +854,29 @@ export default function VenueProfilePage() {
               />
             </div>
           </div>
+        </div>
+
+        {/* YouTube Video */}
+        <div>
+          <label className="block text-sm font-medium text-gray-300 mb-2">
+            <span className="inline-flex items-center gap-2">
+              <svg className="w-4 h-4 text-red-500" viewBox="0 0 24 24" fill="currentColor">
+                <path d="M23.498 6.186a3.016 3.016 0 0 0-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 0 0 .502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 0 0 2.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 0 0 2.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z"/>
+              </svg>
+              YouTube Video URL
+            </span>
+          </label>
+          <input
+            type="url"
+            name="youtube_url"
+            value={formData.youtube_url}
+            onChange={handleChange}
+            className="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-xl text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-yellow-400/50 focus:border-transparent"
+            placeholder="https://www.youtube.com/watch?v=... or https://youtu.be/..."
+          />
+          <p className="text-xs text-gray-500 mt-2">
+            Add a YouTube video to showcase your venue. The video will auto-play (muted) on your venue page.
+          </p>
         </div>
 
         {/* Additional Info */}
