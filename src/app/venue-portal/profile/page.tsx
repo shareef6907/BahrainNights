@@ -350,30 +350,6 @@ export default function VenueProfilePage() {
         </motion.div>
       )}
 
-      {/* Message */}
-      {message && (
-        <motion.div
-          initial={{ opacity: 0, y: -10 }}
-          animate={{ opacity: 1, y: 0 }}
-          className={`flex items-center gap-3 p-4 rounded-xl ${
-            message.type === 'success'
-              ? 'bg-green-500/20 text-green-400 border border-green-500/30'
-              : message.type === 'info'
-              ? 'bg-blue-500/20 text-blue-400 border border-blue-500/30'
-              : 'bg-red-500/20 text-red-400 border border-red-500/30'
-          }`}
-        >
-          {message.type === 'success' ? (
-            <CheckCircle className="w-5 h-5" />
-          ) : message.type === 'info' ? (
-            <Info className="w-5 h-5" />
-          ) : (
-            <AlertCircle className="w-5 h-5" />
-          )}
-          <span>{message.text}</span>
-        </motion.div>
-      )}
-
       {/* Venue Name (Read-only) */}
       <motion.div
         initial={{ opacity: 0, y: 20 }}
@@ -932,6 +908,30 @@ export default function VenueProfilePage() {
             Changes require admin approval before going live.
           </p>
         </div>
+
+        {/* Success/Error Message - shown after submission */}
+        {message && (
+          <motion.div
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            className={`flex items-center gap-3 p-4 rounded-xl mt-4 ${
+              message.type === 'success'
+                ? 'bg-green-500/20 text-green-400 border border-green-500/30'
+                : message.type === 'info'
+                ? 'bg-blue-500/20 text-blue-400 border border-blue-500/30'
+                : 'bg-red-500/20 text-red-400 border border-red-500/30'
+            }`}
+          >
+            {message.type === 'success' ? (
+              <CheckCircle className="w-5 h-5" />
+            ) : message.type === 'info' ? (
+              <Info className="w-5 h-5" />
+            ) : (
+              <AlertCircle className="w-5 h-5" />
+            )}
+            <span>{message.text}</span>
+          </motion.div>
+        )}
       </motion.form>
     </div>
   );
