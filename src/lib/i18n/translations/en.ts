@@ -53,7 +53,7 @@ export const en = {
     hero: {
       title: 'Bahrain Nights — Discover Events, Venues & Experiences',
       subtitle: 'Your guide to things to do in Bahrain',
-      tagline: 'Events • Nightlife • Cinema • Dining',
+      tagline: 'Showcasing Bahrain\'s Finest Experiences',
       searchPlaceholder: 'Search events in Bahrain, venues, cinema...',
       cta: 'Explore Now',
     },
