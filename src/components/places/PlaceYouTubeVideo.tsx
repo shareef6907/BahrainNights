@@ -1,26 +1,121 @@
 'use client';
 
+import { useState, useRef, useEffect } from 'react';
 import { motion } from 'framer-motion';
-import { getYouTubeEmbedUrl } from '@/lib/utils/youtube';
+import { Volume2, VolumeX } from 'lucide-react';
+import { extractYouTubeVideoId } from '@/lib/utils/youtube';
 
 interface PlaceYouTubeVideoProps {
   youtubeUrl: string | null | undefined;
   venueName: string;
 }
 
-export default function PlaceYouTubeVideo({ youtubeUrl, venueName }: PlaceYouTubeVideoProps) {
-  // Get the embed URL with options: no autoplay (so sound works), modest branding, no related videos
-  // Note: Autoplay with sound is blocked by browsers, so we let users click to play
-  const embedUrl = getYouTubeEmbedUrl(youtubeUrl, {
-    autoplay: false,
-    mute: false,
-    loop: false,
-    controls: true,
-    modestbranding: true,
-    rel: false,
-  });
+declare global {
+  interface Window {
+    YT: {
+      Player: new (
+        elementId: string,
+        config: {
+          videoId: string;
+          playerVars?: Record<string, number | string>;
+          events?: {
+            onReady?: (event: { target: YTPlayer }) => void;
+            onStateChange?: (event: { data: number }) => void;
+          };
+        }
+      ) => YTPlayer;
+      PlayerState: {
+        PLAYING: number;
+      };
+    };
+    onYouTubeIframeAPIReady?: () => void;
+  }
+}
 
-  if (!embedUrl) {
+interface YTPlayer {
+  playVideo: () => void;
+  pauseVideo: () => void;
+  mute: () => void;
+  unMute: () => void;
+  isMuted: () => boolean;
+  setVolume: (volume: number) => void;
+  getVolume: () => number;
+  destroy: () => void;
+}
+
+export default function PlaceYouTubeVideo({ youtubeUrl, venueName }: PlaceYouTubeVideoProps) {
+  const [isMuted, setIsMuted] = useState(true);
+  const [isReady, setIsReady] = useState(false);
+  const playerRef = useRef<YTPlayer | null>(null);
+  const containerRef = useRef<string>(`youtube-player-${Math.random().toString(36).substr(2, 9)}`);
+
+  const videoId = extractYouTubeVideoId(youtubeUrl);
+
+  useEffect(() => {
+    if (!videoId) return;
+
+    // Load YouTube IFrame API
+    const tag = document.createElement('script');
+    tag.src = 'https://www.youtube.com/iframe_api';
+    const firstScriptTag = document.getElementsByTagName('script')[0];
+    firstScriptTag.parentNode?.insertBefore(tag, firstScriptTag);
+
+    // Initialize player when API is ready
+    const initPlayer = () => {
+      if (!window.YT || !window.YT.Player) {
+        setTimeout(initPlayer, 100);
+        return;
+      }
+
+      playerRef.current = new window.YT.Player(containerRef.current, {
+        videoId: videoId,
+        playerVars: {
+          autoplay: 1,
+          mute: 1, // Start muted (required for autoplay)
+          loop: 1,
+          playlist: videoId, // Required for loop
+          controls: 1,
+          modestbranding: 1,
+          rel: 0,
+          playsinline: 1,
+        },
+        events: {
+          onReady: (event) => {
+            setIsReady(true);
+            event.target.setVolume(75); // Set volume to 75%
+            event.target.playVideo();
+          },
+        },
+      });
+    };
+
+    if (window.YT && window.YT.Player) {
+      initPlayer();
+    } else {
+      window.onYouTubeIframeAPIReady = initPlayer;
+    }
+
+    return () => {
+      if (playerRef.current) {
+        playerRef.current.destroy();
+      }
+    };
+  }, [videoId]);
+
+  const toggleMute = () => {
+    if (!playerRef.current) return;
+
+    if (isMuted) {
+      playerRef.current.unMute();
+      playerRef.current.setVolume(75);
+      setIsMuted(false);
+    } else {
+      playerRef.current.mute();
+      setIsMuted(true);
+    }
+  };
+
+  if (!videoId) {
     return null;
   }
 
@@ -38,14 +133,28 @@ export default function PlaceYouTubeVideo({ youtubeUrl, venueName }: PlaceYouTub
         Video
       </h2>
       <div className="relative w-full aspect-video rounded-xl overflow-hidden bg-black">
-        <iframe
-          src={embedUrl}
-          title={`${venueName} Video`}
-          className="absolute inset-0 w-full h-full"
-          allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
-          allowFullScreen
-          loading="lazy"
-        />
+        {/* YouTube Player Container */}
+        <div id={containerRef.current} className="absolute inset-0 w-full h-full" />
+
+        {/* Mute/Unmute Button Overlay */}
+        {isReady && (
+          <button
+            onClick={toggleMute}
+            className="absolute bottom-4 right-4 z-10 flex items-center gap-2 px-4 py-2 bg-black/70 hover:bg-black/90 backdrop-blur-sm rounded-full text-white font-medium transition-all"
+          >
+            {isMuted ? (
+              <>
+                <VolumeX className="w-5 h-5" />
+                <span>Tap to Unmute</span>
+              </>
+            ) : (
+              <>
+                <Volume2 className="w-5 h-5" />
+                <span>Sound On</span>
+              </>
+            )}
+          </button>
+        )}
       </div>
     </motion.div>
   );
