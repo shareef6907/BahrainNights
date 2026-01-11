@@ -84,6 +84,7 @@ export async function POST(request: NextRequest) {
       'avg_cost_per_person',
       'menu_url',
       'booking_url',
+      'youtube_url',
     ];
 
     const filteredChanges: Record<string, unknown> = {};

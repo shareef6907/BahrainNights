@@ -88,6 +88,7 @@ export async function POST(request: NextRequest, context: RouteContext) {
       'google_maps_url',
       'price_range',
       'avg_cost_per_person',
+      'youtube_url',
     ];
 
     // Filter changes to only include valid columns
