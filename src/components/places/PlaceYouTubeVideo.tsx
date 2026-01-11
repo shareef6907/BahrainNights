@@ -9,11 +9,12 @@ interface PlaceYouTubeVideoProps {
 }
 
 export default function PlaceYouTubeVideo({ youtubeUrl, venueName }: PlaceYouTubeVideoProps) {
-  // Get the embed URL with options: autoplay (muted), loop, modest branding, no related videos
+  // Get the embed URL with options: no autoplay (so sound works), modest branding, no related videos
+  // Note: Autoplay with sound is blocked by browsers, so we let users click to play
   const embedUrl = getYouTubeEmbedUrl(youtubeUrl, {
-    autoplay: true,
-    mute: true,
-    loop: true,
+    autoplay: false,
+    mute: false,
+    loop: false,
     controls: true,
     modestbranding: true,
     rel: false,
