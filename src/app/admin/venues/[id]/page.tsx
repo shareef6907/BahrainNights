@@ -141,6 +141,7 @@ export default function AdminVenueEditPage({ params }: { params: Promise<{ id: s
   const [deletingGalleryPhoto, setDeletingGalleryPhoto] = useState<string | null>(null);
   const [uploadingGallery, setUploadingGallery] = useState(false);
   const [toast, setToast] = useState<{ message: string; type: 'success' | 'error' } | null>(null);
+  const [newlyUploadedUrls, setNewlyUploadedUrls] = useState<Set<string>>(new Set()); // Track recently uploaded for cache busting
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [showRejectModal, setShowRejectModal] = useState(false);
   const [rejectReason, setRejectReason] = useState('');
@@ -534,16 +535,10 @@ export default function AdminVenueEditPage({ params }: { params: Promise<{ id: s
       }
 
       const galleryData = await galleryResponse.json();
-      // Update local venue state with new gallery (add cache buster)
-      const galleryWithCacheBuster = galleryData.venue.gallery.map((url: string) => {
-        // Add timestamp to force refresh for the new image
-        if (url === imageUrl) {
-          const separator = url.includes('?') ? '&' : '?';
-          return `${url}${separator}t=${Date.now()}`;
-        }
-        return url;
-      });
-      setVenue((prev) => prev ? { ...prev, gallery: galleryWithCacheBuster } : null);
+      // Track newly uploaded URL for cache busting at render time
+      setNewlyUploadedUrls(prev => new Set(prev).add(imageUrl));
+      // Update local venue state with clean gallery URLs (no cache buster in state)
+      setVenue((prev) => prev ? { ...prev, gallery: galleryData.venue.gallery } : null);
       setToast({ message: 'Photo uploaded successfully', type: 'success' });
     } catch (error) {
       console.error('Error uploading gallery photo:', error);
@@ -1162,13 +1157,19 @@ export default function AdminVenueEditPage({ params }: { params: Promise<{ id: s
             {/* Existing Gallery Photos */}
             {venue.gallery && venue.gallery.length > 0 && (
               <div className="grid grid-cols-2 gap-3">
-                {venue.gallery.map((photoUrl, index) => (
+                {venue.gallery.map((photoUrl, index) => {
+                  // Add cache buster for newly uploaded images to force refresh
+                  const isNewlyUploaded = newlyUploadedUrls.has(photoUrl);
+                  const displayUrl = isNewlyUploaded
+                    ? `${photoUrl}${photoUrl.includes('?') ? '&' : '?'}t=${Date.now()}`
+                    : photoUrl;
+                  return (
                   <div
-                    key={photoUrl}
+                    key={isNewlyUploaded ? `${photoUrl}-new-${Date.now()}` : photoUrl}
                     className="relative aspect-square rounded-lg overflow-hidden group"
                   >
                     <Image
-                      src={photoUrl}
+                      src={displayUrl}
                       alt={`Gallery photo ${index + 1}`}
                       fill
                       className="object-cover"
@@ -1190,7 +1191,8 @@ export default function AdminVenueEditPage({ params }: { params: Promise<{ id: s
                       </button>
                     </div>
                   </div>
-                ))}
+                  );
+                })}
               </div>
             )}
           </div>
