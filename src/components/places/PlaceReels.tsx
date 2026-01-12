@@ -1,9 +1,8 @@
 'use client';
 
-import { useState } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
-import { Play, X, ChevronLeft, ChevronRight, ExternalLink } from 'lucide-react';
-import { extractInstagramReelId, getInstagramReelUrl } from '@/lib/utils/instagram';
+import { motion } from 'framer-motion';
+import { Play, ExternalLink } from 'lucide-react';
+import { getInstagramReelUrl } from '@/lib/utils/instagram';
 
 export interface VenueReel {
   id: string;
@@ -17,13 +16,10 @@ export interface VenueReel {
 
 interface PlaceReelsProps {
   reels: VenueReel[];
-  venueName: string;
+  venueName?: string; // Optional - not currently used
 }
 
-export default function PlaceReels({ reels, venueName }: PlaceReelsProps) {
-  const [selectedReelIndex, setSelectedReelIndex] = useState<number | null>(null);
-  const [loadedIframes, setLoadedIframes] = useState<Set<number>>(new Set());
-
+export default function PlaceReels({ reels }: PlaceReelsProps) {
   // Filter to only show active reels and sort by display order
   const activeReels = reels
     .filter(reel => reel.is_active)
@@ -33,26 +29,12 @@ export default function PlaceReels({ reels, venueName }: PlaceReelsProps) {
     return null;
   }
 
-  const handlePrevious = () => {
-    if (selectedReelIndex !== null && selectedReelIndex > 0) {
-      setSelectedReelIndex(selectedReelIndex - 1);
-    }
-  };
-
-  const handleNext = () => {
-    if (selectedReelIndex !== null && selectedReelIndex < activeReels.length - 1) {
-      setSelectedReelIndex(selectedReelIndex + 1);
-    }
-  };
-
+  // Open reel directly on Instagram - cleaner than buggy embed with branding
   const handleReelClick = (index: number) => {
-    setSelectedReelIndex(index);
-    // Mark this iframe as loaded
-    setLoadedIframes(prev => new Set(prev).add(index));
-  };
-
-  const handleClose = () => {
-    setSelectedReelIndex(null);
+    const reelUrl = getInstagramReelUrl(activeReels[index].instagram_url);
+    if (reelUrl) {
+      window.open(reelUrl, '_blank', 'noopener,noreferrer');
+    }
   };
 
   return (
@@ -110,10 +92,11 @@ export default function PlaceReels({ reels, venueName }: PlaceReelsProps) {
               {/* Bottom gradient */}
               <div className="absolute bottom-0 left-0 right-0 h-16 bg-gradient-to-t from-black/60 to-transparent" />
 
-              {/* Watch label */}
+              {/* Watch label with Instagram indicator */}
               <div className="absolute bottom-3 left-3 right-3 flex items-center justify-center">
-                <span className="text-white text-xs font-medium opacity-0 group-hover:opacity-100 transition-opacity">
-                  Watch Reel
+                <span className="text-white text-xs font-medium flex items-center gap-1.5 bg-black/40 px-3 py-1.5 rounded-full backdrop-blur-sm opacity-0 group-hover:opacity-100 transition-opacity">
+                  <ExternalLink className="w-3 h-3" />
+                  Watch on Instagram
                 </span>
               </div>
             </motion.button>
@@ -121,114 +104,7 @@ export default function PlaceReels({ reels, venueName }: PlaceReelsProps) {
         </div>
       </motion.div>
 
-      {/* Fullscreen Modal - Clean video player */}
-      <AnimatePresence>
-        {selectedReelIndex !== null && (
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            className="fixed inset-0 z-50 bg-black flex items-center justify-center"
-            onClick={handleClose}
-          >
-            {/* Close Button */}
-            <button
-              onClick={handleClose}
-              className="absolute top-4 right-4 z-20 p-2 bg-white/10 hover:bg-white/20 rounded-full text-white transition-colors"
-            >
-              <X className="w-6 h-6" />
-            </button>
-
-            {/* Navigation - Previous */}
-            {selectedReelIndex > 0 && (
-              <button
-                onClick={(e) => {
-                  e.stopPropagation();
-                  handlePrevious();
-                }}
-                className="absolute left-4 top-1/2 -translate-y-1/2 z-20 p-3 bg-white/10 hover:bg-white/20 rounded-full text-white transition-colors"
-              >
-                <ChevronLeft className="w-6 h-6" />
-              </button>
-            )}
-
-            {/* Navigation - Next */}
-            {selectedReelIndex < activeReels.length - 1 && (
-              <button
-                onClick={(e) => {
-                  e.stopPropagation();
-                  handleNext();
-                }}
-                className="absolute right-4 top-1/2 -translate-y-1/2 z-20 p-3 bg-white/10 hover:bg-white/20 rounded-full text-white transition-colors"
-              >
-                <ChevronRight className="w-6 h-6" />
-              </button>
-            )}
-
-            {/* Reel Video - Cropped to hide Instagram branding */}
-            <motion.div
-              key={activeReels[selectedReelIndex].id}
-              initial={{ opacity: 0, scale: 0.95 }}
-              animate={{ opacity: 1, scale: 1 }}
-              exit={{ opacity: 0, scale: 0.95 }}
-              className="w-full max-w-md relative"
-              onClick={(e) => e.stopPropagation()}
-            >
-              {/* Video Container - Cropped to hide header and footer */}
-              <div className="relative rounded-2xl overflow-hidden bg-black" style={{ height: 'calc(80vh - 100px)', maxHeight: '600px' }}>
-                {/* Iframe wrapper with negative margins to crop branding */}
-                <div
-                  className="absolute inset-0 overflow-hidden"
-                  style={{
-                    clipPath: 'inset(0 0 0 0)',
-                  }}
-                >
-                  <iframe
-                    src={`https://www.instagram.com/reel/${extractInstagramReelId(activeReels[selectedReelIndex].instagram_url)}/embed/?hidecaption=true&autoplay=1`}
-                    className="absolute w-full border-0"
-                    style={{
-                      height: 'calc(100% + 160px)',
-                      top: '-60px',
-                      left: '0',
-                      right: '0',
-                    }}
-                    frameBorder="0"
-                    scrolling="no"
-                    allowTransparency
-                    allowFullScreen
-                    allow="autoplay; encrypted-media"
-                  />
-                </div>
-
-                {/* Top gradient overlay to hide any remaining header elements */}
-                <div className="absolute top-0 left-0 right-0 h-2 bg-black z-10" />
-
-                {/* Bottom gradient overlay to hide footer elements */}
-                <div className="absolute bottom-0 left-0 right-0 h-2 bg-black z-10" />
-              </div>
-
-              {/* Open in Instagram button - Moved outside cropped area */}
-              <div className="flex justify-center mt-4">
-                <a
-                  href={getInstagramReelUrl(activeReels[selectedReelIndex].instagram_url) || '#'}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  onClick={(e) => e.stopPropagation()}
-                  className="flex items-center gap-2 px-5 py-2.5 bg-gradient-to-r from-purple-600 via-pink-500 to-orange-400 hover:from-purple-500 hover:via-pink-400 hover:to-orange-300 rounded-full text-white text-sm font-medium transition-all shadow-lg"
-                >
-                  <ExternalLink className="w-4 h-4" />
-                  Open in Instagram
-                </a>
-              </div>
-
-              {/* Counter */}
-              <p className="text-center text-gray-400 mt-3 text-sm">
-                {selectedReelIndex + 1} of {activeReels.length}
-              </p>
-            </motion.div>
-          </motion.div>
-        )}
-      </AnimatePresence>
+      {/* Modal removed - reels now open directly on Instagram for best viewing experience */}
     </>
   );
 }
