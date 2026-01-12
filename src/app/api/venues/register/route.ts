@@ -65,6 +65,7 @@ interface RegisterData {
   website?: string | null;
   instagram?: string | null;
   youtubeUrl?: string | null;
+  instagramReelUrl?: string | null;
   description?: string | null;
   logoUrl?: string | null;
   coverImageUrl?: string | null;
@@ -92,6 +93,7 @@ export async function POST(request: NextRequest) {
       website,
       instagram,
       youtubeUrl,
+      instagramReelUrl,
       description,
       logoUrl,
       coverImageUrl,
@@ -252,6 +254,7 @@ export async function POST(request: NextRequest) {
       website: website || null,
       instagram: instagram || null,
       youtube_url: youtubeUrl || null,
+      featured_reel_url: instagramReelUrl || null,
       logo_url: logoUrl,
       cover_image_url: coverImageUrl,
       gallery: galleryUrls || null, // Gallery images uploaded during registration
@@ -290,6 +293,23 @@ export async function POST(request: NextRequest) {
 
     const venueResult = venue as { id: string; name: string; slug: string; status: string };
 
+    // If an Instagram reel URL was provided, create an entry in venue_reels table
+    if (instagramReelUrl && venueResult.id) {
+      try {
+        await supabase
+          .from('venue_reels')
+          .insert({
+            venue_id: venueResult.id,
+            instagram_url: instagramReelUrl,
+            display_order: 0,
+            is_active: true,
+          } as any);
+      } catch (reelError) {
+        console.error('Error creating venue reel entry:', reelError);
+        // Don't fail the registration if reel creation fails
+      }
+    }
+
     // Send registration confirmation email
     let emailSent = false;
     try {
@@ -326,6 +346,6 @@ export async function GET() {
   return NextResponse.json({
     message: 'POST to this endpoint to register a venue',
     required_fields: ['venueName', 'crNumber', 'category', 'area', 'address', 'phone', 'email', 'password'],
-    optional_fields: ['website', 'instagram', 'youtubeUrl', 'description', 'googleMapsUrl', 'logo', 'coverImage'],
+    optional_fields: ['website', 'instagram', 'youtubeUrl', 'instagramReelUrl', 'description', 'googleMapsUrl', 'logo', 'coverImage'],
   });
 }

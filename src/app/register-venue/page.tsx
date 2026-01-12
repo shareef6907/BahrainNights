@@ -2,7 +2,7 @@
 
 import { useState, useRef } from 'react';
 import { motion } from 'framer-motion';
-import { Building2, MapPin, Phone, Mail, Globe, Instagram, Upload, CheckCircle, Loader2, ArrowLeft, Lock, Eye, EyeOff, X, ImageIcon, Map, Shield } from 'lucide-react';
+import { Building2, MapPin, Phone, Mail, Globe, Instagram, Upload, CheckCircle, Loader2, ArrowLeft, Lock, Eye, EyeOff, X, ImageIcon, Map, Shield, Film } from 'lucide-react';
 import Link from 'next/link';
 import AIWriterButton from '@/components/ai/AIWriterButton';
 
@@ -64,6 +64,7 @@ interface FormData {
   website: string;
   instagram: string;
   youtubeUrl: string;
+  instagramReelUrl: string;
   description: string;
   logo: File | null;
   coverImage: File | null;
@@ -89,6 +90,7 @@ export default function RegisterVenuePage() {
     website: '',
     instagram: '',
     youtubeUrl: '',
+    instagramReelUrl: '',
     description: '',
     logo: null,
     coverImage: null,
@@ -371,6 +373,7 @@ export default function RegisterVenuePage() {
         website: formData.website ? `https://${formData.website}` : null,
         instagram: formData.instagram || null,
         youtubeUrl: formData.youtubeUrl || null,
+        instagramReelUrl: formData.instagramReelUrl || null,
         description: formData.description || null,
         logoUrl: formData.logoUrl,
         coverImageUrl: formData.coverImageUrl,
@@ -651,6 +654,23 @@ export default function RegisterVenuePage() {
                 </div>
                 <p className="text-xs text-gray-500 mt-1">
                   Add a promotional video for your venue (will autoplay muted on your profile)
+                </p>
+              </div>
+              <div className="md:col-span-2">
+                <label className="block text-sm text-gray-400 mb-2">Instagram Reel (Showcase your venue with a reel)</label>
+                <div className="relative">
+                  <Film className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-500" />
+                  <input
+                    type="url"
+                    name="instagramReelUrl"
+                    value={formData.instagramReelUrl}
+                    onChange={handleInputChange}
+                    className="w-full bg-gray-900/50 border border-gray-700 rounded-lg pl-10 pr-4 py-3 text-white placeholder-gray-500 focus:border-orange-500 focus:ring-1 focus:ring-orange-500 outline-none transition-all"
+                    placeholder="https://www.instagram.com/reel/ABC123/"
+                  />
+                </div>
+                <p className="text-xs text-gray-500 mt-1">
+                  Optional - Add an Instagram reel to showcase your venue
                 </p>
               </div>
             </div>
