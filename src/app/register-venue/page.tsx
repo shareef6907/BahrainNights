@@ -2,7 +2,7 @@
 
 import { useState, useRef } from 'react';
 import { motion } from 'framer-motion';
-import { Building2, MapPin, Phone, Mail, Globe, Instagram, Upload, CheckCircle, Loader2, ArrowLeft, Lock, Eye, EyeOff, X, ImageIcon, Map } from 'lucide-react';
+import { Building2, MapPin, Phone, Mail, Globe, Instagram, Upload, CheckCircle, Loader2, ArrowLeft, Lock, Eye, EyeOff, X, ImageIcon, Map, Shield } from 'lucide-react';
 import Link from 'next/link';
 import AIWriterButton from '@/components/ai/AIWriterButton';
 
@@ -70,6 +70,8 @@ interface FormData {
   logoUrl: string | null;
   coverImageUrl: string | null;
   galleryImages: GalleryImage[];
+  termsAccepted: boolean;
+  guidelinesAccepted: boolean;
 }
 
 export default function RegisterVenuePage() {
@@ -92,7 +94,9 @@ export default function RegisterVenuePage() {
     coverImage: null,
     logoUrl: null,
     coverImageUrl: null,
-    galleryImages: []
+    galleryImages: [],
+    termsAccepted: false,
+    guidelinesAccepted: false
   });
 
   // Unique registration ID for this session
@@ -110,8 +114,9 @@ export default function RegisterVenuePage() {
   const [coverUploading, setCoverUploading] = useState(false);
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {
-    const { name, value } = e.target;
-    setFormData(prev => ({ ...prev, [name]: value }));
+    const { name, value, type } = e.target;
+    const checked = (e.target as HTMLInputElement).checked;
+    setFormData(prev => ({ ...prev, [name]: type === 'checkbox' ? checked : value }));
   };
 
   // Upload file directly to S3 using presigned URL
@@ -331,6 +336,13 @@ export default function RegisterVenuePage() {
       return;
     }
 
+    // Validate terms acceptance
+    if (!formData.termsAccepted || !formData.guidelinesAccepted) {
+      setError('You must accept the Terms & Conditions and Content Guidelines to register');
+      setIsSubmitting(false);
+      return;
+    }
+
     // Check if images are still uploading
     const galleryUploading = formData.galleryImages.some(img => img.uploading);
     if (logoUploading || coverUploading || galleryUploading) {
@@ -362,7 +374,9 @@ export default function RegisterVenuePage() {
         description: formData.description || null,
         logoUrl: formData.logoUrl,
         coverImageUrl: formData.coverImageUrl,
-        galleryUrls: galleryUrls.length > 0 ? galleryUrls : null
+        galleryUrls: galleryUrls.length > 0 ? galleryUrls : null,
+        terms_accepted: formData.termsAccepted,
+        content_guidelines_accepted: formData.guidelinesAccepted
       };
 
       const response = await fetch('/api/venues/register', {
@@ -878,15 +892,92 @@ export default function RegisterVenuePage() {
             </div>
           </div>
 
+          {/* Terms & Conditions */}
+          <div className="mb-8">
+            <h3 className="text-lg font-semibold text-white mb-4 flex items-center gap-2">
+              <Shield className="w-5 h-5 text-orange-500" />
+              Terms & Conditions
+            </h3>
+
+            {/* Scrollable Terms Box */}
+            <div className="bg-gray-900/50 border border-gray-700 rounded-lg p-4 mb-4 max-h-48 overflow-y-auto text-sm text-gray-400">
+              <h4 className="text-white font-semibold mb-2">Content Responsibility & Liability Disclaimer</h4>
+              <p className="mb-3">
+                By registering your venue on BahrainNights.com, you acknowledge and agree to the following:
+              </p>
+              <ul className="list-disc pl-5 space-y-2 mb-3">
+                <li>
+                  <strong className="text-gray-300">Content Ownership:</strong> You confirm that you have the right to submit this information and any associated images, and that the content does not infringe upon any third-party rights.
+                </li>
+                <li>
+                  <strong className="text-gray-300">Accuracy:</strong> You are solely responsible for ensuring all submitted information is accurate, current, and truthful. BahrainNights.com does not verify the accuracy of user-submitted content.
+                </li>
+                <li>
+                  <strong className="text-gray-300">No Liability:</strong> BahrainNights.com and its operators accept no responsibility or liability for any content submitted by users. This includes but is not limited to inaccurate information, misleading descriptions, or inappropriate content.
+                </li>
+                <li>
+                  <strong className="text-gray-300">Indemnification:</strong> You agree to indemnify and hold harmless BahrainNights.com, its operators, employees, and affiliates from any claims, damages, or expenses arising from your submitted content.
+                </li>
+                <li>
+                  <strong className="text-gray-300">Content Moderation:</strong> BahrainNights.com reserves the right to review, edit, or remove any submitted content at its sole discretion without notice.
+                </li>
+                <li>
+                  <strong className="text-gray-300">Legal Compliance:</strong> You agree that your submission complies with all applicable laws and regulations in the Kingdom of Bahrain.
+                </li>
+                <li>
+                  <strong className="text-gray-300">Account Responsibility:</strong> You are responsible for maintaining the confidentiality of your account credentials and for all activities that occur under your account.
+                </li>
+              </ul>
+              <p className="text-xs text-gray-500">
+                For full terms, please visit our <Link href="/terms" className="text-orange-400 hover:underline">Terms of Service</Link> page.
+              </p>
+            </div>
+
+            {/* Checkboxes */}
+            <div className="space-y-3">
+              <label className="flex items-start gap-3 cursor-pointer">
+                <input
+                  type="checkbox"
+                  name="termsAccepted"
+                  checked={formData.termsAccepted}
+                  onChange={handleInputChange}
+                  required
+                  className="w-5 h-5 mt-0.5 rounded border-gray-600 bg-gray-900/50 text-orange-500 focus:ring-orange-500 focus:ring-offset-0"
+                />
+                <span className="text-gray-300 text-sm">
+                  I have read and agree to the{' '}
+                  <Link href="/terms" className="text-orange-400 hover:underline">
+                    Terms & Conditions
+                  </Link>{' '}
+                  and the liability disclaimer above. <span className="text-red-400">*</span>
+                </span>
+              </label>
+
+              <label className="flex items-start gap-3 cursor-pointer">
+                <input
+                  type="checkbox"
+                  name="guidelinesAccepted"
+                  checked={formData.guidelinesAccepted}
+                  onChange={handleInputChange}
+                  required
+                  className="w-5 h-5 mt-0.5 rounded border-gray-600 bg-gray-900/50 text-orange-500 focus:ring-orange-500 focus:ring-offset-0"
+                />
+                <span className="text-gray-300 text-sm">
+                  I have read and agree to the{' '}
+                  <Link href="/content-guidelines" className="text-orange-400 hover:underline">
+                    Content Guidelines
+                  </Link>{' '}
+                  and confirm that my submission meets the quality standards. <span className="text-red-400">*</span>
+                </span>
+              </label>
+            </div>
+          </div>
+
           {/* Submit */}
-          <div className="flex flex-col sm:flex-row items-center justify-between gap-4 pt-4 border-t border-gray-700">
-            <p className="text-sm text-gray-500">
-              By registering, you agree to our{' '}
-              <Link href="/terms" className="text-orange-500 hover:underline">Terms of Service</Link>
-            </p>
+          <div className="flex flex-col sm:flex-row items-center justify-center gap-4 pt-4 border-t border-gray-700">
             <button
               type="submit"
-              disabled={isSubmitting}
+              disabled={isSubmitting || !formData.termsAccepted || !formData.guidelinesAccepted}
               className="flex items-center space-x-2 bg-gradient-to-r from-yellow-400 via-orange-500 to-pink-500 text-black px-8 py-3 rounded-full font-semibold hover:shadow-lg hover:shadow-orange-500/25 disabled:opacity-50 disabled:cursor-not-allowed transition-all"
             >
               {isSubmitting ? (

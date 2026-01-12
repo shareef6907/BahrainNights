@@ -69,6 +69,8 @@ interface RegisterData {
   logoUrl?: string | null;
   coverImageUrl?: string | null;
   galleryUrls?: string[] | null;
+  terms_accepted?: boolean;
+  content_guidelines_accepted?: boolean;
 }
 
 export async function POST(request: NextRequest) {
@@ -93,7 +95,9 @@ export async function POST(request: NextRequest) {
       description,
       logoUrl,
       coverImageUrl,
-      galleryUrls
+      galleryUrls,
+      terms_accepted,
+      content_guidelines_accepted
     } = body;
 
     // Validate required fields
@@ -103,6 +107,19 @@ export async function POST(request: NextRequest) {
         { status: 400 }
       );
     }
+
+    // Validate terms acceptance
+    if (!terms_accepted || !content_guidelines_accepted) {
+      return NextResponse.json(
+        { error: 'You must accept the Terms & Conditions and Content Guidelines to register' },
+        { status: 400 }
+      );
+    }
+
+    // Capture IP address and user agent for legal records
+    const forwarded = request.headers.get('x-forwarded-for');
+    const ip_address = forwarded ? forwarded.split(',')[0].trim() : request.headers.get('x-real-ip') || 'unknown';
+    const user_agent = request.headers.get('user-agent') || 'unknown';
 
     // Validate email format
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
@@ -243,6 +260,11 @@ export async function POST(request: NextRequest) {
       is_featured: false,
       view_count: 0,
       like_count: 0,
+      terms_accepted: true,
+      terms_accepted_at: new Date().toISOString(),
+      content_guidelines_accepted: true,
+      registration_ip: ip_address,
+      registration_user_agent: user_agent,
     };
 
     const { data: venue, error: insertError } = await supabase

@@ -20,6 +20,8 @@ export async function POST(request: NextRequest) {
       submitter_email,
       submitter_phone,
       is_owner,
+      terms_accepted,
+      content_guidelines_accepted,
     } = body;
 
     // Validate required fields
@@ -29,6 +31,19 @@ export async function POST(request: NextRequest) {
         { status: 400 }
       );
     }
+
+    // Validate terms acceptance
+    if (!terms_accepted || !content_guidelines_accepted) {
+      return NextResponse.json(
+        { error: 'You must accept the Terms & Conditions and Content Guidelines to submit' },
+        { status: 400 }
+      );
+    }
+
+    // Capture IP address and user agent for legal records
+    const forwarded = request.headers.get('x-forwarded-for');
+    const ip_address = forwarded ? forwarded.split(',')[0].trim() : request.headers.get('x-real-ip') || 'unknown';
+    const user_agent = request.headers.get('user-agent') || 'unknown';
 
     // Validate email format
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
@@ -77,6 +92,11 @@ export async function POST(request: NextRequest) {
       submitter_phone: submitter_phone?.trim() || null,
       is_owner: is_owner || false,
       status: 'pending',
+      terms_accepted: true,
+      terms_accepted_at: new Date().toISOString(),
+      content_guidelines_accepted: true,
+      ip_address,
+      user_agent,
     };
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const { data: submission, error } = await (supabase
