@@ -137,7 +137,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     },
   ];
 
-  // Fetch published events
+  // Fetch published events (exclude hidden)
   let eventPages: MetadataRoute.Sitemap = [];
   try {
     const today = new Date().toISOString().split('T')[0];
@@ -145,6 +145,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       .from('events')
       .select('slug, updated_at, date')
       .eq('status', 'published')
+      .eq('is_hidden', false)
       .or(`date.gte.${today},end_date.gte.${today}`)
       .order('date', { ascending: false })
       .limit(500);

@@ -87,6 +87,7 @@ export async function getPublishedEventsWithVenue(filters: Omit<EventFilters, 's
       )
     `)
     .eq('status', 'published')
+    .eq('is_hidden', false)
     .order('start_date', { ascending: true });
 
   if (filters.category) {
@@ -341,7 +342,8 @@ export async function getEventCategories(): Promise<string[]> {
   const { data, error } = await supabase
     .from('events')
     .select('category')
-    .eq('status', 'published');
+    .eq('status', 'published')
+    .eq('is_hidden', false);
 
   if (error) {
     console.error('Error fetching event categories:', error);
@@ -394,6 +396,7 @@ export async function getEventsForCalendar(month: number, year: number): Promise
     .from('events')
     .select('*')
     .eq('status', 'published')
+    .eq('is_hidden', false)
     .gte('start_date', startDate)
     .lte('start_date', endDate)
     .order('start_date', { ascending: true });

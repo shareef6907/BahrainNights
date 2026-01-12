@@ -139,6 +139,7 @@ async function getEvent(slug: string) {
     .select('*')
     .eq('slug', slug)
     .eq('status', 'published')
+    .eq('is_hidden', false)
     .single();
 
   if (error || !event) {
@@ -187,6 +188,7 @@ async function getSimilarEvents(category: string, excludeId: string) {
     .from('events')
     .select('id, title, slug, description, category, venue_name, date, time, price, image_url, cover_url')
     .eq('status', 'published')
+    .eq('is_hidden', false)
     .eq('category', category)
     .neq('id', excludeId)
     .gte('date', new Date().toISOString().split('T')[0])

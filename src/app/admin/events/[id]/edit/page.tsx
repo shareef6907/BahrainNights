@@ -11,6 +11,8 @@ import {
   Upload,
   Star,
   StarOff,
+  Eye,
+  EyeOff,
 } from 'lucide-react';
 import AIWriterButton from '@/components/ai/AIWriterButton';
 
@@ -22,6 +24,7 @@ interface Event {
   category: string;
   status: string;
   is_featured: boolean;
+  is_hidden: boolean;
   venue_name: string;
   venue_address: string | null;
   date: string;
@@ -55,6 +58,7 @@ export default function AdminEventEditPage() {
     category: '',
     status: 'published',
     is_featured: false,
+    is_hidden: false,
     venue_name: '',
     venue_address: '',
     date: '',
@@ -89,6 +93,7 @@ export default function AdminEventEditPage() {
           category: e.category || '',
           status: e.status || 'published',
           is_featured: e.is_featured || false,
+          is_hidden: e.is_hidden || false,
           venue_name: e.venue_name || '',
           venue_address: e.venue_address || '',
           date: e.date ? e.date.split('T')[0] : '',
@@ -136,6 +141,7 @@ export default function AdminEventEditPage() {
         category: formData.category,
         status: formData.status,
         is_featured: formData.is_featured,
+        is_hidden: formData.is_hidden,
         venue_name: formData.venue_name,
         venue_address: formData.venue_address || null,
         date: formData.date || null,
@@ -335,6 +341,31 @@ export default function AdminEventEditPage() {
                 )}
                 <span className="font-medium">
                   {formData.is_featured ? 'Featured' : 'Not Featured'}
+                </span>
+              </div>
+            </label>
+          </div>
+          <div className="flex items-center">
+            <label className="flex items-center gap-3 cursor-pointer">
+              <input
+                type="checkbox"
+                name="is_hidden"
+                checked={formData.is_hidden}
+                onChange={handleChange}
+                className="sr-only"
+              />
+              <div className={`flex items-center gap-2 px-4 py-2 rounded-lg border transition-colors ${
+                formData.is_hidden
+                  ? 'bg-red-500/20 border-red-500/50 text-red-400'
+                  : 'bg-white/5 border-white/10 text-gray-400'
+              }`}>
+                {formData.is_hidden ? (
+                  <EyeOff className="w-4 h-4" />
+                ) : (
+                  <Eye className="w-4 h-4" />
+                )}
+                <span className="font-medium">
+                  {formData.is_hidden ? 'Hidden from Public' : 'Visible to Public'}
                 </span>
               </div>
             </label>

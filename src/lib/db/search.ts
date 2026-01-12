@@ -108,6 +108,7 @@ async function searchEvents(query: string, category?: string): Promise<Event[]> 
     .from('events')
     .select('*')
     .eq('status', 'published')
+    .eq('is_hidden', false)
     .gte('start_date', today)
     .or(`title.ilike.%${query}%,description.ilike.%${query}%`)
     .order('start_date', { ascending: true })

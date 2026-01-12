@@ -10,6 +10,7 @@ import {
   Search,
   MoreVertical,
   Eye,
+  EyeOff,
   Edit,
   CheckCircle,
   XCircle,
@@ -54,6 +55,7 @@ interface Event {
   cover_url: string | null;
   status: string;
   is_featured: boolean;
+  is_hidden: boolean;
   view_count: number;
   views: number;
   price: string | null;
@@ -718,6 +720,32 @@ function ActionDropdown({
           </button>
         )}
 
+        {/* Visibility Toggle */}
+        <button
+          onClick={() => {
+            onAction(event.is_hidden ? 'unhide' : 'hide');
+            onClose();
+          }}
+          disabled={loading}
+          className={`w-full flex items-center gap-2 px-4 py-2 text-sm ${
+            event.is_hidden
+              ? 'text-green-400 hover:bg-green-500/10'
+              : 'text-red-400 hover:bg-red-500/10'
+          } disabled:opacity-50`}
+        >
+          {event.is_hidden ? (
+            <>
+              <Eye className="w-4 h-4" />
+              Show Event
+            </>
+          ) : (
+            <>
+              <EyeOff className="w-4 h-4" />
+              Hide Event
+            </>
+          )}
+        </button>
+
         <div className="my-1 border-t border-white/10" />
 
         {/* Delete */}
@@ -753,6 +781,7 @@ export default function AdminEventsPage() {
   const [activeTab, setActiveTab] = useState<EventStatus>('all');
   const [searchQuery, setSearchQuery] = useState('');
   const [categoryFilter, setCategoryFilter] = useState('all');
+  const [visibilityFilter, setVisibilityFilter] = useState<'all' | 'visible' | 'hidden'>('all');
   const [openActionMenu, setOpenActionMenu] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
   const [actionLoading, setActionLoading] = useState<string | null>(null);
@@ -851,11 +880,19 @@ export default function AdminEventsPage() {
     };
   }, [fetchEvents]);
 
-  // Filter events based on tab (for past events filtering)
+  // Filter events based on tab (for past events filtering) and visibility
   const now = new Date();
   const filteredEvents = events.filter((event) => {
     const eventDate = new Date(event.start_date);
     const isPast = eventDate < now;
+
+    // Apply visibility filter
+    if (visibilityFilter === 'visible' && event.is_hidden) {
+      return false;
+    }
+    if (visibilityFilter === 'hidden' && !event.is_hidden) {
+      return false;
+    }
 
     if (activeTab === 'past') {
       return isPast;
@@ -870,6 +907,28 @@ export default function AdminEventsPage() {
     setOpenActionMenu(null);
 
     try {
+      // Handle visibility toggle via separate endpoint
+      if (action === 'hide' || action === 'unhide') {
+        const response = await fetch(`/api/admin/events/${eventId}/visibility`, {
+          method: 'PATCH',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ is_hidden: action === 'hide' }),
+        });
+
+        const data = await response.json();
+
+        if (response.ok) {
+          await fetchEvents();
+          showToast(
+            action === 'hide' ? 'Event is now hidden from public' : 'Event is now visible to public',
+            'success'
+          );
+        } else {
+          showToast(data.error || 'Action failed', 'error');
+        }
+        return;
+      }
+
       const body: Record<string, unknown> = { action };
       if (rejectionReason) {
         body.rejection_reason = rejectionReason;
@@ -1155,6 +1214,20 @@ export default function AdminEventsPage() {
           </select>
           <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400 pointer-events-none" />
         </div>
+
+        {/* Visibility Filter */}
+        <div className="relative">
+          <select
+            value={visibilityFilter}
+            onChange={(e) => setVisibilityFilter(e.target.value as 'all' | 'visible' | 'hidden')}
+            className="appearance-none px-4 py-2.5 pr-10 bg-white/5 border border-white/10 rounded-xl text-white text-sm focus:outline-none focus:border-cyan-500/50 cursor-pointer"
+          >
+            <option value="all" className="bg-[#1A1A2E]">All Visibility</option>
+            <option value="visible" className="bg-[#1A1A2E]">Visible Only</option>
+            <option value="hidden" className="bg-[#1A1A2E]">Hidden Only</option>
+          </select>
+          <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400 pointer-events-none" />
+        </div>
       </motion.div>
 
       {/* Loading State */}
@@ -1230,7 +1303,16 @@ export default function AdminEventsPage() {
                       )}
                     </td>
                     <td className="p-4 text-gray-300">{formatCategory(event.category)}</td>
-                    <td className="p-4">{getStatusBadge(event.status, event.start_date)}</td>
+                    <td className="p-4">
+                      <div className="flex flex-wrap gap-1">
+                        {getStatusBadge(event.status, event.start_date)}
+                        {event.is_hidden && (
+                          <span className="px-2 py-1 text-xs font-medium bg-red-500/20 text-red-400 rounded-full">
+                            Hidden
+                          </span>
+                        )}
+                      </div>
+                    </td>
                     <td className="p-4 text-gray-300">{(event.views || event.view_count || 0).toLocaleString()}</td>
                     <td className="p-4">
                       <button
@@ -1315,7 +1397,14 @@ export default function AdminEventsPage() {
                         <h3 className="font-medium text-white">{event.title}</h3>
                         <p className="text-sm text-cyan-400">{event.venue_name || 'Venue TBD'}</p>
                       </div>
-                      {getStatusBadge(event.status, event.start_date)}
+                      <div className="flex flex-wrap gap-1">
+                        {getStatusBadge(event.status, event.start_date)}
+                        {event.is_hidden && (
+                          <span className="px-2 py-1 text-xs font-medium bg-red-500/20 text-red-400 rounded-full">
+                            Hidden
+                          </span>
+                        )}
+                      </div>
                     </div>
                     <div className="mt-2 text-xs text-gray-500">
                       <p>{new Date(event.start_date).toLocaleDateString()} • {formatCategory(event.category)}</p>

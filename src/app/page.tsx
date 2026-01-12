@@ -30,6 +30,7 @@ async function getTodayEvents(): Promise<TodayEvent[]> {
       .from('events')
       .select('id, title, slug, venue_name, time, cover_url, category, date, is_featured, view_count')
       .eq('status', 'published')
+      .eq('is_hidden', false)
       .eq('category', category)
       .eq('date', today) // Only TODAY's events
       .order('is_featured', { ascending: false })
@@ -62,8 +63,10 @@ async function getTodayEvents(): Promise<TodayEvent[]> {
       .from('events')
       .select('id, title, slug, venue_name, time, cover_url, category, date')
       .eq('status', 'published')
+      .eq('is_hidden', false)
       .eq('date', today) // Only TODAY's events
       .not('id', 'in', `(${existingIds.length > 0 ? existingIds.map(id => `'${id}'`).join(',') : "''"})`)
+
       .order('is_featured', { ascending: false })
       .order('view_count', { ascending: false })
       .limit(4 - events.length);
@@ -118,7 +121,7 @@ async function getStats() {
   try {
     // Fetch counts in parallel
     const [eventsResult, venuesResult, moviesResult] = await Promise.all([
-      supabaseAdmin.from('events').select('id', { count: 'exact', head: true }).eq('status', 'published'),
+      supabaseAdmin.from('events').select('id', { count: 'exact', head: true }).eq('status', 'published').eq('is_hidden', false),
       supabaseAdmin.from('venues').select('id', { count: 'exact', head: true }),
       supabaseAdmin.from('movies').select('id', { count: 'exact', head: true }).eq('is_now_showing', true),
     ]);

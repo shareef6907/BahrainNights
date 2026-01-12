@@ -84,6 +84,7 @@ async function getEvents(): Promise<Event[]> {
     .from('events')
     .select('*')
     .eq('status', 'published')
+    .eq('is_hidden', false)
     .or(`date.gte.${today},end_date.gte.${today}`)
     .order('date', { ascending: true });
 

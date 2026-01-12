@@ -26,6 +26,7 @@ export async function GET(request: NextRequest) {
       .from('events')
       .select('*')
       .eq('status', 'published')
+      .eq('is_hidden', false)
       .order('created_at', { ascending: false })
       .limit(limit);
 

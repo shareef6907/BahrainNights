@@ -28,10 +28,12 @@ export async function GET() {
       moviesResult,
       offersResult,
     ] = await Promise.all([
-      // Count events (only upcoming/active events)
+      // Count events (only upcoming/active events that are published and visible)
       supabase
         .from('events')
         .select('*', { count: 'exact', head: true })
+        .eq('status', 'published')
+        .eq('is_hidden', false)
         .gte('start_date', new Date().toISOString().split('T')[0]),
 
       // Count approved venues
