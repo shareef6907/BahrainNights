@@ -116,14 +116,15 @@ async function getMovies(): Promise<HomepageMovie[]> {
 
 // Fetch stats for the homepage
 async function getStats() {
-  const defaultStats = { events: 0, venues: 0, cinema: 0, offers: 0, explore: 0 };
+  const defaultStats = { events: 0, venues: 0, cinema: 0, offers: 0, explore: 0, attractions: 0 };
 
   try {
     // Fetch counts in parallel
-    const [eventsResult, venuesResult, moviesResult] = await Promise.all([
+    const [eventsResult, venuesResult, moviesResult, experiencesResult] = await Promise.all([
       supabaseAdmin.from('events').select('id', { count: 'exact', head: true }).eq('status', 'published').eq('is_hidden', false),
       supabaseAdmin.from('venues').select('id', { count: 'exact', head: true }),
       supabaseAdmin.from('movies').select('id', { count: 'exact', head: true }).eq('is_now_showing', true),
+      supabaseAdmin.from('experiences').select('id', { count: 'exact', head: true }).eq('is_active', true),
     ]);
 
     return {
@@ -132,6 +133,7 @@ async function getStats() {
       cinema: moviesResult.count || 0,
       offers: 0, // Will be added later
       explore: 0, // Will be added later
+      attractions: experiencesResult.count || 0,
     };
   } catch (error) {
     console.error('Error fetching stats:', error);

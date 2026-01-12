@@ -46,6 +46,14 @@ export const en = {
     shoppingMarkets: 'Shopping & Markets',
     toursExperiences: 'Tours & Experiences',
     communityEvents: 'Community Events',
+    // Attractions dropdown
+    allAttractions: 'All Attractions',
+    tours: 'Tours',
+    waterSports: 'Water Sports',
+    indoorActivities: 'Indoor Activities',
+    sightseeing: 'Sightseeing',
+    boatTours: 'Boat Tours',
+    desertSafari: 'Desert Safari',
   },
 
   // Homepage
@@ -420,6 +428,8 @@ export const en = {
     offersDesc: 'Deals & promotions',
     explore: 'Explore',
     exploreDesc: 'Hotels, spas & more',
+    attractions: 'Attractions',
+    attractionsDesc: 'Tours, water sports & more',
     listings: 'listings',
     comingSoon: 'Coming soon',
   },

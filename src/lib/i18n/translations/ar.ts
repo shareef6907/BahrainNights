@@ -49,6 +49,14 @@ export const ar = {
     shoppingMarkets: 'التسوق والأسواق',
     toursExperiences: 'الجولات والتجارب',
     communityEvents: 'فعاليات المجتمع',
+    // Attractions dropdown
+    allAttractions: 'جميع المعالم',
+    tours: 'الجولات السياحية',
+    waterSports: 'الرياضات المائية',
+    indoorActivities: 'الأنشطة الداخلية',
+    sightseeing: 'المعالم السياحية',
+    boatTours: 'جولات القوارب',
+    desertSafari: 'سفاري الصحراء',
   },
 
   // Homepage
@@ -423,6 +431,8 @@ export const ar = {
     offersDesc: 'صفقات وترويجات',
     explore: 'استكشف',
     exploreDesc: 'فنادق ومنتجعات والمزيد',
+    attractions: 'المعالم السياحية',
+    attractionsDesc: 'جولات ورياضات مائية والمزيد',
     listings: 'قائمة',
     comingSoon: 'قريباً',
   },

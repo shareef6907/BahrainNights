@@ -155,7 +155,7 @@ function convertToMovieFormat(movie: HomepageMovie): Movie {
 
 interface HomePageClientProps {
   initialMovies: HomepageMovie[];
-  initialStats: { events: number; venues: number; cinema: number; offers: number; explore: number };
+  initialStats: { events: number; venues: number; cinema: number; offers: number; explore: number; attractions: number };
   initialTodayEvents: TodayEvent[];
 }
 
@@ -164,6 +164,20 @@ export default function HomePageClient({ initialMovies, initialStats, initialTod
 
   // Navigation menu data with translations
   const menuItems = [
+    {
+      name: t.nav.attractions,
+      icon: '🎢',
+      href: '/attractions',
+      dropdown: [
+        { name: t.nav.allAttractions, icon: '🎯', href: '/attractions' },
+        { name: t.nav.tours, icon: '🗺️', href: '/attractions?category=tour' },
+        { name: t.nav.waterSports, icon: '🏄', href: '/attractions?category=water-sports' },
+        { name: t.nav.indoorActivities, icon: '🎮', href: '/attractions?category=indoor' },
+        { name: t.nav.sightseeing, icon: '🏛️', href: '/attractions?category=sightseeing' },
+        { name: t.nav.boatTours, icon: '⛵', href: '/attractions?category=boat-tour' },
+        { name: t.nav.desertSafari, icon: '🏜️', href: '/attractions?category=desert-safari' },
+      ]
+    },
     {
       name: t.nav.events,
       icon: '🎭',
@@ -305,6 +319,7 @@ export default function HomePageClient({ initialMovies, initialStats, initialTod
 
   // Categories with real counts from API
   const categories = [
+    { icon: "🎢", name: t.categories.attractions, description: t.categories.attractionsDesc, count: stats.attractions, color: "from-teal-500 to-emerald-500", href: "/attractions" },
     { icon: "🎭", name: t.categories.events, description: t.categories.eventsDesc, count: stats.events, color: "from-purple-500 to-pink-500", href: "/events" },
     { icon: "🍽️", name: t.categories.dining, description: t.categories.diningDesc, count: stats.venues, color: "from-orange-500 to-red-500", href: "/places" },
     { icon: "🎬", name: t.categories.cinema, description: t.categories.cinemaDesc, count: stats.cinema, color: "from-blue-500 to-cyan-500", href: "/cinema" },
@@ -318,6 +333,7 @@ export default function HomePageClient({ initialMovies, initialStats, initialTod
 
   // Quick filter buttons with direct page links (not search)
   const quickFilters = [
+    { label: `🎢 ${t.categories.attractions}`, href: '/attractions' },
     { label: `🎭 ${t.home.quickFilters.events}`, href: '/events' },
     { label: `🍽️ ${t.home.quickFilters.dining}`, href: '/places' },
     { label: `🎬 ${t.home.quickFilters.cinema}`, href: '/cinema' },
