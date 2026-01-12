@@ -356,8 +356,7 @@ export default function ContentGuidelinesPage() {
             <ul className="list-disc pl-6 space-y-2">
               <li>Confirm you own the rights to all uploaded content or have obtained necessary permissions</li>
               <li>Grant BahrainNights a non-exclusive, royalty-free license to use, display, and distribute your content on our platform</li>
-              <li>Agree that your images may be watermarked for platform identification</li>
-              <li>Understand that BahrainNights may compress, resize, or optimize images</li>
+              <li>Understand that BahrainNights may compress, resize, or optimize images for better performance</li>
               <li>Accept that BahrainNights reserves the right to remove any content without notice</li>
             </ul>
           </div>

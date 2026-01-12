@@ -1,16 +1,17 @@
 # AWS Lambda Image Processor Setup Guide
 
-This guide covers the deployment and configuration of the AWS Lambda function that processes and watermarks images for BahrainNights.com.
+This guide covers the deployment and configuration of the AWS Lambda function that processes images for BahrainNights.com.
 
 ## Overview
 
 The Lambda function:
 - Automatically triggers when images are uploaded to the S3 `/uploads/` folder
-- Compresses images based on type (logo, cover, gallery, banner)
-- Adds "BahrainNights.com" watermark (except for logos)
+- Compresses images based on type (logo, cover, gallery, banner) to max 1MB
+- AI content moderation using AWS Rekognition (blocks explicit content)
 - Converts all images to WebP format
 - Moves processed images to `/processed/` folder
 - Deletes originals from `/uploads/`
+- **Note: Watermarking has been disabled - only compression is applied**
 
 ## Prerequisites
 

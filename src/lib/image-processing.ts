@@ -97,7 +97,7 @@ export async function processImage(
     maxWidth = MAX_WIDTH,
     maxHeight = MAX_HEIGHT,
     quality = QUALITY,
-    addWatermark = true,
+    addWatermark = false, // Watermarking disabled - only compression
     watermarkPosition = 'bottom-right',
     format = 'webp',
   } = options;

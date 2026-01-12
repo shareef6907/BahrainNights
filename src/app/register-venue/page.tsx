@@ -842,7 +842,7 @@ export default function RegisterVenuePage() {
                 Gallery Images <span className="text-gray-500">(up to 10 images)</span>
               </label>
               <p className="text-xs text-gray-500 mb-3">
-                These images will be watermarked with the BahrainNights logo for protection.
+                These images will be optimized and compressed for optimal performance.
               </p>
 
               {/* Gallery Grid */}
