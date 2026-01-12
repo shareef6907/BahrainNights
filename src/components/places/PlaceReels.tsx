@@ -165,33 +165,56 @@ export default function PlaceReels({ reels, venueName }: PlaceReelsProps) {
               </button>
             )}
 
-            {/* Reel Video - Direct embed without branding */}
+            {/* Reel Video - Cropped to hide Instagram branding */}
             <motion.div
               key={activeReels[selectedReelIndex].id}
               initial={{ opacity: 0, scale: 0.95 }}
               animate={{ opacity: 1, scale: 1 }}
               exit={{ opacity: 0, scale: 0.95 }}
-              className="w-full max-w-md h-[80vh] max-h-[700px] relative"
+              className="w-full max-w-md relative"
               onClick={(e) => e.stopPropagation()}
             >
-              {/* Video Container */}
-              <div className="w-full h-full rounded-2xl overflow-hidden bg-black relative">
-                <iframe
-                  src={`https://www.instagram.com/reel/${extractInstagramReelId(activeReels[selectedReelIndex].instagram_url)}/embed/?hidecaption=true`}
-                  className="w-full h-full"
-                  frameBorder="0"
-                  scrolling="no"
-                  allowTransparency
-                  allowFullScreen
-                />
+              {/* Video Container - Cropped to hide header and footer */}
+              <div className="relative rounded-2xl overflow-hidden bg-black" style={{ height: 'calc(80vh - 100px)', maxHeight: '600px' }}>
+                {/* Iframe wrapper with negative margins to crop branding */}
+                <div
+                  className="absolute inset-0 overflow-hidden"
+                  style={{
+                    clipPath: 'inset(0 0 0 0)',
+                  }}
+                >
+                  <iframe
+                    src={`https://www.instagram.com/reel/${extractInstagramReelId(activeReels[selectedReelIndex].instagram_url)}/embed/?hidecaption=true&autoplay=1`}
+                    className="absolute w-full border-0"
+                    style={{
+                      height: 'calc(100% + 160px)',
+                      top: '-60px',
+                      left: '0',
+                      right: '0',
+                    }}
+                    frameBorder="0"
+                    scrolling="no"
+                    allowTransparency
+                    allowFullScreen
+                    allow="autoplay; encrypted-media"
+                  />
+                </div>
 
-                {/* Open in Instagram button */}
+                {/* Top gradient overlay to hide any remaining header elements */}
+                <div className="absolute top-0 left-0 right-0 h-2 bg-black z-10" />
+
+                {/* Bottom gradient overlay to hide footer elements */}
+                <div className="absolute bottom-0 left-0 right-0 h-2 bg-black z-10" />
+              </div>
+
+              {/* Open in Instagram button - Moved outside cropped area */}
+              <div className="flex justify-center mt-4">
                 <a
                   href={getInstagramReelUrl(activeReels[selectedReelIndex].instagram_url) || '#'}
                   target="_blank"
                   rel="noopener noreferrer"
                   onClick={(e) => e.stopPropagation()}
-                  className="absolute bottom-4 right-4 z-10 flex items-center gap-1.5 px-4 py-2 bg-black/70 hover:bg-black/90 backdrop-blur-sm rounded-full text-white text-sm font-medium transition-all"
+                  className="flex items-center gap-2 px-5 py-2.5 bg-gradient-to-r from-purple-600 via-pink-500 to-orange-400 hover:from-purple-500 hover:via-pink-400 hover:to-orange-300 rounded-full text-white text-sm font-medium transition-all shadow-lg"
                 >
                   <ExternalLink className="w-4 h-4" />
                   Open in Instagram
@@ -199,7 +222,7 @@ export default function PlaceReels({ reels, venueName }: PlaceReelsProps) {
               </div>
 
               {/* Counter */}
-              <p className="text-center text-gray-400 mt-4 text-sm">
+              <p className="text-center text-gray-400 mt-3 text-sm">
                 {selectedReelIndex + 1} of {activeReels.length}
               </p>
             </motion.div>
