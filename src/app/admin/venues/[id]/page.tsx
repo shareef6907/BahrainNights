@@ -496,7 +496,7 @@ export default function AdminVenueEditPage({ params }: { params: Promise<{ id: s
 
     setUploadingGallery(true);
     try {
-      // Step 1: Upload to S3 with watermark via the existing upload API
+      // Step 1: Upload to S3 via the existing upload API
       const uploadFormData = new FormData();
       uploadFormData.append('file', file);
       uploadFormData.append('entityType', 'venue');
@@ -516,6 +516,11 @@ export default function AdminVenueEditPage({ params }: { params: Promise<{ id: s
       const uploadData = await uploadResponse.json();
       const imageUrl = uploadData.url;
 
+      // If processing wasn't complete, wait a bit more
+      if (!uploadData.processed) {
+        await new Promise(resolve => setTimeout(resolve, 3000));
+      }
+
       // Step 2: Add the uploaded photo URL to venue's gallery array
       const galleryResponse = await fetch(`/api/admin/venues/${resolvedParams.id}/gallery`, {
         method: 'POST',
@@ -529,8 +534,16 @@ export default function AdminVenueEditPage({ params }: { params: Promise<{ id: s
       }
 
       const galleryData = await galleryResponse.json();
-      // Update local venue state with new gallery
-      setVenue((prev) => prev ? { ...prev, gallery: galleryData.venue.gallery } : null);
+      // Update local venue state with new gallery (add cache buster)
+      const galleryWithCacheBuster = galleryData.venue.gallery.map((url: string) => {
+        // Add timestamp to force refresh for the new image
+        if (url === imageUrl) {
+          const separator = url.includes('?') ? '&' : '?';
+          return `${url}${separator}t=${Date.now()}`;
+        }
+        return url;
+      });
+      setVenue((prev) => prev ? { ...prev, gallery: galleryWithCacheBuster } : null);
       setToast({ message: 'Photo uploaded successfully', type: 'success' });
     } catch (error) {
       console.error('Error uploading gallery photo:', error);
@@ -1151,7 +1164,7 @@ export default function AdminVenueEditPage({ params }: { params: Promise<{ id: s
               <div className="grid grid-cols-2 gap-3">
                 {venue.gallery.map((photoUrl, index) => (
                   <div
-                    key={index}
+                    key={photoUrl}
                     className="relative aspect-square rounded-lg overflow-hidden group"
                   >
                     <Image
@@ -1159,6 +1172,7 @@ export default function AdminVenueEditPage({ params }: { params: Promise<{ id: s
                       alt={`Gallery photo ${index + 1}`}
                       fill
                       className="object-cover"
+                      unoptimized
                     />
                     {/* Delete overlay on hover */}
                     <div className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
