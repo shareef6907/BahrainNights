@@ -84,6 +84,7 @@ export interface Database {
           like_count: number;
           is_hidden: boolean;
           youtube_url: string | null;
+          tags: string[] | null;
           created_at: string;
           updated_at: string;
           approved_at: string | null;
@@ -130,6 +131,7 @@ export interface Database {
           like_count?: number;
           is_hidden?: boolean;
           youtube_url?: string | null;
+          tags?: string[] | null;
           created_at?: string;
           updated_at?: string;
           approved_at?: string | null;
@@ -176,6 +178,7 @@ export interface Database {
           like_count?: number;
           is_hidden?: boolean;
           youtube_url?: string | null;
+          tags?: string[] | null;
           created_at?: string;
           updated_at?: string;
           approved_at?: string | null;
@@ -919,6 +922,180 @@ export interface Database {
           window_start?: string;
         };
       };
+      venue_submissions: {
+        Row: {
+          id: string;
+          venue_name: string;
+          category: string;
+          description: string | null;
+          address: string | null;
+          area: string | null;
+          phone: string | null;
+          instagram: string | null;
+          website: string | null;
+          google_maps_url: string | null;
+          submitter_name: string | null;
+          submitter_email: string;
+          submitter_phone: string | null;
+          is_owner: boolean;
+          status: 'pending' | 'approved' | 'rejected';
+          admin_notes: string | null;
+          reviewed_by: string | null;
+          reviewed_at: string | null;
+          venue_id: string | null;
+          created_at: string;
+          updated_at: string;
+        };
+        Insert: {
+          id?: string;
+          venue_name: string;
+          category: string;
+          description?: string | null;
+          address?: string | null;
+          area?: string | null;
+          phone?: string | null;
+          instagram?: string | null;
+          website?: string | null;
+          google_maps_url?: string | null;
+          submitter_name?: string | null;
+          submitter_email: string;
+          submitter_phone?: string | null;
+          is_owner?: boolean;
+          status?: 'pending' | 'approved' | 'rejected';
+          admin_notes?: string | null;
+          reviewed_by?: string | null;
+          reviewed_at?: string | null;
+          venue_id?: string | null;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Update: {
+          id?: string;
+          venue_name?: string;
+          category?: string;
+          description?: string | null;
+          address?: string | null;
+          area?: string | null;
+          phone?: string | null;
+          instagram?: string | null;
+          website?: string | null;
+          google_maps_url?: string | null;
+          submitter_name?: string | null;
+          submitter_email?: string;
+          submitter_phone?: string | null;
+          is_owner?: boolean;
+          status?: 'pending' | 'approved' | 'rejected';
+          admin_notes?: string | null;
+          reviewed_by?: string | null;
+          reviewed_at?: string | null;
+          venue_id?: string | null;
+          created_at?: string;
+          updated_at?: string;
+        };
+      };
+      discovered_venues: {
+        Row: {
+          id: string;
+          google_place_id: string;
+          name: string;
+          address: string | null;
+          latitude: number | null;
+          longitude: number | null;
+          rating: number | null;
+          total_ratings: number | null;
+          phone: string | null;
+          website: string | null;
+          google_maps_url: string | null;
+          photo_reference: string | null;
+          category: string | null;
+          suggested_tags: string[] | null;
+          status: 'pending' | 'approved' | 'rejected' | 'duplicate';
+          admin_notes: string | null;
+          reviewed_by: string | null;
+          reviewed_at: string | null;
+          venue_id: string | null;
+          created_at: string;
+          updated_at: string;
+        };
+        Insert: {
+          id?: string;
+          google_place_id: string;
+          name: string;
+          address?: string | null;
+          latitude?: number | null;
+          longitude?: number | null;
+          rating?: number | null;
+          total_ratings?: number | null;
+          phone?: string | null;
+          website?: string | null;
+          google_maps_url?: string | null;
+          photo_reference?: string | null;
+          category?: string | null;
+          suggested_tags?: string[] | null;
+          status?: 'pending' | 'approved' | 'rejected' | 'duplicate';
+          admin_notes?: string | null;
+          reviewed_by?: string | null;
+          reviewed_at?: string | null;
+          venue_id?: string | null;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Update: {
+          id?: string;
+          google_place_id?: string;
+          name?: string;
+          address?: string | null;
+          latitude?: number | null;
+          longitude?: number | null;
+          rating?: number | null;
+          total_ratings?: number | null;
+          phone?: string | null;
+          website?: string | null;
+          google_maps_url?: string | null;
+          photo_reference?: string | null;
+          category?: string | null;
+          suggested_tags?: string[] | null;
+          status?: 'pending' | 'approved' | 'rejected' | 'duplicate';
+          admin_notes?: string | null;
+          reviewed_by?: string | null;
+          reviewed_at?: string | null;
+          venue_id?: string | null;
+          created_at?: string;
+          updated_at?: string;
+        };
+      };
+      agent_logs: {
+        Row: {
+          id: string;
+          agent_name: string;
+          status: 'running' | 'completed' | 'failed';
+          details: Json | null;
+          error_message: string | null;
+          started_at: string;
+          completed_at: string | null;
+          created_at: string;
+        };
+        Insert: {
+          id?: string;
+          agent_name: string;
+          status: 'running' | 'completed' | 'failed';
+          details?: Json | null;
+          error_message?: string | null;
+          started_at?: string;
+          completed_at?: string | null;
+          created_at?: string;
+        };
+        Update: {
+          id?: string;
+          agent_name?: string;
+          status?: 'running' | 'completed' | 'failed';
+          details?: Json | null;
+          error_message?: string | null;
+          started_at?: string;
+          completed_at?: string | null;
+          created_at?: string;
+        };
+      };
     };
     Views: {
       [_ in never]: never;
@@ -984,6 +1161,18 @@ export type VenueLike = Database['public']['Tables']['venue_likes']['Row'];
 export type VenueLikeInsert = Database['public']['Tables']['venue_likes']['Insert'];
 
 export type LikeRateLimit = Database['public']['Tables']['like_rate_limits']['Row'];
+
+export type VenueSubmission = Database['public']['Tables']['venue_submissions']['Row'];
+export type VenueSubmissionInsert = Database['public']['Tables']['venue_submissions']['Insert'];
+export type VenueSubmissionUpdate = Database['public']['Tables']['venue_submissions']['Update'];
+
+export type DiscoveredVenue = Database['public']['Tables']['discovered_venues']['Row'];
+export type DiscoveredVenueInsert = Database['public']['Tables']['discovered_venues']['Insert'];
+export type DiscoveredVenueUpdate = Database['public']['Tables']['discovered_venues']['Update'];
+
+export type AgentLog = Database['public']['Tables']['agent_logs']['Row'];
+export type AgentLogInsert = Database['public']['Tables']['agent_logs']['Insert'];
+export type AgentLogUpdate = Database['public']['Tables']['agent_logs']['Update'];
 
 // Extended types with relations
 export type VenueWithEvents = Venue & {
