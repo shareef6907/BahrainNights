@@ -398,6 +398,34 @@ export async function getVenueEvents(venueName: string): Promise<{
   }));
 }
 
+// Get active reels for a venue
+export async function getVenueReels(venueId: string): Promise<{
+  id: string;
+  venue_id: string;
+  instagram_url: string;
+  display_order: number;
+  is_active: boolean;
+  created_at: string;
+  updated_at: string;
+}[]> {
+  const supabase = getAdminClient();
+
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const { data, error } = await (supabase
+    .from('venue_reels') as any)
+    .select('*')
+    .eq('venue_id', venueId)
+    .eq('is_active', true)
+    .order('display_order', { ascending: true });
+
+  if (error) {
+    console.error('Error fetching venue reels:', error);
+    return [];
+  }
+
+  return data || [];
+}
+
 // Get active offers for a venue
 export async function getVenueOffers(venueId: string): Promise<{
   id: string;

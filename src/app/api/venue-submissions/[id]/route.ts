@@ -161,6 +161,32 @@ export async function PATCH(request: NextRequest, { params }: PageProps) {
       }
 
       venueId = (newVenue as { id: string }).id;
+
+      // If submission has an Instagram reel URL, create entry in venue_reels table
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const instagramReelUrl = (submission as any).instagram_reel_url;
+      if (instagramReelUrl && venueId) {
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        const { error: reelError } = await (supabase
+          .from('venue_reels') as any)
+          .insert({
+            venue_id: venueId,
+            instagram_url: instagramReelUrl,
+            display_order: 0,
+            is_active: true,
+          });
+
+        if (reelError) {
+          console.error('Error creating venue reel from submission:', reelError);
+          // Don't fail the whole approval if reel creation fails
+        } else {
+          // Also set as featured reel on the venue
+          await (supabase
+            .from('venues') as any)
+            .update({ featured_reel_url: instagramReelUrl })
+            .eq('id', venueId);
+        }
+      }
     }
 
     // Update the submission

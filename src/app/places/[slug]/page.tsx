@@ -1,6 +1,6 @@
 import { notFound } from 'next/navigation';
 import { Metadata } from 'next';
-import { getVenueBySlug, getApprovedVenues, getVenueEvents, getVenueOffers } from '@/lib/db/venues';
+import { getVenueBySlug, getApprovedVenues, getVenueEvents, getVenueOffers, getVenueReels } from '@/lib/db/venues';
 import PlaceDetailPageContent from '@/components/places/PlaceDetailPageContent';
 
 // Force dynamic rendering to ensure fresh data after admin approval
@@ -58,12 +58,16 @@ export default async function PlaceDetailPage({ params }: PageProps) {
   // Fetch active offers for this venue
   const venueOffers = await getVenueOffers(venue.id);
 
+  // Fetch Instagram reels for this venue
+  const venueReels = await getVenueReels(venue.id);
+
   return (
     <PlaceDetailPageContent
       venue={venue}
       similarVenues={filteredSimilarVenues}
       events={venueEvents}
       offers={venueOffers}
+      reels={venueReels}
     />
   );
 }

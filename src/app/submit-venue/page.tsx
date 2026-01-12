@@ -17,8 +17,10 @@ import {
   User,
   MessageSquare,
   FileText,
-  Shield
+  Shield,
+  Film
 } from 'lucide-react';
+import { isValidInstagramReelUrl } from '@/lib/utils/instagram';
 
 interface FormData {
   venueName: string;
@@ -28,6 +30,7 @@ interface FormData {
   area: string;
   phone: string;
   instagram: string;
+  instagramReelUrl: string;
   website: string;
   googleMapsUrl: string;
   submitterName: string;
@@ -74,6 +77,7 @@ export default function SubmitVenuePage() {
     area: '',
     phone: '',
     instagram: '',
+    instagramReelUrl: '',
     website: '',
     googleMapsUrl: '',
     submitterName: '',
@@ -83,6 +87,7 @@ export default function SubmitVenuePage() {
     termsAccepted: false,
     guidelinesAccepted: false,
   });
+  const [reelUrlError, setReelUrlError] = useState<string | null>(null);
 
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isSubmitted, setIsSubmitted] = useState(false);
@@ -103,6 +108,14 @@ export default function SubmitVenuePage() {
     e.preventDefault();
     setIsSubmitting(true);
     setError(null);
+    setReelUrlError(null);
+
+    // Validate Instagram Reel URL if provided
+    if (formData.instagramReelUrl && !isValidInstagramReelUrl(formData.instagramReelUrl)) {
+      setReelUrlError('Please enter a valid Instagram Reel URL (e.g., https://www.instagram.com/reel/ABC123/)');
+      setIsSubmitting(false);
+      return;
+    }
 
     try {
       const response = await fetch('/api/venue-submissions', {
@@ -118,6 +131,7 @@ export default function SubmitVenuePage() {
           area: formData.area,
           phone: formData.phone,
           instagram: formData.instagram,
+          instagram_reel_url: formData.instagramReelUrl || null,
           website: formData.website,
           google_maps_url: formData.googleMapsUrl,
           submitter_name: formData.submitterName,
@@ -181,6 +195,7 @@ export default function SubmitVenuePage() {
                     area: '',
                     phone: '',
                     instagram: '',
+                    instagramReelUrl: '',
                     website: '',
                     googleMapsUrl: '',
                     submitterName: '',
@@ -190,6 +205,7 @@ export default function SubmitVenuePage() {
                     termsAccepted: false,
                     guidelinesAccepted: false,
                   });
+                  setReelUrlError(null);
                 }}
                 className="block w-full py-3 px-6 bg-white/10 text-white font-semibold rounded-xl hover:bg-white/20 transition-all"
               >
@@ -404,6 +420,37 @@ export default function SubmitVenuePage() {
                     placeholder="https://www.example.com"
                   />
                 </div>
+              </div>
+
+              <div className="md:col-span-2">
+                <label className="block text-sm text-gray-400 mb-2">
+                  Instagram Reel
+                  <span className="ml-2 text-xs text-gray-500">(Showcase your venue with a reel)</span>
+                </label>
+                <div className="relative">
+                  <Film className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-500" />
+                  <input
+                    type="url"
+                    name="instagramReelUrl"
+                    value={formData.instagramReelUrl}
+                    onChange={(e) => {
+                      handleInputChange(e);
+                      setReelUrlError(null);
+                    }}
+                    className={`w-full bg-gray-900/50 border rounded-lg pl-10 pr-4 py-3 text-white placeholder-gray-500 focus:ring-1 outline-none transition-all ${
+                      reelUrlError
+                        ? 'border-red-500 focus:border-red-500 focus:ring-red-500'
+                        : 'border-gray-700 focus:border-orange-500 focus:ring-orange-500'
+                    }`}
+                    placeholder="https://www.instagram.com/reel/ABC123/"
+                  />
+                </div>
+                {reelUrlError && (
+                  <p className="mt-1 text-sm text-red-400">{reelUrlError}</p>
+                )}
+                <p className="mt-1 text-xs text-gray-500">
+                  Paste your Instagram Reel URL to showcase your venue. You can add more reels after your venue is approved.
+                </p>
               </div>
             </div>
           </div>

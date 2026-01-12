@@ -14,6 +14,7 @@ import PlaceEvents from './PlaceEvents';
 import SimilarPlaces from './SimilarPlaces';
 import PlaceShareModal from './PlaceShareModal';
 import PlaceYouTubeVideo from './PlaceYouTubeVideo';
+import PlaceReels, { VenueReel } from './PlaceReels';
 import type { Venue } from '@/types/database';
 import type { Place, OpeningHours } from './PlaceCard';
 
@@ -41,6 +42,7 @@ interface PlaceDetailPageContentProps {
   similarVenues: Venue[];
   events?: VenueEvent[];
   offers?: VenueOffer[];
+  reels?: VenueReel[];
 }
 
 const categoryColors: Record<string, string> = {
@@ -96,7 +98,7 @@ function venueToPlace(venue: Venue): Place {
   };
 }
 
-export default function PlaceDetailPageContent({ venue, similarVenues, events = [], offers = [] }: PlaceDetailPageContentProps) {
+export default function PlaceDetailPageContent({ venue, similarVenues, events = [], offers = [], reels = [] }: PlaceDetailPageContentProps) {
   const [shareModalOpen, setShareModalOpen] = useState(false);
 
   // Parse opening hours from JSON
@@ -234,6 +236,9 @@ export default function PlaceDetailPageContent({ venue, similarVenues, events = 
               <PlaceInfo description={venue.description || 'No description available.'} />
               {venue.youtube_url && (
                 <PlaceYouTubeVideo youtubeUrl={venue.youtube_url} venueName={venue.name} />
+              )}
+              {reels.length > 0 && (
+                <PlaceReels reels={reels} venueName={venue.name} />
               )}
               {images.length > 0 && (
                 <PlaceGallery images={images} name={venue.name} />
