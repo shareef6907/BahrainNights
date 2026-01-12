@@ -1,12 +1,14 @@
 name: Scrape Events
 
+# TEMPORARILY DISABLED - Re-enable by removing 'if: false' from the job below
+# and uncommenting the schedule trigger
 on:
-  schedule:
-    # Run every 6 hours at off-peak times (midnight, 6 AM, noon, 6 PM UTC)
-    # These times are: 3 AM, 9 AM, 3 PM, 9 PM in Bahrain (UTC+3)
-    # Chosen to minimize impact on source websites during peak hours
-    - cron: '0 0,6,12,18 * * *'
-  workflow_dispatch:  # Manual trigger
+  # schedule:
+  #   # Run every 6 hours at off-peak times (midnight, 6 AM, noon, 6 PM UTC)
+  #   # These times are: 3 AM, 9 AM, 3 PM, 9 PM in Bahrain (UTC+3)
+  #   # Chosen to minimize impact on source websites during peak hours
+  #   - cron: '0 0,6,12,18 * * *'
+  workflow_dispatch:  # Manual trigger only
 
 env:
   NODE_ENV: production
@@ -15,6 +17,7 @@ env:
 
 jobs:
   scrape:
+    if: false  # TEMPORARILY DISABLED
     runs-on: ubuntu-latest
     timeout-minutes: 45  # Increased to account for rate limiting delays
 

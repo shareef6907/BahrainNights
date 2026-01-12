@@ -5,12 +5,28 @@ import { runDiscoveryAgent } from '@/lib/agents/discovery';
 export const dynamic = 'force-dynamic';
 export const maxDuration = 300; // 5 minutes max
 
+// =====================================================
+// TEMPORARILY DISABLED - Event scraper is disabled
+// To re-enable: Remove the SCRAPER_DISABLED check below
+// =====================================================
+const SCRAPER_DISABLED = true;
+
 /**
  * Daily Discovery Agent Cron Job
  * Runs at 5:00 AM Bahrain time (2:00 AM UTC)
  * Configured in vercel.json
  */
 export async function GET(request: NextRequest) {
+  // TEMPORARILY DISABLED
+  if (SCRAPER_DISABLED) {
+    console.log('[Discovery Cron] DISABLED - Event scraper is temporarily disabled');
+    return NextResponse.json({
+      success: false,
+      message: 'Event scraper temporarily disabled',
+      disabled: true,
+      timestamp: new Date().toISOString()
+    }, { status: 200 });
+  }
   // Verify cron secret for security
   const authHeader = request.headers.get('authorization');
   const cronSecret = process.env.CRON_SECRET;
@@ -79,6 +95,17 @@ export async function GET(request: NextRequest) {
  * For admin dashboard manual runs
  */
 export async function POST(request: NextRequest) {
+  // TEMPORARILY DISABLED
+  if (SCRAPER_DISABLED) {
+    console.log('[Discovery Cron] DISABLED - Manual trigger blocked, scraper is disabled');
+    return NextResponse.json({
+      success: false,
+      message: 'Event scraper temporarily disabled',
+      disabled: true,
+      timestamp: new Date().toISOString()
+    }, { status: 200 });
+  }
+
   // Verify admin authorization
   const authHeader = request.headers.get('authorization');
   const adminSecret = process.env.ADMIN_API_SECRET || process.env.CRON_SECRET;
