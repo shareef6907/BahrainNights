@@ -1,94 +1,124 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { motion } from 'framer-motion';
-import { Instagram, ExternalLink, Loader2 } from 'lucide-react';
+import { Play, Volume2, VolumeX, ExternalLink, Loader2 } from 'lucide-react';
 import { extractInstagramReelId, getInstagramReelUrl } from '@/lib/utils/instagram';
 
 interface InstagramReelEmbedProps {
   reelUrl: string | null | undefined;
   className?: string;
+  autoPlay?: boolean;
+  showControls?: boolean;
 }
 
-export default function InstagramReelEmbed({ reelUrl, className = '' }: InstagramReelEmbedProps) {
-  const [isLoading, setIsLoading] = useState(true);
-  const [hasError, setHasError] = useState(false);
+export default function InstagramReelEmbed({
+  reelUrl,
+  className = '',
+  autoPlay = false,
+  showControls = true
+}: InstagramReelEmbedProps) {
+  const [isPlaying, setIsPlaying] = useState(autoPlay);
+  const [isLoading, setIsLoading] = useState(false);
+  const [isMuted, setIsMuted] = useState(true);
+  const iframeRef = useRef<HTMLIFrameElement>(null);
 
   const reelId = extractInstagramReelId(reelUrl);
   const canonicalUrl = getInstagramReelUrl(reelUrl);
 
   useEffect(() => {
-    // Reset loading state when URL changes
-    setIsLoading(true);
-    setHasError(false);
-  }, [reelUrl]);
+    // Reset state when URL changes
+    setIsPlaying(autoPlay);
+    setIsLoading(false);
+  }, [reelUrl, autoPlay]);
 
   if (!reelId) {
     return null;
   }
 
-  // Instagram embed URL
-  const embedUrl = `https://www.instagram.com/reel/${reelId}/embed/`;
+  // Instagram embed URL with hidecaption to minimize branding
+  const embedUrl = `https://www.instagram.com/reel/${reelId}/embed/?hidecaption=true`;
+
+  const handlePlay = () => {
+    setIsLoading(true);
+    setIsPlaying(true);
+  };
 
   return (
-    <div className={`relative ${className}`}>
-      {/* Loading state */}
-      {isLoading && !hasError && (
-        <div className="absolute inset-0 flex items-center justify-center bg-gray-900/50 rounded-xl z-10">
-          <Loader2 className="w-8 h-8 text-pink-500 animate-spin" />
+    <div className={`relative bg-gradient-to-br from-purple-600 via-pink-500 to-orange-400 ${className}`}>
+      {/* Thumbnail/Preview State */}
+      {!isPlaying && (
+        <div className="absolute inset-0 flex flex-col items-center justify-center z-10">
+          {/* Instagram Gradient Background */}
+          <div className="absolute inset-0 bg-gradient-to-br from-purple-600/90 via-pink-500/90 to-orange-400/90" />
+
+          {/* Play Button */}
+          <motion.button
+            onClick={handlePlay}
+            whileHover={{ scale: 1.1 }}
+            whileTap={{ scale: 0.95 }}
+            className="relative z-10 w-16 h-16 rounded-full bg-white/20 backdrop-blur-sm flex items-center justify-center border border-white/30 hover:bg-white/30 transition-all"
+          >
+            <Play className="w-8 h-8 text-white ml-1" fill="white" />
+          </motion.button>
+
+          {/* Reel Icon */}
+          <div className="relative z-10 mt-4 flex items-center gap-2 text-white/80 text-sm">
+            <svg className="w-5 h-5" viewBox="0 0 24 24" fill="currentColor">
+              <path d="M12 2.982c2.937 0 3.285.011 4.445.064a6.087 6.087 0 0 1 2.042.379 3.408 3.408 0 0 1 1.265.823 3.408 3.408 0 0 1 .823 1.265 6.087 6.087 0 0 1 .379 2.042c.053 1.16.064 1.508.064 4.445s-.011 3.285-.064 4.445a6.087 6.087 0 0 1-.379 2.042 3.643 3.643 0 0 1-2.088 2.088 6.087 6.087 0 0 1-2.042.379c-1.16.053-1.508.064-4.445.064s-3.285-.011-4.445-.064a6.087 6.087 0 0 1-2.043-.379 3.408 3.408 0 0 1-1.264-.823 3.408 3.408 0 0 1-.823-1.265 6.087 6.087 0 0 1-.379-2.042c-.053-1.16-.064-1.508-.064-4.445s.011-3.285.064-4.445a6.087 6.087 0 0 1 .379-2.042 3.408 3.408 0 0 1 .823-1.265 3.408 3.408 0 0 1 1.264-.823 6.087 6.087 0 0 1 2.043-.379c1.16-.053 1.508-.064 4.445-.064M12 1c-2.987 0-3.362.013-4.535.066a8.074 8.074 0 0 0-2.67.511 5.392 5.392 0 0 0-1.949 1.27 5.392 5.392 0 0 0-1.269 1.948 8.074 8.074 0 0 0-.51 2.67C1.012 8.638 1 9.013 1 12s.013 3.362.066 4.535a8.074 8.074 0 0 0 .511 2.67 5.392 5.392 0 0 0 1.27 1.949 5.392 5.392 0 0 0 1.948 1.269 8.074 8.074 0 0 0 2.67.51C8.638 22.988 9.013 23 12 23s3.362-.013 4.535-.066a8.074 8.074 0 0 0 2.67-.511 5.625 5.625 0 0 0 3.218-3.218 8.074 8.074 0 0 0 .51-2.67C22.988 15.362 23 14.987 23 12s-.013-3.362-.066-4.535a8.074 8.074 0 0 0-.511-2.67 5.392 5.392 0 0 0-1.27-1.949 5.392 5.392 0 0 0-1.948-1.269 8.074 8.074 0 0 0-2.67-.51C15.362 1.012 14.987 1 12 1z"/>
+              <path d="M12 6.351A5.649 5.649 0 1 0 17.649 12 5.649 5.649 0 0 0 12 6.351zm0 9.316A3.667 3.667 0 1 1 15.667 12 3.667 3.667 0 0 1 12 15.667z"/>
+              <circle cx="17.872" cy="6.128" r="1.32"/>
+            </svg>
+            <span>Instagram Reel</span>
+          </div>
         </div>
       )}
 
-      {/* Error state */}
-      {hasError && (
-        <div className="absolute inset-0 flex flex-col items-center justify-center bg-gray-900/80 rounded-xl z-10">
-          <Instagram className="w-10 h-10 text-gray-500 mb-2" />
-          <p className="text-gray-400 text-sm mb-2">Couldn't load reel</p>
+      {/* Loading State */}
+      {isLoading && isPlaying && (
+        <div className="absolute inset-0 flex items-center justify-center bg-black/50 z-20">
+          <Loader2 className="w-10 h-10 text-white animate-spin" />
+        </div>
+      )}
+
+      {/* Instagram Iframe - Only rendered when playing */}
+      {isPlaying && (
+        <iframe
+          ref={iframeRef}
+          src={embedUrl}
+          className="w-full h-full rounded-xl"
+          style={{
+            minHeight: '400px',
+            aspectRatio: '9/16'
+          }}
+          frameBorder="0"
+          scrolling="no"
+          allowTransparency
+          allowFullScreen
+          onLoad={() => setIsLoading(false)}
+        />
+      )}
+
+      {/* Placeholder div to maintain aspect ratio when not playing */}
+      {!isPlaying && (
+        <div style={{ aspectRatio: '9/16', minHeight: '400px' }} />
+      )}
+
+      {/* Controls Overlay - shown when playing */}
+      {isPlaying && showControls && (
+        <div className="absolute bottom-3 right-3 z-30 flex items-center gap-2">
           {canonicalUrl && (
             <a
               href={canonicalUrl}
               target="_blank"
               rel="noopener noreferrer"
-              className="flex items-center gap-1 text-pink-400 hover:text-pink-300 text-sm transition-colors"
+              className="flex items-center gap-1.5 px-3 py-1.5 bg-black/70 hover:bg-black/90 backdrop-blur-sm rounded-full text-white text-xs font-medium transition-all"
             >
-              View on Instagram
-              <ExternalLink className="w-3 h-3" />
+              <ExternalLink className="w-3.5 h-3.5" />
+              Open in Instagram
             </a>
           )}
         </div>
-      )}
-
-      {/* Instagram Iframe */}
-      <iframe
-        src={embedUrl}
-        className="w-full rounded-xl bg-black"
-        style={{
-          minHeight: '400px',
-          maxHeight: '600px',
-          aspectRatio: '9/16'
-        }}
-        frameBorder="0"
-        scrolling="no"
-        allowTransparency
-        allowFullScreen
-        onLoad={() => setIsLoading(false)}
-        onError={() => {
-          setIsLoading(false);
-          setHasError(true);
-        }}
-      />
-
-      {/* View on Instagram link */}
-      {canonicalUrl && !hasError && (
-        <a
-          href={canonicalUrl}
-          target="_blank"
-          rel="noopener noreferrer"
-          className="absolute bottom-2 right-2 flex items-center gap-1 px-3 py-1.5 bg-black/70 hover:bg-black/90 backdrop-blur-sm rounded-full text-white text-xs font-medium transition-all opacity-0 group-hover:opacity-100"
-        >
-          <Instagram className="w-3 h-3" />
-          Open in Instagram
-        </a>
       )}
     </div>
   );
