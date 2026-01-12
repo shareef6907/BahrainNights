@@ -141,7 +141,7 @@ export default function AdminVenueEditPage({ params }: { params: Promise<{ id: s
   const [deletingGalleryPhoto, setDeletingGalleryPhoto] = useState<string | null>(null);
   const [uploadingGallery, setUploadingGallery] = useState(false);
   const [toast, setToast] = useState<{ message: string; type: 'success' | 'error' } | null>(null);
-  const [newlyUploadedUrls, setNewlyUploadedUrls] = useState<Set<string>>(new Set()); // Track recently uploaded for cache busting
+  const [newlyUploadedUrls, setNewlyUploadedUrls] = useState<Map<string, number>>(new Map()); // Track recently uploaded URLs with their timestamps for cache busting
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [showRejectModal, setShowRejectModal] = useState(false);
   const [rejectReason, setRejectReason] = useState('');
@@ -535,8 +535,9 @@ export default function AdminVenueEditPage({ params }: { params: Promise<{ id: s
       }
 
       const galleryData = await galleryResponse.json();
-      // Track newly uploaded URL for cache busting at render time
-      setNewlyUploadedUrls(prev => new Set(prev).add(imageUrl));
+      // Track newly uploaded URL with timestamp for cache busting at render time
+      const uploadTimestamp = Date.now();
+      setNewlyUploadedUrls(prev => new Map(prev).set(imageUrl, uploadTimestamp));
       // Update local venue state with clean gallery URLs (no cache buster in state)
       setVenue((prev) => prev ? { ...prev, gallery: galleryData.venue.gallery } : null);
       setToast({ message: 'Photo uploaded successfully', type: 'success' });
@@ -1159,22 +1160,32 @@ export default function AdminVenueEditPage({ params }: { params: Promise<{ id: s
               <div className="grid grid-cols-2 gap-3">
                 {venue.gallery.map((photoUrl, index) => {
                   // Add cache buster for newly uploaded images to force refresh
-                  const isNewlyUploaded = newlyUploadedUrls.has(photoUrl);
+                  const uploadTimestamp = newlyUploadedUrls.get(photoUrl);
+                  const isNewlyUploaded = uploadTimestamp !== undefined;
                   const displayUrl = isNewlyUploaded
-                    ? `${photoUrl}${photoUrl.includes('?') ? '&' : '?'}t=${Date.now()}`
+                    ? `${photoUrl}${photoUrl.includes('?') ? '&' : '?'}t=${uploadTimestamp}`
                     : photoUrl;
                   return (
                   <div
-                    key={isNewlyUploaded ? `${photoUrl}-new-${Date.now()}` : photoUrl}
+                    key={isNewlyUploaded ? `${photoUrl}-${uploadTimestamp}` : photoUrl}
                     className="relative aspect-square rounded-lg overflow-hidden group"
                   >
-                    <Image
-                      src={displayUrl}
-                      alt={`Gallery photo ${index + 1}`}
-                      fill
-                      className="object-cover"
-                      unoptimized
-                    />
+                    {/* Use native img for newly uploaded to completely bypass Next.js caching */}
+                    {isNewlyUploaded ? (
+                      <img
+                        src={displayUrl}
+                        alt={`Gallery photo ${index + 1}`}
+                        className="absolute inset-0 w-full h-full object-cover"
+                      />
+                    ) : (
+                      <Image
+                        src={displayUrl}
+                        alt={`Gallery photo ${index + 1}`}
+                        fill
+                        className="object-cover"
+                        unoptimized
+                      />
+                    )}
                     {/* Delete overlay on hover */}
                     <div className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
                       <button

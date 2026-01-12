@@ -96,24 +96,19 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Check gallery limit for gallery uploads
-    if (imageType === 'gallery') {
-      const currentCount = await countGalleryImages(folder);
-      if (currentCount >= MAX_GALLERY_IMAGES) {
-        return NextResponse.json(
-          { error: `Maximum ${MAX_GALLERY_IMAGES} gallery images allowed` },
-          { status: 400 }
-        );
-      }
-    }
+    // Note: Gallery limit is checked by the gallery API using database count
+    // We skip S3 count check here because it can be out of sync with database
+    // (e.g., orphaned files from previous deletions)
 
     // Generate filename based on image type
     let filename: string;
     const ext = getFileExtension(file.name);
 
     if (imageType === 'gallery') {
-      const number = await getNextGalleryNumber(folder);
-      filename = `gallery/${number}${ext}`;
+      // Use timestamp-based filename to avoid conflicts with orphaned S3 files
+      const timestamp = Date.now();
+      const randomSuffix = Math.random().toString(36).substring(2, 8);
+      filename = `gallery/${timestamp}-${randomSuffix}${ext}`;
     } else {
       // For logo, cover, banner - use fixed names
       filename = `${imageType}${ext}`;
