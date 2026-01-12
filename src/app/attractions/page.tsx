@@ -2,8 +2,9 @@ import { Suspense } from 'react';
 import { getActiveExperiences, getExperienceCategories, Experience } from '@/lib/db/experiences';
 import AttractionsPageClient, { Attraction } from '@/components/attractions/AttractionsPageClient';
 
-// Revalidate every 5 minutes
-export const revalidate = 300;
+// Disable caching temporarily to verify fix, then re-enable
+export const dynamic = 'force-dynamic';
+export const revalidate = 0;
 
 // Convert database Experience to Attraction type for the client
 function toAttraction(exp: Experience): Attraction {
