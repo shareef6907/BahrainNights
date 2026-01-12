@@ -1,5 +1,5 @@
 import { createClient } from '@supabase/supabase-js';
-import { scrapePlatinumlist, filterActivExperiences, generateAffiliateUrl } from './scraper';
+import { scrapePlatinumlist, filterActiveExperiences, generateAffiliateUrl } from './scraper';
 import { ScrapedExperience, ScraperResult } from './types';
 
 // Environment variables
@@ -124,7 +124,7 @@ async function main(): Promise<ScraperResult> {
 
     // Step 2: Filter out past events
     console.log('\nStep 2: Filtering active experiences...');
-    const activeExperiences = filterActivExperiences(scrapedExperiences);
+    const activeExperiences = filterActiveExperiences(scrapedExperiences);
     console.log(`${activeExperiences.length} active experiences after filtering`);
 
     // Step 3: Upsert to database
@@ -134,7 +134,7 @@ async function main(): Promise<ScraperResult> {
 
     // Step 4: Deactivate stale experiences
     console.log('\nStep 4: Deactivating stale experiences...');
-    const scrapedUrls = activeExperiences.map(e => e.originalUrl);
+    const scrapedUrls = activeExperiences.map((e: ScrapedExperience) => e.originalUrl);
     const totalDeactivated = await deactivateStaleExperiences(scrapedUrls);
 
     const duration = (Date.now() - startTime) / 1000;

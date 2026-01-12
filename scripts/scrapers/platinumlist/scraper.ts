@@ -19,7 +19,7 @@ export function convertUsdToBhd(usdPrice: number, rate: number = DEFAULT_CONFIG.
   return Math.round(usdPrice * rate * 100) / 100;
 }
 
-// Parse price from text (handles various formats)
+// Parse price from text (handles various formats like "17.00 BHD" or "19.00 BHD 17.00 BHD")
 export function parsePrice(priceText: string | null): { price: number | null; currency: string } {
   if (!priceText) return { price: null, currency: 'BHD' };
 
@@ -30,11 +30,12 @@ export function parsePrice(priceText: string | null): { price: number | null; cu
     return { price: 0, currency: 'BHD' };
   }
 
-  // Extract number
-  const numberMatch = cleanText.match(/[\d,]+\.?\d*/);
-  if (!numberMatch) return { price: null, currency: 'BHD' };
+  // Extract all numbers - take the last one (usually the discounted price)
+  const numbers = cleanText.match(/[\d,]+\.?\d*/g);
+  if (!numbers || numbers.length === 0) return { price: null, currency: 'BHD' };
 
-  const amount = parseFloat(numberMatch[0].replace(',', ''));
+  // Get the last number (discounted price) or the only number
+  const amount = parseFloat(numbers[numbers.length - 1].replace(',', ''));
 
   // Check currency
   if (cleanText.includes('usd') || cleanText.includes('$')) {
@@ -52,25 +53,25 @@ export function determineCategory(url: string, title: string, description: strin
   const descLower = (description || '').toLowerCase();
   const combined = `${urlLower} ${titleLower} ${descLower}`;
 
-  if (combined.includes('water') || combined.includes('diving') || combined.includes('snorkel') || combined.includes('jet-ski') || combined.includes('kayak')) {
+  if (combined.includes('water') || combined.includes('diving') || combined.includes('snorkel') || combined.includes('jet-ski') || combined.includes('kayak') || combined.includes('pearl')) {
     return 'water-sports';
   }
-  if (combined.includes('boat') || combined.includes('yacht') || combined.includes('cruise') || combined.includes('sailing')) {
+  if (combined.includes('boat') || combined.includes('yacht') || combined.includes('cruise') || combined.includes('sailing') || combined.includes('fishing')) {
     return 'boat-tour';
   }
   if (combined.includes('desert') || combined.includes('safari') || combined.includes('dune')) {
     return 'desert-safari';
   }
-  if (combined.includes('indoor') || combined.includes('trampoline') || combined.includes('bowling') || combined.includes('arcade') || combined.includes('escape room')) {
+  if (combined.includes('indoor') || combined.includes('trampoline') || combined.includes('bowling') || combined.includes('arcade') || combined.includes('escape room') || combined.includes('skydiving') || combined.includes('vr') || combined.includes('virtual reality') || combined.includes('climbing') || combined.includes('aquarium')) {
     return 'indoor';
   }
-  if (combined.includes('tour') || combined.includes('guided') || combined.includes('walking')) {
+  if (combined.includes('tour') || combined.includes('guided') || combined.includes('walking') || combined.includes('food tour') || combined.includes('sightseeing')) {
     return 'tour';
   }
   if (combined.includes('museum') || combined.includes('historical') || combined.includes('heritage') || combined.includes('fort')) {
     return 'sightseeing';
   }
-  if (combined.includes('theme park') || combined.includes('amusement') || combined.includes('waterpark')) {
+  if (combined.includes('theme park') || combined.includes('amusement') || combined.includes('waterpark') || combined.includes('adventure park')) {
     return 'theme-park';
   }
 
@@ -93,51 +94,100 @@ function delay(ms: number): Promise<void> {
   return new Promise(resolve => setTimeout(resolve, ms));
 }
 
-// Scrape a single listing page
+// Scrape a single listing page using Playwright's page evaluation
 async function scrapeListingPage(page: Page, url: string, config: ScraperConfig): Promise<ScrapedExperience[]> {
   const experiences: ScrapedExperience[] = [];
 
   try {
-    await page.goto(url, { waitUntil: 'networkidle', timeout: 30000 });
-    await delay(1000);
+    console.log(`  Navigating to: ${url}`);
+    await page.goto(url, { waitUntil: 'domcontentloaded', timeout: 60000 });
 
-    // Wait for listing cards to load
-    await page.waitForSelector('.card, .event-card, .listing-card, [class*="card"]', { timeout: 10000 }).catch(() => null);
+    // Wait for page to load and JavaScript to render
+    await delay(3000);
 
-    // Get all listing items - Platinumlist uses various card structures
-    const items = await page.$$eval(
-      'a[href*="/event/"], a[href*="/attraction/"], a[href*="/experience/"], .card a, .listing-item a',
-      (links) => {
-        return links.map(link => {
-          const card = link.closest('.card, .listing-item, [class*="card"]') || link;
-          const href = link.getAttribute('href') || '';
+    // Wait for any of the content indicators
+    await page.waitForSelector('a[href*="/event-tickets/"], h1', { timeout: 15000 }).catch(() => {
+      console.log(`  No content selector found on ${url}`);
+    });
 
-          // Get image
-          const img = card.querySelector('img');
-          const imageUrl = img?.getAttribute('src') || img?.getAttribute('data-src') || null;
+    // Additional wait for dynamic content
+    await delay(2000);
 
-          // Get title
-          const titleEl = card.querySelector('h2, h3, h4, .title, .event-title, [class*="title"]');
-          const title = titleEl?.textContent?.trim() || '';
+    // Get all attraction links from the page
+    const items = await page.evaluate(() => {
+      const results: Array<{
+        href: string;
+        title: string;
+        imageUrl: string | null;
+        priceText: string | null;
+      }> = [];
 
-          // Get price
-          const priceEl = card.querySelector('.price, [class*="price"], .amount');
-          const priceText = priceEl?.textContent?.trim() || null;
+      // Find all links to event-tickets pages (this is the pattern Platinumlist uses for attractions)
+      const links = document.querySelectorAll('a[href*="/event-tickets/"]');
+      const processedUrls = new Set<string>();
 
-          // Get venue/location
-          const venueEl = card.querySelector('.venue, .location, [class*="venue"], [class*="location"]');
-          const venue = venueEl?.textContent?.trim() || null;
+      links.forEach(link => {
+        const href = link.getAttribute('href');
+        if (!href || processedUrls.has(href)) return;
 
-          return {
-            href,
-            imageUrl,
-            title,
-            priceText,
-            venue,
-          };
-        }).filter(item => item.href && item.title);
-      }
-    );
+        // Skip purchase/cart links
+        if (href.includes('purchase') || href.includes('cart')) return;
+
+        processedUrls.add(href);
+
+        // Get the card container (parent elements that might contain the full card)
+        let container = link.parentElement;
+        for (let i = 0; i < 5; i++) {
+          if (container && container.parentElement) {
+            container = container.parentElement;
+          }
+        }
+
+        // Get title from the link text or image alt
+        const img = link.querySelector('img') || container?.querySelector('img');
+        let title = '';
+
+        // Try to get title from link text
+        const linkText = link.textContent?.trim();
+        if (linkText && linkText.length > 3 && linkText.length < 200) {
+          title = linkText;
+        }
+
+        // Or from image alt
+        if (!title && img) {
+          const alt = img.getAttribute('alt');
+          if (alt && alt.length > 3) {
+            title = alt;
+          }
+        }
+
+        if (!title) return;
+
+        // Get image URL
+        let imageUrl = img?.getAttribute('src') || img?.getAttribute('data-src') || null;
+
+        // Get price - look for BHD text nearby
+        let priceText: string | null = null;
+        if (container) {
+          const containerText = container.textContent || '';
+          const priceMatch = containerText.match(/[\d,]+\.?\d*\s*BHD/gi);
+          if (priceMatch) {
+            priceText = priceMatch[priceMatch.length - 1]; // Get last (usually discounted) price
+          }
+        }
+
+        results.push({
+          href,
+          title,
+          imageUrl,
+          priceText,
+        });
+      });
+
+      return results;
+    });
+
+    console.log(`  Found ${items.length} items on page`);
 
     // Process each item
     for (const item of items) {
@@ -147,6 +197,9 @@ async function scrapeListingPage(page: Page, url: string, config: ScraperConfig)
       const originalUrl = item.href.startsWith('http')
         ? item.href
         : `${config.baseUrl}${item.href.startsWith('/') ? '' : '/'}${item.href}`;
+
+      // Skip duplicates
+      if (experiences.some(e => e.originalUrl === originalUrl)) continue;
 
       const { price, currency } = parsePrice(item.priceText);
       const category = determineCategory(originalUrl, item.title, null);
@@ -158,7 +211,7 @@ async function scrapeListingPage(page: Page, url: string, config: ScraperConfig)
         price,
         priceCurrency: currency,
         imageUrl: item.imageUrl,
-        venue: item.venue,
+        venue: null,
         location: 'Bahrain',
         category,
         type,
@@ -169,7 +222,7 @@ async function scrapeListingPage(page: Page, url: string, config: ScraperConfig)
       });
     }
 
-    console.log(`Scraped ${experiences.length} items from ${url}`);
+    console.log(`  Scraped ${experiences.length} unique items from ${url}`);
   } catch (error) {
     console.error(`Error scraping ${url}:`, error);
   }
@@ -180,51 +233,96 @@ async function scrapeListingPage(page: Page, url: string, config: ScraperConfig)
 // Scrape detail page for more info
 async function scrapeDetailPage(page: Page, experience: ScrapedExperience, config: ScraperConfig): Promise<ScrapedExperience> {
   try {
-    await page.goto(experience.originalUrl, { waitUntil: 'networkidle', timeout: 30000 });
-    await delay(500);
+    console.log(`    Enriching: ${experience.title}`);
+    await page.goto(experience.originalUrl, { waitUntil: 'domcontentloaded', timeout: 30000 });
+    await delay(2000);
 
-    // Get description
-    const description = await page.$eval(
-      '.description, .event-description, [class*="description"], .content p',
-      el => el.textContent?.trim() || null
-    ).catch(() => null);
+    const details = await page.evaluate(() => {
+      // Get description - look for the main content area
+      let description: string | null = null;
 
-    // Get better image
-    const imageUrl = await page.$eval(
-      '.main-image img, .hero-image img, .event-image img, [class*="gallery"] img',
-      el => el.getAttribute('src') || el.getAttribute('data-src')
-    ).catch(() => experience.imageUrl);
+      // Try to find the main description text
+      const descElements = document.querySelectorAll('div, p');
+      for (const el of descElements) {
+        const text = el.textContent?.trim() || '';
+        // Look for longer text that seems like a description (more than 100 chars, less than 2000)
+        if (text.length > 100 && text.length < 2000 && !text.includes('Why buy with') && !text.includes('Do you have any questions')) {
+          // Check if this is actual content, not navigation
+          const hasLinks = el.querySelectorAll('a').length;
+          if (hasLinks < 5) {
+            description = text;
+            break;
+          }
+        }
+      }
 
-    // Get dates
-    const dateText = await page.$eval(
-      '.date, .event-date, [class*="date"]',
-      el => el.textContent?.trim() || null
-    ).catch(() => null);
+      // Get venue name - look for venue link
+      let venue: string | null = null;
+      const venueLink = document.querySelector('a[href*="/venue/"]');
+      if (venueLink) {
+        venue = venueLink.textContent?.trim() || null;
+      }
 
-    // Get venue
-    const venue = await page.$eval(
-      '.venue-name, .location-name, [class*="venue"]',
-      el => el.textContent?.trim() || null
-    ).catch(() => experience.venue);
+      // Get location from the address area
+      let location: string | null = null;
+      const locationEl = document.querySelector('[class*="address"], [class*="location"]');
+      if (locationEl) {
+        location = locationEl.textContent?.trim() || null;
+      }
 
-    // Get price if not already set
-    if (experience.price === null) {
-      const priceText = await page.$eval(
-        '.price, .ticket-price, [class*="price"]',
-        el => el.textContent?.trim() || null
-      ).catch(() => null);
+      // Get better image from gallery or hero
+      let imageUrl: string | null = null;
+      const heroImg = document.querySelector('img[alt*="Gallery"], .listbox img, [class*="gallery"] img');
+      if (heroImg) {
+        imageUrl = heroImg.getAttribute('src') || null;
+      }
 
-      const { price, currency } = parsePrice(priceText);
+      // Get price if visible
+      let priceText: string | null = null;
+      const priceEl = document.querySelector('[class*="price"]');
+      if (priceEl) {
+        const text = priceEl.textContent || '';
+        const match = text.match(/[\d,]+\.?\d*\s*BHD/i);
+        if (match) {
+          priceText = match[0];
+        }
+      }
+
+      return {
+        description,
+        venue,
+        location,
+        imageUrl,
+        priceText,
+      };
+    });
+
+    // Update experience with scraped details
+    if (details.description) {
+      experience.description = details.description;
+    }
+    if (details.venue) {
+      experience.venue = details.venue;
+    }
+    if (details.location) {
+      experience.location = details.location;
+    }
+    if (details.imageUrl && !experience.imageUrl) {
+      experience.imageUrl = details.imageUrl;
+    }
+    if (details.priceText && experience.price === null) {
+      const { price, currency } = parsePrice(details.priceText);
       experience.price = price;
       experience.priceCurrency = currency;
     }
 
-    return {
-      ...experience,
-      description: description || experience.description,
-      imageUrl: imageUrl || experience.imageUrl,
-      venue: venue || experience.venue,
-    };
+    // Re-categorize with description if available
+    if (details.description) {
+      experience.category = determineCategory(experience.originalUrl, experience.title, details.description);
+      experience.type = determineType(experience.category, experience.originalUrl);
+    }
+
+    return experience;
   } catch (error) {
     console.error(`Error scraping detail page ${experience.originalUrl}:`, error);
     return experience;
@@ -239,32 +337,37 @@ export async function scrapePlatinumlist(config: Partial<ScraperConfig> = {}): P
 
   try {
     console.log('Starting Platinumlist scraper...');
+    console.log(`Base URL: ${fullConfig.baseUrl}`);
 
     browser = await chromium.launch({
       headless: true,
-      args: ['--no-sandbox', '--disable-setuid-sandbox'],
+      args: ['--no-sandbox', '--disable-setuid-sandbox', '--disable-dev-shm-usage'],
     });
 
     const context = await browser.newContext({
-      userAgent: 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
+      userAgent: 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
+      viewport: { width: 1920, height: 1080 },
     });
 
     const page = await context.newPage();
 
-    // URLs to scrape from Platinumlist Bahrain
+    // CORRECT URLs for Platinumlist Bahrain (discovered via inspection)
+    // Note: Platinumlist uses /attraction/ (singular) NOT /attractions/ (plural)
     const urlsToScrape = [
-      `${fullConfig.baseUrl}/things-to-do`,
-      `${fullConfig.baseUrl}/attractions`,
-      `${fullConfig.baseUrl}/tours`,
-      `${fullConfig.baseUrl}/experiences`,
-      `${fullConfig.baseUrl}/events`,
-      `${fullConfig.baseUrl}/water-sports`,
-      `${fullConfig.baseUrl}/indoor-activities`,
+      `${fullConfig.baseUrl}/attraction/attractions`,        // Top-Rated Attractions
+      `${fullConfig.baseUrl}/attraction/recently-added`,     // Recently Added
+      `${fullConfig.baseUrl}/attraction/experiences`,        // Experiences
+      `${fullConfig.baseUrl}/attraction/indoor-attractions`, // Indoor Attractions
+      `${fullConfig.baseUrl}/attraction/water-sports`,       // Water Sports
+      `${fullConfig.baseUrl}/attraction/sightseeing-and-tours`, // Sightseeing and Tours
+      `${fullConfig.baseUrl}/attraction/boat-tours`,         // Boat Tours and Cruises
     ];
+
+    console.log(`\nScraping ${urlsToScrape.length} category pages...\n`);
 
     // Scrape each category page
     for (const url of urlsToScrape) {
-      console.log(`Scraping: ${url}`);
+      console.log(`\nScraping: ${url}`);
 
       try {
         const experiences = await scrapeListingPage(page, url, fullConfig);
@@ -273,23 +376,6 @@ export async function scrapePlatinumlist(config: Partial<ScraperConfig> = {}): P
       } catch (error) {
         console.error(`Failed to scrape ${url}:`, error);
       }
-
-      // Check for pagination
-      let hasNextPage = true;
-      let pageNum = 2;
-
-      while (hasNextPage && pageNum <= 10) {
-        const paginatedUrl = `${url}?page=${pageNum}`;
-        const pageExperiences = await scrapeListingPage(page, paginatedUrl, fullConfig);
-
-        if (pageExperiences.length === 0) {
-          hasNextPage = false;
-        } else {
-          allExperiences.push(...pageExperiences);
-          pageNum++;
-          await delay(fullConfig.delayMs);
-        }
-      }
     }
 
     // Deduplicate by URL
@@ -297,27 +383,25 @@ export async function scrapePlatinumlist(config: Partial<ScraperConfig> = {}): P
       new Map(allExperiences.map(exp => [exp.originalUrl, exp])).values()
     );
 
+    console.log(`\n===========================================`);
     console.log(`Total unique experiences scraped: ${uniqueExperiences.length}`);
+    console.log(`===========================================\n`);
 
-    // Optionally scrape detail pages for more info (first 50 to avoid rate limiting)
-    const experiencesToEnrich = uniqueExperiences.slice(0, 50);
-    const enrichedExperiences: ScrapedExperience[] = [];
+    // Enrich detail pages for first 30 items (to avoid rate limiting)
+    if (uniqueExperiences.length > 0) {
+      console.log('Enriching experiences with detail page info...');
+      const experiencesToEnrich = uniqueExperiences.slice(0, 30);
 
-    for (const exp of experiencesToEnrich) {
-      if (!exp.description) {
-        const enriched = await scrapeDetailPage(page, exp, fullConfig);
-        enrichedExperiences.push(enriched);
+      for (let i = 0; i < experiencesToEnrich.length; i++) {
+        const exp = experiencesToEnrich[i];
+        console.log(`  [${i + 1}/${experiencesToEnrich.length}] ${exp.title}`);
+        await scrapeDetailPage(page, exp, fullConfig);
         await delay(fullConfig.delayMs / 2);
-      } else {
-        enrichedExperiences.push(exp);
       }
     }
 
-    // Add remaining experiences without enrichment
-    enrichedExperiences.push(...uniqueExperiences.slice(50));
-
     await context.close();
-    return enrichedExperiences;
+    return uniqueExperiences;
 
   } catch (error) {
     console.error('Scraper error:', error);
@@ -330,7 +414,7 @@ export async function scrapePlatinumlist(config: Partial<ScraperConfig> = {}): P
 }
 
 // Filter out past events
-export function filterActivExperiences(experiences: ScrapedExperience[]): ScrapedExperience[] {
+export function filterActiveExperiences(experiences: ScrapedExperience[]): ScrapedExperience[] {
   const now = new Date();
 
   return experiences.filter(exp => {
