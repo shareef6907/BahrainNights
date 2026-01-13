@@ -5,6 +5,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { Search, Filter, MapPin, Star, ExternalLink, ChevronDown, X } from 'lucide-react';
 import Link from 'next/link';
 import { useTranslation } from '@/lib/i18n/TranslationContext';
+import AttractionModal, { AttractionData } from './AttractionModal';
 
 export interface Attraction {
   id: string;
@@ -13,6 +14,7 @@ export interface Attraction {
   price: number | null;
   price_currency: string;
   image_url: string | null;
+  cover_url?: string | null;
   venue: string | null;
   location: string | null;
   category: string | null;
@@ -52,6 +54,18 @@ export default function AttractionsPageClient({ initialAttractions, categories }
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
   const [showFilters, setShowFilters] = useState(false);
+  const [selectedAttraction, setSelectedAttraction] = useState<Attraction | null>(null);
+  const [isModalOpen, setIsModalOpen] = useState(false);
+
+  const handleAttractionClick = (attraction: Attraction) => {
+    setSelectedAttraction(attraction);
+    setIsModalOpen(true);
+  };
+
+  const handleCloseModal = () => {
+    setIsModalOpen(false);
+    setSelectedAttraction(null);
+  };
 
   // Filter attractions based on search and category
   const filteredAttractions = useMemo(() => {
@@ -200,11 +214,9 @@ export default function AttractionsPageClient({ initialAttractions, categories }
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ delay: index * 0.05 }}
                   >
-                    <a
-                      href={attraction.affiliate_url}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="group block bg-white/5 border border-white/10 rounded-2xl overflow-hidden hover:border-teal-400/50 transition-all duration-300 hover:-translate-y-1"
+                    <div
+                      onClick={() => handleAttractionClick(attraction)}
+                      className="group block bg-white/5 border border-white/10 rounded-2xl overflow-hidden hover:border-teal-400/50 transition-all duration-300 hover:-translate-y-1 cursor-pointer"
                     >
                       {/* Image */}
                       <div className="relative h-48 overflow-hidden">
@@ -257,12 +269,12 @@ export default function AttractionsPageClient({ initialAttractions, categories }
                         {/* CTA Button */}
                         <div className="flex items-center justify-between">
                           <span className="text-teal-400 text-sm font-medium flex items-center gap-1 group-hover:gap-2 transition-all">
-                            {language === 'ar' ? 'احجز الآن' : 'Book Now'}
+                            {language === 'ar' ? 'اعرف المزيد' : 'Learn More'}
                             <ExternalLink className="w-4 h-4" />
                           </span>
                         </div>
                       </div>
-                    </a>
+                    </div>
                   </motion.div>
                 ))}
               </motion.div>
@@ -319,6 +331,13 @@ export default function AttractionsPageClient({ initialAttractions, categories }
           </div>
         </div>
       </section>
+
+      {/* Attraction Modal */}
+      <AttractionModal
+        attraction={selectedAttraction as AttractionData | null}
+        isOpen={isModalOpen}
+        onClose={handleCloseModal}
+      />
     </div>
   );
 }

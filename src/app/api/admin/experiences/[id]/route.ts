@@ -42,7 +42,7 @@ export async function PATCH(
     // Fields that can be updated
     const allowedFields = [
       'title', 'description', 'price', 'price_currency',
-      'image_url', 'venue', 'location', 'category',
+      'image_url', 'cover_url', 'venue', 'location', 'category',
       'is_active', 'is_featured'
     ];
 

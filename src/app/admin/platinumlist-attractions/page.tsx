@@ -31,6 +31,7 @@ interface Experience {
   price: number | null;
   price_currency: string | null;
   image_url: string | null;
+  cover_url: string | null;
   venue: string | null;
   location: string | null;
   category: string | null;
@@ -87,7 +88,8 @@ export default function PlatinumlistAttractionsAdmin() {
     venue: '',
     location: '',
     category: '',
-    image_url: ''
+    image_url: '',
+    cover_url: ''
   });
   const [saving, setSaving] = useState(false);
   const [rewriting, setRewriting] = useState(false);
@@ -277,7 +279,8 @@ export default function PlatinumlistAttractionsAdmin() {
       venue: experience.venue || '',
       location: experience.location || '',
       category: experience.category || '',
-      image_url: experience.image_url || ''
+      image_url: experience.image_url || '',
+      cover_url: experience.cover_url || ''
     });
     setImageUrlInput('');
     setEditModalOpen(true);
@@ -298,7 +301,8 @@ export default function PlatinumlistAttractionsAdmin() {
           venue: editForm.venue,
           location: editForm.location,
           category: editForm.category,
-          image_url: editForm.image_url
+          image_url: editForm.image_url,
+          cover_url: editForm.cover_url
         })
       });
 
@@ -720,14 +724,14 @@ export default function PlatinumlistAttractionsAdmin() {
                 {/* Image Section */}
                 <div>
                   <label className="block text-sm font-medium text-gray-300 mb-2">
-                    Cover Image
+                    Thumbnail Image
                   </label>
                   <div className="flex gap-4">
                     <div className="w-32 h-32 rounded-xl overflow-hidden bg-gray-800 relative flex-shrink-0">
                       {editForm.image_url ? (
                         <Image
                           src={editForm.image_url}
-                          alt="Cover"
+                          alt="Thumbnail"
                           fill
                           className="object-cover"
                         />
@@ -777,6 +781,33 @@ export default function PlatinumlistAttractionsAdmin() {
                       )}
                     </div>
                   </div>
+                </div>
+
+                {/* Cover URL Section */}
+                <div>
+                  <label className="block text-sm font-medium text-gray-300 mb-2">
+                    Cover Image URL (for modal banner)
+                  </label>
+                  <p className="text-xs text-gray-500 mb-2">
+                    Optional: A wide banner image for the attraction detail modal. If not set, thumbnail will be used.
+                  </p>
+                  <input
+                    type="url"
+                    placeholder="https://example.com/cover-image.jpg"
+                    value={editForm.cover_url}
+                    onChange={(e) => setEditForm(prev => ({ ...prev, cover_url: e.target.value }))}
+                    className="w-full px-4 py-2 bg-gray-800 rounded-lg border border-white/10 focus:border-cyan-500 focus:outline-none"
+                  />
+                  {editForm.cover_url && (
+                    <div className="mt-2 w-full h-32 rounded-xl overflow-hidden bg-gray-800 relative">
+                      <Image
+                        src={editForm.cover_url}
+                        alt="Cover preview"
+                        fill
+                        className="object-cover"
+                      />
+                    </div>
+                  )}
                 </div>
 
                 {/* Title */}
