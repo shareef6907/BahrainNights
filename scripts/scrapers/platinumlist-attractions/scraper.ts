@@ -11,9 +11,9 @@ import {
   cleanDescription,
 } from './utils';
 
-// URLs that are events, not attractions - must be filtered out
-const EVENT_URL_PATTERNS = [
-  '/event-tickets/',
+// URLs that are events-only, not attractions - must be filtered out
+// Note: /event-tickets/ is used by BOTH events and attractions, so we don't filter it
+const EVENT_ONLY_URL_PATTERNS = [
   '/concerts/',
   '/nightlife/',
   '/comedy/',
@@ -23,10 +23,10 @@ const EVENT_URL_PATTERNS = [
 ];
 
 /**
- * Check if a URL is an event (not an attraction)
+ * Check if a URL is an event-only page (not an attraction)
  */
-function isEventUrl(url: string): boolean {
-  return EVENT_URL_PATTERNS.some(pattern => url.includes(pattern));
+function isEventOnlyUrl(url: string): boolean {
+  return EVENT_ONLY_URL_PATTERNS.some(pattern => url.includes(pattern));
 }
 
 /**
@@ -45,22 +45,22 @@ async function scrapeAttractionUrls(page: Page): Promise<string[]> {
       await page.goto(category.url, { waitUntil: 'networkidle', timeout: 30000 });
       await page.waitForTimeout(2000);
 
-      // Get all attraction/event links
+      // Get all attraction links - attractions use /event-tickets/ URLs
       const links = await page.evaluate(() => {
         const anchors = document.querySelectorAll('a[href*="platinumlist.net"]');
         const urls: string[] = [];
         anchors.forEach((a) => {
           const href = (a as HTMLAnchorElement).href;
-          // Only include detail page URLs
-          if (href.includes('/things-to-do/') || href.includes('/attractions/') || href.includes('/tours/')) {
+          // Attractions use /event-tickets/ URLs (same as events)
+          if (href.includes('/event-tickets/')) {
             urls.push(href);
           }
         });
         return urls;
       });
 
-      // Filter out event URLs and duplicates
-      const attractionUrls = links.filter(url => !isEventUrl(url));
+      // Filter out event-only URLs and duplicates
+      const attractionUrls = links.filter(url => !isEventOnlyUrl(url));
       const uniqueUrls = [...new Set(attractionUrls)];
 
       console.log(`  Found ${uniqueUrls.length} attraction URLs (filtered from ${links.length} total)`);
@@ -232,28 +232,29 @@ async function processImages(attraction: ScrapedAttraction): Promise<ScrapedAttr
  */
 async function upsertAttraction(supabase: SupabaseClient, attraction: ScrapedAttraction): Promise<boolean> {
   try {
+    // Generate a unique slug with source prefix
+    const uniqueSlug = `platinumlist-${attraction.slug}`;
+
     const { error } = await supabase
-      .from('experiences')
+      .from('attractions')
       .upsert({
-        title: attraction.title,
-        slug: attraction.slug,
+        name: attraction.title,
+        slug: uniqueSlug,
         description: attraction.description,
-        price: attraction.price,
-        price_currency: attraction.price_currency,
+        short_description: attraction.description?.substring(0, 200),
+        price_from: attraction.price,
+        price_range: attraction.price > 0 ? `From ${attraction.price} BHD` : 'Contact for price',
         image_url: attraction.image_url,
-        cover_url: attraction.cover_url,
-        venue: attraction.venue,
-        location: attraction.location,
+        area: attraction.location || 'Bahrain',
         category: attraction.category,
-        type: attraction.type,
-        original_url: attraction.original_url,
-        affiliate_url: attraction.affiliate_url,
+        booking_url: attraction.affiliate_url,
         source: attraction.source,
-        is_sold_out: attraction.is_sold_out,
+        source_id: attraction.original_url,
         is_active: attraction.is_active,
+        is_featured: false,
         updated_at: new Date().toISOString(),
       }, {
-        onConflict: 'original_url',
+        onConflict: 'slug',
       });
 
     if (error) {

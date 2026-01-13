@@ -1,43 +1,45 @@
 import { Suspense } from 'react';
-import { getActiveExperiences, getExperienceCategories, Experience } from '@/lib/db/experiences';
+import { getAttractions as fetchAttractions, Attraction as DbAttraction } from '@/lib/db/attractions';
 import AttractionsPageClient, { Attraction } from '@/components/attractions/AttractionsPageClient';
 
 // Disable caching temporarily to verify fix, then re-enable
 export const dynamic = 'force-dynamic';
 export const revalidate = 0;
 
-// Convert database Experience to Attraction type for the client
-function toAttraction(exp: Experience): Attraction {
+// Convert database Attraction to client Attraction type
+function toClientAttraction(attr: DbAttraction): Attraction {
   return {
-    id: exp.id,
-    title: exp.title,
-    description: exp.description,
-    price: exp.price,
-    price_currency: exp.price_currency,
-    image_url: exp.image_url,
-    venue: exp.venue,
-    location: exp.location,
-    category: exp.category,
-    type: exp.type,
-    affiliate_url: exp.affiliate_url,
+    id: attr.id,
+    title: attr.name,
+    description: attr.description,
+    price: attr.price_from,
+    price_currency: attr.currency || 'BHD',
+    image_url: attr.image_url,
+    venue: attr.area || null,
+    location: attr.address || attr.area,
+    category: attr.category,
+    type: attr.category || 'attraction',
+    affiliate_url: attr.booking_url || '',
   };
 }
 
-// Fetch attractions from the experiences table
+// Fetch attractions from the attractions table
 async function getAttractions(): Promise<Attraction[]> {
   try {
-    const experiences = await getActiveExperiences();
-    return experiences.map(toAttraction);
+    const attractions = await fetchAttractions({ status: 'active' });
+    return attractions.map(toClientAttraction);
   } catch (error) {
     console.error('Error fetching attractions:', error);
     return [];
   }
 }
 
-// Fetch categories
+// Fetch categories from attractions
 async function getCategories(): Promise<string[]> {
   try {
-    return await getExperienceCategories();
+    const attractions = await fetchAttractions({ status: 'active' });
+    const categories = [...new Set(attractions.map(a => a.category).filter(Boolean) as string[])];
+    return categories.sort();
   } catch (error) {
     console.error('Error fetching categories:', error);
     return [];

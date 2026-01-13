@@ -23,9 +23,12 @@ export interface AttractionCategory {
 }
 
 export const ATTRACTION_CATEGORIES: AttractionCategory[] = [
-  { name: 'things-to-do', url: 'https://manama.platinumlist.net/things-to-do' },
-  { name: 'attractions', url: 'https://manama.platinumlist.net/attractions' },
-  { name: 'tours', url: 'https://manama.platinumlist.net/tours' },
+  { name: 'water-sports', url: 'https://manama.platinumlist.net/attraction/water-sports' },
+  { name: 'attractions', url: 'https://manama.platinumlist.net/attraction/attractions' },
+  { name: 'sightseeing', url: 'https://manama.platinumlist.net/attraction/sightseeing-and-tours' },
+  { name: 'boat-tours', url: 'https://manama.platinumlist.net/attraction/boat-tours' },
+  { name: 'experiences', url: 'https://manama.platinumlist.net/attraction/experiences' },
+  { name: 'indoor', url: 'https://manama.platinumlist.net/attraction/indoor-attractions' },
 ];
 
 export const AFFILIATE_CODE = 'yjg3yzi';
