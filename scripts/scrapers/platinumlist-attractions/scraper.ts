@@ -111,10 +111,25 @@ async function scrapeAttractionDetail(page: Page, url: string): Promise<ScrapedA
       return descEl?.textContent?.trim() || '';
     });
 
-    // Extract price from og:description (e.g., "starting from 15.00 BHD" or "prices starting from 15.00 BHD")
+    // Extract price from og:description - try multiple patterns
+    // Formats: "starting from X BHD", "prices from X BHD", "from X BHD"
     const ogDesc = metaData.ogDesc;
-    const priceMatch = ogDesc.match(/starting from\s*([\d.]+)\s*BHD/i);
-    const priceFromDesc = priceMatch ? parseFloat(priceMatch[1]) : 0;
+    let priceFromDesc = 0;
+
+    // Try different price patterns in order of specificity
+    const pricePatterns = [
+      /starting from\s*([\d.]+)\s*BHD/i,      // "starting from 88.00 BHD"
+      /prices? from\s*([\d.]+)\s*BHD/i,        // "prices from 50.00 BHD" or "price from X BHD"
+      /from\s*([\d.]+)\s*BHD/i,                // "from 15.00 BHD" (generic fallback)
+    ];
+
+    for (const pattern of pricePatterns) {
+      const match = ogDesc.match(pattern);
+      if (match) {
+        priceFromDesc = parseFloat(match[1]);
+        break;
+      }
+    }
 
     // Check for sold out in page content
     const isSoldOut = await page.evaluate(() => {
