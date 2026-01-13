@@ -74,16 +74,52 @@ export async function POST(
     // Option 2: Fetch from URL
     if (imageUrl) {
       try {
-        // Download the image
-        const response = await fetch(imageUrl);
+        // Check if URL is already on our S3 - just save it directly without re-uploading
+        const ourS3Domain = 'bahrainnights-production.s3.me-south-1.amazonaws.com';
+        if (imageUrl.includes(ourS3Domain)) {
+          console.log('URL is already on our S3, saving directly:', imageUrl);
+
+          // Update database directly with the existing S3 URL
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          const { error: updateError } = await (supabase as any)
+            .from('experiences')
+            .update({
+              cover_url: imageUrl,
+              updated_at: new Date().toISOString()
+            })
+            .eq('id', id);
+
+          if (updateError) {
+            console.error('Error updating experience cover:', updateError);
+            return NextResponse.json({ error: 'Failed to update database' }, { status: 500 });
+          }
+
+          return NextResponse.json({
+            success: true,
+            coverUrl: imageUrl,
+            processed: true
+          });
+        }
+
+        // Download the image from external URL
+        console.log('Fetching image from external URL:', imageUrl);
+        const response = await fetch(imageUrl, {
+          headers: {
+            'User-Agent': 'Mozilla/5.0 (compatible; BahrainNights/1.0)',
+          },
+        });
+
         if (!response.ok) {
-          return NextResponse.json({ error: 'Failed to fetch image from URL' }, { status: 400 });
+          console.error('Failed to fetch image:', response.status, response.statusText);
+          return NextResponse.json({
+            error: `Failed to fetch image: ${response.status} ${response.statusText}`
+          }, { status: 400 });
         }
 
         const contentType = response.headers.get('content-type') || 'image/jpeg';
         if (!isValidImageType(contentType)) {
           return NextResponse.json(
-            { error: 'Invalid image type from URL' },
+            { error: `Invalid image type from URL: ${contentType}` },
             { status: 400 }
           );
         }
@@ -129,7 +165,8 @@ export async function POST(
         });
       } catch (error) {
         console.error('Error fetching image from URL:', error);
-        return NextResponse.json({ error: 'Failed to fetch image from URL' }, { status: 400 });
+        const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+        return NextResponse.json({ error: `Failed to fetch image: ${errorMessage}` }, { status: 400 });
       }
     }
 
