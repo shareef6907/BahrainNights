@@ -140,6 +140,21 @@ export default function EventsPageClient({ initialEvents, familyAttractions = []
     router.replace(newUrl, { scroll: false });
   }, [selectedCategory, selectedTime, router]);
 
+  // Map filter category IDs to database category values
+  // Filter ID -> array of matching database categories
+  const categoryFilterMapping: Record<string, string[]> = {
+    'music': ['concerts', 'music', 'comedy'],  // Music & Concerts includes concerts and comedy
+    'dining': ['dining', 'food', 'restaurant', 'brunch'],
+    'family': ['family', 'kids', 'children'],
+    'arts': ['cultural', 'arts', 'theatre', 'theater', 'art'],
+    'sports': ['sports', 'fitness', 'sport'],
+    'nightlife': ['nightlife', 'club', 'party'],
+    'business': ['business', 'networking', 'conference'],
+    'wellness': ['wellness', 'spa', 'yoga', 'health'],
+    'shopping': ['shopping', 'market', 'retail'],
+    'community': ['community', 'charity', 'volunteer'],
+  };
+
   // Filter events based on search, category, and time
   const filteredEvents = useMemo(() => {
     const filtered = events.filter((event) => {
@@ -153,10 +168,21 @@ export default function EventsPageClient({ initialEvents, familyAttractions = []
         if (!matchesSearch) return false;
       }
 
-      // Category filter
+      // Category filter - use mapping to match database categories
       if (selectedCategory !== 'all') {
-        if (event.category.toLowerCase() !== selectedCategory.toLowerCase()) {
-          return false;
+        const eventCategory = event.category.toLowerCase();
+        const allowedCategories = categoryFilterMapping[selectedCategory.toLowerCase()];
+
+        if (allowedCategories) {
+          // Check if event category matches any in the allowed list
+          if (!allowedCategories.includes(eventCategory)) {
+            return false;
+          }
+        } else {
+          // Fallback to direct comparison if no mapping exists
+          if (eventCategory !== selectedCategory.toLowerCase()) {
+            return false;
+          }
         }
       }
 
