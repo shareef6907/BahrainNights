@@ -336,7 +336,7 @@ async function scrapeEventDetailPage(
       let startTime: string | null = null;
 
       // First, look for dates in the entire page text using common patterns
-      const pageText = document.body.textContent || '';
+      // pageText already declared above
 
       // Extract year from page title (e.g., "2026 Theatrical Performance")
       const titleText = document.title || '';

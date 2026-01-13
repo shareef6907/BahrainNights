@@ -24,6 +24,27 @@ function generateSlug(title: string): string {
     .trim();
 }
 
+// Convert time string like "9 PM", "10:30 AM" to 24-hour format "21:00"
+function convertTo24Hour(timeStr: string | null): string | null {
+  if (!timeStr) return null;
+
+  // Already in 24-hour format like "21:00"
+  if (/^\d{1,2}:\d{2}$/.test(timeStr)) return timeStr;
+
+  // Parse 12-hour format like "9 PM", "10:30 AM", "9:00 PM"
+  const match = timeStr.match(/^(\d{1,2})(?::(\d{2}))?\s*(AM|PM)$/i);
+  if (!match) return null;
+
+  let hours = parseInt(match[1]);
+  const minutes = match[2] ? parseInt(match[2]) : 0;
+  const period = match[3].toUpperCase();
+
+  if (period === 'PM' && hours !== 12) hours += 12;
+  if (period === 'AM' && hours === 12) hours = 0;
+
+  return `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}`;
+}
+
 // Convert scraped event to database format
 function toDbFormat(event: ScrapedEvent) {
   const slug = generateSlug(event.title);
@@ -40,8 +61,8 @@ function toDbFormat(event: ScrapedEvent) {
     date: eventDate, // Required field
     start_date: event.startDate,
     end_date: event.endDate,
-    time: event.startTime, // Also set time field
-    start_time: event.startTime,
+    time: convertTo24Hour(event.startTime), // Convert to 24-hour format
+    start_time: convertTo24Hour(event.startTime),
     price: event.price ? `${event.price} BHD` : null,
     price_min: event.price,
     price_currency: event.priceCurrency,
@@ -160,10 +181,11 @@ async function main(): Promise<EventsScraperResult> {
     });
     console.log(`Scraped ${scrapedEvents.length} events`);
 
-    // Step 2: Filter out past events
-    console.log('\nStep 2: Filtering active events...');
-    const activeEvents = filterActiveEvents(scrapedEvents);
-    console.log(`${activeEvents.length} active events after filtering`);
+    // Step 2: Skip date filtering - upsert all scraped events
+    // (Platinumlist only shows upcoming events anyway)
+    console.log('\nStep 2: Processing events...');
+    const activeEvents = scrapedEvents;
+    console.log(`${activeEvents.length} events to upsert`);
 
     // Step 3: Upsert to database
     console.log('\nStep 3: Upserting to database...');
