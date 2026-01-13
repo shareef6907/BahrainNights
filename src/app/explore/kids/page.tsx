@@ -61,7 +61,9 @@ async function getKidsAttractions(): Promise<ExploreItem[]> {
       image: attraction.image_url || 'https://images.unsplash.com/photo-1513889961551-628c1e5e2ee9?w=800',
       area: attraction.area || 'Bahrain',
       description: attraction.short_description || attraction.description?.substring(0, 150) || '',
-      price: attraction.price_from ? `BD ${attraction.price_from}` : (attraction.price_range === 'Free' ? 'Free' : undefined),
+      price: attraction.price_from !== null && attraction.price_from !== undefined && attraction.price_from > 0
+        ? `BD ${attraction.price_from}`
+        : (attraction.price_range === 'Free' ? 'Free' : (attraction.price_range || undefined)),
       rating: attraction.tripadvisor_rating || attraction.rating || undefined,
       duration: attraction.duration || undefined,
       ageRange: ageRange,

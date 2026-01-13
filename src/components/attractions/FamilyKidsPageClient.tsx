@@ -321,12 +321,14 @@ export default function FamilyKidsPageClient({ initialAttractions }: FamilyKidsP
                         {/* Price */}
                         <div className="flex items-center gap-1 text-green-400 font-medium">
                           <DollarSign className="w-4 h-4" />
-                          {attraction.priceRange === 'Free' ? (
-                            <span>Free Entry</span>
-                          ) : attraction.priceFrom ? (
+                          {attraction.priceFrom !== null && attraction.priceFrom !== undefined && attraction.priceFrom > 0 ? (
                             <span>From BD {attraction.priceFrom}</span>
-                          ) : (
+                          ) : attraction.priceRange === 'Free' ? (
+                            <span>Free Entry</span>
+                          ) : attraction.priceRange ? (
                             <span>{attraction.priceRange}</span>
+                          ) : (
+                            <span>Contact for price</span>
                           )}
                         </div>
 
