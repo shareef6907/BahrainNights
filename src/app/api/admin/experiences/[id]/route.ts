@@ -52,9 +52,16 @@ export async function PATCH(
 
     for (const field of allowedFields) {
       if (body[field] !== undefined) {
-        updateData[field] = body[field];
+        // Convert empty strings to null for optional fields
+        if (body[field] === '' && field !== 'title' && field !== 'description') {
+          updateData[field] = null;
+        } else {
+          updateData[field] = body[field];
+        }
       }
     }
+
+    console.log('Updating experience:', id, 'with data:', JSON.stringify(updateData, null, 2));
 
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const { data, error } = await (supabase as any)
@@ -65,14 +72,24 @@ export async function PATCH(
       .single();
 
     if (error) {
-      console.error('Error updating experience:', error);
-      return NextResponse.json({ error: 'Failed to update experience' }, { status: 500 });
+      console.error('Error updating experience:', error.message, error.code, error.details);
+      return NextResponse.json({
+        error: `Failed to update experience: ${error.message || 'Unknown error'}`,
+        code: error.code,
+        details: error.details
+      }, { status: 500 });
+    }
+
+    if (!data) {
+      console.error('No data returned from update - experience may not exist');
+      return NextResponse.json({ error: 'Experience not found or no changes made' }, { status: 404 });
     }
 
     return NextResponse.json({ experience: data });
   } catch (error) {
     console.error('Error in PATCH /api/admin/experiences/[id]:', error);
-    return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
+    const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+    return NextResponse.json({ error: `Internal server error: ${errorMessage}` }, { status: 500 });
   }
 }
 
