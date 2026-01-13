@@ -31,6 +31,7 @@ interface Experience {
   price: number | null;
   price_currency: string | null;
   image_url: string | null;
+  cover_url: string | null;
   venue: string | null;
   location: string | null;
   category: string | null;
@@ -87,12 +88,15 @@ export default function PlatinumlistAttractionsAdmin() {
     venue: '',
     location: '',
     category: '',
-    image_url: ''
+    image_url: '',
+    cover_url: ''
   });
   const [saving, setSaving] = useState(false);
   const [rewriting, setRewriting] = useState(false);
   const [uploadingImage, setUploadingImage] = useState(false);
+  const [uploadingCover, setUploadingCover] = useState(false);
   const [imageUrlInput, setImageUrlInput] = useState('');
+  const [coverUrlInput, setCoverUrlInput] = useState('');
 
   // Toast helper
   const showToast = (message: string, type: 'success' | 'error') => {
@@ -277,9 +281,11 @@ export default function PlatinumlistAttractionsAdmin() {
       venue: experience.venue || '',
       location: experience.location || '',
       category: experience.category || '',
-      image_url: experience.image_url || ''
+      image_url: experience.image_url || '',
+      cover_url: experience.cover_url || ''
     });
     setImageUrlInput('');
+    setCoverUrlInput('');
     setEditModalOpen(true);
   };
 
@@ -298,7 +304,8 @@ export default function PlatinumlistAttractionsAdmin() {
           venue: editForm.venue,
           location: editForm.location,
           category: editForm.category,
-          image_url: editForm.image_url
+          image_url: editForm.image_url,
+          cover_url: editForm.cover_url
         })
       });
 
@@ -405,6 +412,67 @@ export default function PlatinumlistAttractionsAdmin() {
       showToast('Failed to fetch image', 'error');
     } finally {
       setUploadingImage(false);
+    }
+  };
+
+  // Cover image upload handlers
+  const handleCoverFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file || !editingExperience) return;
+
+    setUploadingCover(true);
+    const formData = new FormData();
+    formData.append('file', file);
+
+    try {
+      const response = await fetch(`/api/admin/experiences/${editingExperience.id}/upload-cover`, {
+        method: 'POST',
+        body: formData
+      });
+
+      const data = await response.json();
+
+      if (data.success && data.coverUrl) {
+        setEditForm(prev => ({ ...prev, cover_url: data.coverUrl }));
+        showToast('Cover image uploaded', 'success');
+      } else {
+        showToast(data.error || 'Upload failed', 'error');
+      }
+    } catch (error) {
+      console.error('Cover upload error:', error);
+      showToast('Upload failed', 'error');
+    } finally {
+      setUploadingCover(false);
+    }
+  };
+
+  const handleCoverFetchFromUrl = async () => {
+    if (!coverUrlInput || !editingExperience) return;
+
+    setUploadingCover(true);
+    const formData = new FormData();
+    formData.append('imageUrl', coverUrlInput);
+
+    try {
+      const response = await fetch(`/api/admin/experiences/${editingExperience.id}/upload-cover`, {
+        method: 'POST',
+        body: formData
+      });
+
+      const data = await response.json();
+
+      if (data.success && data.coverUrl) {
+        setEditForm(prev => ({ ...prev, cover_url: data.coverUrl }));
+        setCoverUrlInput('');
+        showToast('Cover image fetched and uploaded', 'success');
+      } else {
+        showToast(data.error || 'Failed to fetch cover image', 'error');
+      }
+    } catch (error) {
+      console.error('Cover fetch error:', error);
+      showToast('Failed to fetch cover image', 'error');
+    } finally {
+      setUploadingCover(false);
     }
   };
 
@@ -773,6 +841,71 @@ export default function PlatinumlistAttractionsAdmin() {
                         <div className="flex items-center gap-2 text-sm text-cyan-400">
                           <Loader2 className="w-4 h-4 animate-spin" />
                           Uploading...
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                </div>
+
+                {/* Cover Image Section */}
+                <div>
+                  <label className="block text-sm font-medium text-gray-300 mb-2">
+                    Cover Image (Wide Banner)
+                  </label>
+                  <p className="text-xs text-gray-500 mb-3">
+                    Optional: A wide banner image for the attraction detail modal. Recommended: 1200x600px. If not set, thumbnail will be used.
+                  </p>
+                  <div className="flex gap-4">
+                    <div className="w-48 h-24 rounded-xl overflow-hidden bg-gray-800 relative flex-shrink-0">
+                      {editForm.cover_url ? (
+                        <Image
+                          src={editForm.cover_url}
+                          alt="Cover"
+                          fill
+                          className="object-cover"
+                        />
+                      ) : (
+                        <div className="w-full h-full flex items-center justify-center">
+                          <ImageIcon className="w-8 h-8 text-gray-500" />
+                        </div>
+                      )}
+                    </div>
+                    <div className="flex-1 space-y-3">
+                      {/* File Upload */}
+                      <div>
+                        <label className="flex items-center gap-2 px-4 py-2 bg-gray-800 hover:bg-gray-700 rounded-lg cursor-pointer transition">
+                          <Upload className="w-4 h-4" />
+                          <span className="text-sm">Upload Cover Image</span>
+                          <input
+                            type="file"
+                            accept="image/*"
+                            onChange={handleCoverFileUpload}
+                            className="hidden"
+                            disabled={uploadingCover}
+                          />
+                        </label>
+                      </div>
+                      {/* URL Fetch */}
+                      <div className="flex gap-2">
+                        <input
+                          type="url"
+                          placeholder="Or paste cover image URL..."
+                          value={coverUrlInput}
+                          onChange={(e) => setCoverUrlInput(e.target.value)}
+                          className="flex-1 px-3 py-2 bg-gray-800 rounded-lg border border-white/10 focus:border-cyan-500 focus:outline-none text-sm"
+                        />
+                        <button
+                          onClick={handleCoverFetchFromUrl}
+                          disabled={!coverUrlInput || uploadingCover}
+                          className="px-3 py-2 bg-gray-800 hover:bg-gray-700 rounded-lg disabled:opacity-50 transition"
+                        >
+                          <LinkIcon className="w-4 h-4" />
+                        </button>
+                      </div>
+                      {uploadingCover && (
+                        <div className="flex items-center gap-2 text-sm text-cyan-400">
+                          <Loader2 className="w-4 h-4 animate-spin" />
+                          Uploading cover...
                         </div>
                       )}
                     </div>

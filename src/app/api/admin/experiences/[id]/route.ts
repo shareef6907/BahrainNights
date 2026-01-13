@@ -40,10 +40,9 @@ export async function PATCH(
     const supabase = getAdminClient();
 
     // Fields that can be updated
-    // Note: cover_url removed as it doesn't exist in the database schema
     const allowedFields = [
       'title', 'description', 'price', 'price_currency',
-      'image_url', 'venue', 'location', 'category',
+      'image_url', 'cover_url', 'venue', 'location', 'category',
       'is_active', 'is_featured'
     ];
 
