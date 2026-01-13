@@ -24,6 +24,7 @@ import {
   Target,
   Star,
   MapPin,
+  Ticket,
 } from 'lucide-react';
 import { useAuth } from '@/lib/auth-context';
 
@@ -78,6 +79,11 @@ const navItems = [
     name: 'Attractions',
     href: '/admin/attractions',
     icon: MapPin,
+  },
+  {
+    name: 'Platinumlist',
+    href: '/admin/platinumlist-attractions',
+    icon: Ticket,
   },
   {
     name: 'Prospects',
