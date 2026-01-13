@@ -86,6 +86,11 @@ const navItems = [
     icon: Ticket,
   },
   {
+    name: 'Platinumlist Events',
+    href: '/admin/platinumlist-events',
+    icon: Calendar,
+  },
+  {
     name: 'Prospects',
     href: '/admin/prospects',
     icon: Target,

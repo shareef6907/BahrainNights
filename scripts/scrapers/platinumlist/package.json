@@ -5,9 +5,13 @@
   "main": "index.ts",
   "scripts": {
     "scrape": "npx tsx index.ts",
+    "scrape:attractions": "npx tsx index.ts",
+    "scrape:events": "npx tsx events-index.ts",
+    "scrape:all": "npx tsx index.ts && npx tsx events-index.ts",
     "test": "npx tsx index.ts --dry-run"
   },
   "dependencies": {
+    "@aws-sdk/client-s3": "^3.500.0",
     "@supabase/supabase-js": "^2.39.0",
     "playwright": "^1.40.0"
   },

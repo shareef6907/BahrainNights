@@ -636,6 +636,10 @@ export default function EventsPageClient({ initialEvents, familyAttractions = []
                                 <span>{event.time}</span>
                               </div>
                             )}
+                            {/* Price display */}
+                            <div className={`font-semibold ${event.isFree ? 'text-green-400' : 'text-yellow-400'}`}>
+                              {event.price}
+                            </div>
                           </div>
                         </div>
                       </div>

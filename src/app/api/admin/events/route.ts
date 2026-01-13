@@ -25,12 +25,24 @@ export async function GET(request: NextRequest) {
     const status = searchParams.get('status');
     const category = searchParams.get('category');
     const search = searchParams.get('search');
+    const source = searchParams.get('source');
+    const includeHidden = searchParams.get('includeHidden') === 'true';
 
     // Use supabaseAdmin to bypass RLS
     let query = supabaseAdmin
       .from('events')
       .select('*')
       .order('created_at', { ascending: false });
+
+    // Filter by source (e.g., 'platinumlist')
+    if (source) {
+      query = query.eq('source_name', source);
+    }
+
+    // Filter by hidden status
+    if (!includeHidden) {
+      query = query.eq('is_hidden', false);
+    }
 
     // Filter by status (only if not 'all' or 'past')
     if (status && status !== 'all' && status !== 'past') {

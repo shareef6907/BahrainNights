@@ -232,6 +232,9 @@ export interface Database {
           source_url: string | null;
           source_name: string | null;
           source_event_id: string | null;
+          affiliate_url: string | null;
+          price_currency: string | null;
+          is_active: boolean;
           last_scraped_at: string | null;
           status: string;
           rejection_reason: string | null;
@@ -289,6 +292,9 @@ export interface Database {
           source_url?: string | null;
           source_name?: string | null;
           source_event_id?: string | null;
+          affiliate_url?: string | null;
+          price_currency?: string | null;
+          is_active?: boolean;
           last_scraped_at?: string | null;
           status?: string;
           rejection_reason?: string | null;
@@ -346,6 +352,9 @@ export interface Database {
           source_url?: string | null;
           source_name?: string | null;
           source_event_id?: string | null;
+          affiliate_url?: string | null;
+          price_currency?: string | null;
+          is_active?: boolean;
           last_scraped_at?: string | null;
           status?: string;
           rejection_reason?: string | null;

@@ -7,15 +7,25 @@ on:
   workflow_dispatch:
     # Allow manual trigger for testing
     inputs:
+      scraper_type:
+        description: 'Which scraper to run'
+        required: false
+        default: 'all'
+        type: choice
+        options:
+          - all
+          - attractions
+          - events
       dry_run:
         description: 'Dry run (no database writes)'
         required: false
         default: 'false'
 
 jobs:
-  scrape:
+  scrape-attractions:
     runs-on: ubuntu-latest
     timeout-minutes: 30
+    if: ${{ github.event.inputs.scraper_type != 'events' }}
 
     steps:
       - name: Checkout repository
@@ -33,16 +43,61 @@ jobs:
         working-directory: scripts/scrapers/platinumlist
         run: npm install
 
-      - name: Run scraper
+      - name: Run attractions scraper
         working-directory: scripts/scrapers/platinumlist
         env:
           SUPABASE_URL: ${{ secrets.NEXT_PUBLIC_SUPABASE_URL }}
           SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
           PLATINUMLIST_AFFILIATE_CODE: 'yjg3yzi'
-        run: npm run scrape
+          BAHRAINNIGHTS_AWS_ACCESS_KEY_ID: ${{ secrets.BAHRAINNIGHTS_AWS_ACCESS_KEY_ID }}
+          BAHRAINNIGHTS_AWS_SECRET_ACCESS_KEY: ${{ secrets.BAHRAINNIGHTS_AWS_SECRET_ACCESS_KEY }}
+          BAHRAINNIGHTS_AWS_REGION: 'me-south-1'
+          BAHRAINNIGHTS_S3_BUCKET: 'bahrainnights-production'
+        run: npm run scrape:attractions
 
-      - name: Report results
+      - name: Report attractions results
         if: always()
         run: |
-          echo "Scraper job completed at $(date)"
+          echo "Attractions scraper job completed at $(date)"
+          echo "Exit code: ${{ job.status }}"
+
+  scrape-events:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    needs: [scrape-attractions]
+    # Run even if attractions scraper fails or is skipped, but not if only attractions was requested
+    if: ${{ always() && github.event.inputs.scraper_type != 'attractions' }}
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Install Playwright
+        run: npx playwright install chromium --with-deps
+
+      - name: Install dependencies
+        working-directory: scripts/scrapers/platinumlist
+        run: npm install
+
+      - name: Run events scraper
+        working-directory: scripts/scrapers/platinumlist
+        env:
+          SUPABASE_URL: ${{ secrets.NEXT_PUBLIC_SUPABASE_URL }}
+          SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
+          PLATINUMLIST_AFFILIATE_CODE: 'yjg3yzi'
+          BAHRAINNIGHTS_AWS_ACCESS_KEY_ID: ${{ secrets.BAHRAINNIGHTS_AWS_ACCESS_KEY_ID }}
+          BAHRAINNIGHTS_AWS_SECRET_ACCESS_KEY: ${{ secrets.BAHRAINNIGHTS_AWS_SECRET_ACCESS_KEY }}
+          BAHRAINNIGHTS_AWS_REGION: 'me-south-1'
+          BAHRAINNIGHTS_S3_BUCKET: 'bahrainnights-production'
+        run: npm run scrape:events
+
+      - name: Report events results
+        if: always()
+        run: |
+          echo "Events scraper job completed at $(date)"
           echo "Exit code: ${{ job.status }}"
