@@ -30,23 +30,37 @@ interface AttractionModalProps {
 const categoryIcons: Record<string, string> = {
   'water-sports': '🏄',
   'boat-tour': '⛵',
+  'boat-tours': '⛵',
   'desert-safari': '🏜️',
   'indoor': '🎮',
+  'indoor-activities': '🎮',
   'tour': '🗺️',
+  'tours': '🗺️',
   'sightseeing': '🏛️',
   'theme-park': '🎢',
+  'theme-parks': '🎢',
   'attraction': '🎯',
+  'attractions': '🎯',
+  'Family & Kids': '👨‍👩‍👧‍👦',
+  'family-kids': '👨‍👩‍👧‍👦',
 };
 
 const categoryLabels: Record<string, { en: string; ar: string }> = {
   'water-sports': { en: 'Water Sports', ar: 'الرياضات المائية' },
   'boat-tour': { en: 'Boat Tours', ar: 'جولات القوارب' },
+  'boat-tours': { en: 'Boat Tours', ar: 'جولات القوارب' },
   'desert-safari': { en: 'Desert Safari', ar: 'سفاري الصحراء' },
   'indoor': { en: 'Indoor Activities', ar: 'الأنشطة الداخلية' },
+  'indoor-activities': { en: 'Indoor activities', ar: 'الأنشطة الداخلية' },
   'tour': { en: 'Tours', ar: 'الجولات السياحية' },
+  'tours': { en: 'Tours', ar: 'الجولات السياحية' },
   'sightseeing': { en: 'Sightseeing', ar: 'المعالم السياحية' },
   'theme-park': { en: 'Theme Parks', ar: 'المدن الترفيهية' },
+  'theme-parks': { en: 'Theme parks', ar: 'المدن الترفيهية' },
   'attraction': { en: 'Attractions', ar: 'المعالم' },
+  'attractions': { en: 'Attractions', ar: 'المعالم' },
+  'Family & Kids': { en: 'Family & Kids', ar: 'العائلات والأطفال' },
+  'family-kids': { en: 'Family & Kids', ar: 'العائلات والأطفال' },
 };
 
 export default function AttractionModal({
@@ -187,9 +201,9 @@ export default function AttractionModal({
                         {attraction.price !== null && (
                           <div className="flex items-center px-3 py-1 bg-emerald-400/10 border border-emerald-400/30 rounded-lg">
                             <span className="text-emerald-400 font-bold">
-                              {attraction.price === 0
-                                ? (language === 'ar' ? 'مجاني' : 'Free')
-                                : `${attraction.price_currency} ${attraction.price}`
+                              {attraction.price > 0
+                                ? `${attraction.price_currency} ${attraction.price}`
+                                : (language === 'ar' ? 'اتصل للسعر' : 'Contact for price')
                               }
                             </span>
                           </div>

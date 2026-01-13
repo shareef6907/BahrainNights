@@ -66,6 +66,12 @@ const nextConfig: NextConfig = {
         port: '',
         pathname: '/**',
       },
+      {
+        protocol: 'https',
+        hostname: 'cdn.platinumlist.net',
+        port: '',
+        pathname: '/**',
+      },
     ],
   },
 
