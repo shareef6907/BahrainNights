@@ -38,6 +38,21 @@ function isAttractionUrl(url: string): boolean {
   return !match;
 }
 
+// Check if title indicates a non-attraction (sports event, concert, festival, etc.)
+function isNonAttractionTitle(title: string): boolean {
+  const nonAttractionKeywords = [
+    'grand prix', 'f1', 'formula 1', 'formula one', 'racing', 'race',
+    'concert', 'festival', 'music festival', 'live music',
+    'championship', 'tournament', 'match', 'vs',
+    'world cup', 'cup final', 'league',
+    'comedy show', 'stand-up', 'standup',
+    'wen w bkm', 'exhibition match'
+  ];
+
+  const lowerTitle = title.toLowerCase();
+  return nonAttractionKeywords.some(keyword => lowerTitle.includes(keyword));
+}
+
 // Download image from URL and return as Buffer
 async function downloadImage(imageUrl: string): Promise<Buffer | null> {
   return new Promise((resolve) => {
@@ -231,27 +246,62 @@ async function scrapeDetailPage(
 
       // Get description - find paragraph text that looks like a description
       let description: string | null = null;
-      const paragraphs = Array.from(document.querySelectorAll('p'));
-      for (let i = 0; i < paragraphs.length; i++) {
-        const text = paragraphs[i].textContent?.trim() || '';
-        // Skip if too short, contains CSS, or is just metadata
-        if (text.length > 50 && text.length < 3000 &&
-            !text.includes('{') && !text.includes('cls-') &&
-            !text.includes('fill-rule') && !text.includes('stroke-') &&
-            !text.startsWith('©') && !text.includes('cookie')) {
-          description = text;
-          break;
+
+      // Look for specific description containers first
+      const descriptionSelectors = [
+        '.event-description',
+        '.description',
+        '[class*="event-detail"] p',
+        '[class*="event-info"] p',
+        'article p',
+        'main p',
+        '.content-body p'
+      ];
+
+      for (let s = 0; s < descriptionSelectors.length && !description; s++) {
+        const elements = Array.from(document.querySelectorAll(descriptionSelectors[s]));
+        for (let i = 0; i < elements.length; i++) {
+          const text = elements[i].textContent?.trim() || '';
+          // Skip navigation text, CSS, metadata, and short text
+          const isNavOrBadText = text.includes('EventsClose') || text.includes('Top events') ||
+            text.includes('TodayThis') || text.includes('This Weekend') || text.includes('This Month') ||
+            text.includes('Sign in') || text.includes('Sign up') || text.includes('Login') ||
+            text.includes('Register') || text.includes('My Account') || text.includes('Privacy Policy') ||
+            text.includes('Follow us') || text.includes('Subscribe') || text.includes('Newsletter') ||
+            text.includes('Facebook') || text.includes('Twitter') || text.includes('Instagram') ||
+            text.includes('All rights reserved') || text.includes('©') || text.includes('Copyright') ||
+            text.includes('cookie') || text.includes('Search') || text.includes('Filter') ||
+            text.includes('Buy tickets') || text.includes('Book now') || text.includes('Get tickets') ||
+            text.includes('{') || text.includes('cls-') || text.includes('fill-rule') || text.includes('stroke-');
+
+          if (text.length > 80 && text.length < 2000 && !isNavOrBadText &&
+              // Must contain some actual sentence-like content
+              (text.includes('.') || text.includes('!') || text.includes(','))) {
+            description = text;
+            break;
+          }
         }
       }
 
-      // If no good paragraph, try div content
+      // Fallback: try all paragraphs
       if (!description) {
-        const contentDivs = Array.from(document.querySelectorAll('div[class*="content"], div[class*="description"], div[class*="about"]'));
-        for (let i = 0; i < contentDivs.length; i++) {
-          const text = contentDivs[i].textContent?.trim() || '';
-          if (text.length > 50 && text.length < 3000 &&
-              !text.includes('{') && !text.includes('cls-')) {
-            description = text.substring(0, 500); // Limit length
+        const paragraphs = Array.from(document.querySelectorAll('p'));
+        for (let i = 0; i < paragraphs.length; i++) {
+          const text = paragraphs[i].textContent?.trim() || '';
+          const isNavOrBadText = text.includes('EventsClose') || text.includes('Top events') ||
+            text.includes('TodayThis') || text.includes('This Weekend') || text.includes('This Month') ||
+            text.includes('Sign in') || text.includes('Sign up') || text.includes('Login') ||
+            text.includes('Register') || text.includes('My Account') || text.includes('Privacy Policy') ||
+            text.includes('Follow us') || text.includes('Subscribe') || text.includes('Newsletter') ||
+            text.includes('Facebook') || text.includes('Twitter') || text.includes('Instagram') ||
+            text.includes('All rights reserved') || text.includes('©') || text.includes('Copyright') ||
+            text.includes('cookie') || text.includes('Search') || text.includes('Filter') ||
+            text.includes('Buy tickets') || text.includes('Book now') || text.includes('Get tickets') ||
+            text.includes('{') || text.includes('cls-') || text.includes('fill-rule') || text.includes('stroke-');
+
+          if (text.length > 80 && text.length < 2000 && !isNavOrBadText &&
+              (text.includes('.') || text.includes('!') || text.includes(','))) {
+            description = text;
             break;
           }
         }
@@ -291,6 +341,12 @@ async function scrapeDetailPage(
 
     if (!data.title) {
       console.log(`    Skipping - no title found`);
+      return null;
+    }
+
+    // Filter out non-attractions by title (sports events, concerts, festivals)
+    if (isNonAttractionTitle(data.title)) {
+      console.log(`    Skipping - non-attraction title: ${data.title}`);
       return null;
     }
 
