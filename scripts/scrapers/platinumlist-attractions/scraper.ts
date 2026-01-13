@@ -21,11 +21,59 @@ const EVENT_ONLY_URL_PATTERNS = [
   '/sports/',
 ];
 
+// Keywords that indicate an item is an event, not an attraction
+const EVENT_KEYWORDS = [
+  'concert',
+  'live at',
+  'live in',
+  'musical',
+  'comedy show',
+  'stand-up',
+  'standup',
+  'festival',
+  'amphitheatre',
+  'amphitheater',
+];
+
+// Known artist/performer names (events, not attractions)
+const KNOWN_ARTISTS = [
+  'linkin park',
+  'calvin harris',
+  'andre rieu',
+  'andré rieu',
+  'wicked',
+  'balti',
+  'bob marley',
+  'abhishek upmanyu',
+  'el daheeh',
+  'mahmoud el lithy',
+  'majid al mohandis',
+];
+
 /**
  * Check if a URL is an event-only page (not an attraction)
  */
 function isEventOnlyUrl(url: string): boolean {
   return EVENT_ONLY_URL_PATTERNS.some(pattern => url.includes(pattern));
+}
+
+/**
+ * Check if a title indicates this is an event (not an attraction)
+ */
+function isEventByTitle(title: string): boolean {
+  const lowerTitle = title.toLowerCase();
+
+  // Check for event keywords
+  if (EVENT_KEYWORDS.some(keyword => lowerTitle.includes(keyword))) {
+    return true;
+  }
+
+  // Check for known artists/performers
+  if (KNOWN_ARTISTS.some(artist => lowerTitle.includes(artist))) {
+    return true;
+  }
+
+  return false;
 }
 
 /**
@@ -102,6 +150,12 @@ async function scrapeAttractionDetail(page: Page, url: string): Promise<ScrapedA
 
     if (!title) {
       console.log(`    No title found, skipping`);
+      return null;
+    }
+
+    // Filter out events based on title
+    if (isEventByTitle(title)) {
+      console.log(`    Skipping event: ${title}`);
       return null;
     }
 
@@ -382,3 +436,6 @@ export async function scrapeAttractions(): Promise<void> {
     await browser.close();
   }
 }
+
+// Run the scraper
+scrapeAttractions();
