@@ -107,15 +107,15 @@ export default function PlatinumlistAttractionsAdmin() {
   const fetchAttractions = async () => {
     setLoading(true);
     try {
-      const response = await fetch('/api/admin/attractions?status=all');
+      // Use server-side filter for platinumlist source
+      const response = await fetch('/api/admin/attractions?status=all&source=platinumlist');
       const data = await response.json();
+      console.log('Platinumlist attractions response:', data);
       if (data.attractions) {
-        // Filter to only show platinumlist attractions
-        const platinumlistAttractions = data.attractions.filter(
-          (a: Attraction) => a.source === 'platinumlist'
-        );
-        setAttractions(platinumlistAttractions);
-        setFilteredAttractions(platinumlistAttractions);
+        setAttractions(data.attractions);
+        setFilteredAttractions(data.attractions);
+      } else {
+        console.log('No attractions in response, full response:', data);
       }
     } catch (error) {
       console.error('Error fetching attractions:', error);

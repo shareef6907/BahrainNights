@@ -51,6 +51,8 @@ export async function GET(request: NextRequest) {
     const featured = searchParams.get('featured');
     const search = searchParams.get('search') || undefined;
     const category = searchParams.get('category') || undefined;
+    const source = searchParams.get('source') || undefined;
+    const excludeSource = searchParams.get('excludeSource') || undefined;
     const limit = searchParams.get('limit') ? parseInt(searchParams.get('limit')!) : undefined;
     const offset = searchParams.get('offset') ? parseInt(searchParams.get('offset')!) : undefined;
 
@@ -60,6 +62,8 @@ export async function GET(request: NextRequest) {
       featured: featured === 'true' ? true : featured === 'false' ? false : undefined,
       search,
       category,
+      source,
+      excludeSource,
       limit,
       offset,
     });

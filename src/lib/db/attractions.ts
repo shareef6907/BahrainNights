@@ -99,6 +99,8 @@ export interface AttractionFilters {
   featured?: boolean;
   search?: string;
   category?: string;
+  source?: string;
+  excludeSource?: string;
   limit?: number;
   offset?: number;
 }
@@ -126,6 +128,14 @@ export async function getAttractions(filters: AttractionFilters = {}): Promise<A
 
   if (filters.category) {
     query = query.eq('category', filters.category);
+  }
+
+  if (filters.source) {
+    query = query.eq('source', filters.source);
+  }
+
+  if (filters.excludeSource) {
+    query = query.neq('source', filters.excludeSource);
   }
 
   if (filters.search) {
