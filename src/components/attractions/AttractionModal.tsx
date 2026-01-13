@@ -2,7 +2,7 @@
 
 import { useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { X, MapPin, DollarSign, ExternalLink, Tag } from 'lucide-react';
+import { X, MapPin, ExternalLink, Tag } from 'lucide-react';
 import Image from 'next/image';
 import { useTranslation } from '@/lib/i18n';
 
@@ -185,8 +185,7 @@ export default function AttractionModal({
                       <div className="flex flex-wrap items-center justify-center md:justify-start gap-3 mb-4">
                         {/* Price Badge */}
                         {attraction.price !== null && (
-                          <div className="flex items-center gap-1 px-3 py-1 bg-emerald-400/10 border border-emerald-400/30 rounded-lg">
-                            <DollarSign className="w-4 h-4 text-emerald-400" />
+                          <div className="flex items-center px-3 py-1 bg-emerald-400/10 border border-emerald-400/30 rounded-lg">
                             <span className="text-emerald-400 font-bold">
                               {attraction.price === 0
                                 ? (language === 'ar' ? 'مجاني' : 'Free')
