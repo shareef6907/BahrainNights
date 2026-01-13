@@ -1,0 +1,46 @@
+name: Platinumlist Attractions Scraper
+
+on:
+  schedule:
+    - cron: '0 */6 * * *'  # Every 6 hours
+  workflow_dispatch:  # Manual trigger
+
+jobs:
+  scrape-attractions:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+          cache-dependency-path: scripts/scrapers/platinumlist-attractions/package.json
+
+      - name: Install dependencies
+        working-directory: scripts/scrapers/platinumlist-attractions
+        run: npm install
+
+      - name: Install Playwright browsers
+        working-directory: scripts/scrapers/platinumlist-attractions
+        run: npx playwright install chromium
+
+      - name: Run Attractions Scraper
+        working-directory: scripts/scrapers/platinumlist-attractions
+        env:
+          NEXT_PUBLIC_SUPABASE_URL: ${{ secrets.NEXT_PUBLIC_SUPABASE_URL }}
+          SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
+          BAHRAINNIGHTS_AWS_ACCESS_KEY_ID: ${{ secrets.BAHRAINNIGHTS_AWS_ACCESS_KEY_ID }}
+          BAHRAINNIGHTS_AWS_SECRET_ACCESS_KEY: ${{ secrets.BAHRAINNIGHTS_AWS_SECRET_ACCESS_KEY }}
+          BAHRAINNIGHTS_AWS_REGION: ${{ secrets.BAHRAINNIGHTS_AWS_REGION }}
+          BAHRAINNIGHTS_S3_BUCKET: ${{ secrets.BAHRAINNIGHTS_S3_BUCKET }}
+        run: npm run scrape
+
+      - name: Log completion
+        run: |
+          echo "Attractions scraper completed at $(date)"
+          echo "Check the database for updated attractions."
