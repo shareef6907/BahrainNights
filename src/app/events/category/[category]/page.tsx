@@ -84,14 +84,21 @@ async function getCategoryEvents(category: string) {
     slug: event.slug || event.id,
     description: event.description || '',
     image: event.cover_url || event.image_url || 'https://images.unsplash.com/photo-1492684223066-81342ee5ff30?w=800&h=500&fit=crop',
+    coverUrl: event.cover_url || event.image_url || null,
     category: event.category || category,
     venue: event.venue_name || 'Venue TBD',
+    location: event.venue_address || event.location || '',
     date: event.date,
+    rawDate: event.date,
+    rawEndDate: event.end_date || null,
     time: event.time || event.start_time || '',
     price: event.price || 'See Details',
+    priceNum: event.price_min || (typeof event.price === 'number' ? event.price : null),
+    priceCurrency: event.price_currency || 'BHD',
     isFree: !event.price || event.price === 'Free' || event.price.toLowerCase?.() === 'free',
     isFeatured: event.is_featured || false,
     is_featured: event.is_featured || false,
+    affiliateUrl: event.affiliate_url || event.booking_url || event.source_url || '',
   }));
 
   // Sort with featured events first (alphabetically), then non-featured by date

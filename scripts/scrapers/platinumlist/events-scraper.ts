@@ -1,6 +1,6 @@
 import { chromium, Browser, Page } from 'playwright';
 import { S3Client, PutObjectCommand } from '@aws-sdk/client-s3';
-import { ScrapedEvent, EventsScraperConfig, EVENT_CATEGORY_MAP, CATEGORY_KEYWORDS } from './events-types';
+import { ScrapedEvent, EventsScraperConfig, EVENT_CATEGORY_MAP, CATEGORY_KEYWORDS, KNOWN_ARTISTS } from './events-types';
 import * as https from 'https';
 import * as http from 'http';
 
@@ -110,22 +110,31 @@ function generateSlug(title: string): string {
 }
 
 // Determine category from URL path and title/description
+// Priority: Known artists -> Keywords -> URL category -> Default
 function determineCategory(urlPath: string, title: string, description: string | null): string {
+  const titleLower = title.toLowerCase();
   const combined = `${title} ${description || ''}`.toLowerCase();
 
-  // First check URL path for category
-  for (const [urlCategory, mappedCategory] of Object.entries(EVENT_CATEGORY_MAP)) {
-    if (urlPath.toLowerCase().includes(urlCategory)) {
-      return mappedCategory;
+  // First check if title contains a known artist name (these are always concerts)
+  for (const artist of KNOWN_ARTISTS) {
+    if (titleLower.includes(artist.toLowerCase())) {
+      return 'concerts';
     }
   }
 
-  // Then check keywords in title/description
+  // Check keywords in title/description (priority over URL category)
   for (const [category, keywords] of Object.entries(CATEGORY_KEYWORDS)) {
     for (const keyword of keywords) {
       if (combined.includes(keyword.toLowerCase())) {
         return category;
       }
+    }
+  }
+
+  // Fallback to URL path for category
+  for (const [urlCategory, mappedCategory] of Object.entries(EVENT_CATEGORY_MAP)) {
+    if (urlPath.toLowerCase().includes(urlCategory)) {
+      return mappedCategory;
     }
   }
 
@@ -295,19 +304,63 @@ async function scrapeEventDetailPage(
         }
       }
 
-      // Get image URLs
+      // Check if sold out
+      const isSoldOut = pageText.toLowerCase().includes('sold out') ||
+                        pageText.toLowerCase().includes('soldout') ||
+                        !!document.querySelector('[class*="sold-out"], [class*="soldout"], .sold-out');
+
+      // Get image URLs - be specific to get the unique event image
       let imageUrl: string | null = null;
       let coverUrl: string | null = null;
 
-      const images = Array.from(document.querySelectorAll('img[src*="/upload/"], img[src*="cdn.platinumlist"]'));
-      for (const img of images) {
-        const src = img.getAttribute('src') || img.getAttribute('data-src');
-        if (src && src.includes('/upload/') && !src.includes('logo') && !src.includes('icon')) {
-          const fullSrc = src.startsWith('http') ? src : `https://cdn.platinumlist.net${src}`;
-          if (!imageUrl) {
-            imageUrl = fullSrc;
-          } else if (!coverUrl) {
-            coverUrl = fullSrc;
+      // Try to find the main event image (usually in a hero section or event-image container)
+      const imageSelectors = [
+        '.event-image img',
+        '.hero-image img',
+        '.event-poster img',
+        '.event-banner img',
+        '[class*="event-detail"] img',
+        '[class*="event-header"] img',
+        'article img',
+        '.content img',
+        'main img',
+      ];
+
+      // First try specific selectors
+      for (const selector of imageSelectors) {
+        if (imageUrl) break;
+        const img = document.querySelector(selector);
+        if (img) {
+          const src = img.getAttribute('src') || img.getAttribute('data-src');
+          if (src && !src.includes('logo') && !src.includes('icon') && !src.includes('avatar') && !src.includes('profile')) {
+            imageUrl = src.startsWith('http') ? src : `https://cdn.platinumlist.net${src}`;
+          }
+        }
+      }
+
+      // Fallback: find images from platinumlist CDN
+      if (!imageUrl) {
+        const images = Array.from(document.querySelectorAll('img[src*="/upload/"], img[src*="cdn.platinumlist"]'));
+        for (const img of images) {
+          const src = img.getAttribute('src') || img.getAttribute('data-src');
+          if (src && src.includes('/upload/') && !src.includes('logo') && !src.includes('icon') && !src.includes('avatar')) {
+            const fullSrc = src.startsWith('http') ? src : `https://cdn.platinumlist.net${src}`;
+            if (!imageUrl) {
+              imageUrl = fullSrc;
+            } else if (!coverUrl && fullSrc !== imageUrl) {
+              coverUrl = fullSrc;
+            }
+          }
+        }
+      }
+
+      // Also try to get image from Open Graph meta tags
+      if (!imageUrl) {
+        const ogImage = document.querySelector('meta[property="og:image"]');
+        if (ogImage) {
+          const content = ogImage.getAttribute('content');
+          if (content) {
+            imageUrl = content.startsWith('http') ? content : `https://cdn.platinumlist.net${content}`;
           }
         }
       }
@@ -415,7 +468,7 @@ async function scrapeEventDetailPage(
         }
       }
 
-      return { title, price, currency, description, imageUrl, coverUrl, venue, location, startDate, endDate, startTime };
+      return { title, price, currency, description, imageUrl, coverUrl, venue, location, startDate, endDate, startTime, isSoldOut };
     });
 
     if (!data.title) {
@@ -479,9 +532,11 @@ async function scrapeEventDetailPage(
       startDate: parseDate(data.startDate),
       endDate: parseDate(data.endDate),
       startTime: data.startTime,
+      isSoldOut: data.isSoldOut || false,
     };
 
-    console.log(`    ✓ ${data.title} - ${finalPrice ? `${finalPrice} BHD` : 'No price'} [${category}]`);
+    const soldOutLabel = data.isSoldOut ? ' [SOLD OUT]' : '';
+    console.log(`    ✓ ${data.title} - ${finalPrice ? `${finalPrice} BHD` : 'No price'} [${category}]${soldOutLabel}`);
     return event;
 
   } catch (error) {

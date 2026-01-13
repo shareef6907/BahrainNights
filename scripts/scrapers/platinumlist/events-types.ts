@@ -14,6 +14,7 @@ export interface ScrapedEvent {
   startDate: string | null;
   endDate: string | null;
   startTime: string | null;
+  isSoldOut: boolean;
 }
 
 export interface EventsScraperConfig {
@@ -45,12 +46,29 @@ export const EVENT_CATEGORY_MAP: Record<string, string> = {
   'events': 'events',
 } as const;
 
-// Keywords for additional category detection
+// Keywords for additional category detection (ordered by priority)
 export const CATEGORY_KEYWORDS: Record<string, string[]> = {
-  concerts: ['concert', 'live music', 'singer', 'band', 'performance', 'gig', 'tour'],
-  nightlife: ['night', 'club', 'dj', 'party', 'lounge', 'bar', 'dance'],
-  comedy: ['comedy', 'stand-up', 'standup', 'comedian', 'funny', 'laugh', 'humour', 'humor'],
-  cultural: ['theatre', 'theater', 'musical', 'opera', 'ballet', 'play', 'festival', 'art', 'exhibition', 'drama'],
-  sports: ['sports', 'match', 'championship', 'tournament', 'race', 'grand prix', 'f1', 'formula', 'football', 'soccer', 'cricket', 'tennis', 'golf'],
-  family: ['family', 'kids', 'children', 'circus', 'magic show', 'disney', 'cartoon'],
+  concerts: [
+    'concert', 'live music', 'singer', 'band', 'performance', 'gig', 'tour',
+    'live at', 'live in', 'amphitheatre', 'amphitheater',
+    // Known artists/bands (will be categorized as concerts)
+    'josh groban', 'linkin park', 'calvin harris', 'andre rieu', 'andré rieu',
+    'john mayer', 'maroon 5', 'coldplay', 'ed sheeran', 'drake', 'the weeknd',
+    'taylor swift', 'beyonce', 'rihanna', 'bruno mars', 'justin bieber',
+    'majid al mohandis', 'balti', 'dystinct', 'wailing wailers', 'bob marley',
+  ],
+  comedy: ['comedy', 'stand-up', 'standup', 'comedian', 'funny', 'laugh', 'humour', 'humor', 'el daheeh', 'imran al aradi'],
+  nightlife: ['night', 'club', 'dj', 'party', 'lounge', 'bar', 'dance', 'ava club', 'klub360', 'volto'],
+  cultural: ['theatre', 'theater', 'musical', 'opera', 'ballet', 'play', 'festival', 'art', 'exhibition', 'drama', 'wicked', 'the musical', 'dinner show'],
+  sports: ['sports', 'match', 'championship', 'tournament', 'race', 'grand prix', 'f1', 'formula', 'football', 'soccer', 'cricket', 'tennis', 'golf', 'pageant'],
+  family: ['family', 'kids', 'children', 'circus', 'magic show', 'disney', 'cartoon', 'booga'],
 };
+
+// Known artist names that should always be categorized as concerts
+export const KNOWN_ARTISTS: string[] = [
+  'josh groban', 'linkin park', 'calvin harris', 'andre rieu', 'andré rieu',
+  'john mayer', 'maroon 5', 'coldplay', 'ed sheeran', 'drake', 'the weeknd',
+  'taylor swift', 'beyonce', 'rihanna', 'bruno mars', 'justin bieber',
+  'majid al mohandis', 'balti', 'dystinct', 'masha vincent', 'moii', 'sara',
+  'yubik', 'julees', 'mahmoud el lithy',
+];

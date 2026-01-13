@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useMemo, useEffect } from 'react';
+import { useState, useMemo, useEffect, useCallback } from 'react';
 import { useSearchParams, useRouter } from 'next/navigation';
 import { motion } from 'framer-motion';
 import { Search, Calendar, MapPin, Clock, Filter, Grid3X3, List, ChevronRight, Star } from 'lucide-react';
@@ -9,6 +9,7 @@ import Image from 'next/image';
 import AdBanner from '@/components/ads/AdBanner';
 import { sortEventsWithFeatured } from '@/lib/utils/eventSorting';
 import { useTranslation } from '@/lib/i18n';
+import EventModal, { EventData } from '@/components/events/EventModal';
 
 // Event interface
 export interface Event {
@@ -17,6 +18,7 @@ export interface Event {
   slug: string;
   description: string;
   image: string;
+  coverUrl?: string; // Full cover image for modal
   category: string;
   categoryColor: string;
   venue: string;
@@ -27,8 +29,11 @@ export interface Event {
   rawEndDate?: string; // ISO end date for filtering
   time: string;
   price: string;
+  priceNum?: number | null; // Numeric price for modal
+  priceCurrency?: string; // Currency code
   isFree: boolean;
   isFeatured?: boolean;
+  affiliateUrl?: string; // Booking/ticket URL
 }
 
 // Attraction interface for Family & Kids
@@ -62,6 +67,41 @@ export default function EventsPageClient({ initialEvents, familyAttractions = []
   const [selectedCategory, setSelectedCategory] = useState(searchParams?.get('category') || 'all');
   const [selectedTime, setSelectedTime] = useState(searchParams?.get('filter') || 'all');
   const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
+
+  // Modal state
+  const [selectedEvent, setSelectedEvent] = useState<EventData | null>(null);
+  const [isModalOpen, setIsModalOpen] = useState(false);
+
+  // Convert Event to EventData for modal
+  const convertToModalData = useCallback((event: Event): EventData => ({
+    id: event.id,
+    title: event.title,
+    description: event.description || null,
+    price: event.priceNum ?? null,
+    price_currency: event.priceCurrency || 'BHD',
+    image_url: event.image || null,
+    cover_url: event.coverUrl || event.image || null,
+    venue_name: event.venue || null,
+    location: event.location || null,
+    category: event.category || null,
+    start_date: event.rawDate || null,
+    start_time: event.time || null,
+    end_date: event.rawEndDate || null,
+    affiliate_url: event.affiliateUrl || '',
+  }), []);
+
+  // Handle event card click
+  const handleEventClick = useCallback((event: Event, e: React.MouseEvent) => {
+    e.preventDefault();
+    setSelectedEvent(convertToModalData(event));
+    setIsModalOpen(true);
+  }, [convertToModalData]);
+
+  // Close modal
+  const handleCloseModal = useCallback(() => {
+    setIsModalOpen(false);
+    setSelectedEvent(null);
+  }, []);
 
   // Translated categories
   const categories = [
@@ -592,58 +632,57 @@ export default function EventsPageClient({ initialEvents, familyAttractions = []
                       visible: { opacity: 1, y: 0 }
                     }}
                     whileHover={{ y: -6 }}
-                    className="group"
+                    className="group cursor-pointer"
+                    onClick={(e) => handleEventClick(event, e)}
                   >
-                    <Link href={`/events/${event.slug}`} className="block">
-                      <div className={`relative bg-white/5 backdrop-blur-sm border ${event.isFeatured ? 'border-yellow-400/50 ring-1 ring-yellow-400/20' : 'border-white/10'} rounded-2xl overflow-hidden hover:border-yellow-400/50 transition-all duration-300`}>
-                        <div className="relative aspect-video overflow-hidden">
-                          <Image
-                            src={event.image}
-                            alt={event.title}
-                            fill
-                            className="object-cover object-top group-hover:scale-105 transition-transform duration-300"
-                            sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
-                          />
-                          <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent" />
-                          <div className={`absolute top-3 left-3 px-3 py-1 ${event.categoryColor} text-white text-xs font-bold rounded-full capitalize`}>
-                            {event.category}
+                    <div className={`relative bg-white/5 backdrop-blur-sm border ${event.isFeatured ? 'border-yellow-400/50 ring-1 ring-yellow-400/20' : 'border-white/10'} rounded-2xl overflow-hidden hover:border-yellow-400/50 transition-all duration-300`}>
+                      <div className="relative aspect-video overflow-hidden">
+                        <Image
+                          src={event.image}
+                          alt={event.title}
+                          fill
+                          className="object-cover object-top group-hover:scale-105 transition-transform duration-300"
+                          sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
+                        />
+                        <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent" />
+                        <div className={`absolute top-3 left-3 px-3 py-1 ${event.categoryColor} text-white text-xs font-bold rounded-full capitalize`}>
+                          {event.category}
+                        </div>
+                        {/* Featured Badge - prominent at top right */}
+                        {event.isFeatured && (
+                          <div className="absolute top-3 right-3 px-3 py-1 bg-yellow-400 text-black text-xs font-bold rounded-full flex items-center gap-1 shadow-lg z-10">
+                            <Star className="w-3 h-3 fill-current" />
+                            {t.common.featured}
                           </div>
-                          {/* Featured Badge - prominent at top right */}
-                          {event.isFeatured && (
-                            <div className="absolute top-3 right-3 px-3 py-1 bg-yellow-400 text-black text-xs font-bold rounded-full flex items-center gap-1 shadow-lg z-10">
-                              <Star className="w-3 h-3 fill-current" />
-                              {t.common.featured}
+                        )}
+                        {/* Date Badge - moved below featured if present */}
+                        <div className={`absolute ${event.isFeatured ? 'top-10' : 'top-3'} right-3 px-3 py-1 bg-black/70 text-white text-xs rounded-full`}>
+                          {event.endDate ? `${event.date} - ${event.endDate}` : event.date}
+                        </div>
+                      </div>
+                      <div className="p-4">
+                        <h3 className="text-lg font-bold text-white group-hover:text-yellow-400 transition-colors line-clamp-2 mb-2">
+                          {event.title}
+                        </h3>
+                        <div className="space-y-2 text-sm text-gray-400">
+                          <div className="flex items-center gap-2">
+                            <MapPin className="w-4 h-4 text-yellow-400" />
+                            <span className="line-clamp-1">{event.venue}</span>
+                          </div>
+                          {/* Only show time if it's set and not TBA */}
+                          {event.time && !event.time.toLowerCase().includes('tba') && (
+                            <div className="flex items-center gap-2">
+                              <Clock className="w-4 h-4 text-yellow-400" />
+                              <span>{event.time}</span>
                             </div>
                           )}
-                          {/* Date Badge - moved below featured if present */}
-                          <div className={`absolute ${event.isFeatured ? 'top-10' : 'top-3'} right-3 px-3 py-1 bg-black/70 text-white text-xs rounded-full`}>
-                            {event.endDate ? `${event.date} - ${event.endDate}` : event.date}
-                          </div>
-                        </div>
-                        <div className="p-4">
-                          <h3 className="text-lg font-bold text-white group-hover:text-yellow-400 transition-colors line-clamp-2 mb-2">
-                            {event.title}
-                          </h3>
-                          <div className="space-y-2 text-sm text-gray-400">
-                            <div className="flex items-center gap-2">
-                              <MapPin className="w-4 h-4 text-yellow-400" />
-                              <span className="line-clamp-1">{event.venue}</span>
-                            </div>
-                            {/* Only show time if it's set and not TBA */}
-                            {event.time && !event.time.toLowerCase().includes('tba') && (
-                              <div className="flex items-center gap-2">
-                                <Clock className="w-4 h-4 text-yellow-400" />
-                                <span>{event.time}</span>
-                              </div>
-                            )}
-                            {/* Price display */}
-                            <div className={`font-semibold ${event.isFree ? 'text-green-400' : 'text-yellow-400'}`}>
-                              {event.price}
-                            </div>
+                          {/* Price display */}
+                          <div className={`font-semibold ${event.isFree ? 'text-green-400' : 'text-yellow-400'}`}>
+                            {event.price}
                           </div>
                         </div>
                       </div>
-                    </Link>
+                    </div>
                   </motion.div>
                 ))}
               </motion.div>
@@ -687,6 +726,13 @@ export default function EventsPageClient({ initialEvents, familyAttractions = []
         </div>
       </section>
     </div>
+
+      {/* Event Modal */}
+      <EventModal
+        event={selectedEvent}
+        isOpen={isModalOpen}
+        onClose={handleCloseModal}
+      />
     </>
   );
 }

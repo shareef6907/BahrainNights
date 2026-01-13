@@ -63,7 +63,7 @@ function toDbFormat(event: ScrapedEvent) {
     end_date: event.endDate,
     time: convertTo24Hour(event.startTime), // Convert to 24-hour format
     start_time: convertTo24Hour(event.startTime),
-    price: event.price ? `${event.price} BHD` : null,
+    price: event.isSoldOut ? 'Sold Out' : (event.price ? `${event.price} BHD` : null),
     price_min: event.price,
     price_currency: event.priceCurrency,
     image_url: event.imageUrl,
@@ -76,6 +76,7 @@ function toDbFormat(event: ScrapedEvent) {
     booking_url: event.affiliateUrl,
     is_active: true,
     is_hidden: false,
+    is_sold_out: event.isSoldOut || false,
     status: 'published',
     last_scraped_at: new Date().toISOString(),
     updated_at: new Date().toISOString(),

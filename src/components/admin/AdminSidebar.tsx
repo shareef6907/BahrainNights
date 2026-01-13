@@ -21,7 +21,6 @@ import {
   Sparkles,
   Heart,
   ClipboardCheck,
-  Target,
   Star,
   MapPin,
   Ticket,
@@ -89,11 +88,6 @@ const navItems = [
     name: 'Platinumlist Events',
     href: '/admin/platinumlist-events',
     icon: Calendar,
-  },
-  {
-    name: 'Prospects',
-    href: '/admin/prospects',
-    icon: Target,
   },
   {
     name: 'Analytics',

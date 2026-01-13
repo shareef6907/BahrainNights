@@ -137,6 +137,7 @@ async function getEvents(): Promise<Event[]> {
       slug: event.slug || event.id,
       description: event.description || '',
       image: event.cover_url || event.image_url || event.featured_image || '/images/event-placeholder.jpg',
+      coverUrl: event.cover_url || event.image_url || event.featured_image || '/images/event-placeholder.jpg',
       category: event.category || 'general',
       categoryColor: getCategoryColor(event.category),
       venue: event.venue_name || event.venue || 'Venue TBA',
@@ -147,8 +148,11 @@ async function getEvents(): Promise<Event[]> {
       rawEndDate, // ISO end date for filtering
       time: eventTime,
       price: isFree ? 'Free' : (price?.includes?.('BD') ? price : `BD ${price}`),
+      priceNum: event.price_min || (typeof event.price === 'number' ? event.price : null),
+      priceCurrency: event.price_currency || 'BHD',
       isFree,
       isFeatured: event.is_featured || false,
+      affiliateUrl: event.affiliate_url || event.booking_url || event.source_url || '',
     };
   });
 }

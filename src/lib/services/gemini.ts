@@ -16,17 +16,28 @@ export async function rewriteDescription(
     return { success: false, error: 'GEMINI_API_KEY not configured' };
   }
 
-  if (!description || description.trim().length < 10) {
-    return { success: false, error: 'No description to rewrite' };
+  // If no title, we can't generate anything useful
+  if (!title || title.trim().length < 3) {
+    return { success: false, error: 'Title is required to generate description' };
   }
 
-  const prompt = `Rewrite this attraction description for a tourism website. Make it engaging, clear, and informative. 2-3 sentences max. Remove any garbage text, CSS, or formatting errors.
+  const hasDescription = description && description.trim().length >= 10;
+
+  // Different prompts based on whether we have an existing description
+  const prompt = hasDescription
+    ? `Rewrite this event description for a tourism website. Make it engaging, clear, and informative. 2-3 sentences max. Remove any garbage text, CSS, or formatting errors.
 
 Title: ${title}
 Original description: ${description}
 Location: ${venue || 'Bahrain'}
 
-Return only the rewritten description, nothing else.`;
+Return only the rewritten description, nothing else.`
+    : `Write a short, engaging description for this event in Bahrain. Make it informative and inviting for tourists. 2-3 sentences max.
+
+Event: ${title}
+Venue: ${venue || 'Bahrain'}
+
+Return only the description, nothing else.`;
 
   try {
     const response = await fetch(`${GEMINI_URL}?key=${GEMINI_API_KEY}`, {

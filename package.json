@@ -14,7 +14,9 @@
     "test:e2e:headed": "playwright test --headed",
     "test:e2e:report": "playwright show-report",
     "test:cinema": "playwright test tests/e2e/cinema-admin.spec.ts --project=chromium",
-    "test:cinema:headed": "playwright test tests/e2e/cinema-admin.spec.ts --project=chromium --headed"
+    "test:cinema:headed": "playwright test tests/e2e/cinema-admin.spec.ts --project=chromium --headed",
+    "scrape:events": "npx tsx scripts/scrapers/platinumlist/events-index.ts",
+    "verify:events": "npx tsx scripts/scrapers/platinumlist/verify-agent.ts"
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^0.71.2",
