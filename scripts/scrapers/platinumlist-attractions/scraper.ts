@@ -5,7 +5,6 @@ import {
   generateAffiliateLink,
   createSlug,
   mapAttractionCategory,
-  parsePrice,
   downloadImage,
   uploadImageToS3,
   cleanDescription,
@@ -81,35 +80,47 @@ async function scrapeAttractionUrls(page: Page): Promise<string[]> {
 
 /**
  * Scrape a single attraction detail page
+ * Uses og:description meta tag which contains structured data:
+ * "Buy {title} tickets, {date}, {venue}, at the official Platinumlist.net site. {title} tickets prices starting from {price}."
  */
 async function scrapeAttractionDetail(page: Page, url: string): Promise<ScrapedAttraction | null> {
   try {
     await page.goto(url, { waitUntil: 'networkidle', timeout: 30000 });
     await page.waitForTimeout(1500);
 
-    // Extract title
-    const title = await page.evaluate(() => {
-      const titleEl = document.querySelector('h1, .event-title, .attraction-title');
-      return titleEl?.textContent?.trim() || '';
+    // Extract meta tags including og:description for reliable data
+    const metaData = await page.evaluate(() => {
+      const ogTitle = document.querySelector('meta[property="og:title"]')?.getAttribute('content') || '';
+      const ogDesc = document.querySelector('meta[property="og:description"]')?.getAttribute('content') || '';
+      const ogImage = document.querySelector('meta[property="og:image"]')?.getAttribute('content') || '';
+      const h1Title = document.querySelector('h1')?.textContent?.trim() || '';
+      return { ogTitle, ogDesc, ogImage, h1Title };
     });
+
+    // Use og:title or h1 for the title
+    const title = metaData.ogTitle || metaData.h1Title;
 
     if (!title) {
       console.log(`    No title found, skipping`);
       return null;
     }
 
-    // Extract description
+    // Extract description from page content
     const description = await page.evaluate(() => {
       const descEl = document.querySelector('.event-description, .description, .about-section p, [class*="description"]');
       return descEl?.textContent?.trim() || '';
     });
 
-    // Extract price
-    const priceText = await page.evaluate(() => {
-      const priceEl = document.querySelector('.price, .event-price, .ticket-price, [class*="price"]');
-      return priceEl?.textContent?.trim() || '';
+    // Extract price from og:description (e.g., "starting from 15.00 BHD" or "prices starting from 15.00 BHD")
+    const ogDesc = metaData.ogDesc;
+    const priceMatch = ogDesc.match(/starting from\s*([\d.]+)\s*BHD/i);
+    const priceFromDesc = priceMatch ? parseFloat(priceMatch[1]) : 0;
+
+    // Check for sold out in page content
+    const isSoldOut = await page.evaluate(() => {
+      const pageText = document.body.textContent?.toLowerCase() || '';
+      return pageText.includes('sold out') || pageText.includes('soldout');
     });
-    const { price, isSoldOut } = parsePrice(priceText);
 
     // Extract venue/location
     const venue = await page.evaluate(() => {
@@ -122,41 +133,43 @@ async function scrapeAttractionDetail(page: Page, url: string): Promise<ScrapedA
       return locationEl?.textContent?.trim() || 'Bahrain';
     });
 
-    // Extract image - try multiple selectors to find the REAL image (not promo banners)
-    const imageUrl = await page.evaluate(() => {
-      // Priority order of selectors
-      const selectors = [
-        '.event-detail-image img',
-        '.event-gallery img:first-child',
-        '.hero-image img',
-        '.main-image img',
-        '.event-image img',
-        'meta[property="og:image"]',
-      ];
+    // Use og:image from meta tags (most reliable), or fall back to page images
+    let imageUrl = metaData.ogImage;
 
-      for (const selector of selectors) {
-        const element = document.querySelector(selector);
-        if (element) {
-          const src = element.getAttribute('src') || element.getAttribute('content');
-          // Skip promo/banner images
-          if (src && !src.includes('promo') && !src.includes('banner') && !src.includes('logo')) {
+    if (!imageUrl) {
+      // Fallback: try to find image in page content
+      imageUrl = await page.evaluate(() => {
+        const selectors = [
+          '.event-detail-image img',
+          '.event-gallery img:first-child',
+          '.hero-image img',
+          '.main-image img',
+          '.event-image img',
+        ];
+
+        for (const selector of selectors) {
+          const element = document.querySelector(selector);
+          if (element) {
+            const src = element.getAttribute('src');
+            if (src && !src.includes('promo') && !src.includes('banner') && !src.includes('logo')) {
+              return src;
+            }
+          }
+        }
+
+        // Fallback: find any large image
+        const images = document.querySelectorAll('img');
+        for (const img of images) {
+          const src = img.src;
+          const width = img.naturalWidth || img.width;
+          if (src && width > 300 && !src.includes('promo') && !src.includes('banner') && !src.includes('logo') && !src.includes('icon')) {
             return src;
           }
         }
-      }
 
-      // Fallback: find any large image
-      const images = document.querySelectorAll('img');
-      for (const img of images) {
-        const src = img.src;
-        const width = img.naturalWidth || img.width;
-        if (src && width > 300 && !src.includes('promo') && !src.includes('banner') && !src.includes('logo') && !src.includes('icon')) {
-          return src;
-        }
-      }
-
-      return null;
-    });
+        return null;
+      });
+    }
 
     // Determine category from URL and title
     const categoryFromUrl = url.includes('/tours/') ? 'tours' :
@@ -170,7 +183,7 @@ async function scrapeAttractionDetail(page: Page, url: string): Promise<ScrapedA
       title,
       slug,
       description: cleanDescription(description),
-      price,
+      price: priceFromDesc,
       price_currency: 'BHD',
       image_url: imageUrl || '',
       cover_url: imageUrl || '',
