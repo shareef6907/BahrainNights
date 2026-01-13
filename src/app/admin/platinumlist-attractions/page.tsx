@@ -24,21 +24,23 @@ import {
   XCircle
 } from 'lucide-react';
 
-interface Experience {
+interface Attraction {
   id: string;
-  title: string;
+  name: string;
+  slug: string;
   description: string | null;
-  price: number | null;
-  price_currency: string | null;
+  short_description: string | null;
+  price_from: number | null;
+  currency: string | null;
   image_url: string | null;
-  cover_url: string | null;
-  venue: string | null;
-  location: string | null;
+  area: string | null;
+  address: string | null;
   category: string | null;
+  booking_url: string | null;
   is_active: boolean;
   is_featured: boolean;
-  source: string;
-  source_url: string | null;
+  source: string | null;
+  source_id: string | null;
   created_at: string;
   updated_at: string;
 }
@@ -68,8 +70,8 @@ function Toast({ message, type, onClose }: { message: string; type: 'success' | 
 }
 
 export default function PlatinumlistAttractionsAdmin() {
-  const [experiences, setExperiences] = useState<Experience[]>([]);
-  const [filteredExperiences, setFilteredExperiences] = useState<Experience[]>([]);
+  const [attractions, setAttractions] = useState<Attraction[]>([]);
+  const [filteredAttractions, setFilteredAttractions] = useState<Attraction[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
   const [categoryFilter, setCategoryFilter] = useState('all');
@@ -80,41 +82,43 @@ export default function PlatinumlistAttractionsAdmin() {
 
   // Edit modal state
   const [editModalOpen, setEditModalOpen] = useState(false);
-  const [editingExperience, setEditingExperience] = useState<Experience | null>(null);
+  const [editingAttraction, setEditingAttraction] = useState<Attraction | null>(null);
   const [editForm, setEditForm] = useState({
-    title: '',
+    name: '',
     description: '',
-    price: '',
-    venue: '',
-    location: '',
+    price_from: '',
+    area: '',
+    address: '',
     category: '',
     image_url: '',
-    cover_url: ''
+    booking_url: ''
   });
   const [saving, setSaving] = useState(false);
   const [rewriting, setRewriting] = useState(false);
   const [uploadingImage, setUploadingImage] = useState(false);
-  const [uploadingCover, setUploadingCover] = useState(false);
   const [imageUrlInput, setImageUrlInput] = useState('');
-  const [coverUrlInput, setCoverUrlInput] = useState('');
 
   // Toast helper
   const showToast = (message: string, type: 'success' | 'error') => {
     setToast({ message, type });
   };
 
-  // Fetch experiences
-  const fetchExperiences = async () => {
+  // Fetch attractions
+  const fetchAttractions = async () => {
     setLoading(true);
     try {
-      const response = await fetch('/api/admin/experiences?source=platinumlist&includeHidden=true');
+      const response = await fetch('/api/admin/attractions?status=all');
       const data = await response.json();
-      if (data.experiences) {
-        setExperiences(data.experiences);
-        setFilteredExperiences(data.experiences);
+      if (data.attractions) {
+        // Filter to only show platinumlist attractions
+        const platinumlistAttractions = data.attractions.filter(
+          (a: Attraction) => a.source === 'platinumlist'
+        );
+        setAttractions(platinumlistAttractions);
+        setFilteredAttractions(platinumlistAttractions);
       }
     } catch (error) {
-      console.error('Error fetching experiences:', error);
+      console.error('Error fetching attractions:', error);
       showToast('Failed to load attractions', 'error');
     } finally {
       setLoading(false);
@@ -122,44 +126,44 @@ export default function PlatinumlistAttractionsAdmin() {
   };
 
   useEffect(() => {
-    fetchExperiences();
+    fetchAttractions();
   }, []);
 
-  // Filter experiences
+  // Filter attractions
   useEffect(() => {
-    let filtered = [...experiences];
+    let filtered = [...attractions];
 
     if (searchTerm) {
       const term = searchTerm.toLowerCase();
-      filtered = filtered.filter(exp =>
-        exp.title.toLowerCase().includes(term) ||
-        exp.venue?.toLowerCase().includes(term) ||
-        exp.description?.toLowerCase().includes(term)
+      filtered = filtered.filter(attr =>
+        attr.name.toLowerCase().includes(term) ||
+        attr.area?.toLowerCase().includes(term) ||
+        attr.description?.toLowerCase().includes(term)
       );
     }
 
     if (categoryFilter !== 'all') {
-      filtered = filtered.filter(exp => exp.category === categoryFilter);
+      filtered = filtered.filter(attr => attr.category === categoryFilter);
     }
 
     if (statusFilter !== 'all') {
-      filtered = filtered.filter(exp =>
-        statusFilter === 'active' ? exp.is_active : !exp.is_active
+      filtered = filtered.filter(attr =>
+        statusFilter === 'active' ? attr.is_active : !attr.is_active
       );
     }
 
-    setFilteredExperiences(filtered);
-  }, [experiences, searchTerm, categoryFilter, statusFilter]);
+    setFilteredAttractions(filtered);
+  }, [attractions, searchTerm, categoryFilter, statusFilter]);
 
   // Get unique categories
-  const categories = [...new Set(experiences.map(exp => exp.category).filter((c): c is string => c !== null))];
+  const categories = [...new Set(attractions.map(attr => attr.category).filter((c): c is string => c !== null))];
 
   // Selection handlers
   const toggleSelectAll = () => {
-    if (selectedIds.size === filteredExperiences.length) {
+    if (selectedIds.size === filteredAttractions.length) {
       setSelectedIds(new Set());
     } else {
-      setSelectedIds(new Set(filteredExperiences.map(exp => exp.id)));
+      setSelectedIds(new Set(filteredAttractions.map(attr => attr.id)));
     }
   };
 
@@ -176,15 +180,15 @@ export default function PlatinumlistAttractionsAdmin() {
   // Single item actions
   const handleToggleVisibility = async (id: string, currentlyActive: boolean) => {
     try {
-      const response = await fetch(`/api/admin/experiences/${id}`, {
+      const response = await fetch(`/api/admin/attractions/${id}`, {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ is_active: !currentlyActive })
+        body: JSON.stringify({ action: 'toggleActive' })
       });
 
       if (response.ok) {
-        setExperiences(prev => prev.map(exp =>
-          exp.id === id ? { ...exp, is_active: !currentlyActive } : exp
+        setAttractions(prev => prev.map(attr =>
+          attr.id === id ? { ...attr, is_active: !currentlyActive } : attr
         ));
         showToast(currentlyActive ? 'Attraction hidden' : 'Attraction visible', 'success');
       } else {
@@ -200,12 +204,12 @@ export default function PlatinumlistAttractionsAdmin() {
     if (!confirm('Are you sure you want to delete this attraction?')) return;
 
     try {
-      const response = await fetch(`/api/admin/experiences/${id}`, {
+      const response = await fetch(`/api/admin/attractions/${id}`, {
         method: 'DELETE'
       });
 
       if (response.ok) {
-        setExperiences(prev => prev.filter(exp => exp.id !== id));
+        setAttractions(prev => prev.filter(attr => attr.id !== id));
         showToast('Attraction deleted', 'success');
       } else {
         showToast('Failed to delete', 'error');
@@ -231,7 +235,7 @@ export default function PlatinumlistAttractionsAdmin() {
     showToast(`Processing ${selectedIds.size} items...`, 'success');
 
     try {
-      const response = await fetch('/api/admin/experiences/bulk', {
+      const response = await fetch('/api/admin/attractions/bulk', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -244,18 +248,18 @@ export default function PlatinumlistAttractionsAdmin() {
 
       if (response.ok) {
         if (action === 'delete') {
-          setExperiences(prev => prev.filter(exp => !selectedIds.has(exp.id)));
+          setAttractions(prev => prev.filter(attr => !selectedIds.has(attr.id)));
         } else if (action === 'hide') {
-          setExperiences(prev => prev.map(exp =>
-            selectedIds.has(exp.id) ? { ...exp, is_active: false } : exp
+          setAttractions(prev => prev.map(attr =>
+            selectedIds.has(attr.id) ? { ...attr, is_active: false } : attr
           ));
         } else if (action === 'show') {
-          setExperiences(prev => prev.map(exp =>
-            selectedIds.has(exp.id) ? { ...exp, is_active: true } : exp
+          setAttractions(prev => prev.map(attr =>
+            selectedIds.has(attr.id) ? { ...attr, is_active: true } : attr
           ));
         } else if (action === 'rewrite') {
           // Refresh to get updated descriptions
-          await fetchExperiences();
+          await fetchAttractions();
         }
 
         setSelectedIds(new Set());
@@ -272,47 +276,44 @@ export default function PlatinumlistAttractionsAdmin() {
   };
 
   // Edit modal handlers
-  const openEditModal = (experience: Experience) => {
-    setEditingExperience(experience);
+  const openEditModal = (attraction: Attraction) => {
+    setEditingAttraction(attraction);
     setEditForm({
-      title: experience.title || '',
-      description: experience.description || '',
-      price: experience.price?.toString() || '',
-      venue: experience.venue || '',
-      location: experience.location || '',
-      category: experience.category || '',
-      image_url: experience.image_url || '',
-      cover_url: experience.cover_url || ''
+      name: attraction.name || '',
+      description: attraction.description || '',
+      price_from: attraction.price_from?.toString() || '',
+      area: attraction.area || '',
+      address: attraction.address || '',
+      category: attraction.category || '',
+      image_url: attraction.image_url || '',
+      booking_url: attraction.booking_url || ''
     });
     setImageUrlInput('');
-    setCoverUrlInput('');
     setEditModalOpen(true);
   };
 
   const handleSave = async () => {
-    if (!editingExperience) return;
+    if (!editingAttraction) return;
 
     setSaving(true);
     try {
-      const response = await fetch(`/api/admin/experiences/${editingExperience.id}`, {
+      const response = await fetch(`/api/admin/attractions/${editingAttraction.id}`, {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          title: editForm.title,
+          name: editForm.name,
           description: editForm.description,
-          price: editForm.price ? parseFloat(editForm.price) : null,
-          venue: editForm.venue,
-          location: editForm.location,
+          priceFrom: editForm.price_from ? parseFloat(editForm.price_from) : null,
+          area: editForm.area,
           category: editForm.category,
-          image_url: editForm.image_url,
-          cover_url: editForm.cover_url
+          imageUrl: editForm.image_url
         })
       });
 
       if (response.ok) {
         const data = await response.json();
-        setExperiences(prev => prev.map(exp =>
-          exp.id === editingExperience.id ? data.experience : exp
+        setAttractions(prev => prev.map(attr =>
+          attr.id === editingAttraction.id ? data.attraction : attr
         ));
         showToast('Attraction updated', 'success');
         setEditModalOpen(false);
@@ -329,11 +330,11 @@ export default function PlatinumlistAttractionsAdmin() {
   };
 
   const handleRewriteWithAI = async () => {
-    if (!editingExperience) return;
+    if (!editingAttraction) return;
 
     setRewriting(true);
     try {
-      const response = await fetch(`/api/admin/experiences/${editingExperience.id}/rewrite`, {
+      const response = await fetch(`/api/admin/attractions/${editingAttraction.id}/rewrite`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({})
@@ -357,14 +358,14 @@ export default function PlatinumlistAttractionsAdmin() {
 
   const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
-    if (!file || !editingExperience) return;
+    if (!file || !editingAttraction) return;
 
     setUploadingImage(true);
     const formData = new FormData();
     formData.append('file', file);
 
     try {
-      const response = await fetch(`/api/admin/experiences/${editingExperience.id}/upload-image`, {
+      const response = await fetch(`/api/admin/attractions/${editingAttraction.id}/upload-image`, {
         method: 'POST',
         body: formData
       });
@@ -386,14 +387,14 @@ export default function PlatinumlistAttractionsAdmin() {
   };
 
   const handleFetchFromUrl = async () => {
-    if (!imageUrlInput || !editingExperience) return;
+    if (!imageUrlInput || !editingAttraction) return;
 
     setUploadingImage(true);
     const formData = new FormData();
     formData.append('imageUrl', imageUrlInput);
 
     try {
-      const response = await fetch(`/api/admin/experiences/${editingExperience.id}/upload-image`, {
+      const response = await fetch(`/api/admin/attractions/${editingAttraction.id}/upload-image`, {
         method: 'POST',
         body: formData
       });
@@ -412,67 +413,6 @@ export default function PlatinumlistAttractionsAdmin() {
       showToast('Failed to fetch image', 'error');
     } finally {
       setUploadingImage(false);
-    }
-  };
-
-  // Cover image upload handlers
-  const handleCoverFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (!file || !editingExperience) return;
-
-    setUploadingCover(true);
-    const formData = new FormData();
-    formData.append('file', file);
-
-    try {
-      const response = await fetch(`/api/admin/experiences/${editingExperience.id}/upload-cover`, {
-        method: 'POST',
-        body: formData
-      });
-
-      const data = await response.json();
-
-      if (data.success && data.coverUrl) {
-        setEditForm(prev => ({ ...prev, cover_url: data.coverUrl }));
-        showToast('Cover image uploaded', 'success');
-      } else {
-        showToast(data.error || 'Upload failed', 'error');
-      }
-    } catch (error) {
-      console.error('Cover upload error:', error);
-      showToast('Upload failed', 'error');
-    } finally {
-      setUploadingCover(false);
-    }
-  };
-
-  const handleCoverFetchFromUrl = async () => {
-    if (!coverUrlInput || !editingExperience) return;
-
-    setUploadingCover(true);
-    const formData = new FormData();
-    formData.append('imageUrl', coverUrlInput);
-
-    try {
-      const response = await fetch(`/api/admin/experiences/${editingExperience.id}/upload-cover`, {
-        method: 'POST',
-        body: formData
-      });
-
-      const data = await response.json();
-
-      if (data.success && data.coverUrl) {
-        setEditForm(prev => ({ ...prev, cover_url: data.coverUrl }));
-        setCoverUrlInput('');
-        showToast('Cover image fetched and uploaded', 'success');
-      } else {
-        showToast(data.error || 'Failed to fetch cover image', 'error');
-      }
-    } catch (error) {
-      console.error('Cover fetch error:', error);
-      showToast('Failed to fetch cover image', 'error');
-    } finally {
-      setUploadingCover(false);
     }
   };
 
@@ -537,7 +477,7 @@ export default function PlatinumlistAttractionsAdmin() {
 
           {/* Refresh */}
           <button
-            onClick={fetchExperiences}
+            onClick={fetchAttractions}
             disabled={loading}
             className="px-4 py-2 bg-gray-800/50 hover:bg-gray-700/50 rounded-lg flex items-center gap-2 transition border border-white/10"
           >
@@ -601,18 +541,18 @@ export default function PlatinumlistAttractionsAdmin() {
       {/* Stats */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
         <div className="bg-[#0F0F1A] rounded-xl p-4 border border-white/10">
-          <div className="text-2xl font-bold text-cyan-400">{experiences.length}</div>
+          <div className="text-2xl font-bold text-cyan-400">{attractions.length}</div>
           <div className="text-gray-400 text-sm">Total Attractions</div>
         </div>
         <div className="bg-[#0F0F1A] rounded-xl p-4 border border-white/10">
           <div className="text-2xl font-bold text-green-400">
-            {experiences.filter(e => e.is_active).length}
+            {attractions.filter(a => a.is_active).length}
           </div>
           <div className="text-gray-400 text-sm">Active</div>
         </div>
         <div className="bg-[#0F0F1A] rounded-xl p-4 border border-white/10">
           <div className="text-2xl font-bold text-gray-400">
-            {experiences.filter(e => !e.is_active).length}
+            {attractions.filter(a => !a.is_active).length}
           </div>
           <div className="text-gray-400 text-sm">Hidden</div>
         </div>
@@ -627,7 +567,7 @@ export default function PlatinumlistAttractionsAdmin() {
         <div className="flex items-center justify-center py-20">
           <Loader2 className="w-8 h-8 animate-spin text-cyan-400" />
         </div>
-      ) : filteredExperiences.length === 0 ? (
+      ) : filteredAttractions.length === 0 ? (
         <div className="bg-[#0F0F1A] rounded-xl p-12 text-center border border-white/10">
           <AlertCircle className="w-12 h-12 text-gray-500 mx-auto mb-4" />
           <p className="text-gray-400">No attractions found</p>
@@ -639,7 +579,7 @@ export default function PlatinumlistAttractionsAdmin() {
               <tr className="bg-gray-800/50">
                 <th className="p-4 text-left">
                   <button onClick={toggleSelectAll} className="text-gray-400 hover:text-white">
-                    {selectedIds.size === filteredExperiences.length ? (
+                    {selectedIds.size === filteredAttractions.length ? (
                       <CheckSquare className="w-5 h-5" />
                     ) : (
                       <Square className="w-5 h-5" />
@@ -655,19 +595,19 @@ export default function PlatinumlistAttractionsAdmin() {
               </tr>
             </thead>
             <tbody>
-              {filteredExperiences.map((exp) => (
+              {filteredAttractions.map((attr) => (
                 <tr
-                  key={exp.id}
+                  key={attr.id}
                   className={`border-t border-white/10 hover:bg-gray-800/30 transition ${
-                    !exp.is_active ? 'opacity-50' : ''
+                    !attr.is_active ? 'opacity-50' : ''
                   }`}
                 >
                   <td className="p-4">
                     <button
-                      onClick={() => toggleSelect(exp.id)}
+                      onClick={() => toggleSelect(attr.id)}
                       className="text-gray-400 hover:text-white"
                     >
-                      {selectedIds.has(exp.id) ? (
+                      {selectedIds.has(attr.id) ? (
                         <CheckSquare className="w-5 h-5 text-cyan-400" />
                       ) : (
                         <Square className="w-5 h-5" />
@@ -676,10 +616,10 @@ export default function PlatinumlistAttractionsAdmin() {
                   </td>
                   <td className="p-4">
                     <div className="w-16 h-16 rounded-lg overflow-hidden bg-gray-800 relative">
-                      {exp.image_url ? (
+                      {attr.image_url ? (
                         <Image
-                          src={exp.image_url}
-                          alt={exp.title}
+                          src={attr.image_url}
+                          alt={attr.name}
                           fill
                           className="object-cover"
                         />
@@ -691,25 +631,25 @@ export default function PlatinumlistAttractionsAdmin() {
                     </div>
                   </td>
                   <td className="p-4">
-                    <div className="font-medium text-white line-clamp-1">{exp.title}</div>
-                    <div className="text-sm text-gray-400 line-clamp-1">{exp.venue}</div>
+                    <div className="font-medium text-white line-clamp-1">{attr.name}</div>
+                    <div className="text-sm text-gray-400 line-clamp-1">{attr.area}</div>
                   </td>
                   <td className="p-4">
                     <span className="px-2 py-1 bg-gray-800 rounded-md text-xs">
-                      {exp.category || 'Uncategorized'}
+                      {attr.category || 'Uncategorized'}
                     </span>
                   </td>
                   <td className="p-4">
-                    {exp.price ? (
+                    {attr.price_from ? (
                       <span className="text-green-400">
-                        {exp.price_currency || 'BHD'} {exp.price}
+                        {attr.currency || 'BHD'} {attr.price_from}
                       </span>
                     ) : (
                       <span className="text-gray-500">-</span>
                     )}
                   </td>
                   <td className="p-4">
-                    {exp.is_active ? (
+                    {attr.is_active ? (
                       <span className="px-2 py-1 bg-green-500/20 text-green-400 rounded-md text-xs">
                         Active
                       </span>
@@ -722,25 +662,25 @@ export default function PlatinumlistAttractionsAdmin() {
                   <td className="p-4">
                     <div className="flex gap-2">
                       <button
-                        onClick={() => openEditModal(exp)}
+                        onClick={() => openEditModal(attr)}
                         className="p-2 bg-gray-800 hover:bg-gray-700 rounded-lg transition"
                         title="Edit"
                       >
                         <Edit2 className="w-4 h-4" />
                       </button>
                       <button
-                        onClick={() => handleToggleVisibility(exp.id, exp.is_active)}
+                        onClick={() => handleToggleVisibility(attr.id, attr.is_active)}
                         className="p-2 bg-gray-800 hover:bg-gray-700 rounded-lg transition"
-                        title={exp.is_active ? 'Hide' : 'Show'}
+                        title={attr.is_active ? 'Hide' : 'Show'}
                       >
-                        {exp.is_active ? (
+                        {attr.is_active ? (
                           <EyeOff className="w-4 h-4" />
                         ) : (
                           <Eye className="w-4 h-4" />
                         )}
                       </button>
                       <button
-                        onClick={() => handleDelete(exp.id)}
+                        onClick={() => handleDelete(attr.id)}
                         className="p-2 bg-red-600/20 hover:bg-red-600/40 text-red-400 rounded-lg transition"
                         title="Delete"
                       >
@@ -757,7 +697,7 @@ export default function PlatinumlistAttractionsAdmin() {
 
       {/* Edit Modal */}
       <AnimatePresence>
-        {editModalOpen && editingExperience && (
+        {editModalOpen && editingAttraction && (
           <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
@@ -788,7 +728,7 @@ export default function PlatinumlistAttractionsAdmin() {
                 {/* Image Section */}
                 <div>
                   <label className="block text-sm font-medium text-gray-300 mb-2">
-                    Thumbnail Image
+                    Image
                   </label>
                   <div className="flex gap-4">
                     <div className="w-32 h-32 rounded-xl overflow-hidden bg-gray-800 relative flex-shrink-0">
@@ -847,80 +787,15 @@ export default function PlatinumlistAttractionsAdmin() {
                   </div>
                 </div>
 
-                {/* Cover Image Section */}
+                {/* Name */}
                 <div>
                   <label className="block text-sm font-medium text-gray-300 mb-2">
-                    Cover Image (Wide Banner)
-                  </label>
-                  <p className="text-xs text-gray-500 mb-3">
-                    Optional: A wide banner image for the attraction detail modal. Recommended: 1200x600px. If not set, thumbnail will be used.
-                  </p>
-                  <div className="flex gap-4">
-                    <div className="w-48 h-24 rounded-xl overflow-hidden bg-gray-800 relative flex-shrink-0">
-                      {editForm.cover_url ? (
-                        <Image
-                          src={editForm.cover_url}
-                          alt="Cover"
-                          fill
-                          className="object-cover"
-                        />
-                      ) : (
-                        <div className="w-full h-full flex items-center justify-center">
-                          <ImageIcon className="w-8 h-8 text-gray-500" />
-                        </div>
-                      )}
-                    </div>
-                    <div className="flex-1 space-y-3">
-                      {/* File Upload */}
-                      <div>
-                        <label className="flex items-center gap-2 px-4 py-2 bg-gray-800 hover:bg-gray-700 rounded-lg cursor-pointer transition">
-                          <Upload className="w-4 h-4" />
-                          <span className="text-sm">Upload Cover Image</span>
-                          <input
-                            type="file"
-                            accept="image/*"
-                            onChange={handleCoverFileUpload}
-                            className="hidden"
-                            disabled={uploadingCover}
-                          />
-                        </label>
-                      </div>
-                      {/* URL Fetch */}
-                      <div className="flex gap-2">
-                        <input
-                          type="url"
-                          placeholder="Or paste cover image URL..."
-                          value={coverUrlInput}
-                          onChange={(e) => setCoverUrlInput(e.target.value)}
-                          className="flex-1 px-3 py-2 bg-gray-800 rounded-lg border border-white/10 focus:border-cyan-500 focus:outline-none text-sm"
-                        />
-                        <button
-                          onClick={handleCoverFetchFromUrl}
-                          disabled={!coverUrlInput || uploadingCover}
-                          className="px-3 py-2 bg-gray-800 hover:bg-gray-700 rounded-lg disabled:opacity-50 transition"
-                        >
-                          <LinkIcon className="w-4 h-4" />
-                        </button>
-                      </div>
-                      {uploadingCover && (
-                        <div className="flex items-center gap-2 text-sm text-cyan-400">
-                          <Loader2 className="w-4 h-4 animate-spin" />
-                          Uploading cover...
-                        </div>
-                      )}
-                    </div>
-                  </div>
-                </div>
-
-                {/* Title */}
-                <div>
-                  <label className="block text-sm font-medium text-gray-300 mb-2">
-                    Title
+                    Name
                   </label>
                   <input
                     type="text"
-                    value={editForm.title}
-                    onChange={(e) => setEditForm(prev => ({ ...prev, title: e.target.value }))}
+                    value={editForm.name}
+                    onChange={(e) => setEditForm(prev => ({ ...prev, name: e.target.value }))}
                     className="w-full px-4 py-2 bg-gray-800 rounded-lg border border-white/10 focus:border-cyan-500 focus:outline-none"
                   />
                 </div>
@@ -961,23 +836,12 @@ export default function PlatinumlistAttractionsAdmin() {
                 <div className="grid md:grid-cols-2 gap-4">
                   <div>
                     <label className="block text-sm font-medium text-gray-300 mb-2">
-                      Venue
+                      Area
                     </label>
                     <input
                       type="text"
-                      value={editForm.venue}
-                      onChange={(e) => setEditForm(prev => ({ ...prev, venue: e.target.value }))}
-                      className="w-full px-4 py-2 bg-gray-800 rounded-lg border border-white/10 focus:border-cyan-500 focus:outline-none"
-                    />
-                  </div>
-                  <div>
-                    <label className="block text-sm font-medium text-gray-300 mb-2">
-                      Location
-                    </label>
-                    <input
-                      type="text"
-                      value={editForm.location}
-                      onChange={(e) => setEditForm(prev => ({ ...prev, location: e.target.value }))}
+                      value={editForm.area}
+                      onChange={(e) => setEditForm(prev => ({ ...prev, area: e.target.value }))}
                       className="w-full px-4 py-2 bg-gray-800 rounded-lg border border-white/10 focus:border-cyan-500 focus:outline-none"
                     />
                   </div>
@@ -999,9 +863,21 @@ export default function PlatinumlistAttractionsAdmin() {
                     <input
                       type="number"
                       step="0.01"
-                      value={editForm.price}
-                      onChange={(e) => setEditForm(prev => ({ ...prev, price: e.target.value }))}
+                      value={editForm.price_from}
+                      onChange={(e) => setEditForm(prev => ({ ...prev, price_from: e.target.value }))}
                       className="w-full px-4 py-2 bg-gray-800 rounded-lg border border-white/10 focus:border-cyan-500 focus:outline-none"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-300 mb-2">
+                      Booking URL
+                    </label>
+                    <input
+                      type="url"
+                      value={editForm.booking_url}
+                      onChange={(e) => setEditForm(prev => ({ ...prev, booking_url: e.target.value }))}
+                      className="w-full px-4 py-2 bg-gray-800 rounded-lg border border-white/10 focus:border-cyan-500 focus:outline-none"
+                      placeholder="https://..."
                     />
                   </div>
                 </div>

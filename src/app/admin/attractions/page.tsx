@@ -82,6 +82,7 @@ export default function AdminAttractionsPage() {
       const { data, error } = await supabase
         .from('attractions')
         .select('*')
+        .neq('source', 'platinumlist')  // Exclude platinumlist items - they have their own tab
         .order('created_at', { ascending: false });
 
       if (error) throw error;
