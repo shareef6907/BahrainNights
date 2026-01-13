@@ -134,7 +134,7 @@ async function scrapeAttractionDetail(page: Page, url: string): Promise<ScrapedA
     });
 
     // Use og:image from meta tags (most reliable), or fall back to page images
-    let imageUrl = metaData.ogImage;
+    let imageUrl: string | null = metaData.ogImage || null;
 
     if (!imageUrl) {
       // Fallback: try to find image in page content
