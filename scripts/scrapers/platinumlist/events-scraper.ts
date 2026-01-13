@@ -142,6 +142,7 @@ function determineCategory(urlPath: string, title: string, description: string |
 }
 
 // Parse date string from Platinumlist format
+// IMPORTANT: Manually construct ISO date to avoid timezone issues with toISOString()
 function parseDate(dateStr: string | null): string | null {
   if (!dateStr) return null;
 
@@ -164,10 +165,10 @@ function parseDate(dateStr: string | null): string | null {
       const day = day1 || day2 || '1';
       const monthIndex = months.findIndex(m => monthStr.toLowerCase().startsWith(m));
       if (monthIndex >= 0) {
-        const date = new Date(parseInt(year), monthIndex, parseInt(day));
-        if (!isNaN(date.getTime())) {
-          return date.toISOString().split('T')[0];
-        }
+        // Manually construct ISO date string to avoid timezone issues
+        const monthNum = (monthIndex + 1).toString().padStart(2, '0');
+        const dayNum = parseInt(day).toString().padStart(2, '0');
+        return `${year}-${monthNum}-${dayNum}`;
       }
     }
 
@@ -177,7 +178,11 @@ function parseDate(dateStr: string | null): string | null {
       // Ensure year is reasonable (not in the past)
       const currentYear = new Date().getFullYear();
       if (date.getFullYear() >= currentYear - 1) {
-        return date.toISOString().split('T')[0];
+        // Use local date components to avoid timezone shift
+        const year = date.getFullYear();
+        const month = (date.getMonth() + 1).toString().padStart(2, '0');
+        const day = date.getDate().toString().padStart(2, '0');
+        return `${year}-${month}-${day}`;
       }
     }
   } catch {
