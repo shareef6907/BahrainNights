@@ -79,59 +79,39 @@ async function scrapeEventUrls(page: Page): Promise<string[]> {
 
 /**
  * Scrape a single event detail page
+ * Uses og:description meta tag which contains structured data:
+ * "Buy {title} tickets, {date}, {venue}, at the official Platinumlist.net site. {title} tickets prices starting from {price}."
  */
 async function scrapeEventDetail(page: Page, url: string, categoryFromUrl: string): Promise<ScrapedEvent | null> {
   try {
     await page.goto(url, { waitUntil: 'networkidle', timeout: 30000 });
     await page.waitForTimeout(1500);
 
-    // Extract title
-    const title = await page.evaluate(() => {
-      const titleEl = document.querySelector('h1, .event-title');
-      return titleEl?.textContent?.trim() || '';
+    // Extract all data from meta tags - most reliable source
+    const metaData = await page.evaluate(() => {
+      const ogTitle = document.querySelector('meta[property="og:title"]')?.getAttribute('content') || '';
+      const ogDesc = document.querySelector('meta[property="og:description"]')?.getAttribute('content') || '';
+      const ogImage = document.querySelector('meta[property="og:image"]')?.getAttribute('content') || '';
+      const h1Title = document.querySelector('h1')?.textContent?.trim() || '';
+
+      return { ogTitle, ogDesc, ogImage, h1Title };
     });
+
+    // Use h1 title or og:title
+    const title = metaData.h1Title || metaData.ogTitle.replace(/ Tickets.*$/, '');
 
     if (!title) {
       console.log(`    No title found, skipping`);
       return null;
     }
 
-    // Extract description
-    const description = await page.evaluate(() => {
-      const descEl = document.querySelector('.event-description, .description, .about-section p, [class*="description"]');
-      return descEl?.textContent?.trim() || '';
-    });
+    // Parse og:description for date, venue, and price
+    // Format: "Buy X tickets, 15 January 2026, Venue Name, at the official..."
+    const ogDesc = metaData.ogDesc;
 
-    // Extract date - CRITICAL: Get the actual date from the page
-    const dateText = await page.evaluate(() => {
-      // Try multiple selectors for date
-      const selectors = [
-        '.event-date',
-        '.date',
-        '[class*="date"]',
-        '.event-info .date',
-        '.event-details .date',
-      ];
-
-      for (const selector of selectors) {
-        const el = document.querySelector(selector);
-        if (el?.textContent) {
-          const text = el.textContent.trim();
-          // Check if it looks like a date
-          if (text.match(/\d{1,2}.*(?:jan|feb|mar|apr|may|jun|jul|aug|sep|oct|nov|dec)/i)) {
-            return text;
-          }
-        }
-      }
-
-      // Look in meta tags
-      const metaDate = document.querySelector('meta[property="event:start_time"]');
-      if (metaDate) {
-        return metaDate.getAttribute('content');
-      }
-
-      return null;
-    });
+    // Extract date from og:description (e.g., "15 January 2026")
+    const dateMatch = ogDesc.match(/tickets,\s*(\d{1,2}\s+[A-Za-z]+\s+\d{4})/i);
+    const dateText = dateMatch ? dateMatch[1] : null;
 
     const startDate = parseEventDate(dateText);
 
@@ -140,66 +120,68 @@ async function scrapeEventDetail(page: Page, url: string, categoryFromUrl: strin
       return null;
     }
 
-    // Extract time
+    // Check if event is in the past - skip past events
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    const eventDate = new Date(startDate);
+    if (eventDate < today) {
+      console.log(`    Event is in the past (${startDate}), skipping`);
+      return null;
+    }
+
+    // Extract venue from og:description (between date and "at the official")
+    // Format: "15 January 2026, Venue Name, Bahrain, at the official" or "15 January 2026, Venue Name, at the official"
+    const venueMatch = ogDesc.match(/\d{4},\s*(.+?),\s*at the official/i);
+    let venueName = venueMatch ? venueMatch[1].trim() : '';
+    // Clean up venue name - remove trailing "Bahrain" if it's just the country name at the end
+    if (venueName.endsWith(', Bahrain')) {
+      // Keep "Bahrain" as part of venue name (e.g., "Volto Restaurant & Lounge, Bahrain")
+    }
+
+    // Extract price from og:description (e.g., "starting from 70.00 BHD")
+    const priceMatch = ogDesc.match(/starting from\s*([\d.]+)\s*BHD/i);
+    const priceFromDesc = priceMatch ? parseFloat(priceMatch[1]) : 0;
+
+    // Check for sold out in page content
+    const isSoldOut = await page.evaluate(() => {
+      const pageText = document.body.textContent?.toLowerCase() || '';
+      return pageText.includes('sold out') || pageText.includes('soldout');
+    });
+
+    // Extract time from page (look for "Doors: HH:MM" pattern)
     const timeText = await page.evaluate(() => {
-      const timeEl = document.querySelector('.event-time, .time, [class*="time"]');
-      return timeEl?.textContent?.trim() || null;
-    });
-    const startTime = parseTime(timeText);
+      // Look for time in the sidebar info section
+      const pageText = document.body.innerText;
+      const doorsMatch = pageText.match(/Doors:?\s*(\d{1,2}:\d{2})/i);
+      if (doorsMatch) return doorsMatch[1];
 
-    // Extract price
-    const priceText = await page.evaluate(() => {
-      const priceEl = document.querySelector('.price, .event-price, .ticket-price, [class*="price"]');
-      return priceEl?.textContent?.trim() || '';
-    });
-    const { price, isSoldOut } = parsePrice(priceText);
-
-    // Extract venue/location
-    const venueName = await page.evaluate(() => {
-      const venueEl = document.querySelector('.venue-name, .location-name, [class*="venue"]');
-      return venueEl?.textContent?.trim() || '';
-    });
-
-    const venueAddress = await page.evaluate(() => {
-      const locationEl = document.querySelector('.venue-address, .location, address, [class*="address"]');
-      return locationEl?.textContent?.trim() || 'Bahrain';
-    });
-
-    // Extract image - try multiple selectors to find the REAL image (not promo banners)
-    const imageUrl = await page.evaluate(() => {
-      // Priority order of selectors
-      const selectors = [
-        '.event-detail-image img',
-        '.event-gallery img:first-child',
-        '.hero-image img',
-        '.main-image img',
-        '.event-image img',
-        'meta[property="og:image"]',
-      ];
-
-      for (const selector of selectors) {
-        const element = document.querySelector(selector);
-        if (element) {
-          const src = element.getAttribute('src') || element.getAttribute('content');
-          // Skip promo/banner images
-          if (src && !src.includes('promo') && !src.includes('banner') && !src.includes('logo')) {
-            return src;
-          }
-        }
-      }
-
-      // Fallback: find any large image
-      const images = document.querySelectorAll('img');
-      for (const img of images) {
-        const src = img.src;
-        const width = img.naturalWidth || img.width;
-        if (src && width > 300 && !src.includes('promo') && !src.includes('banner') && !src.includes('logo') && !src.includes('icon')) {
-          return src;
-        }
-      }
+      // Alternative: look for time pattern near date
+      const timeMatch = pageText.match(/\b(\d{1,2}:\d{2})\s*(AM|PM)?\b/i);
+      if (timeMatch) return timeMatch[0];
 
       return null;
     });
+    const startTime = parseTime(timeText);
+
+    // Extract description from page paragraphs
+    const description = await page.evaluate(() => {
+      const paragraphs = document.querySelectorAll('p');
+      for (const p of paragraphs) {
+        const text = p.textContent?.trim() || '';
+        // Skip short texts and navigation/footer content
+        if (text.length > 50 && text.length < 1000 &&
+            !text.includes('Do you have any questions') &&
+            !text.includes('Download') &&
+            !text.includes('Buy now') &&
+            !text.includes('Sale ends')) {
+          return text;
+        }
+      }
+      return '';
+    });
+
+    // Use og:image for the event poster
+    const imageUrl = metaData.ogImage || null;
 
     // Determine category
     const category = mapEventCategory(categoryFromUrl, title);
@@ -209,12 +191,12 @@ async function scrapeEventDetail(page: Page, url: string, categoryFromUrl: strin
       title,
       slug,
       description: cleanDescription(description),
-      price,
+      price: priceFromDesc,
       price_currency: 'BHD',
       image_url: imageUrl || '',
       cover_url: imageUrl || '',
       venue_name: venueName || 'Various Locations',
-      venue_address: venueAddress || 'Bahrain',
+      venue_address: 'Bahrain',
       category,
       start_date: startDate,
       end_date: null,
