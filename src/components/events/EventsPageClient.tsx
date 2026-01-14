@@ -191,9 +191,8 @@ export default function EventsPageClient({ initialEvents, familyAttractions = []
       // For ongoing/multi-day events, check if event is ACTIVE during the filter period
       if (selectedTime !== 'all') {
         // Get today's date in Bahrain timezone (UTC+3) as ISO string
-        const now = new Date();
-        const bahrainTime = new Date(now.getTime() + (3 * 60 * 60 * 1000) - (now.getTimezoneOffset() * 60 * 1000));
-        const todayISO = bahrainTime.toISOString().split('T')[0]; // "2025-12-30"
+        // Using toLocaleDateString with en-CA locale returns YYYY-MM-DD format
+        const todayISO = new Date().toLocaleDateString('en-CA', { timeZone: 'Asia/Bahrain' });
 
         // Event start and end dates (for multi-day events)
         const eventStartISO = event.rawDate;
