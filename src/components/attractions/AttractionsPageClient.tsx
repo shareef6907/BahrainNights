@@ -250,15 +250,6 @@ export default function AttractionsPageClient({ initialAttractions, categories }
                           </div>
                         )}
 
-                        {/* Price Badge */}
-                        <div className="absolute top-3 right-3 px-3 py-1 bg-black/70 text-white text-sm font-semibold rounded-full">
-                          {attraction.price_range
-                            ? attraction.price_range
-                            : attraction.price && attraction.price > 0
-                              ? `${attraction.price_currency} ${attraction.price}`
-                              : (language === 'ar' ? 'اتصل للسعر' : 'Contact for price')
-                          }
-                        </div>
                       </div>
 
                       {/* Content */}
