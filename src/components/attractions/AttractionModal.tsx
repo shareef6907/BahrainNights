@@ -197,18 +197,6 @@ export default function AttractionModal({
 
                       {/* Meta Info */}
                       <div className="flex flex-wrap items-center justify-center md:justify-start gap-3 mb-4">
-                        {/* Price Badge */}
-                        {attraction.price !== null && (
-                          <div className="flex items-center px-3 py-1 bg-emerald-400/10 border border-emerald-400/30 rounded-lg">
-                            <span className="text-emerald-400 font-bold">
-                              {attraction.price > 0
-                                ? `${attraction.price_currency} ${attraction.price}`
-                                : (language === 'ar' ? 'اتصل للسعر' : 'Contact for price')
-                              }
-                            </span>
-                          </div>
-                        )}
-
                         {/* Location */}
                         {(attraction.venue || attraction.location) && (
                           <div className="flex items-center gap-1 text-gray-300">

@@ -292,21 +292,8 @@ export default function EventModal({
                         )}
                       </div>
 
-                      {/* Price and Location Row */}
+                      {/* Location Row */}
                       <div className="flex flex-wrap items-center justify-center md:justify-start gap-3 mb-4">
-                        {/* Price Badge */}
-                        {event.price !== null && (
-                          <div className={`flex items-center gap-1 px-3 py-1 bg-gradient-to-r ${style.gradient.replace('/90', '/20')} border ${style.borderColor} rounded-lg`}>
-                            <Ticket className={`w-4 h-4 ${style.color}`} />
-                            <span className={`${style.color} font-bold`}>
-                              {event.price === 0
-                                ? (language === 'ar' ? 'مجاني' : 'Free')
-                                : `${event.price_currency} ${event.price}`
-                              }
-                            </span>
-                          </div>
-                        )}
-
                         {/* Location */}
                         {(event.venue_name || event.location) && (
                           <div className="flex items-center gap-1 text-gray-300">
