@@ -1,5 +1,8 @@
 name: Platinumlist Events Scraper
 
+# DISABLED: Scraper deactivated - switching to Platinumlist API
+# To reactivate: remove the 'if: false' from the job below
+
 on:
   schedule:
     - cron: '0 */4 * * *'  # Every 4 hours
@@ -7,6 +10,7 @@ on:
 
 jobs:
   scrape-events:
+    if: false  # DISABLED - using Platinumlist API instead
     runs-on: ubuntu-latest
     timeout-minutes: 30
 
