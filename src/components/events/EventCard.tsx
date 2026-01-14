@@ -80,18 +80,11 @@ function EventCard({ event, view = 'grid', index = 0 }: EventCardProps) {
 
             {/* Content */}
             <div className="flex-1 py-3 pr-4">
-              <div className="flex items-start justify-between">
-                <div>
-                  <h3 className="text-lg font-bold text-white group-hover:text-yellow-400 transition-colors line-clamp-1">
-                    {event.title}
-                  </h3>
-                  <p className="text-sm text-gray-400 line-clamp-1 mt-1">{event.description}</p>
-                </div>
-                <div className="text-right flex-shrink-0 ml-4">
-                  <span className={`text-sm font-bold ${event.isFree ? 'text-green-400' : 'text-yellow-400'}`}>
-                    {event.price}
-                  </span>
-                </div>
+              <div>
+                <h3 className="text-lg font-bold text-white group-hover:text-yellow-400 transition-colors line-clamp-1">
+                  {event.title}
+                </h3>
+                <p className="text-sm text-gray-400 line-clamp-1 mt-1">{event.description}</p>
               </div>
 
               <div className="flex items-center gap-4 mt-3 text-sm text-gray-400">
@@ -180,20 +173,13 @@ function EventCard({ event, view = 'grid', index = 0 }: EventCardProps) {
                 <MapPin className="w-4 h-4 text-yellow-400 flex-shrink-0" />
                 <span className="line-clamp-1">{event.venue}</span>
               </div>
-              <div className="flex items-center justify-between">
-                {/* Only show time if it's actually set (not TBA/TBD/Time TBA) */}
-                {event.time && !['TBA', 'TBD', 'Time TBA', 'time tba'].includes(event.time) && !event.time.toLowerCase().includes('tba') ? (
-                  <div className="flex items-center gap-2">
-                    <Clock className="w-4 h-4 text-yellow-400 flex-shrink-0" />
-                    <span>{event.time}</span>
-                  </div>
-                ) : (
-                  <div /> /* Empty div to maintain spacing */
-                )}
-                <span className={`font-bold ${event.isFree ? 'text-green-400' : 'text-yellow-400'}`}>
-                  {event.price}
-                </span>
-              </div>
+              {/* Only show time if it's actually set (not TBA/TBD/Time TBA) */}
+              {event.time && !['TBA', 'TBD', 'Time TBA', 'time tba'].includes(event.time) && !event.time.toLowerCase().includes('tba') && (
+                <div className="flex items-center gap-2">
+                  <Clock className="w-4 h-4 text-yellow-400 flex-shrink-0" />
+                  <span>{event.time}</span>
+                </div>
+              )}
             </div>
           </div>
         </div>
