@@ -181,7 +181,82 @@ async function scrapeAttractionDetail(page: Page, url: string): Promise<ScrapedA
       const match = ogDesc.match(pattern);
       if (match) {
         priceFromDesc = parseFloat(match[1]);
+        console.log(`    Price from og:description: ${priceFromDesc} BHD`);
         break;
+      }
+    }
+
+    // Fallback: Extract price from page DOM if og:description didn't have it
+    if (priceFromDesc === 0) {
+      const pageDomPrice = await page.evaluate(() => {
+        // Try multiple selectors for price elements
+        const priceSelectors = [
+          '.price',
+          '.ticket-price',
+          '.event-price',
+          '[class*="price"]',
+          '.amount',
+          '.cost',
+        ];
+
+        for (const selector of priceSelectors) {
+          const elements = document.querySelectorAll(selector);
+          for (const el of elements) {
+            const text = el.textContent?.trim() || '';
+            // Look for patterns like "15 BHD", "BHD 20", "20.00", "From 15"
+            const patterns = [
+              /(\d+(?:\.\d+)?)\s*BHD/i,
+              /BHD\s*(\d+(?:\.\d+)?)/i,
+              /from\s*(\d+(?:\.\d+)?)/i,
+              /(\d+(?:\.\d+)?)\s*BD/i,
+            ];
+            for (const pattern of patterns) {
+              const match = text.match(pattern);
+              if (match) {
+                const price = parseFloat(match[1]);
+                if (price > 0 && price < 10000) { // Sanity check
+                  return price;
+                }
+              }
+            }
+          }
+        }
+
+        // Try finding price in elements with specific price patterns
+        // Be more precise - require number to be directly adjacent to BHD/BD
+        const allElements = document.querySelectorAll('*');
+        for (const el of allElements) {
+          if (el.children.length === 0) { // Leaf nodes only
+            const text = el.textContent?.trim() || '';
+            // Only match short text that looks like a price (e.g., "200 BHD", "from 15 BHD")
+            // Must have number DIRECTLY before or after BHD/BD (no other text between)
+            if (text.length < 30) {
+              const strictPatterns = [
+                /^(\d+(?:\.\d+)?)\s*BHD$/i,           // "200 BHD"
+                /^BHD\s*(\d+(?:\.\d+)?)$/i,           // "BHD 200"
+                /^from\s*(\d+(?:\.\d+)?)\s*BHD$/i,    // "from 200 BHD"
+                /^(\d+(?:\.\d+)?)\s*BD$/i,            // "200 BD"
+              ];
+              for (const pattern of strictPatterns) {
+                const match = text.match(pattern);
+                if (match) {
+                  const price = parseFloat(match[1]);
+                  // Use minimum threshold of 3 to filter out tiny numbers
+                  if (price >= 3 && price < 10000) {
+                    return price;
+                  }
+                }
+              }
+            }
+          }
+        }
+
+        return 0;
+      });
+
+      if (pageDomPrice > 0) {
+        priceFromDesc = pageDomPrice;
+        console.log(`    Price from page DOM: ${priceFromDesc} BHD`);
       }
     }
 

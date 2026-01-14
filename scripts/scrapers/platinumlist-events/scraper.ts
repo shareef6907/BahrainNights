@@ -292,38 +292,47 @@ async function scrapeEventDetail(page: Page, url: string, categoryFromUrl: strin
       }
     }
 
-    // Check for sold out in page content - multiple detection methods
+    // Check for sold out - use targeted detection to avoid false positives
+    // (e.g., description text like "Following a sold out edition in 2018...")
     const isSoldOut = await page.evaluate(() => {
-      const pageText = document.body.textContent?.toLowerCase() || '';
-
-      // Method 1: Check for "sold out" text anywhere in the page
-      if (pageText.includes('sold out') || pageText.includes('soldout')) {
-        return true;
+      // Method 1: Check if "Select tickets" button exists - if so, NOT sold out
+      const selectTicketsLink = document.querySelector('a[href*="purchase-entry"]');
+      if (selectTicketsLink) {
+        const linkText = selectTicketsLink.textContent?.toLowerCase() || '';
+        // If the button says "sold out", it is sold out
+        if (linkText.includes('sold out') || linkText.includes('soldout')) {
+          return true;
+        }
+        // Otherwise, tickets are available
+        return false;
       }
 
-      // Method 2: Check for buttons with "sold out" text
-      const buttons = document.querySelectorAll('button, .btn, [class*="button"]');
-      for (const btn of buttons) {
+      // Method 2: Check for buttons with "sold out" text in ticket area
+      const ticketButtons = document.querySelectorAll('button, .btn, [class*="button"], a[class*="ticket"]');
+      for (const btn of ticketButtons) {
         const btnText = btn.textContent?.toLowerCase() || '';
-        if (btnText.includes('sold out') || btnText.includes('soldout')) {
+        // Only check short button text (not descriptions)
+        if (btnText.length < 50 && (btnText.includes('sold out') || btnText.includes('soldout'))) {
           return true;
         }
       }
 
-      // Method 3: Check for price display showing sold out
-      const priceElements = document.querySelectorAll('[class*="price"], [class*="ticket"]');
-      for (const el of priceElements) {
+      // Method 3: Check for price display showing sold out (in ticket/price area only)
+      const priceAreaElements = document.querySelectorAll('[class*="price-from"], [class*="ticket-price"], [class*="ticket-info"]');
+      for (const el of priceAreaElements) {
         const elText = el.textContent?.toLowerCase() || '';
-        if (elText.includes('sold out') || elText.includes('soldout')) {
+        if (elText.length < 100 && (elText.includes('sold out') || elText.includes('soldout'))) {
           return true;
         }
       }
 
-      // Method 4: Check for "no tickets available" or similar text
-      if (pageText.includes('no tickets available') ||
-          pageText.includes('tickets unavailable') ||
-          pageText.includes('not available')) {
-        return true;
+      // Method 4: Check for "no tickets available" in short UI elements only
+      const infoElements = document.querySelectorAll('[class*="info"], [class*="status"], [class*="availability"]');
+      for (const el of infoElements) {
+        const elText = el.textContent?.toLowerCase() || '';
+        if (elText.length < 100 && (elText.includes('no tickets available') || elText.includes('tickets unavailable'))) {
+          return true;
+        }
       }
 
       return false;

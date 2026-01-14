@@ -13,6 +13,7 @@ function toClientAttraction(attr: DbAttraction): Attraction {
     title: attr.name,
     description: attr.description,
     price: attr.price_from,
+    price_range: attr.price_range,
     price_currency: attr.currency || 'BHD',
     image_url: attr.image_url,
     venue: attr.area || null,

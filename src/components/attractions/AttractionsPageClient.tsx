@@ -12,6 +12,7 @@ export interface Attraction {
   title: string;
   description: string | null;
   price: number | null;
+  price_range: string | null;
   price_currency: string;
   image_url: string | null;
   cover_url?: string | null;
@@ -250,14 +251,14 @@ export default function AttractionsPageClient({ initialAttractions, categories }
                         )}
 
                         {/* Price Badge */}
-                        {attraction.price !== null && (
-                          <div className="absolute top-3 right-3 px-3 py-1 bg-black/70 text-white text-sm font-semibold rounded-full">
-                            {attraction.price > 0
+                        <div className="absolute top-3 right-3 px-3 py-1 bg-black/70 text-white text-sm font-semibold rounded-full">
+                          {attraction.price_range
+                            ? attraction.price_range
+                            : attraction.price && attraction.price > 0
                               ? `${attraction.price_currency} ${attraction.price}`
                               : (language === 'ar' ? 'اتصل للسعر' : 'Contact for price')
-                            }
-                          </div>
-                        )}
+                          }
+                        </div>
                       </div>
 
                       {/* Content */}
