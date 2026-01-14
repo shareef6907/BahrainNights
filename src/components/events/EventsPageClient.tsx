@@ -223,31 +223,31 @@ export default function EventsPageClient({ initialEvents, familyAttractions = []
             break;
 
           case 'weekend': {
-            // Weekend = Friday through Sunday
-            let fridayISO: string;
-            let sundayISO: string;
+            // Bahrain Weekend = Thursday through Saturday
+            let thursdayISO: string;
+            let saturdayISO: string;
 
-            if (dayOfWeek === 0) {
-              // Today is Sunday - current weekend is Fri-Sun
-              fridayISO = addDays(todayISO, -2);
-              sundayISO = todayISO;
-            } else if (dayOfWeek === 6) {
-              // Today is Saturday
-              fridayISO = addDays(todayISO, -1);
-              sundayISO = addDays(todayISO, 1);
+            if (dayOfWeek === 6) {
+              // Today is Saturday - current weekend is Thu-Sat
+              thursdayISO = addDays(todayISO, -2);
+              saturdayISO = todayISO;
             } else if (dayOfWeek === 5) {
-              // Today is Friday
-              fridayISO = todayISO;
-              sundayISO = addDays(todayISO, 2);
+              // Today is Friday - current weekend is Thu-Sat
+              thursdayISO = addDays(todayISO, -1);
+              saturdayISO = addDays(todayISO, 1);
+            } else if (dayOfWeek === 4) {
+              // Today is Thursday - current weekend is Thu-Sat
+              thursdayISO = todayISO;
+              saturdayISO = addDays(todayISO, 2);
             } else {
-              // Mon-Thu: show upcoming weekend
-              const daysUntilFriday = 5 - dayOfWeek;
-              fridayISO = addDays(todayISO, daysUntilFriday);
-              sundayISO = addDays(fridayISO, 2);
+              // Sun-Wed (0-3): show upcoming weekend (next Thu-Sat)
+              const daysUntilThursday = (4 - dayOfWeek + 7) % 7 || 7;
+              thursdayISO = addDays(todayISO, daysUntilThursday);
+              saturdayISO = addDays(thursdayISO, 2);
             }
 
-            // Event is active during weekend if it overlaps with Fri-Sun
-            if (!isEventActiveDuring(fridayISO, sundayISO)) return false;
+            // Event is active during weekend if it overlaps with Thu-Sat
+            if (!isEventActiveDuring(thursdayISO, saturdayISO)) return false;
             break;
           }
 
