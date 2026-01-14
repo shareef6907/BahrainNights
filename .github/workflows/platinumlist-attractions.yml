@@ -2,7 +2,7 @@ name: Platinumlist Attractions Scraper
 
 on:
   schedule:
-    - cron: '0 */6 * * *'  # Every 6 hours
+    - cron: '0 0 */2 * *'  # Every 48 hours (at midnight every 2 days)
   workflow_dispatch:  # Manual trigger
 
 jobs:

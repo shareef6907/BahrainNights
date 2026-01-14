@@ -40,6 +40,36 @@ function isKnownArtist(title: string): boolean {
   return KNOWN_ARTISTS.some(artist => lowerTitle.includes(artist));
 }
 
+// Known nightclub venues in Bahrain - events at these venues are nightlife
+const NIGHTCLUB_VENUES = [
+  'klub360',
+  'ava club',
+  'sofitel bahrain',
+  'the bunker',
+  'teres',
+  'gulf hotel',
+  'wyndham',
+  'cielo sky lounge',
+  'trader vic\'s',
+  'havana club',
+  'xs club',
+  'bushido',
+  'sass cafe',
+  'zoe',
+  'billionaire mansion',
+  'calexico',
+  'juju\'s',
+  'oxygen',
+];
+
+/**
+ * Check if title/venue indicates a nightlife event
+ */
+function isNightlifeEvent(title: string): boolean {
+  const lowerTitle = title.toLowerCase();
+  return NIGHTCLUB_VENUES.some(venue => lowerTitle.includes(venue));
+}
+
 /**
  * Map Platinumlist category to sidebar filter categories
  * These MUST match the sidebar filters exactly:
@@ -53,42 +83,41 @@ function isKnownArtist(title: string): boolean {
  * - wellness (Wellness)
  * - shopping (Shopping)
  * - community (Community)
+ *
+ * IMPORTANT: Order matters! More specific categories (comedy, cultural, sports)
+ * should be checked BEFORE generic categories (concerts, nightlife)
  */
 export function mapEventCategory(platinumlistCategory: string, title: string): string {
   const lowerCategory = platinumlistCategory.toLowerCase();
   const lowerTitle = title.toLowerCase();
 
-  // Concerts & Music
-  if (lowerCategory.includes('concert') ||
-      lowerCategory.includes('music') ||
-      lowerTitle.includes('live at') ||
-      lowerTitle.includes('concert') ||
-      isKnownArtist(title)) {
-    return 'concerts';
-  }
-
-  // Comedy
+  // Comedy - Check FIRST before concerts (comedians might be "known artists")
   if (lowerCategory.includes('comedy') ||
       lowerTitle.includes('comedy') ||
       lowerTitle.includes('stand-up') ||
       lowerTitle.includes('stand up') ||
-      lowerTitle.includes('comedian')) {
+      lowerTitle.includes('comedian') ||
+      lowerTitle.includes('standup')) {
     return 'comedy';
   }
 
-  // Theatre/Cultural (maps to "Arts & Culture" in sidebar)
+  // Theatre/Cultural - Check BEFORE concerts (musicals might have "live" in title)
+  // NOTE: Don't use venue names (amphitheatre) as indicators - they host all event types!
   if (lowerCategory.includes('theatre') ||
       lowerCategory.includes('theater') ||
-      lowerTitle.includes('musical') ||
+      lowerTitle.includes('the musical') ||  // "Wicked The Musical" - more specific
       lowerTitle.includes('ballet') ||
       lowerTitle.includes('orchestra') ||
       lowerTitle.includes('opera') ||
-      lowerTitle.includes('wicked') ||
-      lowerTitle.includes('phantom')) {
+      lowerTitle.match(/\bwicked\b/) ||  // Match "wicked" as a word, not part of another word
+      lowerTitle.includes('phantom of the opera') ||
+      lowerTitle.includes('les miserables') ||
+      lowerTitle.includes('cats the musical') ||
+      lowerTitle.includes('broadway')) {
     return 'cultural';
   }
 
-  // Sports
+  // Sports - Check BEFORE concerts
   if (lowerCategory.includes('sport') ||
       lowerTitle.includes('f1') ||
       lowerTitle.includes('grand prix') ||
@@ -96,22 +125,15 @@ export function mapEventCategory(platinumlistCategory: string, title: string): s
       lowerTitle.includes('football') ||
       lowerTitle.includes('championship') ||
       lowerTitle.includes('match') ||
-      lowerTitle.includes('tournament')) {
+      lowerTitle.includes('tournament') ||
+      lowerTitle.includes('horseracing') ||
+      lowerTitle.includes('equestrian')) {
     return 'sports';
   }
 
-  // Nightlife
-  if (lowerCategory.includes('nightlife') ||
-      lowerCategory.includes('club') ||
-      lowerTitle.includes('dj') ||
-      lowerTitle.includes('night at') ||
-      lowerTitle.includes('party') ||
-      lowerTitle.includes('ladies night')) {
-    return 'nightlife';
-  }
-
   // Festivals
-  if (lowerCategory.includes('festival')) {
+  if (lowerCategory.includes('festival') ||
+      lowerTitle.includes('festival')) {
     return 'festivals';
   }
 
@@ -124,7 +146,30 @@ export function mapEventCategory(platinumlistCategory: string, title: string): s
     return 'family';
   }
 
-  // Default to concerts for music events
+  // Nightlife - DJ events, club nights, known nightclub venues
+  // Check this BEFORE concerts to catch DJ events at clubs
+  if (lowerCategory.includes('nightlife') ||
+      lowerCategory.includes('club') ||
+      lowerTitle.includes('dj ') ||
+      lowerTitle.includes('night at') ||
+      lowerTitle.includes('party') ||
+      lowerTitle.includes('ladies night') ||
+      lowerTitle.includes('club night') ||
+      isNightlifeEvent(title)) {  // Check for known nightclub venues
+    return 'nightlife';
+  }
+
+  // Concerts & Music - Default for live performances
+  if (lowerCategory.includes('concert') ||
+      lowerCategory.includes('music') ||
+      lowerTitle.includes('live at') ||
+      lowerTitle.includes('live in') ||
+      lowerTitle.includes('concert') ||
+      isKnownArtist(title)) {
+    return 'concerts';
+  }
+
+  // Default fallback
   return 'concerts';
 }
 

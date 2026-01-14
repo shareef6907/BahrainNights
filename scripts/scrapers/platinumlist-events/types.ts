@@ -2,7 +2,7 @@ export interface ScrapedEvent {
   title: string;
   slug: string;
   description: string;
-  price: number;
+  price: number | null;  // null means "Contact for price"
   price_currency: string;
   image_url: string;
   cover_url: string;

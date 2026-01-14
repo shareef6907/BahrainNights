@@ -79,26 +79,91 @@ async function scrapeEventUrls(page: Page): Promise<string[]> {
 
 /**
  * Scrape a single event detail page
- * Uses og:description meta tag which contains structured data:
- * "Buy {title} tickets, {date}, {venue}, at the official Platinumlist.net site. {title} tickets prices starting from {price}."
+ * Uses multiple extraction methods:
+ * 1. og:description meta tag for structured data
+ * 2. Page DOM elements for dates displayed on the page
+ * 3. Various selectors for venue, price, and other info
  */
 async function scrapeEventDetail(page: Page, url: string, categoryFromUrl: string): Promise<ScrapedEvent | null> {
   try {
     await page.goto(url, { waitUntil: 'networkidle', timeout: 30000 });
     await page.waitForTimeout(1500);
 
-    // Extract all data from meta tags - most reliable source
-    const metaData = await page.evaluate(() => {
+    // Extract all data from meta tags and page DOM
+    const pageData = await page.evaluate(() => {
       const ogTitle = document.querySelector('meta[property="og:title"]')?.getAttribute('content') || '';
       const ogDesc = document.querySelector('meta[property="og:description"]')?.getAttribute('content') || '';
       const ogImage = document.querySelector('meta[property="og:image"]')?.getAttribute('content') || '';
       const h1Title = document.querySelector('h1')?.textContent?.trim() || '';
 
-      return { ogTitle, ogDesc, ogImage, h1Title };
+      // Extract date from page DOM - multiple approaches
+      // Look for date elements on the page (Platinumlist displays dates in various formats)
+      let pageDate: string | null = null;
+
+      // Method 1: Look for date in any element containing day/month pattern
+      const pageText = document.body.innerText;
+
+      // Match patterns like "Wed 14 Jan - Sat 17 Jan", "Fri 16 Jan", "15 January 2026", etc.
+      const datePatterns = [
+        // Date range with weekday: "Wed 14 Jan - Sat 17 Jan"
+        /\b((?:Mon|Tue|Wed|Thu|Fri|Sat|Sun)\s+\d{1,2}\s+(?:Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec)(?:\s+\d{4})?)\s*-/i,
+        // Single date with weekday: "Fri 16 Jan 2026" or "Fri 16 Jan"
+        /\b((?:Mon|Tue|Wed|Thu|Fri|Sat|Sun)\s+\d{1,2}\s+(?:Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec)(?:\s+\d{4})?)\b/i,
+        // Full date: "15 January 2026"
+        /\b(\d{1,2}\s+(?:January|February|March|April|May|June|July|August|September|October|November|December)\s+\d{4})\b/i,
+        // Short date: "15 Jan 2026"
+        /\b(\d{1,2}\s+(?:Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec)\s+\d{4})\b/i,
+      ];
+
+      for (const pattern of datePatterns) {
+        const match = pageText.match(pattern);
+        if (match) {
+          pageDate = match[1];
+          break;
+        }
+      }
+
+      // Extract venue from page DOM
+      // Look for venue link or venue text in the page
+      let pageVenue: string | null = null;
+
+      // Method 1: Look for venue link (often has class or contains venue info)
+      const venueLink = document.querySelector('a[href*="/venue/"]');
+      if (venueLink) {
+        pageVenue = venueLink.textContent?.trim() || null;
+      }
+
+      // Method 2: Look for location pin icon followed by text
+      if (!pageVenue) {
+        const pageText = document.body.innerText;
+        // Match venue patterns like "@ Venue Name" or "Exhibition World Bahrain"
+        const venuePatterns = [
+          /(?:@|at)\s+([A-Z][A-Za-z0-9\s&,'-]+(?:Bahrain|Theatre|Arena|Stadium|Hotel|Club|Lounge|Restaurant|World|Centre|Center|Amphitheatre|Hall))/i,
+          /(?:Venue|Location):\s*([A-Z][A-Za-z0-9\s&,'-]+)/i,
+        ];
+
+        for (const pattern of venuePatterns) {
+          const match = pageText.match(pattern);
+          if (match) {
+            pageVenue = match[1].trim();
+            break;
+          }
+        }
+      }
+
+      // Method 3: Extract from title if it contains "at [Venue]"
+      if (!pageVenue && h1Title) {
+        const titleVenueMatch = h1Title.match(/\s+at\s+(.+?)(?:,\s*Bahrain)?$/i);
+        if (titleVenueMatch) {
+          pageVenue = titleVenueMatch[1].trim();
+        }
+      }
+
+      return { ogTitle, ogDesc, ogImage, h1Title, pageDate, pageVenue };
     });
 
     // Use h1 title or og:title
-    const title = metaData.h1Title || metaData.ogTitle.replace(/ Tickets.*$/, '');
+    const title = pageData.h1Title || pageData.ogTitle.replace(/ Tickets.*$/, '');
 
     if (!title) {
       console.log(`    No title found, skipping`);
@@ -107,18 +172,32 @@ async function scrapeEventDetail(page: Page, url: string, categoryFromUrl: strin
 
     // Parse og:description for date, venue, and price
     // Format: "Buy X tickets, 15 January 2026, Venue Name, at the official..."
-    const ogDesc = metaData.ogDesc;
+    const ogDesc = pageData.ogDesc;
 
-    // Extract date from og:description (e.g., "15 January 2026")
-    const dateMatch = ogDesc.match(/tickets,\s*(\d{1,2}\s+[A-Za-z]+\s+\d{4})/i);
-    const dateText = dateMatch ? dateMatch[1] : null;
+    // Try multiple date extraction methods
+    let dateText: string | null = null;
+
+    // Method 1: Extract date from og:description (e.g., "tickets, 15 January 2026")
+    const ogDateMatch = ogDesc.match(/tickets,\s*(\d{1,2}\s+[A-Za-z]+\s+\d{4})/i);
+    if (ogDateMatch) {
+      dateText = ogDateMatch[1];
+    }
+
+    // Method 2: Fallback to page DOM date
+    if (!dateText && pageData.pageDate) {
+      dateText = pageData.pageDate;
+      console.log(`    Using page DOM date: ${dateText}`);
+    }
 
     const startDate = parseEventDate(dateText);
 
     if (!startDate) {
-      console.log(`    No valid date found (raw: ${dateText}), skipping`);
+      console.log(`    No valid date found (og: ${ogDateMatch?.[1] || 'null'}, page: ${pageData.pageDate || 'null'}), skipping`);
       return null;
     }
+
+    // Rename metaData to pageData reference for rest of function
+    const metaData = pageData;
 
     // Check if event is in the past - skip past events
     const today = new Date();
@@ -129,24 +208,131 @@ async function scrapeEventDetail(page: Page, url: string, categoryFromUrl: strin
       return null;
     }
 
-    // Extract venue from og:description (between date and "at the official")
-    // Format: "15 January 2026, Venue Name, Bahrain, at the official" or "15 January 2026, Venue Name, at the official"
+    // Extract venue - try multiple methods
+    let venueName = '';
+
+    // Method 1: Extract from og:description (between date and "at the official")
     const venueMatch = ogDesc.match(/\d{4},\s*(.+?),\s*at the official/i);
-    let venueName = venueMatch ? venueMatch[1].trim() : '';
-    // Clean up venue name - remove trailing "Bahrain" if it's just the country name at the end
-    if (venueName.endsWith(', Bahrain')) {
-      // Keep "Bahrain" as part of venue name (e.g., "Volto Restaurant & Lounge, Bahrain")
+    if (venueMatch) {
+      venueName = venueMatch[1].trim();
     }
+
+    // Method 2: Fallback to page DOM venue
+    if (!venueName && pageData.pageVenue) {
+      venueName = pageData.pageVenue;
+      console.log(`    Using page DOM venue: ${venueName}`);
+    }
+
+    // Method 3: Extract from title if it contains "at [Venue]"
+    if (!venueName && title) {
+      const titleVenueMatch = title.match(/\s+at\s+(.+?)(?:,\s*Bahrain)?$/i);
+      if (titleVenueMatch) {
+        venueName = titleVenueMatch[1].trim();
+      }
+    }
+
+    // Clean up venue name - remove trailing ", Bahrain" duplicate
+    venueName = venueName.replace(/,\s*Bahrain,\s*Bahrain$/i, ', Bahrain');
 
     // Extract price from og:description (e.g., "starting from 70.00 BHD")
     const priceMatch = ogDesc.match(/starting from\s*([\d.]+)\s*BHD/i);
-    const priceFromDesc = priceMatch ? parseFloat(priceMatch[1]) : 0;
+    let priceFromDesc = priceMatch ? parseFloat(priceMatch[1]) : null;
 
-    // Check for sold out in page content
+    // If og:description didn't have price, try extracting from page DOM
+    if (priceFromDesc === null) {
+      const pagePrice = await page.evaluate(() => {
+        const pageText = document.body.innerText;
+
+        // Method 1: Look for "from X BHD" or "starting X BHD" patterns
+        const pricePatterns = [
+          /(?:from|starting)\s*(?:BHD|BD)?\s*(\d+(?:\.\d+)?)\s*(?:BHD|BD)?/i,
+          /(?:BHD|BD)\s*(\d+(?:\.\d+)?)/i,
+          /(\d+(?:\.\d+)?)\s*(?:BHD|BD)/i,
+          /price[:\s]+(\d+(?:\.\d+)?)/i,
+          /ticket[s]?[:\s]+(?:BHD|BD)?\s*(\d+(?:\.\d+)?)/i,
+        ];
+
+        for (const pattern of pricePatterns) {
+          const match = pageText.match(pattern);
+          if (match) {
+            const price = parseFloat(match[1]);
+            // Only return reasonable prices (1-1000 BHD)
+            if (price >= 1 && price <= 1000) {
+              return price;
+            }
+          }
+        }
+
+        // Method 2: Look for price in specific elements
+        const priceSelectors = [
+          '.price', '.ticket-price', '[class*="price"]',
+          '.event-price', '.cost', '[data-price]'
+        ];
+
+        for (const selector of priceSelectors) {
+          const el = document.querySelector(selector);
+          if (el) {
+            const text = el.textContent || '';
+            const match = text.match(/(\d+(?:\.\d+)?)/);
+            if (match) {
+              const price = parseFloat(match[1]);
+              if (price >= 1 && price <= 1000) {
+                return price;
+              }
+            }
+          }
+        }
+
+        return null;
+      });
+
+      if (pagePrice !== null) {
+        priceFromDesc = pagePrice;
+        console.log(`    Using page DOM price: ${pagePrice} BHD`);
+      }
+    }
+
+    // Check for sold out in page content - multiple detection methods
     const isSoldOut = await page.evaluate(() => {
       const pageText = document.body.textContent?.toLowerCase() || '';
-      return pageText.includes('sold out') || pageText.includes('soldout');
+
+      // Method 1: Check for "sold out" text anywhere in the page
+      if (pageText.includes('sold out') || pageText.includes('soldout')) {
+        return true;
+      }
+
+      // Method 2: Check for buttons with "sold out" text
+      const buttons = document.querySelectorAll('button, .btn, [class*="button"]');
+      for (const btn of buttons) {
+        const btnText = btn.textContent?.toLowerCase() || '';
+        if (btnText.includes('sold out') || btnText.includes('soldout')) {
+          return true;
+        }
+      }
+
+      // Method 3: Check for price display showing sold out
+      const priceElements = document.querySelectorAll('[class*="price"], [class*="ticket"]');
+      for (const el of priceElements) {
+        const elText = el.textContent?.toLowerCase() || '';
+        if (elText.includes('sold out') || elText.includes('soldout')) {
+          return true;
+        }
+      }
+
+      // Method 4: Check for "no tickets available" or similar text
+      if (pageText.includes('no tickets available') ||
+          pageText.includes('tickets unavailable') ||
+          pageText.includes('not available')) {
+        return true;
+      }
+
+      return false;
     });
+
+    // If sold out, set price to null (will display as "Contact for price")
+    if (isSoldOut) {
+      priceFromDesc = null;
+    }
 
     // Extract time from page (look for "Doors: HH:MM" pattern)
     const timeText = await page.evaluate(() => {
@@ -396,3 +582,6 @@ export async function scrapeEvents(): Promise<void> {
     await browser.close();
   }
 }
+
+// Run when executed directly
+scrapeEvents().catch(console.error);

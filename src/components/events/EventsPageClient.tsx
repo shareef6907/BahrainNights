@@ -32,6 +32,7 @@ export interface Event {
   priceNum?: number | null; // Numeric price for modal
   priceCurrency?: string; // Currency code
   isFree: boolean;
+  isSoldOut?: boolean; // Event is sold out
   isFeatured?: boolean;
   affiliateUrl?: string; // Booking/ticket URL
 }

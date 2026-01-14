@@ -21,6 +21,7 @@ export interface Event {
   time: string;
   price: string;
   isFree: boolean;
+  isSoldOut?: boolean;
   isFeatured?: boolean;
 }
 

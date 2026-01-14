@@ -127,9 +127,63 @@ async function getEvents(): Promise<Event[]> {
     // Filter out TBA values
     const eventTime = rawTime && !rawTime.toLowerCase().includes('tba') ? rawTime : '';
 
-    // Handle price - support multiple field names
-    const price = event.price || event.price_range || event.booking_method;
-    const isFree = !price || price === '0' || price.toLowerCase?.() === 'free';
+    // Handle price - support multiple field names and types
+    // Priority: event.price (number or numeric string) > event.price_range (string) > event.booking_method
+    let numericPrice: number | null = null;
+
+    if (typeof event.price === 'number') {
+      numericPrice = event.price;
+    } else if (typeof event.price === 'string') {
+      // Try to parse string price - handles "20", "70 BHD", "BD 25", etc.
+      const priceStr = event.price.toLowerCase();
+      // Check for "free" first
+      if (priceStr === 'free' || priceStr === 'free entry') {
+        numericPrice = 0;
+      } else {
+        // Extract numeric value from strings like "20", "70 BHD", "BD 25"
+        const match = priceStr.match(/(\d+(?:\.\d+)?)/);
+        if (match) {
+          numericPrice = parseFloat(match[1]);
+        }
+      }
+    }
+
+    const priceString = event.price_range || event.booking_method || '';
+    const isSoldOut = event.is_sold_out === true;
+
+    // Determine price display logic:
+    // - is_sold_out → "Sold out"
+    // - null/undefined price → "Contact for price" (not free!)
+    // - price === 0 → "Free" (explicitly free events)
+    // - price > 0 → Show the price
+    // - price_range string containing "free" → Free
+    let displayPrice: string;
+    let isFree = false;
+
+    if (isSoldOut) {
+      // Event is sold out - show sold out status
+      displayPrice = 'Sold out';
+      isFree = false;
+    } else if (numericPrice === null && !priceString) {
+      // No price info at all - show "Contact for price"
+      displayPrice = 'Contact for price';
+      isFree = false;
+    } else if (numericPrice === 0 || priceString.toLowerCase?.() === 'free') {
+      // Explicitly free
+      displayPrice = 'Free';
+      isFree = true;
+    } else if (numericPrice !== null && numericPrice > 0) {
+      // Has a numeric price
+      displayPrice = `BD ${numericPrice}`;
+      isFree = false;
+    } else if (priceString) {
+      // Has a price string (e.g., "From BD 25")
+      displayPrice = priceString.includes('BD') ? priceString : `BD ${priceString}`;
+      isFree = false;
+    } else {
+      displayPrice = 'Contact for price';
+      isFree = false;
+    }
 
     return {
       id: event.id,
@@ -147,10 +201,11 @@ async function getEvents(): Promise<Event[]> {
       rawDate, // ISO date for filtering
       rawEndDate, // ISO end date for filtering
       time: eventTime,
-      price: isFree ? 'Free' : (price?.includes?.('BD') ? price : `BD ${price}`),
-      priceNum: event.price_min || (typeof event.price === 'number' ? event.price : null),
+      price: displayPrice,
+      priceNum: numericPrice,
       priceCurrency: event.price_currency || 'BHD',
       isFree,
+      isSoldOut,
       isFeatured: event.is_featured || false,
       affiliateUrl: event.affiliate_url || event.booking_url || event.source_url || '',
     };
