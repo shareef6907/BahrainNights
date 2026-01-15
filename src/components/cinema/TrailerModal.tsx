@@ -98,6 +98,12 @@ export default function TrailerModal({ isOpen, onClose, title, trailerUrl }: Tra
                   setShowManualPlay(true);
                 }, 1500);
               },
+              onStateChange: (event) => {
+                // Hide manual play button when video starts playing (state 1 = playing)
+                if (event.data === 1) {
+                  setShowManualPlay(false);
+                }
+              },
             },
           });
         } catch {
