@@ -80,11 +80,13 @@ async function getEvents(): Promise<Event[]> {
 
   // Fetch published events that are current or upcoming
   // Filter: date >= today OR end_date >= today (for multi-day events)
+  // Only show Bahrain events on main events page (international events have separate page)
   const { data, error } = await supabase
     .from('events')
     .select('*')
     .eq('status', 'published')
     .eq('is_hidden', false)
+    .eq('country', 'Bahrain')
     .or(`date.gte.${today},end_date.gte.${today}`)
     .order('date', { ascending: true });
 

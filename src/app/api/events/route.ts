@@ -22,11 +22,13 @@ export async function GET(request: NextRequest) {
     const todayStr = today.toISOString().split('T')[0];
 
     // Try to fetch events - handle case where table might not exist or have different schema
+    // Only show Bahrain events in this API (international events have separate page)
     let query = supabaseAdmin
       .from('events')
       .select('*')
       .eq('status', 'published')
       .eq('is_hidden', false)
+      .eq('country', 'Bahrain')
       .order('created_at', { ascending: false })
       .limit(limit);
 

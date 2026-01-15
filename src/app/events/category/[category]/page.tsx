@@ -67,6 +67,7 @@ async function getCategoryEvents(category: string) {
     .select('*')
     .eq('status', 'published')
     .eq('is_hidden', false)
+    .eq('country', 'Bahrain') // Only Bahrain events
     .eq('category', category)
     .gte('date', today)
     .order('date', { ascending: true })

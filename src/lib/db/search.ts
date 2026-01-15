@@ -99,7 +99,7 @@ async function searchVenues(query: string, category?: string): Promise<Venue[]> 
   return (data || []) as Venue[];
 }
 
-// Search events
+// Search events (Bahrain only)
 async function searchEvents(query: string, category?: string): Promise<Event[]> {
   const supabase = getAdminClient();
   const today = new Date().toISOString().split('T')[0];
@@ -109,6 +109,7 @@ async function searchEvents(query: string, category?: string): Promise<Event[]> 
     .select('*')
     .eq('status', 'published')
     .eq('is_hidden', false)
+    .eq('country', 'Bahrain') // Only Bahrain events in search
     .gte('start_date', today)
     .or(`title.ilike.%${query}%,description.ilike.%${query}%`)
     .order('start_date', { ascending: true })
@@ -277,11 +278,12 @@ export async function getSearchSuggestions(query: string, limit: number = 5): Pr
   const venueResults = (venues || []) as { name: string }[];
   venueResults.forEach(v => suggestions.add(v.name));
 
-  // Get event titles
+  // Get event titles (Bahrain only)
   const { data: events } = await supabase
     .from('events')
     .select('title')
     .eq('status', 'published')
+    .eq('country', 'Bahrain')
     .ilike('title', `%${searchTerm}%`)
     .limit(limit);
 
@@ -339,6 +341,7 @@ export async function searchByCategory(category: string, limit: number = 20): Pr
       .from('events')
       .select('*')
       .eq('status', 'published')
+      .eq('country', 'Bahrain')
       .eq('category', category)
       .gte('start_date', today)
       .order('start_date', { ascending: true })
