@@ -187,6 +187,33 @@ interface HomePageClientProps {
 export default function HomePageClient({ initialMovies, initialStats, initialTodayEvents, initialInternationalEvents }: HomePageClientProps) {
   const { t } = useTranslation();
 
+  // All possible international countries with their config
+  const allInternationalCountries = [
+    { code: 'uae', name: 'UAE', flag: '🇦🇪', matchNames: ['UAE', 'United Arab Emirates'] },
+    { code: 'saudi-arabia', name: 'Saudi Arabia', flag: '🇸🇦', matchNames: ['Saudi Arabia'] },
+    { code: 'qatar', name: 'Qatar', flag: '🇶🇦', matchNames: ['Qatar'] },
+    { code: 'egypt', name: 'Egypt', flag: '🇪🇬', matchNames: ['Egypt'] },
+    { code: 'turkiye', name: 'Türkiye', flag: '🇹🇷', matchNames: ['Türkiye', 'Turkey'] },
+    { code: 'uk', name: 'UK', flag: '🇬🇧', matchNames: ['UK', 'United Kingdom'] },
+  ];
+
+  // Filter countries that have events
+  const countriesWithEvents = allInternationalCountries.filter(country =>
+    initialInternationalEvents?.some(event =>
+      country.matchNames.includes(event.country)
+    )
+  );
+
+  // Generate international dropdown items (only countries with events)
+  const internationalDropdownItems = [
+    { name: t.nav.allInternational || 'All International Events', icon: '🎭', href: '/international' },
+    ...countriesWithEvents.map(country => ({
+      name: country.name,
+      icon: country.flag,
+      href: `/international/${country.code}`,
+    })),
+  ];
+
   // Navigation menu data with translations
   const menuItems = [
     {
@@ -221,15 +248,7 @@ export default function HomePageClient({ initialMovies, initialStats, initialTod
       name: t.nav.international || 'International',
       icon: '🌍',
       href: '/international',
-      dropdown: [
-        { name: t.nav.allInternational || 'All International Events', icon: '🎭', href: '/international' },
-        { name: '🇦🇪 UAE', icon: '🇦🇪', href: '/international/uae' },
-        { name: '🇸🇦 Saudi Arabia', icon: '🇸🇦', href: '/international/saudi-arabia' },
-        { name: '🇶🇦 Qatar', icon: '🇶🇦', href: '/international/qatar' },
-        { name: '🇪🇬 Egypt', icon: '🇪🇬', href: '/international/egypt' },
-        { name: '🇹🇷 Türkiye', icon: '🇹🇷', href: '/international/turkiye' },
-        { name: '🇬🇧 UK', icon: '🇬🇧', href: '/international/uk' },
-      ]
+      dropdown: internationalDropdownItems,
     },
     {
       name: t.nav.diningNightlife,
