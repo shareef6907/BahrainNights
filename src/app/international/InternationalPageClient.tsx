@@ -18,6 +18,7 @@ interface InternationalEvent {
   time: string | null;
   start_date: string | null;
   start_time: string | null;
+  end_date: string | null;
   featured_image: string | null;
   cover_url: string | null;
   affiliate_url: string | null;
@@ -76,6 +77,20 @@ export default function InternationalPageClient({ events, eventsByCountry, count
       month: 'short',
       day: 'numeric',
     });
+  };
+
+  // Smart date display for events - shows "Ongoing" if start_date is past but end_date is future
+  const getDisplayDate = (event: InternationalEvent) => {
+    const today = new Date().toISOString().split('T')[0];
+    const startDate = event.start_date || event.date;
+    const endDate = event.end_date;
+
+    // If start date is in the past but end date is in the future, it's an ongoing event
+    if (startDate < today && endDate && endDate >= today) {
+      return 'Ongoing';
+    }
+
+    return formatDate(startDate);
   };
 
   const formatTime = (timeStr: string | null) => {
@@ -229,7 +244,7 @@ export default function InternationalPageClient({ events, eventsByCountry, count
                       <div className="flex items-center justify-between text-sm">
                         <span className="text-gray-300 flex items-center gap-1">
                           <span className="text-blue-400">📅</span>
-                          {formatDate(event.start_date || event.date)}
+                          {getDisplayDate(event)}
                         </span>
                         {event.start_time && (
                           <span className="text-gray-300 flex items-center gap-1">

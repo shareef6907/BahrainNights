@@ -56,8 +56,8 @@ export default async function InternationalPage() {
   const today = new Date().toISOString().split('T')[0];
 
   // Fetch all international events (not from Bahrain)
-  // Filter: start_date >= today OR date >= today
-  // This ensures we only show upcoming events, not events that started months ago
+  // Filter: start_date >= today OR date >= today OR end_date >= today (for ongoing events)
+  // This ensures we show upcoming events AND ongoing events (started in past but still running)
   const { data: events, error } = await supabaseAdmin
     .from('events')
     .select(`
@@ -81,15 +81,38 @@ export default async function InternationalPage() {
     .neq('country', 'Bahrain')
     .eq('status', 'published')
     .eq('is_active', true)
-    .or(`start_date.gte.${today},date.gte.${today}`)
+    .or(`start_date.gte.${today},date.gte.${today},end_date.gte.${today}`)
     .order('start_date', { ascending: true, nullsFirst: false });
 
   if (error) {
     console.error('Error fetching international events:', error);
   }
 
-  // Return data directly - DB filter handles date filtering
-  const internationalEvents: InternationalEvent[] = events || [];
+  // Post-process events:
+  // 1. Filter out events with start_date more than 6 months in the past (even if end_date is future)
+  // 2. Sort by display date (start_date if future, else end_date for ongoing events)
+  const sixMonthsAgo = new Date();
+  sixMonthsAgo.setMonth(sixMonthsAgo.getMonth() - 6);
+  const sixMonthsAgoStr = sixMonthsAgo.toISOString().split('T')[0];
+
+  const internationalEvents: InternationalEvent[] = (events || [])
+    .filter(event => {
+      // Keep if start_date is within last 6 months or in the future
+      const startDate = event.start_date || event.date;
+      return startDate >= sixMonthsAgoStr;
+    })
+    .sort((a, b) => {
+      // Sort by the most relevant date for display
+      const getDisplayDate = (e: InternationalEvent) => {
+        const start = e.start_date || e.date;
+        const end = e.end_date;
+        // If start is in future, use it; otherwise use end_date for ongoing events
+        if (start >= today) return start;
+        if (end && end >= today) return end;
+        return start;
+      };
+      return getDisplayDate(a).localeCompare(getDisplayDate(b));
+    });
 
   // Get unique countries from events and build dynamic country list
   const uniqueCountries = [...new Set(internationalEvents.map(e => e.country))].filter(Boolean);

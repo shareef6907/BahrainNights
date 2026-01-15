@@ -77,7 +77,7 @@ export default async function CountryPage({ params }: Props) {
   const today = new Date().toISOString().split('T')[0];
 
   // Fetch events for this country
-  // Filter: start_date >= today OR date >= today
+  // Filter: start_date >= today OR date >= today OR end_date >= today (for ongoing events)
   const { data: events, error } = await supabaseAdmin
     .from('events')
     .select(`
@@ -102,7 +102,7 @@ export default async function CountryPage({ params }: Props) {
     .eq('country', countryConfig.dbName)
     .eq('status', 'published')
     .eq('is_active', true)
-    .or(`start_date.gte.${today},date.gte.${today}`)
+    .or(`start_date.gte.${today},date.gte.${today},end_date.gte.${today}`)
     .order('start_date', { ascending: true, nullsFirst: false })
     .limit(100);
 
@@ -110,8 +110,27 @@ export default async function CountryPage({ params }: Props) {
     console.error(`Error fetching events for ${countryConfig.name}:`, error);
   }
 
-  // Return data directly - DB filter handles date filtering
-  const countryEvents: InternationalEvent[] = events || [];
+  // Post-process: filter out events with start_date more than 6 months in the past
+  // and sort by most relevant display date
+  const sixMonthsAgo = new Date();
+  sixMonthsAgo.setMonth(sixMonthsAgo.getMonth() - 6);
+  const sixMonthsAgoStr = sixMonthsAgo.toISOString().split('T')[0];
+
+  const countryEvents: InternationalEvent[] = (events || [])
+    .filter(event => {
+      const startDate = event.start_date || event.date;
+      return startDate >= sixMonthsAgoStr;
+    })
+    .sort((a, b) => {
+      const getDisplayDate = (e: InternationalEvent) => {
+        const start = e.start_date || e.date;
+        const end = e.end_date;
+        if (start >= today) return start;
+        if (end && end >= today) return end;
+        return start;
+      };
+      return getDisplayDate(a).localeCompare(getDisplayDate(b));
+    });
 
   // Group events by city
   const eventsByCity: Record<string, InternationalEvent[]> = {};

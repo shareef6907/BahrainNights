@@ -34,6 +34,7 @@ export interface InternationalEvent {
   time: string | null;
   start_date: string | null;
   start_time: string | null;
+  end_date: string | null;
   featured_image: string | null;
   cover_url: string | null;
   affiliate_url: string | null;
@@ -98,6 +99,20 @@ export default function InternationalEventsSection({ events }: Props) {
       month: 'short',
       day: 'numeric',
     });
+  };
+
+  // Smart date display for events - shows "Ongoing" if start_date is past but end_date is future
+  const getDisplayDate = (event: InternationalEvent) => {
+    const today = new Date().toISOString().split('T')[0];
+    const startDate = event.start_date || event.date;
+    const endDate = event.end_date;
+
+    // If start date is in the past but end date is in the future, it's an ongoing event
+    if (startDate < today && endDate && endDate >= today) {
+      return 'Ongoing';
+    }
+
+    return formatDate(startDate);
   };
 
   const getCountryFlag = (countryName: string): string => {
@@ -189,7 +204,7 @@ export default function InternationalEventsSection({ events }: Props) {
                     )}
                     <div className="flex items-center space-x-1.5">
                       <Calendar className="w-3.5 h-3.5 text-blue-400" />
-                      <span>{formatDate(event.start_date || event.date)}</span>
+                      <span>{getDisplayDate(event)}</span>
                     </div>
                   </div>
                 </div>

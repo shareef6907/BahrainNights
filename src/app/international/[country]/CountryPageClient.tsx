@@ -84,6 +84,20 @@ export default function CountryPageClient({ country, events, eventsByCity }: Pro
     });
   };
 
+  // Smart date display for events - shows "Ongoing" if start_date is past but end_date is future
+  const getDisplayDate = (event: InternationalEvent) => {
+    const today = new Date().toISOString().split('T')[0];
+    const startDate = event.start_date || event.date;
+    const endDate = event.end_date;
+
+    // If start date is in the past but end date is in the future, it's an ongoing event
+    if (startDate < today && endDate && endDate >= today) {
+      return 'Ongoing';
+    }
+
+    return formatDate(startDate);
+  };
+
   const formatTime = (timeStr: string | null) => {
     if (!timeStr) return '';
     const [hours, minutes] = timeStr.split(':');
@@ -287,7 +301,7 @@ export default function CountryPageClient({ country, events, eventsByCity }: Pro
                       <div className="flex items-center justify-between">
                         <span className="text-white font-medium flex items-center gap-2">
                           <span className="text-blue-400">📅</span>
-                          {formatDate(event.start_date || event.date)}
+                          {getDisplayDate(event)}
                         </span>
                         {event.start_time && (
                           <span className="text-gray-300 flex items-center gap-2">

@@ -120,8 +120,8 @@ async function getMovies(): Promise<HomepageMovie[]> {
 async function getInternationalEvents() {
   const today = new Date().toISOString().split('T')[0];
 
-  // Fetch more events to ensure we have events from all countries for dropdown
-  // Filter: start_date >= today OR end_date >= today OR date >= today
+  // Fetch events including ongoing ones (end_date in future)
+  // Filter: start_date >= today OR date >= today OR end_date >= today
   const { data, error } = await supabaseAdmin
     .from('events')
     .select(`
@@ -145,7 +145,7 @@ async function getInternationalEvents() {
     .neq('country', 'Bahrain')
     .eq('status', 'published')
     .eq('is_active', true)
-    .or(`start_date.gte.${today},date.gte.${today}`)
+    .or(`start_date.gte.${today},date.gte.${today},end_date.gte.${today}`)
     .order('start_date', { ascending: true, nullsFirst: false })
     .limit(100);
 
@@ -154,9 +154,29 @@ async function getInternationalEvents() {
     return [];
   }
 
-  // Return data directly - DB filter is sufficient for homepage
-  // Homepage shows upcoming events (start_date or date >= today)
-  return data || [];
+  // Post-process: filter out events with start_date more than 6 months in the past
+  // and sort by most relevant display date
+  const sixMonthsAgo = new Date();
+  sixMonthsAgo.setMonth(sixMonthsAgo.getMonth() - 6);
+  const sixMonthsAgoStr = sixMonthsAgo.toISOString().split('T')[0];
+
+  const filteredEvents = (data || [])
+    .filter(event => {
+      const startDate = event.start_date || event.date;
+      return startDate >= sixMonthsAgoStr;
+    })
+    .sort((a, b) => {
+      const getDisplayDate = (e: typeof a) => {
+        const start = e.start_date || e.date;
+        const end = e.end_date;
+        if (start >= today) return start;
+        if (end && end >= today) return end;
+        return start;
+      };
+      return getDisplayDate(a).localeCompare(getDisplayDate(b));
+    });
+
+  return filteredEvents;
 }
 
 // Fetch stats for the homepage

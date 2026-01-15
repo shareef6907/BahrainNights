@@ -228,12 +228,6 @@ export default function HomePageClient({ initialMovies, initialStats, initialTod
       ]
     },
     {
-      name: t.nav.international || 'International',
-      icon: '🌍',
-      href: '/international',
-      dropdown: internationalDropdownItems,
-    },
-    {
       name: t.nav.diningNightlife,
       icon: '🍽️',
       href: '/places',
@@ -277,6 +271,12 @@ export default function HomePageClient({ initialMovies, initialStats, initialTod
         { name: t.nav.toursExperiences, icon: '🗺️', href: '/explore?category=tours' },
         { name: t.nav.communityEvents, icon: '🤝', href: '/explore?category=community' },
       ]
+    },
+    {
+      name: t.nav.international || 'International',
+      icon: '🌍',
+      href: '/international',
+      dropdown: internationalDropdownItems,
     }
   ];
 
@@ -614,8 +614,7 @@ export default function HomePageClient({ initialMovies, initialStats, initialTod
             playsInline
             preload="auto"
             disablePictureInPicture
-            // @ts-expect-error fetchpriority is valid but not in React types yet
-            fetchpriority="high"
+            fetchPriority="high"
             className="absolute inset-0 w-full h-full object-cover"
             style={{ objectPosition: 'center center' }}
             src="/Header-Video1.mp4"
