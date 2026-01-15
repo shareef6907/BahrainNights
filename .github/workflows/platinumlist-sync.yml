@@ -1,0 +1,52 @@
+name: Platinumlist Sync
+
+on:
+  schedule:
+    # Run every 4 hours
+    - cron: '0 */4 * * *'
+  workflow_dispatch:
+    # Allow manual trigger from GitHub Actions UI
+
+env:
+  NODE_VERSION: '20'
+
+jobs:
+  sync:
+    name: Sync Events & Attractions
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+          cache-dependency-path: scripts/platinumlist-api/package.json
+
+      - name: Install dependencies
+        working-directory: scripts/platinumlist-api
+        run: npm install
+
+      - name: Run Platinumlist Sync
+        working-directory: scripts/platinumlist-api
+        env:
+          NEXT_PUBLIC_SUPABASE_URL: ${{ secrets.NEXT_PUBLIC_SUPABASE_URL }}
+          SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
+        run: npx tsx index.ts
+
+      - name: Report Success
+        if: success()
+        run: |
+          echo "✅ Platinumlist sync completed successfully!"
+          echo "Timestamp: $(date -u)"
+
+      - name: Report Failure
+        if: failure()
+        run: |
+          echo "❌ Platinumlist sync failed!"
+          echo "Check the logs above for details."
+          exit 1
