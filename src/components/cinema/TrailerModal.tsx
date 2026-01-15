@@ -75,9 +75,9 @@ export default function TrailerModal({ isOpen, onClose, title, trailerUrl }: Tra
               <div className="relative aspect-video bg-black rounded-xl overflow-hidden shadow-2xl">
                 {videoId ? (
                   <iframe
-                    src={`https://www.youtube.com/embed/${videoId}?autoplay=1&rel=0`}
+                    src={`https://www.youtube.com/embed/${videoId}?autoplay=1&rel=0&modestbranding=1&playsinline=1`}
                     title={`${title} Trailer`}
-                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
                     allowFullScreen
                     className="absolute inset-0 w-full h-full"
                   />

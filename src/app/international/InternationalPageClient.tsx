@@ -137,15 +137,16 @@ export default function InternationalPageClient({ events, eventsByCountry, count
       </div>
 
       {/* Country Filter Pills */}
-      <div className="container mx-auto px-4 -mt-8 relative z-10">
+      <div className="container mx-auto px-4 -mt-8 relative z-20">
         <div className="bg-gray-800/50 backdrop-blur-xl rounded-2xl p-4 shadow-xl border border-gray-700/50">
-          <div className="flex flex-wrap gap-3 justify-center">
+          <div className="flex flex-wrap gap-2 md:gap-3 justify-center">
             <button
+              type="button"
               onClick={() => setSelectedCountry(null)}
-              className={`px-4 py-2 rounded-full transition-all duration-300 ${
+              className={`px-4 py-3 md:py-2 rounded-full transition-all duration-300 text-sm md:text-base touch-manipulation ${
                 selectedCountry === null
                   ? 'bg-gradient-to-r from-purple-500 to-blue-500 text-white shadow-lg'
-                  : 'bg-gray-700/50 text-gray-300 hover:bg-gray-600/50'
+                  : 'bg-gray-700/50 text-gray-300 hover:bg-gray-600/50 active:bg-gray-500/50'
               }`}
             >
               All Countries ({events.length})
@@ -156,12 +157,13 @@ export default function InternationalPageClient({ events, eventsByCountry, count
               const count = (eventsByCountry[country.name] || []).length;
               return (
                 <button
+                  type="button"
                   key={country.code}
                   onClick={() => setSelectedCountry(country.name)}
-                  className={`px-4 py-2 rounded-full transition-all duration-300 flex items-center gap-2 ${
+                  className={`px-4 py-3 md:py-2 rounded-full transition-all duration-300 flex items-center gap-2 text-sm md:text-base touch-manipulation ${
                     selectedCountry === country.name
                       ? 'bg-gradient-to-r from-purple-500 to-blue-500 text-white shadow-lg'
-                      : 'bg-gray-700/50 text-gray-300 hover:bg-gray-600/50'
+                      : 'bg-gray-700/50 text-gray-300 hover:bg-gray-600/50 active:bg-gray-500/50'
                   }`}
                 >
                   <span>{country.flag}</span>

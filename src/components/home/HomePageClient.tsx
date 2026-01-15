@@ -36,6 +36,12 @@ const InternationalEventsSection = dynamic(() => import('@/components/home/Inter
   ssr: false,
 });
 
+// Lazy load event modal - only loaded when user clicks on today's event
+const EventModal = dynamic(() => import('@/components/events/EventModal'), {
+  loading: () => null,
+  ssr: false,
+});
+
 // Animation variants - optimized for speed
 const fadeIn = {
   hidden: { opacity: 0, y: 20 },
@@ -112,6 +118,28 @@ export interface TodayEvent {
   image: string;
   category: string;
   date: string;
+}
+
+// Import EventData type for modal
+import type { EventData } from '@/components/events/EventModal';
+
+// Helper to convert TodayEvent to EventData format for modal
+function convertTodayEventToEventData(event: TodayEvent): EventData {
+  return {
+    id: event.id,
+    title: event.title,
+    description: null,
+    price: null,
+    price_currency: '',
+    image_url: event.image,
+    cover_url: event.image,
+    venue_name: event.venue,
+    location: event.venue,
+    category: event.category,
+    start_date: event.date,
+    start_time: event.time?.includes(':') ? event.time : null,
+    affiliate_url: `/events/${event.slug}`,
+  };
 }
 
 // International event type for homepage section
@@ -296,6 +324,10 @@ export default function HomePageClient({ initialMovies, initialStats, initialTod
   const [isMovieModalOpen, setIsMovieModalOpen] = useState(false);
   const [trailerMovie, setTrailerMovie] = useState<Movie | null>(null);
   const [isTrailerModalOpen, setIsTrailerModalOpen] = useState(false);
+
+  // Event modal states (for Happening Today)
+  const [selectedEvent, setSelectedEvent] = useState<TodayEvent | null>(null);
+  const [isEventModalOpen, setIsEventModalOpen] = useState(false);
 
   // Play video immediately when ready
   useEffect(() => {
@@ -738,6 +770,19 @@ export default function HomePageClient({ initialMovies, initialStats, initialTod
                     alt={movie.title}
                     className="w-full h-[280px] md:h-[450px] object-cover group-hover:scale-105 transition-transform duration-300"
                   />
+                  {/* Mobile-friendly play trailer button - always visible on mobile */}
+                  {movie.trailer_url && (
+                    <button
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        handleTrailerClick(convertToMovieFormat(movie));
+                      }}
+                      className="absolute top-3 right-3 md:hidden p-3 bg-black/70 backdrop-blur-sm rounded-full text-yellow-400 active:bg-black/90 transition-colors z-10"
+                      aria-label={`Play ${movie.title} trailer`}
+                    >
+                      <Play className="w-5 h-5 fill-current" />
+                    </button>
+                  )}
                   <div className="absolute inset-0 bg-gradient-to-t from-black via-black/50 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-200">
                     <div className="absolute bottom-0 left-0 right-0 p-6">
                       <h3 className="font-bold text-xl mb-2">{movie.title}</h3>
@@ -747,14 +792,14 @@ export default function HomePageClient({ initialMovies, initialStats, initialTod
                           <span className="text-lg font-semibold">{movie.tmdb_rating.toFixed(1)}</span>
                         </div>
                       )}
-                      {/* Play trailer button */}
+                      {/* Play trailer button - hover only on desktop */}
                       {movie.trailer_url && (
                         <button
                           onClick={(e) => {
                             e.stopPropagation();
                             handleTrailerClick(convertToMovieFormat(movie));
                           }}
-                          className="mt-3 flex items-center gap-2 px-4 py-2 bg-yellow-400 text-black rounded-full font-medium hover:bg-yellow-300 transition-colors"
+                          className="mt-3 hidden md:flex items-center gap-2 px-4 py-2 bg-yellow-400 text-black rounded-full font-medium hover:bg-yellow-300 transition-colors"
                         >
                           <Play className="w-4 h-4 fill-current" />
                           {t.movieModal.watchTrailer}
@@ -803,9 +848,12 @@ export default function HomePageClient({ initialMovies, initialStats, initialTod
           >
             {todayEvents.length > 0 ? (
               todayEvents.map(event => (
-                <motion.a
+                <motion.div
                   key={event.id}
-                  href={`/events/${event.slug}`}
+                  onClick={() => {
+                    setSelectedEvent(event);
+                    setIsEventModalOpen(true);
+                  }}
                   className="group relative bg-white/5 backdrop-blur-sm border border-white/10 rounded-2xl overflow-hidden cursor-pointer hover:border-yellow-400/50 transition-colors block"
                   variants={fadeIn}
                   whileHover={cardHover}
@@ -830,7 +878,7 @@ export default function HomePageClient({ initialMovies, initialStats, initialTod
                       </div>
                     </div>
                   </div>
-                </motion.a>
+                </motion.div>
               ))
             ) : (
               <div className="col-span-4 text-center py-12">
@@ -957,6 +1005,18 @@ export default function HomePageClient({ initialMovies, initialStats, initialTod
         title={trailerMovie?.title || ''}
         trailerUrl={trailerMovie?.trailerUrl || ''}
       />
+
+      {/* Today Event Modal */}
+      {selectedEvent && (
+        <EventModal
+          event={convertTodayEventToEventData(selectedEvent)}
+          isOpen={isEventModalOpen}
+          onClose={() => {
+            setIsEventModalOpen(false);
+            setSelectedEvent(null);
+          }}
+        />
+      )}
     </div>
   );
 }

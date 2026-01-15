@@ -6,6 +6,7 @@ import { TranslationProvider } from "@/lib/i18n/TranslationContext";
 import { PublicAuthProvider } from "@/context/PublicAuthContext";
 import { PageTracker } from "@/components/analytics/PageTracker";
 import FloatingBackButton from "@/components/ui/FloatingBackButton";
+import SwipeBackHandler from "@/components/SwipeBackHandler";
 
 const inter = Inter({
   variable: "--font-inter",
@@ -156,6 +157,7 @@ export default function RootLayout({
           <PublicAuthProvider>
             <AuthProvider>
               <PageTracker />
+              <SwipeBackHandler threshold={80} edgeWidth={25} />
               {children}
               <FloatingBackButton />
             </AuthProvider>
