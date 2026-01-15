@@ -1,9 +1,14 @@
 import dotenv from 'dotenv';
-import { resolve } from 'path';
+import { resolve, dirname } from 'path';
+import { fileURLToPath } from 'url';
 
-// Load environment variables from project root
-dotenv.config({ path: resolve(process.cwd(), '../../.env.local') });
-dotenv.config({ path: resolve(process.cwd(), '../../.env') });
+// Get directory of current file for proper path resolution
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = dirname(__filename);
+
+// Load environment variables from project root (handles running from any directory)
+dotenv.config({ path: resolve(__dirname, '../../.env.local') });
+dotenv.config({ path: resolve(__dirname, '../../.env') });
 
 import { createClient } from '@supabase/supabase-js';
 import type { PlatinumlistEvent, DbAttraction, ApiResponse } from './types.js';
@@ -297,7 +302,9 @@ export async function fetchAttractions(): Promise<void> {
 }
 
 // Run if executed directly
-if (import.meta.url === `file://${process.argv[1]}`) {
+// Use fileURLToPath to handle URL encoding in paths with spaces
+const isMainModule = fileURLToPath(import.meta.url) === process.argv[1];
+if (isMainModule) {
   fetchAttractions()
     .then(() => process.exit(0))
     .catch(() => process.exit(1));

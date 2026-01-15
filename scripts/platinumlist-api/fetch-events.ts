@@ -1,9 +1,14 @@
 import dotenv from 'dotenv';
-import { resolve } from 'path';
+import { resolve, dirname } from 'path';
+import { fileURLToPath } from 'url';
 
-// Load environment variables from project root
-dotenv.config({ path: resolve(process.cwd(), '../../.env.local') });
-dotenv.config({ path: resolve(process.cwd(), '../../.env') });
+// Get directory of current file for proper path resolution
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = dirname(__filename);
+
+// Load environment variables from project root (handles running from any directory)
+dotenv.config({ path: resolve(__dirname, '../../.env.local') });
+dotenv.config({ path: resolve(__dirname, '../../.env') });
 
 import { createClient } from '@supabase/supabase-js';
 import type { PlatinumlistEvent, DbEvent, ApiResponse } from './types.js';
@@ -15,6 +20,7 @@ import {
   log,
   sleep,
   isBahrainEvent,
+  extractVenueFromImageUrl,
 } from './utils.js';
 
 // Initialize Supabase client
@@ -81,11 +87,20 @@ function transformEvent(event: PlatinumlistEvent): DbEvent {
   // DB stores price as STRING, format: "From X BHD" or null
   const priceString = price > 0 ? `${price}` : null;
 
-  // Extract venue name from event name if it contains location info
+  // Extract venue name - try multiple methods
   let venueName: string | null = null;
+
+  // Method 1: Extract from event name pattern "at [Venue]"
   const nameMatch = event.name.match(/at\s+(.+)$/i);
   if (nameMatch) {
     venueName = nameMatch[1].trim();
+  }
+
+  // Method 2: Extract from image URL if not found in name
+  // Image URLs contain venue info in format: {event}_{date}_{venue}_{id}-size.ext
+  if (!venueName) {
+    const imageUrl = event.image_full?.src || event.image_big?.src;
+    venueName = extractVenueFromImageUrl(imageUrl, event.id);
   }
 
   const startDate = unixToDate(event.start);
@@ -295,7 +310,9 @@ export async function fetchEvents(): Promise<void> {
 }
 
 // Run if executed directly
-if (import.meta.url === `file://${process.argv[1]}`) {
+// Use fileURLToPath to handle URL encoding in paths with spaces
+const isMainModule = fileURLToPath(import.meta.url) === process.argv[1];
+if (isMainModule) {
   fetchEvents()
     .then(() => process.exit(0))
     .catch(() => process.exit(1));

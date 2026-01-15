@@ -203,3 +203,67 @@ export function log(message: string, type: 'info' | 'success' | 'error' | 'warn'
   }[type];
   console.log(`[${timestamp}] ${prefix} ${message}`);
 }
+
+/**
+ * Extract venue name from Platinumlist image URL
+ * Image URLs follow pattern: {event_slug}_{YYYY}_{mon}_{DD}_{venue_slug}_{ID}-size.ext
+ * Example: wicked_the_musical_in_bahrain_2026_jan_13_2026_jan_17_bahrain_national_theatre_103422-full-en1764321001.jpg
+ */
+export function extractVenueFromImageUrl(imageUrl: string | null, eventId: number): string | null {
+  if (!imageUrl) return null;
+
+  try {
+    // Get just the filename from URL
+    const filename = imageUrl.split('/').pop() || '';
+
+    // Remove the suffix after first hyphen (e.g., -full-en1764321001.jpg)
+    const baseName = filename.split('-')[0];
+
+    // Split by underscore
+    const parts = baseName.split('_');
+
+    // Find the index of the event ID
+    const idStr = String(eventId);
+    const idIndex = parts.lastIndexOf(idStr);
+
+    if (idIndex === -1 || idIndex < 5) return null;
+
+    // Find the date pattern (year_mon_day)
+    // Look for patterns like 2026_jan_13 or 2025_dec_31
+    const months = ['jan', 'feb', 'mar', 'apr', 'may', 'jun', 'jul', 'aug', 'sep', 'oct', 'nov', 'dec'];
+
+    let lastDateEndIndex = -1;
+
+    for (let i = 0; i < parts.length - 3; i++) {
+      // Check for year_month_day pattern
+      const isYear = /^20\d{2}$/.test(parts[i]);
+      const isMonth = months.includes(parts[i + 1]?.toLowerCase());
+      const isDay = /^\d{1,2}$/.test(parts[i + 2]);
+
+      if (isYear && isMonth && isDay) {
+        lastDateEndIndex = i + 3; // Position after the date
+        // Continue searching in case there's a date range (start and end dates)
+      }
+    }
+
+    if (lastDateEndIndex === -1 || lastDateEndIndex >= idIndex) return null;
+
+    // Extract venue parts (everything between last date and ID)
+    const venueParts = parts.slice(lastDateEndIndex, idIndex);
+
+    if (venueParts.length === 0) return null;
+
+    // Convert to readable venue name
+    const venueName = venueParts
+      .join(' ')
+      .split(' ')
+      .map(word => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase())
+      .join(' ')
+      .replace(/\s+/g, ' ')
+      .trim();
+
+    return venueName || null;
+  } catch {
+    return null;
+  }
+}
