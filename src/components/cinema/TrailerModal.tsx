@@ -1,8 +1,8 @@
 'use client';
 
 import { motion, AnimatePresence } from 'framer-motion';
-import { X, Play } from 'lucide-react';
-import { useEffect, useRef, useState, useCallback } from 'react';
+import { X } from 'lucide-react';
+import { useEffect, useRef, useState } from 'react';
 
 interface TrailerModalProps {
   isOpen: boolean;
@@ -26,7 +26,6 @@ declare global {
           playerVars?: Record<string, number | string>;
           events?: {
             onReady?: (event: { target: YTPlayer }) => void;
-            onStateChange?: (event: { data: number }) => void;
           };
         }
       ) => YTPlayer;
@@ -39,7 +38,6 @@ export default function TrailerModal({ isOpen, onClose, title, trailerUrl }: Tra
   const playerRef = useRef<HTMLDivElement>(null);
   const playerInstanceRef = useRef<YTPlayer | null>(null);
   const [isAPIReady, setIsAPIReady] = useState(false);
-  const [showManualPlay, setShowManualPlay] = useState(false);
 
   // Extract YouTube video ID from URL
   const getYouTubeId = (url: string) => {
@@ -74,9 +72,6 @@ export default function TrailerModal({ isOpen, onClose, title, trailerUrl }: Tra
         playerInstanceRef.current = null;
       }
 
-      // Reset manual play state
-      setShowManualPlay(false);
-
       // Small delay to ensure DOM is ready
       const initTimer = setTimeout(() => {
         try {
@@ -93,22 +88,11 @@ export default function TrailerModal({ isOpen, onClose, title, trailerUrl }: Tra
               onReady: (event) => {
                 // Try to play immediately
                 event.target.playVideo();
-                // Show manual play button after a short delay if video doesn't start
-                setTimeout(() => {
-                  setShowManualPlay(true);
-                }, 1500);
-              },
-              onStateChange: (event) => {
-                // Hide manual play button when video starts playing (state 1 = playing)
-                if (event.data === 1) {
-                  setShowManualPlay(false);
-                }
               },
             },
           });
         } catch {
-          // Fallback: if API fails, show manual play immediately
-          setShowManualPlay(true);
+          // API failed - YouTube player will show its own play button
         }
       }, 100);
 
@@ -146,14 +130,6 @@ export default function TrailerModal({ isOpen, onClose, title, trailerUrl }: Tra
     return () => document.removeEventListener('keydown', handleEscape);
   }, [onClose]);
 
-  // Manual play handler for mobile
-  const handleManualPlay = useCallback(() => {
-    if (playerInstanceRef.current) {
-      playerInstanceRef.current.playVideo();
-      setShowManualPlay(false);
-    }
-  }, []);
-
   return (
     <AnimatePresence>
       {isOpen && (
@@ -189,26 +165,10 @@ export default function TrailerModal({ isOpen, onClose, title, trailerUrl }: Tra
               {/* Video Container */}
               <div className="relative aspect-video bg-black rounded-xl overflow-hidden shadow-2xl">
                 {videoId ? (
-                  <>
-                    <div
-                      ref={playerRef}
-                      className="absolute inset-0 w-full h-full"
-                    />
-                    {/* Manual play overlay for mobile - shows if autoplay doesn't work */}
-                    {showManualPlay && (
-                      <motion.button
-                        initial={{ opacity: 0 }}
-                        animate={{ opacity: 1 }}
-                        onClick={handleManualPlay}
-                        className="absolute inset-0 flex items-center justify-center bg-black/50 z-10 touch-manipulation"
-                        aria-label="Play trailer"
-                      >
-                        <div className="w-20 h-20 bg-red-600 rounded-full flex items-center justify-center hover:bg-red-500 transition-colors">
-                          <Play className="w-10 h-10 text-white fill-white ml-1" />
-                        </div>
-                      </motion.button>
-                    )}
-                  </>
+                  <div
+                    ref={playerRef}
+                    className="absolute inset-0 w-full h-full"
+                  />
                 ) : (
                   <div className="absolute inset-0 flex items-center justify-center text-gray-400">
                     <p>Trailer not available</p>
