@@ -135,7 +135,9 @@ export default function InternationalPageClient({ events, eventsByCountry, count
             >
               All Countries ({events.length})
             </button>
-            {countries.map(country => {
+            {countries
+              .filter(country => (eventsByCountry[country.name] || []).length > 0)
+              .map(country => {
               const count = (eventsByCountry[country.name] || []).length;
               return (
                 <button

@@ -33,15 +33,24 @@ interface InternationalEvent {
   city: string | null;
 }
 
-// Country configuration for display
-const COUNTRIES = [
-  { code: 'uae', name: 'UAE', flag: '🇦🇪', fullName: 'United Arab Emirates' },
-  { code: 'saudi-arabia', name: 'Saudi Arabia', flag: '🇸🇦', fullName: 'Saudi Arabia' },
-  { code: 'qatar', name: 'Qatar', flag: '🇶🇦', fullName: 'Qatar' },
-  { code: 'egypt', name: 'Egypt', flag: '🇪🇬', fullName: 'Egypt' },
-  { code: 'turkiye', name: 'Türkiye', flag: '🇹🇷', fullName: 'Türkiye' },
-  { code: 'uk', name: 'UK', flag: '🇬🇧', fullName: 'United Kingdom' },
-];
+// Country configuration with flags
+const COUNTRY_CONFIG: Record<string, { flag: string; code: string }> = {
+  'UAE': { flag: '🇦🇪', code: 'uae' },
+  'United Arab Emirates': { flag: '🇦🇪', code: 'uae' },
+  'Saudi Arabia': { flag: '🇸🇦', code: 'saudi-arabia' },
+  'Qatar': { flag: '🇶🇦', code: 'qatar' },
+  'Egypt': { flag: '🇪🇬', code: 'egypt' },
+  'Türkiye': { flag: '🇹🇷', code: 'turkiye' },
+  'Turkey': { flag: '🇹🇷', code: 'turkiye' },
+  'UK': { flag: '🇬🇧', code: 'uk' },
+  'United Kingdom': { flag: '🇬🇧', code: 'uk' },
+  'Kuwait': { flag: '🇰🇼', code: 'kuwait' },
+  'Oman': { flag: '🇴🇲', code: 'oman' },
+  'Jordan': { flag: '🇯🇴', code: 'jordan' },
+  'Lebanon': { flag: '🇱🇧', code: 'lebanon' },
+  'Morocco': { flag: '🇲🇦', code: 'morocco' },
+  'India': { flag: '🇮🇳', code: 'india' },
+};
 
 export default async function InternationalPage() {
   // Fetch all international events (not from Bahrain)
@@ -70,8 +79,7 @@ export default async function InternationalPage() {
     .eq('status', 'published')
     .eq('is_active', true)
     .gte('end_date', new Date().toISOString().split('T')[0])
-    .order('start_date', { ascending: true })
-    .limit(500);
+    .order('start_date', { ascending: true });
 
   if (error) {
     console.error('Error fetching international events:', error);
@@ -79,19 +87,36 @@ export default async function InternationalPage() {
 
   const internationalEvents: InternationalEvent[] = events || [];
 
+  // Get unique countries from events and build dynamic country list
+  const uniqueCountries = [...new Set(internationalEvents.map(e => e.country))].filter(Boolean);
+
+  // Build countries array with flags, sorted by event count
+  const countriesWithEvents = uniqueCountries.map(countryName => {
+    const config = COUNTRY_CONFIG[countryName] || { flag: '🌍', code: countryName.toLowerCase().replace(/\s+/g, '-') };
+    return {
+      code: config.code,
+      name: countryName,
+      flag: config.flag,
+      fullName: countryName,
+    };
+  });
+
   // Group events by country
   const eventsByCountry: Record<string, InternationalEvent[]> = {};
-  COUNTRIES.forEach(country => {
-    eventsByCountry[country.name] = internationalEvents.filter(
-      e => e.country === country.name || e.country === country.fullName
-    );
+  uniqueCountries.forEach(countryName => {
+    eventsByCountry[countryName] = internationalEvents.filter(e => e.country === countryName);
   });
+
+  // Sort countries by event count (descending)
+  countriesWithEvents.sort((a, b) =>
+    (eventsByCountry[b.name]?.length || 0) - (eventsByCountry[a.name]?.length || 0)
+  );
 
   return (
     <InternationalPageClient
       events={internationalEvents}
       eventsByCountry={eventsByCountry}
-      countries={COUNTRIES}
+      countries={countriesWithEvents}
     />
   );
 }
