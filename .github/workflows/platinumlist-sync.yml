@@ -2,7 +2,7 @@ name: Platinumlist Sync
 
 on:
   schedule:
-    # Run every 4 hours
+    # Run every 4 hours for both Bahrain and International events
     - cron: '0 */4 * * *'
   workflow_dispatch:
     # Allow manual trigger from GitHub Actions UI
@@ -12,9 +12,9 @@ env:
 
 jobs:
   sync:
-    name: Sync Events & Attractions
+    name: Sync Bahrain & International Events
     runs-on: ubuntu-latest
-    timeout-minutes: 15
+    timeout-minutes: 30  # Increased for international events
 
     steps:
       - name: Checkout repository
@@ -36,12 +36,18 @@ jobs:
         env:
           NEXT_PUBLIC_SUPABASE_URL: ${{ secrets.NEXT_PUBLIC_SUPABASE_URL }}
           SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
-        run: npx tsx index.ts
+        run: |
+          echo "🌙 Starting BahrainNights Platinumlist Sync"
+          echo "🇧🇭 Bahrain Events & Attractions"
+          echo "🌍 International Events: UAE, Saudi Arabia, Qatar, Egypt, Türkiye, UK"
+          npx tsx index.ts
 
       - name: Report Success
         if: success()
         run: |
           echo "✅ Platinumlist sync completed successfully!"
+          echo "✅ Bahrain Events & Attractions synced"
+          echo "✅ International Events synced"
           echo "Timestamp: $(date -u)"
 
       - name: Report Failure

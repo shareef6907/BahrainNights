@@ -160,6 +160,109 @@ export function sleep(ms: number): Promise<void> {
   return new Promise(resolve => setTimeout(resolve, ms));
 }
 
+// Country detection configuration
+export interface CountryConfig {
+  name: string;
+  code: string;
+  currency: string;
+  timezone: string;
+  urlPatterns: string[];
+  cities: string[];
+}
+
+export const COUNTRY_CONFIGS: CountryConfig[] = [
+  {
+    name: 'Bahrain',
+    code: 'BH',
+    currency: 'BHD',
+    timezone: 'Asia/Bahrain',
+    urlPatterns: ['manama.platinumlist.net', 'bahrain.platinumlist.net'],
+    cities: ['Manama', 'Muharraq', 'Riffa', 'Hamad Town', 'Isa Town', 'Sitra', 'Budaiya', 'Juffair', 'Seef', 'Amwaj Islands']
+  },
+  {
+    name: 'UAE',
+    code: 'AE',
+    currency: 'AED',
+    timezone: 'Asia/Dubai',
+    urlPatterns: ['dubai.platinumlist.net', 'abudhabi.platinumlist.net', 'uae.platinumlist.net'],
+    cities: ['Dubai', 'Abu Dhabi', 'Sharjah', 'Ajman', 'Ras Al Khaimah', 'Fujairah', 'Umm Al Quwain']
+  },
+  {
+    name: 'Saudi Arabia',
+    code: 'SA',
+    currency: 'SAR',
+    timezone: 'Asia/Riyadh',
+    urlPatterns: ['riyadh.platinumlist.net', 'jeddah.platinumlist.net', 'saudi.platinumlist.net', 'ksa.platinumlist.net'],
+    cities: ['Riyadh', 'Jeddah', 'Mecca', 'Medina', 'Dammam', 'Khobar', 'Dhahran', 'Tabuk', 'Abha', 'Taif', 'AlUla']
+  },
+  {
+    name: 'Qatar',
+    code: 'QA',
+    currency: 'QAR',
+    timezone: 'Asia/Qatar',
+    urlPatterns: ['doha.platinumlist.net', 'qatar.platinumlist.net'],
+    cities: ['Doha', 'Al Wakrah', 'Al Khor', 'Lusail', 'The Pearl']
+  },
+  {
+    name: 'Egypt',
+    code: 'EG',
+    currency: 'EGP',
+    timezone: 'Africa/Cairo',
+    urlPatterns: ['cairo.platinumlist.net', 'egypt.platinumlist.net'],
+    cities: ['Cairo', 'Alexandria', 'Giza', 'Sharm El Sheikh', 'Hurghada', 'Luxor', 'Aswan', 'El Gouna']
+  },
+  {
+    name: 'Türkiye',
+    code: 'TR',
+    currency: 'TRY',
+    timezone: 'Europe/Istanbul',
+    urlPatterns: ['istanbul.platinumlist.net', 'turkey.platinumlist.net', 'turkiye.platinumlist.net'],
+    cities: ['Istanbul', 'Ankara', 'Izmir', 'Antalya', 'Bodrum', 'Cappadocia']
+  },
+  {
+    name: 'UK',
+    code: 'GB',
+    currency: 'GBP',
+    timezone: 'Europe/London',
+    urlPatterns: ['london.platinumlist.net', 'uk.platinumlist.net'],
+    cities: ['London', 'Manchester', 'Birmingham', 'Liverpool', 'Edinburgh', 'Glasgow', 'Bristol']
+  }
+];
+
+/**
+ * Detect country from event data
+ */
+export function detectCountry(event: {
+  url?: string;
+  timezone?: string;
+  price?: { data?: { currency?: string } };
+}): CountryConfig | null {
+  const url = event.url?.toLowerCase() || '';
+  const timezone = event.timezone || '';
+  const currency = event.price?.data?.currency || '';
+
+  for (const config of COUNTRY_CONFIGS) {
+    // Check URL patterns first (most reliable)
+    for (const pattern of config.urlPatterns) {
+      if (url.includes(pattern)) {
+        return config;
+      }
+    }
+
+    // Check timezone
+    if (timezone === config.timezone) {
+      return config;
+    }
+
+    // Check currency
+    if (currency === config.currency) {
+      return config;
+    }
+  }
+
+  return null;
+}
+
 /**
  * Check if an event/attraction is from Bahrain
  */
@@ -168,26 +271,43 @@ export function isBahrainEvent(event: {
   timezone?: string;
   price?: { data?: { currency?: string } };
 }): boolean {
-  // Check URL for Bahrain-specific subdomains
-  if (event.url) {
-    const url = event.url.toLowerCase();
-    if (url.includes('manama.platinumlist.net') ||
-        url.includes('bahrain.platinumlist.net')) {
-      return true;
+  const country = detectCountry(event);
+  return country?.name === 'Bahrain';
+}
+
+/**
+ * Check if an event is from a supported international country (not Bahrain)
+ */
+export function isInternationalEvent(event: {
+  url?: string;
+  timezone?: string;
+  price?: { data?: { currency?: string } };
+}): boolean {
+  const country = detectCountry(event);
+  return country !== null && country.name !== 'Bahrain';
+}
+
+/**
+ * Get list of supported international countries (excluding Bahrain)
+ */
+export function getInternationalCountries(): string[] {
+  return COUNTRY_CONFIGS.filter(c => c.name !== 'Bahrain').map(c => c.name);
+}
+
+/**
+ * Extract city from event name or description
+ */
+export function extractCity(eventName: string, country: CountryConfig): string | null {
+  const text = eventName.toLowerCase();
+
+  for (const city of country.cities) {
+    if (text.includes(city.toLowerCase())) {
+      return city;
     }
   }
 
-  // Check timezone
-  if (event.timezone === 'Asia/Bahrain') {
-    return true;
-  }
-
-  // Check currency (BHD = Bahraini Dinar)
-  if (event.price?.data?.currency === 'BHD') {
-    return true;
-  }
-
-  return false;
+  // Default to first city (usually capital/major city)
+  return country.cities[0] || null;
 }
 
 /**

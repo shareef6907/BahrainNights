@@ -54,6 +54,34 @@ export const en = {
     sightseeing: 'Sightseeing',
     boatTours: 'Boat Tours',
     desertSafari: 'Desert Safari',
+    // International dropdown
+    international: 'International',
+    allInternational: 'All International Events',
+  },
+
+  // International Events
+  international: {
+    title: 'International Events',
+    subtitle: 'Discover amazing events across the Middle East and beyond',
+    hero: {
+      title: 'International',
+      titleHighlight: 'Events',
+      subtitle: 'Discover the best concerts, shows, and experiences happening worldwide',
+    },
+    countries: {
+      uae: 'United Arab Emirates',
+      saudiArabia: 'Saudi Arabia',
+      qatar: 'Qatar',
+      egypt: 'Egypt',
+      turkiye: 'Türkiye',
+      uk: 'United Kingdom',
+    },
+    exploreEvents: 'Explore Events',
+    eventsInCountry: 'Events in {country}',
+    upcomingEvents: 'Upcoming Events',
+    noEvents: 'No upcoming events in this country',
+    viewAll: 'View All Events',
+    bookNow: 'Book Now',
   },
 
   // Homepage

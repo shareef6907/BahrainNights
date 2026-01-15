@@ -114,6 +114,44 @@ async function getMovies(): Promise<HomepageMovie[]> {
   return data || [];
 }
 
+// Fetch international events for homepage section
+async function getInternationalEvents() {
+  const today = new Date().toISOString().split('T')[0];
+
+  const { data, error } = await supabaseAdmin
+    .from('events')
+    .select(`
+      id,
+      title,
+      slug,
+      description,
+      category,
+      venue_name,
+      date,
+      time,
+      start_date,
+      start_time,
+      featured_image,
+      cover_url,
+      affiliate_url,
+      country,
+      city
+    `)
+    .neq('country', 'Bahrain')
+    .eq('status', 'published')
+    .eq('is_active', true)
+    .gte('start_date', today)
+    .order('start_date', { ascending: true })
+    .limit(8);
+
+  if (error) {
+    console.error('Error fetching international events:', error);
+    return [];
+  }
+
+  return data || [];
+}
+
 // Fetch stats for the homepage
 async function getStats() {
   const defaultStats = { events: 0, venues: 0, cinema: 0, offers: 0, explore: 0, attractions: 0 };
@@ -144,10 +182,11 @@ async function getStats() {
 // Server Component - data is fetched BEFORE the page renders
 export default async function BahrainNightsHomepage() {
   // Fetch all data on the server - NO loading state needed!
-  const [movies, stats, todayEvents] = await Promise.all([
+  const [movies, stats, todayEvents, internationalEvents] = await Promise.all([
     getMovies(),
     getStats(),
-    getTodayEvents()
+    getTodayEvents(),
+    getInternationalEvents()
   ]);
 
   return (
@@ -155,6 +194,7 @@ export default async function BahrainNightsHomepage() {
       initialMovies={movies}
       initialStats={stats}
       initialTodayEvents={todayEvents}
+      initialInternationalEvents={internationalEvents}
     />
   );
 }

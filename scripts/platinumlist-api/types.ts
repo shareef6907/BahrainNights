@@ -86,6 +86,8 @@ export interface DbEvent {
   status: string;
   is_featured: boolean;
   is_active: boolean;
+  country: string;  // Country where event takes place (default: Bahrain)
+  city: string | null;  // City where event takes place
   created_at?: string;
   updated_at?: string;
 }

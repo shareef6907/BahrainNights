@@ -31,6 +31,11 @@ const TrailerModal = dynamic(() => import('@/components/cinema/TrailerModal'), {
   ssr: false,
 });
 
+const InternationalEventsSection = dynamic(() => import('@/components/home/InternationalEventsSection'), {
+  loading: () => <div className="h-[400px] bg-slate-800/50 rounded-2xl animate-pulse" />,
+  ssr: false,
+});
+
 // Animation variants - optimized for speed
 const fadeIn = {
   hidden: { opacity: 0, y: 20 },
@@ -109,6 +114,25 @@ export interface TodayEvent {
   date: string;
 }
 
+// International event type for homepage section
+export interface HomepageInternationalEvent {
+  id: string;
+  title: string;
+  slug: string;
+  description: string | null;
+  category: string;
+  venue_name: string | null;
+  date: string;
+  time: string | null;
+  start_date: string | null;
+  start_time: string | null;
+  featured_image: string | null;
+  cover_url: string | null;
+  affiliate_url: string | null;
+  country: string;
+  city: string | null;
+}
+
 // Helper to convert homepage movie data to Movie format for modal
 function convertToMovieFormat(movie: HomepageMovie): Movie {
   const durationMins = movie.duration_minutes || 0;
@@ -157,9 +181,10 @@ interface HomePageClientProps {
   initialMovies: HomepageMovie[];
   initialStats: { events: number; venues: number; cinema: number; offers: number; explore: number; attractions: number };
   initialTodayEvents: TodayEvent[];
+  initialInternationalEvents: HomepageInternationalEvent[];
 }
 
-export default function HomePageClient({ initialMovies, initialStats, initialTodayEvents }: HomePageClientProps) {
+export default function HomePageClient({ initialMovies, initialStats, initialTodayEvents, initialInternationalEvents }: HomePageClientProps) {
   const { t } = useTranslation();
 
   // Navigation menu data with translations
@@ -190,6 +215,20 @@ export default function HomePageClient({ initialMovies, initialStats, initialTod
         { name: t.nav.culturalArts, icon: '🎨', href: '/events?category=cultural' },
         { name: t.nav.sports, icon: '⚽', href: '/events?category=sports' },
         { name: t.nav.fullCalendar, icon: '📆', href: '/events/calendar' },
+      ]
+    },
+    {
+      name: t.nav.international || 'International',
+      icon: '🌍',
+      href: '/international',
+      dropdown: [
+        { name: t.nav.allInternational || 'All International Events', icon: '🎭', href: '/international' },
+        { name: '🇦🇪 UAE', icon: '🇦🇪', href: '/international/uae' },
+        { name: '🇸🇦 Saudi Arabia', icon: '🇸🇦', href: '/international/saudi-arabia' },
+        { name: '🇶🇦 Qatar', icon: '🇶🇦', href: '/international/qatar' },
+        { name: '🇪🇬 Egypt', icon: '🇪🇬', href: '/international/egypt' },
+        { name: '🇹🇷 Türkiye', icon: '🇹🇷', href: '/international/turkiye' },
+        { name: '🇬🇧 UK', icon: '🇬🇧', href: '/international/uk' },
       ]
     },
     {
@@ -802,6 +841,11 @@ export default function HomePageClient({ initialMovies, initialStats, initialTod
           </motion.div>
         </div>
       </section>
+
+      {/* International Events Section */}
+      {initialInternationalEvents && initialInternationalEvents.length > 0 && (
+        <InternationalEventsSection events={initialInternationalEvents} />
+      )}
 
       {/* Categories Grid - Updated to match main menu */}
       <section className="px-4 mb-12 md:mb-24">

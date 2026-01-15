@@ -6,11 +6,12 @@ dotenv.config({ path: resolve(process.cwd(), '../../.env.local') });
 dotenv.config({ path: resolve(process.cwd(), '../../.env') });
 import { fetchEvents } from './fetch-events.js';
 import { fetchAttractions } from './fetch-attractions.js';
-import { log } from './utils.js';
+import { fetchInternationalEvents } from './fetch-international.js';
+import { log, getInternationalCountries } from './utils.js';
 
 /**
  * Main orchestrator for Platinumlist sync
- * Fetches both events and attractions
+ * Fetches Bahrain events, attractions, and international events
  */
 async function main(): Promise<void> {
   const startTime = Date.now();
@@ -20,16 +21,20 @@ async function main(): Promise<void> {
   console.log('║        🌙 BahrainNights - Platinumlist Sync 🌙         ║');
   console.log('╚════════════════════════════════════════════════════════╝');
   console.log('');
+  console.log(`🇧🇭 Bahrain Events & Attractions`);
+  console.log(`🌍 International Events: ${getInternationalCountries().join(', ')}`);
+  console.log('');
 
-  let eventsSuccess = false;
+  let bahrainEventsSuccess = false;
   let attractionsSuccess = false;
+  let internationalEventsSuccess = false;
 
-  // Sync Events
+  // Sync Bahrain Events
   try {
     await fetchEvents();
-    eventsSuccess = true;
+    bahrainEventsSuccess = true;
   } catch (error) {
-    log(`Events sync failed: ${error}`, 'error');
+    log(`Bahrain events sync failed: ${error}`, 'error');
   }
 
   console.log('');
@@ -42,6 +47,16 @@ async function main(): Promise<void> {
     log(`Attractions sync failed: ${error}`, 'error');
   }
 
+  console.log('');
+
+  // Sync International Events
+  try {
+    await fetchInternationalEvents();
+    internationalEventsSuccess = true;
+  } catch (error) {
+    log(`International events sync failed: ${error}`, 'error');
+  }
+
   // Final Summary
   const duration = ((Date.now() - startTime) / 1000).toFixed(2);
 
@@ -49,14 +64,15 @@ async function main(): Promise<void> {
   console.log('╔════════════════════════════════════════════════════════╗');
   console.log('║                    📊 SYNC SUMMARY                     ║');
   console.log('╠════════════════════════════════════════════════════════╣');
-  console.log(`║  Events:      ${eventsSuccess ? '✅ Success' : '❌ Failed'}                             ║`);
-  console.log(`║  Attractions: ${attractionsSuccess ? '✅ Success' : '❌ Failed'}                             ║`);
-  console.log(`║  Duration:    ${duration}s                                  ║`);
+  console.log(`║  🇧🇭 Bahrain Events:      ${bahrainEventsSuccess ? '✅ Success' : '❌ Failed'}                    ║`);
+  console.log(`║  🎯 Attractions:          ${attractionsSuccess ? '✅ Success' : '❌ Failed'}                    ║`);
+  console.log(`║  🌍 International Events: ${internationalEventsSuccess ? '✅ Success' : '❌ Failed'}                    ║`);
+  console.log(`║  ⏱️  Duration:            ${duration}s                         ║`);
   console.log('╚════════════════════════════════════════════════════════╝');
   console.log('');
 
   // Exit with error code if any sync failed
-  if (!eventsSuccess || !attractionsSuccess) {
+  if (!bahrainEventsSuccess || !attractionsSuccess || !internationalEventsSuccess) {
     process.exit(1);
   }
 }

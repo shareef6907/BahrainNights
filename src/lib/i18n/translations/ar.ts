@@ -57,6 +57,34 @@ export const ar = {
     sightseeing: 'المعالم السياحية',
     boatTours: 'جولات القوارب',
     desertSafari: 'سفاري الصحراء',
+    // International dropdown
+    international: 'الدولية',
+    allInternational: 'جميع الفعاليات الدولية',
+  },
+
+  // International Events
+  international: {
+    title: 'الفعاليات الدولية',
+    subtitle: 'اكتشف فعاليات مذهلة في الشرق الأوسط والعالم',
+    hero: {
+      title: 'الفعاليات',
+      titleHighlight: 'الدولية',
+      subtitle: 'اكتشف أفضل الحفلات والعروض والتجارب حول العالم',
+    },
+    countries: {
+      uae: 'الإمارات العربية المتحدة',
+      saudiArabia: 'المملكة العربية السعودية',
+      qatar: 'قطر',
+      egypt: 'مصر',
+      turkiye: 'تركيا',
+      uk: 'المملكة المتحدة',
+    },
+    exploreEvents: 'استكشف الفعاليات',
+    eventsInCountry: 'فعاليات في {country}',
+    upcomingEvents: 'الفعاليات القادمة',
+    noEvents: 'لا توجد فعاليات قادمة في هذا البلد',
+    viewAll: 'عرض جميع الفعاليات',
+    bookNow: 'احجز الآن',
   },
 
   // Homepage

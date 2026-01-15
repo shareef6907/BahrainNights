@@ -19,10 +19,11 @@ import {
   cleanDescription,
   log,
   sleep,
-  isBahrainEvent,
-  extractVenueFromImageUrl,
+  isInternationalEvent,
   detectCountry,
   extractCity,
+  extractVenueFromImageUrl,
+  getInternationalCountries,
 } from './utils.js';
 
 // Initialize Supabase client
@@ -68,7 +69,7 @@ function detectCategory(name: string, description: string): string {
   if (text.includes('sport') || text.includes('football') || text.includes('racing') || text.includes('match')) {
     return 'sports';
   }
-  if (text.includes('theatre') || text.includes('theater') || text.includes('play') || text.includes('drama')) {
+  if (text.includes('theatre') || text.includes('theater') || text.includes('play') || text.includes('drama') || text.includes('musical')) {
     return 'cultural';
   }
   if (text.includes('family') || text.includes('kids') || text.includes('children')) {
@@ -83,13 +84,12 @@ function detectCategory(name: string, description: string): string {
  */
 function transformEvent(event: PlatinumlistEvent): DbEvent {
   const price = event.price?.data?.price;
-  const currency = event.price?.data?.currency || 'BHD';
+  const currency = event.price?.data?.currency || 'AED';
 
   // Parse price - API returns -1 for "contact for price" or sold out
-  // DB stores price as STRING, format: "From X BHD" or null
   const priceString = price > 0 ? `${price}` : null;
 
-  // Extract venue name - try multiple methods
+  // Extract venue name
   let venueName: string | null = null;
 
   // Method 1: Extract from event name pattern "at [Venue]"
@@ -98,8 +98,7 @@ function transformEvent(event: PlatinumlistEvent): DbEvent {
     venueName = nameMatch[1].trim();
   }
 
-  // Method 2: Extract from image URL if not found in name
-  // Image URLs contain venue info in format: {event}_{date}_{venue}_{id}-size.ext
+  // Method 2: Extract from image URL
   if (!venueName) {
     const imageUrl = event.image_full?.src || event.image_big?.src;
     venueName = extractVenueFromImageUrl(imageUrl, event.id);
@@ -107,7 +106,7 @@ function transformEvent(event: PlatinumlistEvent): DbEvent {
 
   // Detect country and city
   const countryConfig = detectCountry(event);
-  const country = countryConfig?.name || 'Bahrain';
+  const country = countryConfig?.name || 'UAE';
   const city = countryConfig ? extractCity(event.name, countryConfig) : null;
 
   const startDate = unixToDate(event.start);
@@ -121,7 +120,7 @@ function transformEvent(event: PlatinumlistEvent): DbEvent {
     category: detectCategory(event.name, event.description || ''),
     tags: null,
     venue_name: venueName,
-    date: startDate,  // Required NOT NULL column
+    date: startDate,
     time: startTime,
     start_date: startDate,
     end_date: unixToDate(event.end),
@@ -145,17 +144,18 @@ function transformEvent(event: PlatinumlistEvent): DbEvent {
 }
 
 /**
- * Fetch all events from Platinumlist API
+ * Fetch all international events from Platinumlist API
+ * International events are events from UAE, Saudi Arabia, Qatar, Egypt, Türkiye, UK
  */
-async function fetchAllEvents(): Promise<PlatinumlistEvent[]> {
+async function fetchAllInternationalEvents(): Promise<PlatinumlistEvent[]> {
   const allEvents: PlatinumlistEvent[] = [];
   let page = 1;
   const perPage = 50;
-  const maxPages = 30; // Safety limit
+  const maxPages = 50; // Higher limit for international events
   let hasMore = true;
 
   while (hasMore && page <= maxPages) {
-    log(`Fetching events page ${page}...`);
+    log(`Fetching international events page ${page}...`);
 
     const response = await fetchFromPlatinumlist<ApiResponse<PlatinumlistEvent>>(
       `/events?page=${page}&per_page=${perPage}`
@@ -166,22 +166,22 @@ async function fetchAllEvents(): Promise<PlatinumlistEvent[]> {
       break;
     }
 
-    // Filter for Bahrain events that are not sold out and are not pure attractions
-    const bahrainEvents = response.data.filter(e => {
-      // Must be from Bahrain
-      if (!isBahrainEvent(e)) return false;
+    // Filter for international events (not Bahrain) that are not sold out and not attractions
+    const internationalEvents = response.data.filter(e => {
+      // Must be from an international country (not Bahrain)
+      if (!isInternationalEvent(e)) return false;
 
       // Skip attractions (they go to attractions table)
       if (e.is_attraction) return false;
 
-      // Must have tickets available (on sale)
+      // Must have tickets available
       if (e.status === 'sold out') return false;
 
       return true;
     });
 
-    log(`Found ${bahrainEvents.length} Bahrain events on page ${page} (filtered from ${response.data.length})`);
-    allEvents.push(...bahrainEvents);
+    log(`Found ${internationalEvents.length} international events on page ${page} (filtered from ${response.data.length})`);
+    allEvents.push(...internationalEvents);
 
     // Check pagination
     if (response.meta?.pagination) {
@@ -205,7 +205,7 @@ async function upsertEvents(events: DbEvent[]): Promise<{ inserted: number; upda
 
   for (const event of events) {
     try {
-      // Check if event exists by source_event_id (Platinumlist ID)
+      // Check if event exists by source_event_id
       const { data: existing } = await supabase
         .from('events')
         .select('id')
@@ -256,7 +256,7 @@ async function upsertEvents(events: DbEvent[]): Promise<{ inserted: number; upda
 }
 
 /**
- * Remove past events from database
+ * Remove past international events from database
  */
 async function cleanupPastEvents(): Promise<number> {
   const today = new Date().toISOString().split('T')[0];
@@ -265,11 +265,12 @@ async function cleanupPastEvents(): Promise<number> {
     .from('events')
     .delete()
     .eq('source_name', 'platinumlist')
+    .neq('country', 'Bahrain')  // Only international events
     .lt('end_date', today)
     .select('id');
 
   if (error) {
-    log(`Error cleaning up past events: ${error.message}`, 'error');
+    log(`Error cleaning up past international events: ${error.message}`, 'error');
     return 0;
   }
 
@@ -277,21 +278,33 @@ async function cleanupPastEvents(): Promise<number> {
 }
 
 /**
- * Main function to fetch and sync events
+ * Main function to fetch and sync international events
  */
-export async function fetchEvents(): Promise<void> {
-  log('🎫 Starting Platinumlist Events Sync', 'info');
+export async function fetchInternationalEvents(): Promise<void> {
+  log('🌍 Starting Platinumlist International Events Sync', 'info');
   console.log('='.repeat(50));
+  console.log(`Supported countries: ${getInternationalCountries().join(', ')}`);
 
   try {
-    // Step 1: Fetch all events from API
-    log('Fetching events from Platinumlist API...', 'info');
-    const apiEvents = await fetchAllEvents();
-    log(`Fetched ${apiEvents.length} Bahrain events from API`, 'success');
+    // Step 1: Fetch all international events from API
+    log('Fetching international events from Platinumlist API...', 'info');
+    const apiEvents = await fetchAllInternationalEvents();
+    log(`Fetched ${apiEvents.length} international events from API`, 'success');
 
     if (apiEvents.length === 0) {
-      log('No Bahrain events found from API.', 'warn');
+      log('No international events found from API.', 'warn');
     } else {
+      // Log breakdown by country
+      const countryBreakdown: Record<string, number> = {};
+      apiEvents.forEach(e => {
+        const country = detectCountry(e)?.name || 'Unknown';
+        countryBreakdown[country] = (countryBreakdown[country] || 0) + 1;
+      });
+      console.log('Events by country:');
+      Object.entries(countryBreakdown).forEach(([country, count]) => {
+        console.log(`  - ${country}: ${count}`);
+      });
+
       // Step 2: Transform events
       log('Transforming events...', 'info');
       const dbEvents = apiEvents.map(transformEvent);
@@ -304,25 +317,24 @@ export async function fetchEvents(): Promise<void> {
     }
 
     // Step 4: Cleanup past events
-    log('Cleaning up past events...', 'info');
+    log('Cleaning up past international events...', 'info');
     const cleaned = await cleanupPastEvents();
-    log(`Removed ${cleaned} past events`, 'success');
+    log(`Removed ${cleaned} past international events`, 'success');
 
     // Summary
     console.log('='.repeat(50));
-    log('🎉 Events sync completed!', 'success');
+    log('🎉 International events sync completed!', 'success');
 
   } catch (error) {
-    log(`Fatal error during events sync: ${error}`, 'error');
+    log(`Fatal error during international events sync: ${error}`, 'error');
     throw error;
   }
 }
 
 // Run if executed directly
-// Use fileURLToPath to handle URL encoding in paths with spaces
 const isMainModule = fileURLToPath(import.meta.url) === process.argv[1];
 if (isMainModule) {
-  fetchEvents()
+  fetchInternationalEvents()
     .then(() => process.exit(0))
     .catch(() => process.exit(1));
 }
