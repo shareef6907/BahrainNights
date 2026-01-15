@@ -74,7 +74,10 @@ export default async function CountryPage({ params }: Props) {
     notFound();
   }
 
+  const today = new Date().toISOString().split('T')[0];
+
   // Fetch events for this country
+  // Filter: start_date >= today OR end_date >= today (for long-running shows)
   const { data: events, error } = await supabaseAdmin
     .from('events')
     .select(`
@@ -99,7 +102,7 @@ export default async function CountryPage({ params }: Props) {
     .eq('country', countryConfig.dbName)
     .eq('status', 'published')
     .eq('is_active', true)
-    .gte('start_date', new Date().toISOString().split('T')[0])
+    .or(`start_date.gte.${today},end_date.gte.${today}`)
     .order('start_date', { ascending: true })
     .limit(100);
 

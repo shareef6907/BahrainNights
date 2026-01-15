@@ -48,12 +48,12 @@ interface Country {
   dbName: string;
 }
 
+// Only show countries that are popular destinations for Bahrainis
+// Removed Egypt and Türkiye as they have no events and are not popular
 const COUNTRIES: Country[] = [
   { code: 'uae', name: 'UAE', flag: '🇦🇪', dbName: 'UAE' },
   { code: 'saudi-arabia', name: 'Saudi Arabia', flag: '🇸🇦', dbName: 'Saudi Arabia' },
   { code: 'qatar', name: 'Qatar', flag: '🇶🇦', dbName: 'Qatar' },
-  { code: 'egypt', name: 'Egypt', flag: '🇪🇬', dbName: 'Egypt' },
-  { code: 'turkiye', name: 'Türkiye', flag: '🇹🇷', dbName: 'Türkiye' },
   { code: 'uk', name: 'UK', flag: '🇬🇧', dbName: 'UK' },
 ];
 

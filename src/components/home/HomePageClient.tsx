@@ -187,31 +187,14 @@ interface HomePageClientProps {
 export default function HomePageClient({ initialMovies, initialStats, initialTodayEvents, initialInternationalEvents }: HomePageClientProps) {
   const { t } = useTranslation();
 
-  // All possible international countries with their config
-  const allInternationalCountries = [
-    { code: 'uae', name: 'UAE', flag: '🇦🇪', matchNames: ['UAE', 'United Arab Emirates'] },
-    { code: 'saudi-arabia', name: 'Saudi Arabia', flag: '🇸🇦', matchNames: ['Saudi Arabia'] },
-    { code: 'qatar', name: 'Qatar', flag: '🇶🇦', matchNames: ['Qatar'] },
-    { code: 'egypt', name: 'Egypt', flag: '🇪🇬', matchNames: ['Egypt'] },
-    { code: 'turkiye', name: 'Türkiye', flag: '🇹🇷', matchNames: ['Türkiye', 'Turkey'] },
-    { code: 'uk', name: 'UK', flag: '🇬🇧', matchNames: ['UK', 'United Kingdom'] },
-  ];
-
-  // Filter countries that have events
-  const countriesWithEvents = allInternationalCountries.filter(country =>
-    initialInternationalEvents?.some(event =>
-      country.matchNames.includes(event.country)
-    )
-  );
-
-  // Generate international dropdown items (only countries with events)
+  // International dropdown - hardcoded to show UAE, Saudi Arabia, Qatar, UK
+  // (removed Egypt and Türkiye as they have no events and are not popular destinations)
   const internationalDropdownItems = [
     { name: t.nav.allInternational || 'All International Events', icon: '🎭', href: '/international' },
-    ...countriesWithEvents.map(country => ({
-      name: country.name,
-      icon: country.flag,
-      href: `/international/${country.code}`,
-    })),
+    { name: 'UAE', icon: '🇦🇪', href: '/international/uae' },
+    { name: 'Saudi Arabia', icon: '🇸🇦', href: '/international/saudi-arabia' },
+    { name: 'Qatar', icon: '🇶🇦', href: '/international/qatar' },
+    { name: 'UK', icon: '🇬🇧', href: '/international/uk' },
   ];
 
   // Navigation menu data with translations
