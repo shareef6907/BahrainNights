@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useRef } from 'react';
 import dynamic from 'next/dynamic';
+import Link from 'next/link';
 import { motion, AnimatePresence } from 'framer-motion';
 import { MapPin, Clock, Star, ChevronRight, ChevronDown, Menu, X, Sparkles, Plus, Play, Building2, LogIn } from 'lucide-react';
 import GlobalSearch from '@/components/search/GlobalSearch';
@@ -428,11 +429,11 @@ export default function HomePageClient({ initialMovies, initialStats, initialTod
           <div className="flex items-center justify-between h-20">
             {/* Logo and Language Toggle */}
             <div className="flex items-center gap-3 flex-shrink-0">
-              <a href="/" className="flex items-center">
+              <Link href="/" className="flex items-center">
                 <span className="text-2xl lg:text-3xl font-black bg-gradient-to-r from-yellow-400 via-orange-500 to-pink-500 bg-clip-text text-transparent">
                   BahrainNights
                 </span>
-              </a>
+              </Link>
               <LanguageToggle variant="pill" />
             </div>
 
@@ -466,7 +467,7 @@ export default function HomePageClient({ initialMovies, initialStats, initialTod
                       >
                         <div className="py-2">
                           {item.dropdown.map((subItem, index) => (
-                            <a
+                            <Link
                               key={subItem.name}
                               href={subItem.href}
                               className="flex items-center space-x-3 px-4 py-3 hover:bg-white/5 transition-colors group"
@@ -474,17 +475,17 @@ export default function HomePageClient({ initialMovies, initialStats, initialTod
                             >
                               <span className="text-xl group-hover:scale-110 transition-transform duration-200">{subItem.icon}</span>
                               <span className="text-gray-300 group-hover:text-white transition-colors">{subItem.name}</span>
-                            </a>
+                            </Link>
                           ))}
                         </div>
                         <div className="border-t border-white/10 p-3">
-                          <a
+                          <Link
                             href={item.href}
                             className="flex items-center justify-center space-x-2 py-2 text-yellow-400 hover:text-yellow-300 font-medium transition-colors"
                           >
                             <span>{t.nav.viewAll} {item.name}</span>
                             <ChevronRight className="w-4 h-4" />
-                          </a>
+                          </Link>
                         </div>
                       </motion.div>
                     )}
@@ -496,20 +497,20 @@ export default function HomePageClient({ initialMovies, initialStats, initialTod
             {/* Right Side Actions */}
             <div className="hidden lg:flex items-center space-x-2">
               <GlobalSearch variant="navbar" />
-              <a
+              <Link
                 href="/register-venue"
                 className="flex items-center space-x-1.5 bg-gradient-to-r from-yellow-400 via-orange-500 to-pink-500 text-black px-3 py-2 rounded-full text-sm font-semibold hover:shadow-lg hover:shadow-orange-500/25 hover:scale-105 transition-all duration-200"
               >
                 <Building2 className="w-4 h-4" />
                 <span>{t.nav.registerVenue}</span>
-              </a>
-              <a
+              </Link>
+              <Link
                 href="/venue-portal/login"
                 className="flex items-center space-x-1.5 text-gray-400 hover:text-white px-2 py-2 text-xs transition-all duration-200"
               >
                 <LogIn className="w-3 h-3" />
                 <span>{t.nav.login}</span>
-              </a>
+              </Link>
             </div>
 
             {/* Mobile Menu Button */}
@@ -563,7 +564,7 @@ export default function HomePageClient({ initialMovies, initialStats, initialTod
                         >
                           <div className="pb-4 pl-4 space-y-1">
                             {item.dropdown.map((subItem) => (
-                              <a
+                              <Link
                                 key={subItem.name}
                                 href={subItem.href}
                                 className="flex items-center space-x-3 py-3 px-4 rounded-xl hover:bg-white/5 transition-colors"
@@ -571,16 +572,16 @@ export default function HomePageClient({ initialMovies, initialStats, initialTod
                               >
                                 <span className="text-xl">{subItem.icon}</span>
                                 <span className="text-gray-300">{subItem.name}</span>
-                              </a>
+                              </Link>
                             ))}
-                            <a
+                            <Link
                               href={item.href}
                               className="flex items-center space-x-2 py-3 px-4 text-yellow-400 font-medium"
                               onClick={() => setMobileMenuOpen(false)}
                             >
                               <span>{t.nav.viewAll}</span>
                               <ChevronRight className="w-4 h-4" />
-                            </a>
+                            </Link>
                           </div>
                         </motion.div>
                       )}
@@ -595,22 +596,22 @@ export default function HomePageClient({ initialMovies, initialStats, initialTod
 
                 {/* Mobile CTA */}
                 <div className="pt-4 space-y-3">
-                  <a
+                  <Link
                     href="/register-venue"
                     className="w-full flex items-center justify-center space-x-2 bg-gradient-to-r from-yellow-400 via-orange-500 to-pink-500 text-black px-6 py-4 rounded-xl font-semibold"
                     onClick={() => setMobileMenuOpen(false)}
                   >
                     <Building2 className="w-5 h-5" />
                     <span>{t.footer.registerYourVenue}</span>
-                  </a>
-                  <a
+                  </Link>
+                  <Link
                     href="/venue-portal/login"
                     className="w-full flex items-center justify-center space-x-2 text-gray-400 hover:text-white text-sm py-2"
                     onClick={() => setMobileMenuOpen(false)}
                   >
                     <LogIn className="w-4 h-4" />
                     <span>{t.footer.venueLogin}</span>
-                  </a>
+                  </Link>
                 </div>
               </div>
             </motion.div>
@@ -689,16 +690,13 @@ export default function HomePageClient({ initialMovies, initialStats, initialTod
             {/* Quick Filters - Neon Glow Category Buttons */}
             <motion.div className="flex flex-wrap justify-center gap-3 mt-8" variants={stagger} initial="hidden" animate="visible">
               {quickFilters.map(filter => (
-                <motion.a
+                <Link
                   key={filter.label}
                   href={filter.href}
-                  className="category-btn-neon px-6 py-3 rounded-full text-sm font-medium"
-                  variants={fadeIn}
-                  whileHover={{ scale: 1.05 }}
-                  whileTap={{ scale: 0.98 }}
+                  className="category-btn-neon px-6 py-3 rounded-full text-sm font-medium hover:scale-105 active:scale-98 transition-transform"
                 >
                   {filter.label}
-                </motion.a>
+                </Link>
               ))}
             </motion.div>
           </motion.div>
@@ -728,10 +726,10 @@ export default function HomePageClient({ initialMovies, initialStats, initialTod
             variants={fadeIn}
           >
             <h2 className="text-3xl md:text-5xl font-bold">🎬 {t.home.sections.nowShowing}</h2>
-            <a href="/cinema" className="text-yellow-400 hover:text-yellow-300 flex items-center space-x-2 transition-colors group">
+            <Link href="/cinema" className="text-yellow-400 hover:text-yellow-300 flex items-center space-x-2 transition-colors group">
               <span className="font-medium">{t.home.sections.viewAll}</span>
               <ChevronRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
-            </a>
+            </Link>
           </motion.div>
 
           <motion.div
@@ -798,7 +796,7 @@ export default function HomePageClient({ initialMovies, initialStats, initialTod
               // No movies fallback
               <div className="col-span-4 text-center py-12">
                 <p className="text-gray-400">No movies currently showing. Check back soon!</p>
-                <a href="/cinema" className="text-yellow-400 hover:text-yellow-300 mt-2 inline-block">Browse all movies →</a>
+                <Link href="/cinema" className="text-yellow-400 hover:text-yellow-300 mt-2 inline-block">Browse all movies →</Link>
               </div>
             )}
           </motion.div>
@@ -818,10 +816,10 @@ export default function HomePageClient({ initialMovies, initialStats, initialTod
             <h2 className="text-3xl md:text-5xl font-bold flex items-center gap-3">
               🔥 {t.home.sections.happeningToday}
             </h2>
-            <a href="/events/today" className="text-yellow-400 hover:text-yellow-300 flex items-center space-x-2 transition-colors group">
+            <Link href="/events/today" className="text-yellow-400 hover:text-yellow-300 flex items-center space-x-2 transition-colors group">
               <span className="font-medium">{t.home.sections.viewAll}</span>
               <ChevronRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
-            </a>
+            </Link>
           </motion.div>
 
           <motion.div
@@ -868,7 +866,7 @@ export default function HomePageClient({ initialMovies, initialStats, initialTod
             ) : (
               <div className="col-span-4 text-center py-12">
                 <p className="text-gray-400">No upcoming events found. Check back soon!</p>
-                <a href="/events" className="text-yellow-400 hover:text-yellow-300 mt-2 inline-block">Browse all events →</a>
+                <Link href="/events" className="text-yellow-400 hover:text-yellow-300 mt-2 inline-block">Browse all events →</Link>
               </div>
             )}
           </motion.div>
@@ -896,12 +894,10 @@ export default function HomePageClient({ initialMovies, initialStats, initialTod
             viewport={{ once: true, margin: "-100px" }}
           >
             {categories.map(category => (
-              <motion.a
+              <Link
                 key={category.name}
                 href={category.href}
                 className="group relative bg-white/5 backdrop-blur-sm border border-white/10 rounded-2xl p-6 cursor-pointer overflow-hidden hover:border-yellow-400/50 transition-all duration-300"
-                variants={fadeIn}
-                whileHover={cardHover}
               >
                 <div className={`absolute inset-0 bg-gradient-to-br ${category.color} opacity-0 group-hover:opacity-20 transition-opacity duration-300`} />
                 <div className="relative text-center">
@@ -912,7 +908,7 @@ export default function HomePageClient({ initialMovies, initialStats, initialTod
                     {category.count > 0 ? `${category.count} ${t.categories.listings}` : t.categories.comingSoon}
                   </p>
                 </div>
-              </motion.a>
+              </Link>
             ))}
           </motion.div>
         </div>
@@ -957,7 +953,7 @@ export default function HomePageClient({ initialMovies, initialStats, initialTod
                 <ul className="space-y-3 text-gray-400">
                   {section.links.map(link => (
                     <li key={link.name} className="hover:text-white hover:translate-x-1 transition-all duration-200">
-                      <a href={link.href}>{link.name}</a>
+                      <Link href={link.href}>{link.name}</Link>
                     </li>
                   ))}
                 </ul>
