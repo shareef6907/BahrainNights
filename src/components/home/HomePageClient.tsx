@@ -686,15 +686,15 @@ export default function HomePageClient({ initialMovies, initialStats, initialTod
               placeholder={t.home.hero.searchPlaceholder}
             />
 
-            {/* Quick Filters */}
+            {/* Quick Filters - Neon Glow Category Buttons */}
             <motion.div className="flex flex-wrap justify-center gap-3 mt-8" variants={stagger} initial="hidden" animate="visible">
               {quickFilters.map(filter => (
                 <motion.a
                   key={filter.label}
                   href={filter.href}
-                  className="px-6 py-3 bg-white/5 backdrop-blur-sm border border-white/10 rounded-full hover:bg-white/10 hover:border-yellow-400/50 transition-all duration-200 text-sm font-medium"
+                  className="category-btn-neon px-6 py-3 rounded-full text-sm font-medium"
                   variants={fadeIn}
-                  whileHover={{ scale: 1.02 }}
+                  whileHover={{ scale: 1.05 }}
                   whileTap={{ scale: 0.98 }}
                 >
                   {filter.label}
