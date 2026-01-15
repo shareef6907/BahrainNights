@@ -111,12 +111,13 @@ export default async function CountryPage({ params }: Props) {
   }
 
   // Additional client-side filter to ensure no past events slip through
+  // Check if ANY of the date fields is today or in the future
   const todayDate = new Date(today);
   const countryEvents: InternationalEvent[] = (events || []).filter(event => {
-    const eventDate = event.start_date || event.end_date || event.date;
-    if (!eventDate) return false;
-    const parsedDate = new Date(eventDate);
-    return parsedDate >= todayDate;
+    const dates = [event.start_date, event.end_date, event.date].filter(Boolean);
+    if (dates.length === 0) return false;
+    // Include event if ANY date is today or in the future
+    return dates.some(d => new Date(d as string) >= todayDate);
   });
 
   // Group events by city
