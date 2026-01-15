@@ -614,7 +614,6 @@ export default function HomePageClient({ initialMovies, initialStats, initialTod
             playsInline
             preload="auto"
             disablePictureInPicture
-            fetchPriority="high"
             className="absolute inset-0 w-full h-full object-cover"
             style={{ objectPosition: 'center center' }}
             src="/Header-Video1.mp4"
