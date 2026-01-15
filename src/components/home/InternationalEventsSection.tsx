@@ -114,6 +114,11 @@ export default function InternationalEventsSection({ events }: Props) {
     return null;
   }
 
+  // Get countries that have events
+  const countriesWithEvents = COUNTRIES.filter(country =>
+    events.some(event => event.country === country.name || event.country === country.dbName)
+  );
+
   return (
     <section className="px-4 mb-12 md:mb-24">
       <div className="max-w-7xl mx-auto">
@@ -193,25 +198,27 @@ export default function InternationalEventsSection({ events }: Props) {
           ))}
         </motion.div>
 
-        {/* Country Quick Links */}
-        <motion.div
-          className="mt-8 flex flex-wrap justify-center gap-3"
-          initial="hidden"
-          whileInView="visible"
-          viewport={{ once: true, margin: "-100px" }}
-          variants={fadeIn}
-        >
-          {COUNTRIES.map((country) => (
-            <Link
-              key={country.code}
-              href={`/international/${country.code}`}
-              className="px-4 py-2 bg-white/5 backdrop-blur border border-white/10 rounded-full hover:border-purple-500/50 hover:bg-purple-500/10 transition-all duration-300 flex items-center gap-2 text-sm font-medium"
-            >
-              <span>{country.flag}</span>
-              <span>{country.name}</span>
-            </Link>
-          ))}
-        </motion.div>
+        {/* Country Quick Links - Only show countries with events */}
+        {countriesWithEvents.length > 0 && (
+          <motion.div
+            className="mt-8 flex flex-wrap justify-center gap-3"
+            initial="hidden"
+            whileInView="visible"
+            viewport={{ once: true, margin: "-100px" }}
+            variants={fadeIn}
+          >
+            {countriesWithEvents.map((country) => (
+              <Link
+                key={country.code}
+                href={`/international/${country.code}`}
+                className="px-4 py-2 bg-white/5 backdrop-blur border border-white/10 rounded-full hover:border-purple-500/50 hover:bg-purple-500/10 transition-all duration-300 flex items-center gap-2 text-sm font-medium"
+              >
+                <span>{country.flag}</span>
+                <span>{country.name}</span>
+              </Link>
+            ))}
+          </motion.div>
+        )}
       </div>
 
       {/* Event Modal */}

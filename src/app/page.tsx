@@ -120,6 +120,7 @@ async function getMovies(): Promise<HomepageMovie[]> {
 async function getInternationalEvents() {
   const today = new Date().toISOString().split('T')[0];
 
+  // Fetch more events to ensure we have events from all countries for dropdown
   const { data, error } = await supabaseAdmin
     .from('events')
     .select(`
@@ -142,9 +143,9 @@ async function getInternationalEvents() {
     .neq('country', 'Bahrain')
     .eq('status', 'published')
     .eq('is_active', true)
-    .gte('start_date', today)
+    .or(`start_date.gte.${today},end_date.gte.${today}`)
     .order('start_date', { ascending: true })
-    .limit(8);
+    .limit(100);
 
   if (error) {
     console.error('Error fetching international events:', error);

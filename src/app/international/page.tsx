@@ -53,8 +53,10 @@ const COUNTRY_CONFIG: Record<string, { flag: string; code: string }> = {
 };
 
 export default async function InternationalPage() {
+  const today = new Date().toISOString().split('T')[0];
+
   // Fetch all international events (not from Bahrain)
-  // Use end_date >= today to include long-running shows (e.g., West End musicals)
+  // Filter: start_date >= today OR end_date >= today (for long-running shows like West End musicals)
   const { data: events, error } = await supabaseAdmin
     .from('events')
     .select(`
@@ -78,7 +80,7 @@ export default async function InternationalPage() {
     .neq('country', 'Bahrain')
     .eq('status', 'published')
     .eq('is_active', true)
-    .gte('end_date', new Date().toISOString().split('T')[0])
+    .or(`start_date.gte.${today},end_date.gte.${today}`)
     .order('start_date', { ascending: true });
 
   if (error) {
