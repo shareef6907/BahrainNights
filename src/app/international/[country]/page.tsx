@@ -77,7 +77,7 @@ export default async function CountryPage({ params }: Props) {
   const today = new Date().toISOString().split('T')[0];
 
   // Fetch events for this country
-  // Filter: start_date >= today OR end_date >= today OR date >= today
+  // Filter: start_date >= today OR date >= today
   const { data: events, error } = await supabaseAdmin
     .from('events')
     .select(`
@@ -102,7 +102,7 @@ export default async function CountryPage({ params }: Props) {
     .eq('country', countryConfig.dbName)
     .eq('status', 'published')
     .eq('is_active', true)
-    .or(`start_date.gte.${today},end_date.gte.${today},date.gte.${today}`)
+    .or(`start_date.gte.${today},date.gte.${today}`)
     .order('start_date', { ascending: true, nullsFirst: false })
     .limit(100);
 
@@ -110,15 +110,8 @@ export default async function CountryPage({ params }: Props) {
     console.error(`Error fetching events for ${countryConfig.name}:`, error);
   }
 
-  // Additional client-side filter to ensure no past events slip through
-  // Check if ANY of the date fields is today or in the future
-  const todayDate = new Date(today);
-  const countryEvents: InternationalEvent[] = (events || []).filter(event => {
-    const dates = [event.start_date, event.end_date, event.date].filter(Boolean);
-    if (dates.length === 0) return false;
-    // Include event if ANY date is today or in the future
-    return dates.some(d => new Date(d as string) >= todayDate);
-  });
+  // Return data directly - DB filter handles date filtering
+  const countryEvents: InternationalEvent[] = events || [];
 
   // Group events by city
   const eventsByCity: Record<string, InternationalEvent[]> = {};

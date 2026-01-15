@@ -145,7 +145,7 @@ async function getInternationalEvents() {
     .neq('country', 'Bahrain')
     .eq('status', 'published')
     .eq('is_active', true)
-    .or(`start_date.gte.${today},end_date.gte.${today},date.gte.${today}`)
+    .or(`start_date.gte.${today},date.gte.${today}`)
     .order('start_date', { ascending: true, nullsFirst: false })
     .limit(100);
 
@@ -154,15 +154,9 @@ async function getInternationalEvents() {
     return [];
   }
 
-  // Additional client-side filter to ensure no past events slip through
-  // Check if ANY of the date fields is today or in the future
-  const todayDate = new Date(today);
-  return (data || []).filter(event => {
-    const dates = [event.start_date, event.end_date, event.date].filter(Boolean);
-    if (dates.length === 0) return false;
-    // Include event if ANY date is today or in the future
-    return dates.some(d => new Date(d as string) >= todayDate);
-  });
+  // Return data directly - DB filter is sufficient for homepage
+  // Homepage shows upcoming events (start_date or date >= today)
+  return data || [];
 }
 
 // Fetch stats for the homepage

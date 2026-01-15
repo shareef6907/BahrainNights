@@ -56,8 +56,8 @@ export default async function InternationalPage() {
   const today = new Date().toISOString().split('T')[0];
 
   // Fetch all international events (not from Bahrain)
-  // Filter: start_date >= today OR end_date >= today OR date >= today
-  // This handles events that only have `date` field populated
+  // Filter: start_date >= today OR date >= today
+  // This ensures we only show upcoming events, not events that started months ago
   const { data: events, error } = await supabaseAdmin
     .from('events')
     .select(`
@@ -81,22 +81,15 @@ export default async function InternationalPage() {
     .neq('country', 'Bahrain')
     .eq('status', 'published')
     .eq('is_active', true)
-    .or(`start_date.gte.${today},end_date.gte.${today},date.gte.${today}`)
+    .or(`start_date.gte.${today},date.gte.${today}`)
     .order('start_date', { ascending: true, nullsFirst: false });
 
   if (error) {
     console.error('Error fetching international events:', error);
   }
 
-  // Additional client-side filter to ensure no past events slip through
-  // Check if ANY of the date fields is today or in the future
-  const todayDate = new Date(today);
-  const internationalEvents: InternationalEvent[] = (events || []).filter(event => {
-    const dates = [event.start_date, event.end_date, event.date].filter(Boolean);
-    if (dates.length === 0) return false;
-    // Include event if ANY date is today or in the future
-    return dates.some(d => new Date(d as string) >= todayDate);
-  });
+  // Return data directly - DB filter handles date filtering
+  const internationalEvents: InternationalEvent[] = events || [];
 
   // Get unique countries from events and build dynamic country list
   const uniqueCountries = [...new Set(internationalEvents.map(e => e.country))].filter(Boolean);
