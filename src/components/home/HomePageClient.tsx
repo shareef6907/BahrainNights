@@ -843,11 +843,6 @@ export default function HomePageClient({ initialMovies, initialStats, initialTod
         </div>
       </section>
 
-      {/* International Events Section */}
-      {initialInternationalEvents && initialInternationalEvents.length > 0 && (
-        <InternationalEventsSection events={initialInternationalEvents} />
-      )}
-
       {/* Categories Grid - Updated to match main menu */}
       <section className="px-4 mb-12 md:mb-24">
         <div className="max-w-7xl mx-auto">
@@ -890,6 +885,11 @@ export default function HomePageClient({ initialMovies, initialStats, initialTod
           </motion.div>
         </div>
       </section>
+
+      {/* International Events Section - After Explore by Category */}
+      {initialInternationalEvents && initialInternationalEvents.length > 0 && (
+        <InternationalEventsSection events={initialInternationalEvents} />
+      )}
 
       {/* Sponsors Section */}
       <SponsorsSection />
