@@ -126,6 +126,7 @@ export interface HomepageInternationalEvent {
   time: string | null;
   start_date: string | null;
   start_time: string | null;
+  end_date: string | null;
   featured_image: string | null;
   cover_url: string | null;
   affiliate_url: string | null;
