@@ -98,8 +98,7 @@ export default function RootLayout({
         <link rel="preconnect" href="https://image.tmdb.org" />
         <link rel="dns-prefetch" href="https://bahrainnights-production.s3.me-south-1.amazonaws.com" />
         <link rel="dns-prefetch" href="https://image.tmdb.org" />
-        {/* Preload hero video for instant playback */}
-        <link rel="preload" href="/Header-Video1.mp4" as="video" type="video/mp4" />
+        <link rel="dns-prefetch" href="https://cdn.platinumlist.net" />
         {/* Organization and WebSite Schema for SEO */}
         <script
           type="application/ld+json"

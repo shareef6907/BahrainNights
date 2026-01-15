@@ -41,11 +41,15 @@ const nextConfig: NextConfig = {
   // Enable compression
   compress: true,
 
+  // Optimize production builds with SWC minifier
+  // swcMinify is now default in Next.js 15
+
   // Remove console logs in production
   compiler: {
     removeConsole: process.env.NODE_ENV === 'production' ? { exclude: ['error', 'warn'] } : false,
   },
 
+  // Optimized image configuration
   images: {
     remotePatterns: [
       {
@@ -73,16 +77,86 @@ const nextConfig: NextConfig = {
         pathname: '/**',
       },
     ],
+    // Enable modern image formats for better compression
+    formats: ['image/avif', 'image/webp'],
+    // Cache optimized images for 7 days
+    minimumCacheTTL: 604800,
+    // Device sizes for responsive images
+    deviceSizes: [640, 750, 828, 1080, 1200, 1920],
+    // Image sizes for different breakpoints
+    imageSizes: [16, 32, 48, 64, 96, 128, 256, 384],
   },
 
-  // Add security headers to all routes
+  // Experimental features for better performance
+  experimental: {
+    // Optimize CSS
+    optimizeCss: true,
+  },
+
+  // Add security headers and caching headers
   async headers() {
     return [
+      // Security headers for all routes
       {
         source: '/:path*',
         headers: securityHeaders,
       },
+      // Cache static assets for 1 year (immutable)
+      {
+        source: '/:all*(svg|jpg|jpeg|png|webp|avif|gif|ico)',
+        headers: [
+          {
+            key: 'Cache-Control',
+            value: 'public, max-age=31536000, immutable',
+          },
+        ],
+      },
+      // Cache JS and CSS for 1 year (immutable)
+      {
+        source: '/_next/static/:path*',
+        headers: [
+          {
+            key: 'Cache-Control',
+            value: 'public, max-age=31536000, immutable',
+          },
+        ],
+      },
+      // Cache fonts for 1 year
+      {
+        source: '/:all*(woff|woff2|ttf|otf|eot)',
+        headers: [
+          {
+            key: 'Cache-Control',
+            value: 'public, max-age=31536000, immutable',
+          },
+        ],
+      },
+      // Cache video files for 7 days
+      {
+        source: '/:all*(mp4|webm|ogg)',
+        headers: [
+          {
+            key: 'Cache-Control',
+            value: 'public, max-age=604800, stale-while-revalidate=86400',
+          },
+        ],
+      },
     ];
+  },
+
+  // Webpack optimizations
+  webpack: (config, { isServer }) => {
+    // Don't include node modules in client bundle
+    if (!isServer) {
+      config.resolve.fallback = {
+        ...config.resolve.fallback,
+        fs: false,
+        net: false,
+        tls: false,
+        dns: false,
+      };
+    }
+    return config;
   },
 };
 

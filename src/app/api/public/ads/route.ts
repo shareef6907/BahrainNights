@@ -1,6 +1,9 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getAdsForPage, type AdTargetPage, type AdPlacement } from '@/lib/db/ads';
 
+// Cache ads for 5 minutes
+export const revalidate = 300;
+
 // Get active ads for a specific page and placement (public API)
 export async function GET(request: NextRequest) {
   try {
@@ -28,7 +31,11 @@ export async function GET(request: NextRequest) {
       image_settings: ad.image_settings,
     }));
 
-    return NextResponse.json({ ads: publicAds });
+    return NextResponse.json({ ads: publicAds }, {
+      headers: {
+        'Cache-Control': 'public, s-maxage=300, stale-while-revalidate=600',
+      },
+    });
   } catch (error) {
     console.error('Error fetching public ads:', error);
     return NextResponse.json({ ads: [] });

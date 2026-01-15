@@ -1,8 +1,8 @@
 import { NextResponse } from 'next/server';
 import { createClient } from '@supabase/supabase-js';
 
-export const dynamic = 'force-dynamic';
-export const revalidate = 300; // Cache for 5 minutes
+// Cache stats for 5 minutes (300 seconds)
+export const revalidate = 300;
 
 function getSupabaseAdmin() {
   return createClient(
@@ -65,7 +65,11 @@ export async function GET() {
       explore: venuesResult.count || 0,
     };
 
-    return NextResponse.json(stats);
+    return NextResponse.json(stats, {
+      headers: {
+        'Cache-Control': 'public, s-maxage=300, stale-while-revalidate=600',
+      },
+    });
   } catch (error) {
     console.error('Stats API error:', error);
     // Return zeros on error

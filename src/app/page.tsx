@@ -19,72 +19,66 @@ const categoryDisplay: Record<string, { label: string; icon: string }> = {
 
 // Fetch featured events for "Happening Today" - ONLY today's events
 async function getTodayEvents(): Promise<TodayEvent[]> {
-  const today = new Date().toISOString().split('T')[0]; // "2026-01-04"
+  const today = new Date().toISOString().split('T')[0];
 
-  // Get events happening TODAY only from each category
-  const categories = ['music', 'sports', 'arts', 'dining', 'community', 'shopping', 'nightlife', 'special', 'family'];
-  const events: TodayEvent[] = [];
+  // Fetch all today's events in a single query and group by category
+  const { data: allTodayEvents, error } = await supabaseAdmin
+    .from('events')
+    .select('id, title, slug, venue_name, time, cover_url, category, date, is_featured, view_count')
+    .eq('status', 'published')
+    .eq('is_hidden', false)
+    .eq('country', 'Bahrain')
+    .eq('date', today)
+    .order('is_featured', { ascending: false })
+    .order('view_count', { ascending: false })
+    .limit(20);
 
-  for (const category of categories) {
-    const { data, error } = await supabaseAdmin
-      .from('events')
-      .select('id, title, slug, venue_name, time, cover_url, category, date, is_featured, view_count')
-      .eq('status', 'published')
-      .eq('is_hidden', false)
-      .eq('country', 'Bahrain') // Only Bahrain events on homepage
-      .eq('category', category)
-      .eq('date', today) // Only TODAY's events
-      .order('is_featured', { ascending: false })
-      .order('view_count', { ascending: false })
-      .limit(1)
-      .single();
-
-    if (!error && data) {
-      const catInfo = categoryDisplay[data.category] || { label: data.category, icon: '📅' };
-      events.push({
-        id: data.id,
-        title: data.title,
-        slug: data.slug,
-        venue: data.venue_name || 'TBA',
-        time: data.time || 'Check listing',
-        image: data.cover_url || 'https://images.unsplash.com/photo-1492684223066-81342ee5ff30?w=400&h=500&fit=crop',
-        category: catInfo.label,
-        date: data.date,
-      });
-    }
-
-    // Stop after 4 events
-    if (events.length >= 4) break;
+  if (error || !allTodayEvents) {
+    console.error('Error fetching today events:', error);
+    return [];
   }
 
-  // If we don't have 4 events happening TODAY, fetch more from any category (still only today)
+  // Group by category and take the best event from each
+  const categoryOrder = ['music', 'sports', 'arts', 'dining', 'community', 'shopping', 'nightlife', 'special', 'family'];
+  const seenCategories = new Set<string>();
+  const events: TodayEvent[] = [];
+
+  // First pass: get one event per category
+  for (const category of categoryOrder) {
+    if (events.length >= 4) break;
+    const event = allTodayEvents.find(e => e.category === category && !seenCategories.has(e.category));
+    if (event) {
+      seenCategories.add(event.category);
+      const catInfo = categoryDisplay[event.category] || { label: event.category, icon: '📅' };
+      events.push({
+        id: event.id,
+        title: event.title,
+        slug: event.slug,
+        venue: event.venue_name || 'TBA',
+        time: event.time || 'Check listing',
+        image: event.cover_url || 'https://images.unsplash.com/photo-1492684223066-81342ee5ff30?w=400&h=500&fit=crop',
+        category: catInfo.label,
+        date: event.date,
+      });
+    }
+  }
+
+  // Second pass: fill remaining slots with any events
   if (events.length < 4) {
-    const existingIds = events.map(e => e.id);
-    const { data: moreEvents } = await supabaseAdmin
-      .from('events')
-      .select('id, title, slug, venue_name, time, cover_url, category, date')
-      .eq('status', 'published')
-      .eq('is_hidden', false)
-      .eq('country', 'Bahrain') // Only Bahrain events on homepage
-      .eq('date', today) // Only TODAY's events
-      .not('id', 'in', `(${existingIds.length > 0 ? existingIds.map(id => `'${id}'`).join(',') : "''"})`)
-
-      .order('is_featured', { ascending: false })
-      .order('view_count', { ascending: false })
-      .limit(4 - events.length);
-
-    if (moreEvents) {
-      for (const data of moreEvents) {
-        const catInfo = categoryDisplay[data.category] || { label: data.category, icon: '📅' };
+    const existingIds = new Set(events.map(e => e.id));
+    for (const event of allTodayEvents) {
+      if (events.length >= 4) break;
+      if (!existingIds.has(event.id)) {
+        const catInfo = categoryDisplay[event.category] || { label: event.category, icon: '📅' };
         events.push({
-          id: data.id,
-          title: data.title,
-          slug: data.slug,
-          venue: data.venue_name || 'TBA',
-          time: data.time || 'Check listing',
-          image: data.cover_url || 'https://images.unsplash.com/photo-1492684223066-81342ee5ff30?w=400&h=500&fit=crop',
+          id: event.id,
+          title: event.title,
+          slug: event.slug,
+          venue: event.venue_name || 'TBA',
+          time: event.time || 'Check listing',
+          image: event.cover_url || 'https://images.unsplash.com/photo-1492684223066-81342ee5ff30?w=400&h=500&fit=crop',
           category: catInfo.label,
-          date: data.date,
+          date: event.date,
         });
       }
     }
@@ -100,7 +94,7 @@ async function getMovies(): Promise<HomepageMovie[]> {
 
   const { data, error } = await supabaseAdmin
     .from('movies')
-    .select('*')
+    .select('id, title, slug, poster_url, backdrop_url, tmdb_rating, genre, duration_minutes, language, release_date, is_now_showing, synopsis, trailer_url, movie_cast, scraped_from')
     .eq('is_now_showing', true)
     .not('language', 'in', `(${indianLanguages.join(',')})`)
     // Exclude movies that are ONLY from Mukta - only show VOX, Cineco, Seef, or manual entries
