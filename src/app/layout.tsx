@@ -157,7 +157,7 @@ export default function RootLayout({
           <PublicAuthProvider>
             <AuthProvider>
               <PageTracker />
-              <SwipeBackHandler threshold={80} edgeWidth={25} />
+              <SwipeBackHandler threshold={50} edgeWidth={50} />
               {children}
               <FloatingBackButton />
             </AuthProvider>
