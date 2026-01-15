@@ -56,7 +56,8 @@ export default async function InternationalPage() {
   const today = new Date().toISOString().split('T')[0];
 
   // Fetch all international events (not from Bahrain)
-  // Filter: start_date >= today OR end_date >= today (for long-running shows like West End musicals)
+  // Filter: start_date >= today OR end_date >= today OR date >= today
+  // This handles events that only have `date` field populated
   const { data: events, error } = await supabaseAdmin
     .from('events')
     .select(`
@@ -80,14 +81,21 @@ export default async function InternationalPage() {
     .neq('country', 'Bahrain')
     .eq('status', 'published')
     .eq('is_active', true)
-    .or(`start_date.gte.${today},end_date.gte.${today}`)
-    .order('start_date', { ascending: true });
+    .or(`start_date.gte.${today},end_date.gte.${today},date.gte.${today}`)
+    .order('start_date', { ascending: true, nullsFirst: false });
 
   if (error) {
     console.error('Error fetching international events:', error);
   }
 
-  const internationalEvents: InternationalEvent[] = events || [];
+  // Additional client-side filter to ensure no past events slip through
+  const todayDate = new Date(today);
+  const internationalEvents: InternationalEvent[] = (events || []).filter(event => {
+    const eventDate = event.start_date || event.end_date || event.date;
+    if (!eventDate) return false;
+    const parsedDate = new Date(eventDate);
+    return parsedDate >= todayDate;
+  });
 
   // Get unique countries from events and build dynamic country list
   const uniqueCountries = [...new Set(internationalEvents.map(e => e.country))].filter(Boolean);

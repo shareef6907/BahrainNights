@@ -121,6 +121,7 @@ async function getInternationalEvents() {
   const today = new Date().toISOString().split('T')[0];
 
   // Fetch more events to ensure we have events from all countries for dropdown
+  // Filter: start_date >= today OR end_date >= today OR date >= today
   const { data, error } = await supabaseAdmin
     .from('events')
     .select(`
@@ -143,8 +144,8 @@ async function getInternationalEvents() {
     .neq('country', 'Bahrain')
     .eq('status', 'published')
     .eq('is_active', true)
-    .or(`start_date.gte.${today},end_date.gte.${today}`)
-    .order('start_date', { ascending: true })
+    .or(`start_date.gte.${today},end_date.gte.${today},date.gte.${today}`)
+    .order('start_date', { ascending: true, nullsFirst: false })
     .limit(100);
 
   if (error) {
@@ -152,7 +153,14 @@ async function getInternationalEvents() {
     return [];
   }
 
-  return data || [];
+  // Additional client-side filter to ensure no past events slip through
+  const todayDate = new Date(today);
+  return (data || []).filter(event => {
+    const eventDate = event.start_date || event.date;
+    if (!eventDate) return false;
+    const parsedDate = new Date(eventDate);
+    return parsedDate >= todayDate;
+  });
 }
 
 // Fetch stats for the homepage
