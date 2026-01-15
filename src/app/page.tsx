@@ -179,11 +179,11 @@ async function getStats() {
 
   try {
     // Fetch counts in parallel (only Bahrain events for event count)
-    const [eventsResult, venuesResult, moviesResult, experiencesResult] = await Promise.all([
+    const [eventsResult, venuesResult, moviesResult, attractionsResult] = await Promise.all([
       supabaseAdmin.from('events').select('id', { count: 'exact', head: true }).eq('status', 'published').eq('is_hidden', false).eq('country', 'Bahrain'),
       supabaseAdmin.from('venues').select('id', { count: 'exact', head: true }),
       supabaseAdmin.from('movies').select('id', { count: 'exact', head: true }).eq('is_now_showing', true),
-      supabaseAdmin.from('experiences').select('id', { count: 'exact', head: true }).eq('is_active', true),
+      supabaseAdmin.from('attractions').select('id', { count: 'exact', head: true }).eq('is_active', true),
     ]);
 
     return {
@@ -192,7 +192,7 @@ async function getStats() {
       cinema: moviesResult.count || 0,
       offers: 0, // Will be added later
       explore: 0, // Will be added later
-      attractions: experiencesResult.count || 0,
+      attractions: attractionsResult.count || 0,
     };
   } catch (error) {
     console.error('Error fetching stats:', error);
