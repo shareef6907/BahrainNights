@@ -143,7 +143,11 @@ export default function InternationalPageClient({ events, eventsByCountry, count
             <button
               type="button"
               onClick={() => setSelectedCountry(null)}
-              className={`px-4 py-3 md:py-2 rounded-full transition-all duration-300 text-sm md:text-base touch-manipulation ${
+              onTouchEnd={(e) => {
+                e.preventDefault();
+                setSelectedCountry(null);
+              }}
+              className={`px-4 py-3 md:py-2 rounded-full transition-all duration-300 text-sm md:text-base touch-manipulation cursor-pointer select-none relative z-10 ${
                 selectedCountry === null
                   ? 'bg-gradient-to-r from-purple-500 to-blue-500 text-white shadow-lg'
                   : 'bg-gray-700/50 text-gray-300 hover:bg-gray-600/50 active:bg-gray-500/50'
@@ -160,7 +164,11 @@ export default function InternationalPageClient({ events, eventsByCountry, count
                   type="button"
                   key={country.code}
                   onClick={() => setSelectedCountry(country.name)}
-                  className={`px-4 py-3 md:py-2 rounded-full transition-all duration-300 flex items-center gap-2 text-sm md:text-base touch-manipulation ${
+                  onTouchEnd={(e) => {
+                    e.preventDefault();
+                    setSelectedCountry(country.name);
+                  }}
+                  className={`px-4 py-3 md:py-2 rounded-full transition-all duration-300 flex items-center gap-2 text-sm md:text-base touch-manipulation cursor-pointer select-none relative z-10 ${
                     selectedCountry === country.name
                       ? 'bg-gradient-to-r from-purple-500 to-blue-500 text-white shadow-lg'
                       : 'bg-gray-700/50 text-gray-300 hover:bg-gray-600/50 active:bg-gray-500/50'
