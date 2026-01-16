@@ -1105,6 +1105,129 @@ export interface Database {
           created_at?: string;
         };
       };
+      blog_articles: {
+        Row: {
+          id: string;
+          title: string;
+          slug: string;
+          excerpt: string | null;
+          content: string;
+          meta_title: string | null;
+          meta_description: string | null;
+          keywords: string[] | null;
+          country: string;
+          city: string | null;
+          category: string | null;
+          tags: string[] | null;
+          event_id: string | null;
+          venue_id: string | null;
+          featured_image: string | null;
+          images: string[] | null;
+          article_type: string;
+          status: 'draft' | 'published' | 'archived';
+          is_featured: boolean;
+          view_count: number;
+          read_time_minutes: number;
+          created_at: string;
+          updated_at: string;
+          published_at: string;
+        };
+        Insert: {
+          id?: string;
+          title: string;
+          slug: string;
+          excerpt?: string | null;
+          content: string;
+          meta_title?: string | null;
+          meta_description?: string | null;
+          keywords?: string[] | null;
+          country?: string;
+          city?: string | null;
+          category?: string | null;
+          tags?: string[] | null;
+          event_id?: string | null;
+          venue_id?: string | null;
+          featured_image?: string | null;
+          images?: string[] | null;
+          article_type?: string;
+          status?: 'draft' | 'published' | 'archived';
+          is_featured?: boolean;
+          view_count?: number;
+          read_time_minutes?: number;
+          created_at?: string;
+          updated_at?: string;
+          published_at?: string;
+        };
+        Update: {
+          id?: string;
+          title?: string;
+          slug?: string;
+          excerpt?: string | null;
+          content?: string;
+          meta_title?: string | null;
+          meta_description?: string | null;
+          keywords?: string[] | null;
+          country?: string;
+          city?: string | null;
+          category?: string | null;
+          tags?: string[] | null;
+          event_id?: string | null;
+          venue_id?: string | null;
+          featured_image?: string | null;
+          images?: string[] | null;
+          article_type?: string;
+          status?: 'draft' | 'published' | 'archived';
+          is_featured?: boolean;
+          view_count?: number;
+          read_time_minutes?: number;
+          created_at?: string;
+          updated_at?: string;
+          published_at?: string;
+        };
+      };
+      blog_event_tracker: {
+        Row: {
+          id: string;
+          event_id: string;
+          article_id: string;
+          created_at: string;
+        };
+        Insert: {
+          id?: string;
+          event_id: string;
+          article_id: string;
+          created_at?: string;
+        };
+        Update: {
+          id?: string;
+          event_id?: string;
+          article_id?: string;
+          created_at?: string;
+        };
+      };
+      blog_experience_tracker: {
+        Row: {
+          id: string;
+          experience_type: string;
+          experience_id: string;
+          article_id: string;
+          created_at: string;
+        };
+        Insert: {
+          id?: string;
+          experience_type: string;
+          experience_id: string;
+          article_id: string;
+          created_at?: string;
+        };
+        Update: {
+          id?: string;
+          experience_type?: string;
+          experience_id?: string;
+          article_id?: string;
+          created_at?: string;
+        };
+      };
     };
     Views: {
       [_ in never]: never;
@@ -1183,6 +1306,18 @@ export type DiscoveredVenueUpdate = Database['public']['Tables']['discovered_ven
 export type AgentLog = Database['public']['Tables']['agent_logs']['Row'];
 export type AgentLogInsert = Database['public']['Tables']['agent_logs']['Insert'];
 export type AgentLogUpdate = Database['public']['Tables']['agent_logs']['Update'];
+
+export type BlogArticle = Database['public']['Tables']['blog_articles']['Row'];
+export type BlogArticleInsert = Database['public']['Tables']['blog_articles']['Insert'];
+export type BlogArticleUpdate = Database['public']['Tables']['blog_articles']['Update'];
+
+export type BlogEventTracker = Database['public']['Tables']['blog_event_tracker']['Row'];
+export type BlogEventTrackerInsert = Database['public']['Tables']['blog_event_tracker']['Insert'];
+export type BlogEventTrackerUpdate = Database['public']['Tables']['blog_event_tracker']['Update'];
+
+export type BlogExperienceTracker = Database['public']['Tables']['blog_experience_tracker']['Row'];
+export type BlogExperienceTrackerInsert = Database['public']['Tables']['blog_experience_tracker']['Insert'];
+export type BlogExperienceTrackerUpdate = Database['public']['Tables']['blog_experience_tracker']['Update'];
 
 // Extended types with relations
 export type VenueWithEvents = Venue & {

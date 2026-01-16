@@ -925,7 +925,7 @@ export default function HomePageClient({ initialMovies, initialStats, initialTod
       {/* Footer */}
       <footer className="border-t border-white/10 px-4 py-16">
         <div className="max-w-7xl mx-auto">
-          <div className="grid grid-cols-1 md:grid-cols-5 gap-10 mb-10">
+          <div className="grid grid-cols-1 md:grid-cols-6 gap-10 mb-10">
             <div className="md:col-span-2">
               <div className="text-3xl font-black bg-gradient-to-r from-yellow-400 via-orange-500 to-pink-500 bg-clip-text text-transparent mb-4">
                 BahrainNights
@@ -946,6 +946,7 @@ export default function HomePageClient({ initialMovies, initialStats, initialTod
             {[
               { title: t.footer.events, links: [{ name: t.footer.todaysEvents, href: '/events?filter=today' }, { name: t.footer.thisWeekend, href: '/events?filter=weekend' }, { name: t.footer.concerts, href: '/events?category=concerts' }, { name: t.footer.fullCalendar, href: '/events/calendar' }] },
               { title: t.footer.dining, links: [{ name: t.footer.restaurants, href: '/places?category=restaurant' }, { name: t.footer.cafes, href: '/places?category=cafe' }, { name: t.footer.nightlife, href: '/places?category=nightclub' }, { name: t.footer.viewAll, href: '/places' }] },
+              { title: 'Places to Go', links: [{ name: 'Our Blog', href: '/blog' }, { name: '🇧🇭 Bahrain', href: '/blog/places-to-go/bahrain' }, { name: '🇦🇪 UAE', href: '/blog/places-to-go/uae' }, { name: '🇸🇦 Saudi Arabia', href: '/blog/places-to-go/saudi-arabia' }, { name: '🇶🇦 Qatar', href: '/blog/places-to-go/qatar' }] },
               { title: t.footer.forBusinesses, links: [{ name: t.footer.registerYourVenue, href: '/register-venue' }, { name: t.footer.venueLogin, href: '/venue-portal/login' }, { name: t.footer.listYourEvent, href: '/list-event' }, { name: t.footer.advertise, href: '/advertise' }, { name: t.footer.contact, href: '/contact' }] }
             ].map(section => (
               <div key={section.title}>
