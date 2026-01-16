@@ -2,9 +2,11 @@
 
 import React from 'react';
 import { motion } from 'framer-motion';
-import { MapPin, Clock, Calendar, Star } from 'lucide-react';
+import { MapPin, Clock, Calendar, Star, Repeat } from 'lucide-react';
 import Image from 'next/image';
 import Link from 'next/link';
+import { formatRecurrence } from '@/lib/utils/recurrence';
+import { WeekDay, RecurrenceType } from '@/types/recurrence';
 
 export interface Event {
   id: string;
@@ -23,6 +25,10 @@ export interface Event {
   isFree: boolean;
   isSoldOut?: boolean;
   isFeatured?: boolean;
+  // Recurrence fields
+  isRecurring?: boolean;
+  recurrencePattern?: RecurrenceType | string | null;
+  recurrenceDays?: WeekDay[] | string[] | null;
 }
 
 interface EventCardProps {
@@ -45,6 +51,11 @@ const cardVariants = {
 };
 
 function EventCard({ event, view = 'grid', index = 0 }: EventCardProps) {
+  // Format recurrence for display
+  const recurrenceText = event.isRecurring
+    ? formatRecurrence(event.recurrencePattern || null, event.recurrenceDays || null, { short: true })
+    : '';
+
   if (view === 'list') {
     return (
       <motion.div
@@ -103,6 +114,13 @@ function EventCard({ event, view = 'grid', index = 0 }: EventCardProps) {
                     <span>{event.time}</span>
                   </div>
                 )}
+                {/* Recurrence Badge */}
+                {recurrenceText && (
+                  <div className="flex items-center gap-1 text-purple-400">
+                    <Repeat className="w-3.5 h-3.5" />
+                    <span>{recurrenceText}</span>
+                  </div>
+                )}
               </div>
             </div>
           </div>
@@ -153,6 +171,14 @@ function EventCard({ event, view = 'grid', index = 0 }: EventCardProps) {
             <div className={`absolute ${event.isFeatured ? 'top-10' : 'top-3'} right-3 px-3 py-1 bg-black/70 backdrop-blur-sm text-white text-xs font-medium rounded-full`}>
               {event.endDate ? `${event.date} - ${event.endDate}` : event.date}
             </div>
+
+            {/* Recurrence Badge */}
+            {recurrenceText && (
+              <div className="absolute bottom-3 left-3 px-2 py-1 bg-purple-500/90 backdrop-blur-sm text-white text-xs font-medium rounded-full flex items-center gap-1 shadow-lg">
+                <Repeat className="w-3 h-3" />
+                <span>{recurrenceText}</span>
+              </div>
+            )}
 
             {/* View Details Overlay */}
             <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-300">

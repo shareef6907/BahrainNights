@@ -90,7 +90,7 @@ export async function GET() {
     // Filter events by venue_name (events table uses venue_name, not venue_id)
     const { data: events, error } = await supabase
       .from('events')
-      .select('id, title, slug, status, start_date, end_date, start_time, category, featured_image')
+      .select('id, title, slug, status, start_date, end_date, start_time, category, featured_image, is_recurring, recurrence_pattern, recurrence_days, promotion_start_date, promotion_end_date')
       .eq('venue_name', venue.name)
       .order('start_date', { ascending: false });
 
@@ -189,6 +189,12 @@ export async function POST(request: NextRequest) {
       is_featured: false,
       views: 0,
       view_count: 0,
+      // Recurrence fields
+      is_recurring: body.is_recurring || false,
+      recurrence_pattern: body.recurrence_pattern || null,
+      recurrence_days: body.recurrence_days || null,
+      promotion_start_date: body.promotion_start_date || null,
+      promotion_end_date: body.promotion_end_date || null,
     };
 
     // eslint-disable-next-line @typescript-eslint/no-explicit-any

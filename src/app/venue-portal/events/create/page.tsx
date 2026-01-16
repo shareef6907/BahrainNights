@@ -16,9 +16,11 @@ import {
   Image as ImageIcon,
   X,
   MapPin,
+  Repeat,
 } from 'lucide-react';
 import AIWriterButton from '@/components/ai/AIWriterButton';
 import { compressImage } from '@/lib/image-compression';
+import { WeekDay, WEEKDAYS, RecurrenceType } from '@/types/recurrence';
 
 const CATEGORIES = [
   { value: 'dining', label: 'Dining & Restaurants' },
@@ -54,6 +56,19 @@ export default function CreateEventPage() {
     google_maps_url: '',
     featured_image: '',
   });
+
+  // Recurrence state
+  const [isRecurring, setIsRecurring] = useState(false);
+  const [recurrenceType, setRecurrenceType] = useState<RecurrenceType>('weekly');
+  const [selectedDays, setSelectedDays] = useState<WeekDay[]>([]);
+  const [promotionStartDate, setPromotionStartDate] = useState('');
+  const [promotionEndDate, setPromotionEndDate] = useState('');
+
+  const toggleDay = (day: WeekDay) => {
+    setSelectedDays((prev) =>
+      prev.includes(day) ? prev.filter((d) => d !== day) : [...prev, day]
+    );
+  };
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
     const { name, value } = e.target;
@@ -139,10 +154,20 @@ export default function CreateEventPage() {
     }
 
     try {
+      // Build submission data with recurrence
+      const submitData = {
+        ...formData,
+        is_recurring: isRecurring,
+        recurrence_pattern: isRecurring ? recurrenceType : null,
+        recurrence_days: isRecurring && selectedDays.length > 0 ? selectedDays : null,
+        promotion_start_date: isRecurring && promotionStartDate ? promotionStartDate : null,
+        promotion_end_date: isRecurring && promotionEndDate ? promotionEndDate : null,
+      };
+
       const response = await fetch('/api/venue-portal/events', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(formData),
+        body: JSON.stringify(submitData),
       });
 
       if (response.ok) {
@@ -426,6 +451,104 @@ export default function CreateEventPage() {
           <p className="text-gray-500 text-xs mt-1">
             Paste the Google Maps link to your event location (optional - uses venue location if empty)
           </p>
+        </div>
+
+        {/* Recurring Event Section */}
+        <div className="space-y-4 p-4 bg-white/5 border border-white/10 rounded-xl">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-2">
+              <Repeat className="w-5 h-5 text-yellow-400" />
+              <label className="text-sm font-medium text-gray-300">
+                Recurring Event
+              </label>
+            </div>
+            <button
+              type="button"
+              onClick={() => setIsRecurring(!isRecurring)}
+              className={`relative w-12 h-6 rounded-full transition-colors ${
+                isRecurring ? 'bg-yellow-400' : 'bg-white/20'
+              }`}
+            >
+              <span
+                className={`absolute top-1 w-4 h-4 rounded-full bg-white transition-transform ${
+                  isRecurring ? 'left-7' : 'left-1'
+                }`}
+              />
+            </button>
+          </div>
+          <p className="text-gray-500 text-xs">
+            Enable this for events that happen regularly (e.g., every Wednesday)
+          </p>
+
+          {isRecurring && (
+            <motion.div
+              initial={{ opacity: 0, height: 0 }}
+              animate={{ opacity: 1, height: 'auto' }}
+              exit={{ opacity: 0, height: 0 }}
+              className="space-y-4 pt-4 border-t border-white/10"
+            >
+              {/* Day Selector */}
+              <div>
+                <label className="block text-sm font-medium text-gray-300 mb-3">
+                  Select Days *
+                </label>
+                <div className="flex flex-wrap gap-2">
+                  {WEEKDAYS.map((day) => (
+                    <button
+                      key={day}
+                      type="button"
+                      onClick={() => toggleDay(day)}
+                      className={`px-3 py-2 rounded-lg text-sm font-medium transition-all ${
+                        selectedDays.includes(day)
+                          ? 'bg-yellow-400 text-black'
+                          : 'bg-white/10 text-gray-300 hover:bg-white/20'
+                      }`}
+                    >
+                      {day.slice(0, 3)}
+                    </button>
+                  ))}
+                </div>
+                {selectedDays.length > 0 && (
+                  <p className="text-yellow-400 text-xs mt-2">
+                    Repeats every: {selectedDays.join(', ')}
+                  </p>
+                )}
+              </div>
+
+              {/* Promotion Period */}
+              <div>
+                <label className="block text-sm font-medium text-gray-300 mb-2">
+                  Promotion Period (Optional)
+                </label>
+                <p className="text-gray-500 text-xs mb-3">
+                  Set a date range for when this recurring event is active
+                </p>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div>
+                    <label className="block text-xs text-gray-400 mb-1">Start Date</label>
+                    <input
+                      type="date"
+                      value={promotionStartDate}
+                      onChange={(e) => setPromotionStartDate(e.target.value)}
+                      className="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-xl text-white focus:outline-none focus:ring-2 focus:ring-yellow-400/50 focus:border-transparent"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-xs text-gray-400 mb-1">End Date</label>
+                    <input
+                      type="date"
+                      value={promotionEndDate}
+                      onChange={(e) => setPromotionEndDate(e.target.value)}
+                      className="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-xl text-white focus:outline-none focus:ring-2 focus:ring-yellow-400/50 focus:border-transparent"
+                    />
+                  </div>
+                </div>
+                <p className="text-gray-500 text-xs mt-2">
+                  Leave empty for ongoing events with no end date
+                </p>
+              </div>
+            </motion.div>
+          )}
         </div>
 
         {/* Submit */}
