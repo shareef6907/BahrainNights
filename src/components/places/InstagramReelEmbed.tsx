@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useRef } from 'react';
 import { motion } from 'framer-motion';
-import { Play, Volume2, VolumeX, ExternalLink, Loader2 } from 'lucide-react';
+import { Play, ExternalLink, Loader2 } from 'lucide-react';
 import { extractInstagramReelId, getInstagramReelUrl } from '@/lib/utils/instagram';
 
 interface InstagramReelEmbedProps {
@@ -15,21 +15,45 @@ interface InstagramReelEmbedProps {
 export default function InstagramReelEmbed({
   reelUrl,
   className = '',
-  autoPlay = false,
+  autoPlay = true, // Default to true for better UX
   showControls = true
 }: InstagramReelEmbedProps) {
-  const [isPlaying, setIsPlaying] = useState(autoPlay);
-  const [isLoading, setIsLoading] = useState(false);
-  const [isMuted, setIsMuted] = useState(true);
+  const [isPlaying, setIsPlaying] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
+  const [hasInteracted, setHasInteracted] = useState(false);
   const iframeRef = useRef<HTMLIFrameElement>(null);
+  const containerRef = useRef<HTMLDivElement>(null);
 
   const reelId = extractInstagramReelId(reelUrl);
   const canonicalUrl = getInstagramReelUrl(reelUrl);
 
+  // Auto-load embed when autoPlay is true and component is in view
   useEffect(() => {
-    // Reset state when URL changes
-    setIsPlaying(autoPlay);
-    setIsLoading(false);
+    if (!autoPlay || !containerRef.current) return;
+
+    const observer = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          if (entry.isIntersecting && !hasInteracted) {
+            setIsPlaying(true);
+            setHasInteracted(true);
+          }
+        });
+      },
+      { threshold: 0.3 }
+    );
+
+    observer.observe(containerRef.current);
+    return () => observer.disconnect();
+  }, [autoPlay, hasInteracted]);
+
+  // Reset when URL changes
+  useEffect(() => {
+    setIsLoading(true);
+    if (!autoPlay) {
+      setIsPlaying(false);
+      setHasInteracted(false);
+    }
   }, [reelUrl, autoPlay]);
 
   if (!reelId) {
@@ -42,11 +66,15 @@ export default function InstagramReelEmbed({
   const handlePlay = () => {
     setIsLoading(true);
     setIsPlaying(true);
+    setHasInteracted(true);
   };
 
   return (
-    <div className={`relative bg-gradient-to-br from-purple-600 via-pink-500 to-orange-400 ${className}`}>
-      {/* Thumbnail/Preview State */}
+    <div
+      ref={containerRef}
+      className={`relative bg-gradient-to-br from-purple-600 via-pink-500 to-orange-400 rounded-xl overflow-hidden ${className}`}
+    >
+      {/* Thumbnail/Preview State - shown when not playing */}
       {!isPlaying && (
         <div className="absolute inset-0 flex flex-col items-center justify-center z-10">
           {/* Instagram Gradient Background */}
@@ -69,55 +97,58 @@ export default function InstagramReelEmbed({
               <path d="M12 6.351A5.649 5.649 0 1 0 17.649 12 5.649 5.649 0 0 0 12 6.351zm0 9.316A3.667 3.667 0 1 1 15.667 12 3.667 3.667 0 0 1 12 15.667z"/>
               <circle cx="17.872" cy="6.128" r="1.32"/>
             </svg>
-            <span>Instagram Reel</span>
+            <span>Tap to play</span>
           </div>
         </div>
       )}
 
-      {/* Loading State */}
+      {/* Loading State - shown while iframe is loading */}
       {isLoading && isPlaying && (
-        <div className="absolute inset-0 flex items-center justify-center bg-black/50 z-20">
-          <Loader2 className="w-10 h-10 text-white animate-spin" />
+        <div className="absolute inset-0 flex items-center justify-center bg-gradient-to-br from-purple-600 via-pink-500 to-orange-400 z-20">
+          <div className="flex flex-col items-center">
+            <Loader2 className="w-10 h-10 text-white animate-spin mb-2" />
+            <span className="text-white/80 text-sm">Loading reel...</span>
+          </div>
         </div>
       )}
 
-      {/* Instagram Iframe - Only rendered when playing */}
+      {/* Instagram Iframe - Rendered when playing */}
       {isPlaying && (
         <iframe
           ref={iframeRef}
           src={embedUrl}
-          className="w-full h-full rounded-xl"
+          className="w-full rounded-xl"
           style={{
-            minHeight: '400px',
-            aspectRatio: '9/16'
+            minHeight: '500px',
+            aspectRatio: '9/16',
+            border: 'none',
           }}
           frameBorder="0"
           scrolling="no"
           allowTransparency
           allowFullScreen
+          allow="autoplay; encrypted-media"
           onLoad={() => setIsLoading(false)}
         />
       )}
 
       {/* Placeholder div to maintain aspect ratio when not playing */}
       {!isPlaying && (
-        <div style={{ aspectRatio: '9/16', minHeight: '400px' }} />
+        <div style={{ aspectRatio: '9/16', minHeight: '500px' }} />
       )}
 
-      {/* Controls Overlay - shown when playing */}
-      {isPlaying && showControls && (
-        <div className="absolute bottom-3 right-3 z-30 flex items-center gap-2">
-          {canonicalUrl && (
-            <a
-              href={canonicalUrl}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="flex items-center gap-1.5 px-3 py-1.5 bg-black/70 hover:bg-black/90 backdrop-blur-sm rounded-full text-white text-xs font-medium transition-all"
-            >
-              <ExternalLink className="w-3.5 h-3.5" />
-              Open in Instagram
-            </a>
-          )}
+      {/* Controls Overlay - "Open in Instagram" link */}
+      {isPlaying && !isLoading && showControls && canonicalUrl && (
+        <div className="absolute bottom-3 right-3 z-30">
+          <a
+            href={canonicalUrl}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="flex items-center gap-1.5 px-3 py-1.5 bg-black/70 hover:bg-black/90 backdrop-blur-sm rounded-full text-white text-xs font-medium transition-all"
+          >
+            <ExternalLink className="w-3.5 h-3.5" />
+            Open in Instagram
+          </a>
         </div>
       )}
     </div>
