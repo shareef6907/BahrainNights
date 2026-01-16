@@ -47,3 +47,6 @@ playwright/.cache/
 
 # Scraper dependencies
 scripts/scrapers/**/node_modules/
+
+# Playwright test screenshots
+.playwright-mcp/
