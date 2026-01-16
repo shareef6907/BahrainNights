@@ -22,6 +22,10 @@ function toClientAttraction(attr: DbAttraction): Attraction {
     category: attr.category,
     type: attr.category || 'attraction',
     affiliate_url: attr.booking_url || '',
+    source: attr.source || null,
+    google_maps_url: attr.google_maps_url || null,
+    latitude: attr.latitude || null,
+    longitude: attr.longitude || null,
   };
 }
 

@@ -2,7 +2,7 @@
 
 import { useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { X, MapPin, ExternalLink, Tag } from 'lucide-react';
+import { X, MapPin, ExternalLink, Tag, Navigation } from 'lucide-react';
 import Image from 'next/image';
 import { useTranslation } from '@/lib/i18n';
 
@@ -19,6 +19,10 @@ export interface AttractionData {
   category: string | null;
   type: string;
   affiliate_url: string;
+  source: string | null;
+  google_maps_url: string | null;
+  latitude: number | null;
+  longitude: number | null;
 }
 
 interface AttractionModalProps {
@@ -244,23 +248,54 @@ export default function AttractionModal({
                     </div>
                   )}
 
-                  {/* Book Now Section */}
+                  {/* Action Button Section - Book Now for Platinumlist, Google Maps for manual */}
                   <div className="mt-6">
-                    <a
-                      href={attraction.affiliate_url}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="group flex items-center justify-center gap-3 w-full px-6 py-4 bg-gradient-to-r from-teal-500 to-emerald-500 hover:from-teal-400 hover:to-emerald-400 text-white font-bold text-lg rounded-xl transition-all hover:shadow-lg hover:shadow-teal-500/25 hover:scale-[1.02]"
-                    >
-                      <span>{language === 'ar' ? 'احجز الآن' : 'Book Now'}</span>
-                      <ExternalLink className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
-                    </a>
-                    <p className="text-center text-gray-400 text-sm mt-2">
-                      {language === 'ar'
-                        ? 'سيتم توجيهك إلى Platinumlist للحجز'
-                        : 'You will be redirected to Platinumlist to complete your booking'
-                      }
-                    </p>
+                    {attraction.source === 'platinumlist' && attraction.affiliate_url ? (
+                      <>
+                        <a
+                          href={attraction.affiliate_url}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="group flex items-center justify-center gap-3 w-full px-6 py-4 bg-gradient-to-r from-teal-500 to-emerald-500 hover:from-teal-400 hover:to-emerald-400 text-white font-bold text-lg rounded-xl transition-all hover:shadow-lg hover:shadow-teal-500/25 hover:scale-[1.02]"
+                        >
+                          <span>{language === 'ar' ? 'احجز الآن' : 'Book Now'}</span>
+                          <ExternalLink className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
+                        </a>
+                        <p className="text-center text-gray-400 text-sm mt-2">
+                          {language === 'ar'
+                            ? 'سيتم توجيهك إلى Platinumlist للحجز'
+                            : 'You will be redirected to Platinumlist to complete your booking'
+                          }
+                        </p>
+                      </>
+                    ) : (
+                      <>
+                        <a
+                          href={
+                            attraction.google_maps_url ||
+                            (attraction.latitude && attraction.longitude
+                              ? `https://www.google.com/maps?q=${attraction.latitude},${attraction.longitude}`
+                              : `https://www.google.com/maps/search/${encodeURIComponent(
+                                  `${attraction.title} ${attraction.venue || ''} ${attraction.location || ''} Bahrain`
+                                )}`
+                            )
+                          }
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="group flex items-center justify-center gap-3 w-full px-6 py-4 bg-gradient-to-r from-blue-500 to-indigo-500 hover:from-blue-400 hover:to-indigo-400 text-white font-bold text-lg rounded-xl transition-all hover:shadow-lg hover:shadow-blue-500/25 hover:scale-[1.02]"
+                        >
+                          <Navigation className="w-5 h-5" />
+                          <span>{language === 'ar' ? 'عرض على الخريطة' : 'View on Google Maps'}</span>
+                          <ExternalLink className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
+                        </a>
+                        <p className="text-center text-gray-400 text-sm mt-2">
+                          {language === 'ar'
+                            ? 'اضغط للحصول على الاتجاهات في خرائط جوجل'
+                            : 'Click to get directions in Google Maps'
+                          }
+                        </p>
+                      </>
+                    )}
                   </div>
                 </div>
               </motion.div>

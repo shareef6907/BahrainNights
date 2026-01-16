@@ -21,6 +21,10 @@ export interface Attraction {
   category: string | null;
   type: string;
   affiliate_url: string;
+  source: string | null;
+  google_maps_url: string | null;
+  latitude: number | null;
+  longitude: number | null;
 }
 
 interface AttractionsPageClientProps {
