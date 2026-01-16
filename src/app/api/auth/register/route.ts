@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { generateToken, setAuthCookie, getUserByEmailFromDb, sendWelcomeEmail } from '@/lib/auth';
+import { generateToken, setAuthCookie, getUserByEmailFromDb } from '@/lib/auth';
+import { sendVenueRegistrationEmail } from '@/lib/email';
 import { createUser } from '@/lib/db/users';
 import { createVenue } from '@/lib/db/venues';
 import { z } from 'zod';
@@ -86,8 +87,8 @@ export async function POST(request: NextRequest) {
       status: 'pending',
     } as any);
 
-    // Send welcome email
-    sendWelcomeEmail(newUser.email, newVenue.name);
+    // Send venue registration confirmation email (uses SES)
+    await sendVenueRegistrationEmail(newUser.email, newVenue.name);
 
     // Generate JWT token
     const token = await generateToken({

@@ -64,8 +64,8 @@ export async function GET(request: NextRequest) {
     if (error) {
       console.error('Admin events fetch error:', error);
       return NextResponse.json(
-        { events: [], counts: { all: 0, pending: 0, published: 0, draft: 0, past: 0 }, error: error.message },
-        { status: 200 }
+        { events: [], counts: { all: 0, pending: 0, published: 0, draft: 0, past: 0 }, error: 'Failed to fetch events' },
+        { status: 500 }
       );
     }
 
@@ -105,7 +105,7 @@ export async function GET(request: NextRequest) {
     console.error('Admin events API error:', error);
     return NextResponse.json(
       { events: [], counts: { all: 0, pending: 0, published: 0, draft: 0, past: 0 }, error: 'Server error' },
-      { status: 200 }
+      { status: 500 }
     );
   }
 }

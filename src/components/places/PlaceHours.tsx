@@ -3,6 +3,14 @@
 import { motion } from 'framer-motion';
 import { Clock, Phone, Mail, Globe, Instagram, Facebook, MapPin, Navigation, ExternalLink } from 'lucide-react';
 import { OpeningHours } from './PlaceCard';
+import {
+  DAY_ORDER,
+  DAY_LABELS,
+  getTodayName,
+  isOpenNow,
+  formatTime,
+  formatHours,
+} from '@/lib/utils/openingHours';
 
 interface PlaceHoursProps {
   openingHours: OpeningHours;
@@ -19,17 +27,6 @@ interface PlaceHoursProps {
   googleMapsUrl?: string | null;
 }
 
-const dayOrder = ['sunday', 'monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday'];
-const dayLabels: Record<string, string> = {
-  sunday: 'Sunday',
-  monday: 'Monday',
-  tuesday: 'Tuesday',
-  wednesday: 'Wednesday',
-  thursday: 'Thursday',
-  friday: 'Friday',
-  saturday: 'Saturday',
-};
-
 export default function PlaceHours({
   openingHours,
   phone,
@@ -44,42 +41,8 @@ export default function PlaceHours({
   venueName,
   googleMapsUrl,
 }: PlaceHoursProps) {
-  const today = dayOrder[new Date().getDay()];
-
-  const formatHours = (hours: { open: string; close: string } | 'closed' | undefined) => {
-    if (!hours || hours === 'closed') return 'Closed';
-    if (!hours.open || !hours.close) return 'Hours not set';
-    return `${formatTime(hours.open)} - ${formatTime(hours.close)}`;
-  };
-
-  const formatTime = (time: string) => {
-    if (!time || !time.includes(':')) return 'N/A';
-    const [hours, minutes] = time.split(':').map(Number);
-    if (isNaN(hours) || isNaN(minutes)) return 'N/A';
-    const period = hours >= 12 ? 'PM' : 'AM';
-    const displayHours = hours % 12 || 12;
-    return `${displayHours}:${minutes.toString().padStart(2, '0')} ${period}`;
-  };
-
-  const isOpenNow = () => {
-    const now = new Date();
-    const hours = openingHours[today];
-    if (!hours || hours === 'closed') return false;
-    if (!hours.open || !hours.close) return false;
-
-    const currentTime = now.getHours() * 100 + now.getMinutes();
-    const openTime = parseInt(hours.open.replace(':', ''));
-    let closeTime = parseInt(hours.close.replace(':', ''));
-
-    if (isNaN(openTime) || isNaN(closeTime)) return false;
-
-    if (closeTime < openTime) {
-      return currentTime >= openTime || currentTime <= closeTime;
-    }
-    return currentTime >= openTime && currentTime <= closeTime;
-  };
-
-  const open = isOpenNow();
+  const today = getTodayName();
+  const open = isOpenNow(openingHours);
   const todayHours = openingHours[today];
 
   return (
@@ -107,7 +70,7 @@ export default function PlaceHours({
 
         {/* Weekly Schedule */}
         <div className="space-y-2">
-          {dayOrder.map((day) => {
+          {DAY_ORDER.map((day) => {
             const isToday = day === today;
             const hours = openingHours[day];
             const isClosed = !hours || hours === 'closed';
@@ -123,7 +86,7 @@ export default function PlaceHours({
                   {isToday && (
                     <span className="absolute -left-3 top-1/2 -translate-y-1/2 w-1.5 h-1.5 bg-yellow-400 rounded-full" />
                   )}
-                  {dayLabels[day]}
+                  {DAY_LABELS[day]}
                 </span>
                 <span className={isClosed ? 'text-red-400/70' : ''}>
                   {formatHours(hours)}

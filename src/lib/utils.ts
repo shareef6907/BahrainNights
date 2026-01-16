@@ -5,6 +5,20 @@ export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
 }
 
+// Cached regex patterns for coordinate extraction (prevents recreation on each call)
+const COORD_PATTERNS = {
+  // Pattern 1: /@lat,lng,zoom format (most common in place URLs)
+  at: /@(-?\d+\.?\d*),(-?\d+\.?\d*)/,
+  // Pattern 2: ?q=lat,lng or &q=lat,lng format
+  q: /[?&]q=(-?\d+\.?\d*),(-?\d+\.?\d*)/,
+  // Pattern 3: query=lat,lng format (API style)
+  query: /[?&]query=(-?\d+\.?\d*),(-?\d+\.?\d*)/,
+  // Pattern 4: ll=lat,lng format
+  ll: /[?&]ll=(-?\d+\.?\d*),(-?\d+\.?\d*)/,
+  // Pattern 5: destination=lat,lng format (directions)
+  destination: /[?&]destination=(-?\d+\.?\d*),(-?\d+\.?\d*)/,
+} as const;
+
 /**
  * Extract latitude and longitude coordinates from a Google Maps URL
  * Supports various formats:
@@ -19,63 +33,15 @@ export function extractCoordinatesFromGoogleMapsUrl(url: string): { latitude: nu
   if (!url) return null;
 
   try {
-    // Pattern 1: /@lat,lng,zoom format (most common in place URLs)
-    // Example: https://www.google.com/maps/place/.../@26.2285067,50.5860123,17z/...
-    const atPattern = /@(-?\d+\.?\d*),(-?\d+\.?\d*)/;
-    const atMatch = url.match(atPattern);
-    if (atMatch) {
-      const latitude = parseFloat(atMatch[1]);
-      const longitude = parseFloat(atMatch[2]);
-      if (isValidCoordinate(latitude, longitude)) {
-        return { latitude, longitude };
-      }
-    }
-
-    // Pattern 2: ?q=lat,lng or &q=lat,lng format
-    // Example: https://maps.google.com/?q=26.2285,50.5860
-    const qPattern = /[?&]q=(-?\d+\.?\d*),(-?\d+\.?\d*)/;
-    const qMatch = url.match(qPattern);
-    if (qMatch) {
-      const latitude = parseFloat(qMatch[1]);
-      const longitude = parseFloat(qMatch[2]);
-      if (isValidCoordinate(latitude, longitude)) {
-        return { latitude, longitude };
-      }
-    }
-
-    // Pattern 3: query=lat,lng format (API style)
-    // Example: https://www.google.com/maps/search/?api=1&query=26.2285,50.5860
-    const queryPattern = /[?&]query=(-?\d+\.?\d*),(-?\d+\.?\d*)/;
-    const queryMatch = url.match(queryPattern);
-    if (queryMatch) {
-      const latitude = parseFloat(queryMatch[1]);
-      const longitude = parseFloat(queryMatch[2]);
-      if (isValidCoordinate(latitude, longitude)) {
-        return { latitude, longitude };
-      }
-    }
-
-    // Pattern 4: ll=lat,lng format
-    // Example: https://maps.google.com/?ll=26.2285,50.5860
-    const llPattern = /[?&]ll=(-?\d+\.?\d*),(-?\d+\.?\d*)/;
-    const llMatch = url.match(llPattern);
-    if (llMatch) {
-      const latitude = parseFloat(llMatch[1]);
-      const longitude = parseFloat(llMatch[2]);
-      if (isValidCoordinate(latitude, longitude)) {
-        return { latitude, longitude };
-      }
-    }
-
-    // Pattern 5: destination=lat,lng format (directions)
-    // Example: https://www.google.com/maps/dir/?api=1&destination=26.2285,50.5860
-    const destPattern = /[?&]destination=(-?\d+\.?\d*),(-?\d+\.?\d*)/;
-    const destMatch = url.match(destPattern);
-    if (destMatch) {
-      const latitude = parseFloat(destMatch[1]);
-      const longitude = parseFloat(destMatch[2]);
-      if (isValidCoordinate(latitude, longitude)) {
-        return { latitude, longitude };
+    // Try each pattern in order of likelihood
+    for (const pattern of Object.values(COORD_PATTERNS)) {
+      const match = url.match(pattern);
+      if (match) {
+        const latitude = parseFloat(match[1]);
+        const longitude = parseFloat(match[2]);
+        if (isValidCoordinate(latitude, longitude)) {
+          return { latitude, longitude };
+        }
       }
     }
 

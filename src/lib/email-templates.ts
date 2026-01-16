@@ -465,6 +465,35 @@ export function welcomeEmail(venueName: string): string {
   `);
 }
 
+/**
+ * Password Changed Confirmation Email
+ */
+export function passwordChangedEmail(): string {
+  const loginUrl = `${SITE_URL}/venue-portal/login`;
+
+  return baseLayout(`
+    ${simpleHeader('Password Changed', COLORS.success)}
+    ${contentBody(`
+      <p style="color: ${COLORS.gray[700]}; font-size: 16px; line-height: 1.6; margin: 0 0 20px;">
+        Your BahrainNights account password has been successfully changed.
+      </p>
+
+      <p style="color: ${COLORS.gray[700]}; font-size: 16px; line-height: 1.6; margin: 0 0 20px;">
+        You can now log in with your new password.
+      </p>
+
+      ${primaryButton('Log In Now', loginUrl)}
+
+      ${alertBox('Security notice:', 'If you did not make this change, please contact us immediately at help@bahrainnights.com', 'warning')}
+
+      <p style="color: ${COLORS.gray[500]}; font-size: 14px; line-height: 1.6; margin: 20px 0 0;">
+        Questions? Contact us at
+        <a href="mailto:help@bahrainnights.com" style="color: ${COLORS.primary};">help@bahrainnights.com</a>
+      </p>
+    `)}
+  `);
+}
+
 // Export all templates
 export default {
   venueRegistrationConfirmation,
@@ -474,5 +503,6 @@ export default {
   eventApprovalEmail,
   eventRejectionEmail,
   passwordResetEmail,
+  passwordChangedEmail,
   welcomeEmail,
 };

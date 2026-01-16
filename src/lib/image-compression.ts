@@ -14,17 +14,13 @@ const MAX_DIMENSION = 2000; // Max width/height to prevent huge images
 export async function compressImage(file: File): Promise<File> {
   // If file is already in the target range, return as-is
   if (file.size >= MIN_SIZE && file.size <= MAX_SIZE) {
-    console.log(`[Compression] File already in range: ${(file.size / 1024).toFixed(0)}KB`);
     return file;
   }
 
   // If file is smaller than minimum, return as-is (don't upscale)
   if (file.size < MIN_SIZE) {
-    console.log(`[Compression] File below minimum (${(file.size / 1024).toFixed(0)}KB), keeping original`);
     return file;
   }
-
-  console.log(`[Compression] Starting compression: ${(file.size / 1024).toFixed(0)}KB -> target: 600KB-1MB`);
 
   return new Promise((resolve, reject) => {
     const img = new Image();
@@ -36,7 +32,13 @@ export async function compressImage(file: File): Promise<File> {
       return;
     }
 
+    // Create object URL for the file
+    const objectUrl = URL.createObjectURL(file);
+
     img.onload = async () => {
+      // Revoke the object URL to free memory (prevents memory leak)
+      URL.revokeObjectURL(objectUrl);
+
       try {
         // Calculate dimensions (resize if too large)
         let { width, height } = img;
@@ -72,8 +74,6 @@ export async function compressImage(file: File): Promise<File> {
             return;
           }
 
-          console.log(`[Compression] Attempt ${attempts + 1}: quality=${quality.toFixed(2)}, size=${(blob.size / 1024).toFixed(0)}KB`);
-
           if (blob.size >= MIN_SIZE && blob.size <= MAX_SIZE) {
             // Perfect! In range
             bestBlob = blob;
@@ -103,11 +103,6 @@ export async function compressImage(file: File): Promise<File> {
           return;
         }
 
-        // If still too large after compression, accept it but log warning
-        if (bestBlob.size > MAX_SIZE) {
-          console.warn(`[Compression] Could not compress below 1MB: ${(bestBlob.size / 1024).toFixed(0)}KB`);
-        }
-
         // Create new File from Blob
         const compressedFile = new File(
           [bestBlob],
@@ -115,7 +110,6 @@ export async function compressImage(file: File): Promise<File> {
           { type: 'image/jpeg' }
         );
 
-        console.log(`[Compression] Complete: ${(file.size / 1024).toFixed(0)}KB -> ${(compressedFile.size / 1024).toFixed(0)}KB`);
         resolve(compressedFile);
       } catch (error) {
         reject(error);
@@ -123,11 +117,12 @@ export async function compressImage(file: File): Promise<File> {
     };
 
     img.onerror = () => {
+      URL.revokeObjectURL(objectUrl); // Clean up on error
       reject(new Error('Failed to load image'));
     };
 
     // Load image from file
-    img.src = URL.createObjectURL(file);
+    img.src = objectUrl;
   });
 }
 
@@ -144,4 +139,64 @@ export function needsCompression(file: File): boolean {
 export function getCompressionInfo(originalSize: number, compressedSize: number): string {
   const reduction = ((originalSize - compressedSize) / originalSize * 100).toFixed(0);
   return `Compressed: ${(originalSize / 1024 / 1024).toFixed(1)}MB → ${(compressedSize / 1024).toFixed(0)}KB (${reduction}% smaller)`;
+}
+
+/**
+ * Validate an image file before upload
+ */
+export function validateImage(file: File, maxSizeMB: number = 10): { valid: boolean; error?: string } {
+  // Check file type
+  if (!file.type.startsWith('image/')) {
+    return { valid: false, error: 'Please upload an image file (JPG, PNG, WebP, GIF)' };
+  }
+
+  // Check file size
+  const maxBytes = maxSizeMB * 1024 * 1024;
+  if (file.size > maxBytes) {
+    return { valid: false, error: `File too large. Maximum size is ${maxSizeMB}MB` };
+  }
+
+  // Check supported formats
+  const supportedTypes = ['image/jpeg', 'image/png', 'image/webp', 'image/gif'];
+  if (!supportedTypes.includes(file.type)) {
+    return { valid: false, error: 'Unsupported image format. Use JPG, PNG, WebP, or GIF' };
+  }
+
+  return { valid: true };
+}
+
+/**
+ * Get image dimensions from a file
+ */
+export async function getImageDimensions(file: File): Promise<{ width: number; height: number }> {
+  return new Promise((resolve, reject) => {
+    const img = new Image();
+    const url = URL.createObjectURL(file);
+
+    img.onload = () => {
+      URL.revokeObjectURL(url);
+      resolve({ width: img.width, height: img.height });
+    };
+
+    img.onerror = () => {
+      URL.revokeObjectURL(url);
+      reject(new Error('Failed to load image'));
+    };
+
+    img.src = url;
+  });
+}
+
+/**
+ * Create a preview URL for a file
+ */
+export function createPreviewUrl(file: File): string {
+  return URL.createObjectURL(file);
+}
+
+/**
+ * Revoke a preview URL to free memory
+ */
+export function revokePreviewUrl(url: string): void {
+  URL.revokeObjectURL(url);
 }

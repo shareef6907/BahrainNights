@@ -19,11 +19,17 @@ export async function GET(request: NextRequest) {
     const supabase = getAdminClient() as any;
     const { searchParams } = new URL(request.url);
 
-    const page = parseInt(searchParams.get('page') || '1');
-    const limit = parseInt(searchParams.get('limit') || '20');
+    // Validate and sanitize pagination parameters
+    const page = Math.max(1, parseInt(searchParams.get('page') || '1') || 1);
+    const limit = Math.min(100, Math.max(1, parseInt(searchParams.get('limit') || '20') || 20));
     const search = searchParams.get('search') || '';
-    const sortBy = searchParams.get('sortBy') || 'created_at';
-    const sortOrder = searchParams.get('sortOrder') || 'desc';
+
+    // Validate sort parameters with whitelist
+    const allowedSortFields = ['created_at', 'email', 'name', 'last_login'];
+    const sortByParam = searchParams.get('sortBy') || 'created_at';
+    const sortBy = allowedSortFields.includes(sortByParam) ? sortByParam : 'created_at';
+    const sortOrderParam = searchParams.get('sortOrder') || 'desc';
+    const sortOrder = ['asc', 'desc'].includes(sortOrderParam) ? sortOrderParam : 'desc';
 
     const offset = (page - 1) * limit;
 

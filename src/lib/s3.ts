@@ -7,12 +7,24 @@ import {
 } from '@aws-sdk/client-s3';
 import { getSignedUrl } from '@aws-sdk/s3-request-presigner';
 
+// Validate S3 environment variables at startup
+const AWS_ACCESS_KEY = process.env.BAHRAINNIGHTS_AWS_ACCESS_KEY_ID || process.env.AWS_ACCESS_KEY_ID;
+const AWS_SECRET_KEY = process.env.BAHRAINNIGHTS_AWS_SECRET_ACCESS_KEY || process.env.AWS_SECRET_ACCESS_KEY;
+
+if (!AWS_ACCESS_KEY || !AWS_SECRET_KEY) {
+  console.error(
+    'S3 Configuration Error: AWS credentials are missing. ' +
+    'Please set BAHRAINNIGHTS_AWS_ACCESS_KEY_ID and BAHRAINNIGHTS_AWS_SECRET_ACCESS_KEY ' +
+    '(or AWS_ACCESS_KEY_ID and AWS_SECRET_ACCESS_KEY) environment variables.'
+  );
+}
+
 // Initialize S3 client - support both BAHRAINNIGHTS_ and AWS_ prefixed env vars
 const s3Client = new S3Client({
   region: process.env.BAHRAINNIGHTS_AWS_REGION || process.env.AWS_REGION || 'me-south-1',
   credentials: {
-    accessKeyId: process.env.BAHRAINNIGHTS_AWS_ACCESS_KEY_ID || process.env.AWS_ACCESS_KEY_ID || '',
-    secretAccessKey: process.env.BAHRAINNIGHTS_AWS_SECRET_ACCESS_KEY || process.env.AWS_SECRET_ACCESS_KEY || '',
+    accessKeyId: AWS_ACCESS_KEY || '',
+    secretAccessKey: AWS_SECRET_KEY || '',
   },
 });
 

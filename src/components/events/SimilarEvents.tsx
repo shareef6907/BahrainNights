@@ -1,6 +1,6 @@
 'use client';
 
-import { useRef } from 'react';
+import React, { useRef } from 'react';
 import { motion } from 'framer-motion';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
 import EventCard, { Event } from './EventCard';
@@ -10,7 +10,7 @@ interface SimilarEventsProps {
   events: Event[];
 }
 
-export default function SimilarEvents({ title, events }: SimilarEventsProps) {
+function SimilarEvents({ title, events }: SimilarEventsProps) {
   const scrollRef = useRef<HTMLDivElement>(null);
 
   const scroll = (direction: 'left' | 'right') => {
@@ -78,3 +78,5 @@ export default function SimilarEvents({ title, events }: SimilarEventsProps) {
     </motion.section>
   );
 }
+
+export default React.memo(SimilarEvents);

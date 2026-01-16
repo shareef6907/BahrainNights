@@ -1141,6 +1141,7 @@ export type MovieUpdate = Database['public']['Tables']['movies']['Update'];
 
 export type Showtime = Database['public']['Tables']['showtimes']['Row'];
 export type ShowtimeInsert = Database['public']['Tables']['showtimes']['Insert'];
+export type ShowtimeUpdate = Database['public']['Tables']['showtimes']['Update'];
 
 export type HomepageAd = Database['public']['Tables']['homepage_ads']['Row'];
 export type HomepageAdInsert = Database['public']['Tables']['homepage_ads']['Insert'];

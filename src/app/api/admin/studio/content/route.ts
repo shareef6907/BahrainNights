@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@supabase/supabase-js';
+import { requireAdmin } from '@/lib/api-auth';
 
 export const dynamic = 'force-dynamic';
 
@@ -19,6 +20,12 @@ function getSupabaseAdmin() {
 // GET - List content with filters
 export async function GET(request: NextRequest) {
   try {
+    // Verify admin authentication
+    const auth = await requireAdmin(request);
+    if (!auth.authenticated) {
+      return auth.response;
+    }
+
     const supabase = getSupabaseAdmin();
     const { searchParams } = new URL(request.url);
 
@@ -65,6 +72,12 @@ export async function GET(request: NextRequest) {
 // POST - Create new content
 export async function POST(request: NextRequest) {
   try {
+    // Verify admin authentication
+    const auth = await requireAdmin(request);
+    if (!auth.authenticated) {
+      return auth.response;
+    }
+
     const supabase = getSupabaseAdmin();
     const body = await request.json();
 
@@ -151,6 +164,12 @@ export async function POST(request: NextRequest) {
 // PUT - Update content
 export async function PUT(request: NextRequest) {
   try {
+    // Verify admin authentication
+    const auth = await requireAdmin(request);
+    if (!auth.authenticated) {
+      return auth.response;
+    }
+
     const supabase = getSupabaseAdmin();
     const body = await request.json();
     const { id, ...updates } = body;
@@ -189,6 +208,12 @@ export async function PUT(request: NextRequest) {
 // DELETE - Delete content
 export async function DELETE(request: NextRequest) {
   try {
+    // Verify admin authentication
+    const auth = await requireAdmin(request);
+    if (!auth.authenticated) {
+      return auth.response;
+    }
+
     const supabase = getSupabaseAdmin();
     const { searchParams } = new URL(request.url);
     const id = searchParams.get('id');

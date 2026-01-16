@@ -1,10 +1,12 @@
 'use client';
 
+import React from 'react';
 import { motion } from 'framer-motion';
 import Link from 'next/link';
 import Image from 'next/image';
 import { MapPin, ChevronRight } from 'lucide-react';
 import { Place } from './PlaceCard';
+import { getCategoryBgColor } from '@/lib/constants/categoryColors';
 
 interface SimilarPlacesProps {
   title: string;
@@ -13,16 +15,7 @@ interface SimilarPlacesProps {
   viewAllHref?: string;
 }
 
-const categoryColors: Record<string, string> = {
-  restaurant: 'bg-orange-500',
-  cafe: 'bg-amber-600',
-  lounge: 'bg-purple-500',
-  bar: 'bg-blue-500',
-  nightclub: 'bg-pink-500',
-  'beach-club': 'bg-cyan-500',
-};
-
-export default function SimilarPlaces({ title, places, showViewAll = true, viewAllHref }: SimilarPlacesProps) {
+function SimilarPlaces({ title, places, showViewAll = true, viewAllHref }: SimilarPlacesProps) {
   if (places.length === 0) return null;
 
   return (
@@ -73,7 +66,7 @@ export default function SimilarPlaces({ title, places, showViewAll = true, viewA
                   <div className="absolute inset-0 bg-gradient-to-t from-slate-900/80 via-transparent to-transparent" />
 
                   {/* Category Badge */}
-                  <div className={`absolute top-3 left-3 px-2 py-1 ${categoryColors[place.category] || 'bg-gray-500'} rounded-full`}>
+                  <div className={`absolute top-3 left-3 px-2 py-1 ${getCategoryBgColor(place.category)} rounded-full`}>
                     <span className="text-xs font-bold text-white capitalize">
                       {place.category.replace('-', ' ')}
                     </span>
@@ -119,3 +112,5 @@ export default function SimilarPlaces({ title, places, showViewAll = true, viewA
     </motion.section>
   );
 }
+
+export default React.memo(SimilarPlaces);

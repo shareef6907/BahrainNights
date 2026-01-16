@@ -4,7 +4,7 @@ import { useState, useRef } from 'react';
 import { motion } from 'framer-motion';
 import { Calendar, MapPin, Send, CheckCircle, Sparkles, Upload, X, Loader2, ImageIcon } from 'lucide-react';
 import Link from 'next/link';
-import { compressImage, validateImage, createPreviewUrl, revokePreviewUrl } from '@/lib/image-compress';
+import { compressImage, validateImage, createPreviewUrl, revokePreviewUrl } from '@/lib/image-compression';
 import VenueSearch from '@/components/forms/VenueSearch';
 import AIWriterButton from '@/components/ai/AIWriterButton';
 

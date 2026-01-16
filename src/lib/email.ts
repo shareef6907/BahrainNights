@@ -12,6 +12,7 @@ import {
   eventApprovalEmail,
   eventRejectionEmail,
   passwordResetEmail,
+  passwordChangedEmail,
   welcomeEmail,
 } from './email-templates';
 
@@ -132,6 +133,19 @@ export async function sendWelcomeEmail(
     to: email,
     subject: `Welcome to BahrainNights, ${venueName}!`,
     html: welcomeEmail(venueName),
+  });
+}
+
+/**
+ * Send password changed confirmation email
+ */
+export async function sendPasswordChangedEmail(
+  email: string
+): Promise<EmailResult> {
+  return sendEmail({
+    to: email,
+    subject: 'Your BahrainNights Password Has Been Changed',
+    html: passwordChangedEmail(),
   });
 }
 

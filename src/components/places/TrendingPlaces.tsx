@@ -5,6 +5,7 @@ import Image from 'next/image';
 import Link from 'next/link';
 import { TrendingUp, Sparkles, Clock, ArrowRight } from 'lucide-react';
 import { Place } from './PlaceCard';
+import { getCategoryBgColor } from '@/lib/constants/categoryColors';
 
 interface TrendingOffer {
   id: string;
@@ -21,15 +22,6 @@ interface TrendingPlacesProps {
   newOpenings: Place[];
   tonightOffers: TrendingOffer[];
 }
-
-const categoryColors: Record<string, string> = {
-  restaurant: 'bg-orange-500',
-  cafe: 'bg-amber-600',
-  lounge: 'bg-purple-500',
-  bar: 'bg-blue-500',
-  nightclub: 'bg-pink-500',
-  'beach-club': 'bg-cyan-500',
-};
 
 export default function TrendingPlaces({
   trending,
@@ -69,7 +61,7 @@ export default function TrendingPlaces({
                 </h4>
                 <p className="text-xs text-gray-400">{place.area}</p>
                 <span
-                  className={`inline-block mt-1 px-1.5 py-0.5 ${categoryColors[place.category]} rounded text-[10px] font-bold text-white`}
+                  className={`inline-block mt-1 px-1.5 py-0.5 ${getCategoryBgColor(place.category)} rounded text-[10px] font-bold text-white`}
                 >
                   {place.category.replace('-', ' ')}
                 </span>

@@ -3,8 +3,8 @@ import {
   verifyDbPasswordResetToken,
   useDbPasswordResetToken,
   updateUserPassword,
-  sendPasswordChangedEmail,
 } from '@/lib/auth';
+import { sendPasswordChangedEmail } from '@/lib/email';
 import { getUserById } from '@/lib/db/users';
 import { resetPasswordSchema } from '@/lib/validations/auth';
 

@@ -1,5 +1,6 @@
 'use client';
 
+import React from 'react';
 import { motion } from 'framer-motion';
 import {
   Sun,
@@ -54,7 +55,7 @@ const featureIcons: Record<string, { icon: React.ElementType; color: string }> =
   'Fine Dining': { icon: Sparkles, color: 'text-yellow-400 bg-yellow-400/10' },
 };
 
-export default function PlaceFeatures({ features }: PlaceFeaturesProps) {
+function PlaceFeatures({ features }: PlaceFeaturesProps) {
   if (features.length === 0) return null;
 
   return (
@@ -90,3 +91,5 @@ export default function PlaceFeatures({ features }: PlaceFeaturesProps) {
     </motion.div>
   );
 }
+
+export default React.memo(PlaceFeatures);

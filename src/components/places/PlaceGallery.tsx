@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import Image from 'next/image';
 import { X, ChevronLeft, ChevronRight, Expand, Images } from 'lucide-react';
@@ -10,7 +10,7 @@ interface PlaceGalleryProps {
   name: string;
 }
 
-export default function PlaceGallery({ images, name }: PlaceGalleryProps) {
+function PlaceGallery({ images, name }: PlaceGalleryProps) {
   const [lightboxOpen, setLightboxOpen] = useState(false);
   const [currentIndex, setCurrentIndex] = useState(0);
   const [showAll, setShowAll] = useState(false);
@@ -74,7 +74,7 @@ export default function PlaceGallery({ images, name }: PlaceGalleryProps) {
         <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
           {displayImages.map((image, index) => (
             <motion.button
-              key={index}
+              key={image}
               initial={{ opacity: 0, scale: 0.95 }}
               animate={{ opacity: 1, scale: 1 }}
               transition={{ delay: index * 0.05 }}
@@ -190,7 +190,7 @@ export default function PlaceGallery({ images, name }: PlaceGalleryProps) {
             <div className="absolute bottom-4 left-1/2 -translate-x-1/2 flex items-center gap-2 max-w-[90vw] overflow-x-auto px-4 py-2 bg-black/50 rounded-xl">
               {images.map((image, index) => (
                 <button
-                  key={index}
+                  key={image}
                   onClick={(e) => {
                     e.stopPropagation();
                     setCurrentIndex(index);
@@ -217,3 +217,5 @@ export default function PlaceGallery({ images, name }: PlaceGalleryProps) {
     </>
   );
 }
+
+export default React.memo(PlaceGallery);

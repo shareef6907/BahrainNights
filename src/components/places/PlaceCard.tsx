@@ -6,6 +6,8 @@ import Image from 'next/image';
 import Link from 'next/link';
 import { MapPin, Phone, Navigation, Instagram, Star } from 'lucide-react';
 import { LikeButton } from '@/components/ui/LikeButton';
+import { CATEGORY_COLORS, CATEGORY_LABELS } from '@/lib/constants/categoryColors';
+import { isOpenNow } from '@/lib/utils/openingHours';
 
 export interface OpeningHours {
   [key: string]: { open: string; close: string } | 'closed';
@@ -40,48 +42,9 @@ interface PlaceCardProps {
   index: number;
 }
 
-const categoryColors: Record<string, { bg: string; text: string }> = {
-  restaurant: { bg: 'bg-orange-500', text: 'text-orange-500' },
-  cafe: { bg: 'bg-amber-600', text: 'text-amber-600' },
-  lounge: { bg: 'bg-purple-500', text: 'text-purple-500' },
-  bar: { bg: 'bg-blue-500', text: 'text-blue-500' },
-  nightclub: { bg: 'bg-pink-500', text: 'text-pink-500' },
-  'beach-club': { bg: 'bg-cyan-500', text: 'text-cyan-500' },
-};
-
-const categoryLabels: Record<string, string> = {
-  restaurant: 'Restaurant',
-  cafe: 'Cafe',
-  lounge: 'Lounge',
-  bar: 'Bar',
-  nightclub: 'Nightclub',
-  'beach-club': 'Beach Club',
-};
-
 function PlaceCard({ place, index }: PlaceCardProps) {
-  const isOpenNow = () => {
-    const now = new Date();
-    const days = ['sunday', 'monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday'];
-    const today = days[now.getDay()];
-    const hours = place.openingHours[today];
-
-    if (hours === 'closed') return false;
-    if (!hours) return false;
-
-    const currentTime = now.getHours() * 100 + now.getMinutes();
-    const openTime = parseInt(hours.open.replace(':', ''));
-    let closeTime = parseInt(hours.close.replace(':', ''));
-
-    // Handle venues that close after midnight
-    if (closeTime < openTime) {
-      return currentTime >= openTime || currentTime <= closeTime;
-    }
-
-    return currentTime >= openTime && currentTime <= closeTime;
-  };
-
-  const open = isOpenNow();
-  const colors = categoryColors[place.category] || categoryColors.restaurant;
+  const open = isOpenNow(place.openingHours);
+  const colors = CATEGORY_COLORS[place.category] || CATEGORY_COLORS.restaurant;
 
   const handlePhone = (e: React.MouseEvent) => {
     e.preventDefault();
@@ -127,7 +90,7 @@ function PlaceCard({ place, index }: PlaceCardProps) {
             {/* Category Badge */}
             <div className={`absolute top-3 left-3 px-3 py-1 ${colors.bg} rounded-full`}>
               <span className="text-xs font-bold text-white">
-                {categoryLabels[place.category]}
+                {CATEGORY_LABELS[place.category]}
               </span>
             </div>
 

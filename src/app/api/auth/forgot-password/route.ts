@@ -1,10 +1,10 @@
 import { NextRequest, NextResponse } from 'next/server';
 import {
   checkResetRateLimit,
-  sendPasswordResetEmail,
   getUserByEmailFromDb,
   createDbPasswordResetToken,
 } from '@/lib/auth';
+import { sendPasswordResetEmail } from '@/lib/email';
 import { forgotPasswordSchema } from '@/lib/validations/auth';
 
 export async function POST(request: NextRequest) {
@@ -54,9 +54,8 @@ export async function POST(request: NextRequest) {
     // Generate reset token and store in database
     const resetToken = await createDbPasswordResetToken(user.id);
 
-    // Send password reset email
-    const resetUrl = `${process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:3000'}/reset-password?token=${resetToken}`;
-    sendPasswordResetEmail(user.email, resetUrl);
+    // Send password reset email (uses SES)
+    await sendPasswordResetEmail(user.email, resetToken);
 
     return NextResponse.json(
       {
