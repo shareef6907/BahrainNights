@@ -46,6 +46,10 @@ export async function getSponsors(filters: SponsorFilters = {}): Promise<Sponsor
   const { data, error } = await query;
 
   if (error) {
+    // PGRST205: Table doesn't exist - return empty array gracefully
+    if (error.code === 'PGRST205') {
+      return [];
+    }
     console.error('Error fetching sponsors:', error);
     throw new Error('Failed to fetch sponsors');
   }
@@ -84,7 +88,8 @@ export async function getSponsorById(id: string): Promise<Sponsor | null> {
     .single();
 
   if (error) {
-    if (error.code === 'PGRST116') {
+    // PGRST116: Row not found, PGRST205: Table doesn't exist
+    if (error.code === 'PGRST116' || error.code === 'PGRST205') {
       return null;
     }
     console.error('Error fetching sponsor by ID:', error);
@@ -188,6 +193,10 @@ export async function countSponsorsByTier(): Promise<Record<string, number>> {
     .select('tier, status');
 
   if (error) {
+    // PGRST205: Table doesn't exist - return empty counts gracefully
+    if (error.code === 'PGRST205') {
+      return { total: 0, active: 0, golden: 0, silver: 0 };
+    }
     console.error('Error counting sponsors:', error);
     return {};
   }
@@ -228,6 +237,10 @@ export async function getExpiringSoonSponsors(daysAhead: number = 30): Promise<S
     .order('end_date', { ascending: true });
 
   if (error) {
+    // PGRST205: Table doesn't exist - return empty array gracefully
+    if (error.code === 'PGRST205') {
+      return [];
+    }
     console.error('Error fetching expiring sponsors:', error);
     return [];
   }
@@ -245,6 +258,10 @@ export async function getSponsorRevenue(): Promise<number> {
     .eq('status', 'active');
 
   if (error) {
+    // PGRST205: Table doesn't exist - return 0 gracefully
+    if (error.code === 'PGRST205') {
+      return 0;
+    }
     console.error('Error calculating sponsor revenue:', error);
     return 0;
   }
