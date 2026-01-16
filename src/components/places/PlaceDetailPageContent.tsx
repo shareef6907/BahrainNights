@@ -233,22 +233,30 @@ export default function PlaceDetailPageContent({ venue, similarVenues, events = 
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
             {/* Left Column */}
             <div className="lg:col-span-2 space-y-8">
+              {/* 1. Description */}
               <PlaceInfo description={venue.description || 'No description available.'} />
+
+              {/* 2. YouTube Video */}
               {venue.youtube_url && (
                 <PlaceYouTubeVideo youtubeUrl={venue.youtube_url} venueName={venue.name} />
               )}
-              {reels.length > 0 && (
-                <PlaceReels reels={reels} venueName={venue.name} />
-              )}
+
+              {/* 3. Photos Gallery */}
               {images.length > 0 && (
                 <PlaceGallery images={images} name={venue.name} />
               )}
+
+              {/* 4. Instagram Reels */}
+              {reels.length > 0 && (
+                <PlaceReels reels={reels} venueName={venue.name} />
+              )}
+
+              {/* 5. Features */}
               {venue.features && venue.features.length > 0 && (
                 <PlaceFeatures features={venue.features} />
               )}
-              {/* Current Offers - shown before events */}
-              <PlaceOffers offers={offers} />
-              {/* Upcoming Events at this venue */}
+
+              {/* 6. Upcoming Events */}
               <PlaceEvents
                 events={events.map(e => ({
                   ...e,
@@ -257,6 +265,9 @@ export default function PlaceDetailPageContent({ venue, similarVenues, events = 
                 venueName={venue.name}
                 venueSlug={venue.slug}
               />
+
+              {/* 7. Offers */}
+              <PlaceOffers offers={offers} />
             </div>
 
             {/* Right Column */}
