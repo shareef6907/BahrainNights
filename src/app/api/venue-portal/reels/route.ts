@@ -137,14 +137,10 @@ export async function POST(request: NextRequest) {
 
     const nextOrder = maxOrderResult ? maxOrderResult.display_order + 1 : 0;
 
-    // Create the reel - video_url and thumbnail_url are optional
-    const { video_url, thumbnail_url } = body;
-
+    // Create the reel
     const reelData = {
       venue_id: venueId,
       instagram_url: normalizedUrl,
-      video_url: video_url || null,
-      thumbnail_url: thumbnail_url || null,
       display_order: nextOrder,
       is_active: true,
     };
