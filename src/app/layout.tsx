@@ -118,15 +118,23 @@ export default function RootLayout({
                     width: 512,
                     height: 512
                   },
+                  description: "Bahrain's premier guide to events, dining, nightlife, and entertainment. Discover the best things to do in Bahrain and the region.",
                   sameAs: [
-                    'https://instagram.com/bahaborainnights',
-                    'https://facebook.com/bahaborainnights',
-                    'https://twitter.com/bahaborainnights'
+                    'https://instagram.com/BahrainNights',
+                    'https://facebook.com/BahrainNights',
+                    'https://twitter.com/BahrainNights'
                   ],
                   contactPoint: {
                     '@type': 'ContactPoint',
+                    telephone: '+973-3900-7750',
                     contactType: 'customer service',
-                    email: 'admin@bahrainnights.com'
+                    email: 'ceo@bahrainnights.com',
+                    areaServed: ['BH', 'AE', 'SA', 'QA', 'EG', 'TR', 'GB'],
+                    availableLanguage: ['English', 'Arabic']
+                  },
+                  address: {
+                    '@type': 'PostalAddress',
+                    addressCountry: 'Bahrain'
                   }
                 },
                 {
@@ -134,7 +142,7 @@ export default function RootLayout({
                   '@id': 'https://bahrainnights.com/#website',
                   url: 'https://bahrainnights.com',
                   name: 'BahrainNights',
-                  description: 'Discover the best events, restaurants, nightlife, cinema, and things to do in Bahrain',
+                  description: 'Discover events, dining, nightlife, and entertainment in Bahrain and the region.',
                   publisher: {
                     '@id': 'https://bahrainnights.com/#organization'
                   },

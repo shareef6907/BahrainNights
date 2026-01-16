@@ -2,6 +2,8 @@ import { Metadata } from 'next';
 import { notFound } from 'next/navigation';
 import { supabaseAdmin } from '@/lib/supabase';
 import CountryPageClient from './CountryPageClient';
+import BreadcrumbSchema from '@/components/seo/BreadcrumbSchema';
+import EventListSchema from '@/components/seo/EventListSchema';
 
 // Country configuration
 const COUNTRIES: Record<string, { name: string; fullName: string; flag: string; dbName: string }> = {
@@ -142,11 +144,36 @@ export default async function CountryPage({ params }: Props) {
     eventsByCity[city].push(event);
   });
 
+  // Transform events for schema
+  const schemaEvents = countryEvents.slice(0, 15).map(event => ({
+    title: event.title,
+    start_date: event.start_date || event.date,
+    venue_name: event.venue_name,
+    affiliate_url: event.affiliate_url,
+    image_url: event.cover_url || event.featured_image,
+    slug: event.slug,
+  }));
+
   return (
-    <CountryPageClient
-      country={countryConfig}
-      events={countryEvents}
-      eventsByCity={eventsByCity}
-    />
+    <>
+      <BreadcrumbSchema
+        items={[
+          { name: 'Home', url: 'https://bahrainnights.com' },
+          { name: 'International', url: 'https://bahrainnights.com/international' },
+          { name: countryConfig.fullName, url: `https://bahrainnights.com/international/${country}` },
+        ]}
+      />
+      <EventListSchema
+        events={schemaEvents}
+        pageTitle={`Events in ${countryConfig.fullName}`}
+        pageDescription={`Discover concerts, shows, and experiences in ${countryConfig.fullName}`}
+        pageUrl={`https://bahrainnights.com/international/${country}`}
+      />
+      <CountryPageClient
+        country={countryConfig}
+        events={countryEvents}
+        eventsByCity={eventsByCity}
+      />
+    </>
   );
 }

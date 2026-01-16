@@ -1,6 +1,8 @@
 import { Metadata } from 'next';
 import { supabaseAdmin } from '@/lib/supabase';
 import InternationalPageClient from './InternationalPageClient';
+import BreadcrumbSchema from '@/components/seo/BreadcrumbSchema';
+import EventListSchema from '@/components/seo/EventListSchema';
 
 export const metadata: Metadata = {
   title: 'International Events | BahrainNights',
@@ -139,11 +141,35 @@ export default async function InternationalPage() {
     (eventsByCountry[b.name]?.length || 0) - (eventsByCountry[a.name]?.length || 0)
   );
 
+  // Transform events for schema
+  const schemaEvents = internationalEvents.slice(0, 15).map(event => ({
+    title: event.title,
+    start_date: event.start_date || event.date,
+    venue_name: event.venue_name,
+    affiliate_url: event.affiliate_url,
+    image_url: event.cover_url || event.featured_image,
+    slug: event.slug,
+  }));
+
   return (
-    <InternationalPageClient
-      events={internationalEvents}
-      eventsByCountry={eventsByCountry}
-      countries={countriesWithEvents}
-    />
+    <>
+      <BreadcrumbSchema
+        items={[
+          { name: 'Home', url: 'https://bahrainnights.com' },
+          { name: 'International Events', url: 'https://bahrainnights.com/international' },
+        ]}
+      />
+      <EventListSchema
+        events={schemaEvents}
+        pageTitle="International Events"
+        pageDescription="Discover concerts, shows, and experiences across UAE, Saudi Arabia, Qatar, and more"
+        pageUrl="https://bahrainnights.com/international"
+      />
+      <InternationalPageClient
+        events={internationalEvents}
+        eventsByCountry={eventsByCountry}
+        countries={countriesWithEvents}
+      />
+    </>
   );
 }

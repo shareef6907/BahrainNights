@@ -1,6 +1,7 @@
 import { Suspense } from 'react';
 import { getAttractions as fetchAttractions, Attraction as DbAttraction } from '@/lib/db/attractions';
 import AttractionsPageClient, { Attraction } from '@/components/attractions/AttractionsPageClient';
+import AttractionListSchema from '@/components/seo/AttractionListSchema';
 
 // Disable caching temporarily to verify fix, then re-enable
 export const dynamic = 'force-dynamic';
@@ -55,12 +56,20 @@ export default async function AttractionsPage() {
   ]);
 
   return (
-    <Suspense fallback={<AttractionsLoadingSkeleton />}>
-      <AttractionsPageClient
-        initialAttractions={attractions}
-        categories={categories}
+    <>
+      <AttractionListSchema
+        attractions={attractions}
+        pageTitle="Attractions & Experiences in Bahrain"
+        pageDescription="Discover tours, water sports, and experiences in Bahrain"
+        pageUrl="https://bahrainnights.com/attractions"
       />
-    </Suspense>
+      <Suspense fallback={<AttractionsLoadingSkeleton />}>
+        <AttractionsPageClient
+          initialAttractions={attractions}
+          categories={categories}
+        />
+      </Suspense>
+    </>
   );
 }
 

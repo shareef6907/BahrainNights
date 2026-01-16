@@ -1,6 +1,7 @@
 import { Suspense } from 'react';
 import { createClient } from '@supabase/supabase-js';
 import EventsPageClient, { Event, Attraction } from '@/components/events/EventsPageClient';
+import EventListSchema from '@/components/seo/EventListSchema';
 
 // Force dynamic rendering to ensure fresh data on every request
 export const dynamic = 'force-dynamic';
@@ -265,10 +266,28 @@ export default async function EventsPage() {
     getAttractions()
   ]);
 
+  // Transform events for schema - map to format expected by EventListSchema
+  const schemaEvents = events.slice(0, 20).map(event => ({
+    title: event.title,
+    start_date: event.rawDate,
+    venue_name: event.venue,
+    affiliate_url: event.affiliateUrl,
+    image_url: event.image,
+    slug: event.slug,
+  }));
+
   return (
-    <Suspense fallback={null}>
-      <EventsPageClient initialEvents={events} familyAttractions={attractions} />
-    </Suspense>
+    <>
+      <EventListSchema
+        events={schemaEvents}
+        pageTitle="Events in Bahrain"
+        pageDescription="Discover concerts, nightlife, comedy, and more events in Bahrain"
+        pageUrl="https://bahrainnights.com/events"
+      />
+      <Suspense fallback={null}>
+        <EventsPageClient initialEvents={events} familyAttractions={attractions} />
+      </Suspense>
+    </>
   );
 }
 

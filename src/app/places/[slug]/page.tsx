@@ -2,6 +2,7 @@ import { notFound } from 'next/navigation';
 import { Metadata } from 'next';
 import { getVenueBySlug, getApprovedVenues, getVenueEvents, getVenueOffers, getVenueReels } from '@/lib/db/venues';
 import PlaceDetailPageContent from '@/components/places/PlaceDetailPageContent';
+import VenueSchema from '@/components/seo/VenueSchema';
 
 // Force dynamic rendering to ensure fresh data after admin approval
 export const dynamic = 'force-dynamic';
@@ -62,12 +63,30 @@ export default async function PlaceDetailPage({ params }: PageProps) {
   const venueReels = await getVenueReels(venue.id);
 
   return (
-    <PlaceDetailPageContent
-      venue={venue}
-      similarVenues={filteredSimilarVenues}
-      events={venueEvents}
-      offers={venueOffers}
-      reels={venueReels}
-    />
+    <>
+      <VenueSchema
+        venue={{
+          name: venue.name,
+          description: venue.description,
+          address: venue.address,
+          location: venue.area,
+          phone: venue.phone,
+          website: venue.website,
+          image_url: venue.logo_url,
+          cover_url: venue.cover_image_url,
+          category: venue.category,
+          google_maps_url: venue.google_maps_url,
+          reservation_url: venue.reservation_url,
+          slug: venue.slug,
+        }}
+      />
+      <PlaceDetailPageContent
+        venue={venue}
+        similarVenues={filteredSimilarVenues}
+        events={venueEvents}
+        offers={venueOffers}
+        reels={venueReels}
+      />
+    </>
   );
 }
