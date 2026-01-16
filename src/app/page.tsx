@@ -149,7 +149,6 @@ async function getInternationalEvents() {
   }
 
   // Post-process: filter out events with start_date more than 6 months in the past
-  // and sort by most relevant display date
   const sixMonthsAgo = new Date();
   sixMonthsAgo.setMonth(sixMonthsAgo.getMonth() - 6);
   const sixMonthsAgoStr = sixMonthsAgo.toISOString().split('T')[0];
@@ -170,7 +169,38 @@ async function getInternationalEvents() {
       return getDisplayDate(a).localeCompare(getDisplayDate(b));
     });
 
-  return filteredEvents;
+  // Diversify by country: ensure we show events from different countries
+  // Take one event from each country first, then fill remaining slots
+  const countryPriority = ['UAE', 'Saudi Arabia', 'Qatar', 'UK', 'Egypt', 'Türkiye'];
+  const seenCountries = new Set<string>();
+  const diverseEvents: typeof filteredEvents = [];
+
+  // First pass: get one event per country (in priority order)
+  for (const country of countryPriority) {
+    const event = filteredEvents.find(e => e.country === country && !seenCountries.has(e.country));
+    if (event) {
+      seenCountries.add(event.country);
+      diverseEvents.push(event);
+    }
+  }
+
+  // Second pass: add any remaining countries not in priority list
+  for (const event of filteredEvents) {
+    if (!seenCountries.has(event.country)) {
+      seenCountries.add(event.country);
+      diverseEvents.push(event);
+    }
+  }
+
+  // Third pass: fill remaining slots with events from any country
+  const diverseEventIds = new Set(diverseEvents.map(e => e.id));
+  for (const event of filteredEvents) {
+    if (!diverseEventIds.has(event.id)) {
+      diverseEvents.push(event);
+    }
+  }
+
+  return diverseEvents;
 }
 
 // Fetch stats for the homepage
