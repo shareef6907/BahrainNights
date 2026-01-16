@@ -13,6 +13,8 @@ import {
   Instagram,
   GripVertical,
   ExternalLink,
+  Upload,
+  Video,
 } from 'lucide-react';
 import { isValidInstagramReelUrl, getInstagramReelUrl } from '@/lib/utils/instagram';
 import InstagramReelEmbed from '@/components/places/InstagramReelEmbed';
@@ -21,6 +23,8 @@ interface VenueReel {
   id: string;
   venue_id: string;
   instagram_url: string;
+  video_url?: string | null;
+  thumbnail_url?: string | null;
   display_order: number;
   is_active: boolean;
   created_at: string;
@@ -36,6 +40,13 @@ export default function VenueReelsPage() {
   const [message, setMessage] = useState<{ type: 'success' | 'error'; text: string } | null>(null);
   const [showAddForm, setShowAddForm] = useState(false);
   const [deletingId, setDeletingId] = useState<string | null>(null);
+
+  // Video upload state
+  const [videoFile, setVideoFile] = useState<File | null>(null);
+  const [videoUrl, setVideoUrl] = useState<string | null>(null);
+  const [uploadProgress, setUploadProgress] = useState<number>(0);
+  const [isUploading, setIsUploading] = useState(false);
+  const [videoError, setVideoError] = useState<string | null>(null);
 
   useEffect(() => {
     loadReels();
@@ -55,6 +66,98 @@ export default function VenueReelsPage() {
       setIsLoading(false);
     }
   }
+
+  // Handle video file selection and upload
+  const handleVideoSelect = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    setVideoError(null);
+    setVideoFile(file);
+
+    // Validate file type
+    const allowedTypes = ['video/mp4', 'video/webm', 'video/quicktime'];
+    if (!allowedTypes.includes(file.type)) {
+      setVideoError('Invalid video format. Please upload MP4, WebM, or MOV.');
+      setVideoFile(null);
+      return;
+    }
+
+    // Validate file size (100MB limit)
+    if (file.size > 100 * 1024 * 1024) {
+      setVideoError('Video too large. Maximum 100MB allowed.');
+      setVideoFile(null);
+      return;
+    }
+
+    // Upload to S3
+    setIsUploading(true);
+    setUploadProgress(0);
+
+    try {
+      // Get presigned URL
+      const presignResponse = await fetch('/api/venue-portal/reels/upload', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          fileType: file.type,
+          fileSize: file.size,
+        }),
+      });
+
+      if (!presignResponse.ok) {
+        const data = await presignResponse.json();
+        throw new Error(data.error || 'Failed to get upload URL');
+      }
+
+      const { presignedUrl, finalUrl } = await presignResponse.json();
+
+      // Upload directly to S3 with progress tracking
+      await new Promise<void>((resolve, reject) => {
+        const xhr = new XMLHttpRequest();
+
+        xhr.upload.addEventListener('progress', (event) => {
+          if (event.lengthComputable) {
+            const percent = Math.round((event.loaded / event.total) * 100);
+            setUploadProgress(percent);
+          }
+        });
+
+        xhr.addEventListener('load', () => {
+          if (xhr.status >= 200 && xhr.status < 300) {
+            resolve();
+          } else {
+            reject(new Error('Upload failed'));
+          }
+        });
+
+        xhr.addEventListener('error', () => reject(new Error('Upload failed')));
+
+        xhr.open('PUT', presignedUrl);
+        xhr.setRequestHeader('Content-Type', file.type);
+        xhr.send(file);
+      });
+
+      setVideoUrl(finalUrl);
+      setMessage({ type: 'success', text: 'Video uploaded! Now add your Instagram reel URL and save.' });
+    } catch (error) {
+      console.error('Video upload error:', error);
+      setVideoError(error instanceof Error ? error.message : 'Video upload failed');
+      setVideoFile(null);
+    } finally {
+      setIsUploading(false);
+    }
+  };
+
+  const resetForm = () => {
+    setNewReelUrl('');
+    setVideoFile(null);
+    setVideoUrl(null);
+    setUploadProgress(0);
+    setUrlError(null);
+    setVideoError(null);
+    setShowAddForm(false);
+  };
 
   const handleAddReel = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -90,16 +193,18 @@ export default function VenueReelsPage() {
       const response = await fetch('/api/venue-portal/reels', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ instagram_url: normalizedUrl }),
+        body: JSON.stringify({
+          instagram_url: normalizedUrl,
+          video_url: videoUrl, // Include uploaded video URL for autoplay
+        }),
       });
 
       const data = await response.json();
 
       if (response.ok) {
         setReels(prev => [...prev, data.reel]);
-        setNewReelUrl('');
-        setShowAddForm(false);
-        setMessage({ type: 'success', text: 'Reel added successfully!' });
+        resetForm();
+        setMessage({ type: 'success', text: videoUrl ? 'Reel added with autoplay video!' : 'Reel added successfully!' });
       } else {
         setMessage({ type: 'error', text: data.error || 'Failed to add reel' });
       }
@@ -226,14 +331,14 @@ export default function VenueReelsPage() {
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             className="fixed inset-0 z-50 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4"
-            onClick={() => setShowAddForm(false)}
+            onClick={() => resetForm()}
           >
             <motion.div
               initial={{ opacity: 0, scale: 0.95 }}
               animate={{ opacity: 1, scale: 1 }}
               exit={{ opacity: 0, scale: 0.95 }}
               onClick={(e) => e.stopPropagation()}
-              className="w-full max-w-lg bg-slate-900 border border-white/10 rounded-2xl p-6"
+              className="w-full max-w-lg bg-slate-900 border border-white/10 rounded-2xl p-6 max-h-[90vh] overflow-y-auto"
             >
               <div className="flex items-center justify-between mb-6">
                 <h2 className="text-xl font-bold text-white flex items-center gap-2">
@@ -241,7 +346,7 @@ export default function VenueReelsPage() {
                   Add Instagram Reel
                 </h2>
                 <button
-                  onClick={() => setShowAddForm(false)}
+                  onClick={() => resetForm()}
                   className="p-2 text-gray-400 hover:text-white hover:bg-white/10 rounded-lg transition-colors"
                 >
                   <X className="w-5 h-5" />
@@ -249,9 +354,82 @@ export default function VenueReelsPage() {
               </div>
 
               <form onSubmit={handleAddReel} className="space-y-4">
+                {/* Video Upload Section (Optional - for autoplay) */}
+                <div className="p-4 bg-gradient-to-r from-purple-500/10 to-pink-500/10 border border-purple-500/20 rounded-xl">
+                  <h3 className="text-sm font-semibold text-white mb-2 flex items-center gap-2">
+                    <Video className="w-4 h-4 text-purple-400" />
+                    Upload Video for Autoplay
+                    <span className="text-xs font-normal text-gray-400">(Optional)</span>
+                  </h3>
+                  <p className="text-xs text-gray-400 mb-3">
+                    Upload a video file to enable autoplay on your venue page. The video will play automatically when visitors view your profile.
+                  </p>
+
+                  {!videoUrl ? (
+                    <label className={`relative block cursor-pointer ${isUploading ? 'pointer-events-none' : ''}`}>
+                      <input
+                        type="file"
+                        accept="video/mp4,video/webm,video/quicktime"
+                        onChange={handleVideoSelect}
+                        className="sr-only"
+                        disabled={isUploading}
+                      />
+                      <div className={`flex flex-col items-center justify-center p-6 border-2 border-dashed rounded-xl transition-all ${
+                        videoError ? 'border-red-500' : 'border-gray-600 hover:border-purple-500'
+                      }`}>
+                        {isUploading ? (
+                          <>
+                            <Loader2 className="w-8 h-8 text-purple-400 animate-spin mb-2" />
+                            <p className="text-sm text-gray-400">Uploading... {uploadProgress}%</p>
+                            <div className="w-full mt-2 bg-gray-700 rounded-full h-2">
+                              <div
+                                className="bg-gradient-to-r from-purple-500 to-pink-500 h-2 rounded-full transition-all"
+                                style={{ width: `${uploadProgress}%` }}
+                              />
+                            </div>
+                          </>
+                        ) : (
+                          <>
+                            <Upload className="w-8 h-8 text-gray-400 mb-2" />
+                            <p className="text-sm text-gray-400">Click to upload video</p>
+                            <p className="text-xs text-gray-500 mt-1">MP4, WebM, MOV up to 100MB</p>
+                          </>
+                        )}
+                      </div>
+                    </label>
+                  ) : (
+                    <div className="flex items-center gap-3 p-3 bg-green-500/10 border border-green-500/30 rounded-lg">
+                      <CheckCircle className="w-5 h-5 text-green-400 flex-shrink-0" />
+                      <div className="flex-1 min-w-0">
+                        <p className="text-sm text-green-400 font-medium">Video uploaded!</p>
+                        <p className="text-xs text-gray-400 truncate">{videoFile?.name}</p>
+                      </div>
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setVideoFile(null);
+                          setVideoUrl(null);
+                          setUploadProgress(0);
+                        }}
+                        className="p-1.5 text-gray-400 hover:text-red-400 hover:bg-red-500/10 rounded-lg transition-colors"
+                      >
+                        <X className="w-4 h-4" />
+                      </button>
+                    </div>
+                  )}
+
+                  {videoError && (
+                    <p className="mt-2 text-sm text-red-400 flex items-center gap-1">
+                      <AlertCircle className="w-4 h-4" />
+                      {videoError}
+                    </p>
+                  )}
+                </div>
+
+                {/* Instagram URL (Required) */}
                 <div>
                   <label className="block text-sm text-gray-400 mb-2">
-                    Instagram Reel URL
+                    Instagram Reel URL <span className="text-red-400">*</span>
                   </label>
                   <input
                     type="url"
@@ -271,21 +449,21 @@ export default function VenueReelsPage() {
                     <p className="mt-2 text-sm text-red-400">{urlError}</p>
                   )}
                   <p className="mt-2 text-xs text-gray-500">
-                    Paste the URL of your Instagram Reel. You can find this by opening the reel on Instagram and copying the URL from your browser.
+                    This link will show a &quot;Watch on Instagram&quot; button. The uploaded video above enables autoplay on your venue page.
                   </p>
                 </div>
 
                 <div className="flex gap-3 pt-2">
                   <button
                     type="button"
-                    onClick={() => setShowAddForm(false)}
+                    onClick={() => resetForm()}
                     className="flex-1 px-4 py-3 bg-white/10 text-white rounded-xl font-medium hover:bg-white/20 transition-colors"
                   >
                     Cancel
                   </button>
                   <button
                     type="submit"
-                    disabled={isSubmitting}
+                    disabled={isSubmitting || isUploading}
                     className="flex-1 px-4 py-3 bg-gradient-to-r from-pink-500 to-purple-500 text-white rounded-xl font-medium hover:opacity-90 transition-opacity disabled:opacity-50 flex items-center justify-center gap-2"
                   >
                     {isSubmitting ? (
@@ -406,9 +584,10 @@ export default function VenueReelsPage() {
           Tips for Great Reels
         </h3>
         <ul className="text-gray-400 text-sm space-y-2">
-          <li>• Showcase your venue's best features and ambiance</li>
+          <li>• Showcase your venue&apos;s best features and ambiance</li>
           <li>• Include clips of special events, live music, or food/drinks</li>
           <li>• Keep reels engaging and high-quality</li>
+          <li>• <strong className="text-purple-400">Upload a video file</strong> to enable autoplay on your venue page</li>
           <li>• Make sure your Instagram account is public for reels to display</li>
           <li>• Drag reels to reorder them - the first reel will be most prominent</li>
         </ul>
