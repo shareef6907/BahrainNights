@@ -447,7 +447,7 @@ export default function HomePageClient({ initialMovies, initialStats, initialTod
                   onMouseLeave={() => setActiveDropdown(null)}
                 >
                   <button
-                    className={`flex items-center space-x-1.5 px-4 py-2.5 rounded-lg text-gray-300 hover:text-white hover:bg-white/5 transition-all duration-200 group ${activeDropdown === item.name ? 'text-white bg-white/5' : ''}`}
+                    className={`nav-item-glow flex items-center space-x-1.5 px-4 py-2.5 rounded-lg text-white hover:text-white transition-all duration-200 group ${activeDropdown === item.name ? 'text-white' : ''}`}
                     onClick={(e) => e.stopPropagation()}
                   >
                     <span className="text-lg">{item.icon}</span>

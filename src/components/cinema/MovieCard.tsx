@@ -70,8 +70,22 @@ function MovieCard({ movie, index = 0, onMovieClick, onTrailerClick }: MovieCard
           )}
         </div>
 
-        {/* Hover Overlay */}
-        <div className="absolute inset-0 bg-gradient-to-t from-black via-black/50 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex flex-col items-center justify-center gap-3">
+        {/* Mobile Play Button - Always visible on touch devices */}
+        {movie.trailerUrl && (
+          <button
+            className="md:hidden absolute bottom-3 left-3 p-3 bg-yellow-400 rounded-full text-black shadow-lg active:scale-95 transition-transform z-10"
+            onClick={(e) => {
+              e.stopPropagation();
+              onTrailerClick(movie);
+            }}
+            aria-label="Play trailer"
+          >
+            <Play className="w-5 h-5 fill-current" />
+          </button>
+        )}
+
+        {/* Hover Overlay - Desktop only */}
+        <div className="absolute inset-0 bg-gradient-to-t from-black via-black/50 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 hidden md:flex flex-col items-center justify-center gap-3">
           {/* Play Trailer Button - Only show if trailer exists */}
           {movie.trailerUrl && (
             <motion.button
