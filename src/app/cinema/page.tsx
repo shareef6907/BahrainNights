@@ -2,7 +2,7 @@ import { Suspense } from 'react';
 import { supabaseAdmin } from '@/lib/supabase';
 import CinemaPageClient from '@/components/cinema/CinemaPageClient';
 import { Movie } from '@/components/cinema/MovieCard';
-import MovieListSchema from '@/components/seo/MovieListSchema';
+import MovieListSchema from '@/components/SEO/MovieListSchema';
 
 // Revalidate every 5 minutes for fresh data
 export const revalidate = 300;

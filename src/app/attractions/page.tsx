@@ -1,7 +1,7 @@
 import { Suspense } from 'react';
 import { getAttractions as fetchAttractions, Attraction as DbAttraction } from '@/lib/db/attractions';
 import AttractionsPageClient, { Attraction } from '@/components/attractions/AttractionsPageClient';
-import AttractionListSchema from '@/components/seo/AttractionListSchema';
+import AttractionListSchema from '@/components/SEO/AttractionListSchema';
 
 // Disable caching temporarily to verify fix, then re-enable
 export const dynamic = 'force-dynamic';

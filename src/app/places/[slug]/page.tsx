@@ -2,7 +2,7 @@ import { notFound } from 'next/navigation';
 import { Metadata } from 'next';
 import { getVenueBySlug, getApprovedVenues, getVenueEvents, getVenueOffers, getVenueReels } from '@/lib/db/venues';
 import PlaceDetailPageContent from '@/components/places/PlaceDetailPageContent';
-import VenueSchema from '@/components/seo/VenueSchema';
+import VenueSchema from '@/components/SEO/VenueSchema';
 
 // Force dynamic rendering to ensure fresh data after admin approval
 export const dynamic = 'force-dynamic';
@@ -76,7 +76,6 @@ export default async function PlaceDetailPage({ params }: PageProps) {
           cover_url: venue.cover_image_url,
           category: venue.category,
           google_maps_url: venue.google_maps_url,
-          reservation_url: venue.reservation_url,
           slug: venue.slug,
         }}
       />

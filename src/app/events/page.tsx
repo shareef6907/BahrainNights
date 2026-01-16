@@ -1,7 +1,7 @@
 import { Suspense } from 'react';
 import { createClient } from '@supabase/supabase-js';
 import EventsPageClient, { Event, Attraction } from '@/components/events/EventsPageClient';
-import EventListSchema from '@/components/seo/EventListSchema';
+import EventListSchema from '@/components/SEO/EventListSchema';
 
 // Force dynamic rendering to ensure fresh data on every request
 export const dynamic = 'force-dynamic';

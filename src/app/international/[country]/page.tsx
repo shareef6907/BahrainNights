@@ -2,8 +2,8 @@ import { Metadata } from 'next';
 import { notFound } from 'next/navigation';
 import { supabaseAdmin } from '@/lib/supabase';
 import CountryPageClient from './CountryPageClient';
-import BreadcrumbSchema from '@/components/seo/BreadcrumbSchema';
-import EventListSchema from '@/components/seo/EventListSchema';
+import BreadcrumbSchema from '@/components/SEO/BreadcrumbSchema';
+import EventListSchema from '@/components/SEO/EventListSchema';
 
 // Country configuration
 const COUNTRIES: Record<string, { name: string; fullName: string; flag: string; dbName: string }> = {

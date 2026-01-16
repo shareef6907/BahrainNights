@@ -1,8 +1,8 @@
 import { Metadata } from 'next';
 import { supabaseAdmin } from '@/lib/supabase';
 import InternationalPageClient from './InternationalPageClient';
-import BreadcrumbSchema from '@/components/seo/BreadcrumbSchema';
-import EventListSchema from '@/components/seo/EventListSchema';
+import BreadcrumbSchema from '@/components/SEO/BreadcrumbSchema';
+import EventListSchema from '@/components/SEO/EventListSchema';
 
 export const metadata: Metadata = {
   title: 'International Events | BahrainNights',
