@@ -17,11 +17,8 @@ import type { Event, BlogArticle } from '@/types/database';
 
 export const maxDuration = 300; // 5 minutes max for Pro plan
 
-// Maximum events to process per request to avoid timeouts
-const MAX_EVENTS_PER_RUN = 3;
-
 // Delay between API calls to avoid rate limits (in ms)
-const DELAY_BETWEEN_CALLS = 1000;
+const DELAY_BETWEEN_CALLS = 1500;
 
 export async function POST(request: NextRequest) {
   try {
@@ -43,6 +40,9 @@ export async function POST(request: NextRequest) {
         { status: 500 }
       );
     }
+
+    // Get limit parameter (default 10, max 100)
+    const limit = Math.min(parseInt(searchParams.get('limit') || '10'), 100);
 
     const supabase = getAdminClient();
 
@@ -66,7 +66,7 @@ export async function POST(request: NextRequest) {
       .not('affiliate_url', 'is', null) // Only Platinumlist events (have affiliate URL)
       .gte('start_date', today) // Only future events
       .order('start_date', { ascending: true }) // Prioritize nearest events
-      .limit(MAX_EVENTS_PER_RUN);
+      .limit(limit);
 
     // Exclude already blogged events if any exist
     if (bloggedEventIds.length > 0) {
@@ -242,11 +242,21 @@ export async function POST(request: NextRequest) {
       revalidatePath('/blog/places-to-go/uk');
     }
 
+    // Count remaining unblogged events
+    const { count: totalRemaining } = await supabase
+      .from('events')
+      .select('*', { count: 'exact', head: true })
+      .eq('is_active', true)
+      .not('affiliate_url', 'is', null)
+      .gte('start_date', today)
+      .not('id', 'in', `(${[...bloggedEventIds, ...results.map(r => r.event_id)].join(',')})`);
+
     return NextResponse.json({
       success: true,
       message: `Generated ${results.length} blog posts`,
       processed: results.length,
       failed: errors.length,
+      remaining: totalRemaining || 0,
       articles: results,
       errors: errors.length > 0 ? errors : undefined,
     });
