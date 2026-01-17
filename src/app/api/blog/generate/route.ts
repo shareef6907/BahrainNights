@@ -46,13 +46,25 @@ export async function POST(request: NextRequest) {
 
     const supabase = getAdminClient();
 
-    // Get IDs of events that have already been blogged
+    // Get IDs of events that have already been blogged - check BOTH tables for safety
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const { data: bloggedEvents } = await (supabase as any)
+    const { data: trackedEvents } = await (supabase as any)
       .from('blog_event_tracker')
       .select('event_id') as { data: { event_id: string }[] | null };
 
-    const bloggedEventIds = bloggedEvents?.map((e) => e.event_id) || [];
+    // Also check blog_articles directly for event_id (backup check)
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const { data: articlesWithEvents } = await (supabase as any)
+      .from('blog_articles')
+      .select('event_id')
+      .not('event_id', 'is', null) as { data: { event_id: string }[] | null };
+
+    // Combine both lists to get all blogged event IDs
+    const trackedIds = trackedEvents?.map((e) => e.event_id) || [];
+    const articleIds = articlesWithEvents?.map((e) => e.event_id) || [];
+    const bloggedEventIds = [...new Set([...trackedIds, ...articleIds])];
+
+    console.log(`Already blogged events: ${bloggedEventIds.length} (tracker: ${trackedIds.length}, articles: ${articleIds.length})`);
 
     // Get today's date in YYYY-MM-DD format for filtering future events
     const today = new Date().toISOString().split('T')[0];
