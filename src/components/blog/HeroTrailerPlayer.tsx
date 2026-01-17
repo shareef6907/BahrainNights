@@ -111,25 +111,13 @@ export function HeroTrailerPlayer() {
     };
   }, [movies.length]);
 
-  // When slide changes, restore sound state if user had enabled sound
-  // New iframe loads muted, so we need to unmute it via postMessage
-  // On mobile, we must ensure video is playing before unmuting
+  // On mobile, reset to muted when changing slides to ensure video plays
+  // Mobile browsers require muted autoplay - trying to unmute new iframes is unreliable
   useEffect(() => {
-    if (!isMuted) {
-      // Wait for new iframe to fully load and YouTube API to initialize
-      const timer = setTimeout(() => {
-        if (iframeRef.current) {
-          // First ensure video is playing, then unmute
-          sendYouTubeCommand(iframeRef.current, 'playVideo');
-          // Small delay between commands for reliability
-          setTimeout(() => {
-            sendYouTubeCommand(iframeRef.current, 'unMute');
-          }, 300);
-        }
-      }, 2500); // Longer delay to ensure YouTube player is ready
-      return () => clearTimeout(timer);
+    if (isMobile && !isMuted) {
+      setIsMuted(true);
     }
-  }, [currentIndex]); // Only trigger on slide change, not on isMuted change
+  }, [currentIndex]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const currentMovie = movies[currentIndex];
 
