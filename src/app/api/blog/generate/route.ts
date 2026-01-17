@@ -53,12 +53,18 @@ export async function POST(request: NextRequest) {
 
     const bloggedEventIds = bloggedEvents?.map((e) => e.event_id) || [];
 
-    // Get events that haven't been blogged yet
+    // Get today's date in YYYY-MM-DD format for filtering future events
+    const today = new Date().toISOString().split('T')[0];
+
+    // Get Platinumlist events with future dates that haven't been blogged yet
+    // Only events with affiliate_url (Platinumlist source) and future start_date
     let eventsQuery = supabase
       .from('events')
       .select('*')
       .eq('is_active', true)
-      .order('created_at', { ascending: false })
+      .not('affiliate_url', 'is', null) // Only Platinumlist events (have affiliate URL)
+      .gte('start_date', today) // Only future events
+      .order('start_date', { ascending: true }) // Prioritize nearest events
       .limit(MAX_EVENTS_PER_RUN);
 
     // Exclude already blogged events if any exist
@@ -241,6 +247,9 @@ export async function GET(request: NextRequest) {
 
   const supabase = getAdminClient();
 
+  // Get today's date for filtering
+  const today = new Date().toISOString().split('T')[0];
+
   // Get counts - use type assertions for new blog tables
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const { count: totalArticles } = await (supabase as any)
@@ -252,10 +261,13 @@ export async function GET(request: NextRequest) {
     .from('blog_event_tracker')
     .select('*', { count: 'exact', head: true });
 
-  const { count: totalEvents } = await supabase
+  // Count only Platinumlist events with future dates
+  const { count: eligibleEvents } = await supabase
     .from('events')
     .select('*', { count: 'exact', head: true })
-    .eq('is_active', true);
+    .eq('is_active', true)
+    .not('affiliate_url', 'is', null)
+    .gte('start_date', today);
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const { data: recentArticles } = await (supabase as any)
@@ -269,8 +281,8 @@ export async function GET(request: NextRequest) {
     stats: {
       total_articles: totalArticles || 0,
       blogged_events: bloggedEvents || 0,
-      total_active_events: totalEvents || 0,
-      remaining_events: (totalEvents || 0) - (bloggedEvents || 0),
+      eligible_events: eligibleEvents || 0,
+      remaining_events: (eligibleEvents || 0) - (bloggedEvents || 0),
     },
     recent_articles: recentArticles || [],
     api_configured: !!process.env.ANTHROPIC_API_KEY,

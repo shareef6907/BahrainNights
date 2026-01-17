@@ -67,12 +67,17 @@ export async function GET(request: NextRequest) {
 
       const bloggedEventIds = bloggedEvents?.map((e) => e.event_id) || [];
 
-      // Get events that haven't been blogged yet (limit to 1 to avoid timeout)
+      // Get today's date for filtering future events
+      const today = new Date().toISOString().split('T')[0];
+
+      // Get Platinumlist events with future dates that haven't been blogged yet (limit to 1)
       let eventsQuery = supabase
         .from('events')
         .select('*')
         .eq('is_active', true)
-        .order('created_at', { ascending: false })
+        .not('affiliate_url', 'is', null) // Only Platinumlist events
+        .gte('start_date', today) // Only future events
+        .order('start_date', { ascending: true }) // Nearest events first
         .limit(1);
 
       // Exclude already blogged events if any exist
@@ -230,11 +235,14 @@ export async function GET(request: NextRequest) {
   // Default: show status page with UI
   const supabase = getAdminClient();
 
+  // Get today's date for filtering
+  const today = new Date().toISOString().split('T')[0];
+
   // Get current stats
   let stats = {
     total_articles: 0,
     blogged_events: 0,
-    total_active_events: 0,
+    eligible_events: 0,
     remaining_events: 0,
   };
 
@@ -249,16 +257,19 @@ export async function GET(request: NextRequest) {
       .from('blog_event_tracker')
       .select('*', { count: 'exact', head: true });
 
-    const { count: totalEvents } = await supabase
+    // Count only Platinumlist events with future dates
+    const { count: eligibleEvents } = await supabase
       .from('events')
       .select('*', { count: 'exact', head: true })
-      .eq('is_active', true);
+      .eq('is_active', true)
+      .not('affiliate_url', 'is', null)
+      .gte('start_date', today);
 
     stats = {
       total_articles: totalArticles || 0,
       blogged_events: bloggedEvents || 0,
-      total_active_events: totalEvents || 0,
-      remaining_events: (totalEvents || 0) - (bloggedEvents || 0),
+      eligible_events: eligibleEvents || 0,
+      remaining_events: (eligibleEvents || 0) - (bloggedEvents || 0),
     };
   } catch (e) {
     console.error('Error fetching stats:', e);
@@ -433,8 +444,8 @@ export async function GET(request: NextRequest) {
           <div class="stat-label">Events Remaining</div>
         </div>
         <div class="stat">
-          <div class="stat-value">${stats.total_active_events}</div>
-          <div class="stat-label">Total Active Events</div>
+          <div class="stat-value">${stats.eligible_events}</div>
+          <div class="stat-label">Platinumlist Future Events</div>
         </div>
         <div class="stat">
           <div class="stat-value">${stats.blogged_events}</div>

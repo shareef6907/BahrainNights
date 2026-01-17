@@ -86,6 +86,21 @@ async function getArticle(slug: string) {
     .eq('id', article.id)
     .then(() => {});
 
+  // Get event details if linked (to get slug and affiliate_url)
+  let eventSlug: string | null = null;
+  let eventAffiliateUrl: string | null = null;
+  if (article.event_id) {
+    const { data: event } = await supabase
+      .from('events')
+      .select('slug, affiliate_url')
+      .eq('id', article.event_id)
+      .single() as { data: { slug: string; affiliate_url: string | null } | null };
+    if (event) {
+      eventSlug = event.slug;
+      eventAffiliateUrl = event.affiliate_url;
+    }
+  }
+
   // Get related articles
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const { data: related } = await (supabase as any)
@@ -97,7 +112,7 @@ async function getArticle(slug: string) {
     .order('published_at', { ascending: false })
     .limit(3) as { data: RelatedArticle[] | null };
 
-  return { article, related: related || [] };
+  return { article, related: related || [], eventSlug, eventAffiliateUrl };
 }
 
 export default async function ArticlePage({ params }: Props) {
@@ -108,7 +123,7 @@ export default async function ArticlePage({ params }: Props) {
     notFound();
   }
 
-  const { article, related } = data;
+  const { article, related, eventSlug, eventAffiliateUrl } = data;
 
   const publishedDate = new Date(article.published_at).toLocaleDateString('en-US', {
     year: 'numeric',
@@ -186,18 +201,30 @@ export default async function ArticlePage({ params }: Props) {
         />
 
         {/* Event Link */}
-        {article.event_id && (
+        {article.event_id && eventSlug && (
           <div className="mt-12 p-6 bg-gradient-to-r from-yellow-500/20 to-pink-500/20 border border-yellow-400/30 rounded-2xl">
             <h3 className="text-xl font-bold mb-2 flex items-center gap-2">
               <span>🎟️</span> Get Tickets
             </h3>
             <p className="text-gray-400 mb-4">Don&apos;t miss this event!</p>
-            <Link
-              href={`/events/${article.event_id}`}
-              className="inline-block bg-gradient-to-r from-yellow-400 via-orange-500 to-pink-500 text-black font-bold px-6 py-3 rounded-full hover:shadow-lg hover:shadow-orange-500/25 transition-all"
-            >
-              View Event Details &rarr;
-            </Link>
+            <div className="flex flex-wrap gap-3">
+              {eventAffiliateUrl && (
+                <a
+                  href={eventAffiliateUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="inline-block bg-gradient-to-r from-yellow-400 via-orange-500 to-pink-500 text-black font-bold px-6 py-3 rounded-full hover:shadow-lg hover:shadow-orange-500/25 transition-all"
+                >
+                  Buy Tickets &rarr;
+                </a>
+              )}
+              <Link
+                href={`/events/${eventSlug}`}
+                className="inline-block bg-white/10 border border-white/20 px-6 py-3 rounded-full hover:bg-white/20 transition-all"
+              >
+                View Event Details
+              </Link>
+            </div>
           </div>
         )}
 
