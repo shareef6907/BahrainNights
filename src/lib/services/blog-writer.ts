@@ -343,7 +343,8 @@ function formatCountryName(country: string): string {
     'uk': 'United Kingdom',
     'oman': 'Oman',
     'kuwait': 'Kuwait',
-    'unknown': 'Location TBA'
+    'tba': 'TBA',
+    'unknown': 'TBA'
   };
   return countryMap[country.toLowerCase()] || country;
 }
@@ -374,10 +375,28 @@ export function determineCountry(location: string): string {
       locationLower.includes('saadiyat') ||
       locationLower.includes('al reem') ||
       locationLower.includes('jebel ali') ||
-      locationLower.includes('marina mall') ||
+      locationLower.includes('palm jumeirah') ||
+      locationLower.includes('five palm') ||
+      locationLower.includes('jumeirah') ||
+      locationLower.includes('jbr') ||
+      locationLower.includes('difc') ||
+      locationLower.includes('deira') ||
+      locationLower.includes('bur dubai') ||
+      locationLower.includes('al barsha') ||
+      locationLower.includes('business bay') ||
+      locationLower.includes('downtown dubai') ||
+      locationLower.includes('marina') ||
       locationLower.includes('mall of emirates') ||
       locationLower.includes('dubai mall') ||
+      locationLower.includes('dubai opera') ||
+      locationLower.includes('dubai autodrome') ||
+      locationLower.includes('meydan') ||
+      locationLower.includes('coca-cola arena') ||
+      locationLower.includes('etihad arena') ||
       locationLower.includes('etihad') ||
+      locationLower.includes('louvre abu dhabi') ||
+      locationLower.includes('ferrari world') ||
+      locationLower.includes('expo city') ||
       locationLower.includes('uae') ||
       locationLower.includes('united arab emirates') ||
       locationLower.includes('emirates')) {
@@ -450,7 +469,33 @@ export function determineCity(location: string): string {
 
   // UAE cities (check first as they're most specific)
   if (locationLower.includes('dubai')) return 'Dubai';
+  // Dubai landmarks/areas that indicate Dubai city
+  if (locationLower.includes('palm jumeirah')) return 'Dubai';
+  if (locationLower.includes('five palm')) return 'Dubai';
+  if (locationLower.includes('jumeirah')) return 'Dubai';
+  if (locationLower.includes('jbr')) return 'Dubai';
+  if (locationLower.includes('difc')) return 'Dubai';
+  if (locationLower.includes('deira')) return 'Dubai';
+  if (locationLower.includes('bur dubai')) return 'Dubai';
+  if (locationLower.includes('al barsha')) return 'Dubai';
+  if (locationLower.includes('business bay')) return 'Dubai';
+  if (locationLower.includes('downtown dubai')) return 'Dubai';
+  if (locationLower.includes('dubai mall')) return 'Dubai';
+  if (locationLower.includes('dubai opera')) return 'Dubai';
+  if (locationLower.includes('dubai autodrome')) return 'Dubai';
+  if (locationLower.includes('meydan')) return 'Dubai';
+  if (locationLower.includes('coca-cola arena')) return 'Dubai';
+  if (locationLower.includes('marina')) return 'Dubai';
+  if (locationLower.includes('mall of emirates')) return 'Dubai';
+  if (locationLower.includes('jebel ali')) return 'Dubai';
+  // Abu Dhabi
   if (locationLower.includes('abu dhabi')) return 'Abu Dhabi';
+  if (locationLower.includes('yas island')) return 'Abu Dhabi';
+  if (locationLower.includes('saadiyat')) return 'Abu Dhabi';
+  if (locationLower.includes('etihad arena')) return 'Abu Dhabi';
+  if (locationLower.includes('louvre abu dhabi')) return 'Abu Dhabi';
+  if (locationLower.includes('ferrari world')) return 'Abu Dhabi';
+  // Other UAE
   if (locationLower.includes('sharjah')) return 'Sharjah';
   if (locationLower.includes('ajman')) return 'Ajman';
   if (locationLower.includes('ras al khaimah')) return 'Ras Al Khaimah';

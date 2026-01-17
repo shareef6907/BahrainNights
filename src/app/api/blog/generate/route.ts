@@ -107,51 +107,68 @@ export async function POST(request: NextRequest) {
       error: string;
     }> = [];
 
-    const skipped: Array<{
-      event_id: string;
-      event_title: string;
-      reason: string;
-    }> = [];
-
     for (const event of unbloggedEvents) {
       try {
         // CRITICAL: Combine ALL location sources for accurate extraction
         // Include title, description, venue info, and source URL for maximum coverage
         const allLocationSources = [
-          event.venue_address,
-          event.venue_name,
           event.title,
+          event.venue_name,
+          event.venue_address,
           event.description,
           event.source_url,
           event.affiliate_url,
           event.google_maps_link,
         ].filter(Boolean).join(' ');
 
-        // Extract accurate city and country - NO defaults to Bahrain/Manama
+        // Extract accurate city and country from all available data
         const extractedCity = determineCity(allLocationSources);
         const extractedCountry = determineCountry(allLocationSources);
 
         // Log for debugging
         console.log(`Event: ${event.title}`);
-        console.log(`  Location sources: ${allLocationSources.substring(0, 200)}...`);
+        console.log(`  Venue: ${event.venue_name || 'N/A'}`);
         console.log(`  Extracted city: ${extractedCity || 'NOT FOUND'}`);
         console.log(`  Extracted country: ${extractedCountry || 'NOT FOUND'}`);
 
-        // CRITICAL: Skip events without valid location data
-        // Location is MANDATORY - we don't want blogs with "unknown" locations
-        if (!extractedCity && !extractedCountry) {
-          console.log(`  SKIPPED: No location data found`);
-          skipped.push({
-            event_id: event.id,
-            event_title: event.title,
-            reason: 'No location data found in event',
-          });
-          continue;
+        // Use extracted values, or derive country from city if needed
+        let finalCity = extractedCity;
+        let finalCountry = extractedCountry;
+
+        // If we have a city but no country, derive country from city
+        if (finalCity && !finalCountry) {
+          // Dubai, Abu Dhabi, Sharjah, etc. are in UAE
+          const uaeCities = ['dubai', 'abu dhabi', 'sharjah', 'ajman', 'ras al khaimah', 'fujairah', 'al ain', 'khorfakkan'];
+          const saudiCities = ['riyadh', 'jeddah', 'dammam', 'al khobar', 'mecca', 'medina'];
+          const qatarCities = ['doha', 'lusail', 'al wakrah'];
+          const bahrainCities = ['manama', 'seef', 'muharraq', 'juffair', 'riffa', 'amwaj'];
+
+          const cityLower = finalCity.toLowerCase();
+          if (uaeCities.some(c => cityLower.includes(c))) finalCountry = 'uae';
+          else if (saudiCities.some(c => cityLower.includes(c))) finalCountry = 'saudi-arabia';
+          else if (qatarCities.some(c => cityLower.includes(c))) finalCountry = 'qatar';
+          else if (bahrainCities.some(c => cityLower.includes(c))) finalCountry = 'bahrain';
         }
 
-        // Use extracted values - at this point we know at least one is valid
-        const finalCity = extractedCity || 'TBA';
-        const finalCountry = extractedCountry || 'TBA';
+        // If we still don't have location, check if Platinumlist URL contains country hint
+        if (!finalCity && !finalCountry && event.affiliate_url) {
+          const urlLower = event.affiliate_url.toLowerCase();
+          if (urlLower.includes('/ae/') || urlLower.includes('uae')) {
+            finalCountry = 'uae';
+          } else if (urlLower.includes('/bh/') || urlLower.includes('bahrain')) {
+            finalCountry = 'bahrain';
+          } else if (urlLower.includes('/sa/') || urlLower.includes('saudi')) {
+            finalCountry = 'saudi-arabia';
+          } else if (urlLower.includes('/qa/') || urlLower.includes('qatar')) {
+            finalCountry = 'qatar';
+          }
+        }
+
+        // Provide defaults only if absolutely nothing found
+        const cityForBlog = finalCity || 'TBA';
+        const countryForBlog = finalCountry || 'TBA';
+
+        console.log(`  Final city: ${cityForBlog}, country: ${countryForBlog}`);
 
         const eventData: EventData = {
           id: event.id,
@@ -160,8 +177,8 @@ export async function POST(request: NextRequest) {
           venue_name: event.venue_name,
           venue_address: event.venue_address,
           location: allLocationSources || 'Location not specified',
-          city: finalCity,
-          country: finalCountry,
+          city: cityForBlog,
+          country: countryForBlog,
           start_date: event.start_date,
           end_date: event.end_date,
           start_time: event.start_time,
@@ -194,8 +211,8 @@ export async function POST(request: NextRequest) {
             keywords: article.keywords,
             tags: article.tags,
             read_time_minutes: article.read_time_minutes,
-            country: finalCountry,
-            city: finalCity,
+            country: countryForBlog,
+            city: cityForBlog,
             category: event.category,
             event_id: event.id,
             featured_image: featuredImage,
@@ -275,14 +292,12 @@ export async function POST(request: NextRequest) {
 
     return NextResponse.json({
       success: true,
-      message: `Generated ${results.length} blog posts${skipped.length > 0 ? `, skipped ${skipped.length} (no location)` : ''}`,
+      message: `Generated ${results.length} blog posts`,
       processed: results.length,
       failed: errors.length,
-      skipped: skipped.length,
       remaining: totalRemaining || 0,
       articles: results,
       errors: errors.length > 0 ? errors : undefined,
-      skipped_events: skipped.length > 0 ? skipped : undefined,
     });
   } catch (error) {
     console.error('Blog generation error:', error);
