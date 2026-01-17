@@ -74,15 +74,16 @@ function convertToMovieFormat(dbMovie: DBMovie): Movie {
   };
 }
 
-// Fetch all movies on the server (excluding Mukta-only movies)
+// Fetch all movies on the server (ONLY scraped movies actually playing in Bahrain)
 async function getMovies() {
-  // Fetch all movies - we'll group them by genre on the client side
-  // This avoids the "Now Showing" / "Coming Soon" labels since scraper data isn't 100% accurate
+  // Fetch ONLY movies that are scraped from Bahrain cinemas
+  // This ensures we only show movies actually playing in Bahrain (not random TMDB entries)
   const { data: allMoviesData } = await supabaseAdmin
     .from('movies')
     .select('*')
-    // Exclude movies that are ONLY from Mukta - only show VOX, Cineco, Seef, or manual entries
-    .or('scraped_from.is.null,scraped_from.cs.{vox},scraped_from.cs.{cineco},scraped_from.cs.{seef}')
+    // ONLY show movies scraped from actual Bahrain cinemas - VOX, Cineco, or Seef
+    // Movies must have scraped_from array containing at least one valid cinema
+    .or('scraped_from.cs.{vox},scraped_from.cs.{cineco},scraped_from.cs.{seef}')
     .order('tmdb_rating', { ascending: false });
 
   const allMovies = (allMoviesData || []).map((m: DBMovie) => convertToMovieFormat(m));
@@ -129,13 +130,59 @@ async function getLastUpdated() {
   return data?.completed_at || null;
 }
 
+// Fetch featured trailers for cinema hero (admin-selected)
+async function getFeaturedTrailers(): Promise<string[]> {
+  try {
+    const { data, error } = await supabaseAdmin
+      .from('cinema_featured_trailers')
+      .select('movie_id')
+      .eq('is_active', true)
+      .order('display_order', { ascending: true });
+
+    if (error) {
+      // Table might not exist yet - return empty array
+      console.log('Featured trailers table not available:', error.message);
+      return [];
+    }
+
+    return (data || []).map((t: { movie_id: string }) => t.movie_id);
+  } catch {
+    return [];
+  }
+}
+
 // Server Component - data is fetched BEFORE the page renders
 export default async function CinemaPage() {
   // Fetch all data on the server - NO loading state needed!
-  const [{ allMovies, nowShowing }, lastUpdated] = await Promise.all([
+  const [{ allMovies, nowShowing }, featuredTrailerIds] = await Promise.all([
     getMovies(),
-    getLastUpdated()
+    getFeaturedTrailers()
   ]);
+
+  // Get hero movies: use admin-selected featured trailers if available, otherwise use top-rated with trailers
+  let heroMovies: Movie[] = [];
+
+  if (featuredTrailerIds.length > 0) {
+    // Use admin-selected featured trailers in the specified order
+    heroMovies = featuredTrailerIds
+      .map(id => allMovies.find(m => m.id === id))
+      .filter((m): m is Movie => m !== undefined && !!m.trailerUrl);
+  }
+
+  // If no featured trailers or none have valid trailers, fall back to top-rated with trailers
+  if (heroMovies.length === 0) {
+    heroMovies = allMovies
+      .filter((movie) => {
+        const hasValidBackdrop = movie.backdrop &&
+          !movie.backdrop.includes('placeholder') &&
+          !movie.backdrop.includes('null') &&
+          movie.backdrop.startsWith('http');
+        const hasTrailer = movie.trailerUrl && movie.trailerUrl.length > 0;
+        return hasValidBackdrop && hasTrailer;
+      })
+      .sort((a, b) => b.rating - a.rating)
+      .slice(0, 5);
+  }
 
   return (
     <>
@@ -146,7 +193,7 @@ export default async function CinemaPage() {
         pageUrl="https://bahrainnights.com/cinema"
       />
       <Suspense fallback={null}>
-        <CinemaNetflixClient allMovies={allMovies} />
+        <CinemaNetflixClient allMovies={allMovies} heroMovies={heroMovies} />
       </Suspense>
     </>
   );

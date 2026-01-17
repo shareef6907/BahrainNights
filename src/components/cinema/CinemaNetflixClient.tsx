@@ -1,8 +1,7 @@
 'use client';
 
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useEffect } from 'react';
 import dynamic from 'next/dynamic';
-import { Search, Film, X } from 'lucide-react';
 import CinemaHeroPlayer from './CinemaHeroPlayer';
 import MovieRow from './MovieRow';
 import { Movie } from './MovieCard';
@@ -20,9 +19,10 @@ const TrailerModal = dynamic(() => import('./TrailerModal'), {
 
 interface CinemaNetflixClientProps {
   allMovies: Movie[];
+  heroMovies?: Movie[];  // Admin-selected hero movies (optional - computed from allMovies if not provided)
 }
 
-// Genre configuration for rows
+// Genre configuration for rows - only genre-based rows, no "Top Rated" or "Featured"
 const GENRE_ROWS = [
   { genre: 'Action', icon: '💥', title: 'Action Films' },
   { genre: 'Comedy', icon: '😂', title: 'Comedy' },
@@ -39,15 +39,20 @@ const GENRE_ROWS = [
   { genre: 'Documentary', icon: '📹', title: 'Documentary' },
 ];
 
-export default function CinemaNetflixClient({ allMovies }: CinemaNetflixClientProps) {
-  const [searchQuery, setSearchQuery] = useState('');
+export default function CinemaNetflixClient({ allMovies, heroMovies: serverHeroMovies }: CinemaNetflixClientProps) {
   const [selectedMovie, setSelectedMovie] = useState<Movie | null>(null);
   const [isMovieModalOpen, setIsMovieModalOpen] = useState(false);
   const [trailerMovie, setTrailerMovie] = useState<Movie | null>(null);
   const [isTrailerModalOpen, setIsTrailerModalOpen] = useState(false);
 
-  // Featured movies for hero - top rated with valid backdrops and trailers
+  // Featured movies for hero - use server-provided if available, otherwise compute from allMovies
   const heroMovies = useMemo(() => {
+    // If server provided hero movies, use them
+    if (serverHeroMovies && serverHeroMovies.length > 0) {
+      return serverHeroMovies;
+    }
+
+    // Fallback: compute from allMovies (with valid backdrops and trailers)
     return allMovies
       .filter((movie) => {
         const hasValidBackdrop = movie.backdrop &&
@@ -59,7 +64,7 @@ export default function CinemaNetflixClient({ allMovies }: CinemaNetflixClientPr
       })
       .sort((a, b) => b.rating - a.rating)
       .slice(0, 5);
-  }, [allMovies]);
+  }, [allMovies, serverHeroMovies]);
 
   // Group movies by genre
   const moviesByGenre = useMemo(() => {
@@ -74,23 +79,6 @@ export default function CinemaNetflixClient({ allMovies }: CinemaNetflixClientPr
     return groups;
   }, [allMovies]);
 
-  // Top Rated row
-  const topRatedMovies = useMemo(() => {
-    return [...allMovies]
-      .sort((a, b) => b.rating - a.rating)
-      .slice(0, 15);
-  }, [allMovies]);
-
-  // Search results
-  const searchResults = useMemo(() => {
-    if (!searchQuery.trim()) return [];
-    const query = searchQuery.toLowerCase();
-    return allMovies.filter((movie) =>
-      movie.title.toLowerCase().includes(query) ||
-      movie.genres.some((g) => g.toLowerCase().includes(query))
-    );
-  }, [allMovies, searchQuery]);
-
   const handleMovieClick = (movie: Movie) => {
     setSelectedMovie(movie);
     setIsMovieModalOpen(true);
@@ -103,122 +91,66 @@ export default function CinemaNetflixClient({ allMovies }: CinemaNetflixClientPr
     }
   };
 
-  const isSearching = searchQuery.trim().length > 0;
+  // Listen for openMovieModal events from hero player
+  useEffect(() => {
+    const handleOpenModal = (e: CustomEvent) => {
+      if (e.detail) {
+        // Find the movie in allMovies that matches
+        const movie = allMovies.find(m => m.id === e.detail.id || m.title === e.detail.title);
+        if (movie) {
+          setSelectedMovie(movie);
+          setIsMovieModalOpen(true);
+        }
+      }
+    };
+
+    window.addEventListener('openMovieModal', handleOpenModal as EventListener);
+    return () => window.removeEventListener('openMovieModal', handleOpenModal as EventListener);
+  }, [allMovies]);
 
   return (
     <div className="min-h-screen bg-gray-950">
       {/* Hero Section with Auto-Playing Trailers */}
-      {!isSearching && heroMovies.length > 0 && (
+      {heroMovies.length > 0 && (
         <CinemaHeroPlayer
           movies={heroMovies}
           onMovieClick={handleMovieClick}
         />
       )}
 
-      {/* Search Bar - Fixed at top when scrolling */}
-      <div className={`sticky top-16 z-30 bg-gradient-to-b from-gray-950 via-gray-950/95 to-transparent ${isSearching ? 'pt-24' : ''}`}>
-        <div className="max-w-7xl mx-auto px-6 md:px-12 py-4">
-          <div className="relative max-w-md">
-            <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
-            <input
-              type="text"
-              placeholder="Search movies..."
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              className="w-full pl-12 pr-10 py-3 bg-gray-800/80 border border-gray-700 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:border-red-500 transition-colors"
-            />
-            {searchQuery && (
-              <button
-                onClick={() => setSearchQuery('')}
-                className="absolute right-3 top-1/2 -translate-y-1/2 p-1 text-gray-400 hover:text-white"
-              >
-                <X size={18} />
-              </button>
-            )}
-          </div>
+      {/* Content - Genre Rows Only (No search bar, no Top Rated, no Featured) */}
+      <div className="relative -mt-32 z-10 pb-20">
+        <div className="space-y-2 md:space-y-4">
+          {/* Genre-based Rows ONLY */}
+          {GENRE_ROWS.map(({ genre, icon, title }) => {
+            const movies = moviesByGenre[genre] || [];
+            if (movies.length === 0) return null;
+
+            return (
+              <MovieRow
+                key={genre}
+                title={title}
+                icon={icon}
+                movies={movies}
+                onSelectMovie={handleMovieClick}
+              />
+            );
+          })}
+
+          {/* Latest Releases - by release date */}
+          <MovieRow
+            title="Latest Releases"
+            icon="🆕"
+            movies={[...allMovies]
+              .sort((a, b) => {
+                const dateA = a.releaseDate ? new Date(a.releaseDate).getTime() : 0;
+                const dateB = b.releaseDate ? new Date(b.releaseDate).getTime() : 0;
+                return dateB - dateA;
+              })
+              .slice(0, 20)}
+            onSelectMovie={handleMovieClick}
+          />
         </div>
-      </div>
-
-      {/* Content */}
-      <div className={`relative ${isSearching ? '' : '-mt-32'} z-10 pb-20`}>
-        {isSearching ? (
-          /* Search Results */
-          <div className="px-6 md:px-12 pt-4">
-            <h2 className="text-2xl font-bold text-white mb-6">
-              {searchResults.length > 0
-                ? `Found ${searchResults.length} result${searchResults.length !== 1 ? 's' : ''}`
-                : 'No movies found'}
-            </h2>
-            {searchResults.length > 0 ? (
-              <MovieRow
-                title="Search Results"
-                icon="🔍"
-                movies={searchResults}
-                onSelectMovie={handleMovieClick}
-              />
-            ) : (
-              <div className="text-center py-20">
-                <Film className="w-16 h-16 text-gray-600 mx-auto mb-4" />
-                <p className="text-gray-400">
-                  Try searching for a different movie title or genre
-                </p>
-              </div>
-            )}
-          </div>
-        ) : (
-          /* Genre Rows */
-          <div className="space-y-2 md:space-y-4">
-            {/* Top Rated Row */}
-            {topRatedMovies.length > 0 && (
-              <MovieRow
-                title="Top Rated"
-                icon="⭐"
-                movies={topRatedMovies}
-                onSelectMovie={handleMovieClick}
-              />
-            )}
-
-            {/* Featured Films - All movies that have trailers */}
-            {heroMovies.length > 0 && (
-              <MovieRow
-                title="Featured Films"
-                icon="🎬"
-                movies={allMovies.filter(m => m.trailerUrl && m.trailerUrl.length > 0).slice(0, 20)}
-                onSelectMovie={handleMovieClick}
-              />
-            )}
-
-            {/* Genre-based Rows */}
-            {GENRE_ROWS.map(({ genre, icon, title }) => {
-              const movies = moviesByGenre[genre] || [];
-              if (movies.length === 0) return null;
-
-              return (
-                <MovieRow
-                  key={genre}
-                  title={title}
-                  icon={icon}
-                  movies={movies}
-                  onSelectMovie={handleMovieClick}
-                />
-              );
-            })}
-
-            {/* Latest Releases - by release date */}
-            <MovieRow
-              title="Latest Releases"
-              icon="🆕"
-              movies={[...allMovies]
-                .sort((a, b) => {
-                  const dateA = a.releaseDate ? new Date(a.releaseDate).getTime() : 0;
-                  const dateB = b.releaseDate ? new Date(b.releaseDate).getTime() : 0;
-                  return dateB - dateA;
-                })
-                .slice(0, 20)}
-              onSelectMovie={handleMovieClick}
-            />
-          </div>
-        )}
       </div>
 
       {/* Movie Detail Modal */}

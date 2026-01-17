@@ -12,19 +12,30 @@ interface CinemaHeroPlayerProps {
 
 export default function CinemaHeroPlayer({ movies, onMovieClick }: CinemaHeroPlayerProps) {
   const [currentIndex, setCurrentIndex] = useState(0);
+  // Start MUTED on mobile for autoplay to work (browser restriction)
+  // Desktop starts unmuted for better experience
   const [isMuted, setIsMuted] = useState(true);
-  const [hasInteracted, setHasInteracted] = useState(false);
+  const [isMobile, setIsMobile] = useState(false);
   const autoAdvanceRef = useRef<NodeJS.Timeout | null>(null);
 
-  // IMPORTANT: Store mute preference that persists across slide changes
-  const userMutePreference = useRef<boolean | null>(null);
+  // IMPORTANT: Persist mute preference across slide changes using ref
+  const userMutePreference = useRef<boolean>(true);
 
+  // Detect mobile device
   useEffect(() => {
-    // Check if user previously unmuted (for returning visitors)
-    const savedMuteState = localStorage.getItem('cinema-mute-preference');
-    if (savedMuteState === 'unmuted') {
-      userMutePreference.current = false;
-    }
+    const checkMobile = () => {
+      const mobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent) || window.innerWidth < 768;
+      setIsMobile(mobile);
+      // On desktop, start unmuted for better experience
+      // On mobile, keep muted for autoplay to work
+      if (!mobile) {
+        setIsMuted(false);
+        userMutePreference.current = false;
+      }
+    };
+    checkMobile();
+    window.addEventListener('resize', checkMobile);
+    return () => window.removeEventListener('resize', checkMobile);
   }, []);
 
   // Auto-advance trailers every 25 seconds
@@ -32,37 +43,13 @@ export default function CinemaHeroPlayer({ movies, onMovieClick }: CinemaHeroPla
     if (movies.length > 1) {
       autoAdvanceRef.current = setInterval(() => {
         setCurrentIndex((prev) => (prev + 1) % movies.length);
+        // DO NOT change mute state when auto-advancing - this fixes the sliding mute bug
       }, 25000);
     }
     return () => {
       if (autoAdvanceRef.current) clearInterval(autoAdvanceRef.current);
     };
   }, [movies.length]);
-
-  // Handle user interaction (click/tap) to unmute - MOBILE FIX
-  useEffect(() => {
-    const handleInteraction = () => {
-      if (!hasInteracted) {
-        setHasInteracted(true);
-
-        // If user hasn't explicitly muted, unmute on interaction
-        if (userMutePreference.current === null || userMutePreference.current === false) {
-          setIsMuted(false);
-          userMutePreference.current = false;
-          localStorage.setItem('cinema-mute-preference', 'unmuted');
-        }
-      }
-    };
-
-    // Listen for both click and touch
-    document.addEventListener('click', handleInteraction, { once: true });
-    document.addEventListener('touchstart', handleInteraction, { once: true });
-
-    return () => {
-      document.removeEventListener('click', handleInteraction);
-      document.removeEventListener('touchstart', handleInteraction);
-    };
-  }, [hasInteracted]);
 
   const currentMovie = movies[currentIndex];
 
@@ -73,25 +60,26 @@ export default function CinemaHeroPlayer({ movies, onMovieClick }: CinemaHeroPla
     return match?.[1] || null;
   }, []);
 
-  // Get YouTube embed URL - PRESERVES MUTE STATE
+  // Get YouTube embed URL - ALWAYS uses userMutePreference ref to persist across slides
   const getYouTubeUrl = useCallback((movie: Movie): string | null => {
     const videoId = getYouTubeId(movie);
     if (!videoId) return null;
 
-    // Use the current mute state (this preserves across slide changes)
-    return `https://www.youtube.com/embed/${videoId}?autoplay=1&mute=${isMuted ? 1 : 0}&controls=0&loop=1&playlist=${videoId}&modestbranding=1&rel=0&showinfo=0&iv_load_policy=3&disablekb=1&enablejsapi=1&playsinline=1`;
-  }, [isMuted, getYouTubeId]);
+    // Use userMutePreference.current to persist mute state across slide changes
+    const muteParam = userMutePreference.current ? 1 : 0;
+    return `https://www.youtube.com/embed/${videoId}?autoplay=1&mute=${muteParam}&controls=0&loop=1&playlist=${videoId}&modestbranding=1&rel=0&showinfo=0&iv_load_policy=3&disablekb=1&enablejsapi=1&playsinline=1`;
+  }, [getYouTubeId]);
 
   const goToSlide = (index: number) => {
     setCurrentIndex(index);
-    // Reset auto-advance timer
+    // Reset auto-advance timer but DO NOT touch mute state
     if (autoAdvanceRef.current) {
       clearInterval(autoAdvanceRef.current);
       autoAdvanceRef.current = setInterval(() => {
         setCurrentIndex((prev) => (prev + 1) % movies.length);
       }, 25000);
     }
-    // NOTE: We do NOT reset isMuted here - this fixes the mobile bug!
+    // NOTE: We do NOT reset isMuted here - this fixes the mobile mute bug!
   };
 
   const goNext = () => goToSlide((currentIndex + 1) % movies.length);
@@ -101,11 +89,8 @@ export default function CinemaHeroPlayer({ movies, onMovieClick }: CinemaHeroPla
     e.stopPropagation();
     const newMuteState = !isMuted;
     setIsMuted(newMuteState);
-    setHasInteracted(true);
-
-    // Save user preference
+    // Save user preference to persist across slide changes
     userMutePreference.current = newMuteState;
-    localStorage.setItem('cinema-mute-preference', newMuteState ? 'muted' : 'unmuted');
   };
 
   if (movies.length === 0) {
@@ -113,7 +98,7 @@ export default function CinemaHeroPlayer({ movies, onMovieClick }: CinemaHeroPla
       <div className="relative w-full h-[60vh] bg-gradient-to-b from-gray-800 to-gray-950 flex items-center justify-center">
         <div className="text-center px-4">
           <h1 className="text-4xl md:text-6xl font-bold text-white mb-4">🎬 Cinema</h1>
-          <p className="text-xl text-gray-400">Discover the latest movies</p>
+          <p className="text-xl text-gray-400">Discover movies playing in Bahrain</p>
         </div>
       </div>
     );
@@ -158,7 +143,7 @@ export default function CinemaHeroPlayer({ movies, onMovieClick }: CinemaHeroPla
             {currentMovie?.genres && currentMovie.genres.length > 0 && (
               <div className="flex items-center gap-3 mb-4">
                 <span className="bg-red-600 text-white px-3 py-1 rounded text-sm font-bold">
-                  🎬 FEATURED
+                  🎬 NOW SHOWING
                 </span>
                 <span className="text-gray-300 text-sm">{currentMovie.genres.join(' • ')}</span>
               </div>
@@ -191,32 +176,51 @@ export default function CinemaHeroPlayer({ movies, onMovieClick }: CinemaHeroPla
               </p>
             )}
 
-            {/* Action Buttons */}
-            <div className="flex flex-wrap items-center gap-4">
+            {/* Action Buttons - Enhanced for mobile touch */}
+            <div className="flex flex-wrap items-center gap-3 md:gap-4 relative z-20">
               {hasTrailer && (
                 <button
                   onClick={toggleMute}
-                  className="flex items-center gap-2 bg-white text-black px-6 md:px-8 py-3 rounded-lg font-bold text-lg hover:bg-gray-200 transition-colors"
+                  onTouchEnd={(e) => {
+                    e.preventDefault();
+                    toggleMute(e as unknown as React.MouseEvent);
+                  }}
+                  className={`flex items-center gap-2 px-5 md:px-8 py-3 md:py-3 rounded-lg font-bold text-base md:text-lg transition-all active:scale-95 touch-manipulation ${
+                    isMuted
+                      ? 'bg-red-500 text-white animate-pulse'
+                      : 'bg-white text-black hover:bg-gray-200'
+                  }`}
                 >
-                  {isMuted ? <VolumeX size={24} /> : <Volume2 size={24} />}
-                  {isMuted ? 'Unmute' : 'Mute'}
+                  {isMuted ? <VolumeX size={22} /> : <Volume2 size={22} />}
+                  <span className="hidden sm:inline">{isMuted ? 'Tap to Unmute' : 'Mute'}</span>
+                  <span className="sm:hidden">{isMuted ? 'Unmute' : 'Mute'}</span>
                 </button>
               )}
 
               <button
                 onClick={() => onMovieClick(currentMovie)}
-                className="flex items-center gap-2 bg-red-600 hover:bg-red-500 text-white px-6 md:px-8 py-3 rounded-lg font-bold text-lg transition-colors"
+                onTouchEnd={(e) => {
+                  e.preventDefault();
+                  onMovieClick(currentMovie);
+                }}
+                className="flex items-center gap-2 bg-red-600 hover:bg-red-500 active:bg-red-700 text-white px-5 md:px-8 py-3 md:py-3 rounded-lg font-bold text-base md:text-lg transition-all active:scale-95 touch-manipulation"
               >
-                <Ticket size={24} />
-                Book Tickets
+                <Ticket size={22} />
+                <span className="hidden sm:inline">Book Tickets</span>
+                <span className="sm:hidden">Book</span>
               </button>
 
               <button
                 onClick={() => onMovieClick(currentMovie)}
-                className="flex items-center gap-2 bg-gray-600/80 hover:bg-gray-500/80 text-white px-6 py-3 rounded-lg font-bold text-lg transition-colors"
+                onTouchEnd={(e) => {
+                  e.preventDefault();
+                  onMovieClick(currentMovie);
+                }}
+                className="flex items-center gap-2 bg-gray-600/80 hover:bg-gray-500/80 active:bg-gray-700/80 text-white px-5 md:px-6 py-3 md:py-3 rounded-lg font-bold text-base md:text-lg transition-all active:scale-95 touch-manipulation"
               >
-                <Info size={24} />
-                More Info
+                <Info size={22} />
+                <span className="hidden sm:inline">More Info</span>
+                <span className="sm:hidden">Info</span>
               </button>
             </div>
           </div>
@@ -241,7 +245,7 @@ export default function CinemaHeroPlayer({ movies, onMovieClick }: CinemaHeroPla
         </>
       )}
 
-      {/* Trailer Indicators */}
+      {/* Trailer Indicators - Bottom Center */}
       {movies.length > 1 && (
         <div className="absolute bottom-32 md:bottom-24 left-1/2 -translate-x-1/2 flex items-center gap-2">
           {movies.map((_, index) => (
@@ -258,22 +262,7 @@ export default function CinemaHeroPlayer({ movies, onMovieClick }: CinemaHeroPla
         </div>
       )}
 
-      {/* Volume Toggle - Bottom Right */}
-      {hasTrailer && (
-        <button
-          onClick={toggleMute}
-          className="absolute bottom-32 md:bottom-24 right-8 bg-black/50 hover:bg-black/80 text-white p-3 rounded-full border border-white/30 transition-all"
-        >
-          {isMuted ? <VolumeX size={24} /> : <Volume2 size={24} />}
-        </button>
-      )}
-
-      {/* Sound Hint - Only on mobile when muted */}
-      {isMuted && !hasInteracted && hasTrailer && (
-        <div className="absolute bottom-32 md:bottom-24 right-24 bg-black/70 text-white px-4 py-2 rounded-lg text-sm animate-pulse md:hidden">
-          🔊 Tap for sound
-        </div>
-      )}
+      {/* REMOVED: Bottom-right sound icon as requested - only mute button in action buttons area */}
     </div>
   );
 }

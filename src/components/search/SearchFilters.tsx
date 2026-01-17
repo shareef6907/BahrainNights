@@ -99,7 +99,7 @@ export default function SearchFilters({
                 onClick={() => onTabChange(tab.id)}
                 className={`flex items-center gap-2 px-4 py-2 rounded-full whitespace-nowrap transition-all ${
                   isActive
-                    ? 'bg-yellow-500 text-black font-medium'
+                    ? 'bg-pink-500 text-black font-medium'
                     : 'bg-white/5 text-gray-400 hover:bg-white/10 hover:text-white'
                 }`}
               >
@@ -135,7 +135,7 @@ export default function SearchFilters({
                 onClick={() => onDateFilterChange(option.id)}
                 className={`w-full px-4 py-2 text-left text-sm transition-colors ${
                   dateFilter === option.id
-                    ? 'bg-yellow-500/20 text-yellow-400'
+                    ? 'bg-pink-500/20 text-pink-400'
                     : 'text-gray-300 hover:bg-white/5'
                 }`}
               >
@@ -158,7 +158,7 @@ export default function SearchFilters({
                 className={`w-full px-4 py-2 text-left text-sm transition-colors ${
                   (area === 'All Areas' && !areaFilter) ||
                   areaFilter === area
-                    ? 'bg-yellow-500/20 text-yellow-400'
+                    ? 'bg-pink-500/20 text-pink-400'
                     : 'text-gray-300 hover:bg-white/5'
                 }`}
               >
@@ -179,7 +179,7 @@ export default function SearchFilters({
                 onClick={() => onSortChange(option.id)}
                 className={`w-full px-4 py-2 text-left text-sm transition-colors ${
                   sortBy === option.id
-                    ? 'bg-yellow-500/20 text-yellow-400'
+                    ? 'bg-pink-500/20 text-pink-400'
                     : 'text-gray-300 hover:bg-white/5'
                 }`}
               >
@@ -197,7 +197,7 @@ export default function SearchFilters({
           <SlidersHorizontal className="w-4 h-4" />
           <span>Filters</span>
           {(dateFilter !== 'any' || areaFilter) && (
-            <span className="w-2 h-2 bg-yellow-500 rounded-full" />
+            <span className="w-2 h-2 bg-pink-500 rounded-full" />
           )}
         </button>
 
@@ -258,7 +258,7 @@ export default function SearchFilters({
                       onClick={() => onDateFilterChange(option.id)}
                       className={`px-4 py-3 rounded-lg text-sm transition-colors ${
                         dateFilter === option.id
-                          ? 'bg-yellow-500 text-black font-medium'
+                          ? 'bg-pink-500 text-black font-medium'
                           : 'bg-white/5 text-gray-300 hover:bg-white/10'
                       }`}
                     >
@@ -283,7 +283,7 @@ export default function SearchFilters({
                       className={`px-4 py-3 rounded-lg text-sm transition-colors ${
                         (area === 'All Areas' && !areaFilter) ||
                         areaFilter === area
-                          ? 'bg-yellow-500 text-black font-medium'
+                          ? 'bg-pink-500 text-black font-medium'
                           : 'bg-white/5 text-gray-300 hover:bg-white/10'
                       }`}
                     >
@@ -305,7 +305,7 @@ export default function SearchFilters({
                       onClick={() => onSortChange(option.id)}
                       className={`px-4 py-3 rounded-lg text-sm transition-colors ${
                         sortBy === option.id
-                          ? 'bg-yellow-500 text-black font-medium'
+                          ? 'bg-pink-500 text-black font-medium'
                           : 'bg-white/5 text-gray-300 hover:bg-white/10'
                       }`}
                     >
@@ -318,7 +318,7 @@ export default function SearchFilters({
               {/* Apply Button */}
               <button
                 onClick={() => setShowMobileFilters(false)}
-                className="w-full py-3 bg-yellow-500 hover:bg-yellow-400 text-black font-semibold rounded-lg transition-colors"
+                className="w-full py-3 bg-pink-500 hover:bg-pink-400 text-black font-semibold rounded-lg transition-colors"
               >
                 Apply Filters
               </button>
@@ -395,11 +395,11 @@ function FilterBadge({
   onRemove: () => void;
 }) {
   return (
-    <span className="inline-flex items-center gap-1 px-2 py-1 bg-yellow-500/20 text-yellow-400 text-sm rounded-full">
+    <span className="inline-flex items-center gap-1 px-2 py-1 bg-pink-500/20 text-pink-400 text-sm rounded-full">
       {label}
       <button
         onClick={onRemove}
-        className="p-0.5 hover:bg-yellow-500/30 rounded-full"
+        className="p-0.5 hover:bg-pink-500/30 rounded-full"
       >
         <X className="w-3 h-3" />
       </button>

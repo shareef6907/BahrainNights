@@ -231,6 +231,13 @@ export default function AdminCinemaPage() {
 
         <div className="flex flex-wrap gap-3">
           <Link
+            href="/admin/cinema/trailers"
+            className="flex items-center gap-2 px-4 py-2.5 bg-red-500/20 border border-red-500/30 text-red-400 rounded-xl hover:bg-red-500/30 transition-colors"
+          >
+            <Play className="w-4 h-4" />
+            Hero Trailers
+          </Link>
+          <Link
             href="/admin/cinema/logs"
             className="flex items-center gap-2 px-4 py-2.5 bg-white/5 border border-white/10 text-gray-300 rounded-xl hover:bg-white/10 transition-colors"
           >
