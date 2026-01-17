@@ -14,6 +14,8 @@ import {
 } from '@/lib/services/blog-writer';
 import type { Event, BlogArticle } from '@/types/database';
 
+export const maxDuration = 300; // 5 minutes max for Pro plan
+
 // Maximum events to process per request to avoid timeouts
 const MAX_EVENTS_PER_RUN = 3;
 

@@ -3,7 +3,7 @@ import { getAdminClient } from '@/lib/supabase/server';
 import type { Event } from '@/types/database';
 
 export const dynamic = 'force-dynamic';
-export const maxDuration = 60;
+export const maxDuration = 300; // 5 minutes max for Pro plan
 
 export async function GET(request: NextRequest) {
   const { searchParams } = new URL(request.url);
@@ -67,13 +67,13 @@ export async function GET(request: NextRequest) {
 
       const bloggedEventIds = bloggedEvents?.map((e) => e.event_id) || [];
 
-      // Get events that haven't been blogged yet (limit to 2 to avoid timeout)
+      // Get events that haven't been blogged yet (limit to 1 to avoid timeout)
       let eventsQuery = supabase
         .from('events')
         .select('*')
         .eq('is_active', true)
         .order('created_at', { ascending: false })
-        .limit(2);
+        .limit(1);
 
       // Exclude already blogged events if any exist
       if (bloggedEventIds.length > 0) {
@@ -443,7 +443,7 @@ export async function GET(request: NextRequest) {
       </div>
 
       <button id="generateBtn" onclick="generate()" ${!apiConfigured ? 'disabled' : ''}>
-        Generate 2 Blog Posts
+        Generate 1 Blog Post
       </button>
 
       <div id="result"></div>
@@ -498,7 +498,7 @@ export async function GET(request: NextRequest) {
           }
 
           btn.disabled = false;
-          btn.textContent = 'Generate 2 Blog Posts';
+          btn.textContent = 'Generate 1 Blog Post';
         }
       </script>
     </body>
