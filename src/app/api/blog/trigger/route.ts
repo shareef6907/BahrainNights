@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { revalidatePath } from 'next/cache';
 import { getAdminClient } from '@/lib/supabase/server';
 import type { Event } from '@/types/database';
 
@@ -173,6 +174,7 @@ export async function GET(request: NextRequest) {
               featured_image: featuredImage,
               article_type: 'event',
               status: 'published',
+              published_at: new Date().toISOString(),
             })
             .select()
             .single();
@@ -213,6 +215,14 @@ export async function GET(request: NextRequest) {
             error: err instanceof Error ? err.message : 'Unknown error',
           });
         }
+      }
+
+      // Revalidate blog pages to show new articles immediately
+      if (results.length > 0) {
+        revalidatePath('/blog');
+        revalidatePath('/blog/places-to-go/bahrain');
+        revalidatePath('/blog/places-to-go/saudi-arabia');
+        revalidatePath('/blog/places-to-go/uae');
       }
 
       return NextResponse.json({
