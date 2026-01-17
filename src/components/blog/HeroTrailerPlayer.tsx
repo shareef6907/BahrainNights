@@ -111,6 +111,18 @@ export function HeroTrailerPlayer() {
     };
   }, [movies.length]);
 
+  // When slide changes, restore sound state if user had enabled sound
+  // New iframe loads muted, so we need to unmute it via postMessage
+  useEffect(() => {
+    if (!isMuted && iframeRef.current) {
+      // Wait for new iframe to load and YouTube API to initialize
+      const timer = setTimeout(() => {
+        sendYouTubeCommand(iframeRef.current, 'unMute');
+      }, 1500); // Give iframe time to load YouTube player
+      return () => clearTimeout(timer);
+    }
+  }, [currentIndex, isMuted]);
+
   const currentMovie = movies[currentIndex];
 
   // Get YouTube video ID
