@@ -6,13 +6,13 @@ import { Volume2, VolumeX, Info, ChevronLeft, ChevronRight } from 'lucide-react'
 interface Movie {
   id: string;
   title: string;
-  overview?: string;
-  genre?: string;
-  trailer_url?: string;
-  youtube_trailer_id?: string;
-  poster_url?: string;
-  backdrop_url?: string;
-  release_date?: string;
+  synopsis?: string | null;
+  genre?: string[] | null;
+  trailer_url?: string | null;
+  trailer_key?: string | null;
+  poster_url?: string | null;
+  backdrop_url?: string | null;
+  release_date?: string | null;
 }
 
 export function HeroTrailerPlayer() {
@@ -56,11 +56,15 @@ export function HeroTrailerPlayer() {
   const currentMovie = movies[currentIndex];
 
   const getYouTubeUrl = useCallback((movie: Movie) => {
-    let videoId = movie.youtube_trailer_id;
+    // First try trailer_key (YouTube video ID)
+    let videoId = movie.trailer_key;
+
+    // If no trailer_key, try to extract from trailer_url
     if (!videoId && movie.trailer_url) {
       const match = movie.trailer_url.match(/(?:youtube\.com\/(?:watch\?v=|embed\/)|youtu\.be\/)([^&\s?]+)/);
       videoId = match?.[1];
     }
+
     if (!videoId) return null;
     return `https://www.youtube.com/embed/${videoId}?autoplay=1&mute=${isMuted ? 1 : 0}&controls=0&loop=1&playlist=${videoId}&modestbranding=1&rel=0&showinfo=0&iv_load_policy=3&disablekb=1`;
   }, [isMuted]);
@@ -86,21 +90,33 @@ export function HeroTrailerPlayer() {
     );
   }
 
+  // Fallback hero when no trailers available
   if (movies.length === 0) {
     return (
       <div className="relative w-full h-[70vh] md:h-[85vh] bg-gradient-to-b from-gray-800 to-gray-950 flex items-center justify-center">
-        <div className="text-center">
-          <h1 className="text-4xl md:text-6xl font-bold text-white mb-4">BahrainNights Blog</h1>
-          <p className="text-xl text-gray-400">Discover events, culture & nightlife</p>
+        <div className="absolute inset-0 bg-[url('/images/hero-pattern.svg')] opacity-10" />
+        <div className="relative text-center px-4">
+          <h1 className="text-4xl md:text-6xl lg:text-7xl font-black text-white mb-4">
+            <span className="bg-gradient-to-r from-yellow-400 via-orange-500 to-pink-500 bg-clip-text text-transparent">
+              BahrainNights
+            </span>{' '}
+            Blog
+          </h1>
+          <p className="text-xl md:text-2xl text-gray-400 max-w-2xl mx-auto">
+            Discover the best events, culture & nightlife across the Middle East
+          </p>
         </div>
       </div>
     );
   }
 
   const youtubeUrl = getYouTubeUrl(currentMovie);
+  const genreDisplay = Array.isArray(currentMovie.genre)
+    ? currentMovie.genre.slice(0, 3).join(' • ')
+    : currentMovie.genre;
 
   return (
-    <div className="relative w-full h-[70vh] md:h-[85vh] overflow-hidden bg-black">
+    <div className="relative w-full h-[70vh] md:h-[85vh] overflow-hidden bg-black group">
       {/* Video Background */}
       <div className="absolute inset-0">
         {youtubeUrl ? (
@@ -114,7 +130,7 @@ export function HeroTrailerPlayer() {
           />
         ) : (
           <img
-            src={currentMovie.backdrop_url || currentMovie.poster_url}
+            src={currentMovie.backdrop_url || currentMovie.poster_url || ''}
             alt={currentMovie.title}
             className="w-full h-full object-cover"
           />
@@ -135,8 +151,8 @@ export function HeroTrailerPlayer() {
               <span className="bg-yellow-500 text-black px-3 py-1 rounded text-sm font-bold">
                 NOW SHOWING
               </span>
-              {currentMovie.genre && (
-                <span className="text-gray-400 text-sm">{currentMovie.genre}</span>
+              {genreDisplay && (
+                <span className="text-gray-400 text-sm">{genreDisplay}</span>
               )}
             </div>
 
@@ -145,10 +161,10 @@ export function HeroTrailerPlayer() {
               {currentMovie.title}
             </h1>
 
-            {/* Overview */}
-            {currentMovie.overview && (
+            {/* Synopsis */}
+            {currentMovie.synopsis && (
               <p className="text-lg md:text-xl text-gray-200 mb-6 line-clamp-3 drop-shadow-lg max-w-xl">
-                {currentMovie.overview}
+                {currentMovie.synopsis}
               </p>
             )}
 
@@ -179,14 +195,14 @@ export function HeroTrailerPlayer() {
         <>
           <button
             onClick={goPrev}
-            className="absolute left-4 top-1/2 -translate-y-1/2 bg-black/50 hover:bg-black/70 text-white p-3 rounded-full transition-all opacity-0 hover:opacity-100 focus:opacity-100 group-hover:opacity-100"
+            className="absolute left-4 top-1/2 -translate-y-1/2 bg-black/50 hover:bg-black/70 text-white p-3 rounded-full transition-all opacity-0 group-hover:opacity-100"
             aria-label="Previous trailer"
           >
             <ChevronLeft size={32} />
           </button>
           <button
             onClick={goNext}
-            className="absolute right-4 top-1/2 -translate-y-1/2 bg-black/50 hover:bg-black/70 text-white p-3 rounded-full transition-all opacity-0 hover:opacity-100 focus:opacity-100 group-hover:opacity-100"
+            className="absolute right-4 top-1/2 -translate-y-1/2 bg-black/50 hover:bg-black/70 text-white p-3 rounded-full transition-all opacity-0 group-hover:opacity-100"
             aria-label="Next trailer"
           >
             <ChevronRight size={32} />
@@ -213,13 +229,15 @@ export function HeroTrailerPlayer() {
       )}
 
       {/* Volume Toggle (Bottom Right) */}
-      <button
-        onClick={() => setIsMuted(!isMuted)}
-        className="absolute bottom-8 right-8 bg-black/50 hover:bg-black/70 text-white p-3 rounded-full border border-white/30 transition-colors"
-        aria-label={isMuted ? 'Unmute' : 'Mute'}
-      >
-        {isMuted ? <VolumeX size={24} /> : <Volume2 size={24} />}
-      </button>
+      {youtubeUrl && (
+        <button
+          onClick={() => setIsMuted(!isMuted)}
+          className="absolute bottom-8 right-8 bg-black/50 hover:bg-black/70 text-white p-3 rounded-full border border-white/30 transition-colors"
+          aria-label={isMuted ? 'Unmute' : 'Mute'}
+        >
+          {isMuted ? <VolumeX size={24} /> : <Volume2 size={24} />}
+        </button>
+      )}
     </div>
   );
 }
