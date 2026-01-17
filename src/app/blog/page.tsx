@@ -32,17 +32,27 @@ interface BlogArticle {
 }
 
 async function getBlogArticles() {
-  const supabase = getAdminClient();
+  try {
+    const supabase = getAdminClient();
 
-  // Get all published articles
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const { data: articles } = await (supabase as any)
-    .from('blog_articles')
-    .select('id, title, slug, excerpt, content, featured_image, country, city, category, read_time_minutes, view_count, published_at, affiliate_url')
-    .eq('status', 'published')
-    .order('published_at', { ascending: false }) as { data: BlogArticle[] | null };
+    // Get all published articles
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const { data: articles, error } = await (supabase as any)
+      .from('blog_articles')
+      .select('id, title, slug, excerpt, content, featured_image, country, city, category, read_time_minutes, view_count, published_at, affiliate_url')
+      .eq('status', 'published')
+      .order('published_at', { ascending: false }) as { data: BlogArticle[] | null; error: Error | null };
 
-  return articles || [];
+    if (error) {
+      console.error('Blog articles fetch error:', error);
+      return [];
+    }
+
+    return articles || [];
+  } catch (err) {
+    console.error('Blog articles exception:', err);
+    return [];
+  }
 }
 
 export default async function BlogPage() {

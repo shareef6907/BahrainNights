@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, useRef, useCallback } from 'react';
+import { useState, useEffect, useRef, useCallback, useMemo } from 'react';
 import { Volume2, VolumeX, Info, ChevronLeft, ChevronRight } from 'lucide-react';
 
 interface Movie {
@@ -21,7 +21,6 @@ export function HeroTrailerPlayer() {
   const [isMuted, setIsMuted] = useState(true);
   const [isLoading, setIsLoading] = useState(true);
   const autoAdvanceRef = useRef<NodeJS.Timeout | null>(null);
-  const playerRef = useRef<HTMLIFrameElement>(null);
 
   useEffect(() => {
     fetchMovies();
@@ -55,19 +54,24 @@ export function HeroTrailerPlayer() {
 
   const currentMovie = movies[currentIndex];
 
-  const getYouTubeUrl = useCallback((movie: Movie) => {
-    // First try trailer_key (YouTube video ID)
-    let videoId = movie.trailer_key;
-
-    // If no trailer_key, try to extract from trailer_url
-    if (!videoId && movie.trailer_url) {
+  // Get YouTube video ID from movie
+  const getVideoId = useCallback((movie: Movie): string | null => {
+    if (movie.trailer_key) return movie.trailer_key;
+    if (movie.trailer_url) {
       const match = movie.trailer_url.match(/(?:youtube\.com\/(?:watch\?v=|embed\/)|youtu\.be\/)([^&\s?]+)/);
-      videoId = match?.[1];
+      return match?.[1] || null;
     }
+    return null;
+  }, []);
 
-    if (!videoId) return null;
-    return `https://www.youtube.com/embed/${videoId}?autoplay=1&mute=${isMuted ? 1 : 0}&controls=0&loop=1&playlist=${videoId}&modestbranding=1&rel=0&showinfo=0&iv_load_policy=3&disablekb=1`;
-  }, [isMuted]);
+  // Precompute all YouTube URLs for preloading
+  const youtubeUrls = useMemo(() => {
+    return movies.map(movie => {
+      const videoId = getVideoId(movie);
+      if (!videoId) return null;
+      return `https://www.youtube.com/embed/${videoId}?autoplay=1&mute=1&controls=0&loop=1&playlist=${videoId}&modestbranding=1&rel=0&showinfo=0&iv_load_policy=3&disablekb=1`;
+    });
+  }, [movies, getVideoId]);
 
   const goToSlide = (index: number) => {
     setCurrentIndex(index);
@@ -110,40 +114,52 @@ export function HeroTrailerPlayer() {
     );
   }
 
-  const youtubeUrl = getYouTubeUrl(currentMovie);
-  const genreDisplay = Array.isArray(currentMovie.genre)
+  const genreDisplay = currentMovie && Array.isArray(currentMovie.genre)
     ? currentMovie.genre.slice(0, 3).join(' • ')
-    : currentMovie.genre;
+    : currentMovie?.genre;
 
   return (
     <div className="relative w-full h-[70vh] md:h-[85vh] overflow-hidden bg-black group">
-      {/* Video Background */}
+      {/* Preloaded Video Backgrounds - All iframes loaded, only current one visible */}
       <div className="absolute inset-0">
-        {youtubeUrl ? (
-          <iframe
-            ref={playerRef}
-            key={`${currentMovie.id}-${isMuted}`}
-            src={youtubeUrl}
-            className="absolute w-[300%] h-[300%] top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 pointer-events-none"
-            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-            style={{ border: 'none' }}
-          />
-        ) : (
-          <img
-            src={currentMovie.backdrop_url || currentMovie.poster_url || ''}
-            alt={currentMovie.title}
-            className="w-full h-full object-cover"
-          />
-        )}
+        {movies.map((movie, index) => {
+          const url = youtubeUrls[index];
+          const isActive = index === currentIndex;
+
+          return (
+            <div
+              key={movie.id}
+              className={`absolute inset-0 transition-opacity duration-700 ${
+                isActive ? 'opacity-100 z-10' : 'opacity-0 z-0'
+              }`}
+            >
+              {url ? (
+                <iframe
+                  src={url}
+                  className="absolute w-[300%] h-[300%] top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 pointer-events-none"
+                  allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                  style={{ border: 'none' }}
+                  loading={index === 0 ? 'eager' : 'lazy'}
+                />
+              ) : (
+                <img
+                  src={movie.backdrop_url || movie.poster_url || ''}
+                  alt={movie.title}
+                  className="w-full h-full object-cover"
+                />
+              )}
+            </div>
+          );
+        })}
       </div>
 
       {/* Gradient Overlays */}
-      <div className="absolute inset-0 bg-gradient-to-r from-black/80 via-black/40 to-transparent" />
-      <div className="absolute inset-0 bg-gradient-to-t from-gray-950 via-transparent to-black/30" />
-      <div className="absolute bottom-0 left-0 right-0 h-32 bg-gradient-to-t from-gray-950 to-transparent" />
+      <div className="absolute inset-0 bg-gradient-to-r from-black/80 via-black/40 to-transparent z-20" />
+      <div className="absolute inset-0 bg-gradient-to-t from-gray-950 via-transparent to-black/30 z-20" />
+      <div className="absolute bottom-0 left-0 right-0 h-32 bg-gradient-to-t from-gray-950 to-transparent z-20" />
 
       {/* Content */}
-      <div className="absolute inset-0 flex items-center">
+      <div className="absolute inset-0 flex items-center z-30">
         <div className="w-full max-w-7xl mx-auto px-6 md:px-12">
           <div className="max-w-2xl">
             {/* Badge */}
@@ -156,17 +172,37 @@ export function HeroTrailerPlayer() {
               )}
             </div>
 
-            {/* Title */}
-            <h1 className="text-4xl md:text-6xl lg:text-7xl font-black text-white mb-4 leading-tight drop-shadow-2xl">
-              {currentMovie.title}
-            </h1>
+            {/* Title with fade transition */}
+            <div className="relative h-[120px] md:h-[180px] overflow-hidden">
+              {movies.map((movie, index) => (
+                <h1
+                  key={movie.id}
+                  className={`absolute inset-0 text-4xl md:text-6xl lg:text-7xl font-black text-white leading-tight drop-shadow-2xl transition-all duration-500 ${
+                    index === currentIndex
+                      ? 'opacity-100 translate-y-0'
+                      : 'opacity-0 translate-y-4'
+                  }`}
+                >
+                  {movie.title}
+                </h1>
+              ))}
+            </div>
 
-            {/* Synopsis */}
-            {currentMovie.synopsis && (
-              <p className="text-lg md:text-xl text-gray-200 mb-6 line-clamp-3 drop-shadow-lg max-w-xl">
-                {currentMovie.synopsis}
-              </p>
-            )}
+            {/* Synopsis with fade transition */}
+            <div className="relative h-[80px] md:h-[100px] overflow-hidden mb-6">
+              {movies.map((movie, index) => (
+                <p
+                  key={movie.id}
+                  className={`absolute inset-0 text-lg md:text-xl text-gray-200 line-clamp-3 drop-shadow-lg max-w-xl transition-all duration-500 ${
+                    index === currentIndex
+                      ? 'opacity-100 translate-y-0'
+                      : 'opacity-0 translate-y-4'
+                  }`}
+                >
+                  {movie.synopsis || ''}
+                </p>
+              ))}
+            </div>
 
             {/* Action Buttons */}
             <div className="flex flex-wrap items-center gap-4">
@@ -195,14 +231,14 @@ export function HeroTrailerPlayer() {
         <>
           <button
             onClick={goPrev}
-            className="absolute left-4 top-1/2 -translate-y-1/2 bg-black/50 hover:bg-black/70 text-white p-3 rounded-full transition-all opacity-0 group-hover:opacity-100"
+            className="absolute left-4 top-1/2 -translate-y-1/2 z-30 bg-black/50 hover:bg-black/70 text-white p-3 rounded-full transition-all opacity-0 group-hover:opacity-100"
             aria-label="Previous trailer"
           >
             <ChevronLeft size={32} />
           </button>
           <button
             onClick={goNext}
-            className="absolute right-4 top-1/2 -translate-y-1/2 bg-black/50 hover:bg-black/70 text-white p-3 rounded-full transition-all opacity-0 group-hover:opacity-100"
+            className="absolute right-4 top-1/2 -translate-y-1/2 z-30 bg-black/50 hover:bg-black/70 text-white p-3 rounded-full transition-all opacity-0 group-hover:opacity-100"
             aria-label="Next trailer"
           >
             <ChevronRight size={32} />
@@ -212,7 +248,7 @@ export function HeroTrailerPlayer() {
 
       {/* Trailer Indicators */}
       {movies.length > 1 && (
-        <div className="absolute bottom-8 left-1/2 -translate-x-1/2 flex items-center gap-2">
+        <div className="absolute bottom-8 left-1/2 -translate-x-1/2 flex items-center gap-2 z-30">
           {movies.map((_, index) => (
             <button
               key={index}
@@ -229,10 +265,10 @@ export function HeroTrailerPlayer() {
       )}
 
       {/* Volume Toggle (Bottom Right) */}
-      {youtubeUrl && (
+      {youtubeUrls[currentIndex] && (
         <button
           onClick={() => setIsMuted(!isMuted)}
-          className="absolute bottom-8 right-8 bg-black/50 hover:bg-black/70 text-white p-3 rounded-full border border-white/30 transition-colors"
+          className="absolute bottom-8 right-8 z-30 bg-black/50 hover:bg-black/70 text-white p-3 rounded-full border border-white/30 transition-colors"
           aria-label={isMuted ? 'Unmute' : 'Mute'}
         >
           {isMuted ? <VolumeX size={24} /> : <Volume2 size={24} />}
