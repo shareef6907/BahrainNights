@@ -205,15 +205,16 @@ async function getInternationalEvents() {
 
 // Fetch stats for the homepage
 async function getStats() {
-  const defaultStats = { events: 0, venues: 0, cinema: 0, offers: 0, explore: 0, attractions: 0 };
+  const defaultStats = { events: 0, venues: 0, cinema: 0, offers: 0, explore: 0, attractions: 0, blog: 0 };
 
   try {
     // Fetch counts in parallel (only Bahrain events for event count)
-    const [eventsResult, venuesResult, moviesResult, attractionsResult] = await Promise.all([
+    const [eventsResult, venuesResult, moviesResult, attractionsResult, blogResult] = await Promise.all([
       supabaseAdmin.from('events').select('id', { count: 'exact', head: true }).eq('status', 'published').eq('is_hidden', false).eq('country', 'Bahrain'),
       supabaseAdmin.from('venues').select('id', { count: 'exact', head: true }),
       supabaseAdmin.from('movies').select('id', { count: 'exact', head: true }).eq('is_now_showing', true),
       supabaseAdmin.from('attractions').select('id', { count: 'exact', head: true }).eq('is_active', true),
+      supabaseAdmin.from('blog_articles').select('id', { count: 'exact', head: true }).eq('status', 'published'),
     ]);
 
     return {
@@ -223,6 +224,7 @@ async function getStats() {
       offers: 0, // Will be added later
       explore: 0, // Will be added later
       attractions: attractionsResult.count || 0,
+      blog: blogResult.count || 0,
     };
   } catch (error) {
     console.error('Error fetching stats:', error);

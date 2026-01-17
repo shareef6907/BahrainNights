@@ -458,7 +458,10 @@ export const en = {
     exploreDesc: 'Hotels, spas & more',
     attractions: 'Attractions',
     attractionsDesc: 'Tours, water sports & more',
+    blog: 'Blog',
+    blogDesc: 'Articles & guides',
     listings: 'listings',
+    articles: 'articles',
     comingSoon: 'Coming soon',
   },
 
