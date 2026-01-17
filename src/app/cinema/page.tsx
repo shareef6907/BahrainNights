@@ -1,6 +1,6 @@
 import { Suspense } from 'react';
 import { supabaseAdmin } from '@/lib/supabase';
-import CinemaPageClient from '@/components/cinema/CinemaPageClient';
+import CinemaNetflixClient from '@/components/cinema/CinemaNetflixClient';
 import { Movie } from '@/components/cinema/MovieCard';
 import MovieListSchema from '@/components/SEO/MovieListSchema';
 
@@ -76,27 +76,22 @@ function convertToMovieFormat(dbMovie: DBMovie): Movie {
 
 // Fetch all movies on the server (excluding Mukta-only movies)
 async function getMovies() {
-  const [nowShowingRes, comingSoonRes] = await Promise.all([
-    supabaseAdmin
-      .from('movies')
-      .select('*')
-      .eq('is_now_showing', true)
-      // Exclude movies that are ONLY from Mukta - only show VOX, Cineco, Seef, or manual entries
-      .or('scraped_from.is.null,scraped_from.cs.{vox},scraped_from.cs.{cineco},scraped_from.cs.{seef}')
-      .order('tmdb_rating', { ascending: false }),
-    supabaseAdmin
-      .from('movies')
-      .select('*')
-      .eq('is_coming_soon', true)
-      // Exclude movies that are ONLY from Mukta - only show VOX, Cineco, Seef, or manual entries
-      .or('scraped_from.is.null,scraped_from.cs.{vox},scraped_from.cs.{cineco},scraped_from.cs.{seef}')
-      .order('release_date', { ascending: true })
-  ]);
+  // Fetch all movies - we'll group them by genre on the client side
+  // This avoids the "Now Showing" / "Coming Soon" labels since scraper data isn't 100% accurate
+  const { data: allMoviesData } = await supabaseAdmin
+    .from('movies')
+    .select('*')
+    // Exclude movies that are ONLY from Mukta - only show VOX, Cineco, Seef, or manual entries
+    .or('scraped_from.is.null,scraped_from.cs.{vox},scraped_from.cs.{cineco},scraped_from.cs.{seef}')
+    .order('tmdb_rating', { ascending: false });
 
-  const nowShowing = (nowShowingRes.data || []).map((m: DBMovie) => convertToMovieFormat(m));
-  const comingSoon = (comingSoonRes.data || []).map((m: DBMovie) => convertToMovieFormat(m));
+  const allMovies = (allMoviesData || []).map((m: DBMovie) => convertToMovieFormat(m));
 
-  return { nowShowing, comingSoon };
+  // Also get separated lists for SEO schema
+  const nowShowing = allMovies.filter((m: Movie) => m.isNowShowing);
+  const comingSoon = allMovies.filter((m: Movie) => !m.isNowShowing);
+
+  return { allMovies, nowShowing, comingSoon };
 }
 
 // Fetch cinemas for filter dropdown
@@ -137,9 +132,8 @@ async function getLastUpdated() {
 // Server Component - data is fetched BEFORE the page renders
 export default async function CinemaPage() {
   // Fetch all data on the server - NO loading state needed!
-  const [{ nowShowing, comingSoon }, cinemas, lastUpdated] = await Promise.all([
+  const [{ allMovies, nowShowing }, lastUpdated] = await Promise.all([
     getMovies(),
-    getCinemas(),
     getLastUpdated()
   ]);
 
@@ -147,17 +141,12 @@ export default async function CinemaPage() {
     <>
       <MovieListSchema
         movies={nowShowing}
-        pageTitle="Movies Now Showing in Bahrain"
-        pageDescription="Find movies now showing in Bahrain cinemas - Cineco, VOX, Cinépolis, and more"
+        pageTitle="Movies in Bahrain Cinemas"
+        pageDescription="Find movies playing in Bahrain cinemas - Cineco, VOX, Cinépolis, and more. Watch trailers and book tickets."
         pageUrl="https://bahrainnights.com/cinema"
       />
       <Suspense fallback={null}>
-        <CinemaPageClient
-          initialNowShowing={nowShowing}
-          initialComingSoon={comingSoon}
-          initialCinemas={cinemas}
-          lastUpdated={lastUpdated}
-        />
+        <CinemaNetflixClient allMovies={allMovies} />
       </Suspense>
     </>
   );
