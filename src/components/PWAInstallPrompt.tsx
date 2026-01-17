@@ -92,11 +92,11 @@ export function PWAInstallPrompt() {
 
         <div className="flex items-start gap-4">
           {/* App Icon */}
-          <div className="w-14 h-14 rounded-xl flex-shrink-0 overflow-hidden">
+          <div className="w-14 h-14 rounded-xl flex-shrink-0 overflow-hidden bg-[#0f172a] border-2 border-yellow-500 p-1">
             <img
-              src="/logo.png"
+              src="/android-chrome-192x192.png"
               alt="BahrainNights"
-              className="w-full h-full object-cover"
+              className="w-full h-full object-contain rounded-lg"
             />
           </div>
 
