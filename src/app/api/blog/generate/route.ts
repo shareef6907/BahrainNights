@@ -161,6 +161,7 @@ export async function POST(request: NextRequest) {
             featured_image: featuredImage,
             article_type: 'event',
             status: 'published',
+            published_at: new Date().toISOString(),
           })
           .select()
           .single() as { data: BlogArticle | null; error: Error | null };

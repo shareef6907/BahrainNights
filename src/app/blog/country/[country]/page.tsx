@@ -50,7 +50,7 @@ async function getArticles(country: string, city?: string) {
     .select('*')
     .eq('status', 'published')
     .eq('country', country)
-    .order('published_at', { ascending: false });
+    .order('created_at', { ascending: false });
 
   if (city) {
     query = query.ilike('city', city);

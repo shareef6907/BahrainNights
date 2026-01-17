@@ -27,16 +27,16 @@ async function getBlogArticles() {
     .select('*')
     .eq('status', 'published')
     .eq('is_featured', true)
-    .order('published_at', { ascending: false })
+    .order('created_at', { ascending: false })
     .limit(3) as { data: BlogArticle[] | null };
 
-  // Get recent articles
+  // Get recent articles - order by created_at to ensure all published articles show
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const { data: recent } = await (supabase as any)
     .from('blog_articles')
     .select('*')
     .eq('status', 'published')
-    .order('published_at', { ascending: false })
+    .order('created_at', { ascending: false })
     .limit(12) as { data: BlogArticle[] | null };
 
   // Get article counts by country

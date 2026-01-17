@@ -130,7 +130,7 @@ async function getArticle(slug: string) {
     .eq('status', 'published')
     .eq('country', article.country)
     .neq('id', article.id)
-    .order('published_at', { ascending: false })
+    .order('created_at', { ascending: false })
     .limit(3) as { data: RelatedArticle[] | null };
 
   return { article, related: related || [], eventSlug, eventAffiliateUrl, eventData };

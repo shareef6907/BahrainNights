@@ -57,7 +57,7 @@ async function getLocationData(location: string) {
     .select('*')
     .eq('status', 'published')
     .eq('country', location)
-    .order('published_at', { ascending: false })
+    .order('created_at', { ascending: false })
     .limit(20) as { data: BlogArticle[] | null };
 
   // Get events count for this country (approximate from location field)
@@ -76,7 +76,7 @@ async function getLocationData(location: string) {
     .eq('status', 'published')
     .eq('country', location)
     .eq('is_featured', true)
-    .order('published_at', { ascending: false })
+    .order('created_at', { ascending: false })
     .limit(3) as { data: BlogArticle[] | null };
 
   return {
