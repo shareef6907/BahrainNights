@@ -433,8 +433,8 @@ export default function HomePageClient({ initialMovies, initialStats, initialTod
             <div className="flex items-center gap-3 flex-shrink-0">
               <Link href="/" className="flex items-center">
                 <span
-                  className="text-2xl lg:text-3xl font-black bg-gradient-to-r from-amber-200 via-yellow-300 to-amber-400 bg-clip-text text-transparent"
-                  style={{ filter: 'drop-shadow(0 0 8px rgba(251, 191, 36, 0.5))' }}
+                  className="text-2xl lg:text-3xl font-black bg-gradient-to-r from-yellow-500 via-amber-400 to-yellow-600 bg-clip-text text-transparent"
+                  style={{ filter: 'drop-shadow(0 0 8px rgba(217, 119, 6, 0.4))' }}
                 >
                   BahrainNights
                 </span>
@@ -661,9 +661,9 @@ export default function HomePageClient({ initialMovies, initialStats, initialTod
             transition={{ duration: 0.4 }}
           >
             <span
-              className="bg-gradient-to-r from-amber-200 via-yellow-300 to-amber-400 bg-clip-text text-transparent"
+              className="bg-gradient-to-r from-yellow-500 via-amber-400 to-yellow-600 bg-clip-text text-transparent"
               style={{
-                filter: 'drop-shadow(0 0 20px rgba(251, 191, 36, 0.6)) drop-shadow(0 0 40px rgba(251, 191, 36, 0.4)) drop-shadow(0 0 60px rgba(245, 158, 11, 0.3)) drop-shadow(0 4px 12px rgba(0, 0, 0, 0.5))'
+                filter: 'drop-shadow(0 0 20px rgba(217, 119, 6, 0.5)) drop-shadow(0 0 40px rgba(180, 83, 9, 0.3)) drop-shadow(0 4px 12px rgba(0, 0, 0, 0.6))'
               }}
             >
               {t.home.hero.title}
@@ -935,8 +935,8 @@ export default function HomePageClient({ initialMovies, initialStats, initialTod
           <div className="grid grid-cols-1 md:grid-cols-6 gap-10 mb-10">
             <div className="md:col-span-2">
               <div
-                className="text-3xl font-black bg-gradient-to-r from-amber-200 via-yellow-300 to-amber-400 bg-clip-text text-transparent mb-4"
-                style={{ filter: 'drop-shadow(0 0 8px rgba(251, 191, 36, 0.4))' }}
+                className="text-3xl font-black bg-gradient-to-r from-yellow-500 via-amber-400 to-yellow-600 bg-clip-text text-transparent mb-4"
+                style={{ filter: 'drop-shadow(0 0 8px rgba(217, 119, 6, 0.4))' }}
               >
                 BahrainNights
               </div>
