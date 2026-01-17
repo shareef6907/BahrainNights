@@ -21,6 +21,9 @@ import {
   ChevronRight,
   Check,
   X,
+  Sparkles,
+  Rocket,
+  Key,
 } from 'lucide-react';
 
 interface BlogArticle {
@@ -48,6 +51,21 @@ interface ArticlesResponse {
   limit: number;
   totalPages: number;
   countryStats: Record<string, number>;
+}
+
+interface GeneratorStats {
+  total_articles: number;
+  remaining_events: number;
+}
+
+interface GeneratorResult {
+  success?: boolean;
+  message?: string;
+  processed?: number;
+  failed?: number;
+  remaining?: number;
+  articles?: Array<{ article_title: string; slug: string }>;
+  error?: string;
 }
 
 const COUNTRIES = [
@@ -81,6 +99,64 @@ export default function BlogAdminPage() {
   const [isDeleting, setIsDeleting] = useState(false);
   const [showDeleteConfirm, setShowDeleteConfirm] = useState<'bulk' | 'country' | 'all' | null>(null);
   const [deleteTarget, setDeleteTarget] = useState<string | null>(null);
+
+  // Generator state
+  const [generatorStats, setGeneratorStats] = useState<GeneratorStats>({ total_articles: 0, remaining_events: 0 });
+  const [isGenerating, setIsGenerating] = useState(false);
+  const [generatorProgress, setGeneratorProgress] = useState(0);
+  const [generatorResult, setGeneratorResult] = useState<GeneratorResult | null>(null);
+  const [secretInput, setSecretInput] = useState('');
+  const [hasSecret, setHasSecret] = useState(false);
+  const [showSecretInput, setShowSecretInput] = useState(false);
+
+  // Check for saved secret on mount
+  useEffect(() => {
+    const saved = localStorage.getItem('blog_generation_secret');
+    if (saved) {
+      setHasSecret(true);
+    }
+  }, []);
+
+  const getSecret = (): string => {
+    // Try URL param first, then localStorage
+    if (typeof window !== 'undefined') {
+      const urlParams = new URLSearchParams(window.location.search);
+      const urlSecret = urlParams.get('secret');
+      if (urlSecret) {
+        localStorage.setItem('blog_generation_secret', urlSecret);
+        setHasSecret(true);
+        return urlSecret;
+      }
+      return localStorage.getItem('blog_generation_secret') || '';
+    }
+    return '';
+  };
+
+  const saveSecret = () => {
+    if (secretInput.trim()) {
+      localStorage.setItem('blog_generation_secret', secretInput.trim());
+      setHasSecret(true);
+      setShowSecretInput(false);
+      setSecretInput('');
+    }
+  };
+
+  const clearSecret = () => {
+    localStorage.removeItem('blog_generation_secret');
+    setHasSecret(false);
+  };
+
+  const fetchGeneratorStats = useCallback(async () => {
+    try {
+      const response = await fetch('/api/admin/blog/stats');
+      if (response.ok) {
+        const data = await response.json();
+        setGeneratorStats(data);
+      }
+    } catch (error) {
+      console.error('Error fetching generator stats:', error);
+    }
+  }, []);
 
   const fetchArticles = useCallback(async () => {
     setIsLoading(true);
@@ -117,12 +193,57 @@ export default function BlogAdminPage() {
 
   useEffect(() => {
     fetchArticles();
-  }, [fetchArticles]);
+    fetchGeneratorStats();
+  }, [fetchArticles, fetchGeneratorStats]);
 
   // Reset page when filters change
   useEffect(() => {
     setPage(1);
   }, [countryFilter, statusFilter, searchQuery]);
+
+  const generateBlogs = async (count: number) => {
+    const secret = getSecret();
+    if (!secret) {
+      setShowSecretInput(true);
+      return;
+    }
+
+    if (isGenerating) return;
+
+    setIsGenerating(true);
+    setGeneratorProgress(0);
+    setGeneratorResult(null);
+
+    // Simulate progress
+    const estimatedSeconds = count * 2;
+    let progress = 0;
+    const interval = setInterval(() => {
+      progress += (100 / estimatedSeconds) * 0.5;
+      if (progress > 95) progress = 95;
+      setGeneratorProgress(progress);
+    }, 500);
+
+    try {
+      const response = await fetch(`/api/blog/generate?secret=${secret}&limit=${count}`, {
+        method: 'POST',
+      });
+      const result = await response.json();
+
+      clearInterval(interval);
+      setGeneratorProgress(100);
+      setGeneratorResult(result);
+
+      // Refresh data
+      await fetchArticles();
+      await fetchGeneratorStats();
+
+    } catch (error) {
+      clearInterval(interval);
+      setGeneratorResult({ error: String(error) });
+    }
+
+    setIsGenerating(false);
+  };
 
   const handleDeleteSingle = async (id: string) => {
     if (!confirm('Are you sure you want to delete this article?')) return;
@@ -135,6 +256,7 @@ export default function BlogAdminPage() {
 
       if (response.ok) {
         await fetchArticles();
+        await fetchGeneratorStats();
       } else {
         const error = await response.json();
         alert(error.error || 'Failed to delete article');
@@ -159,6 +281,7 @@ export default function BlogAdminPage() {
       if (response.ok) {
         setSelectedArticles([]);
         await fetchArticles();
+        await fetchGeneratorStats();
       } else {
         const error = await response.json();
         alert(error.error || 'Failed to delete articles');
@@ -183,6 +306,7 @@ export default function BlogAdminPage() {
         const data = await response.json();
         alert(`Deleted ${data.deletedCount} articles from ${country}`);
         await fetchArticles();
+        await fetchGeneratorStats();
       } else {
         const error = await response.json();
         alert(error.error || 'Failed to delete articles');
@@ -209,6 +333,7 @@ export default function BlogAdminPage() {
         alert(`Deleted ${data.deletedCount} articles`);
         setSelectedArticles([]);
         await fetchArticles();
+        await fetchGeneratorStats();
       } else {
         const error = await response.json();
         alert(error.error || 'Failed to delete articles');
@@ -253,18 +378,185 @@ export default function BlogAdminPage() {
             Blog Articles
           </h1>
           <p className="text-gray-400 mt-1">
-            Manage AI-generated blog posts ({total} total)
+            {total} articles total • {generatorStats.remaining_events} events to blog
           </p>
         </div>
         <div className="flex items-center gap-2">
           <button
-            onClick={fetchArticles}
+            onClick={() => { fetchArticles(); fetchGeneratorStats(); }}
             disabled={isLoading}
             className="p-2 bg-white/5 hover:bg-white/10 rounded-xl text-gray-400 transition-all disabled:opacity-50"
           >
             <RefreshCw className={`w-5 h-5 ${isLoading ? 'animate-spin' : ''}`} />
           </button>
         </div>
+      </div>
+
+      {/* AI Blog Generator Section */}
+      <div className="bg-gradient-to-r from-amber-500/10 via-purple-500/10 to-pink-500/10 border border-amber-500/20 rounded-2xl p-5 md:p-6">
+        <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
+          <div className="flex items-start gap-3">
+            <div className="w-10 h-10 bg-gradient-to-br from-amber-500 to-pink-500 rounded-xl flex items-center justify-center flex-shrink-0">
+              <Sparkles className="w-5 h-5 text-white" />
+            </div>
+            <div>
+              <h2 className="text-lg font-bold text-white flex items-center gap-2">
+                AI Blog Generator
+                {hasSecret ? (
+                  <span className="text-xs bg-green-500/20 text-green-400 px-2 py-0.5 rounded-full">Ready</span>
+                ) : (
+                  <span className="text-xs bg-yellow-500/20 text-yellow-400 px-2 py-0.5 rounded-full">Needs Setup</span>
+                )}
+              </h2>
+              <p className="text-gray-400 text-sm mt-0.5">
+                {generatorStats.remaining_events > 0
+                  ? `Generate blog posts for ${generatorStats.remaining_events} Platinumlist events`
+                  : 'All events have been blogged!'}
+              </p>
+            </div>
+          </div>
+
+          {/* Secret Management */}
+          <div className="flex items-center gap-2">
+            {hasSecret ? (
+              <button
+                onClick={clearSecret}
+                className="text-xs text-gray-500 hover:text-gray-400 flex items-center gap-1"
+              >
+                <Key className="w-3 h-3" />
+                Clear Secret
+              </button>
+            ) : (
+              <button
+                onClick={() => setShowSecretInput(true)}
+                className="text-xs text-amber-400 hover:text-amber-300 flex items-center gap-1"
+              >
+                <Key className="w-3 h-3" />
+                Set API Secret
+              </button>
+            )}
+          </div>
+        </div>
+
+        {/* Secret Input */}
+        {showSecretInput && (
+          <div className="mt-4 p-4 bg-black/20 rounded-xl border border-white/10">
+            <p className="text-sm text-gray-400 mb-3">Enter your blog generation secret key:</p>
+            <div className="flex gap-2">
+              <input
+                type="password"
+                value={secretInput}
+                onChange={(e) => setSecretInput(e.target.value)}
+                placeholder="Enter BLOG_GENERATION_SECRET"
+                className="flex-1 px-4 py-2 bg-white/5 border border-white/10 rounded-lg text-white text-sm placeholder:text-gray-500 focus:outline-none focus:border-amber-500/50"
+              />
+              <button
+                onClick={saveSecret}
+                className="px-4 py-2 bg-amber-500 hover:bg-amber-400 text-black rounded-lg font-medium text-sm transition-all"
+              >
+                Save
+              </button>
+              <button
+                onClick={() => { setShowSecretInput(false); setSecretInput(''); }}
+                className="px-4 py-2 bg-white/5 hover:bg-white/10 text-gray-400 rounded-lg text-sm transition-all"
+              >
+                Cancel
+              </button>
+            </div>
+          </div>
+        )}
+
+        {/* Generate Buttons */}
+        <div className="mt-4 flex flex-wrap gap-2">
+          <button
+            onClick={() => generateBlogs(10)}
+            disabled={isGenerating || generatorStats.remaining_events === 0}
+            className="px-4 py-2.5 bg-white/5 hover:bg-amber-500/20 border border-white/10 hover:border-amber-500/30 text-white rounded-xl font-medium text-sm transition-all disabled:opacity-40 disabled:cursor-not-allowed"
+          >
+            {isGenerating ? '...' : 'Generate 10'}
+          </button>
+          <button
+            onClick={() => generateBlogs(25)}
+            disabled={isGenerating || generatorStats.remaining_events === 0}
+            className="px-4 py-2.5 bg-white/5 hover:bg-amber-500/20 border border-white/10 hover:border-amber-500/30 text-white rounded-xl font-medium text-sm transition-all disabled:opacity-40 disabled:cursor-not-allowed"
+          >
+            {isGenerating ? '...' : 'Generate 25'}
+          </button>
+          <button
+            onClick={() => generateBlogs(50)}
+            disabled={isGenerating || generatorStats.remaining_events === 0}
+            className="px-4 py-2.5 bg-white/5 hover:bg-amber-500/20 border border-white/10 hover:border-amber-500/30 text-white rounded-xl font-medium text-sm transition-all disabled:opacity-40 disabled:cursor-not-allowed"
+          >
+            {isGenerating ? '...' : 'Generate 50'}
+          </button>
+          <button
+            onClick={() => generateBlogs(100)}
+            disabled={isGenerating || generatorStats.remaining_events === 0}
+            className="px-4 py-2.5 bg-gradient-to-r from-amber-500 to-pink-500 hover:from-amber-400 hover:to-pink-400 text-black rounded-xl font-bold text-sm transition-all disabled:opacity-40 disabled:cursor-not-allowed flex items-center gap-2"
+          >
+            <Rocket className="w-4 h-4" />
+            {isGenerating ? '...' : 'Generate 100'}
+          </button>
+        </div>
+
+        {/* Progress Bar */}
+        {isGenerating && (
+          <div className="mt-4">
+            <div className="bg-black/30 rounded-full h-2 overflow-hidden">
+              <div
+                className="bg-gradient-to-r from-amber-500 to-pink-500 h-full transition-all duration-300"
+                style={{ width: `${generatorProgress}%` }}
+              />
+            </div>
+            <p className="text-sm text-gray-400 mt-2 flex items-center gap-2">
+              <RefreshCw className="w-4 h-4 animate-spin" />
+              Generating articles... {Math.round(generatorProgress)}%
+            </p>
+          </div>
+        )}
+
+        {/* Result */}
+        {generatorResult && !isGenerating && (
+          <div className={`mt-4 p-4 rounded-xl text-sm ${
+            generatorResult.error
+              ? 'bg-red-500/10 border border-red-500/20'
+              : 'bg-green-500/10 border border-green-500/20'
+          }`}>
+            {generatorResult.error ? (
+              <span className="text-red-400 flex items-center gap-2">
+                <X className="w-4 h-4" />
+                Error: {generatorResult.error}
+              </span>
+            ) : (
+              <div>
+                <span className="text-green-400 flex items-center gap-2">
+                  <Check className="w-4 h-4" />
+                  Generated {generatorResult.processed} articles
+                  {generatorResult.failed ? ` (${generatorResult.failed} failed)` : ''}
+                  {' • '}{generatorResult.remaining} events remaining
+                </span>
+                {generatorResult.articles && generatorResult.articles.length > 0 && (
+                  <div className="mt-3 space-y-1">
+                    {generatorResult.articles.slice(0, 5).map((article, i) => (
+                      <a
+                        key={i}
+                        href={`/blog/${article.slug}`}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="block text-amber-400 hover:text-amber-300 text-xs truncate"
+                      >
+                        → {article.article_title}
+                      </a>
+                    ))}
+                    {generatorResult.articles.length > 5 && (
+                      <p className="text-gray-500 text-xs">+ {generatorResult.articles.length - 5} more</p>
+                    )}
+                  </div>
+                )}
+              </div>
+            )}
+          </div>
+        )}
       </div>
 
       {/* Stats Cards */}
@@ -401,7 +693,7 @@ export default function BlogAdminPage() {
           <p className="text-gray-400">
             {searchQuery || countryFilter !== 'all' || statusFilter !== 'all'
               ? 'Try adjusting your filters'
-              : 'No blog articles have been generated yet'}
+              : 'Click "Generate" above to create blog posts from events'}
           </p>
         </div>
       ) : (
