@@ -432,7 +432,7 @@ export default function HomePageClient({ initialMovies, initialStats, initialTod
             {/* Logo */}
             <div className="flex items-center gap-3 flex-shrink-0">
               <Link href="/" className="flex items-center">
-                <span className="text-2xl lg:text-3xl font-black bg-gradient-to-r from-pink-500 via-rose-500 to-fuchsia-500 bg-clip-text text-transparent">
+                <span className="text-2xl lg:text-3xl font-black bg-gradient-to-r from-orange-400 via-pink-500 to-purple-500 bg-clip-text text-transparent">
                   BahrainNights
                 </span>
               </Link>
@@ -482,7 +482,7 @@ export default function HomePageClient({ initialMovies, initialStats, initialTod
                         <div className="border-t border-white/10 p-3">
                           <Link
                             href={item.href}
-                            className="flex items-center justify-center space-x-2 py-2 text-pink-400 hover:text-pink-300 font-medium transition-colors"
+                            className="flex items-center justify-center space-x-2 py-2 text-yellow-500 hover:text-yellow-400 font-medium transition-colors"
                           >
                             <span>{t.nav.viewAll} {item.name}</span>
                             <ChevronRight className="w-4 h-4" />
@@ -500,7 +500,7 @@ export default function HomePageClient({ initialMovies, initialStats, initialTod
               <GlobalSearch variant="navbar" />
               <Link
                 href="/register-venue"
-                className="flex items-center space-x-1.5 bg-gradient-to-r from-pink-500 via-rose-500 to-fuchsia-500 text-black px-3 py-2 rounded-full text-sm font-semibold hover:shadow-lg hover:shadow-orange-500/25 hover:scale-105 transition-all duration-200"
+                className="flex items-center space-x-1.5 bg-yellow-500 text-black px-3 py-2 rounded-full text-sm font-semibold hover:shadow-lg hover:shadow-orange-500/25 hover:scale-105 transition-all duration-200"
               >
                 <Building2 className="w-4 h-4" />
                 <span>{t.nav.registerVenue}</span>
@@ -549,7 +549,7 @@ export default function HomePageClient({ initialMovies, initialStats, initialTod
                         <span className="text-lg font-medium text-white">{item.name}</span>
                       </div>
                       <ChevronDown
-                        className={`w-5 h-5 text-gray-400 transition-transform duration-300 ${mobileAccordion === item.name ? 'rotate-180 text-pink-400' : ''}`}
+                        className={`w-5 h-5 text-gray-400 transition-transform duration-300 ${mobileAccordion === item.name ? 'rotate-180 text-yellow-500' : ''}`}
                       />
                     </button>
 
@@ -577,7 +577,7 @@ export default function HomePageClient({ initialMovies, initialStats, initialTod
                             ))}
                             <Link
                               href={item.href}
-                              className="flex items-center space-x-2 py-3 px-4 text-pink-400 font-medium"
+                              className="flex items-center space-x-2 py-3 px-4 text-yellow-500 font-medium"
                               onClick={() => setMobileMenuOpen(false)}
                             >
                               <span>{t.nav.viewAll}</span>
@@ -594,7 +594,7 @@ export default function HomePageClient({ initialMovies, initialStats, initialTod
                 <div className="pt-4 space-y-3">
                   <Link
                     href="/register-venue"
-                    className="w-full flex items-center justify-center space-x-2 bg-gradient-to-r from-pink-500 via-rose-500 to-fuchsia-500 text-black px-6 py-4 rounded-xl font-semibold"
+                    className="w-full flex items-center justify-center space-x-2 bg-yellow-500 text-black px-6 py-4 rounded-xl font-semibold"
                     onClick={() => setMobileMenuOpen(false)}
                   >
                     <Building2 className="w-5 h-5" />
@@ -640,7 +640,7 @@ export default function HomePageClient({ initialMovies, initialStats, initialTod
 
         <div className="relative z-10 max-w-7xl mx-auto text-center">
           <motion.div
-            className="inline-block mb-6 px-6 py-3 bg-white/5 backdrop-blur-sm rounded-full border border-white/10 hover:border-pink-400/50 transition-colors"
+            className="inline-block mb-6 px-6 py-3 bg-white/5 backdrop-blur-sm rounded-full border border-white/10 hover:border-orange-400/50 transition-colors"
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.3 }}
@@ -658,9 +658,9 @@ export default function HomePageClient({ initialMovies, initialStats, initialTod
             transition={{ duration: 0.4 }}
           >
             <span
-              className="bg-gradient-to-r from-pink-500 via-rose-500 to-fuchsia-500 bg-clip-text text-transparent"
+              className="bg-gradient-to-r from-orange-400 via-pink-500 to-purple-500 bg-clip-text text-transparent"
               style={{
-                textShadow: '0 4px 20px rgba(236, 72, 153, 0.5), 0 2px 10px rgba(0, 0, 0, 0.8)',
+                textShadow: '0 4px 20px rgba(249, 115, 22, 0.4), 0 2px 10px rgba(0, 0, 0, 0.8)',
                 filter: 'drop-shadow(0 4px 8px rgba(0, 0, 0, 0.5))'
               }}
             >
@@ -731,7 +731,7 @@ export default function HomePageClient({ initialMovies, initialStats, initialTod
             variants={fadeIn}
           >
             <h2 className="text-3xl md:text-5xl font-bold">🎬 {t.home.sections.nowShowing}</h2>
-            <Link href="/cinema" className="text-pink-400 hover:text-pink-300 flex items-center space-x-2 transition-colors group">
+            <Link href="/cinema" className="text-yellow-500 hover:text-yellow-400 flex items-center space-x-2 transition-colors group">
               <span className="font-medium">{t.home.sections.viewAll}</span>
               <ChevronRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
             </Link>
@@ -765,7 +765,7 @@ export default function HomePageClient({ initialMovies, initialStats, initialTod
                         e.stopPropagation();
                         handleTrailerClick(convertToMovieFormat(movie));
                       }}
-                      className="absolute top-2 right-2 md:hidden p-4 bg-black/80 backdrop-blur-sm rounded-full text-pink-400 active:bg-pink-500 active:text-black transition-all duration-150 z-10 touch-manipulation"
+                      className="absolute top-2 right-2 md:hidden p-4 bg-black/80 backdrop-blur-sm rounded-full text-yellow-500 active:bg-pink-500 active:text-black transition-all duration-150 z-10 touch-manipulation"
                       aria-label={`Play ${movie.title} trailer`}
                     >
                       <Play className="w-6 h-6 fill-current" />
@@ -775,7 +775,7 @@ export default function HomePageClient({ initialMovies, initialStats, initialTod
                     <div className="absolute bottom-0 left-0 right-0 p-6">
                       <h3 className="font-bold text-xl mb-2">{movie.title}</h3>
                       {movie.tmdb_rating && (
-                        <div className="flex items-center space-x-2 text-pink-400">
+                        <div className="flex items-center space-x-2 text-yellow-500">
                           <Star className="w-5 h-5 fill-current" />
                           <span className="text-lg font-semibold">{movie.tmdb_rating.toFixed(1)}</span>
                         </div>
@@ -787,7 +787,7 @@ export default function HomePageClient({ initialMovies, initialStats, initialTod
                             e.stopPropagation();
                             handleTrailerClick(convertToMovieFormat(movie));
                           }}
-                          className="mt-3 hidden md:flex items-center gap-2 px-4 py-2 bg-pink-500 text-black rounded-full font-medium hover:bg-pink-400 transition-colors"
+                          className="mt-3 hidden md:flex items-center gap-2 px-4 py-2 bg-yellow-500 text-black rounded-full font-medium hover:bg-yellow-400 transition-colors"
                         >
                           <Play className="w-4 h-4 fill-current" />
                           {t.movieModal.watchTrailer}
@@ -801,7 +801,7 @@ export default function HomePageClient({ initialMovies, initialStats, initialTod
               // No movies fallback
               <div className="col-span-4 text-center py-12">
                 <p className="text-gray-400">No movies currently showing. Check back soon!</p>
-                <Link href="/cinema" className="text-pink-400 hover:text-pink-300 mt-2 inline-block">Browse all movies →</Link>
+                <Link href="/cinema" className="text-yellow-500 hover:text-yellow-400 mt-2 inline-block">Browse all movies →</Link>
               </div>
             )}
           </motion.div>
@@ -821,7 +821,7 @@ export default function HomePageClient({ initialMovies, initialStats, initialTod
             <h2 className="text-3xl md:text-5xl font-bold flex items-center gap-3">
               🔥 {t.home.sections.happeningToday}
             </h2>
-            <Link href="/events/today" className="text-pink-400 hover:text-pink-300 flex items-center space-x-2 transition-colors group">
+            <Link href="/events/today" className="text-yellow-500 hover:text-yellow-400 flex items-center space-x-2 transition-colors group">
               <span className="font-medium">{t.home.sections.viewAll}</span>
               <ChevronRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
             </Link>
@@ -842,25 +842,25 @@ export default function HomePageClient({ initialMovies, initialStats, initialTod
                     setSelectedEvent(event);
                     setIsEventModalOpen(true);
                   }}
-                  className="group relative bg-white/5 backdrop-blur-sm border border-white/10 rounded-2xl overflow-hidden cursor-pointer hover:border-pink-400/50 transition-colors block"
+                  className="group relative bg-white/5 backdrop-blur-sm border border-white/10 rounded-2xl overflow-hidden cursor-pointer hover:border-orange-400/50 transition-colors block"
                   variants={fadeIn}
                   whileHover={cardHover}
                 >
                   <div className="relative h-72 overflow-hidden">
                     <img src={event.image} alt={event.title} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" />
                     <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/30 to-transparent" />
-                    <div className="absolute top-4 right-4 px-4 py-1.5 bg-pink-500 text-black text-xs font-bold rounded-full">
+                    <div className="absolute top-4 right-4 px-4 py-1.5 bg-yellow-500 text-black text-xs font-bold rounded-full">
                       {event.category}
                     </div>
                     <div className="absolute bottom-0 left-0 right-0 p-6">
                       <h3 className="text-xl font-bold mb-3 line-clamp-2">{event.title}</h3>
                       <div className="flex items-center justify-between text-sm text-gray-300">
                         <div className="flex items-center space-x-2">
-                          <MapPin className="w-4 h-4 text-pink-400" />
+                          <MapPin className="w-4 h-4 text-yellow-500" />
                           <span className="truncate max-w-[100px]">{event.venue}</span>
                         </div>
                         <div className="flex items-center space-x-2">
-                          <Clock className="w-4 h-4 text-pink-400" />
+                          <Clock className="w-4 h-4 text-yellow-500" />
                           <span>{event.time}</span>
                         </div>
                       </div>
@@ -871,7 +871,7 @@ export default function HomePageClient({ initialMovies, initialStats, initialTod
             ) : (
               <div className="col-span-4 text-center py-12">
                 <p className="text-gray-400">No upcoming events found. Check back soon!</p>
-                <Link href="/events" className="text-pink-400 hover:text-pink-300 mt-2 inline-block">Browse all events →</Link>
+                <Link href="/events" className="text-yellow-500 hover:text-yellow-400 mt-2 inline-block">Browse all events →</Link>
               </div>
             )}
           </motion.div>
@@ -902,14 +902,14 @@ export default function HomePageClient({ initialMovies, initialStats, initialTod
               <Link
                 key={category.name}
                 href={category.href}
-                className="group relative bg-white/5 backdrop-blur-sm border border-white/10 rounded-2xl p-6 cursor-pointer overflow-hidden hover:border-pink-400/50 transition-all duration-300"
+                className="group relative block w-full h-full bg-white/5 backdrop-blur-sm border border-white/10 rounded-2xl p-6 cursor-pointer overflow-hidden hover:border-orange-400/50 hover:bg-white/10 transition-all duration-300 touch-manipulation active:scale-[0.98]"
               >
-                <div className={`absolute inset-0 bg-gradient-to-br ${category.color} opacity-0 group-hover:opacity-20 transition-opacity duration-300`} />
-                <div className="relative text-center">
+                <div className={`absolute inset-0 bg-gradient-to-br ${category.color} opacity-0 group-hover:opacity-20 transition-opacity duration-300 pointer-events-none`} />
+                <div className="relative text-center pointer-events-none">
                   <div className="text-5xl mb-4 group-hover:scale-110 transition-transform duration-200">{category.icon}</div>
-                  <h3 className="text-xl font-bold mb-1">{category.name}</h3>
+                  <h3 className="text-xl font-bold mb-1 group-hover:text-orange-400 transition-colors">{category.name}</h3>
                   <p className="text-sm text-gray-400 mb-2">{category.description}</p>
-                  <p className="text-pink-400 font-semibold">
+                  <p className="text-yellow-500 font-semibold">
                     {`${category.count} ${category.countLabel}`}
                   </p>
                 </div>
@@ -932,7 +932,7 @@ export default function HomePageClient({ initialMovies, initialStats, initialTod
         <div className="max-w-7xl mx-auto">
           <div className="grid grid-cols-1 md:grid-cols-6 gap-10 mb-10">
             <div className="md:col-span-2">
-              <div className="text-3xl font-black bg-gradient-to-r from-pink-500 via-rose-500 to-fuchsia-500 bg-clip-text text-transparent mb-4">
+              <div className="text-3xl font-black bg-gradient-to-r from-orange-400 via-pink-500 to-purple-500 bg-clip-text text-transparent mb-4">
                 BahrainNights
               </div>
               <p className="text-gray-400 mb-6">{t.footer.tagline}</p>

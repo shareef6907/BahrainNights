@@ -59,7 +59,7 @@ function highlightMatch(text: string, query: string): React.ReactNode {
   return (
     <>
       {before}
-      <span className="text-pink-400 font-semibold">{match}</span>
+      <span className="text-orange-500 font-semibold">{match}</span>
       {after}
     </>
   );

@@ -149,7 +149,7 @@ export default function InternationalEventsSection({ events }: Props) {
           </h2>
           <Link
             href="/international"
-            className="text-pink-400 hover:text-pink-300 flex items-center space-x-2 transition-colors group"
+            className="text-yellow-500 hover:text-yellow-400 flex items-center space-x-2 transition-colors group"
           >
             <span className="font-medium">{t.home?.sections?.viewAll || 'View All'}</span>
             <ChevronRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />

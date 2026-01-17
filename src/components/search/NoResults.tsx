@@ -69,24 +69,24 @@ export default function NoResults({ query, onSearchSelect }: NoResultsProps) {
       {/* Suggestions */}
       <div className="bg-white/5 border border-white/10 rounded-xl p-6 max-w-md mx-auto mb-8">
         <h3 className="text-white font-medium mb-4 flex items-center justify-center gap-2">
-          <Sparkles className="w-5 h-5 text-pink-400" />
+          <Sparkles className="w-5 h-5 text-orange-500" />
           Try these tips
         </h3>
         <ul className="text-left text-gray-400 space-y-2 text-sm">
           <li className="flex items-start gap-2">
-            <span className="text-pink-400">•</span>
+            <span className="text-orange-500">•</span>
             Check for spelling errors
           </li>
           <li className="flex items-start gap-2">
-            <span className="text-pink-400">•</span>
+            <span className="text-orange-500">•</span>
             Try different or more general keywords
           </li>
           <li className="flex items-start gap-2">
-            <span className="text-pink-400">•</span>
+            <span className="text-orange-500">•</span>
             Search for a venue name or area
           </li>
           <li className="flex items-start gap-2">
-            <span className="text-pink-400">•</span>
+            <span className="text-orange-500">•</span>
             Browse by category below
           </li>
         </ul>
@@ -218,7 +218,7 @@ export function EmptyQueryState({
       {/* Trending This Week */}
       <div className="mt-12">
         <h3 className="text-gray-400 text-sm font-medium mb-4 flex items-center justify-center gap-2">
-          <Sparkles className="w-4 h-4 text-pink-400" />
+          <Sparkles className="w-4 h-4 text-orange-500" />
           Trending This Week
         </h3>
         <div className="flex flex-wrap justify-center gap-2 text-sm">
@@ -243,7 +243,7 @@ function TrendingItem({
   return (
     <button
       onClick={onClick}
-      className="px-4 py-2 bg-pink-500/10 hover:bg-pink-500/20 border border-pink-500/30 rounded-full text-pink-400 hover:text-pink-300 transition-all"
+      className="px-4 py-2 bg-pink-500/10 hover:bg-pink-500/20 border border-pink-500/30 rounded-full text-orange-500 hover:text-pink-300 transition-all"
     >
       {label}
     </button>

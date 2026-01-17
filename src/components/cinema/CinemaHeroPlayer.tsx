@@ -12,38 +12,19 @@ interface CinemaHeroPlayerProps {
 
 export default function CinemaHeroPlayer({ movies, onMovieClick }: CinemaHeroPlayerProps) {
   const [currentIndex, setCurrentIndex] = useState(0);
-  // Start MUTED on mobile for autoplay to work (browser restriction)
-  // Desktop starts unmuted for better experience
+  // Start MUTED for autoplay to work (browser restriction)
   const [isMuted, setIsMuted] = useState(true);
-  const [isMobile, setIsMobile] = useState(false);
+  const iframeRef = useRef<HTMLIFrameElement>(null);
   const autoAdvanceRef = useRef<NodeJS.Timeout | null>(null);
 
   // IMPORTANT: Persist mute preference across slide changes using ref
   const userMutePreference = useRef<boolean>(true);
-
-  // Detect mobile device
-  useEffect(() => {
-    const checkMobile = () => {
-      const mobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent) || window.innerWidth < 768;
-      setIsMobile(mobile);
-      // On desktop, start unmuted for better experience
-      // On mobile, keep muted for autoplay to work
-      if (!mobile) {
-        setIsMuted(false);
-        userMutePreference.current = false;
-      }
-    };
-    checkMobile();
-    window.addEventListener('resize', checkMobile);
-    return () => window.removeEventListener('resize', checkMobile);
-  }, []);
 
   // Auto-advance trailers every 25 seconds
   useEffect(() => {
     if (movies.length > 1) {
       autoAdvanceRef.current = setInterval(() => {
         setCurrentIndex((prev) => (prev + 1) % movies.length);
-        // DO NOT change mute state when auto-advancing - this fixes the sliding mute bug
       }, 25000);
     }
     return () => {
@@ -60,38 +41,69 @@ export default function CinemaHeroPlayer({ movies, onMovieClick }: CinemaHeroPla
     return match?.[1] || null;
   }, []);
 
-  // Get YouTube embed URL - ALWAYS uses userMutePreference ref to persist across slides
+  // Get YouTube embed URL - ALWAYS start muted for autoplay, control via postMessage
   const getYouTubeUrl = useCallback((movie: Movie): string | null => {
     const videoId = getYouTubeId(movie);
     if (!videoId) return null;
 
-    // Use userMutePreference.current to persist mute state across slide changes
-    const muteParam = userMutePreference.current ? 1 : 0;
-    return `https://www.youtube.com/embed/${videoId}?autoplay=1&mute=${muteParam}&controls=0&loop=1&playlist=${videoId}&modestbranding=1&rel=0&showinfo=0&iv_load_policy=3&disablekb=1&enablejsapi=1&playsinline=1`;
+    // IMPORTANT: Always mute=1 in URL for autoplay to work on all browsers
+    // We control actual mute state via postMessage API
+    return `https://www.youtube.com/embed/${videoId}?autoplay=1&mute=1&controls=0&loop=1&playlist=${videoId}&modestbranding=1&rel=0&showinfo=0&iv_load_policy=3&disablekb=1&enablejsapi=1&playsinline=1&origin=${typeof window !== 'undefined' ? window.location.origin : ''}`;
   }, [getYouTubeId]);
 
   const goToSlide = (index: number) => {
     setCurrentIndex(index);
-    // Reset auto-advance timer but DO NOT touch mute state
+    // Reset auto-advance timer
     if (autoAdvanceRef.current) {
       clearInterval(autoAdvanceRef.current);
       autoAdvanceRef.current = setInterval(() => {
         setCurrentIndex((prev) => (prev + 1) % movies.length);
       }, 25000);
     }
-    // NOTE: We do NOT reset isMuted here - this fixes the mobile mute bug!
   };
 
   const goNext = () => goToSlide((currentIndex + 1) % movies.length);
   const goPrev = () => goToSlide((currentIndex - 1 + movies.length) % movies.length);
 
-  const toggleMute = (e: React.MouseEvent) => {
-    e.stopPropagation();
+  // Control mute via postMessage instead of re-creating iframe
+  const toggleMute = useCallback(() => {
     const newMuteState = !isMuted;
     setIsMuted(newMuteState);
-    // Save user preference to persist across slide changes
     userMutePreference.current = newMuteState;
-  };
+
+    // Send command to YouTube iframe via postMessage API
+    if (iframeRef.current?.contentWindow) {
+      const command = newMuteState ? 'mute' : 'unMute';
+      iframeRef.current.contentWindow.postMessage(
+        JSON.stringify({
+          event: 'command',
+          func: command,
+          args: []
+        }),
+        '*'
+      );
+    }
+  }, [isMuted]);
+
+  // When slide changes, apply current mute state to new video after it loads
+  useEffect(() => {
+    // Small delay to let iframe load before sending commands
+    const timer = setTimeout(() => {
+      if (iframeRef.current?.contentWindow && !userMutePreference.current) {
+        // If user previously unmuted, unmute the new video too
+        iframeRef.current.contentWindow.postMessage(
+          JSON.stringify({
+            event: 'command',
+            func: 'unMute',
+            args: []
+          }),
+          '*'
+        );
+      }
+    }, 1500);
+
+    return () => clearTimeout(timer);
+  }, [currentIndex]);
 
   if (movies.length === 0) {
     return (
@@ -113,7 +125,8 @@ export default function CinemaHeroPlayer({ movies, onMovieClick }: CinemaHeroPla
       <div className="absolute inset-0">
         {hasTrailer ? (
           <iframe
-            key={`cinema-trailer-${currentIndex}-${isMuted}`}
+            ref={iframeRef}
+            key={`cinema-trailer-${currentIndex}`}
             src={youtubeUrl}
             className="absolute w-[300%] h-[300%] top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 pointer-events-none"
             allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
@@ -180,10 +193,14 @@ export default function CinemaHeroPlayer({ movies, onMovieClick }: CinemaHeroPla
             <div className="flex flex-wrap items-center gap-3 md:gap-4 relative z-20">
               {hasTrailer && (
                 <button
-                  onClick={toggleMute}
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    toggleMute();
+                  }}
                   onTouchEnd={(e) => {
                     e.preventDefault();
-                    toggleMute(e as unknown as React.MouseEvent);
+                    e.stopPropagation();
+                    toggleMute();
                   }}
                   className={`flex items-center gap-2 px-5 md:px-8 py-3 md:py-3 rounded-lg font-bold text-base md:text-lg transition-all active:scale-95 touch-manipulation ${
                     isMuted
@@ -261,8 +278,6 @@ export default function CinemaHeroPlayer({ movies, onMovieClick }: CinemaHeroPla
           ))}
         </div>
       )}
-
-      {/* REMOVED: Bottom-right sound icon as requested - only mute button in action buttons area */}
     </div>
   );
 }

@@ -53,7 +53,7 @@ function highlightMatch(text: string, query?: string): React.ReactNode {
   return (
     <>
       {before}
-      <span className="bg-pink-500/30 text-pink-200 px-0.5 rounded">
+      <span className="bg-orange-500/30 text-orange-200 px-0.5 rounded">
         {match}
       </span>
       {after}
@@ -96,7 +96,7 @@ export default function SearchResultCard({
 
             {/* Content */}
             <div className="flex-1 min-w-0">
-              <h3 className="text-white font-semibold text-lg group-hover:text-pink-400 transition-colors line-clamp-1">
+              <h3 className="text-white font-semibold text-lg group-hover:text-yellow-500 transition-colors line-clamp-1">
                 {highlightMatch(item.title, query)}
               </h3>
 
@@ -131,7 +131,7 @@ export default function SearchResultCard({
 
                 {/* Rating for places */}
                 {item.rating && (
-                  <div className="flex items-center gap-1 text-pink-400">
+                  <div className="flex items-center gap-1 text-yellow-500">
                     <Star className="w-3.5 h-3.5 fill-current" />
                     <span>{item.rating}</span>
                   </div>
@@ -211,7 +211,7 @@ export function SearchResultCardCompact({
             {/* Rating badge */}
             {item.rating && (
               <div className="absolute top-3 right-3 bg-black/40 backdrop-blur-sm px-2 py-1 rounded-full flex items-center gap-1">
-                <Star className="w-3 h-3 text-pink-400 fill-current" />
+                <Star className="w-3 h-3 text-yellow-500 fill-current" />
                 <span className="text-white text-xs font-medium">
                   {item.rating}
                 </span>
@@ -221,7 +221,7 @@ export function SearchResultCardCompact({
 
           {/* Content */}
           <div className="p-4">
-            <h3 className="text-white font-semibold group-hover:text-pink-400 transition-colors line-clamp-1">
+            <h3 className="text-white font-semibold group-hover:text-yellow-500 transition-colors line-clamp-1">
               {highlightMatch(item.title, query)}
             </h3>
 
