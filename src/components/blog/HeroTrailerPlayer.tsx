@@ -18,9 +18,9 @@ interface Movie {
 export function HeroTrailerPlayer() {
   const [movies, setMovies] = useState<Movie[]>([]);
   const [currentIndex, setCurrentIndex] = useState(0);
-  const [isMuted, setIsMuted] = useState(true);
+  const [isMuted, setIsMuted] = useState(false); // Start UNMUTED
   const [isLoading, setIsLoading] = useState(true);
-  const [userInteracted, setUserInteracted] = useState(false);
+  const [userInteracted, setUserInteracted] = useState(true); // Hide the hint by default
   const autoAdvanceRef = useRef<NodeJS.Timeout | null>(null);
 
   useEffect(() => {
@@ -77,19 +77,6 @@ export function HeroTrailerPlayer() {
       if (autoAdvanceRef.current) clearInterval(autoAdvanceRef.current);
     };
   }, [movies.length]);
-
-  // Handle user interaction for sound
-  useEffect(() => {
-    const handleInteraction = () => {
-      if (!userInteracted) {
-        setUserInteracted(true);
-        setIsMuted(false); // Auto-unmute on first click
-      }
-    };
-
-    document.addEventListener('click', handleInteraction, { once: true });
-    return () => document.removeEventListener('click', handleInteraction);
-  }, [userInteracted]);
 
   const currentMovie = movies[currentIndex];
 
