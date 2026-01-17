@@ -6,10 +6,6 @@ on:
     - cron: '0 2 * * *'
   workflow_dispatch: # Allow manual trigger
 
-env:
-  SITE_URL: ${{ secrets.SITE_URL }}
-  BLOG_GENERATION_SECRET: ${{ secrets.BLOG_GENERATION_SECRET }}
-
 jobs:
   generate-blogs:
     runs-on: ubuntu-latest
@@ -18,69 +14,36 @@ jobs:
     steps:
       - name: Check required secrets
         run: |
-          if [ -z "$SITE_URL" ]; then
+          if [ -z "${{ secrets.SITE_URL }}" ]; then
             echo "Error: SITE_URL secret is not set"
             exit 1
           fi
-          if [ -z "$BLOG_GENERATION_SECRET" ]; then
+          if [ -z "${{ secrets.BLOG_GENERATION_SECRET }}" ]; then
             echo "Error: BLOG_GENERATION_SECRET secret is not set"
             exit 1
           fi
           echo "All required secrets are configured"
 
-      - name: Check Blog API Status
-        id: status
-        run: |
-          echo "Checking blog API status at $(date)"
-
-          response=$(curl -s -w "\n%{http_code}" \
-            "${SITE_URL}/api/blog/generate?secret=${BLOG_GENERATION_SECRET}" \
-            -H "Content-Type: application/json")
-
-          http_code=$(echo "$response" | tail -n1)
-          body=$(echo "$response" | sed '$d')
-
-          echo "HTTP Status: $http_code"
-          echo "Response: $body"
-
-          if [ "$http_code" != "200" ]; then
-            echo "Status check failed with HTTP $http_code"
-            exit 1
-          fi
-
-          remaining=$(echo "$body" | jq -r '.stats.remaining_events // 0')
-          echo "Remaining events to blog: $remaining"
-          echo "remaining=$remaining" >> $GITHUB_OUTPUT
-
       - name: Generate Blog Posts
-        if: steps.status.outputs.remaining > 0
         run: |
           echo "Starting blog generation at $(date)"
 
-          response=$(curl -s -w "\n%{http_code}" -X POST \
-            "${SITE_URL}/api/blog/generate?secret=${BLOG_GENERATION_SECRET}" \
-            -H "Content-Type: application/json")
+          # Call the blog generation API with POST, follow redirects with -L
+          response=$(curl -s -L -X POST \
+            -H "Content-Type: application/json" \
+            "${{ secrets.SITE_URL }}/api/blog/generate?secret=${{ secrets.BLOG_GENERATION_SECRET }}")
 
-          http_code=$(echo "$response" | tail -n1)
-          body=$(echo "$response" | sed '$d')
-
-          echo "HTTP Status: $http_code"
-          echo "Response: $body"
-
-          if [ "$http_code" != "200" ]; then
-            echo "Blog generation failed with HTTP $http_code"
-            exit 1
-          fi
+          echo "Response: $response"
 
           # Check if there was an error in the response
-          has_error=$(echo "$body" | jq -r '.error // empty')
+          has_error=$(echo "$response" | jq -r '.error // empty')
           if [ -n "$has_error" ]; then
             echo "Blog generation returned error: $has_error"
             exit 1
           fi
 
-          processed=$(echo "$body" | jq -r '.processed // 0')
-          failed=$(echo "$body" | jq -r '.failed // 0')
+          processed=$(echo "$response" | jq -r '.processed // 0')
+          failed=$(echo "$response" | jq -r '.failed // 0')
 
           echo "✅ Blog generation completed"
           echo "   - Processed: $processed articles"
@@ -89,12 +52,7 @@ jobs:
           # Show generated articles
           echo ""
           echo "Generated articles:"
-          echo "$body" | jq -r '.articles[]? | "  - \(.article_title) (/blog/\(.slug))"'
-
-      - name: Skip - No Events to Blog
-        if: steps.status.outputs.remaining == 0 || steps.status.outputs.remaining == '0'
-        run: |
-          echo "No new events to blog. Skipping generation."
+          echo "$response" | jq -r '.articles[]? | "  - \(.article_title) (/blog/\(.slug))"'
 
       - name: Summary
         if: always()
