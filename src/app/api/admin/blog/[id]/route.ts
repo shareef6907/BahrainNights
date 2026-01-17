@@ -152,6 +152,66 @@ export async function PUT(request: NextRequest, { params }: RouteParams) {
   }
 }
 
+// PATCH - Quick update for single fields (e.g., toggle featured)
+export async function PATCH(request: NextRequest, { params }: RouteParams) {
+  try {
+    const { id } = await params;
+    const supabase = getAdminClient();
+    const body = await request.json();
+
+    // Only allow specific fields to be patched
+    const allowedFields = ['is_featured', 'status'];
+    const updateData: Record<string, unknown> = {};
+
+    for (const field of allowedFields) {
+      if (body[field] !== undefined) {
+        updateData[field] = body[field];
+      }
+    }
+
+    if (Object.keys(updateData).length === 0) {
+      return NextResponse.json(
+        { error: 'No valid fields to update' },
+        { status: 400 }
+      );
+    }
+
+    updateData.updated_at = new Date().toISOString();
+
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const { data: article, error } = await (supabase as any)
+      .from('blog_articles')
+      .update(updateData)
+      .eq('id', id)
+      .select('id, slug, country, is_featured, status')
+      .single() as { data: { id: string; slug: string; country: string; is_featured: boolean; status: string } | null; error: Error | null };
+
+    if (error || !article) {
+      console.error('Error patching article:', error);
+      return NextResponse.json(
+        { error: 'Failed to update article' },
+        { status: 500 }
+      );
+    }
+
+    // Revalidate the article page and blog listing
+    revalidatePath(`/blog/${article.slug}`);
+    revalidatePath('/blog');
+    revalidatePath(`/blog/places-to-go/${article.country}`);
+
+    return NextResponse.json({
+      success: true,
+      article,
+    });
+  } catch (error) {
+    console.error('Blog admin PATCH error:', error);
+    return NextResponse.json(
+      { error: 'Internal server error' },
+      { status: 500 }
+    );
+  }
+}
+
 // DELETE - Delete single article
 export async function DELETE(request: NextRequest, { params }: RouteParams) {
   try {

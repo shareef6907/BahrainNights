@@ -24,6 +24,7 @@ import {
   Sparkles,
   Rocket,
   Key,
+  Star,
 } from 'lucide-react';
 
 interface BlogArticle {
@@ -124,6 +125,9 @@ export default function BlogAdminPage() {
   // Cleanup state
   const [isCleaningUp, setIsCleaningUp] = useState(false);
   const [cleanupResult, setCleanupResult] = useState<{ success?: boolean; message?: string; duplicatesRemoved?: number; error?: string } | null>(null);
+
+  // Featured toggle state
+  const [togglingFeatured, setTogglingFeatured] = useState<string | null>(null);
 
   // Check for saved secret on mount
   useEffect(() => {
@@ -311,6 +315,37 @@ export default function BlogAdminPage() {
     }
 
     setIsCleaningUp(false);
+  };
+
+  const toggleFeatured = async (articleId: string, currentFeatured: boolean) => {
+    if (togglingFeatured) return;
+
+    setTogglingFeatured(articleId);
+
+    try {
+      const response = await fetch(`/api/admin/blog/${articleId}`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ is_featured: !currentFeatured }),
+      });
+
+      if (response.ok) {
+        // Update local state immediately for instant feedback
+        setArticles(prev => prev.map(article =>
+          article.id === articleId
+            ? { ...article, is_featured: !currentFeatured }
+            : article
+        ));
+      } else {
+        const error = await response.json();
+        alert(error.error || 'Failed to update featured status');
+      }
+    } catch (error) {
+      console.error('Error toggling featured:', error);
+      alert('Failed to update featured status');
+    }
+
+    setTogglingFeatured(null);
   };
 
   const handleDeleteSingle = async (id: string) => {
@@ -884,7 +919,21 @@ export default function BlogAdminPage() {
                   <div className="flex-1 p-4 pt-0 md:pt-4">
                     <div className="flex items-start justify-between gap-2">
                       <div className="min-w-0 flex-1">
-                        <h3 className="text-white font-semibold line-clamp-1">{article.title}</h3>
+                        <div className="flex items-center gap-2">
+                          <button
+                            onClick={() => toggleFeatured(article.id, article.is_featured)}
+                            disabled={togglingFeatured === article.id}
+                            className={`flex-shrink-0 p-1 rounded-lg transition-all ${
+                              article.is_featured
+                                ? 'text-yellow-400 hover:text-yellow-300'
+                                : 'text-gray-500 hover:text-yellow-400'
+                            } ${togglingFeatured === article.id ? 'opacity-50 cursor-wait' : ''}`}
+                            title={article.is_featured ? 'Remove from featured' : 'Add to featured'}
+                          >
+                            <Star className={`w-5 h-5 ${article.is_featured ? 'fill-current' : ''}`} />
+                          </button>
+                          <h3 className="text-white font-semibold line-clamp-1">{article.title}</h3>
+                        </div>
                         {article.excerpt && (
                           <p className="text-gray-400 text-sm mt-1 line-clamp-2">{article.excerpt}</p>
                         )}
