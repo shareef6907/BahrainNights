@@ -1,22 +1,31 @@
+/**
+ * MovieListSchema Component
+ * Generates JSON-LD structured data for movie/cinema listing pages
+ */
+
+interface MovieItem {
+  title: string;
+  slug: string;
+  description?: string | null;
+  poster_url?: string | null;
+  rating?: number | null;
+  duration_minutes?: number | null;
+  genre?: string[] | null;
+}
+
 interface MovieListSchemaProps {
-  movies: Array<{
-    title: string;
-    poster?: string | null;
-    rating?: number | null;
-    genres?: string[] | null;
-    duration?: string | null;
-    releaseDate?: string | null;
-    slug?: string | null;
-    synopsis?: string | null;
-  }>;
+  movies: MovieItem[];
   pageTitle: string;
   pageDescription: string;
   pageUrl: string;
 }
 
-export default function MovieListSchema({ movies, pageTitle, pageDescription, pageUrl }: MovieListSchemaProps) {
-  if (!movies || movies.length === 0) return null;
-
+export default function MovieListSchema({
+  movies,
+  pageTitle,
+  pageDescription,
+  pageUrl,
+}: MovieListSchemaProps) {
   const schema = {
     '@context': 'https://schema.org',
     '@type': 'ItemList',
@@ -24,40 +33,31 @@ export default function MovieListSchema({ movies, pageTitle, pageDescription, pa
     description: pageDescription,
     url: pageUrl,
     numberOfItems: movies.length,
-    itemListElement: movies.slice(0, 15).map((movie, index) => {
-      // Parse duration to ISO format if possible (e.g., "2h 30min" -> "PT2H30M")
-      let isoDuration = undefined;
-      if (movie.duration) {
-        const match = movie.duration.match(/(\d+)h\s*(\d+)?/);
-        if (match) {
-          const hours = match[1] || '0';
-          const mins = match[2] || '0';
-          isoDuration = `PT${hours}H${mins}M`;
-        }
-      }
-
-      return {
-        '@type': 'ListItem',
-        position: index + 1,
-        item: {
-          '@type': 'Movie',
-          name: movie.title,
-          image: movie.poster,
-          description: movie.synopsis || `${movie.title} - Now showing in Bahrain cinemas`,
-          url: movie.slug ? `https://bahrainnights.com/cinema/${movie.slug}` : pageUrl,
-          ...(movie.genres && movie.genres.length > 0 && { genre: movie.genres.join(', ') }),
-          ...(isoDuration && { duration: isoDuration }),
-          ...(movie.rating && {
-            aggregateRating: {
-              '@type': 'AggregateRating',
-              ratingValue: movie.rating.toString(),
-              bestRating: '10',
-              ratingCount: '100',
-            },
-          }),
-        },
-      };
-    }),
+    itemListElement: movies.slice(0, 10).map((movie, index) => ({
+      '@type': 'ListItem',
+      position: index + 1,
+      item: {
+        '@type': 'Movie',
+        name: movie.title,
+        url: `https://bahrainnights.com/cinema/${movie.slug}`,
+        description: movie.description?.slice(0, 200) || movie.title,
+        image: movie.poster_url || 'https://bahrainnights.com/og-image.jpg',
+        ...(movie.rating && {
+          aggregateRating: {
+            '@type': 'AggregateRating',
+            ratingValue: movie.rating,
+            bestRating: 10,
+            worstRating: 0,
+          },
+        }),
+        ...(movie.duration_minutes && {
+          duration: `PT${movie.duration_minutes}M`,
+        }),
+        ...(movie.genre && movie.genre.length > 0 && {
+          genre: movie.genre,
+        }),
+      },
+    })),
   };
 
   return (

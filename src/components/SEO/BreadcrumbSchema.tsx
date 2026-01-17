@@ -1,3 +1,8 @@
+/**
+ * BreadcrumbSchema Component
+ * Generates JSON-LD structured data for breadcrumb navigation
+ */
+
 interface BreadcrumbItem {
   name: string;
   url: string;
@@ -8,8 +13,6 @@ interface BreadcrumbSchemaProps {
 }
 
 export default function BreadcrumbSchema({ items }: BreadcrumbSchemaProps) {
-  if (!items || items.length === 0) return null;
-
   const schema = {
     '@context': 'https://schema.org',
     '@type': 'BreadcrumbList',

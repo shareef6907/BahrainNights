@@ -1,77 +1,73 @@
+/**
+ * VenueSchema Component
+ * Generates JSON-LD structured data for venue/place pages
+ */
+
 interface VenueSchemaProps {
   venue: {
     name: string;
+    slug: string;
     description?: string | null;
     address?: string | null;
     location?: string | null;
     phone?: string | null;
+    email?: string | null;
     website?: string | null;
+    logo_url?: string | null;
     image_url?: string | null;
     cover_url?: string | null;
+    cover_image_url?: string | null;
     category?: string | null;
+    latitude?: number | null;
+    longitude?: number | null;
+    opening_hours?: string | null;
+    price_range?: string | null;
     google_maps_url?: string | null;
-    reservation_url?: string | null;
-    slug?: string | null;
   };
 }
 
 export default function VenueSchema({ venue }: VenueSchemaProps) {
-  const getVenueType = (category?: string | null) => {
-    if (!category) return 'LocalBusiness';
+  // Map category to Schema.org type
+  const getSchemaType = (category?: string | null): string => {
     const types: Record<string, string> = {
       restaurant: 'Restaurant',
-      restaurants: 'Restaurant',
-      dining: 'Restaurant',
       cafe: 'CafeOrCoffeeShop',
-      coffee: 'CafeOrCoffeeShop',
       bar: 'BarOrPub',
-      bars: 'BarOrPub',
       nightclub: 'NightClub',
-      club: 'NightClub',
-      lounge: 'BarOrPub',
-      lounges: 'BarOrPub',
       hotel: 'Hotel',
-      hotels: 'Hotel',
-      spa: 'DaySpa',
-      beach: 'Beach',
-      default: 'LocalBusiness',
+      spa: 'HealthAndBeautyBusiness',
+      gym: 'ExerciseGym',
+      shopping: 'ShoppingCenter',
+      entertainment: 'EntertainmentBusiness',
     };
-    return types[category.toLowerCase()] || types.default;
+    return types[(category || '').toLowerCase()] || 'LocalBusiness';
   };
-
-  const venueUrl = venue.slug
-    ? `https://bahrainnights.com/places/${venue.slug}`
-    : venue.website || 'https://bahrainnights.com/places';
 
   const schema = {
     '@context': 'https://schema.org',
-    '@type': getVenueType(venue.category),
+    '@type': getSchemaType(venue.category),
     name: venue.name,
-    description: venue.description || `${venue.name} - Premier venue in Bahrain`,
-    image: venue.cover_url || venue.image_url || 'https://bahrainnights.com/og-image.jpg',
+    description: venue.description?.slice(0, 500) || `${venue.name} in Bahrain`,
+    url: `https://bahrainnights.com/places/${venue.slug}`,
+    image: venue.cover_url || venue.cover_image_url || venue.image_url || venue.logo_url || 'https://bahrainnights.com/og-image.jpg',
     address: {
       '@type': 'PostalAddress',
-      streetAddress: venue.address || '',
+      streetAddress: venue.address || venue.location || 'Bahrain',
       addressLocality: venue.location || 'Manama',
-      addressCountry: 'Bahrain',
+      addressCountry: 'BH',
     },
-    telephone: venue.phone || '',
-    url: venueUrl,
-    hasMap: venue.google_maps_url || '',
-    acceptsReservations: !!venue.reservation_url,
-    ...(venue.reservation_url && {
-      potentialAction: {
-        '@type': 'ReserveAction',
-        target: {
-          '@type': 'EntryPoint',
-          urlTemplate: venue.reservation_url,
-        },
-        result: {
-          '@type': 'Reservation',
-          name: `Reservation at ${venue.name}`,
-        },
+    ...(venue.phone && { telephone: venue.phone }),
+    ...(venue.email && { email: venue.email }),
+    ...(venue.website && { sameAs: [venue.website] }),
+    ...(venue.google_maps_url && { hasMap: venue.google_maps_url }),
+    ...(venue.latitude && venue.longitude && {
+      geo: {
+        '@type': 'GeoCoordinates',
+        latitude: venue.latitude,
+        longitude: venue.longitude,
       },
     }),
+    ...(venue.price_range && { priceRange: venue.price_range }),
   };
 
   return (

@@ -1,22 +1,32 @@
+/**
+ * EventListSchema Component
+ * Generates JSON-LD structured data for event listing pages
+ */
+
+interface EventItem {
+  title: string;
+  slug: string;
+  description?: string | null;
+  start_date?: string | null;
+  date?: string | null;
+  venue_name?: string | null;
+  image_url?: string | null;
+  cover_url?: string | null;
+}
+
 interface EventListSchemaProps {
-  events: Array<{
-    title: string;
-    start_date?: string | null;
-    date?: string | null;
-    venue_name?: string | null;
-    affiliate_url?: string | null;
-    image_url?: string | null;
-    cover_url?: string | null;
-    slug?: string | null;
-  }>;
+  events: EventItem[];
   pageTitle: string;
   pageDescription: string;
   pageUrl: string;
 }
 
-export default function EventListSchema({ events, pageTitle, pageDescription, pageUrl }: EventListSchemaProps) {
-  if (!events || events.length === 0) return null;
-
+export default function EventListSchema({
+  events,
+  pageTitle,
+  pageDescription,
+  pageUrl,
+}: EventListSchemaProps) {
   const schema = {
     '@context': 'https://schema.org',
     '@type': 'ItemList',
@@ -30,13 +40,19 @@ export default function EventListSchema({ events, pageTitle, pageDescription, pa
       item: {
         '@type': 'Event',
         name: event.title,
-        startDate: event.start_date || event.date,
+        url: `https://bahrainnights.com/events/${event.slug}`,
+        description: event.description?.slice(0, 200) || event.title,
+        startDate: event.start_date || event.date || new Date().toISOString(),
         location: {
           '@type': 'Place',
-          name: event.venue_name || 'Venue TBA',
+          name: event.venue_name || 'Bahrain',
+          address: {
+            '@type': 'PostalAddress',
+            addressLocality: 'Manama',
+            addressCountry: 'BH',
+          },
         },
-        url: event.affiliate_url || (event.slug ? `https://bahrainnights.com/events/${event.slug}` : pageUrl),
-        image: event.cover_url || event.image_url,
+        image: event.cover_url || event.image_url || 'https://bahrainnights.com/og-image.jpg',
       },
     })),
   };

@@ -1,20 +1,29 @@
+/**
+ * AttractionListSchema Component
+ * Generates JSON-LD structured data for attraction listing pages
+ */
+
+interface AttractionItem {
+  id: string;
+  title: string;
+  description?: string | null;
+  image_url?: string | null;
+  location?: string | null;
+}
+
 interface AttractionListSchemaProps {
-  attractions: Array<{
-    title?: string | null;
-    name?: string | null;
-    description?: string | null;
-    location?: string | null;
-    affiliate_url?: string | null;
-    image_url?: string | null;
-  }>;
+  attractions: AttractionItem[];
   pageTitle: string;
   pageDescription: string;
   pageUrl: string;
 }
 
-export default function AttractionListSchema({ attractions, pageTitle, pageDescription, pageUrl }: AttractionListSchemaProps) {
-  if (!attractions || attractions.length === 0) return null;
-
+export default function AttractionListSchema({
+  attractions,
+  pageTitle,
+  pageDescription,
+  pageUrl,
+}: AttractionListSchemaProps) {
   const schema = {
     '@context': 'https://schema.org',
     '@type': 'ItemList',
@@ -27,15 +36,16 @@ export default function AttractionListSchema({ attractions, pageTitle, pageDescr
       position: index + 1,
       item: {
         '@type': 'TouristAttraction',
-        name: attraction.title || attraction.name,
-        description: attraction.description,
+        name: attraction.title,
+        url: `https://bahrainnights.com/attractions/${attraction.id}`,
+        description: attraction.description?.slice(0, 200) || attraction.title,
+        image: attraction.image_url || 'https://bahrainnights.com/og-image.jpg',
         address: {
           '@type': 'PostalAddress',
-          addressLocality: attraction.location || 'Bahrain',
-          addressCountry: 'Bahrain',
+          streetAddress: attraction.location || 'Bahrain',
+          addressLocality: 'Manama',
+          addressCountry: 'BH',
         },
-        url: attraction.affiliate_url || pageUrl,
-        image: attraction.image_url,
       },
     })),
   };

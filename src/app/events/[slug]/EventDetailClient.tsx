@@ -82,51 +82,7 @@ export default function EventDetailClient({ event, similarEvents }: EventDetailC
 
   return (
     <>
-      {/* JSON-LD Structured Data */}
-      <script
-        type="application/ld+json"
-        dangerouslySetInnerHTML={{
-          __html: JSON.stringify({
-            '@context': 'https://schema.org',
-            '@type': 'Event',
-            name: event.title,
-            description: event.description.slice(0, 200),
-            image: event.image,
-            startDate: event.startDate,
-            endDate: event.endDate,
-            eventStatus: 'https://schema.org/EventScheduled',
-            eventAttendanceMode: 'https://schema.org/OfflineEventAttendanceMode',
-            location: {
-              '@type': 'Place',
-              name: event.venueDetails.name,
-              address: {
-                '@type': 'PostalAddress',
-                streetAddress: event.venueDetails.address,
-                addressLocality: 'Manama',
-                addressCountry: 'BH'
-              },
-              geo: {
-                '@type': 'GeoCoordinates',
-                latitude: event.venueDetails.latitude,
-                longitude: event.venueDetails.longitude
-              }
-            },
-            offers: event.priceTiers.length > 0 ? event.priceTiers.map(tier => ({
-              '@type': 'Offer',
-              name: tier.tier,
-              price: tier.price.replace('BD ', '').replace(/[^0-9.]/g, '') || '0',
-              priceCurrency: 'BHD',
-              availability: 'https://schema.org/InStock',
-              url: event.bookingUrl
-            })) : undefined,
-            organizer: {
-              '@type': 'Organization',
-              name: 'BahrainNights',
-              url: 'https://bahrainnights.com'
-            }
-          })
-        }}
-      />
+      {/* JSON-LD Structured Data is rendered in the server component for better SEO */}
 
       <div className="bg-gradient-to-b from-slate-950 via-slate-900 to-slate-950 text-white min-h-screen">
         {/* Hero Section */}

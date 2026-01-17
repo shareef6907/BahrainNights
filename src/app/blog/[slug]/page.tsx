@@ -3,6 +3,7 @@ import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import { getAdminClient } from '@/lib/supabase/server';
 import type { BlogArticle } from '@/types/database';
+import EventSchema from '@/components/SEO/EventSchema';
 
 interface Props {
   params: Promise<{ slug: string }>;
@@ -86,18 +87,38 @@ async function getArticle(slug: string) {
     .eq('id', article.id)
     .then(() => {});
 
-  // Get event details if linked (to get slug and affiliate_url)
+  // Get event details if linked (for CTA and structured data)
+  interface LinkedEvent {
+    title: string;
+    description: string | null;
+    start_date: string;
+    start_time: string | null;
+    end_date: string | null;
+    end_time: string | null;
+    venue_name: string | null;
+    venue_address: string | null;
+    price: string | null;
+    image_url: string | null;
+    cover_url: string | null;
+    category: string | null;
+    slug: string;
+    affiliate_url: string | null;
+  }
+
   let eventSlug: string | null = null;
   let eventAffiliateUrl: string | null = null;
+  let eventData: LinkedEvent | null = null;
+
   if (article.event_id) {
     const { data: event } = await supabase
       .from('events')
-      .select('slug, affiliate_url')
+      .select('title, description, start_date, start_time, end_date, end_time, venue_name, venue_address, price, image_url, cover_url, category, slug, affiliate_url')
       .eq('id', article.event_id)
-      .single() as { data: { slug: string; affiliate_url: string | null } | null };
+      .single() as { data: LinkedEvent | null };
     if (event) {
       eventSlug = event.slug;
       eventAffiliateUrl = event.affiliate_url;
+      eventData = event;
     }
   }
 
@@ -112,7 +133,7 @@ async function getArticle(slug: string) {
     .order('published_at', { ascending: false })
     .limit(3) as { data: RelatedArticle[] | null };
 
-  return { article, related: related || [], eventSlug, eventAffiliateUrl };
+  return { article, related: related || [], eventSlug, eventAffiliateUrl, eventData };
 }
 
 export default async function ArticlePage({ params }: Props) {
@@ -123,7 +144,7 @@ export default async function ArticlePage({ params }: Props) {
     notFound();
   }
 
-  const { article, related, eventSlug, eventAffiliateUrl } = data;
+  const { article, related, eventSlug, eventAffiliateUrl, eventData } = data;
 
   const publishedDate = new Date(article.published_at).toLocaleDateString('en-US', {
     year: 'numeric',
@@ -132,8 +153,30 @@ export default async function ArticlePage({ params }: Props) {
   });
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-slate-950 via-slate-900 to-slate-950 text-white">
-      {/* Hero Image */}
+    <>
+      {/* Event Structured Data for SEO - only for event-related articles */}
+      {eventData && (
+        <EventSchema
+          event={{
+            title: eventData.title,
+            description: eventData.description,
+            start_date: eventData.start_date,
+            start_time: eventData.start_time,
+            end_date: eventData.end_date,
+            end_time: eventData.end_time,
+            venue_name: eventData.venue_name,
+            venue_address: eventData.venue_address,
+            price: eventData.price,
+            booking_url: eventData.affiliate_url,
+            image_url: eventData.image_url,
+            cover_url: eventData.cover_url,
+            category: eventData.category,
+            slug: eventData.slug,
+          }}
+        />
+      )}
+      <div className="min-h-screen bg-gradient-to-b from-slate-950 via-slate-900 to-slate-950 text-white">
+        {/* Hero Image */}
       {article.featured_image && (
         <div className="w-full h-[40vh] md:h-[50vh] relative">
           <img
@@ -334,15 +377,16 @@ export default async function ArticlePage({ params }: Props) {
         </section>
       )}
 
-      {/* Back to Blog */}
-      <div className="text-center pb-16">
-        <Link
-          href="/blog"
-          className="inline-block text-yellow-400 hover:text-yellow-300 font-medium"
-        >
-          &larr; Back to Blog
-        </Link>
+        {/* Back to Blog */}
+        <div className="text-center pb-16">
+          <Link
+            href="/blog"
+            className="inline-block text-yellow-400 hover:text-yellow-300 font-medium"
+          >
+            &larr; Back to Blog
+          </Link>
+        </div>
       </div>
-    </div>
+    </>
   );
 }

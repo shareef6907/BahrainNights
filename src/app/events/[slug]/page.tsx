@@ -1,6 +1,7 @@
 import { notFound } from 'next/navigation';
 import { supabaseAdmin } from '@/lib/supabase';
 import EventDetailClient from './EventDetailClient';
+import EventSchema from '@/components/SEO/EventSchema';
 
 // Revalidate every 5 minutes
 export const revalidate = 300;
@@ -331,5 +332,29 @@ export default async function EventDetailPage({ params }: PageProps) {
     };
   });
 
-  return <EventDetailClient event={event} similarEvents={similarEvents} />;
+  return (
+    <>
+      {/* Structured Data for SEO - Server-rendered for better indexing */}
+      <EventSchema
+        event={{
+          title: dbEvent.title,
+          description: dbEvent.description,
+          date: dbEvent.date,
+          time: dbEvent.time,
+          end_date: dbEvent.end_date,
+          end_time: dbEvent.end_time,
+          venue_name: dbEvent.venue_name,
+          venue_address: dbEvent.venue_address,
+          price: dbEvent.price,
+          booking_url: dbEvent.booking_url,
+          image_url: dbEvent.image_url,
+          cover_url: dbEvent.cover_url,
+          featured_image: dbEvent.featured_image,
+          category: dbEvent.category,
+          slug: dbEvent.slug,
+        }}
+      />
+      <EventDetailClient event={event} similarEvents={similarEvents} />
+    </>
+  );
 }
