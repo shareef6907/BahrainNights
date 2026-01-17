@@ -18,10 +18,28 @@ interface Movie {
 export function HeroTrailerPlayer() {
   const [movies, setMovies] = useState<Movie[]>([]);
   const [currentIndex, setCurrentIndex] = useState(0);
-  const [isMuted, setIsMuted] = useState(false); // Start UNMUTED
+  const [isMobile, setIsMobile] = useState(false);
+  const [isMuted, setIsMuted] = useState(true); // Start muted, will adjust based on device
   const [isLoading, setIsLoading] = useState(true);
-  const [userInteracted, setUserInteracted] = useState(true); // Hide the hint by default
+  const [showMobileHint, setShowMobileHint] = useState(false);
   const autoAdvanceRef = useRef<NodeJS.Timeout | null>(null);
+
+  // Detect mobile device and set initial mute state
+  useEffect(() => {
+    const checkDevice = () => {
+      const mobile = window.innerWidth < 768 ||
+        /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+      setIsMobile(mobile);
+      // Mobile: MUST be muted for autoplay to work (browser requirement)
+      // Desktop: Can autoplay unmuted
+      setIsMuted(mobile);
+      // Show sound hint only on mobile
+      setShowMobileHint(mobile);
+    };
+
+    checkDevice();
+    // Don't add resize listener to avoid changing mute state after initial load
+  }, []);
 
   useEffect(() => {
     fetchFeaturedTrailers();
@@ -105,7 +123,7 @@ export function HeroTrailerPlayer() {
   const goPrev = () => goToSlide((currentIndex - 1 + movies.length) % movies.length);
 
   const toggleMute = () => {
-    setUserInteracted(true);
+    setShowMobileHint(false); // Hide hint after user interaction
     setIsMuted(!isMuted);
   };
 
@@ -140,8 +158,9 @@ export function HeroTrailerPlayer() {
 
   // IMPORTANT: Only create ONE iframe URL for the CURRENT trailer
   // This prevents multiple audio streams playing simultaneously
+  // playsinline=1 is required for iOS autoplay
   const iframeUrl = videoId
-    ? `https://www.youtube.com/embed/${videoId}?autoplay=1&mute=${isMuted ? 1 : 0}&controls=0&loop=1&playlist=${videoId}&modestbranding=1&rel=0&showinfo=0&iv_load_policy=3&disablekb=1&enablejsapi=1`
+    ? `https://www.youtube.com/embed/${videoId}?autoplay=1&mute=${isMuted ? 1 : 0}&controls=0&loop=1&playlist=${videoId}&modestbranding=1&rel=0&showinfo=0&iv_load_policy=3&disablekb=1&enablejsapi=1&playsinline=1`
     : null;
 
   const genreDisplay = currentMovie && Array.isArray(currentMovie.genre)
@@ -275,12 +294,15 @@ export function HeroTrailerPlayer() {
         </button>
       )}
 
-      {/* Click for Sound Hint */}
-      {!userInteracted && iframeUrl && (
-        <div className="absolute bottom-32 left-1/2 -translate-x-1/2 flex items-center gap-3 bg-black/70 backdrop-blur-sm text-white px-6 py-3 rounded-full border border-white/20 animate-pulse">
+      {/* Mobile Sound Hint - Prominent tap button */}
+      {showMobileHint && isMuted && iframeUrl && (
+        <button
+          onClick={toggleMute}
+          className="absolute bottom-32 left-1/2 -translate-x-1/2 flex items-center gap-3 bg-yellow-500 hover:bg-yellow-400 text-black px-6 py-3 rounded-full font-bold shadow-lg animate-pulse transition-colors"
+        >
           <Volume2 size={20} />
-          <span className="font-medium">Click anywhere for sound</span>
-        </div>
+          <span>Tap for Sound</span>
+        </button>
       )}
     </div>
   );
