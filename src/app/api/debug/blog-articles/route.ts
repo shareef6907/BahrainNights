@@ -15,11 +15,11 @@ export async function GET() {
       .eq('status', 'published')
       .limit(3);
 
-    // Test 2: Full query matching page.tsx exactly
+    // Test 2: Full query matching page.tsx exactly (without affiliate_url which doesn't exist)
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const { data: fullArticles, error: fullError } = await (supabase as any)
       .from('blog_articles')
-      .select('id, title, slug, excerpt, content, featured_image, country, city, category, read_time_minutes, view_count, published_at, affiliate_url')
+      .select('id, title, slug, excerpt, content, featured_image, country, city, category, read_time_minutes, view_count, published_at')
       .eq('status', 'published')
       .order('published_at', { ascending: false });
 
