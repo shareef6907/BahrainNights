@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect, useRef, useCallback, useMemo } from 'react';
-import { Volume2, VolumeX, Info, ChevronLeft, ChevronRight } from 'lucide-react';
+import { Volume2, VolumeX, Info, ChevronLeft, ChevronRight, Play } from 'lucide-react';
 
 interface Movie {
   id: string;
@@ -20,11 +20,36 @@ export function HeroTrailerPlayer() {
   const [currentIndex, setCurrentIndex] = useState(0);
   const [isMuted, setIsMuted] = useState(true);
   const [isLoading, setIsLoading] = useState(true);
+  const [hasUserInteracted, setHasUserInteracted] = useState(false);
+  const [showUnmuteHint, setShowUnmuteHint] = useState(true);
   const autoAdvanceRef = useRef<NodeJS.Timeout | null>(null);
 
   useEffect(() => {
     fetchMovies();
   }, []);
+
+  // Auto-unmute on first user interaction anywhere on page
+  useEffect(() => {
+    const handleFirstInteraction = () => {
+      if (!hasUserInteracted) {
+        setHasUserInteracted(true);
+        setIsMuted(false);
+        // Hide the hint after unmuting
+        setTimeout(() => setShowUnmuteHint(false), 2000);
+      }
+    };
+
+    // Listen for any click on the page
+    document.addEventListener('click', handleFirstInteraction, { once: true });
+
+    // Hide hint after 5 seconds even without interaction
+    const hintTimer = setTimeout(() => setShowUnmuteHint(false), 5000);
+
+    return () => {
+      document.removeEventListener('click', handleFirstInteraction);
+      clearTimeout(hintTimer);
+    };
+  }, [hasUserInteracted]);
 
   const fetchMovies = async () => {
     try {
@@ -64,14 +89,31 @@ export function HeroTrailerPlayer() {
     return null;
   }, []);
 
-  // Precompute all YouTube URLs for preloading
+  // Precompute all YouTube URLs - always start muted, control via postMessage
   const youtubeUrls = useMemo(() => {
     return movies.map(movie => {
       const videoId = getVideoId(movie);
       if (!videoId) return null;
-      return `https://www.youtube.com/embed/${videoId}?autoplay=1&mute=1&controls=0&loop=1&playlist=${videoId}&modestbranding=1&rel=0&showinfo=0&iv_load_policy=3&disablekb=1`;
+      // Always load muted, we'll control volume via postMessage
+      return `https://www.youtube.com/embed/${videoId}?autoplay=1&mute=1&controls=0&loop=1&playlist=${videoId}&modestbranding=1&rel=0&showinfo=0&iv_load_policy=3&disablekb=1&enablejsapi=1&origin=${typeof window !== 'undefined' ? window.location.origin : ''}`;
     });
   }, [movies, getVideoId]);
+
+  // Control mute state via postMessage to avoid iframe reload
+  useEffect(() => {
+    const iframes = document.querySelectorAll('iframe[src*="youtube.com/embed"]');
+    iframes.forEach((iframe) => {
+      const command = isMuted ? 'mute' : 'unMute';
+      try {
+        (iframe as HTMLIFrameElement).contentWindow?.postMessage(
+          JSON.stringify({ event: 'command', func: command }),
+          '*'
+        );
+      } catch {
+        // Cross-origin may block this
+      }
+    });
+  }, [isMuted]);
 
   const goToSlide = (index: number) => {
     setCurrentIndex(index);
@@ -207,19 +249,28 @@ export function HeroTrailerPlayer() {
             {/* Action Buttons */}
             <div className="flex flex-wrap items-center gap-4">
               <button
-                onClick={() => setIsMuted(!isMuted)}
-                className="flex items-center gap-2 bg-white text-black px-6 py-3 rounded-lg font-bold hover:bg-gray-200 transition-colors"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  setIsMuted(!isMuted);
+                  setHasUserInteracted(true);
+                  setShowUnmuteHint(false);
+                }}
+                className={`flex items-center gap-2 px-6 py-3 rounded-lg font-bold transition-all duration-300 ${
+                  isMuted
+                    ? 'bg-yellow-500 hover:bg-yellow-400 text-black'
+                    : 'bg-white hover:bg-gray-200 text-black'
+                }`}
               >
-                {isMuted ? <VolumeX size={20} /> : <Volume2 size={20} />}
-                {isMuted ? 'Unmute' : 'Mute'}
+                {isMuted ? <Volume2 size={20} /> : <VolumeX size={20} />}
+                {isMuted ? 'Enable Sound' : 'Mute'}
               </button>
 
               <a
                 href="/cinema"
-                className="flex items-center gap-2 bg-white/20 backdrop-blur-sm text-white px-6 py-3 rounded-lg font-bold hover:bg-white/30 transition-colors"
+                className="flex items-center gap-2 bg-white/20 backdrop-blur-sm text-white px-6 py-3 rounded-lg font-bold hover:bg-white/30 transition-all duration-300"
               >
-                <Info size={20} />
-                More Info
+                <Play size={20} className="fill-current" />
+                View All Movies
               </a>
             </div>
           </div>
@@ -264,11 +315,36 @@ export function HeroTrailerPlayer() {
         </div>
       )}
 
+      {/* Sound Hint Overlay - Shows when muted */}
+      {isMuted && showUnmuteHint && youtubeUrls[currentIndex] && (
+        <div
+          onClick={() => {
+            setIsMuted(false);
+            setShowUnmuteHint(false);
+            setHasUserInteracted(true);
+          }}
+          className="absolute inset-0 z-25 cursor-pointer flex items-center justify-center"
+        >
+          <div className="absolute bottom-32 left-1/2 -translate-x-1/2 flex items-center gap-3 bg-black/70 backdrop-blur-sm text-white px-6 py-3 rounded-full border border-white/20 animate-pulse hover:bg-black/90 transition-all">
+            <Volume2 size={20} />
+            <span className="font-medium">Click anywhere for sound</span>
+          </div>
+        </div>
+      )}
+
       {/* Volume Toggle (Bottom Right) */}
       {youtubeUrls[currentIndex] && (
         <button
-          onClick={() => setIsMuted(!isMuted)}
-          className="absolute bottom-8 right-8 z-30 bg-black/50 hover:bg-black/70 text-white p-3 rounded-full border border-white/30 transition-colors"
+          onClick={(e) => {
+            e.stopPropagation();
+            setIsMuted(!isMuted);
+            setHasUserInteracted(true);
+          }}
+          className={`absolute bottom-8 right-8 z-30 p-3 rounded-full border transition-all duration-300 ${
+            isMuted
+              ? 'bg-yellow-500 hover:bg-yellow-400 text-black border-yellow-400'
+              : 'bg-black/50 hover:bg-black/70 text-white border-white/30'
+          }`}
           aria-label={isMuted ? 'Unmute' : 'Mute'}
         >
           {isMuted ? <VolumeX size={24} /> : <Volume2 size={24} />}

@@ -37,10 +37,19 @@ export async function GET(request: NextRequest) {
 
     // Filter movies that have trailers (trailer_url or trailer_key for YouTube)
     const moviesWithTrailers = (movies || [])
-      .filter(m => m.trailer_url || m.trailer_key)
-      .slice(0, limit);
+      .filter(m => m.trailer_url || m.trailer_key);
 
-    return NextResponse.json({ movies: moviesWithTrailers });
+    // Prioritize Avatar to be first (featured trailer)
+    const avatarIndex = moviesWithTrailers.findIndex(m =>
+      m.title.toLowerCase().includes('avatar')
+    );
+
+    if (avatarIndex > 0) {
+      const [avatar] = moviesWithTrailers.splice(avatarIndex, 1);
+      moviesWithTrailers.unshift(avatar);
+    }
+
+    return NextResponse.json({ movies: moviesWithTrailers.slice(0, limit) });
   } catch (err) {
     console.error('Trailers API exception:', err);
     return NextResponse.json({ movies: [], error: String(err) }, { status: 200 });

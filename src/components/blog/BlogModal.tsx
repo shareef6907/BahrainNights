@@ -1,7 +1,7 @@
 'use client';
 
-import { useState, useEffect } from 'react';
-import { X, Calendar, Clock, Eye, Ticket, Share2, ExternalLink } from 'lucide-react';
+import { useState, useEffect, useCallback } from 'react';
+import { X, Calendar, Clock, Eye, Play, Share2, ArrowRight, MapPin } from 'lucide-react';
 import Link from 'next/link';
 
 interface BlogArticle {
@@ -17,7 +17,6 @@ interface BlogArticle {
   read_time_minutes: number;
   view_count: number;
   published_at: string;
-  affiliate_url?: string | null;
 }
 
 interface BlogModalProps {
@@ -28,10 +27,17 @@ interface BlogModalProps {
 
 export function BlogModal({ article, isOpen, onClose }: BlogModalProps) {
   const [isVisible, setIsVisible] = useState(false);
+  const [isAnimating, setIsAnimating] = useState(false);
 
   useEffect(() => {
     if (isOpen) {
       setIsVisible(true);
+      // Small delay for smooth animation
+      requestAnimationFrame(() => {
+        requestAnimationFrame(() => {
+          setIsAnimating(true);
+        });
+      });
       document.body.style.overflow = 'hidden';
 
       // Track view
@@ -39,19 +45,21 @@ export function BlogModal({ article, isOpen, onClose }: BlogModalProps) {
         fetch(`/api/blog/${article.id}/view`, { method: 'POST' }).catch(() => {});
       }
     } else {
+      setIsAnimating(false);
       document.body.style.overflow = 'unset';
-      setTimeout(() => setIsVisible(false), 300);
+      setTimeout(() => setIsVisible(false), 400);
     }
     return () => { document.body.style.overflow = 'unset'; };
   }, [isOpen, article?.id]);
 
+  const handleEsc = useCallback((e: KeyboardEvent) => {
+    if (e.key === 'Escape') onClose();
+  }, [onClose]);
+
   useEffect(() => {
-    const handleEsc = (e: KeyboardEvent) => {
-      if (e.key === 'Escape') onClose();
-    };
     window.addEventListener('keydown', handleEsc);
     return () => window.removeEventListener('keydown', handleEsc);
-  }, [onClose]);
+  }, [handleEsc]);
 
   const handleShare = async () => {
     const url = `${window.location.origin}/blog/${article?.slug}`;
@@ -87,14 +95,14 @@ export function BlogModal({ article, isOpen, onClose }: BlogModalProps) {
 
   return (
     <div
-      className={`fixed inset-0 z-[100] flex items-start justify-center pt-10 md:pt-20 px-4 transition-all duration-300 ${
-        isOpen ? 'bg-black/90 backdrop-blur-sm' : 'bg-transparent pointer-events-none'
+      className={`fixed inset-0 z-[100] flex items-start justify-center pt-10 md:pt-20 px-4 transition-all duration-500 ease-out ${
+        isAnimating ? 'bg-black/90 backdrop-blur-md' : 'bg-transparent pointer-events-none'
       }`}
       onClick={(e) => e.target === e.currentTarget && onClose()}
     >
       <div
-        className={`relative w-full max-w-4xl max-h-[90vh] bg-gray-900 rounded-xl overflow-hidden shadow-2xl transition-all duration-500 ${
-          isOpen ? 'scale-100 opacity-100' : 'scale-95 opacity-0'
+        className={`relative w-full max-w-4xl max-h-[90vh] bg-gradient-to-b from-gray-900 to-gray-950 rounded-2xl overflow-hidden shadow-2xl ring-1 ring-white/10 transition-all duration-500 ease-out transform ${
+          isAnimating ? 'scale-100 opacity-100 translate-y-0' : 'scale-95 opacity-0 translate-y-8'
         }`}
       >
         {/* Close Button */}
@@ -155,31 +163,28 @@ export function BlogModal({ article, isOpen, onClose }: BlogModalProps) {
 
             {/* Action Buttons */}
             <div className="flex flex-wrap gap-3 mb-8">
-              {article.affiliate_url && (
-                <a
-                  href={article.affiliate_url}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="flex items-center gap-2 bg-gradient-to-r from-yellow-500 to-pink-500 text-black font-bold px-6 py-3 rounded-full hover:opacity-90 transition"
-                >
-                  <Ticket size={18} />
-                  Get Tickets
-                </a>
-              )}
+              {/* Primary CTA - Always visible */}
+              <Link
+                href={`/blog/${article.slug}`}
+                className="group flex items-center gap-2 bg-gradient-to-r from-yellow-500 to-orange-500 text-black font-bold px-6 py-3 rounded-full hover:from-yellow-400 hover:to-orange-400 transition-all duration-300 hover:scale-105 hover:shadow-lg hover:shadow-yellow-500/25"
+              >
+                <Play size={18} className="fill-current" />
+                Read Full Story
+                <ArrowRight size={16} className="group-hover:translate-x-1 transition-transform" />
+              </Link>
               <button
                 onClick={handleShare}
-                className="flex items-center gap-2 bg-white/10 hover:bg-white/20 text-white px-5 py-3 rounded-full transition"
+                className="flex items-center gap-2 bg-white/10 hover:bg-white/20 text-white px-5 py-3 rounded-full transition-all duration-300 hover:scale-105 backdrop-blur-sm"
               >
                 <Share2 size={18} />
                 Share
               </button>
-              <Link
-                href={`/blog/${article.slug}`}
-                className="flex items-center gap-2 bg-white/10 hover:bg-white/20 text-white px-5 py-3 rounded-full transition"
-              >
-                <ExternalLink size={18} />
-                Full Article
-              </Link>
+              {article.city && (
+                <span className="flex items-center gap-2 bg-white/5 text-gray-400 px-5 py-3 rounded-full">
+                  <MapPin size={16} />
+                  {article.city}
+                </span>
+              )}
             </div>
 
             {/* Divider */}
@@ -194,22 +199,19 @@ export function BlogModal({ article, isOpen, onClose }: BlogModalProps) {
               dangerouslySetInnerHTML={{ __html: article.content }}
             />
 
-            {/* Bottom CTA */}
-            {article.affiliate_url && (
-              <div className="mt-10 p-6 bg-gradient-to-r from-yellow-500/10 to-pink-500/10 border border-yellow-500/20 rounded-xl text-center">
-                <h3 className="text-xl font-bold text-white mb-2">Don&apos;t Miss Out!</h3>
-                <p className="text-gray-400 mb-4">Secure your spot today</p>
-                <a
-                  href={article.affiliate_url}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="inline-flex items-center gap-2 bg-gradient-to-r from-yellow-500 to-pink-500 text-black font-bold px-8 py-3 rounded-full"
-                >
-                  <Ticket size={18} />
-                  Get Tickets Now
-                </a>
-              </div>
-            )}
+            {/* Bottom CTA - Always visible */}
+            <div className="mt-10 p-6 bg-gradient-to-r from-yellow-500/10 via-orange-500/10 to-pink-500/10 border border-yellow-500/20 rounded-2xl text-center">
+              <h3 className="text-xl font-bold text-white mb-2">Want to know more?</h3>
+              <p className="text-gray-400 mb-4">Read the full article for all the details</p>
+              <Link
+                href={`/blog/${article.slug}`}
+                className="group inline-flex items-center gap-2 bg-gradient-to-r from-yellow-500 to-orange-500 text-black font-bold px-8 py-3 rounded-full hover:from-yellow-400 hover:to-orange-400 transition-all duration-300 hover:scale-105 hover:shadow-lg hover:shadow-yellow-500/25"
+              >
+                <Play size={18} className="fill-current" />
+                Read Full Story
+                <ArrowRight size={16} className="group-hover:translate-x-1 transition-transform" />
+              </Link>
+            </div>
           </div>
         </div>
       </div>
