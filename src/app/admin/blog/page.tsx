@@ -121,6 +121,10 @@ export default function BlogAdminPage() {
   const [hasSecret, setHasSecret] = useState(false);
   const [showSecretInput, setShowSecretInput] = useState(false);
 
+  // Cleanup state
+  const [isCleaningUp, setIsCleaningUp] = useState(false);
+  const [cleanupResult, setCleanupResult] = useState<{ success?: boolean; message?: string; duplicatesRemoved?: number; error?: string } | null>(null);
+
   // Check for saved secret on mount
   useEffect(() => {
     const saved = localStorage.getItem('blog_generation_secret');
@@ -273,6 +277,40 @@ export default function BlogAdminPage() {
     }
 
     setIsGenerating(false);
+  };
+
+  const cleanupDuplicates = async () => {
+    const secret = getSecret();
+    if (!secret) {
+      setShowSecretInput(true);
+      return;
+    }
+
+    if (isCleaningUp) return;
+
+    setIsCleaningUp(true);
+    setCleanupResult(null);
+
+    try {
+      const response = await fetch(`/api/admin/blog/cleanup-duplicates?secret=${secret}`, {
+        method: 'POST',
+      });
+
+      const result = await response.json();
+      setCleanupResult(result);
+
+      if (result.success && result.duplicatesRemoved > 0) {
+        // Refresh data after cleanup
+        await fetchArticles();
+        await fetchGeneratorStats();
+      }
+    } catch (error) {
+      setCleanupResult({
+        error: error instanceof Error ? error.message : 'Failed to cleanup duplicates'
+      });
+    }
+
+    setIsCleaningUp(false);
   };
 
   const handleDeleteSingle = async (id: string) => {
@@ -519,10 +557,38 @@ export default function BlogAdminPage() {
             <Rocket className="w-4 h-4" />
             {isGenerating ? '...' : 'Generate 20'}
           </button>
+          <button
+            onClick={cleanupDuplicates}
+            disabled={isCleaningUp || isGenerating}
+            className="px-4 py-2.5 bg-white/5 hover:bg-red-500/20 border border-white/10 hover:border-red-500/30 text-white rounded-xl font-medium text-sm transition-all disabled:opacity-40 disabled:cursor-not-allowed flex items-center gap-2"
+          >
+            <Trash2 className="w-4 h-4" />
+            {isCleaningUp ? 'Cleaning...' : 'Cleanup Duplicates'}
+          </button>
         </div>
         <p className="text-xs text-gray-500 mt-2">
           Max 20 articles per request to prevent timeouts. For more articles, click multiple times.
         </p>
+
+        {/* Cleanup Result */}
+        {cleanupResult && !isCleaningUp && (
+          <div className={`mt-4 p-4 rounded-xl text-sm ${
+            cleanupResult.error
+              ? 'bg-red-500/10 border border-red-500/20'
+              : 'bg-green-500/10 border border-green-500/20'
+          }`}>
+            {cleanupResult.error ? (
+              <p className="text-red-400">{cleanupResult.error}</p>
+            ) : (
+              <div className="text-green-400">
+                <p className="font-semibold">{cleanupResult.message}</p>
+                {cleanupResult.duplicatesRemoved === 0 && (
+                  <p className="mt-1 text-gray-400">No duplicates found - all articles are unique!</p>
+                )}
+              </div>
+            )}
+          </div>
+        )}
 
         {/* Progress Bar */}
         {isGenerating && (
