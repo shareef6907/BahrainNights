@@ -92,8 +92,12 @@ export function PWAInstallPrompt() {
 
         <div className="flex items-start gap-4">
           {/* App Icon */}
-          <div className="w-14 h-14 bg-gradient-to-br from-yellow-500 to-orange-500 rounded-xl flex items-center justify-center flex-shrink-0">
-            <span className="text-2xl">🌙</span>
+          <div className="w-14 h-14 rounded-xl flex-shrink-0 overflow-hidden">
+            <img
+              src="/logo.png"
+              alt="BahrainNights"
+              className="w-full h-full object-cover"
+            />
           </div>
 
           <div className="flex-1 pr-6">
