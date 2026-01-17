@@ -240,6 +240,19 @@ export default function BlogAdminPage() {
       const response = await fetch(`/api/blog/generate?secret=${secret}&limit=${count}`, {
         method: 'POST',
       });
+
+      // Check if response is JSON before parsing
+      const contentType = response.headers.get('content-type');
+      if (!contentType || !contentType.includes('application/json')) {
+        // Server returned non-JSON (likely timeout or error)
+        const text = await response.text();
+        clearInterval(interval);
+        setGeneratorResult({
+          error: `Server returned non-JSON response. This usually means a timeout occurred. Try generating fewer articles (10-20 at a time). Response: ${text.substring(0, 100)}...`
+        });
+        return;
+      }
+
       const result = await response.json();
 
       clearInterval(interval);
@@ -252,7 +265,11 @@ export default function BlogAdminPage() {
 
     } catch (error) {
       clearInterval(interval);
-      setGeneratorResult({ error: String(error) });
+      setGeneratorResult({
+        error: error instanceof Error
+          ? `${error.message}. Try generating fewer articles (10-20) to avoid timeouts.`
+          : String(error)
+      });
     }
 
     setIsGenerating(false);
@@ -495,28 +512,17 @@ export default function BlogAdminPage() {
             {isGenerating ? '...' : 'Generate 10'}
           </button>
           <button
-            onClick={() => generateBlogs(25)}
-            disabled={isGenerating || generatorStats.remaining_events === 0}
-            className="px-4 py-2.5 bg-white/5 hover:bg-amber-500/20 border border-white/10 hover:border-amber-500/30 text-white rounded-xl font-medium text-sm transition-all disabled:opacity-40 disabled:cursor-not-allowed"
-          >
-            {isGenerating ? '...' : 'Generate 25'}
-          </button>
-          <button
-            onClick={() => generateBlogs(50)}
-            disabled={isGenerating || generatorStats.remaining_events === 0}
-            className="px-4 py-2.5 bg-white/5 hover:bg-amber-500/20 border border-white/10 hover:border-amber-500/30 text-white rounded-xl font-medium text-sm transition-all disabled:opacity-40 disabled:cursor-not-allowed"
-          >
-            {isGenerating ? '...' : 'Generate 50'}
-          </button>
-          <button
-            onClick={() => generateBlogs(100)}
+            onClick={() => generateBlogs(20)}
             disabled={isGenerating || generatorStats.remaining_events === 0}
             className="px-4 py-2.5 bg-gradient-to-r from-amber-500 to-pink-500 hover:from-amber-400 hover:to-pink-400 text-black rounded-xl font-bold text-sm transition-all disabled:opacity-40 disabled:cursor-not-allowed flex items-center gap-2"
           >
             <Rocket className="w-4 h-4" />
-            {isGenerating ? '...' : 'Generate 100'}
+            {isGenerating ? '...' : 'Generate 20'}
           </button>
         </div>
+        <p className="text-xs text-gray-500 mt-2">
+          Max 20 articles per request to prevent timeouts. For more articles, click multiple times.
+        </p>
 
         {/* Progress Bar */}
         {isGenerating && (

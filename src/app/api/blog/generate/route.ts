@@ -15,12 +15,16 @@ import {
 } from '@/lib/services/blog-writer';
 import type { Event, BlogArticle } from '@/types/database';
 
-export const maxDuration = 300; // 5 minutes max for Pro plan
+export const maxDuration = 60; // 60 seconds - safe for most Vercel plans
 
 // Delay between API calls to avoid rate limits (in ms)
 const DELAY_BETWEEN_CALLS = 1500;
 
+// Maximum articles per request to prevent timeout
+const MAX_ARTICLES_PER_REQUEST = 20;
+
 export async function POST(request: NextRequest) {
+  // CRITICAL: Wrap EVERYTHING in try-catch to ensure JSON response
   try {
     // Verify secret key for security
     const { searchParams } = new URL(request.url);
@@ -41,8 +45,10 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Get limit parameter (default 10, max 100)
-    const limit = Math.min(parseInt(searchParams.get('limit') || '10'), 100);
+    // Get limit parameter (default 10, max 20 to prevent timeout)
+    // IMPORTANT: Cap at 20 to prevent Vercel timeout errors
+    const requestedLimit = parseInt(searchParams.get('limit') || '10');
+    const limit = Math.min(requestedLimit, MAX_ARTICLES_PER_REQUEST);
 
     const supabase = getAdminClient();
 
@@ -317,11 +323,16 @@ export async function POST(request: NextRequest) {
       errors: errors.length > 0 ? errors : undefined,
     });
   } catch (error) {
-    console.error('Blog generation error:', error);
+    // CRITICAL: Always return JSON even on unexpected errors
+    console.error('[Blog Gen] Critical error:', error);
     return NextResponse.json(
       {
+        success: false,
         error: 'Internal server error',
-        details: error instanceof Error ? error.message : 'Unknown error',
+        message: error instanceof Error ? error.message : 'Unknown error',
+        processed: 0,
+        failed: 0,
+        remaining: 0,
       },
       { status: 500 }
     );
