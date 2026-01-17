@@ -24,6 +24,7 @@ import {
   Star,
   MapPin,
   Ticket,
+  FileText,
 } from 'lucide-react';
 import { useAuth } from '@/lib/auth-context';
 
@@ -38,6 +39,11 @@ const navItems = [
     href: '/admin/studio',
     icon: Sparkles,
     highlight: true,
+  },
+  {
+    name: 'Blog Articles',
+    href: '/admin/blog',
+    icon: FileText,
   },
   {
     name: 'Venues',

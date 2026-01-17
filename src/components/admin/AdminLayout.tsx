@@ -27,6 +27,7 @@ const pageTitles: Record<string, string> = {
   '/admin/analytics': 'Platform Analytics',
   '/admin/members': 'Members',
   '/admin/users': 'Manage Users',
+  '/admin/blog': 'Blog Articles',
   '/admin/studio': 'Content Studio',
   '/admin/studio/blog': 'Blog Posts',
   '/admin/studio/feed': 'Feed Posts',
@@ -72,6 +73,11 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
     // Check for ad edit page
     if (pathname.match(/^\/admin\/ads\/[^/]+\/edit$/)) {
       return 'Edit Ad';
+    }
+
+    // Check for blog article edit page
+    if (pathname.match(/^\/admin\/blog\/[^/]+$/)) {
+      return 'Edit Article';
     }
 
     return 'Admin';
