@@ -36,7 +36,7 @@ interface CinemaPageClientProps {
 }
 
 // Format the last updated timestamp
-function formatLastUpdated(timestamp: string | null | undefined, t: { cinema: { minuteAgo: string; minutesAgo: string; hourAgo: string; hoursAgo: string } }, language: string): string {
+function formatLastUpdated(timestamp: string | null | undefined, t: { cinema: { minuteAgo: string; minutesAgo: string; hourAgo: string; hoursAgo: string } }): string {
   if (!timestamp) return 'Unknown';
   const date = new Date(timestamp);
   const now = new Date();
@@ -49,7 +49,7 @@ function formatLastUpdated(timestamp: string | null | undefined, t: { cinema: { 
   } else if (diffHours < 24) {
     return `${diffHours} ${diffHours === 1 ? t.cinema.hourAgo : t.cinema.hoursAgo}`;
   } else {
-    return date.toLocaleDateString(language === 'ar' ? 'ar-BH' : 'en-US', {
+    return date.toLocaleDateString('en-US', {
       month: 'short',
       day: 'numeric',
       hour: 'numeric',
@@ -64,7 +64,7 @@ export default function CinemaPageClient({
   initialCinemas = defaultCinemas,
   lastUpdated
 }: CinemaPageClientProps) {
-  const { t, language } = useTranslation();
+  const { t } = useTranslation();
   const searchParams = useSearchParams();
   const filterParam = searchParams?.get('filter') ?? null;
 
@@ -268,7 +268,7 @@ export default function CinemaPageClient({
               <div className="flex items-center justify-center gap-4 mt-3 text-sm">
                 <div className="flex items-center gap-1.5 text-gray-500">
                   <Clock className="w-4 h-4" />
-                  <span>{t.cinema.updated} {formatLastUpdated(lastUpdated, t, language)}</span>
+                  <span>{t.cinema.updated} {formatLastUpdated(lastUpdated, t)}</span>
                 </div>
               </div>
             </motion.div>

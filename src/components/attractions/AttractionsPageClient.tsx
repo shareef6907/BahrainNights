@@ -50,26 +50,26 @@ const categoryIcons: Record<string, string> = {
   'family-kids': '👨‍👩‍👧‍👦',
 };
 
-const categoryLabels: Record<string, { en: string; ar: string }> = {
-  'water-sports': { en: 'Water Sports', ar: 'الرياضات المائية' },
-  'boat-tour': { en: 'Boat Tours', ar: 'جولات القوارب' },
-  'boat-tours': { en: 'Boat Tours', ar: 'جولات القوارب' },
-  'desert-safari': { en: 'Desert Safari', ar: 'سفاري الصحراء' },
-  'indoor': { en: 'Indoor Activities', ar: 'الأنشطة الداخلية' },
-  'indoor-activities': { en: 'Indoor activities', ar: 'الأنشطة الداخلية' },
-  'tour': { en: 'Tours', ar: 'الجولات السياحية' },
-  'tours': { en: 'Tours', ar: 'الجولات السياحية' },
-  'sightseeing': { en: 'Sightseeing', ar: 'المعالم السياحية' },
-  'theme-park': { en: 'Theme Parks', ar: 'المدن الترفيهية' },
-  'theme-parks': { en: 'Theme parks', ar: 'المدن الترفيهية' },
-  'attraction': { en: 'Attractions', ar: 'المعالم' },
-  'attractions': { en: 'Attractions', ar: 'المعالم' },
-  'Family & Kids': { en: 'Family & Kids', ar: 'العائلات والأطفال' },
-  'family-kids': { en: 'Family & Kids', ar: 'العائلات والأطفال' },
+const categoryLabels: Record<string, string> = {
+  'water-sports': 'Water Sports',
+  'boat-tour': 'Boat Tours',
+  'boat-tours': 'Boat Tours',
+  'desert-safari': 'Desert Safari',
+  'indoor': 'Indoor Activities',
+  'indoor-activities': 'Indoor activities',
+  'tour': 'Tours',
+  'tours': 'Tours',
+  'sightseeing': 'Sightseeing',
+  'theme-park': 'Theme Parks',
+  'theme-parks': 'Theme parks',
+  'attraction': 'Attractions',
+  'attractions': 'Attractions',
+  'Family & Kids': 'Family & Kids',
+  'family-kids': 'Family & Kids',
 };
 
 export default function AttractionsPageClient({ initialAttractions, categories }: AttractionsPageClientProps) {
-  const { t, language } = useTranslation();
+  const { t } = useTranslation();
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
   const [showFilters, setShowFilters] = useState(false);
@@ -112,7 +112,7 @@ export default function AttractionsPageClient({ initialAttractions, categories }
   const getCategoryLabel = (cat: string) => {
     const label = categoryLabels[cat];
     if (label) {
-      return language === 'ar' ? label.ar : label.en;
+      return label;
     }
     return cat.charAt(0).toUpperCase() + cat.slice(1).replace(/-/g, ' ');
   };
@@ -133,15 +133,13 @@ export default function AttractionsPageClient({ initialAttractions, categories }
             transition={{ duration: 0.5 }}
           >
             <h1 className="text-4xl md:text-6xl font-bold mb-4">
-              <span className="text-white">{language === 'ar' ? 'اكتشف' : 'Discover'} </span>
+              <span className="text-white">Discover </span>
               <span className="bg-gradient-to-r from-teal-400 to-emerald-400 bg-clip-text text-transparent">
                 {t.nav.attractions}
               </span>
             </h1>
             <p className="text-xl text-gray-400 mb-8 max-w-2xl mx-auto">
-              {language === 'ar'
-                ? 'اكتشف أفضل الجولات والرياضات المائية والتجارب في البحرين'
-                : 'Explore the best tours, water sports, and experiences in Bahrain'}
+              Explore the best tours, water sports, and experiences in Bahrain
             </p>
           </motion.div>
 
@@ -156,7 +154,7 @@ export default function AttractionsPageClient({ initialAttractions, categories }
               <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
               <input
                 type="text"
-                placeholder={language === 'ar' ? 'ابحث عن الجولات والتجارب...' : 'Search tours and experiences...'}
+                placeholder="Search tours and experiences..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
                 className="w-full pl-12 pr-4 py-4 bg-white/5 border border-white/10 rounded-2xl text-white placeholder-gray-400 focus:outline-none focus:border-teal-400/50 focus:ring-2 focus:ring-teal-400/20 transition-all"
@@ -208,7 +206,7 @@ export default function AttractionsPageClient({ initialAttractions, categories }
 
             {/* Results count */}
             <div className="text-gray-400 text-sm">
-              {filteredAttractions.length} {language === 'ar' ? 'نتيجة' : 'results'}
+              {filteredAttractions.length} results
             </div>
           </div>
         </div>
@@ -279,7 +277,7 @@ export default function AttractionsPageClient({ initialAttractions, categories }
                         {/* CTA Button */}
                         <div className="flex items-center justify-between">
                           <span className="text-teal-400 text-sm font-medium flex items-center gap-1 group-hover:gap-2 transition-all">
-                            {language === 'ar' ? 'اعرف المزيد' : 'Learn More'}
+                            Learn More
                             <ExternalLink className="w-4 h-4" />
                           </span>
                         </div>
@@ -298,12 +296,10 @@ export default function AttractionsPageClient({ initialAttractions, categories }
               >
                 <div className="text-6xl mb-4">🔍</div>
                 <h3 className="text-2xl font-bold text-white mb-2">
-                  {language === 'ar' ? 'لم يتم العثور على نتائج' : 'No attractions found'}
+                  No attractions found
                 </h3>
                 <p className="text-gray-400 mb-6">
-                  {language === 'ar'
-                    ? 'جرّب تعديل البحث أو الفلاتر'
-                    : 'Try adjusting your search or filters'}
+                  Try adjusting your search or filters
                 </p>
                 <button
                   onClick={() => {
@@ -312,7 +308,7 @@ export default function AttractionsPageClient({ initialAttractions, categories }
                   }}
                   className="px-6 py-3 bg-teal-500 text-white rounded-full font-medium hover:bg-teal-600 transition-colors"
                 >
-                  {language === 'ar' ? 'مسح الفلاتر' : 'Clear Filters'}
+                  Clear Filters
                 </button>
               </motion.div>
             )}
@@ -325,18 +321,16 @@ export default function AttractionsPageClient({ initialAttractions, categories }
         <div className="max-w-4xl mx-auto">
           <div className="bg-gradient-to-r from-teal-500/20 to-emerald-500/20 border border-teal-500/30 rounded-3xl p-8 md:p-12 text-center">
             <h2 className="text-2xl md:text-3xl font-bold mb-4">
-              {language === 'ar' ? 'هل لديك تجربة أو جولة؟' : 'Have a Tour or Experience?'}
+              Have a Tour or Experience?
             </h2>
             <p className="text-gray-300 mb-6 max-w-2xl mx-auto">
-              {language === 'ar'
-                ? 'انضم إلى بحرين نايتس واعرض تجاربك لآلاف الزوار شهرياً'
-                : 'Join BahrainNights and showcase your experiences to thousands of visitors every month'}
+              Join BahrainNights and showcase your experiences to thousands of visitors every month
             </p>
             <Link
               href="/register-venue"
               className="inline-flex items-center gap-2 px-8 py-4 bg-gradient-to-r from-teal-500 to-emerald-500 text-white rounded-full font-semibold hover:shadow-lg hover:shadow-teal-500/25 transition-all"
             >
-              {language === 'ar' ? 'سجّل تجربتك' : 'Register Your Experience'}
+              Register Your Experience
             </Link>
           </div>
         </div>

@@ -4,7 +4,6 @@ import { useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { X, MapPin, ExternalLink, Tag, Navigation } from 'lucide-react';
 import Image from 'next/image';
-import { useTranslation } from '@/lib/i18n';
 
 export interface AttractionData {
   id: string;
@@ -49,22 +48,22 @@ const categoryIcons: Record<string, string> = {
   'family-kids': '👨‍👩‍👧‍👦',
 };
 
-const categoryLabels: Record<string, { en: string; ar: string }> = {
-  'water-sports': { en: 'Water Sports', ar: 'الرياضات المائية' },
-  'boat-tour': { en: 'Boat Tours', ar: 'جولات القوارب' },
-  'boat-tours': { en: 'Boat Tours', ar: 'جولات القوارب' },
-  'desert-safari': { en: 'Desert Safari', ar: 'سفاري الصحراء' },
-  'indoor': { en: 'Indoor Activities', ar: 'الأنشطة الداخلية' },
-  'indoor-activities': { en: 'Indoor activities', ar: 'الأنشطة الداخلية' },
-  'tour': { en: 'Tours', ar: 'الجولات السياحية' },
-  'tours': { en: 'Tours', ar: 'الجولات السياحية' },
-  'sightseeing': { en: 'Sightseeing', ar: 'المعالم السياحية' },
-  'theme-park': { en: 'Theme Parks', ar: 'المدن الترفيهية' },
-  'theme-parks': { en: 'Theme parks', ar: 'المدن الترفيهية' },
-  'attraction': { en: 'Attractions', ar: 'المعالم' },
-  'attractions': { en: 'Attractions', ar: 'المعالم' },
-  'Family & Kids': { en: 'Family & Kids', ar: 'العائلات والأطفال' },
-  'family-kids': { en: 'Family & Kids', ar: 'العائلات والأطفال' },
+const categoryLabels: Record<string, string> = {
+  'water-sports': 'Water Sports',
+  'boat-tour': 'Boat Tours',
+  'boat-tours': 'Boat Tours',
+  'desert-safari': 'Desert Safari',
+  'indoor': 'Indoor Activities',
+  'indoor-activities': 'Indoor activities',
+  'tour': 'Tours',
+  'tours': 'Tours',
+  'sightseeing': 'Sightseeing',
+  'theme-park': 'Theme Parks',
+  'theme-parks': 'Theme parks',
+  'attraction': 'Attractions',
+  'attractions': 'Attractions',
+  'Family & Kids': 'Family & Kids',
+  'family-kids': 'Family & Kids',
 };
 
 export default function AttractionModal({
@@ -72,8 +71,6 @@ export default function AttractionModal({
   isOpen,
   onClose,
 }: AttractionModalProps) {
-  const { t, language } = useTranslation();
-
   // Lock body scroll when modal is open
   useEffect(() => {
     if (isOpen) {
@@ -98,10 +95,10 @@ export default function AttractionModal({
   if (!attraction) return null;
 
   const getCategoryLabel = (cat: string | null) => {
-    if (!cat) return language === 'ar' ? 'المعالم' : 'Attraction';
+    if (!cat) return 'Attraction';
     const label = categoryLabels[cat];
     if (label) {
-      return language === 'ar' ? label.ar : label.en;
+      return label;
     }
     return cat.charAt(0).toUpperCase() + cat.slice(1).replace(/-/g, ' ');
   };
@@ -225,9 +222,7 @@ export default function AttractionModal({
                   {/* Description */}
                   {attraction.description && (
                     <div className="mt-6 p-4 bg-white/5 rounded-xl">
-                      <h3 className="text-lg font-bold text-white mb-2">
-                        {language === 'ar' ? 'الوصف' : 'About'}
-                      </h3>
+                      <h3 className="text-lg font-bold text-white mb-2">About</h3>
                       <p className="text-gray-300 leading-relaxed">{attraction.description}</p>
                     </div>
                   )}
@@ -235,9 +230,7 @@ export default function AttractionModal({
                   {/* Venue/Location Details */}
                   {attraction.venue && attraction.location && (
                     <div className="mt-4 p-4 bg-white/5 rounded-xl">
-                      <h3 className="text-lg font-bold text-white mb-2">
-                        {language === 'ar' ? 'الموقع' : 'Location'}
-                      </h3>
+                      <h3 className="text-lg font-bold text-white mb-2">Location</h3>
                       <div className="flex items-start gap-2 text-gray-300">
                         <MapPin className="w-5 h-5 text-teal-400 mt-0.5 flex-shrink-0" />
                         <div>
@@ -258,14 +251,11 @@ export default function AttractionModal({
                           rel="noopener noreferrer"
                           className="group flex items-center justify-center gap-3 w-full px-6 py-4 bg-gradient-to-r from-teal-500 to-emerald-500 hover:from-teal-400 hover:to-emerald-400 text-white font-bold text-lg rounded-xl transition-all hover:shadow-lg hover:shadow-teal-500/25 hover:scale-[1.02]"
                         >
-                          <span>{language === 'ar' ? 'احجز الآن' : 'Book Now'}</span>
+                          <span>Book Now</span>
                           <ExternalLink className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
                         </a>
                         <p className="text-center text-gray-400 text-sm mt-2">
-                          {language === 'ar'
-                            ? 'سيتم توجيهك إلى Platinumlist للحجز'
-                            : 'You will be redirected to Platinumlist to complete your booking'
-                          }
+                          You will be redirected to Platinumlist to complete your booking
                         </p>
                       </>
                     ) : (
@@ -285,14 +275,11 @@ export default function AttractionModal({
                           className="group flex items-center justify-center gap-3 w-full px-6 py-4 bg-gradient-to-r from-blue-500 to-indigo-500 hover:from-blue-400 hover:to-indigo-400 text-white font-bold text-lg rounded-xl transition-all hover:shadow-lg hover:shadow-blue-500/25 hover:scale-[1.02]"
                         >
                           <Navigation className="w-5 h-5" />
-                          <span>{language === 'ar' ? 'عرض على الخريطة' : 'View on Google Maps'}</span>
+                          <span>View on Google Maps</span>
                           <ExternalLink className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
                         </a>
                         <p className="text-center text-gray-400 text-sm mt-2">
-                          {language === 'ar'
-                            ? 'اضغط للحصول على الاتجاهات في خرائط جوجل'
-                            : 'Click to get directions in Google Maps'
-                          }
+                          Click to get directions in Google Maps
                         </p>
                       </>
                     )}

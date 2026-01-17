@@ -6,16 +6,10 @@ export const LANGUAGES = {
     direction: 'ltr',
     flag: '🇬🇧',
   },
-  ar: {
-    code: 'ar',
-    name: 'Arabic',
-    nativeName: 'العربية',
-    direction: 'rtl',
-    flag: '🇧🇭',
-  },
 } as const;
 
 export type LanguageCode = keyof typeof LANGUAGES;
 export const DEFAULT_LANGUAGE: LanguageCode = 'en';
 
-export const isRTL = (lang: LanguageCode) => LANGUAGES[lang].direction === 'rtl';
+// Always LTR since only English is supported
+export const isRTL = (_lang: LanguageCode) => false;

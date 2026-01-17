@@ -4,7 +4,6 @@ import { useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { X, MapPin, ExternalLink, Tag, Calendar, Clock, Ticket } from 'lucide-react';
 import Image from 'next/image';
-import { useTranslation } from '@/lib/i18n';
 
 export interface EventData {
   id: string;
@@ -37,7 +36,7 @@ const categoryStyles: Record<string, {
   gradient: string;
   borderColor: string;
   buttonGradient: string;
-  labels: { en: string; ar: string };
+  label: string;
 }> = {
   'concerts': {
     icon: '🎤',
@@ -45,7 +44,7 @@ const categoryStyles: Record<string, {
     gradient: 'from-purple-500/90 to-pink-500/90',
     borderColor: 'border-purple-500/30',
     buttonGradient: 'from-purple-500 to-pink-500 hover:from-purple-400 hover:to-pink-400',
-    labels: { en: 'Concert', ar: 'حفلة موسيقية' },
+    label: 'Concert',
   },
   'comedy': {
     icon: '😂',
@@ -53,7 +52,7 @@ const categoryStyles: Record<string, {
     gradient: 'from-yellow-500/90 to-orange-500/90',
     borderColor: 'border-yellow-500/30',
     buttonGradient: 'from-yellow-500 to-orange-500 hover:from-yellow-400 hover:to-orange-400',
-    labels: { en: 'Comedy', ar: 'كوميديا' },
+    label: 'Comedy',
   },
   'nightlife': {
     icon: '🎉',
@@ -61,7 +60,7 @@ const categoryStyles: Record<string, {
     gradient: 'from-pink-500/90 to-rose-500/90',
     borderColor: 'border-pink-500/30',
     buttonGradient: 'from-pink-500 to-rose-500 hover:from-pink-400 hover:to-rose-400',
-    labels: { en: 'Nightlife', ar: 'الحياة الليلية' },
+    label: 'Nightlife',
   },
   'sports': {
     icon: '⚽',
@@ -69,7 +68,7 @@ const categoryStyles: Record<string, {
     gradient: 'from-green-500/90 to-emerald-500/90',
     borderColor: 'border-green-500/30',
     buttonGradient: 'from-green-500 to-emerald-500 hover:from-green-400 hover:to-emerald-400',
-    labels: { en: 'Sports', ar: 'رياضة' },
+    label: 'Sports',
   },
   'cultural': {
     icon: '🎭',
@@ -77,7 +76,7 @@ const categoryStyles: Record<string, {
     gradient: 'from-amber-500/90 to-red-500/90',
     borderColor: 'border-amber-500/30',
     buttonGradient: 'from-amber-500 to-red-500 hover:from-amber-400 hover:to-red-400',
-    labels: { en: 'Theatre & Arts', ar: 'المسرح والفنون' },
+    label: 'Theatre & Arts',
   },
   'family': {
     icon: '👨‍👩‍👧‍👦',
@@ -85,7 +84,7 @@ const categoryStyles: Record<string, {
     gradient: 'from-cyan-500/90 to-blue-500/90',
     borderColor: 'border-cyan-500/30',
     buttonGradient: 'from-cyan-500 to-blue-500 hover:from-cyan-400 hover:to-blue-400',
-    labels: { en: 'Family', ar: 'عائلي' },
+    label: 'Family',
   },
   'events': {
     icon: '🎪',
@@ -93,7 +92,7 @@ const categoryStyles: Record<string, {
     gradient: 'from-teal-500/90 to-emerald-500/90',
     borderColor: 'border-teal-500/30',
     buttonGradient: 'from-teal-500 to-emerald-500 hover:from-teal-400 hover:to-emerald-400',
-    labels: { en: 'Events', ar: 'فعاليات' },
+    label: 'Events',
   },
 };
 
@@ -103,7 +102,7 @@ const defaultStyle = {
   gradient: 'from-teal-500/90 to-emerald-500/90',
   borderColor: 'border-teal-500/30',
   buttonGradient: 'from-teal-500 to-emerald-500 hover:from-teal-400 hover:to-emerald-400',
-  labels: { en: 'Event', ar: 'فعالية' },
+  label: 'Event',
 };
 
 export default function EventModal({
@@ -111,8 +110,6 @@ export default function EventModal({
   isOpen,
   onClose,
 }: EventModalProps) {
-  const { language } = useTranslation();
-
   // Lock body scroll when modal is open
   useEffect(() => {
     if (isOpen) {
@@ -144,7 +141,7 @@ export default function EventModal({
   const style = getCategoryStyle(event.category);
 
   const getCategoryLabel = () => {
-    return language === 'ar' ? style.labels.ar : style.labels.en;
+    return style.label;
   };
 
   // Format date display
@@ -152,7 +149,7 @@ export default function EventModal({
     if (!dateStr) return null;
     try {
       const date = new Date(dateStr);
-      return date.toLocaleDateString(language === 'ar' ? 'ar-BH' : 'en-BH', {
+      return date.toLocaleDateString('en-BH', {
         weekday: 'long',
         year: 'numeric',
         month: 'long',
@@ -319,7 +316,7 @@ export default function EventModal({
                   {event.description && (
                     <div className="mt-6 p-4 bg-white/5 rounded-xl">
                       <h3 className="text-lg font-bold text-white mb-2">
-                        {language === 'ar' ? 'عن الفعالية' : 'About This Event'}
+                        About This Event
                       </h3>
                       <p className="text-gray-300 leading-relaxed whitespace-pre-line">
                         {event.description}
@@ -331,7 +328,7 @@ export default function EventModal({
                   {(event.start_date || event.start_time) && (
                     <div className="mt-4 p-4 bg-white/5 rounded-xl">
                       <h3 className="text-lg font-bold text-white mb-2">
-                        {language === 'ar' ? 'الموعد' : 'When'}
+                        When
                       </h3>
                       <div className="flex flex-col gap-2 text-gray-300">
                         {event.start_date && (
@@ -360,7 +357,7 @@ export default function EventModal({
                   {event.venue_name && (
                     <div className="mt-4 p-4 bg-white/5 rounded-xl">
                       <h3 className="text-lg font-bold text-white mb-2">
-                        {language === 'ar' ? 'الموقع' : 'Location'}
+                        Location
                       </h3>
                       <div className="flex items-start gap-2 text-gray-300">
                         <MapPin className={`w-5 h-5 ${style.color} mt-0.5 flex-shrink-0`} />
@@ -383,14 +380,11 @@ export default function EventModal({
                       className={`group flex items-center justify-center gap-3 w-full px-6 py-4 bg-gradient-to-r ${style.buttonGradient} text-white font-bold text-lg rounded-xl transition-all hover:shadow-lg hover:scale-[1.02]`}
                     >
                       <Ticket className="w-5 h-5" />
-                      <span>{language === 'ar' ? 'احجز التذاكر' : 'Get Tickets'}</span>
+                      <span>Get Tickets</span>
                       <ExternalLink className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
                     </a>
                     <p className="text-center text-gray-400 text-sm mt-2">
-                      {language === 'ar'
-                        ? 'سيتم توجيهك إلى Platinumlist لإتمام الحجز'
-                        : 'You will be redirected to Platinumlist to complete your booking'
-                      }
+                      You will be redirected to Platinumlist to complete your booking
                     </p>
                   </div>
                 </div>

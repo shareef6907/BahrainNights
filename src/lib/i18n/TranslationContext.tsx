@@ -1,9 +1,8 @@
 'use client';
 
-import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
+import React, { createContext, useContext, ReactNode } from 'react';
 import { en } from './translations/en';
-import { ar } from './translations/ar';
-import { LanguageCode, DEFAULT_LANGUAGE, isRTL, LANGUAGES } from './config';
+import { LanguageCode, DEFAULT_LANGUAGE, LANGUAGES } from './config';
 
 type Translations = typeof en;
 
@@ -17,68 +16,21 @@ interface TranslationContextType {
   languageInfo: typeof LANGUAGES[LanguageCode];
 }
 
-const translations: Record<LanguageCode, Translations> = {
-  en,
-  ar,
-};
-
 const TranslationContext = createContext<TranslationContextType | undefined>(undefined);
 
 export function TranslationProvider({ children }: { children: ReactNode }) {
-  const [language, setLanguageState] = useState<LanguageCode>(DEFAULT_LANGUAGE);
-  const [mounted, setMounted] = useState(false);
-
-  useEffect(() => {
-    // Load saved language preference
-    const saved = localStorage.getItem('bahrainnights-lang') as LanguageCode;
-    if (saved && translations[saved]) {
-      setLanguageState(saved);
-    }
-    setMounted(true);
-  }, []);
-
-  useEffect(() => {
-    if (!mounted) return;
-
-    // Update document direction and lang attribute
-    document.documentElement.dir = isRTL(language) ? 'rtl' : 'ltr';
-    document.documentElement.lang = language;
-  }, [language, mounted]);
-
-  const setLanguage = (lang: LanguageCode) => {
-    setLanguageState(lang);
-    localStorage.setItem('bahrainnights-lang', lang);
-  };
-
-  const toggleLanguage = () => {
-    setLanguage(language === 'en' ? 'ar' : 'en');
-  };
+  // Always use English - Arabic support removed
+  const language = DEFAULT_LANGUAGE;
 
   const value: TranslationContextType = {
     language,
-    setLanguage,
-    t: translations[language],
-    isRTL: isRTL(language),
-    direction: isRTL(language) ? 'rtl' : 'ltr',
-    toggleLanguage,
-    languageInfo: LANGUAGES[language],
+    setLanguage: () => {}, // No-op - only English supported
+    t: en,
+    isRTL: false,
+    direction: 'ltr',
+    toggleLanguage: () => {}, // No-op - only English supported
+    languageInfo: LANGUAGES.en,
   };
-
-  // Prevent hydration mismatch
-  if (!mounted) {
-    return (
-      <TranslationContext.Provider value={{
-        ...value,
-        language: DEFAULT_LANGUAGE,
-        t: en,
-        isRTL: false,
-        direction: 'ltr',
-        languageInfo: LANGUAGES.en,
-      }}>
-        {children}
-      </TranslationContext.Provider>
-    );
-  }
 
   return (
     <TranslationContext.Provider value={value}>
