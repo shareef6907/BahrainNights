@@ -40,6 +40,60 @@ export async function GET(request: NextRequest) {
     );
   }
 
+  // If action=cleanup, delete all blog articles and tracker entries
+  // This is used to clear incorrect articles before regenerating
+  if (action === 'cleanup') {
+    try {
+      const supabase = getAdminClient();
+
+      // Delete all tracker entries first (has foreign key to articles)
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const { error: trackerError } = await (supabase as any)
+        .from('blog_event_tracker')
+        .delete()
+        .neq('id', '00000000-0000-0000-0000-000000000000'); // Delete all
+
+      if (trackerError) {
+        console.error('Error deleting tracker entries:', trackerError);
+      }
+
+      // Delete all blog articles
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const { error: articlesError, count } = await (supabase as any)
+        .from('blog_articles')
+        .delete()
+        .neq('id', '00000000-0000-0000-0000-000000000000')
+        .select('*', { count: 'exact', head: true });
+
+      if (articlesError) {
+        return NextResponse.json({
+          success: false,
+          error: 'Failed to delete articles: ' + articlesError.message,
+        }, { status: 500 });
+      }
+
+      // Revalidate all blog pages
+      revalidatePath('/blog');
+      revalidatePath('/blog/places-to-go/bahrain');
+      revalidatePath('/blog/places-to-go/saudi-arabia');
+      revalidatePath('/blog/places-to-go/uae');
+      revalidatePath('/blog/places-to-go/qatar');
+      revalidatePath('/blog/places-to-go/uk');
+
+      return NextResponse.json({
+        success: true,
+        message: 'All blog articles and tracker entries have been deleted',
+        deleted_count: count || 'unknown',
+      });
+    } catch (error) {
+      console.error('Cleanup error:', error);
+      return NextResponse.json({
+        success: false,
+        error: error instanceof Error ? error.message : 'Unknown error',
+      }, { status: 500 });
+    }
+  }
+
   // If action=generate, trigger the generation
   if (action === 'generate') {
     try {
