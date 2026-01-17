@@ -67,13 +67,13 @@ export async function GET(request: NextRequest) {
 
       const bloggedEventIds = bloggedEvents?.map((e) => e.event_id) || [];
 
-      // Get events that haven't been blogged yet
+      // Get events that haven't been blogged yet (limit to 2 to avoid timeout)
       let eventsQuery = supabase
         .from('events')
         .select('*')
         .eq('is_active', true)
         .order('created_at', { ascending: false })
-        .limit(10);
+        .limit(2);
 
       // Exclude already blogged events if any exist
       if (bloggedEventIds.length > 0) {
@@ -200,11 +200,6 @@ export async function GET(request: NextRequest) {
           });
 
           console.log(`Successfully created blog post: ${article.title}`);
-
-          // Delay between API calls to avoid rate limits
-          if (unbloggedEvents.indexOf(event) < unbloggedEvents.length - 1) {
-            await new Promise((resolve) => setTimeout(resolve, 3000));
-          }
         } catch (err) {
           console.error(`Error processing event ${event.id}:`, err);
           errors.push({
@@ -448,7 +443,7 @@ export async function GET(request: NextRequest) {
       </div>
 
       <button id="generateBtn" onclick="generate()" ${!apiConfigured ? 'disabled' : ''}>
-        Generate Blog Posts (up to 10)
+        Generate 2 Blog Posts
       </button>
 
       <div id="result"></div>
@@ -503,7 +498,7 @@ export async function GET(request: NextRequest) {
           }
 
           btn.disabled = false;
-          btn.textContent = 'Generate Blog Posts (up to 10)';
+          btn.textContent = 'Generate 2 Blog Posts';
         }
       </script>
     </body>

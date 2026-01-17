@@ -15,10 +15,10 @@ import {
 import type { Event, BlogArticle } from '@/types/database';
 
 // Maximum events to process per request to avoid timeouts
-const MAX_EVENTS_PER_RUN = 10;
+const MAX_EVENTS_PER_RUN = 3;
 
 // Delay between API calls to avoid rate limits (in ms)
-const DELAY_BETWEEN_CALLS = 3000;
+const DELAY_BETWEEN_CALLS = 1000;
 
 export async function POST(request: NextRequest) {
   try {
