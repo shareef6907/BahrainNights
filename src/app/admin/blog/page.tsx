@@ -51,6 +51,7 @@ interface ArticlesResponse {
   limit: number;
   totalPages: number;
   countryStats: Record<string, number>;
+  cityStats: Record<string, number>;
 }
 
 interface GeneratorStats {
@@ -85,6 +86,16 @@ const STATUSES = [
   { value: 'archived', label: 'Archived' },
 ];
 
+const CITIES = [
+  { name: 'Dubai', icon: '🏙️', color: 'from-blue-500 to-cyan-400' },
+  { name: 'Abu Dhabi', icon: '🕌', color: 'from-emerald-500 to-teal-400' },
+  { name: 'Riyadh', icon: '🏛️', color: 'from-amber-500 to-yellow-400' },
+  { name: 'Jeddah', icon: '⛵', color: 'from-red-500 to-rose-400' },
+  { name: 'Doha', icon: '🌆', color: 'from-purple-500 to-violet-400' },
+  { name: 'London', icon: '🎡', color: 'from-indigo-500 to-blue-400' },
+  { name: 'Bahrain', icon: '🇧🇭', color: 'from-pink-500 to-rose-400' },
+];
+
 export default function BlogAdminPage() {
   const [articles, setArticles] = useState<BlogArticle[]>([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -95,6 +106,7 @@ export default function BlogAdminPage() {
   const [totalPages, setTotalPages] = useState(1);
   const [total, setTotal] = useState(0);
   const [countryStats, setCountryStats] = useState<Record<string, number>>({});
+  const [cityStats, setCityStats] = useState<Record<string, number>>({});
   const [selectedArticles, setSelectedArticles] = useState<string[]>([]);
   const [isDeleting, setIsDeleting] = useState(false);
   const [showDeleteConfirm, setShowDeleteConfirm] = useState<'bulk' | 'country' | 'all' | null>(null);
@@ -183,6 +195,7 @@ export default function BlogAdminPage() {
         setTotal(data.total);
         setTotalPages(data.totalPages);
         setCountryStats(data.countryStats || {});
+        setCityStats(data.cityStats || {});
       }
     } catch (error) {
       console.error('Error fetching articles:', error);
@@ -565,7 +578,7 @@ export default function BlogAdminPage() {
         )}
       </div>
 
-      {/* Stats Cards */}
+      {/* Country Stats Cards */}
       <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-3">
         {COUNTRIES.slice(1).map((country) => (
           <button
@@ -584,6 +597,36 @@ export default function BlogAdminPage() {
             <p className="text-xs text-gray-400">{country.label}</p>
           </button>
         ))}
+      </div>
+
+      {/* City Stats Section */}
+      <div className="bg-gradient-to-r from-indigo-500/10 via-purple-500/10 to-pink-500/10 border border-indigo-500/20 rounded-2xl p-5">
+        <h3 className="text-lg font-bold text-white mb-4 flex items-center gap-2">
+          <MapPin className="w-5 h-5 text-indigo-400" />
+          Articles by City
+        </h3>
+        <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-7 gap-3">
+          {CITIES.map((city) => {
+            const count = cityStats[city.name] || 0;
+            return (
+              <div
+                key={city.name}
+                className="bg-white/5 border border-white/10 rounded-xl p-4 text-center hover:border-white/20 transition-all"
+              >
+                <div className={`w-10 h-10 mx-auto rounded-lg bg-gradient-to-br ${city.color} flex items-center justify-center mb-2`}>
+                  <span className="text-lg">{city.icon}</span>
+                </div>
+                <p className="text-2xl font-bold text-white">{count}</p>
+                <p className="text-xs text-gray-400 mt-1">{city.name}</p>
+              </div>
+            );
+          })}
+        </div>
+        {Object.keys(cityStats).length === 0 && (
+          <p className="text-gray-500 text-sm text-center mt-4">
+            No city data available yet. Generate some blog articles!
+          </p>
+        )}
       </div>
 
       {/* Bulk Actions */}

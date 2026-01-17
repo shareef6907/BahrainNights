@@ -72,6 +72,39 @@ export async function GET(request: NextRequest) {
         return { data: counts };
       });
 
+    // Get city counts for city stats UI
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const { data: cityStats } = await (supabase as any)
+      .from('blog_articles')
+      .select('city')
+      .then((result: { data: { city: string | null }[] | null }) => {
+        const counts: Record<string, number> = {};
+        result.data?.forEach(row => {
+          if (row.city) {
+            const cityLower = row.city.toLowerCase();
+            // Normalize city names
+            if (cityLower.includes('dubai')) {
+              counts['Dubai'] = (counts['Dubai'] || 0) + 1;
+            } else if (cityLower.includes('abu dhabi') || cityLower.includes('abu-dhabi')) {
+              counts['Abu Dhabi'] = (counts['Abu Dhabi'] || 0) + 1;
+            } else if (cityLower.includes('riyadh')) {
+              counts['Riyadh'] = (counts['Riyadh'] || 0) + 1;
+            } else if (cityLower.includes('jeddah')) {
+              counts['Jeddah'] = (counts['Jeddah'] || 0) + 1;
+            } else if (cityLower.includes('doha')) {
+              counts['Doha'] = (counts['Doha'] || 0) + 1;
+            } else if (cityLower.includes('london')) {
+              counts['London'] = (counts['London'] || 0) + 1;
+            } else if (cityLower.includes('manama') || cityLower.includes('bahrain')) {
+              counts['Bahrain'] = (counts['Bahrain'] || 0) + 1;
+            } else {
+              counts['Other'] = (counts['Other'] || 0) + 1;
+            }
+          }
+        });
+        return { data: counts };
+      });
+
     return NextResponse.json({
       articles: articles || [],
       total: count || 0,
@@ -79,6 +112,7 @@ export async function GET(request: NextRequest) {
       limit,
       totalPages: Math.ceil((count || 0) / limit),
       countryStats: countryStats || {},
+      cityStats: cityStats || {},
     });
   } catch (error) {
     console.error('Blog admin GET error:', error);
