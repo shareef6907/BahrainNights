@@ -113,15 +113,23 @@ export function HeroTrailerPlayer() {
 
   // When slide changes, restore sound state if user had enabled sound
   // New iframe loads muted, so we need to unmute it via postMessage
+  // On mobile, we must ensure video is playing before unmuting
   useEffect(() => {
-    if (!isMuted && iframeRef.current) {
-      // Wait for new iframe to load and YouTube API to initialize
+    if (!isMuted) {
+      // Wait for new iframe to fully load and YouTube API to initialize
       const timer = setTimeout(() => {
-        sendYouTubeCommand(iframeRef.current, 'unMute');
-      }, 1500); // Give iframe time to load YouTube player
+        if (iframeRef.current) {
+          // First ensure video is playing, then unmute
+          sendYouTubeCommand(iframeRef.current, 'playVideo');
+          // Small delay between commands for reliability
+          setTimeout(() => {
+            sendYouTubeCommand(iframeRef.current, 'unMute');
+          }, 300);
+        }
+      }, 2500); // Longer delay to ensure YouTube player is ready
       return () => clearTimeout(timer);
     }
-  }, [currentIndex, isMuted]);
+  }, [currentIndex]); // Only trigger on slide change, not on isMuted change
 
   const currentMovie = movies[currentIndex];
 
