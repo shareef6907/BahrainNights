@@ -4,6 +4,16 @@ import { useState, useEffect, useRef, useCallback } from 'react';
 import { Volume2, VolumeX, Info, ChevronLeft, ChevronRight } from 'lucide-react';
 import Link from 'next/link';
 
+// YouTube Player API commands via postMessage
+const sendYouTubeCommand = (iframe: HTMLIFrameElement | null, command: string) => {
+  if (iframe?.contentWindow) {
+    iframe.contentWindow.postMessage(
+      JSON.stringify({ event: 'command', func: command }),
+      '*'
+    );
+  }
+};
+
 interface Movie {
   id: string;
   title: string;
@@ -23,6 +33,7 @@ export function HeroTrailerPlayer() {
   const [isLoading, setIsLoading] = useState(true);
   const [showMobileHint, setShowMobileHint] = useState(false);
   const autoAdvanceRef = useRef<NodeJS.Timeout | null>(null);
+  const iframeRef = useRef<HTMLIFrameElement | null>(null);
 
   // Detect mobile device and set initial mute state
   useEffect(() => {
@@ -124,7 +135,11 @@ export function HeroTrailerPlayer() {
 
   const toggleMute = () => {
     setShowMobileHint(false); // Hide hint after user interaction
-    setIsMuted(!isMuted);
+    // Use YouTube postMessage API to toggle mute without recreating iframe
+    // This prevents video from stopping on mobile when toggling sound
+    const newMutedState = !isMuted;
+    sendYouTubeCommand(iframeRef.current, newMutedState ? 'mute' : 'unMute');
+    setIsMuted(newMutedState);
   };
 
   if (isLoading) {
@@ -173,7 +188,8 @@ export function HeroTrailerPlayer() {
       <div className="absolute inset-0">
         {iframeUrl ? (
           <iframe
-            key={`trailer-${currentIndex}-${isMuted}`} // Key changes force re-render with new mute state
+            ref={iframeRef}
+            key={`trailer-${currentIndex}`} // Only re-render on trailer change, NOT on mute toggle
             src={iframeUrl}
             className="absolute w-[300%] h-[300%] top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 pointer-events-none"
             allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
