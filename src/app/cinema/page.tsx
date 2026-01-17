@@ -1,6 +1,6 @@
 import { Suspense } from 'react';
 import { supabaseAdmin } from '@/lib/supabase';
-import CinemaNetflixClient from '@/components/cinema/CinemaNetflixClient';
+import CinemaPageClient from '@/components/cinema/CinemaPageClient';
 import { Movie } from '@/components/cinema/MovieCard';
 import MovieListSchema from '@/components/SEO/MovieListSchema';
 
@@ -74,25 +74,29 @@ function convertToMovieFormat(dbMovie: DBMovie): Movie {
   };
 }
 
-// Fetch all movies on the server (ONLY scraped movies actually playing in Bahrain)
+// Fetch all movies on the server (excluding Mukta-only movies)
 async function getMovies() {
-  // Fetch ONLY movies that are scraped from Bahrain cinemas
-  // This ensures we only show movies actually playing in Bahrain (not random TMDB entries)
-  const { data: allMoviesData } = await supabaseAdmin
-    .from('movies')
-    .select('*')
-    // ONLY show movies scraped from actual Bahrain cinemas - VOX, Cineco, or Seef
-    // Movies must have scraped_from array containing at least one valid cinema
-    .or('scraped_from.cs.{vox},scraped_from.cs.{cineco},scraped_from.cs.{seef}')
-    .order('tmdb_rating', { ascending: false });
+  const [nowShowingRes, comingSoonRes] = await Promise.all([
+    supabaseAdmin
+      .from('movies')
+      .select('*')
+      .eq('is_now_showing', true)
+      // Exclude movies that are ONLY from Mukta - only show VOX, Cineco, Seef, or manual entries
+      .or('scraped_from.is.null,scraped_from.cs.{vox},scraped_from.cs.{cineco},scraped_from.cs.{seef}')
+      .order('tmdb_rating', { ascending: false }),
+    supabaseAdmin
+      .from('movies')
+      .select('*')
+      .eq('is_coming_soon', true)
+      // Exclude movies that are ONLY from Mukta - only show VOX, Cineco, Seef, or manual entries
+      .or('scraped_from.is.null,scraped_from.cs.{vox},scraped_from.cs.{cineco},scraped_from.cs.{seef}')
+      .order('release_date', { ascending: true })
+  ]);
 
-  const allMovies = (allMoviesData || []).map((m: DBMovie) => convertToMovieFormat(m));
+  const nowShowing = (nowShowingRes.data || []).map((m: DBMovie) => convertToMovieFormat(m));
+  const comingSoon = (comingSoonRes.data || []).map((m: DBMovie) => convertToMovieFormat(m));
 
-  // Also get separated lists for SEO schema
-  const nowShowing = allMovies.filter((m: Movie) => m.isNowShowing);
-  const comingSoon = allMovies.filter((m: Movie) => !m.isNowShowing);
-
-  return { allMovies, nowShowing, comingSoon };
+  return { nowShowing, comingSoon };
 }
 
 // Fetch cinemas for filter dropdown
@@ -130,70 +134,30 @@ async function getLastUpdated() {
   return data?.completed_at || null;
 }
 
-// Fetch featured trailers for cinema hero (admin-selected)
-async function getFeaturedTrailers(): Promise<string[]> {
-  try {
-    const { data, error } = await supabaseAdmin
-      .from('cinema_featured_trailers')
-      .select('movie_id')
-      .eq('is_active', true)
-      .order('display_order', { ascending: true });
-
-    if (error) {
-      // Table might not exist yet - return empty array
-      console.log('Featured trailers table not available:', error.message);
-      return [];
-    }
-
-    return (data || []).map((t: { movie_id: string }) => t.movie_id);
-  } catch {
-    return [];
-  }
-}
-
 // Server Component - data is fetched BEFORE the page renders
 export default async function CinemaPage() {
   // Fetch all data on the server - NO loading state needed!
-  const [{ allMovies, nowShowing }, featuredTrailerIds] = await Promise.all([
+  const [{ nowShowing, comingSoon }, cinemas, lastUpdated] = await Promise.all([
     getMovies(),
-    getFeaturedTrailers()
+    getCinemas(),
+    getLastUpdated()
   ]);
-
-  // Get hero movies: use admin-selected featured trailers if available, otherwise use top-rated with trailers
-  let heroMovies: Movie[] = [];
-
-  if (featuredTrailerIds.length > 0) {
-    // Use admin-selected featured trailers in the specified order
-    heroMovies = featuredTrailerIds
-      .map(id => allMovies.find(m => m.id === id))
-      .filter((m): m is Movie => m !== undefined && !!m.trailerUrl);
-  }
-
-  // If no featured trailers or none have valid trailers, fall back to top-rated with trailers
-  if (heroMovies.length === 0) {
-    heroMovies = allMovies
-      .filter((movie) => {
-        const hasValidBackdrop = movie.backdrop &&
-          !movie.backdrop.includes('placeholder') &&
-          !movie.backdrop.includes('null') &&
-          movie.backdrop.startsWith('http');
-        const hasTrailer = movie.trailerUrl && movie.trailerUrl.length > 0;
-        return hasValidBackdrop && hasTrailer;
-      })
-      .sort((a, b) => b.rating - a.rating)
-      .slice(0, 5);
-  }
 
   return (
     <>
       <MovieListSchema
         movies={nowShowing}
-        pageTitle="Movies in Bahrain Cinemas"
-        pageDescription="Find movies playing in Bahrain cinemas - Cineco, VOX, Cinépolis, and more. Watch trailers and book tickets."
+        pageTitle="Movies Now Showing in Bahrain"
+        pageDescription="Find movies now showing in Bahrain cinemas - Cineco, VOX, Cinépolis, and more"
         pageUrl="https://bahrainnights.com/cinema"
       />
       <Suspense fallback={null}>
-        <CinemaNetflixClient allMovies={allMovies} heroMovies={heroMovies} />
+        <CinemaPageClient
+          initialNowShowing={nowShowing}
+          initialComingSoon={comingSoon}
+          initialCinemas={cinemas}
+          lastUpdated={lastUpdated}
+        />
       </Suspense>
     </>
   );
