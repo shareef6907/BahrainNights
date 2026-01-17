@@ -13,7 +13,7 @@ export const metadata: Metadata = {
   },
 };
 
-export const revalidate = 3600; // Revalidate every hour
+export const dynamic = 'force-dynamic'; // Always fetch fresh data
 
 interface BlogArticle {
   id: string;
