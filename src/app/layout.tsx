@@ -7,6 +7,8 @@ import { PublicAuthProvider } from "@/context/PublicAuthContext";
 import { PageTracker } from "@/components/analytics/PageTracker";
 import FloatingBackButton from "@/components/ui/FloatingBackButton";
 import SwipeBackHandler from "@/components/SwipeBackHandler";
+import { PWARegister } from "@/components/PWARegister";
+import { PWAInstallPrompt } from "@/components/PWAInstallPrompt";
 
 const inter = Inter({
   variable: "--font-inter",
@@ -32,7 +34,15 @@ export const metadata: Metadata = {
   authors: [{ name: "BahrainNights" }],
   creator: "BahrainNights",
   publisher: "BahrainNights",
-  manifest: "/site.webmanifest",
+  manifest: "/manifest.json",
+  appleWebApp: {
+    capable: true,
+    statusBarStyle: 'black-translucent',
+    title: 'BahrainNights',
+  },
+  formatDetection: {
+    telephone: true,
+  },
   alternates: {
     canonical: "https://bahrainnights.com",
   },
@@ -94,6 +104,16 @@ export default function RootLayout({
   return (
     <html lang="en" suppressHydrationWarning>
       <head>
+        {/* PWA Meta Tags */}
+        <meta name="theme-color" content="#eab308" />
+        <meta name="apple-mobile-web-app-capable" content="yes" />
+        <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+        <meta name="apple-mobile-web-app-title" content="BahrainNights" />
+
+        {/* Apple Touch Icons */}
+        <link rel="apple-touch-icon" href="/icons/icon-152x152.png" />
+        <link rel="apple-touch-icon" sizes="180x180" href="/icons/icon-192x192.png" />
+
         {/* Preconnect to external resources for faster loading */}
         <link rel="preconnect" href="https://bahrainnights-production.s3.me-south-1.amazonaws.com" />
         <link rel="preconnect" href="https://image.tmdb.org" />
@@ -171,6 +191,8 @@ export default function RootLayout({
             </AuthProvider>
           </PublicAuthProvider>
         </TranslationProvider>
+        <PWARegister />
+        <PWAInstallPrompt />
       </body>
     </html>
   );
