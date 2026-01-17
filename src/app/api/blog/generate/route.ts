@@ -107,13 +107,24 @@ export async function POST(request: NextRequest) {
       error: string;
     }> = [];
 
+    const skipped: Array<{
+      event_id: string;
+      event_title: string;
+      reason: string;
+    }> = [];
+
     for (const event of unbloggedEvents) {
       try {
         // CRITICAL: Combine ALL location sources for accurate extraction
-        // Do NOT default to Bahrain - let the extraction functions determine the actual location
+        // Include title, description, venue info, and source URL for maximum coverage
         const allLocationSources = [
           event.venue_address,
           event.venue_name,
+          event.title,
+          event.description,
+          event.source_url,
+          event.affiliate_url,
+          event.google_maps_link,
         ].filter(Boolean).join(' ');
 
         // Extract accurate city and country - NO defaults to Bahrain/Manama
@@ -122,9 +133,25 @@ export async function POST(request: NextRequest) {
 
         // Log for debugging
         console.log(`Event: ${event.title}`);
-        console.log(`  Location sources: ${allLocationSources}`);
-        console.log(`  Extracted city: ${extractedCity || 'unknown'}`);
-        console.log(`  Extracted country: ${extractedCountry || 'unknown'}`);
+        console.log(`  Location sources: ${allLocationSources.substring(0, 200)}...`);
+        console.log(`  Extracted city: ${extractedCity || 'NOT FOUND'}`);
+        console.log(`  Extracted country: ${extractedCountry || 'NOT FOUND'}`);
+
+        // CRITICAL: Skip events without valid location data
+        // Location is MANDATORY - we don't want blogs with "unknown" locations
+        if (!extractedCity && !extractedCountry) {
+          console.log(`  SKIPPED: No location data found`);
+          skipped.push({
+            event_id: event.id,
+            event_title: event.title,
+            reason: 'No location data found in event',
+          });
+          continue;
+        }
+
+        // Use extracted values - at this point we know at least one is valid
+        const finalCity = extractedCity || 'TBA';
+        const finalCountry = extractedCountry || 'TBA';
 
         const eventData: EventData = {
           id: event.id,
@@ -133,8 +160,8 @@ export async function POST(request: NextRequest) {
           venue_name: event.venue_name,
           venue_address: event.venue_address,
           location: allLocationSources || 'Location not specified',
-          city: extractedCity || 'unknown',
-          country: extractedCountry || 'unknown',
+          city: finalCity,
+          country: finalCountry,
           start_date: event.start_date,
           end_date: event.end_date,
           start_time: event.start_time,
@@ -153,12 +180,7 @@ export async function POST(request: NextRequest) {
         // Get featured image
         const featuredImage = event.cover_url || event.image_url || event.featured_image;
 
-        // Use the extracted location for database storage
-        // The article generation will also validate these
-        const finalCountry = extractedCountry || 'unknown';
-        const finalCity = extractedCity || null;
-
-        // Save to database with accurate location data
+        // Save to database with accurate location data (using already-validated finalCity/finalCountry)
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         const { data: savedArticle, error: saveError } = await (supabase as any)
           .from('blog_articles')
@@ -253,12 +275,14 @@ export async function POST(request: NextRequest) {
 
     return NextResponse.json({
       success: true,
-      message: `Generated ${results.length} blog posts`,
+      message: `Generated ${results.length} blog posts${skipped.length > 0 ? `, skipped ${skipped.length} (no location)` : ''}`,
       processed: results.length,
       failed: errors.length,
+      skipped: skipped.length,
       remaining: totalRemaining || 0,
       articles: results,
       errors: errors.length > 0 ? errors : undefined,
+      skipped_events: skipped.length > 0 ? skipped : undefined,
     });
   } catch (error) {
     console.error('Blog generation error:', error);

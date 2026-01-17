@@ -366,6 +366,18 @@ export function determineCountry(location: string): string {
       locationLower.includes('ras al khaimah') ||
       locationLower.includes('fujairah') ||
       locationLower.includes('umm al quwain') ||
+      locationLower.includes('al ain') ||
+      locationLower.includes('khorfakkan') ||
+      locationLower.includes('kalba') ||
+      locationLower.includes('dibba') ||
+      locationLower.includes('yas island') ||
+      locationLower.includes('saadiyat') ||
+      locationLower.includes('al reem') ||
+      locationLower.includes('jebel ali') ||
+      locationLower.includes('marina mall') ||
+      locationLower.includes('mall of emirates') ||
+      locationLower.includes('dubai mall') ||
+      locationLower.includes('etihad') ||
       locationLower.includes('uae') ||
       locationLower.includes('united arab emirates') ||
       locationLower.includes('emirates')) {
@@ -443,6 +455,10 @@ export function determineCity(location: string): string {
   if (locationLower.includes('ajman')) return 'Ajman';
   if (locationLower.includes('ras al khaimah')) return 'Ras Al Khaimah';
   if (locationLower.includes('fujairah')) return 'Fujairah';
+  if (locationLower.includes('al ain')) return 'Al Ain';
+  if (locationLower.includes('khorfakkan')) return 'Khorfakkan';
+  if (locationLower.includes('kalba')) return 'Kalba';
+  if (locationLower.includes('dibba')) return 'Dibba';
 
   // Saudi cities
   if (locationLower.includes('riyadh')) return 'Riyadh';
