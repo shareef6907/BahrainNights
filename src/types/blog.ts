@@ -27,6 +27,11 @@ export interface BlogArticle {
   created_at: string;
   updated_at: string;
   published_at: string;
+  // Event-specific fields for modal display
+  event_date: string | null;
+  event_end_date: string | null;
+  event_venue: string | null;
+  affiliate_url: string | null;
 }
 
 export interface BlogEventTracker {

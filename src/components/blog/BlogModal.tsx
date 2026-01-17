@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect, useCallback } from 'react';
-import { X, Calendar, Clock, Eye, Play, Share2, ArrowRight, MapPin } from 'lucide-react';
+import { X, Calendar, Clock, Eye, Play, Share2, ArrowRight, MapPin, Ticket } from 'lucide-react';
 import Link from 'next/link';
 
 interface BlogArticle {
@@ -17,6 +17,36 @@ interface BlogArticle {
   read_time_minutes: number;
   view_count: number;
   published_at: string;
+  event_date?: string | null;
+  event_end_date?: string | null;
+  event_venue?: string | null;
+  affiliate_url?: string | null;
+}
+
+// Helper function to format event dates nicely
+function formatEventDate(startDate: string, endDate?: string | null): string {
+  const start = new Date(startDate);
+  const options: Intl.DateTimeFormatOptions = {
+    weekday: 'short',
+    month: 'short',
+    day: 'numeric',
+    year: 'numeric',
+  };
+
+  const startStr = start.toLocaleDateString('en-US', options);
+
+  if (endDate) {
+    const end = new Date(endDate);
+    // If same day, just show one date
+    if (start.toDateString() === end.toDateString()) {
+      return startStr;
+    }
+    // If different days, show range
+    const endStr = end.toLocaleDateString('en-US', options);
+    return `${startStr} - ${endStr}`;
+  }
+
+  return startStr;
 }
 
 interface BlogModalProps {
@@ -143,13 +173,9 @@ export function BlogModal({ article, isOpen, onClose }: BlogModalProps) {
             </h1>
 
             {/* Meta */}
-            <div className="flex flex-wrap items-center gap-4 text-sm text-gray-400 mb-6">
+            <div className="flex flex-wrap items-center gap-4 text-sm text-gray-400 mb-4">
               <span className="flex items-center gap-1">
                 {countryFlags[article.country] || '📍'} {article.city || countryNames[article.country] || article.country}
-              </span>
-              <span className="flex items-center gap-1">
-                <Calendar size={14} />
-                {new Date(article.published_at).toLocaleDateString()}
               </span>
               <span className="flex items-center gap-1">
                 <Clock size={14} />
@@ -160,6 +186,38 @@ export function BlogModal({ article, isOpen, onClose }: BlogModalProps) {
                 {article.view_count || 0} views
               </span>
             </div>
+
+            {/* Event Info Banner - Shows event date prominently */}
+            {article.event_date && (
+              <div className="bg-gradient-to-r from-yellow-500/10 to-orange-500/10 border border-yellow-500/30 rounded-xl p-4 mb-6">
+                <div className="flex items-center justify-between flex-wrap gap-4">
+                  <div>
+                    <p className="text-yellow-500 text-sm font-medium mb-1">📅 Event Date</p>
+                    <p className="text-white text-xl font-bold">
+                      {formatEventDate(article.event_date, article.event_end_date)}
+                    </p>
+                    {article.event_venue && (
+                      <p className="text-gray-400 text-sm mt-1 flex items-center gap-1">
+                        <MapPin size={14} />
+                        {article.event_venue}{article.city ? `, ${article.city}` : ''}
+                      </p>
+                    )}
+                  </div>
+
+                  {article.affiliate_url && (
+                    <a
+                      href={article.affiliate_url}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="bg-gradient-to-r from-yellow-500 to-orange-500 text-black font-bold px-6 py-3 rounded-full hover:opacity-90 transition-opacity flex items-center gap-2 hover:scale-105 duration-300"
+                    >
+                      <Ticket size={18} />
+                      Get Tickets
+                    </a>
+                  )}
+                </div>
+              </div>
+            )}
 
             {/* Action Buttons */}
             <div className="flex flex-wrap gap-3 mb-8">
@@ -179,12 +237,6 @@ export function BlogModal({ article, isOpen, onClose }: BlogModalProps) {
                 <Share2 size={18} />
                 Share
               </button>
-              {article.city && (
-                <span className="flex items-center gap-2 bg-white/5 text-gray-400 px-5 py-3 rounded-full">
-                  <MapPin size={16} />
-                  {article.city}
-                </span>
-              )}
             </div>
 
             {/* Divider */}

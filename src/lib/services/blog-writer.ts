@@ -51,8 +51,37 @@ export interface VenueData {
 /**
  * Generate an SEO-optimized blog post for an event
  * Uses STRICT FACTUAL prompts - only uses provided data
+ * Includes retry logic for reliability
  */
 export async function generateEventBlogPost(event: EventData): Promise<GeneratedBlogArticle> {
+  const maxRetries = 2;
+  let lastError: Error | null = null;
+
+  for (let attempt = 0; attempt <= maxRetries; attempt++) {
+    try {
+      const article = await attemptGenerateEventBlogPost(event);
+      return article;
+    } catch (error) {
+      lastError = error as Error;
+      console.error(`Blog generation attempt ${attempt + 1} failed for "${event.title}":`, error);
+
+      // Wait before retry (exponential backoff)
+      if (attempt < maxRetries) {
+        const delay = 2000 * (attempt + 1);
+        console.log(`Retrying in ${delay}ms...`);
+        await new Promise(resolve => setTimeout(resolve, delay));
+      }
+    }
+  }
+
+  // All retries failed - throw the last error
+  throw lastError || new Error(`Failed to generate blog for "${event.title}" after ${maxRetries + 1} attempts`);
+}
+
+/**
+ * Internal function that attempts to generate a blog post
+ */
+async function attemptGenerateEventBlogPost(event: EventData): Promise<GeneratedBlogArticle> {
   // Extract ACCURATE location info from ALL available event data
   const locationSources = [
     event.venue_address,
@@ -161,27 +190,59 @@ Remember: ACCURACY IS MANDATORY. Only use the data provided. The city is ${actua
     throw new Error('Unexpected response type from Claude');
   }
 
-  // Parse JSON from response - handle potential markdown code blocks
-  let jsonText = content.text.trim();
+  // Parse JSON from response with robust error handling
+  const text = content.text.trim();
+  let article: GeneratedBlogArticle;
 
-  // Remove markdown code blocks if present
-  if (jsonText.startsWith('```json')) {
-    jsonText = jsonText.slice(7);
-  } else if (jsonText.startsWith('```')) {
-    jsonText = jsonText.slice(3);
-  }
-  if (jsonText.endsWith('```')) {
-    jsonText = jsonText.slice(0, -3);
-  }
-  jsonText = jsonText.trim();
+  try {
+    // First try: direct JSON parse
+    article = JSON.parse(text);
+  } catch {
+    // Second try: extract JSON from markdown code block
+    let jsonText = text;
 
-  // Find JSON object in the response
-  const jsonMatch = jsonText.match(/\{[\s\S]*\}/);
-  if (!jsonMatch) {
-    throw new Error('Could not parse JSON from Claude response');
+    // Remove markdown code blocks if present
+    const codeBlockMatch = text.match(/```(?:json)?\s*([\s\S]*?)```/);
+    if (codeBlockMatch) {
+      jsonText = codeBlockMatch[1].trim();
+      try {
+        article = JSON.parse(jsonText);
+      } catch {
+        // Third try: find JSON object in text
+        const objectMatch = text.match(/\{[\s\S]*\}/);
+        if (objectMatch) {
+          try {
+            article = JSON.parse(objectMatch[0]);
+          } catch (parseError) {
+            console.error('Failed to parse JSON from response:', text.substring(0, 500));
+            throw new Error(`Failed to parse JSON: ${parseError instanceof Error ? parseError.message : 'Unknown parse error'}`);
+          }
+        } else {
+          console.error('No JSON found in response:', text.substring(0, 500));
+          throw new Error('No valid JSON found in AI response');
+        }
+      }
+    } else {
+      // Try to find JSON object in raw text
+      const objectMatch = text.match(/\{[\s\S]*\}/);
+      if (objectMatch) {
+        try {
+          article = JSON.parse(objectMatch[0]);
+        } catch (parseError) {
+          console.error('Failed to parse JSON from response:', text.substring(0, 500));
+          throw new Error(`Failed to parse JSON: ${parseError instanceof Error ? parseError.message : 'Unknown parse error'}`);
+        }
+      } else {
+        console.error('No JSON found in response:', text.substring(0, 500));
+        throw new Error('No valid JSON found in AI response');
+      }
+    }
   }
 
-  const article = JSON.parse(jsonMatch[0]) as GeneratedBlogArticle;
+  // Validate required fields
+  if (!article.title || !article.content) {
+    throw new Error('AI response missing required fields (title or content)');
+  }
 
   // CRITICAL: Override with extracted values to ensure accuracy
   // This is a safety net in case the AI doesn't follow instructions

@@ -209,7 +209,7 @@ export async function POST(request: NextRequest) {
         // Get featured image
         const featuredImage = event.cover_url || event.image_url || event.featured_image;
 
-        // Save to database with accurate location data (using already-validated finalCity/finalCountry)
+        // Save to database with accurate location data and event details
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         const { data: savedArticle, error: saveError } = await (supabase as any)
           .from('blog_articles')
@@ -231,6 +231,11 @@ export async function POST(request: NextRequest) {
             article_type: 'event',
             status: 'published',
             published_at: new Date().toISOString(),
+            // Event-specific fields for modal display
+            event_date: event.start_date,
+            event_end_date: event.end_date,
+            event_venue: event.venue_name,
+            affiliate_url: event.affiliate_url,
           })
           .select()
           .single() as { data: BlogArticle | null; error: Error | null };
