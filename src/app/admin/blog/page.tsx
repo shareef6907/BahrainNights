@@ -382,6 +382,12 @@ export default function BlogAdminPage() {
           </p>
         </div>
         <div className="flex items-center gap-2">
+          <Link
+            href="/admin/blog/trailers"
+            className="px-4 py-2 bg-purple-600 hover:bg-purple-500 text-white rounded-xl font-medium text-sm transition-all flex items-center gap-2"
+          >
+            🎬 Manage Trailers
+          </Link>
           <button
             onClick={() => { fetchArticles(); fetchGeneratorStats(); }}
             disabled={isLoading}

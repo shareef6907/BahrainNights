@@ -18,7 +18,7 @@ interface Movie {
 export function HeroTrailerPlayer() {
   const [movies, setMovies] = useState<Movie[]>([]);
   const [currentIndex, setCurrentIndex] = useState(0);
-  const [isMuted, setIsMuted] = useState(true);
+  const [isMuted, setIsMuted] = useState(true); // Start muted (browser requirement)
   const [isLoading, setIsLoading] = useState(true);
   const [hasUserInteracted, setHasUserInteracted] = useState(false);
   const [showUnmuteHint, setShowUnmuteHint] = useState(true);
@@ -53,6 +53,23 @@ export function HeroTrailerPlayer() {
 
   const fetchMovies = async () => {
     try {
+      // First try to fetch admin-curated featured trailers
+      const featuredRes = await fetch('/api/admin/blog/trailers');
+      const featuredData = await featuredRes.json();
+
+      if (featuredData.trailers?.length > 0) {
+        const activeTrailers = featuredData.trailers
+          .filter((t: { is_active: boolean; movie?: Movie }) => t.is_active && t.movie)
+          .map((t: { movie: Movie }) => t.movie);
+
+        if (activeTrailers.length > 0) {
+          setMovies(activeTrailers);
+          setIsLoading(false);
+          return;
+        }
+      }
+
+      // Fallback to regular trailers API
       const res = await fetch('/api/cinema/trailers?limit=5');
       const data = await res.json();
       if (data.movies?.length > 0) {
@@ -60,6 +77,16 @@ export function HeroTrailerPlayer() {
       }
     } catch (error) {
       console.error('Failed to fetch trailers:', error);
+      // Try fallback
+      try {
+        const res = await fetch('/api/cinema/trailers?limit=5');
+        const data = await res.json();
+        if (data.movies?.length > 0) {
+          setMovies(data.movies);
+        }
+      } catch {
+        // Silent fail
+      }
     } finally {
       setIsLoading(false);
     }
@@ -70,7 +97,7 @@ export function HeroTrailerPlayer() {
     if (movies.length > 1) {
       autoAdvanceRef.current = setInterval(() => {
         setCurrentIndex((prev) => (prev + 1) % movies.length);
-      }, 20000); // 20 seconds per trailer
+      }, 25000); // 25 seconds per trailer
     }
     return () => {
       if (autoAdvanceRef.current) clearInterval(autoAdvanceRef.current);
@@ -89,12 +116,12 @@ export function HeroTrailerPlayer() {
     return null;
   }, []);
 
-  // Precompute all YouTube URLs - always start muted, control via postMessage
+  // Precompute all YouTube URLs - mute state controlled via postMessage
   const youtubeUrls = useMemo(() => {
     return movies.map(movie => {
       const videoId = getVideoId(movie);
       if (!videoId) return null;
-      // Always load muted, we'll control volume via postMessage
+      // Always load muted (browser requirement), control via postMessage
       return `https://www.youtube.com/embed/${videoId}?autoplay=1&mute=1&controls=0&loop=1&playlist=${videoId}&modestbranding=1&rel=0&showinfo=0&iv_load_policy=3&disablekb=1&enablejsapi=1&origin=${typeof window !== 'undefined' ? window.location.origin : ''}`;
     });
   }, [movies, getVideoId]);
@@ -121,7 +148,7 @@ export function HeroTrailerPlayer() {
       clearInterval(autoAdvanceRef.current);
       autoAdvanceRef.current = setInterval(() => {
         setCurrentIndex((prev) => (prev + 1) % movies.length);
-      }, 20000);
+      }, 25000);
     }
   };
 

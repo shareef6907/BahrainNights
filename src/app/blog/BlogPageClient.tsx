@@ -18,19 +18,34 @@ interface BlogArticle {
   read_time_minutes: number;
   view_count: number;
   published_at: string;
+  is_featured?: boolean;
 }
 
 interface Props {
+  featured: BlogArticle[];
   bahrain: BlogArticle[];
-  uae: BlogArticle[];
-  saudi: BlogArticle[];
-  qatar: BlogArticle[];
-  uk: BlogArticle[];
+  dubai: BlogArticle[];
+  abuDhabi: BlogArticle[];
+  riyadh: BlogArticle[];
+  jeddah: BlogArticle[];
+  doha: BlogArticle[];
+  london: BlogArticle[];
   trending: BlogArticle[];
   latest: BlogArticle[];
 }
 
-export function BlogPageClient({ bahrain, uae, saudi, qatar, uk, trending, latest }: Props) {
+export function BlogPageClient({
+  featured,
+  bahrain,
+  dubai,
+  abuDhabi,
+  riyadh,
+  jeddah,
+  doha,
+  london,
+  trending,
+  latest,
+}: Props) {
   const [selectedArticle, setSelectedArticle] = useState<BlogArticle | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
 
@@ -44,6 +59,8 @@ export function BlogPageClient({ bahrain, uae, saudi, qatar, uk, trending, lates
     setTimeout(() => setSelectedArticle(null), 300);
   };
 
+  const hasArticles = trending.length > 0 || latest.length > 0;
+
   return (
     <div className="min-h-screen bg-gray-950">
       {/* Full-Screen Hero Trailer */}
@@ -51,89 +68,123 @@ export function BlogPageClient({ bahrain, uae, saudi, qatar, uk, trending, lates
 
       {/* Content Rows */}
       <div className="relative z-10 -mt-20 pb-20">
-        {/* Trending */}
-        {trending.length > 0 && (
-          <BlogRow
-            title="Trending Now"
-            icon="🔥"
-            articles={trending}
-            onSelectArticle={handleSelectArticle}
-          />
-        )}
-
-        {/* Latest */}
-        {latest.length > 0 && (
-          <BlogRow
-            title="Latest Stories"
-            icon="✨"
-            articles={latest}
-            onSelectArticle={handleSelectArticle}
-          />
-        )}
-
-        {/* Bahrain */}
-        {bahrain.length > 0 && (
-          <BlogRow
-            title="Bahrain"
-            icon="🇧🇭"
-            articles={bahrain}
-            onSelectArticle={handleSelectArticle}
-            seeAllLink="/blog/places-to-go/bahrain"
-          />
-        )}
-
-        {/* UAE */}
-        {uae.length > 0 && (
-          <BlogRow
-            title="UAE"
-            icon="🇦🇪"
-            articles={uae}
-            onSelectArticle={handleSelectArticle}
-            seeAllLink="/blog/places-to-go/uae"
-          />
-        )}
-
-        {/* Saudi Arabia */}
-        {saudi.length > 0 && (
-          <BlogRow
-            title="Saudi Arabia"
-            icon="🇸🇦"
-            articles={saudi}
-            onSelectArticle={handleSelectArticle}
-            seeAllLink="/blog/places-to-go/saudi-arabia"
-          />
-        )}
-
-        {/* Qatar */}
-        {qatar.length > 0 && (
-          <BlogRow
-            title="Qatar"
-            icon="🇶🇦"
-            articles={qatar}
-            onSelectArticle={handleSelectArticle}
-            seeAllLink="/blog/places-to-go/qatar"
-          />
-        )}
-
-        {/* UK */}
-        {uk.length > 0 && (
-          <BlogRow
-            title="United Kingdom"
-            icon="🇬🇧"
-            articles={uk}
-            onSelectArticle={handleSelectArticle}
-            seeAllLink="/blog/places-to-go/uk"
-          />
-        )}
-
-        {/* Empty State */}
-        {trending.length === 0 && latest.length === 0 && (
+        {!hasArticles ? (
+          /* No Articles State */
           <div className="text-center py-32 px-4">
             <h2 className="text-4xl font-bold text-white mb-4">Coming Soon</h2>
             <p className="text-gray-400 text-lg max-w-md mx-auto">
               We&apos;re preparing amazing stories about events, culture & nightlife across the region.
             </p>
           </div>
+        ) : (
+          <>
+            {/* Featured Stories */}
+            {featured.length > 0 && (
+              <BlogRow
+                title="Featured Stories"
+                icon="⭐"
+                articles={featured}
+                onSelectArticle={handleSelectArticle}
+              />
+            )}
+
+            {/* Trending */}
+            {trending.length > 0 && (
+              <BlogRow
+                title="Trending Now"
+                icon="🔥"
+                articles={trending}
+                onSelectArticle={handleSelectArticle}
+              />
+            )}
+
+            {/* Latest */}
+            {latest.length > 0 && (
+              <BlogRow
+                title="Latest Stories"
+                icon="✨"
+                articles={latest}
+                onSelectArticle={handleSelectArticle}
+              />
+            )}
+
+            {/* Bahrain */}
+            {bahrain.length > 0 && (
+              <BlogRow
+                title="Bahrain"
+                icon="🇧🇭"
+                articles={bahrain}
+                onSelectArticle={handleSelectArticle}
+                seeAllLink="/blog/places-to-go/bahrain"
+              />
+            )}
+
+            {/* Dubai */}
+            {dubai.length > 0 && (
+              <BlogRow
+                title="Dubai"
+                icon="🇦🇪"
+                articles={dubai}
+                onSelectArticle={handleSelectArticle}
+                seeAllLink="/blog/places-to-go/uae"
+              />
+            )}
+
+            {/* Abu Dhabi */}
+            {abuDhabi.length > 0 && (
+              <BlogRow
+                title="Abu Dhabi"
+                icon="🇦🇪"
+                articles={abuDhabi}
+                onSelectArticle={handleSelectArticle}
+                seeAllLink="/blog/places-to-go/uae"
+              />
+            )}
+
+            {/* Riyadh */}
+            {riyadh.length > 0 && (
+              <BlogRow
+                title="Riyadh"
+                icon="🇸🇦"
+                articles={riyadh}
+                onSelectArticle={handleSelectArticle}
+                seeAllLink="/blog/places-to-go/saudi-arabia"
+              />
+            )}
+
+            {/* Jeddah */}
+            {jeddah.length > 0 && (
+              <BlogRow
+                title="Jeddah"
+                icon="🇸🇦"
+                articles={jeddah}
+                onSelectArticle={handleSelectArticle}
+                seeAllLink="/blog/places-to-go/saudi-arabia"
+              />
+            )}
+
+            {/* Doha */}
+            {doha.length > 0 && (
+              <BlogRow
+                title="Doha"
+                icon="🇶🇦"
+                articles={doha}
+                onSelectArticle={handleSelectArticle}
+                seeAllLink="/blog/places-to-go/qatar"
+              />
+            )}
+
+            {/* London */}
+            {london.length > 0 && (
+              <BlogRow
+                title="London"
+                icon="🇬🇧"
+                articles={london}
+                onSelectArticle={handleSelectArticle}
+                seeAllLink="/blog/places-to-go/uk"
+              />
+            )}
+          </>
         )}
       </div>
 

@@ -28,6 +28,7 @@ interface BlogArticle {
   read_time_minutes: number;
   view_count: number;
   published_at: string;
+  is_featured?: boolean;
 }
 
 async function getBlogArticles() {
@@ -38,7 +39,7 @@ async function getBlogArticles() {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const { data: articles, error } = await (supabase as any)
       .from('blog_articles')
-      .select('id, title, slug, excerpt, content, featured_image, country, city, category, read_time_minutes, view_count, published_at')
+      .select('id, title, slug, excerpt, content, featured_image, country, city, category, read_time_minutes, view_count, published_at, is_featured')
       .eq('status', 'published')
       .order('published_at', { ascending: false }) as { data: BlogArticle[] | null; error: Error | null };
 
@@ -57,28 +58,61 @@ async function getBlogArticles() {
 export default async function BlogPage() {
   const articles = await getBlogArticles();
 
-  // Group by country
-  const bahrain = articles.filter(a => a.country === 'bahrain');
-  const uae = articles.filter(a => a.country === 'uae');
-  const saudi = articles.filter(a => a.country === 'saudi-arabia');
-  const qatar = articles.filter(a => a.country === 'qatar');
-  const uk = articles.filter(a => a.country === 'uk');
+  // Featured articles (admin-selected)
+  const featured = articles.filter(a => a.is_featured).slice(0, 10);
 
   // Get trending (most viewed)
   const trending = [...articles]
     .sort((a, b) => (b.view_count || 0) - (a.view_count || 0))
-    .slice(0, 10);
+    .slice(0, 15);
 
   // Get latest
-  const latest = articles.slice(0, 10);
+  const latest = articles.slice(0, 15);
+
+  // City-based filtering
+  const bahrain = articles.filter(a =>
+    a.country === 'bahrain' ||
+    a.city?.toLowerCase().includes('manama') ||
+    a.city?.toLowerCase().includes('bahrain')
+  );
+
+  const dubai = articles.filter(a =>
+    a.city?.toLowerCase().includes('dubai')
+  );
+
+  const abuDhabi = articles.filter(a =>
+    a.city?.toLowerCase().includes('abu dhabi') ||
+    a.city?.toLowerCase().includes('abu-dhabi')
+  );
+
+  const riyadh = articles.filter(a =>
+    a.city?.toLowerCase().includes('riyadh')
+  );
+
+  const jeddah = articles.filter(a =>
+    a.city?.toLowerCase().includes('jeddah')
+  );
+
+  const doha = articles.filter(a =>
+    a.city?.toLowerCase().includes('doha') ||
+    a.country === 'qatar'
+  );
+
+  const london = articles.filter(a =>
+    a.city?.toLowerCase().includes('london') ||
+    a.country === 'uk'
+  );
 
   return (
     <BlogPageClient
+      featured={featured}
       bahrain={bahrain}
-      uae={uae}
-      saudi={saudi}
-      qatar={qatar}
-      uk={uk}
+      dubai={dubai}
+      abuDhabi={abuDhabi}
+      riyadh={riyadh}
+      jeddah={jeddah}
+      doha={doha}
+      london={london}
       trending={trending}
       latest={latest}
     />
