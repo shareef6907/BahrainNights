@@ -168,7 +168,10 @@ export function HeroTrailerPlayer() {
         <div className="absolute inset-0 bg-[url('/images/hero-pattern.svg')] opacity-10" />
         <div className="relative text-center px-4">
           <h1 className="text-4xl md:text-6xl lg:text-7xl font-black text-white mb-4">
-            <span className="bg-gradient-to-r from-yellow-400 via-orange-500 to-pink-500 bg-clip-text text-transparent">
+            <span
+              className="bg-gradient-to-r from-amber-200 via-yellow-300 to-amber-400 bg-clip-text text-transparent"
+              style={{ filter: 'drop-shadow(0 0 12px rgba(251, 191, 36, 0.5))' }}
+            >
               BahrainNights
             </span>{' '}
             Blog

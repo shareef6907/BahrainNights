@@ -75,7 +75,7 @@ export default function AuthCard({ children, variant = 'login' }: AuthCardProps)
         <div className="relative z-10 flex flex-col justify-center px-12 w-full">
           {/* Logo */}
           <Link href="/" className="inline-flex items-center gap-2 mb-8">
-            <span className="text-3xl font-black bg-gradient-to-r from-yellow-400 via-orange-500 to-pink-500 bg-clip-text text-transparent">
+            <span className="text-3xl font-black bg-gradient-to-r from-amber-200 via-yellow-300 to-amber-400 bg-clip-text text-transparent">
               BahrainNights
             </span>
             <span className="flex text-xs text-yellow-400 items-center gap-1">
@@ -140,7 +140,7 @@ export default function AuthCard({ children, variant = 'login' }: AuthCardProps)
           {/* Mobile Logo */}
           <div className="lg:hidden text-center mb-8">
             <Link href="/" className="inline-flex flex-col items-center gap-2">
-              <span className="text-2xl font-black bg-gradient-to-r from-yellow-400 via-orange-500 to-pink-500 bg-clip-text text-transparent">
+              <span className="text-2xl font-black bg-gradient-to-r from-amber-200 via-yellow-300 to-amber-400 bg-clip-text text-transparent">
                 BahrainNights
               </span>
               <span className="flex text-xs text-yellow-400 items-center gap-1">
