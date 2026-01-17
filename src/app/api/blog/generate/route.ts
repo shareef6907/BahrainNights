@@ -127,6 +127,20 @@ export async function POST(request: NextRequest) {
 
     for (const event of unbloggedEvents) {
       try {
+        // CRITICAL: Double-check this event hasn't been blogged by a concurrent request
+        // This prevents race conditions when multiple requests run simultaneously
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        const { data: existingArticle } = await (supabase as any)
+          .from('blog_articles')
+          .select('id')
+          .eq('event_id', event.id)
+          .maybeSingle();
+
+        if (existingArticle) {
+          console.log(`Skipping event ${event.id} - article already exists (race condition prevented)`);
+          continue;
+        }
+
         // CRITICAL: Combine ALL location sources for accurate extraction
         // Include title, description, venue info, and source URL for maximum coverage
         const allLocationSources = [
@@ -247,6 +261,14 @@ export async function POST(request: NextRequest) {
           .single() as { data: BlogArticle | null; error: Error | null };
 
         if (saveError || !savedArticle) {
+          // Check if error is due to duplicate event_id (race condition)
+          const isDuplicateError = saveError?.message?.includes('duplicate') ||
+                                   saveError?.message?.includes('unique') ||
+                                   saveError?.message?.includes('event_id');
+          if (isDuplicateError) {
+            console.log(`Skipping event ${event.id} - duplicate detected during insert (race condition)`);
+            continue; // Skip to next event, don't count as error
+          }
           console.error(`Error saving article for event ${event.id}:`, saveError);
           errors.push({
             event_id: event.id,
