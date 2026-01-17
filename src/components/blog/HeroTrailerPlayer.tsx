@@ -29,11 +29,14 @@ export function HeroTrailerPlayer() {
   const [movies, setMovies] = useState<Movie[]>([]);
   const [currentIndex, setCurrentIndex] = useState(0);
   const [isMobile, setIsMobile] = useState(false);
-  const [isMuted, setIsMuted] = useState(true); // Start muted, will adjust based on device
+  const [isMuted, setIsMuted] = useState(true); // UI state for mute toggle
   const [isLoading, setIsLoading] = useState(true);
   const [showMobileHint, setShowMobileHint] = useState(false);
   const autoAdvanceRef = useRef<NodeJS.Timeout | null>(null);
   const iframeRef = useRef<HTMLIFrameElement | null>(null);
+  // IMPORTANT: initialMuted is used in iframe URL and NEVER changes
+  // This prevents iframe reload when toggling mute via postMessage
+  const initialMutedRef = useRef<boolean>(true);
 
   // Detect mobile device and set initial mute state
   useEffect(() => {
@@ -43,6 +46,7 @@ export function HeroTrailerPlayer() {
       setIsMobile(mobile);
       // Mobile: MUST be muted for autoplay to work (browser requirement)
       // Desktop: Can autoplay unmuted
+      initialMutedRef.current = mobile;
       setIsMuted(mobile);
       // Show sound hint only on mobile
       setShowMobileHint(mobile);
@@ -174,8 +178,10 @@ export function HeroTrailerPlayer() {
   // IMPORTANT: Only create ONE iframe URL for the CURRENT trailer
   // This prevents multiple audio streams playing simultaneously
   // playsinline=1 is required for iOS autoplay
+  // CRITICAL: Use initialMutedRef (not isMuted) so URL doesn't change when toggling sound
+  // Mobile MUST start muted for autoplay to work, postMessage handles unmute
   const iframeUrl = videoId
-    ? `https://www.youtube.com/embed/${videoId}?autoplay=1&mute=${isMuted ? 1 : 0}&controls=0&loop=1&playlist=${videoId}&modestbranding=1&rel=0&showinfo=0&iv_load_policy=3&disablekb=1&enablejsapi=1&playsinline=1`
+    ? `https://www.youtube.com/embed/${videoId}?autoplay=1&mute=${initialMutedRef.current ? 1 : 0}&controls=0&loop=1&playlist=${videoId}&modestbranding=1&rel=0&showinfo=0&iv_load_policy=3&disablekb=1&enablejsapi=1&playsinline=1&origin=${typeof window !== 'undefined' ? window.location.origin : ''}`
     : null;
 
   const genreDisplay = currentMovie && Array.isArray(currentMovie.genre)
@@ -293,21 +299,6 @@ export function HeroTrailerPlayer() {
             />
           ))}
         </div>
-      )}
-
-      {/* Volume Toggle - Bottom Right */}
-      {iframeUrl && (
-        <button
-          onClick={toggleMute}
-          className={`absolute bottom-8 right-8 p-3 rounded-full border transition-all ${
-            isMuted
-              ? 'bg-yellow-500 hover:bg-yellow-400 text-black border-yellow-400'
-              : 'bg-black/50 hover:bg-black/80 text-white border-white/30'
-          }`}
-          aria-label={isMuted ? 'Unmute' : 'Mute'}
-        >
-          {isMuted ? <VolumeX size={24} /> : <Volume2 size={24} />}
-        </button>
       )}
 
       {/* Mobile Sound Hint - Prominent tap button */}
