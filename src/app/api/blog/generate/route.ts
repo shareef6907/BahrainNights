@@ -109,10 +109,22 @@ export async function POST(request: NextRequest) {
 
     for (const event of unbloggedEvents) {
       try {
-        // Determine location info
-        const location = event.venue_address || event.venue_name || 'Bahrain';
-        const country = determineCountry(location);
-        const city = determineCity(location);
+        // CRITICAL: Combine ALL location sources for accurate extraction
+        // Do NOT default to Bahrain - let the extraction functions determine the actual location
+        const allLocationSources = [
+          event.venue_address,
+          event.venue_name,
+        ].filter(Boolean).join(' ');
+
+        // Extract accurate city and country - NO defaults to Bahrain/Manama
+        const extractedCity = determineCity(allLocationSources);
+        const extractedCountry = determineCountry(allLocationSources);
+
+        // Log for debugging
+        console.log(`Event: ${event.title}`);
+        console.log(`  Location sources: ${allLocationSources}`);
+        console.log(`  Extracted city: ${extractedCity || 'unknown'}`);
+        console.log(`  Extracted country: ${extractedCountry || 'unknown'}`);
 
         const eventData: EventData = {
           id: event.id,
@@ -120,9 +132,9 @@ export async function POST(request: NextRequest) {
           description: event.description,
           venue_name: event.venue_name,
           venue_address: event.venue_address,
-          location,
-          city: city || 'Manama',
-          country,
+          location: allLocationSources || 'Location not specified',
+          city: extractedCity || 'unknown',
+          country: extractedCountry || 'unknown',
           start_date: event.start_date,
           end_date: event.end_date,
           start_time: event.start_time,
@@ -134,14 +146,19 @@ export async function POST(request: NextRequest) {
           booking_url: event.booking_url,
         };
 
-        // Generate blog post using AI
+        // Generate blog post using AI - this now uses strict factual prompts
         console.log(`Generating blog post for: ${event.title}`);
         const article = await generateEventBlogPost(eventData);
 
         // Get featured image
         const featuredImage = event.cover_url || event.image_url || event.featured_image;
 
-        // Save to database
+        // Use the extracted location for database storage
+        // The article generation will also validate these
+        const finalCountry = extractedCountry || 'unknown';
+        const finalCity = extractedCity || null;
+
+        // Save to database with accurate location data
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         const { data: savedArticle, error: saveError } = await (supabase as any)
           .from('blog_articles')
@@ -155,8 +172,8 @@ export async function POST(request: NextRequest) {
             keywords: article.keywords,
             tags: article.tags,
             read_time_minutes: article.read_time_minutes,
-            country,
-            city: city || null,
+            country: finalCountry,
+            city: finalCity,
             category: event.category,
             event_id: event.id,
             featured_image: featuredImage,
@@ -221,6 +238,8 @@ export async function POST(request: NextRequest) {
       revalidatePath('/blog/places-to-go/bahrain');
       revalidatePath('/blog/places-to-go/saudi-arabia');
       revalidatePath('/blog/places-to-go/uae');
+      revalidatePath('/blog/places-to-go/qatar');
+      revalidatePath('/blog/places-to-go/uk');
     }
 
     return NextResponse.json({

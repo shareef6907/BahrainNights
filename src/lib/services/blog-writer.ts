@@ -1,6 +1,9 @@
 /**
  * AI Blog Writer Service for BahrainNights.com
  * Uses Anthropic Claude to generate SEO-optimized blog posts
+ *
+ * CRITICAL: This service uses STRICT FACTUAL prompts to prevent
+ * the AI from making up information or incorrect locations.
  */
 
 import Anthropic from '@anthropic-ai/sdk';
@@ -47,85 +50,104 @@ export interface VenueData {
 
 /**
  * Generate an SEO-optimized blog post for an event
+ * Uses STRICT FACTUAL prompts - only uses provided data
  */
 export async function generateEventBlogPost(event: EventData): Promise<GeneratedBlogArticle> {
-  const prompt = `You are a world-class entertainment and lifestyle writer for BahrainNights.com, the premier events platform for Bahrain and the Middle East.
+  // Extract ACCURATE location info from ALL available event data
+  const locationSources = [
+    event.venue_address,
+    event.venue_name,
+    event.location,
+    event.city,
+    event.country
+  ].filter(Boolean).join(' ');
 
-Write an engaging, inspiring, and SEO-optimized blog post about this event:
+  // Determine accurate city and country
+  const extractedCity = determineCity(locationSources);
+  const extractedCountry = determineCountry(locationSources);
 
-EVENT DETAILS:
-- Title: ${event.title}
-- Venue: ${event.venue_name || 'TBA'}
-- Location: ${event.venue_address || event.location}
-- City: ${event.city}
-- Country: ${event.country}
-- Date: ${event.start_date || 'Check website'}${event.end_date ? ` to ${event.end_date}` : ''}
-- Time: ${event.start_time || 'Check website'}
-- Category: ${event.category}
-- Description: ${event.description || 'No description provided'}
-- Price: ${event.price || 'Check website for pricing'}
+  // Use extracted values, falling back to provided values, then 'unknown'
+  const actualCity = extractedCity || event.city || 'unknown';
+  const actualCountry = extractedCountry || event.country || 'unknown';
 
-WRITING GUIDELINES:
+  // Format country for display
+  const countryDisplay = formatCountryName(actualCountry);
 
-1. **HOOK**: Start with a captivating opening that draws readers in. Don't start with the event name - start with emotion, a story, or a compelling fact.
+  const prompt = `You are a content writer for BahrainNights.com, an events platform covering the Middle East and beyond.
 
-2. **STORYTELLING**: Include interesting elements about:
-   - The performer/artist/event (their journey, achievements, interesting facts)
-   - The venue (ambiance, what makes it special)
-   - The city/location (why it's a great place for this event)
+═══════════════════════════════════════════════════════════════════
+CRITICAL RULES - YOU MUST FOLLOW THESE EXACTLY:
+═══════════════════════════════════════════════════════════════════
 
-3. **PERSONAL & INSPIRING**:
-   - Connect with the reader emotionally
-   - Include motivational elements ("If you've ever dreamed of...")
-   - Make them feel like they NEED to be there
+1. ⚠️ ONLY use the information provided below. Do NOT make up ANY facts.
+2. ⚠️ ONLY mention the venue, city, and country EXACTLY as provided below.
+3. ⚠️ Do NOT assume this event is in Bahrain unless the data says so.
+4. ⚠️ Do NOT research or add information about performers/teams/artists.
+5. ⚠️ Do NOT invent history, background stories, or facts about anyone.
+6. ⚠️ If information is missing, write generally without making up specifics.
+7. ⚠️ Keep the tone engaging but 100% FACTUALLY ACCURATE.
 
-4. **PRACTICAL INFO**:
-   - What to expect at the event
-   - Best time to arrive
-   - What to wear (if relevant)
-   - Nearby attractions or restaurants
+═══════════════════════════════════════════════════════════════════
+EVENT DATA - USE ONLY THIS INFORMATION:
+═══════════════════════════════════════════════════════════════════
 
-5. **SEO REQUIREMENTS**:
-   - Naturally include keywords: "${event.city} events", "things to do in ${event.city}", "${event.category} ${event.country}"
-   - Use headers (H2, H3) to structure content
-   - Write 800-1200 words
+Title: ${event.title}
+Venue: ${event.venue_name || 'Venue to be announced'}
+Venue Address: ${event.venue_address || 'Address not specified'}
+City: ${actualCity}
+Country: ${countryDisplay}
+Date: ${event.start_date || 'Date to be announced'}${event.end_date && event.end_date !== event.start_date ? ` to ${event.end_date}` : ''}
+Time: ${event.start_time || 'Time to be announced'}
+Category: ${event.category || 'Event'}
+Price: ${event.price || 'Check website for pricing'}
+Event Description: ${event.description || 'No description available'}
 
-6. **TONE**:
-   - Exciting but not cheesy
-   - Informative but entertaining
-   - Premium but approachable
-   - Like a knowledgeable friend sharing insider tips
+═══════════════════════════════════════════════════════════════════
+WRITING INSTRUCTIONS:
+═══════════════════════════════════════════════════════════════════
 
-7. **FORMAT**:
-   - Use HTML formatting (<h2>, <h3>, <p>, <strong>, <ul>, <li>)
-   - Break up text with subheadings
-   - Keep paragraphs short and scannable
+1. Write a 400-600 word blog post about this event
+2. Start with an engaging hook about the TYPE of event (not made-up facts)
+3. Use EXACTLY this city: ${actualCity} - do NOT use any other city
+4. Use EXACTLY this country: ${countryDisplay} - do NOT use any other country
+5. Mention the date and time exactly as provided above
+6. If there's a description, use information from it - don't add to it
+7. Include a call-to-action to get tickets
+8. Use HTML formatting: <h2>, <p>, <strong>, <ul>, <li>
 
-8. **CALL TO ACTION**: End with urgency to book tickets or attend
+═══════════════════════════════════════════════════════════════════
+🚫 FORBIDDEN - NEVER DO THESE:
+═══════════════════════════════════════════════════════════════════
 
-DO NOT:
-- Use generic filler content
-- Be boring or corporate
-- Copy the event description verbatim
-- Use clickbait or misleading info
-- Include any competitor names
+❌ Do NOT say the event is in Bahrain or Manama unless City is "Manama" above
+❌ Do NOT invent performer/team biographies, histories, or achievements
+❌ Do NOT make up venue descriptions, histories, or atmospheres
+❌ Do NOT add facts that aren't in the provided data above
+❌ Do NOT assume anything - only use what's explicitly provided
+❌ Do NOT mention cities other than: ${actualCity}
+❌ Do NOT mention countries other than: ${countryDisplay}
 
-Respond ONLY with valid JSON in this exact format (no markdown, no code blocks):
+═══════════════════════════════════════════════════════════════════
+FORMAT YOUR RESPONSE AS JSON:
+═══════════════════════════════════════════════════════════════════
+
 {
-  "title": "Catchy, SEO-friendly title (50-60 chars)",
-  "slug": "url-friendly-slug-no-special-chars",
-  "excerpt": "Compelling 2-sentence summary (150-160 chars)",
-  "content": "Full HTML-formatted article content",
-  "meta_title": "SEO title with keywords (50-60 chars)",
-  "meta_description": "SEO description (150-160 chars)",
-  "keywords": ["keyword1", "keyword2", "keyword3", "keyword4", "keyword5"],
-  "tags": ["tag1", "tag2", "tag3"],
-  "read_time_minutes": 5
-}`;
+  "title": "Event title including ${actualCity} (50-60 chars max)",
+  "slug": "url-friendly-slug-with-${actualCity.toLowerCase().replace(/\s+/g, '-')}",
+  "excerpt": "2 sentence summary mentioning ${actualCity}, ${countryDisplay}",
+  "content": "HTML formatted article - ONLY use facts from above",
+  "meta_title": "SEO title with ${actualCity} (50-60 chars)",
+  "meta_description": "SEO description mentioning ${actualCity} (150-160 chars)",
+  "keywords": ["${actualCity.toLowerCase()} events", "${event.category?.toLowerCase() || 'events'}", "things to do in ${actualCity.toLowerCase()}"],
+  "tags": ["${actualCity}", "${countryDisplay}", "${event.category || 'Events'}"],
+  "read_time_minutes": 3
+}
+
+Remember: ACCURACY IS MANDATORY. Only use the data provided. The city is ${actualCity} and the country is ${countryDisplay}.`;
 
   const response = await anthropic.messages.create({
     model: 'claude-sonnet-4-20250514',
-    max_tokens: 4000,
+    max_tokens: 3000,
     messages: [
       {
         role: 'user',
@@ -161,6 +183,22 @@ Respond ONLY with valid JSON in this exact format (no markdown, no code blocks):
 
   const article = JSON.parse(jsonMatch[0]) as GeneratedBlogArticle;
 
+  // CRITICAL: Override with extracted values to ensure accuracy
+  // This is a safety net in case the AI doesn't follow instructions
+
+  // Validate that the article doesn't contain wrong locations
+  const contentLower = article.content.toLowerCase();
+  const titleLower = article.title.toLowerCase();
+
+  // If event is NOT in Bahrain but article mentions Bahrain/Manama - this is wrong
+  if (actualCountry !== 'bahrain' && actualCity.toLowerCase() !== 'manama') {
+    if (contentLower.includes('bahrain') || contentLower.includes('manama') ||
+        titleLower.includes('bahrain') || titleLower.includes('manama')) {
+      console.error(`Location mismatch detected! Event is in ${actualCity}, ${countryDisplay} but article mentions Bahrain/Manama`);
+      throw new Error(`Location mismatch: Article incorrectly mentions Bahrain/Manama for event in ${actualCity}, ${countryDisplay}`);
+    }
+  }
+
   // Ensure slug is URL-friendly and unique
   article.slug = article.slug
     .toLowerCase()
@@ -176,54 +214,67 @@ Respond ONLY with valid JSON in this exact format (no markdown, no code blocks):
 
 /**
  * Generate an SEO-optimized blog post for a venue
+ * Uses STRICT FACTUAL prompts - only uses provided data
  */
 export async function generateVenueBlogPost(venue: VenueData): Promise<GeneratedBlogArticle> {
-  const prompt = `You are a world-class food, nightlife, and lifestyle writer for BahrainNights.com.
+  // Determine accurate location
+  const locationSources = [venue.address, venue.area, venue.city, venue.country].filter(Boolean).join(' ');
+  const actualCity = determineCity(locationSources) || venue.city || 'unknown';
+  const actualCountry = determineCountry(locationSources) || venue.country || 'unknown';
+  const countryDisplay = formatCountryName(actualCountry);
 
-Write an engaging, SEO-optimized blog post about this venue:
+  const prompt = `You are a content writer for BahrainNights.com, covering venues in the Middle East.
 
-VENUE DETAILS:
-- Name: ${venue.name}
-- Category: ${venue.category}
-- Area: ${venue.area}
-- Address: ${venue.address}
-- City: ${venue.city}
-- Country: ${venue.country}
-- Description: ${venue.description || 'A popular venue in the area'}
-- Features: ${venue.features?.join(', ') || 'Various amenities'}
-- Cuisine Types: ${venue.cuisine_types?.join(', ') || 'N/A'}
+═══════════════════════════════════════════════════════════════════
+CRITICAL RULES - FOLLOW EXACTLY:
+═══════════════════════════════════════════════════════════════════
 
-WRITING GUIDELINES:
+1. ⚠️ ONLY use the information provided below. Do NOT make up facts.
+2. ⚠️ Use ONLY this city: ${actualCity}
+3. ⚠️ Use ONLY this country: ${countryDisplay}
+4. ⚠️ Do NOT invent venue history, atmosphere details, or experiences.
 
-1. **HOOK**: Start with an engaging opening about the venue's atmosphere or unique selling point.
+═══════════════════════════════════════════════════════════════════
+VENUE DATA - USE ONLY THIS:
+═══════════════════════════════════════════════════════════════════
 
-2. **CONTENT**: Cover:
-   - What makes this venue special
-   - The ambiance and atmosphere
-   - Food/drinks highlights (if applicable)
-   - Best times to visit
-   - What to expect
+Name: ${venue.name}
+Category: ${venue.category}
+Area: ${venue.area}
+Address: ${venue.address}
+City: ${actualCity}
+Country: ${countryDisplay}
+Description: ${venue.description || 'A venue in the area'}
+Features: ${venue.features?.join(', ') || 'Various amenities'}
+Cuisine Types: ${venue.cuisine_types?.join(', ') || 'N/A'}
 
-3. **SEO REQUIREMENTS**:
-   - Include keywords: "best ${venue.category} in ${venue.city}", "${venue.area} ${venue.category}", "where to go in ${venue.city}"
-   - Use headers to structure content
-   - Write 600-900 words
+═══════════════════════════════════════════════════════════════════
+WRITING INSTRUCTIONS:
+═══════════════════════════════════════════════════════════════════
 
-4. **FORMAT**: Use HTML formatting (<h2>, <h3>, <p>, <strong>, <ul>, <li>)
+1. Write a 400-600 word blog post
+2. Only mention features/details provided above
+3. Use HTML formatting: <h2>, <p>, <strong>, <ul>, <li>
+4. Include a call-to-action to visit
 
-5. **CALL TO ACTION**: Encourage readers to visit
+🚫 FORBIDDEN:
+❌ Do NOT mention Bahrain/Manama unless that's the actual location
+❌ Do NOT invent details not in the data above
 
-Respond ONLY with valid JSON in this exact format (no markdown, no code blocks):
+═══════════════════════════════════════════════════════════════════
+FORMAT AS JSON:
+═══════════════════════════════════════════════════════════════════
+
 {
-  "title": "Engaging title about the venue (50-60 chars)",
+  "title": "Venue title with ${actualCity} (50-60 chars)",
   "slug": "url-friendly-slug",
-  "excerpt": "Compelling summary (150-160 chars)",
-  "content": "Full HTML-formatted article",
+  "excerpt": "Summary mentioning ${actualCity} (150-160 chars)",
+  "content": "HTML formatted article - ONLY use facts from above",
   "meta_title": "SEO title (50-60 chars)",
   "meta_description": "SEO description (150-160 chars)",
-  "keywords": ["keyword1", "keyword2", "keyword3", "keyword4", "keyword5"],
-  "tags": ["tag1", "tag2", "tag3"],
-  "read_time_minutes": 4
+  "keywords": ["keyword1", "keyword2", "keyword3"],
+  "tags": ["${actualCity}", "${countryDisplay}", "${venue.category}"],
+  "read_time_minutes": 3
 }`;
 
   const response = await anthropic.messages.create({
@@ -260,6 +311,14 @@ Respond ONLY with valid JSON in this exact format (no markdown, no code blocks):
 
   const article = JSON.parse(jsonMatch[0]) as GeneratedBlogArticle;
 
+  // Validate location accuracy
+  const contentLower = article.content.toLowerCase();
+  if (actualCountry !== 'bahrain' && actualCity.toLowerCase() !== 'manama') {
+    if (contentLower.includes('bahrain') || contentLower.includes('manama')) {
+      throw new Error(`Location mismatch: Article mentions Bahrain/Manama for venue in ${actualCity}, ${countryDisplay}`);
+    }
+  }
+
   article.slug = article.slug
     .toLowerCase()
     .replace(/[^a-z0-9-]/g, '-')
@@ -272,52 +331,131 @@ Respond ONLY with valid JSON in this exact format (no markdown, no code blocks):
 }
 
 /**
+ * Helper function to format country name for display
+ */
+function formatCountryName(country: string): string {
+  const countryMap: Record<string, string> = {
+    'bahrain': 'Bahrain',
+    'uae': 'UAE',
+    'saudi-arabia': 'Saudi Arabia',
+    'saudi': 'Saudi Arabia',
+    'qatar': 'Qatar',
+    'uk': 'United Kingdom',
+    'oman': 'Oman',
+    'kuwait': 'Kuwait',
+    'unknown': 'Location TBA'
+  };
+  return countryMap[country.toLowerCase()] || country;
+}
+
+/**
  * Helper function to determine country from location string
+ * Returns slug-format country code
+ * IMPORTANT: Does NOT default to Bahrain - returns 'unknown' if uncertain
  */
 export function determineCountry(location: string): string {
+  if (!location) return '';
+
   const locationLower = location.toLowerCase();
 
-  if (locationLower.includes('bahrain')) return 'bahrain';
-  if (locationLower.includes('dubai') || locationLower.includes('abu dhabi') ||
-    locationLower.includes('sharjah') || locationLower.includes('uae') ||
-    locationLower.includes('emirates') || locationLower.includes('ajman')) return 'uae';
-  if (locationLower.includes('saudi') || locationLower.includes('riyadh') ||
-    locationLower.includes('jeddah') || locationLower.includes('dammam') ||
-    locationLower.includes('khobar')) return 'saudi-arabia';
-  if (locationLower.includes('qatar') || locationLower.includes('doha')) return 'qatar';
-  if (locationLower.includes('uk') || locationLower.includes('london') ||
-    locationLower.includes('manchester') || locationLower.includes('england') ||
-    locationLower.includes('birmingham') || locationLower.includes('scotland')) return 'uk';
+  // Check for UAE indicators first (more specific)
+  if (locationLower.includes('dubai') ||
+      locationLower.includes('abu dhabi') ||
+      locationLower.includes('sharjah') ||
+      locationLower.includes('ajman') ||
+      locationLower.includes('ras al khaimah') ||
+      locationLower.includes('fujairah') ||
+      locationLower.includes('umm al quwain') ||
+      locationLower.includes('uae') ||
+      locationLower.includes('united arab emirates') ||
+      locationLower.includes('emirates')) {
+    return 'uae';
+  }
 
-  return 'bahrain'; // Default
+  // Check for Saudi Arabia
+  if (locationLower.includes('saudi') ||
+      locationLower.includes('riyadh') ||
+      locationLower.includes('jeddah') ||
+      locationLower.includes('dammam') ||
+      locationLower.includes('khobar') ||
+      locationLower.includes('mecca') ||
+      locationLower.includes('makkah') ||
+      locationLower.includes('medina') ||
+      locationLower.includes('madinah') ||
+      locationLower.includes('ksa')) {
+    return 'saudi-arabia';
+  }
+
+  // Check for Qatar
+  if (locationLower.includes('qatar') ||
+      locationLower.includes('doha') ||
+      locationLower.includes('al wakrah') ||
+      locationLower.includes('lusail')) {
+    return 'qatar';
+  }
+
+  // Check for Bahrain (explicit only)
+  if (locationLower.includes('bahrain') ||
+      locationLower.includes('manama') ||
+      locationLower.includes('muharraq') ||
+      locationLower.includes('seef') ||
+      locationLower.includes('juffair') ||
+      locationLower.includes('amwaj') ||
+      locationLower.includes('riffa')) {
+    return 'bahrain';
+  }
+
+  // Check for UK
+  if (locationLower.includes('united kingdom') ||
+      locationLower.includes('uk') ||
+      locationLower.includes('england') ||
+      locationLower.includes('scotland') ||
+      locationLower.includes('wales') ||
+      locationLower.includes('london') ||
+      locationLower.includes('manchester') ||
+      locationLower.includes('birmingham') ||
+      locationLower.includes('edinburgh') ||
+      locationLower.includes('glasgow')) {
+    return 'uk';
+  }
+
+  // Check for other GCC countries
+  if (locationLower.includes('oman') || locationLower.includes('muscat')) return 'oman';
+  if (locationLower.includes('kuwait')) return 'kuwait';
+
+  // IMPORTANT: Return empty string if unknown - DO NOT default to bahrain
+  return '';
 }
 
 /**
  * Helper function to determine city from location string
+ * IMPORTANT: Does NOT default to any city - returns empty if uncertain
  */
 export function determineCity(location: string): string {
+  if (!location) return '';
+
   const locationLower = location.toLowerCase();
 
-  // UAE cities
+  // UAE cities (check first as they're most specific)
   if (locationLower.includes('dubai')) return 'Dubai';
   if (locationLower.includes('abu dhabi')) return 'Abu Dhabi';
   if (locationLower.includes('sharjah')) return 'Sharjah';
   if (locationLower.includes('ajman')) return 'Ajman';
+  if (locationLower.includes('ras al khaimah')) return 'Ras Al Khaimah';
+  if (locationLower.includes('fujairah')) return 'Fujairah';
 
   // Saudi cities
   if (locationLower.includes('riyadh')) return 'Riyadh';
   if (locationLower.includes('jeddah')) return 'Jeddah';
   if (locationLower.includes('dammam')) return 'Dammam';
   if (locationLower.includes('khobar')) return 'Al Khobar';
+  if (locationLower.includes('mecca') || locationLower.includes('makkah')) return 'Mecca';
+  if (locationLower.includes('medina') || locationLower.includes('madinah')) return 'Medina';
 
-  // Qatar
+  // Qatar cities
   if (locationLower.includes('doha')) return 'Doha';
-
-  // UK cities
-  if (locationLower.includes('london')) return 'London';
-  if (locationLower.includes('manchester')) return 'Manchester';
-  if (locationLower.includes('birmingham')) return 'Birmingham';
-  if (locationLower.includes('edinburgh')) return 'Edinburgh';
+  if (locationLower.includes('al wakrah')) return 'Al Wakrah';
+  if (locationLower.includes('lusail')) return 'Lusail';
 
   // Bahrain cities
   if (locationLower.includes('manama')) return 'Manama';
@@ -326,9 +464,65 @@ export function determineCity(location: string): string {
   if (locationLower.includes('juffair')) return 'Juffair';
   if (locationLower.includes('amwaj')) return 'Amwaj';
   if (locationLower.includes('riffa')) return 'Riffa';
+  if (locationLower.includes('adliya')) return 'Adliya';
 
-  // Default to Manama for Bahrain
-  if (determineCountry(location) === 'bahrain') return 'Manama';
+  // UK cities
+  if (locationLower.includes('london')) return 'London';
+  if (locationLower.includes('manchester')) return 'Manchester';
+  if (locationLower.includes('birmingham')) return 'Birmingham';
+  if (locationLower.includes('edinburgh')) return 'Edinburgh';
+  if (locationLower.includes('glasgow')) return 'Glasgow';
+  if (locationLower.includes('liverpool')) return 'Liverpool';
+  if (locationLower.includes('leeds')) return 'Leeds';
 
+  // Oman
+  if (locationLower.includes('muscat')) return 'Muscat';
+
+  // Kuwait
+  if (locationLower.includes('kuwait city') || locationLower.includes('kuwait')) return 'Kuwait City';
+
+  // IMPORTANT: Return empty string if unknown - DO NOT default to any city
   return '';
+}
+
+/**
+ * Validate that article location matches event location
+ * Returns true if valid, throws error if mismatch detected
+ */
+export function validateArticleLocation(
+  articleContent: string,
+  articleTitle: string,
+  expectedCity: string,
+  expectedCountry: string
+): boolean {
+  const contentLower = articleContent.toLowerCase();
+  const titleLower = articleTitle.toLowerCase();
+  const combined = contentLower + ' ' + titleLower;
+
+  // List of locations that should NOT appear if event is not there
+  const locationChecks = [
+    { name: 'bahrain', cities: ['manama', 'seef', 'muharraq', 'juffair', 'riffa', 'amwaj'] },
+    { name: 'uae', cities: ['dubai', 'abu dhabi', 'sharjah', 'ajman'] },
+    { name: 'saudi-arabia', cities: ['riyadh', 'jeddah', 'dammam', 'khobar', 'mecca', 'medina'] },
+    { name: 'qatar', cities: ['doha', 'lusail', 'al wakrah'] },
+  ];
+
+  for (const loc of locationChecks) {
+    // Skip if this is the expected location
+    if (expectedCountry.toLowerCase() === loc.name) continue;
+    if (loc.cities.includes(expectedCity.toLowerCase())) continue;
+
+    // Check if article incorrectly mentions this location
+    if (combined.includes(loc.name)) {
+      throw new Error(`Article mentions ${loc.name} but event is in ${expectedCity}, ${expectedCountry}`);
+    }
+
+    for (const city of loc.cities) {
+      if (combined.includes(city)) {
+        throw new Error(`Article mentions ${city} but event is in ${expectedCity}, ${expectedCountry}`);
+      }
+    }
+  }
+
+  return true;
 }
