@@ -28,7 +28,6 @@ interface BlogArticle {
   read_time_minutes: number;
   view_count: number;
   published_at: string;
-  affiliate_url?: string | null;
 }
 
 async function getBlogArticles() {
@@ -39,7 +38,7 @@ async function getBlogArticles() {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const { data: articles, error } = await (supabase as any)
       .from('blog_articles')
-      .select('id, title, slug, excerpt, content, featured_image, country, city, category, read_time_minutes, view_count, published_at, affiliate_url')
+      .select('id, title, slug, excerpt, content, featured_image, country, city, category, read_time_minutes, view_count, published_at')
       .eq('status', 'published')
       .order('published_at', { ascending: false }) as { data: BlogArticle[] | null; error: Error | null };
 

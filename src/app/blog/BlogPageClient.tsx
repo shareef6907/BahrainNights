@@ -18,7 +18,6 @@ interface BlogArticle {
   read_time_minutes: number;
   view_count: number;
   published_at: string;
-  affiliate_url?: string | null;
 }
 
 interface Props {
