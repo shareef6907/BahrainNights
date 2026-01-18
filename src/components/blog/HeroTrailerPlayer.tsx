@@ -34,6 +34,7 @@ export function HeroTrailerPlayer() {
   const [showMobileHint, setShowMobileHint] = useState(false);
   const [hasUserInteracted, setHasUserInteracted] = useState(false); // Track if user has tapped to play
   const [showPlayOverlay, setShowPlayOverlay] = useState(false); // Show play button on mobile
+  const [videoError, setVideoError] = useState(false); // Track if current video has error/unavailable
   const autoAdvanceRef = useRef<NodeJS.Timeout | null>(null);
   const iframeRef = useRef<HTMLIFrameElement | null>(null);
   // IMPORTANT: initialMuted is used in iframe URL and NEVER changes
@@ -117,11 +118,47 @@ export function HeroTrailerPlayer() {
 
   // On mobile, reset to muted when changing slides to ensure video plays
   // Mobile browsers require muted autoplay - trying to unmute new iframes is unreliable
+  // Also reset video error state for new slide
   useEffect(() => {
     if (isMobile && !isMuted) {
       setIsMuted(true);
     }
+    setVideoError(false); // Reset error state for new video
   }, [currentIndex]); // eslint-disable-line react-hooks/exhaustive-deps
+
+  // Listen for YouTube iframe error messages to detect unavailable videos
+  useEffect(() => {
+    const handleMessage = (event: MessageEvent) => {
+      // Only process YouTube messages
+      if (event.origin !== 'https://www.youtube.com') return;
+
+      try {
+        const data = typeof event.data === 'string' ? JSON.parse(event.data) : event.data;
+
+        // YouTube sends error events with specific codes:
+        // 2 = Invalid video ID, 5 = HTML5 player error, 100 = Video not found
+        // 101/150 = Video owner doesn't allow embedding
+        if (data.event === 'onError' ||
+            (data.info && typeof data.info === 'number' && [2, 5, 100, 101, 150].includes(data.info))) {
+          setVideoError(true);
+        }
+
+        // Also detect 'initialDelivery' with error state
+        if (data.event === 'initialDelivery' && data.info?.playerState === -1) {
+          // Player state -1 can indicate error on some embeds
+          // Give it a moment to recover, then check
+          setTimeout(() => {
+            // If still no playback after 3 seconds, might be unavailable
+          }, 3000);
+        }
+      } catch {
+        // Not a JSON message, ignore
+      }
+    };
+
+    window.addEventListener('message', handleMessage);
+    return () => window.removeEventListener('message', handleMessage);
+  }, []);
 
   const currentMovie = movies[currentIndex];
 
@@ -221,26 +258,28 @@ export function HeroTrailerPlayer() {
     <div className="relative w-full h-[70vh] md:h-[85vh] overflow-hidden bg-black">
       {/* SINGLE Video Background - Only current trailer loads */}
       <div className="absolute inset-0">
-        {iframeUrl ? (
+        {/* Always show backdrop image as fallback (visible when video fails/unavailable) */}
+        <img
+          src={currentMovie?.backdrop_url || currentMovie?.poster_url || ''}
+          alt={currentMovie?.title}
+          className="w-full h-full object-cover"
+        />
+        {/* YouTube iframe overlays the backdrop - hidden when video has error */}
+        {iframeUrl && !videoError && (
           <iframe
             ref={iframeRef}
             key={`trailer-${currentIndex}`} // Only re-render on trailer change, NOT on mute toggle
             src={iframeUrl}
-            className="absolute w-[300%] h-[300%] top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 pointer-events-none"
+            className="absolute inset-0 w-[300%] h-[300%] top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 pointer-events-none"
             allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
             style={{ border: 'none' }}
-          />
-        ) : (
-          <img
-            src={currentMovie?.backdrop_url || currentMovie?.poster_url || ''}
-            alt={currentMovie?.title}
-            className="w-full h-full object-cover"
           />
         )}
       </div>
 
       {/* Mobile Play Overlay - Tap to start video on devices that don't autoplay */}
-      {showPlayOverlay && iframeUrl && (
+      {/* Hidden when video has error */}
+      {showPlayOverlay && iframeUrl && !videoError && (
         <button
           onClick={handlePlayTap}
           className="absolute inset-0 z-20 flex items-center justify-center bg-black/30 transition-opacity"
@@ -281,17 +320,31 @@ export function HeroTrailerPlayer() {
             )}
 
             <div className="flex flex-wrap items-center gap-4">
-              <button
-                onClick={toggleMute}
-                className={`flex items-center gap-2 px-8 py-3 rounded-lg font-bold text-lg transition-colors ${
-                  isMuted
-                    ? 'bg-yellow-500 hover:bg-yellow-400 text-black'
-                    : 'bg-white hover:bg-gray-200 text-black'
-                }`}
-              >
-                {isMuted ? <Volume2 size={24} /> : <VolumeX size={24} />}
-                {isMuted ? 'Enable Sound' : 'Mute'}
-              </button>
+              {/* Show sound toggle only when video is available */}
+              {iframeUrl && !videoError ? (
+                <button
+                  onClick={toggleMute}
+                  className={`flex items-center gap-2 px-8 py-3 rounded-lg font-bold text-lg transition-colors ${
+                    isMuted
+                      ? 'bg-yellow-500 hover:bg-yellow-400 text-black'
+                      : 'bg-white hover:bg-gray-200 text-black'
+                  }`}
+                >
+                  {isMuted ? <Volume2 size={24} /> : <VolumeX size={24} />}
+                  {isMuted ? 'Enable Sound' : 'Mute'}
+                </button>
+              ) : videoId ? (
+                /* Show Watch Trailer link when video is unavailable but we have a video ID */
+                <a
+                  href={`https://www.youtube.com/watch?v=${videoId}`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="flex items-center gap-2 px-8 py-3 rounded-lg font-bold text-lg bg-red-600 hover:bg-red-500 text-white transition-colors"
+                >
+                  <Play size={24} fill="white" />
+                  Watch Trailer
+                </a>
+              ) : null}
 
               <Link
                 href="/cinema"
@@ -344,7 +397,8 @@ export function HeroTrailerPlayer() {
       )}
 
       {/* Mobile Sound Hint - Shows after user taps play, not while play overlay is visible */}
-      {showMobileHint && isMuted && iframeUrl && !showPlayOverlay && (
+      {/* Hidden when video has error */}
+      {showMobileHint && isMuted && iframeUrl && !showPlayOverlay && !videoError && (
         <button
           onClick={toggleMute}
           className="absolute bottom-32 left-1/2 -translate-x-1/2 flex items-center gap-3 bg-yellow-500 hover:bg-yellow-400 text-black px-6 py-3 rounded-full font-bold shadow-lg animate-pulse transition-colors"

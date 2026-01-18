@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useRef, useCallback } from 'react';
 import Image from 'next/image';
 import { Play, Plus, Clock } from 'lucide-react';
 
@@ -30,12 +30,7 @@ interface BlogCardProps {
 
 export function BlogCard({ article, onSelect, index = 0 }: BlogCardProps) {
   const [isHovered, setIsHovered] = useState(false);
-  const [isTouchDevice, setIsTouchDevice] = useState(false);
-
-  // Detect touch device on mount
-  useEffect(() => {
-    setIsTouchDevice('ontouchstart' in window || navigator.maxTouchPoints > 0);
-  }, []);
+  const touchedRef = useRef(false); // Track if touch event happened
 
   const countryFlags: Record<string, string> = {
     'bahrain': '🇧🇭',
@@ -45,24 +40,48 @@ export function BlogCard({ article, onSelect, index = 0 }: BlogCardProps) {
     'uk': '🇬🇧',
   };
 
-  // Handle click - opens modal immediately on touch devices
-  const handleClick = useCallback(() => {
+  // Handle touch start - mark that touch happened
+  const handleTouchStart = useCallback(() => {
+    touchedRef.current = true;
+  }, []);
+
+  // Handle touch end - open modal immediately, prevent subsequent mouse events
+  const handleTouchEnd = useCallback((e: React.TouchEvent) => {
+    e.preventDefault(); // Prevent mouse events from firing after touch
+    e.stopPropagation();
     onSelect(article);
   }, [onSelect, article]);
 
-  // Handle touch end - prevent double-tap issue by opening immediately
-  const handleTouchEnd = useCallback((e: React.TouchEvent) => {
-    e.preventDefault(); // Prevent mouse events from firing
+  // Handle click - only for non-touch devices
+  const handleClick = useCallback((e: React.MouseEvent) => {
+    // If this click came from a touch, ignore it (touchEnd already handled)
+    if (touchedRef.current) {
+      touchedRef.current = false;
+      return;
+    }
     onSelect(article);
   }, [onSelect, article]);
+
+  // Handle mouse enter - only show hover on non-touch devices
+  const handleMouseEnter = useCallback(() => {
+    if (!touchedRef.current) {
+      setIsHovered(true);
+    }
+  }, []);
+
+  const handleMouseLeave = useCallback(() => {
+    setIsHovered(false);
+    touchedRef.current = false; // Reset touch flag on mouse leave
+  }, []);
 
   return (
     <div
       className="relative flex-shrink-0 w-[250px] md:w-[280px] cursor-pointer group"
-      onMouseEnter={() => !isTouchDevice && setIsHovered(true)}
-      onMouseLeave={() => !isTouchDevice && setIsHovered(false)}
-      onClick={!isTouchDevice ? handleClick : undefined}
-      onTouchEnd={isTouchDevice ? handleTouchEnd : undefined}
+      onMouseEnter={handleMouseEnter}
+      onMouseLeave={handleMouseLeave}
+      onClick={handleClick}
+      onTouchStart={handleTouchStart}
+      onTouchEnd={handleTouchEnd}
     >
       {/* Card Container with Netflix Hover Effect */}
       <div
