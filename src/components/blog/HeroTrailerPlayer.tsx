@@ -39,18 +39,28 @@ export function HeroTrailerPlayer() {
   // This prevents iframe reload when toggling mute via postMessage
   const initialMutedRef = useRef<boolean>(true);
 
-  // Detect mobile device and set initial mute state
+  // Detect mobile/touch device and set initial mute state
   useEffect(() => {
     const checkDevice = () => {
-      const mobile = window.innerWidth < 768 ||
-        /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+      // Detect touch devices (phones, tablets including modern iPads)
+      // Modern iPads report as "Macintosh" but have touch support
+      const isTouchDevice = 'ontouchstart' in window || navigator.maxTouchPoints > 0;
+
+      // Also check for mobile user agents (fallback)
+      const isMobileUA = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+
+      // Detect iPad specifically (modern iPads report as Mac with touch)
+      const isIPad = /iPad/.test(navigator.userAgent) ||
+        (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+
+      const mobile = isTouchDevice || isMobileUA || isIPad;
       setIsMobile(mobile);
 
-      // Mobile: MUST be muted for autoplay to work (browser requirement)
+      // Touch devices: MUST be muted for autoplay to work (browser requirement)
       // Desktop: Can autoplay unmuted
       initialMutedRef.current = mobile;
       setIsMuted(mobile);
-      // Show sound hint on mobile
+      // Show sound hint on touch devices
       setShowMobileHint(mobile);
     };
 
