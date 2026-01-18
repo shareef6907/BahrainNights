@@ -9,7 +9,6 @@ import {
   Save,
   Trash2,
   ExternalLink,
-  Eye,
   AlertTriangle,
   RefreshCw,
   Globe,

@@ -12,7 +12,6 @@ import {
   Crown,
   Medal,
   DollarSign,
-  GripVertical,
   ExternalLink,
   Building2,
   Eye,

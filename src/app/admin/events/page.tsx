@@ -31,7 +31,6 @@ import {
   DollarSign,
   ExternalLink,
   X,
-  Sparkles,
   Save,
 } from 'lucide-react';
 import AIWriterButton from '@/components/ai/AIWriterButton';

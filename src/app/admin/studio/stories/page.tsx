@@ -5,7 +5,6 @@ import { motion } from 'framer-motion';
 import {
   PlaySquare,
   Search,
-  Filter,
   RefreshCw,
   Trash2,
   Clock,

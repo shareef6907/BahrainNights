@@ -8,7 +8,6 @@ import {
   Search,
   Eye,
   Trash2,
-  Star,
   Loader2,
   RefreshCw,
   User,

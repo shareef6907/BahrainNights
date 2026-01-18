@@ -16,7 +16,6 @@ import {
   Clock,
   Building2,
   Loader2,
-  UserCheck,
   Activity,
   TrendingUp,
 } from 'lucide-react';

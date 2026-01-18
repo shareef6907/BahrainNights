@@ -11,7 +11,6 @@ import {
   Shield,
   Clock,
   Instagram,
-  Globe,
   AlertCircle,
   CheckCircle,
   Loader2,

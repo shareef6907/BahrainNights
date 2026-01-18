@@ -31,10 +31,6 @@ export default function TrailersAdminPage() {
   const [tableExists, setTableExists] = useState(true);
   const [creatingTable, setCreatingTable] = useState(false);
 
-  useEffect(() => {
-    fetchData();
-  }, []);
-
   const fetchData = async () => {
     setLoading(true);
 
@@ -55,6 +51,11 @@ export default function TrailersAdminPage() {
 
     setLoading(false);
   };
+
+  useEffect(() => {
+    fetchData();
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   const createTable = async () => {
     setCreatingTable(true);

@@ -7,7 +7,6 @@ import {
   Search,
   RefreshCw,
   Trash2,
-  Download,
   Music,
   Type,
   Zap,

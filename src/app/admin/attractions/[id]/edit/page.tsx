@@ -16,7 +16,6 @@ import {
   Tag,
   Users,
   Star,
-  RefreshCw,
   Move,
   Sparkles
 } from 'lucide-react';

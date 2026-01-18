@@ -32,10 +32,6 @@ export default function CinemaTrailersAdminPage() {
   const [tableExists, setTableExists] = useState(true);
   const [creatingTable, setCreatingTable] = useState(false);
 
-  useEffect(() => {
-    fetchData();
-  }, []);
-
   const fetchData = async () => {
     setLoading(true);
 
@@ -56,6 +52,11 @@ export default function CinemaTrailersAdminPage() {
 
     setLoading(false);
   };
+
+  useEffect(() => {
+    fetchData();
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   const createTable = async () => {
     setCreatingTable(true);

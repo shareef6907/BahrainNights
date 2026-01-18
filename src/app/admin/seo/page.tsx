@@ -5,7 +5,6 @@ import {
   Search,
   Globe,
   FileText,
-  TrendingUp,
   Clock,
   Play,
   RefreshCw,
