@@ -9,7 +9,7 @@ interface BlogArticle {
   title: string;
   slug: string;
   excerpt: string;
-  content: string;
+  content?: string; // Now optional - fetched on-demand
   featured_image: string | null;
   country: string;
   city: string | null;
@@ -58,6 +58,39 @@ interface BlogModalProps {
 export function BlogModal({ article, isOpen, onClose }: BlogModalProps) {
   const [isVisible, setIsVisible] = useState(false);
   const [isAnimating, setIsAnimating] = useState(false);
+  const [fullContent, setFullContent] = useState<string | null>(null);
+  const [loadingContent, setLoadingContent] = useState(false);
+
+  // Fetch full content on-demand when modal opens
+  useEffect(() => {
+    if (isOpen && article?.id) {
+      // If content is already available (passed in), use it
+      if (article.content) {
+        setFullContent(article.content);
+      } else {
+        // Otherwise fetch it
+        setLoadingContent(true);
+        fetch(`/api/blog/${article.id}`)
+          .then(res => res.json())
+          .then(data => {
+            setFullContent(data.content || null);
+          })
+          .catch(() => {
+            setFullContent(null);
+          })
+          .finally(() => {
+            setLoadingContent(false);
+          });
+      }
+    }
+  }, [isOpen, article?.id, article?.content]);
+
+  // Reset content when modal closes
+  useEffect(() => {
+    if (!isOpen) {
+      setFullContent(null);
+    }
+  }, [isOpen]);
 
   useEffect(() => {
     if (isOpen) {
@@ -246,10 +279,20 @@ export function BlogModal({ article, isOpen, onClose }: BlogModalProps) {
             <p className="text-lg text-gray-300 mb-6">{article.excerpt}</p>
 
             {/* Content */}
-            <div
-              className="prose prose-invert prose-lg max-w-none prose-headings:text-white prose-p:text-gray-300 prose-a:text-yellow-500"
-              dangerouslySetInnerHTML={{ __html: article.content }}
-            />
+            {loadingContent ? (
+              <div className="space-y-4 animate-pulse">
+                <div className="h-4 bg-gray-700 rounded w-3/4"></div>
+                <div className="h-4 bg-gray-700 rounded w-full"></div>
+                <div className="h-4 bg-gray-700 rounded w-5/6"></div>
+                <div className="h-4 bg-gray-700 rounded w-full"></div>
+                <div className="h-4 bg-gray-700 rounded w-2/3"></div>
+              </div>
+            ) : fullContent ? (
+              <div
+                className="prose prose-invert prose-lg max-w-none prose-headings:text-white prose-p:text-gray-300 prose-a:text-yellow-500"
+                dangerouslySetInnerHTML={{ __html: fullContent }}
+              />
+            ) : null}
 
             {/* Bottom CTA - Always visible */}
             <div className="mt-10 p-6 bg-gradient-to-r from-yellow-500/10 via-orange-500/10 to-pink-500/10 border border-yellow-500/20 rounded-2xl text-center">

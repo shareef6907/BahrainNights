@@ -13,14 +13,14 @@ export const metadata: Metadata = {
   },
 };
 
-export const dynamic = 'force-dynamic'; // Always fetch fresh data
+// Cache page for 5 minutes - HUGE performance boost
+export const revalidate = 300;
 
 interface BlogArticle {
   id: string;
   title: string;
   slug: string;
   excerpt: string;
-  content: string;
   featured_image: string | null;
   country: string;
   city: string | null;
@@ -29,19 +29,25 @@ interface BlogArticle {
   view_count: number;
   published_at: string;
   is_featured?: boolean;
+  event_date?: string | null;
+  event_end_date?: string | null;
+  event_venue?: string | null;
+  affiliate_url?: string | null;
 }
 
 async function getBlogArticles() {
   try {
     const supabase = getAdminClient();
 
-    // Get all published articles
+    // OPTIMIZED: Only fetch fields needed for listing (NO content field - it's heavy)
+    // Content is fetched on-demand when modal opens
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const { data: articles, error } = await (supabase as any)
       .from('blog_articles')
-      .select('id, title, slug, excerpt, content, featured_image, country, city, category, read_time_minutes, view_count, published_at, is_featured')
+      .select('id, title, slug, excerpt, featured_image, country, city, category, read_time_minutes, view_count, published_at, is_featured, event_date, event_end_date, event_venue, affiliate_url')
       .eq('status', 'published')
-      .order('published_at', { ascending: false }) as { data: BlogArticle[] | null; error: Error | null };
+      .order('published_at', { ascending: false })
+      .limit(100) as { data: BlogArticle[] | null; error: Error | null };
 
     if (error) {
       console.error('Blog articles fetch error:', error);

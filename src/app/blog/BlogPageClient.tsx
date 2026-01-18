@@ -10,7 +10,6 @@ interface BlogArticle {
   title: string;
   slug: string;
   excerpt: string;
-  content: string;
   featured_image: string | null;
   country: string;
   city: string | null;
@@ -19,6 +18,10 @@ interface BlogArticle {
   view_count: number;
   published_at: string;
   is_featured?: boolean;
+  event_date?: string | null;
+  event_end_date?: string | null;
+  event_venue?: string | null;
+  affiliate_url?: string | null;
 }
 
 interface Props {

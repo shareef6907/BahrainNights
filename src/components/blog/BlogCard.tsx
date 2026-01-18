@@ -1,6 +1,7 @@
 'use client';
 
 import { useState } from 'react';
+import Image from 'next/image';
 import { Play, Plus, Clock } from 'lucide-react';
 
 interface BlogArticle {
@@ -8,7 +9,6 @@ interface BlogArticle {
   title: string;
   slug: string;
   excerpt: string;
-  content: string;
   featured_image: string | null;
   country: string;
   city: string | null;
@@ -17,6 +17,9 @@ interface BlogArticle {
   view_count: number;
   published_at: string;
   affiliate_url?: string | null;
+  event_date?: string | null;
+  event_end_date?: string | null;
+  event_venue?: string | null;
 }
 
 interface BlogCardProps {
@@ -57,10 +60,13 @@ export function BlogCard({ article, onSelect, index = 0 }: BlogCardProps) {
         {/* Image */}
         <div className="relative aspect-video">
           {article.featured_image ? (
-            <img
+            <Image
               src={article.featured_image}
               alt={article.title}
-              className="w-full h-full object-cover"
+              fill
+              sizes="(max-width: 768px) 50vw, 280px"
+              className="object-cover"
+              loading="lazy"
             />
           ) : (
             <div className="w-full h-full bg-gradient-to-br from-gray-800 to-gray-900 flex items-center justify-center">
