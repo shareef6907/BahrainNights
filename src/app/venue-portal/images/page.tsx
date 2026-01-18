@@ -390,14 +390,13 @@ export default function VenueImagesPage() {
                   target.src = 'https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?w=400&h=400&fit=crop';
                 }}
               />
-              <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
-                <button
-                  onClick={() => handleDeleteImage(index)}
-                  className="p-3 bg-red-500 rounded-full hover:bg-red-600 transition-colors"
-                >
-                  <Trash2 className="w-5 h-5 text-white" />
-                </button>
-              </div>
+              {/* Delete button - always visible on mobile, hover on desktop */}
+              <button
+                onClick={() => handleDeleteImage(index)}
+                className="absolute top-2 right-2 p-2 bg-red-500/90 rounded-full hover:bg-red-600 transition-colors opacity-100 lg:opacity-0 lg:group-hover:opacity-100 shadow-lg"
+              >
+                <Trash2 className="w-4 h-4 text-white" />
+              </button>
               <div className="absolute bottom-2 left-2 px-2 py-1 bg-black/70 rounded text-xs text-white">
                 {index + 1}
               </div>

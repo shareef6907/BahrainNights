@@ -17,6 +17,7 @@ import {
   MapPin,
   Tag,
   Film,
+  Plus,
 } from 'lucide-react';
 
 interface VenueSession {
@@ -36,6 +37,12 @@ const sidebarLinks = [
   { href: '/venue-portal/reels', label: 'Instagram Reels', icon: Film },
   { href: '/venue-portal/events', label: 'My Events', icon: Calendar },
   { href: '/venue-portal/offers', label: 'My Offers', icon: Tag },
+];
+
+// Quick action links for creating content
+const quickActions = [
+  { href: '/venue-portal/events/create', label: 'Create Event', icon: Calendar },
+  { href: '/venue-portal/offers/create', label: 'Create Offer', icon: Tag },
 ];
 
 export default function VenuePortalLayout({
@@ -116,7 +123,7 @@ export default function VenuePortalLayout({
           >
             {sidebarOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
           </button>
-          <Link href="/" className="text-xl font-bold bg-gradient-to-r from-yellow-400 via-orange-500 to-pink-500 bg-clip-text text-transparent">
+          <Link href="/" className="text-xl font-bold bg-gradient-to-r from-yellow-500 via-amber-400 to-yellow-600 bg-clip-text text-transparent" style={{ filter: 'drop-shadow(0 0 8px rgba(217, 119, 6, 0.3))' }}>
             BahrainNights
           </Link>
           <div className="w-10" /> {/* Spacer for balance */}
@@ -141,7 +148,7 @@ export default function VenuePortalLayout({
           {/* Logo */}
           <div className="p-6 border-b border-white/10">
             <Link href="/" className="block">
-              <span className="text-2xl font-bold bg-gradient-to-r from-yellow-400 via-orange-500 to-pink-500 bg-clip-text text-transparent">
+              <span className="text-2xl font-bold bg-gradient-to-r from-yellow-500 via-amber-400 to-yellow-600 bg-clip-text text-transparent" style={{ filter: 'drop-shadow(0 0 8px rgba(217, 119, 6, 0.3))' }}>
                 BahrainNights
               </span>
             </Link>
@@ -191,6 +198,29 @@ export default function VenuePortalLayout({
                 </Link>
               );
             })}
+
+            {/* Quick Actions */}
+            <div className="mt-4 pt-4 border-t border-white/10">
+              <p className="px-4 text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2">
+                Quick Actions
+              </p>
+              {quickActions.map((action) => {
+                const Icon = action.icon;
+                return (
+                  <Link
+                    key={action.href}
+                    href={action.href}
+                    onClick={() => setSidebarOpen(false)}
+                    className="flex items-center gap-3 px-4 py-3 rounded-xl text-yellow-400 hover:bg-yellow-400/10 transition-all"
+                  >
+                    <div className="w-6 h-6 rounded-lg bg-yellow-400/20 flex items-center justify-center">
+                      <Plus className="w-4 h-4" />
+                    </div>
+                    <span className="font-medium">{action.label}</span>
+                  </Link>
+                );
+              })}
+            </div>
           </nav>
 
           {/* Logout */}
