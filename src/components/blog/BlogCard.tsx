@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import Image from 'next/image';
 import { Play, Plus, Clock } from 'lucide-react';
 
@@ -30,6 +30,12 @@ interface BlogCardProps {
 
 export function BlogCard({ article, onSelect, index = 0 }: BlogCardProps) {
   const [isHovered, setIsHovered] = useState(false);
+  const [isTouchDevice, setIsTouchDevice] = useState(false);
+
+  // Detect touch device on mount
+  useEffect(() => {
+    setIsTouchDevice('ontouchstart' in window || navigator.maxTouchPoints > 0);
+  }, []);
 
   const countryFlags: Record<string, string> = {
     'bahrain': '🇧🇭',
@@ -39,12 +45,24 @@ export function BlogCard({ article, onSelect, index = 0 }: BlogCardProps) {
     'uk': '🇬🇧',
   };
 
+  // Handle click - opens modal immediately on touch devices
+  const handleClick = useCallback(() => {
+    onSelect(article);
+  }, [onSelect, article]);
+
+  // Handle touch end - prevent double-tap issue by opening immediately
+  const handleTouchEnd = useCallback((e: React.TouchEvent) => {
+    e.preventDefault(); // Prevent mouse events from firing
+    onSelect(article);
+  }, [onSelect, article]);
+
   return (
     <div
       className="relative flex-shrink-0 w-[250px] md:w-[280px] cursor-pointer group"
-      onMouseEnter={() => setIsHovered(true)}
-      onMouseLeave={() => setIsHovered(false)}
-      onClick={() => onSelect(article)}
+      onMouseEnter={() => !isTouchDevice && setIsHovered(true)}
+      onMouseLeave={() => !isTouchDevice && setIsHovered(false)}
+      onClick={!isTouchDevice ? handleClick : undefined}
+      onTouchEnd={isTouchDevice ? handleTouchEnd : undefined}
     >
       {/* Card Container with Netflix Hover Effect */}
       <div
