@@ -32,8 +32,6 @@ export function HeroTrailerPlayer() {
   const [isMuted, setIsMuted] = useState(true); // UI state for mute toggle
   const [isLoading, setIsLoading] = useState(true);
   const [showMobileHint, setShowMobileHint] = useState(false);
-  const [hasUserInteracted, setHasUserInteracted] = useState(false); // Track if user has tapped to play
-  const [showPlayOverlay, setShowPlayOverlay] = useState(false); // Show play button on mobile
   const [videoError, setVideoError] = useState(false); // Track if current video has error/unavailable
   const [isStandalone, setIsStandalone] = useState(false); // Track if running as PWA/home screen app
   const autoAdvanceRef = useRef<NodeJS.Timeout | null>(null);
@@ -63,8 +61,6 @@ export function HeroTrailerPlayer() {
       setIsMuted(mobile);
       // Show sound hint only on mobile (and not in standalone mode)
       setShowMobileHint(mobile && !standalone);
-      // On mobile, show play overlay since autoplay may not work
-      setShowPlayOverlay(mobile && !standalone);
     };
 
     checkDevice();
@@ -196,26 +192,12 @@ export function HeroTrailerPlayer() {
   const goNext = () => goToSlide((currentIndex + 1) % movies.length);
   const goPrev = () => goToSlide((currentIndex - 1 + movies.length) % movies.length);
 
-  // Handle play button tap on mobile
-  const handlePlayTap = () => {
-    setShowPlayOverlay(false);
-    setHasUserInteracted(true);
-    // Try to play the video via postMessage
-    sendYouTubeCommand(iframeRef.current, 'playVideo');
-  };
-
   const toggleMute = () => {
     setShowMobileHint(false); // Hide hint after user interaction
-    setShowPlayOverlay(false); // Hide play overlay
-    setHasUserInteracted(true);
     // Use YouTube postMessage API to toggle mute without recreating iframe
     // This prevents video from stopping on mobile when toggling sound
     const newMutedState = !isMuted;
     sendYouTubeCommand(iframeRef.current, newMutedState ? 'mute' : 'unMute');
-    // Also try to play the video in case it hasn't started
-    if (!hasUserInteracted) {
-      sendYouTubeCommand(iframeRef.current, 'playVideo');
-    }
     setIsMuted(newMutedState);
   };
 
@@ -287,19 +269,7 @@ export function HeroTrailerPlayer() {
         )}
       </div>
 
-      {/* Mobile Play Overlay - Tap to start video on devices that don't autoplay */}
-      {/* Hidden when video has error */}
-      {showPlayOverlay && iframeUrl && !videoError && (
-        <button
-          onClick={handlePlayTap}
-          className="absolute inset-0 z-20 flex items-center justify-center bg-black/30 transition-opacity"
-          aria-label="Tap to play trailer"
-        >
-          <div className="bg-yellow-500 hover:bg-yellow-400 text-black p-6 rounded-full shadow-2xl transform hover:scale-110 transition-all animate-pulse">
-            <Play size={48} fill="black" />
-          </div>
-        </button>
-      )}
+      {/* Mobile Play Overlay removed - trailers auto-play muted on mobile */}
 
       {/* Gradient Overlays */}
       <div className="absolute inset-0 bg-gradient-to-r from-black/90 via-black/50 to-transparent" />
@@ -406,9 +376,9 @@ export function HeroTrailerPlayer() {
         </div>
       )}
 
-      {/* Mobile Sound Hint - Shows after user taps play, not while play overlay is visible */}
-      {/* Hidden when video has error */}
-      {showMobileHint && isMuted && iframeUrl && !showPlayOverlay && !videoError && (
+      {/* Mobile Sound Hint - Tap for sound on mobile */}
+      {/* Hidden when video has error or in standalone mode */}
+      {showMobileHint && isMuted && iframeUrl && !videoError && !isStandalone && (
         <button
           onClick={toggleMute}
           className="absolute bottom-32 left-1/2 -translate-x-1/2 flex items-center gap-3 bg-yellow-500 hover:bg-yellow-400 text-black px-6 py-3 rounded-full font-bold shadow-lg animate-pulse transition-colors"
