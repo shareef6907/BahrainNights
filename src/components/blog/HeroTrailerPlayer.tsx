@@ -35,26 +35,36 @@ export function HeroTrailerPlayer() {
   const [hasUserInteracted, setHasUserInteracted] = useState(false); // Track if user has tapped to play
   const [showPlayOverlay, setShowPlayOverlay] = useState(false); // Show play button on mobile
   const [videoError, setVideoError] = useState(false); // Track if current video has error/unavailable
+  const [isStandalone, setIsStandalone] = useState(false); // Track if running as PWA/home screen app
   const autoAdvanceRef = useRef<NodeJS.Timeout | null>(null);
   const iframeRef = useRef<HTMLIFrameElement | null>(null);
   // IMPORTANT: initialMuted is used in iframe URL and NEVER changes
   // This prevents iframe reload when toggling mute via postMessage
   const initialMutedRef = useRef<boolean>(true);
 
-  // Detect mobile device and set initial mute state
+  // Detect mobile device, standalone mode (PWA), and set initial mute state
   useEffect(() => {
     const checkDevice = () => {
       const mobile = window.innerWidth < 768 ||
         /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
       setIsMobile(mobile);
+
+      // Detect if running as PWA/standalone app (added to home screen)
+      // YouTube embeds don't work properly in standalone mode
+      const standalone =
+        window.matchMedia('(display-mode: standalone)').matches ||
+        (window.navigator as Navigator & { standalone?: boolean }).standalone === true ||
+        document.referrer.includes('android-app://');
+      setIsStandalone(standalone);
+
       // Mobile: MUST be muted for autoplay to work (browser requirement)
       // Desktop: Can autoplay unmuted
       initialMutedRef.current = mobile;
       setIsMuted(mobile);
-      // Show sound hint only on mobile
-      setShowMobileHint(mobile);
+      // Show sound hint only on mobile (and not in standalone mode)
+      setShowMobileHint(mobile && !standalone);
       // On mobile, show play overlay since autoplay may not work
-      setShowPlayOverlay(mobile);
+      setShowPlayOverlay(mobile && !standalone);
     };
 
     checkDevice();
@@ -258,14 +268,14 @@ export function HeroTrailerPlayer() {
     <div className="relative w-full h-[70vh] md:h-[85vh] overflow-hidden bg-black">
       {/* SINGLE Video Background - Only current trailer loads */}
       <div className="absolute inset-0">
-        {/* Always show backdrop image as fallback (visible when video fails/unavailable) */}
+        {/* Always show backdrop image as fallback (visible when video fails/unavailable/standalone) */}
         <img
           src={currentMovie?.backdrop_url || currentMovie?.poster_url || ''}
           alt={currentMovie?.title}
           className="w-full h-full object-cover"
         />
-        {/* YouTube iframe overlays the backdrop - hidden when video has error */}
-        {iframeUrl && !videoError && (
+        {/* YouTube iframe overlays the backdrop - hidden when video has error OR in standalone/PWA mode */}
+        {iframeUrl && !videoError && !isStandalone && (
           <iframe
             ref={iframeRef}
             key={`trailer-${currentIndex}`} // Only re-render on trailer change, NOT on mute toggle
@@ -320,8 +330,8 @@ export function HeroTrailerPlayer() {
             )}
 
             <div className="flex flex-wrap items-center gap-4">
-              {/* Show sound toggle only when video is available */}
-              {iframeUrl && !videoError ? (
+              {/* Show sound toggle only when video is available and NOT in standalone mode */}
+              {iframeUrl && !videoError && !isStandalone ? (
                 <button
                   onClick={toggleMute}
                   className={`flex items-center gap-2 px-8 py-3 rounded-lg font-bold text-lg transition-colors ${
@@ -334,7 +344,7 @@ export function HeroTrailerPlayer() {
                   {isMuted ? 'Enable Sound' : 'Mute'}
                 </button>
               ) : videoId ? (
-                /* Show Watch Trailer link when video is unavailable but we have a video ID */
+                /* Show Watch Trailer link when video is unavailable/error OR in standalone mode */
                 <a
                   href={`https://www.youtube.com/watch?v=${videoId}`}
                   target="_blank"
