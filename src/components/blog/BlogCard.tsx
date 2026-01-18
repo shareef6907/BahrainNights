@@ -30,7 +30,7 @@ interface BlogCardProps {
 
 export function BlogCard({ article, onSelect, index = 0 }: BlogCardProps) {
   const [isHovered, setIsHovered] = useState(false);
-  const touchedRef = useRef(false); // Track if touch event happened
+  const touchStartRef = useRef<{ x: number; y: number; time: number } | null>(null);
 
   const countryFlags: Record<string, string> = {
     'bahrain': '🇧🇭',
@@ -40,38 +40,50 @@ export function BlogCard({ article, onSelect, index = 0 }: BlogCardProps) {
     'uk': '🇬🇧',
   };
 
-  // Handle touch start - mark that touch happened
-  const handleTouchStart = useCallback(() => {
-    touchedRef.current = true;
+  // Handle touch start - record position and time
+  const handleTouchStart = useCallback((e: React.TouchEvent) => {
+    const touch = e.touches[0];
+    touchStartRef.current = {
+      x: touch.clientX,
+      y: touch.clientY,
+      time: Date.now(),
+    };
   }, []);
 
-  // Handle touch end - open modal immediately, prevent subsequent mouse events
+  // Handle touch end - only open modal if it was a tap (not a swipe)
   const handleTouchEnd = useCallback((e: React.TouchEvent) => {
-    e.preventDefault(); // Prevent mouse events from firing after touch
-    e.stopPropagation();
-    onSelect(article);
-  }, [onSelect, article]);
+    if (!touchStartRef.current) return;
 
-  // Handle click - only for non-touch devices
-  const handleClick = useCallback((e: React.MouseEvent) => {
-    // If this click came from a touch, ignore it (touchEnd already handled)
-    if (touchedRef.current) {
-      touchedRef.current = false;
-      return;
+    const touch = e.changedTouches[0];
+    const deltaX = Math.abs(touch.clientX - touchStartRef.current.x);
+    const deltaY = Math.abs(touch.clientY - touchStartRef.current.y);
+    const deltaTime = Date.now() - touchStartRef.current.time;
+
+    // Only trigger if:
+    // - Movement was less than 10px (it's a tap, not a swipe)
+    // - Touch duration was less than 300ms (quick tap)
+    const isTap = deltaX < 10 && deltaY < 10 && deltaTime < 300;
+
+    if (isTap) {
+      e.preventDefault(); // Prevent mouse events only on tap
+      onSelect(article);
     }
+
+    touchStartRef.current = null;
+  }, [onSelect, article]);
+
+  // Handle click - for desktop/mouse users
+  const handleClick = useCallback(() => {
     onSelect(article);
   }, [onSelect, article]);
 
-  // Handle mouse enter - only show hover on non-touch devices
+  // Handle mouse enter - show hover effect on desktop
   const handleMouseEnter = useCallback(() => {
-    if (!touchedRef.current) {
-      setIsHovered(true);
-    }
+    setIsHovered(true);
   }, []);
 
   const handleMouseLeave = useCallback(() => {
     setIsHovered(false);
-    touchedRef.current = false; // Reset touch flag on mouse leave
   }, []);
 
   return (
