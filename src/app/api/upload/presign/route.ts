@@ -44,9 +44,16 @@ export async function POST(request: NextRequest) {
 
     // Generate unique filename
     const ext = filename.split('.').pop()?.toLowerCase() || 'jpg';
-    const uniqueFilename = imageType
-      ? `${imageType}.${ext}`
-      : `${Date.now()}.${ext}`;
+    const timestamp = Date.now();
+    const randomSuffix = Math.random().toString(36).substring(2, 8);
+
+    // For gallery images, always use unique timestamp + random suffix
+    // For other types (logo, cover), use the imageType as filename
+    const uniqueFilename = imageType === 'gallery'
+      ? `gallery-${timestamp}-${randomSuffix}.${ext}`
+      : imageType
+        ? `${imageType}.${ext}`
+        : `${timestamp}-${randomSuffix}.${ext}`;
 
     // Get presigned URL
     const result = await getPresignedUploadUrl(folder, uniqueFilename, contentType);
