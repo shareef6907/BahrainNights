@@ -3,7 +3,7 @@ import { verifyToken } from '@/lib/auth';
 import { getVenueById, updateVenue } from '@/lib/db/venues';
 import { cookies } from 'next/headers';
 
-const MAX_GALLERY_IMAGES = 12;
+// Admin gallery has no limit - admins can upload unlimited photos
 
 // Add a photo to venue gallery
 export async function POST(
@@ -47,13 +47,7 @@ export async function POST(
     // Get current gallery array
     const currentGallery = venue.gallery || [];
 
-    // Check gallery limit
-    if (currentGallery.length >= MAX_GALLERY_IMAGES) {
-      return NextResponse.json(
-        { error: `Maximum ${MAX_GALLERY_IMAGES} gallery images allowed` },
-        { status: 400 }
-      );
-    }
+    // Admin gallery has no limit - removed limit check
 
     // Check if photo already exists in gallery
     if (currentGallery.includes(photoUrl)) {

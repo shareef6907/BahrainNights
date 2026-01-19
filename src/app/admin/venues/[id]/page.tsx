@@ -141,6 +141,7 @@ export default function AdminVenueEditPage({ params }: { params: Promise<{ id: s
   const [uploadingCover, setUploadingCover] = useState(false);
   const [deletingGalleryPhoto, setDeletingGalleryPhoto] = useState<string | null>(null);
   const [uploadingGallery, setUploadingGallery] = useState(false);
+  const [uploadProgress, setUploadProgress] = useState<{ current: number; total: number } | null>(null);
   const [toast, setToast] = useState<{ message: string; type: 'success' | 'error' } | null>(null);
   const [newlyUploadedUrls, setNewlyUploadedUrls] = useState<Map<string, number>>(new Map()); // Track recently uploaded URLs with their timestamps for cache busting
   const [showDeleteModal, setShowDeleteModal] = useState(false);
@@ -489,12 +490,7 @@ export default function AdminVenueEditPage({ params }: { params: Promise<{ id: s
   };
 
   const handleGalleryUpload = async (file: File) => {
-    // Check gallery limit
-    const currentGalleryCount = venue?.gallery?.length || 0;
-    if (currentGalleryCount >= 12) {
-      setToast({ message: 'Maximum 12 gallery images allowed', type: 'error' });
-      return;
-    }
+    // Admin gallery has no limit - removed limit check
 
     setUploadingGallery(true);
     try {
@@ -566,6 +562,99 @@ export default function AdminVenueEditPage({ params }: { params: Promise<{ id: s
       setToast({ message: error instanceof Error ? error.message : 'Failed to upload photo', type: 'error' });
     } finally {
       setUploadingGallery(false);
+    }
+  };
+
+  // Handle multiple gallery photo uploads sequentially
+  const handleMultipleGalleryUpload = async (files: FileList) => {
+    const fileArray = Array.from(files);
+    let successCount = 0;
+    let failCount = 0;
+
+    setUploadingGallery(true);
+    setUploadProgress({ current: 0, total: fileArray.length });
+
+    for (let i = 0; i < fileArray.length; i++) {
+      const file = fileArray[i];
+      setUploadProgress({ current: i + 1, total: fileArray.length });
+
+      try {
+        // Step 1: Compress image client-side
+        const compressedFile = await compressImage(file);
+
+        // Step 2: Get presigned URL for direct S3 upload
+        const timestamp = Date.now();
+        const randomSuffix = Math.random().toString(36).substring(2, 8);
+        const filename = `gallery-${timestamp}-${randomSuffix}.jpg`;
+
+        const presignResponse = await fetch('/api/upload/presign', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            filename,
+            contentType: compressedFile.type,
+            entityType: 'venue',
+            entitySlug: venue?.slug || resolvedParams.id,
+            imageType: 'gallery',
+          }),
+        });
+
+        if (!presignResponse.ok) {
+          throw new Error('Failed to prepare upload');
+        }
+
+        const { uploadUrl, processedUrl } = await presignResponse.json();
+
+        // Step 3: Upload directly to S3
+        const s3Response = await fetch(uploadUrl, {
+          method: 'PUT',
+          body: compressedFile,
+          headers: { 'Content-Type': compressedFile.type },
+          mode: 'cors',
+        });
+
+        if (!s3Response.ok) {
+          throw new Error('Failed to upload to storage');
+        }
+
+        // Step 4: Wait for Lambda processing
+        await new Promise(resolve => setTimeout(resolve, 3000));
+
+        // Step 5: Add the photo URL to venue's gallery
+        const galleryResponse = await fetch(`/api/admin/venues/${resolvedParams.id}/gallery`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ photoUrl: processedUrl }),
+        });
+
+        if (!galleryResponse.ok) {
+          throw new Error('Failed to add photo to gallery');
+        }
+
+        const galleryData = await galleryResponse.json();
+        const uploadTimestamp = Date.now();
+        setNewlyUploadedUrls(prev => new Map(prev).set(processedUrl, uploadTimestamp));
+        setVenue(prev => prev ? { ...prev, gallery: galleryData.venue.gallery } : null);
+        successCount++;
+      } catch (error) {
+        console.error(`Error uploading file ${file.name}:`, error);
+        failCount++;
+      }
+    }
+
+    setUploadingGallery(false);
+    setUploadProgress(null);
+
+    if (failCount > 0) {
+      setToast({
+        message: `Uploaded ${successCount} photo${successCount !== 1 ? 's' : ''}, ${failCount} failed`,
+        type: successCount > 0 ? 'success' : 'error'
+      });
+    } else {
+      setToast({
+        message: `${successCount} photo${successCount !== 1 ? 's' : ''} uploaded successfully`,
+        type: 'success'
+      });
     }
   };
 
@@ -1137,41 +1226,45 @@ export default function AdminVenueEditPage({ params }: { params: Promise<{ id: s
           {/* Gallery Management */}
           <div className="bg-[#1A1A2E] rounded-xl p-6 border border-white/10">
             <h3 className="text-lg font-semibold text-white mb-4">
-              Gallery ({venue.gallery?.length || 0}/12 photos)
+              Gallery ({venue.gallery?.length || 0} photos)
             </h3>
 
             {/* Upload Button */}
             <label className={`flex flex-col items-center justify-center aspect-video border-2 border-dashed rounded-xl mb-4 transition-colors ${
-              (venue.gallery?.length || 0) >= 12
-                ? 'border-gray-600 cursor-not-allowed opacity-50'
+              uploadingGallery
+                ? 'border-cyan-500/50 cursor-wait'
                 : 'border-white/20 cursor-pointer hover:border-cyan-500/50'
             }`}>
               {uploadingGallery ? (
                 <div className="flex flex-col items-center">
                   <Loader2 className="w-8 h-8 animate-spin text-cyan-500 mb-2" />
-                  <span className="text-gray-400 text-sm">Uploading...</span>
+                  <span className="text-gray-400 text-sm">
+                    {uploadProgress
+                      ? `Uploading ${uploadProgress.current}/${uploadProgress.total}...`
+                      : 'Uploading...'}
+                  </span>
                 </div>
-              ) : (venue.gallery?.length || 0) >= 12 ? (
-                <>
-                  <Upload className="w-8 h-8 text-gray-500 mb-2" />
-                  <span className="text-gray-500 text-sm">Gallery Full</span>
-                </>
               ) : (
                 <>
                   <Upload className="w-8 h-8 text-gray-400 mb-2" />
-                  <span className="text-gray-400 text-sm">Add Gallery Photo</span>
-                  <span className="text-gray-500 text-xs mt-1">Max 10MB, compressed to 1MB</span>
+                  <span className="text-gray-400 text-sm">Add Gallery Photos</span>
+                  <span className="text-gray-500 text-xs mt-1">Select multiple files • Max 10MB each</span>
                 </>
               )}
               <input
                 type="file"
                 accept="image/*"
+                multiple
                 className="hidden"
-                disabled={uploadingGallery || (venue.gallery?.length || 0) >= 12}
+                disabled={uploadingGallery}
                 onChange={(e) => {
-                  const file = e.target.files?.[0];
-                  if (file) {
-                    handleGalleryUpload(file);
+                  const files = e.target.files;
+                  if (files && files.length > 0) {
+                    if (files.length === 1) {
+                      handleGalleryUpload(files[0]);
+                    } else {
+                      handleMultipleGalleryUpload(files);
+                    }
                     e.target.value = ''; // Reset input
                   }
                 }}
