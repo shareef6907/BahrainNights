@@ -25,6 +25,7 @@ import {
   Trash2,
   ExternalLink,
 } from 'lucide-react';
+import { compressImage } from '@/lib/image-compression';
 
 interface Venue {
   id: string;
@@ -497,36 +498,55 @@ export default function AdminVenueEditPage({ params }: { params: Promise<{ id: s
 
     setUploadingGallery(true);
     try {
-      // Step 1: Upload to S3 via the existing upload API
-      const uploadFormData = new FormData();
-      uploadFormData.append('file', file);
-      uploadFormData.append('entityType', 'venue');
-      uploadFormData.append('imageType', 'gallery');
-      uploadFormData.append('venueSlug', venue?.slug || resolvedParams.id);
+      // Step 1: Compress image client-side (target: 600KB-1MB)
+      const compressedFile = await compressImage(file);
 
-      const uploadResponse = await fetch('/api/upload', {
+      // Step 2: Get presigned URL for direct S3 upload (bypasses Vercel's 4.5MB limit)
+      const timestamp = Date.now();
+      const randomSuffix = Math.random().toString(36).substring(2, 8);
+      const filename = `gallery-${timestamp}-${randomSuffix}.jpg`;
+
+      const presignResponse = await fetch('/api/upload/presign', {
         method: 'POST',
-        body: uploadFormData,
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          filename,
+          contentType: compressedFile.type,
+          entityType: 'venue',
+          entitySlug: venue?.slug || resolvedParams.id,
+          imageType: 'gallery',
+        }),
       });
 
-      if (!uploadResponse.ok) {
-        const errorData = await uploadResponse.json().catch(() => ({}));
-        throw new Error(errorData.error || 'Failed to upload image');
+      if (!presignResponse.ok) {
+        const errorData = await presignResponse.json().catch(() => ({}));
+        throw new Error(errorData.error || 'Failed to prepare upload');
       }
 
-      const uploadData = await uploadResponse.json();
-      const imageUrl = uploadData.url;
+      const { uploadUrl, processedUrl } = await presignResponse.json();
 
-      // If processing wasn't complete, wait a bit more
-      if (!uploadData.processed) {
-        await new Promise(resolve => setTimeout(resolve, 3000));
+      // Step 3: Upload directly to S3 using presigned URL
+      const s3Response = await fetch(uploadUrl, {
+        method: 'PUT',
+        body: compressedFile,
+        headers: {
+          'Content-Type': compressedFile.type,
+        },
+        mode: 'cors',
+      });
+
+      if (!s3Response.ok) {
+        throw new Error(`Failed to upload to storage: ${s3Response.status}`);
       }
 
-      // Step 2: Add the uploaded photo URL to venue's gallery array
+      // Step 4: Wait for Lambda to process the image
+      await new Promise(resolve => setTimeout(resolve, 3000));
+
+      // Step 5: Add the processed photo URL to venue's gallery array
       const galleryResponse = await fetch(`/api/admin/venues/${resolvedParams.id}/gallery`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ photoUrl: imageUrl }),
+        body: JSON.stringify({ photoUrl: processedUrl }),
       });
 
       if (!galleryResponse.ok) {
@@ -537,7 +557,7 @@ export default function AdminVenueEditPage({ params }: { params: Promise<{ id: s
       const galleryData = await galleryResponse.json();
       // Track newly uploaded URL with timestamp for cache busting at render time
       const uploadTimestamp = Date.now();
-      setNewlyUploadedUrls(prev => new Map(prev).set(imageUrl, uploadTimestamp));
+      setNewlyUploadedUrls(prev => new Map(prev).set(processedUrl, uploadTimestamp));
       // Update local venue state with clean gallery URLs (no cache buster in state)
       setVenue((prev) => prev ? { ...prev, gallery: galleryData.venue.gallery } : null);
       setToast({ message: 'Photo uploaded successfully', type: 'success' });
@@ -1140,7 +1160,7 @@ export default function AdminVenueEditPage({ params }: { params: Promise<{ id: s
                 <>
                   <Upload className="w-8 h-8 text-gray-400 mb-2" />
                   <span className="text-gray-400 text-sm">Add Gallery Photo</span>
-                  <span className="text-gray-500 text-xs mt-1">Max 10MB per image</span>
+                  <span className="text-gray-500 text-xs mt-1">Max 10MB, compressed to 1MB</span>
                 </>
               )}
               <input
