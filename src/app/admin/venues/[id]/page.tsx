@@ -24,6 +24,10 @@ import {
   EyeOff,
   Trash2,
   ExternalLink,
+  Clock,
+  ToggleLeft,
+  ToggleRight,
+  Copy,
 } from 'lucide-react';
 import { compressImage } from '@/lib/image-compression';
 
@@ -130,6 +134,41 @@ const AREAS = [
   'Other',
 ];
 
+// Opening Hours types and constants
+interface DayHours {
+  open: string;
+  close: string;
+  isClosed: boolean;
+}
+
+interface OpeningHours {
+  sunday: DayHours;
+  monday: DayHours;
+  tuesday: DayHours;
+  wednesday: DayHours;
+  thursday: DayHours;
+  friday: DayHours;
+  saturday: DayHours;
+}
+
+const DAYS = ['sunday', 'monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday'] as const;
+
+const DAY_LABELS: Record<string, string> = {
+  sunday: 'Sunday',
+  monday: 'Monday',
+  tuesday: 'Tuesday',
+  wednesday: 'Wednesday',
+  thursday: 'Thursday',
+  friday: 'Friday',
+  saturday: 'Saturday',
+};
+
+const DEFAULT_HOURS: DayHours = {
+  open: '10:00',
+  close: '22:00',
+  isClosed: false,
+};
+
 export default function AdminVenueEditPage({ params }: { params: Promise<{ id: string }> }) {
   const resolvedParams = use(params);
   const router = useRouter();
@@ -147,6 +186,17 @@ export default function AdminVenueEditPage({ params }: { params: Promise<{ id: s
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [showRejectModal, setShowRejectModal] = useState(false);
   const [rejectReason, setRejectReason] = useState('');
+
+  // Opening hours state
+  const [openingHours, setOpeningHours] = useState<OpeningHours>({
+    sunday: { ...DEFAULT_HOURS },
+    monday: { ...DEFAULT_HOURS },
+    tuesday: { ...DEFAULT_HOURS },
+    wednesday: { ...DEFAULT_HOURS },
+    thursday: { ...DEFAULT_HOURS },
+    friday: { ...DEFAULT_HOURS },
+    saturday: { ...DEFAULT_HOURS },
+  });
 
   // Form state
   const [formData, setFormData] = useState({
@@ -216,6 +266,36 @@ export default function AdminVenueEditPage({ params }: { params: Promise<{ id: s
         is_verified: v.is_verified || false,
         is_hidden: v.is_hidden || false,
       });
+
+      // Parse opening hours
+      if (v.opening_hours && typeof v.opening_hours === 'object') {
+        const parsedHours: OpeningHours = {
+          sunday: { ...DEFAULT_HOURS },
+          monday: { ...DEFAULT_HOURS },
+          tuesday: { ...DEFAULT_HOURS },
+          wednesday: { ...DEFAULT_HOURS },
+          thursday: { ...DEFAULT_HOURS },
+          friday: { ...DEFAULT_HOURS },
+          saturday: { ...DEFAULT_HOURS },
+        };
+
+        DAYS.forEach((day) => {
+          const dayData = v.opening_hours[day];
+          if (dayData) {
+            if (dayData === 'closed') {
+              parsedHours[day] = { open: '10:00', close: '22:00', isClosed: true };
+            } else if (typeof dayData === 'object') {
+              parsedHours[day] = {
+                open: dayData.open || '10:00',
+                close: dayData.close || '22:00',
+                isClosed: false,
+              };
+            }
+          }
+        });
+
+        setOpeningHours(parsedHours);
+      }
     } catch (error) {
       console.error('Error fetching venue:', error);
       setToast({ message: 'Failed to load venue', type: 'error' });
@@ -236,6 +316,39 @@ export default function AdminVenueEditPage({ params }: { params: Promise<{ id: s
       ...prev,
       [name]: type === 'checkbox' ? (e.target as HTMLInputElement).checked : value,
     }));
+  };
+
+  // Opening hours handlers
+  const handleHoursChange = (day: keyof OpeningHours, field: keyof DayHours, value: string | boolean) => {
+    setOpeningHours((prev) => ({
+      ...prev,
+      [day]: {
+        ...prev[day],
+        [field]: value,
+      },
+    }));
+  };
+
+  const handleToggleClosed = (day: keyof OpeningHours) => {
+    setOpeningHours((prev) => ({
+      ...prev,
+      [day]: {
+        ...prev[day],
+        isClosed: !prev[day].isClosed,
+      },
+    }));
+  };
+
+  const handleCopyHoursToAll = (sourceDay: keyof OpeningHours) => {
+    const sourceHours = openingHours[sourceDay];
+    const newHours = { ...openingHours };
+
+    DAYS.forEach((day) => {
+      newHours[day] = { ...sourceHours };
+    });
+
+    setOpeningHours(newHours);
+    setToast({ message: `Copied ${DAY_LABELS[sourceDay]}'s hours to all days`, type: 'success' });
   };
 
   const handleSave = async () => {
@@ -267,6 +380,20 @@ export default function AdminVenueEditPage({ params }: { params: Promise<{ id: s
         is_featured: formData.is_featured,
         is_verified: formData.is_verified,
         is_hidden: formData.is_hidden,
+        opening_hours: (() => {
+          const dbHours: Record<string, { open: string; close: string } | 'closed'> = {};
+          DAYS.forEach((day) => {
+            if (openingHours[day].isClosed) {
+              dbHours[day] = 'closed';
+            } else {
+              dbHours[day] = {
+                open: openingHours[day].open,
+                close: openingHours[day].close,
+              };
+            }
+          });
+          return dbHours;
+        })(),
       };
 
       const response = await fetch(`/api/admin/venues/${resolvedParams.id}`, {
@@ -1090,6 +1217,85 @@ export default function AdminVenueEditPage({ params }: { params: Promise<{ id: s
                 </select>
               </div>
             </div>
+          </div>
+
+          {/* Opening Hours */}
+          <div className="bg-[#1A1A2E] rounded-xl p-6 border border-white/10">
+            <div className="flex items-center gap-2 mb-4">
+              <Clock className="w-5 h-5 text-cyan-400" />
+              <h3 className="text-lg font-semibold text-white">Opening Hours</h3>
+            </div>
+            <div className="space-y-3">
+              {DAYS.map((day) => (
+                <div
+                  key={day}
+                  className={`flex flex-col sm:flex-row sm:items-center gap-3 p-3 rounded-lg ${
+                    openingHours[day].isClosed ? 'bg-red-500/10' : 'bg-white/5'
+                  }`}
+                >
+                  {/* Day Name */}
+                  <div className="w-24 flex-shrink-0">
+                    <span className="text-white font-medium text-sm">{DAY_LABELS[day]}</span>
+                  </div>
+
+                  {/* Open/Closed Toggle */}
+                  <button
+                    type="button"
+                    onClick={() => handleToggleClosed(day)}
+                    className={`flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg transition-all text-xs font-medium ${
+                      openingHours[day].isClosed
+                        ? 'bg-red-500/20 text-red-400 hover:bg-red-500/30'
+                        : 'bg-green-500/20 text-green-400 hover:bg-green-500/30'
+                    }`}
+                  >
+                    {openingHours[day].isClosed ? (
+                      <>
+                        <ToggleLeft className="w-4 h-4" />
+                        Closed
+                      </>
+                    ) : (
+                      <>
+                        <ToggleRight className="w-4 h-4" />
+                        Open
+                      </>
+                    )}
+                  </button>
+
+                  {/* Time Inputs */}
+                  {!openingHours[day].isClosed && (
+                    <div className="flex items-center gap-2 flex-1">
+                      <input
+                        type="time"
+                        value={openingHours[day].open}
+                        onChange={(e) => handleHoursChange(day, 'open', e.target.value)}
+                        className="px-2 py-1.5 bg-white/5 border border-white/10 rounded-lg text-white text-sm focus:outline-none focus:ring-2 focus:ring-cyan-500/50 w-[110px]"
+                      />
+                      <span className="text-gray-500 text-sm">to</span>
+                      <input
+                        type="time"
+                        value={openingHours[day].close}
+                        onChange={(e) => handleHoursChange(day, 'close', e.target.value)}
+                        className="px-2 py-1.5 bg-white/5 border border-white/10 rounded-lg text-white text-sm focus:outline-none focus:ring-2 focus:ring-cyan-500/50 w-[110px]"
+                      />
+                    </div>
+                  )}
+
+                  {/* Copy to All Button */}
+                  <button
+                    type="button"
+                    onClick={() => handleCopyHoursToAll(day)}
+                    className="flex items-center gap-1 text-xs text-gray-500 hover:text-cyan-400 transition-colors whitespace-nowrap ml-auto"
+                    title={`Copy ${DAY_LABELS[day]}'s hours to all days`}
+                  >
+                    <Copy className="w-3 h-3" />
+                    Copy to all
+                  </button>
+                </div>
+              ))}
+            </div>
+            <p className="text-xs text-gray-500 mt-4">
+              These hours will be displayed on the venue&apos;s public page. Remember to click &quot;Save Changes&quot; to apply.
+            </p>
           </div>
         </div>
 
