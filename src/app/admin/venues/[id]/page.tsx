@@ -28,6 +28,7 @@ import {
   ToggleLeft,
   ToggleRight,
   Copy,
+  EyeOffIcon,
 } from 'lucide-react';
 import { compressImage } from '@/lib/image-compression';
 
@@ -197,6 +198,7 @@ export default function AdminVenueEditPage({ params }: { params: Promise<{ id: s
     friday: { ...DEFAULT_HOURS },
     saturday: { ...DEFAULT_HOURS },
   });
+  const [hideHours, setHideHours] = useState(false);
 
   // Form state
   const [formData, setFormData] = useState({
@@ -278,6 +280,11 @@ export default function AdminVenueEditPage({ params }: { params: Promise<{ id: s
           friday: { ...DEFAULT_HOURS },
           saturday: { ...DEFAULT_HOURS },
         };
+
+        // Load hideHours flag
+        if (v.opening_hours.hideHours !== undefined) {
+          setHideHours(v.opening_hours.hideHours);
+        }
 
         DAYS.forEach((day) => {
           const dayData = v.opening_hours[day];
@@ -381,7 +388,9 @@ export default function AdminVenueEditPage({ params }: { params: Promise<{ id: s
         is_verified: formData.is_verified,
         is_hidden: formData.is_hidden,
         opening_hours: (() => {
-          const dbHours: Record<string, { open: string; close: string } | 'closed'> = {};
+          const dbHours: Record<string, { open: string; close: string } | 'closed' | boolean> = {
+            hideHours, // Include the hide flag
+          };
           DAYS.forEach((day) => {
             if (openingHours[day].isClosed) {
               dbHours[day] = 'closed';
@@ -1225,7 +1234,44 @@ export default function AdminVenueEditPage({ params }: { params: Promise<{ id: s
               <Clock className="w-5 h-5 text-cyan-400" />
               <h3 className="text-lg font-semibold text-white">Opening Hours</h3>
             </div>
-            <div className="space-y-3">
+
+            {/* Hide Hours Toggle */}
+            <div className="mb-4 p-3 rounded-lg bg-white/5 border border-white/10">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-3">
+                  {hideHours ? (
+                    <EyeOff className="w-5 h-5 text-orange-400" />
+                  ) : (
+                    <Eye className="w-5 h-5 text-green-400" />
+                  )}
+                  <div>
+                    <p className="text-white font-medium text-sm">
+                      {hideHours ? 'Hours Hidden from Public' : 'Hours Visible to Public'}
+                    </p>
+                    <p className="text-gray-400 text-xs">
+                      {hideHours
+                        ? 'Opening hours will not be displayed on the venue page'
+                        : 'Opening hours will be shown on the venue page'}
+                    </p>
+                  </div>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => setHideHours(!hideHours)}
+                  className={`relative w-12 h-6 rounded-full transition-colors ${
+                    hideHours ? 'bg-orange-500' : 'bg-green-500'
+                  }`}
+                >
+                  <span
+                    className={`absolute top-1 w-4 h-4 bg-white rounded-full transition-transform ${
+                      hideHours ? 'left-7' : 'left-1'
+                    }`}
+                  />
+                </button>
+              </div>
+            </div>
+
+            <div className={`space-y-3 ${hideHours ? 'opacity-50' : ''}`}>
               {DAYS.map((day) => (
                 <div
                   key={day}

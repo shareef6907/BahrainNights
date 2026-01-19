@@ -14,6 +14,7 @@ import {
 
 interface PlaceHoursProps {
   openingHours: OpeningHours;
+  hideHours?: boolean;
   phone?: string;
   email?: string;
   website?: string;
@@ -29,6 +30,7 @@ interface PlaceHoursProps {
 
 export default function PlaceHours({
   openingHours,
+  hideHours = false,
   phone,
   email,
   website,
@@ -52,50 +54,52 @@ export default function PlaceHours({
       viewport={{ once: true }}
       className="bg-white/5 backdrop-blur-sm border border-white/10 rounded-2xl p-6"
     >
-      {/* Opening Hours */}
-      <div className="mb-6">
-        <div className="flex items-center gap-2 mb-4">
-          <Clock className="w-5 h-5 text-yellow-400" />
-          <h3 className="text-lg font-bold text-white">Opening Hours</h3>
-        </div>
+      {/* Opening Hours - only show if not hidden */}
+      {!hideHours && (
+        <div className="mb-6">
+          <div className="flex items-center gap-2 mb-4">
+            <Clock className="w-5 h-5 text-yellow-400" />
+            <h3 className="text-lg font-bold text-white">Opening Hours</h3>
+          </div>
 
-        {/* Current Status */}
-        <div className={`flex items-center gap-2 mb-4 pb-4 border-b border-white/10 ${open ? 'text-green-400' : 'text-red-400'}`}>
-          <div className={`w-2.5 h-2.5 rounded-full ${open ? 'bg-green-400 animate-pulse' : 'bg-red-400'}`} />
-          <span className="font-semibold">{open ? 'Open Now' : 'Closed'}</span>
-          {todayHours && todayHours !== 'closed' && todayHours.open && todayHours.close && (
-            <span className="text-gray-400">• {open ? `Closes at ${formatTime(todayHours.close)}` : `Opens at ${formatTime(todayHours.open)}`}</span>
-          )}
-        </div>
+          {/* Current Status */}
+          <div className={`flex items-center gap-2 mb-4 pb-4 border-b border-white/10 ${open ? 'text-green-400' : 'text-red-400'}`}>
+            <div className={`w-2.5 h-2.5 rounded-full ${open ? 'bg-green-400 animate-pulse' : 'bg-red-400'}`} />
+            <span className="font-semibold">{open ? 'Open Now' : 'Closed'}</span>
+            {todayHours && todayHours !== 'closed' && todayHours.open && todayHours.close && (
+              <span className="text-gray-400">• {open ? `Closes at ${formatTime(todayHours.close)}` : `Opens at ${formatTime(todayHours.open)}`}</span>
+            )}
+          </div>
 
-        {/* Weekly Schedule */}
-        <div className="space-y-2">
-          {DAY_ORDER.map((day) => {
-            const isToday = day === today;
-            const hours = openingHours[day];
-            const isClosed = !hours || hours === 'closed';
+          {/* Weekly Schedule */}
+          <div className="space-y-2">
+            {DAY_ORDER.map((day) => {
+              const isToday = day === today;
+              const hours = openingHours[day];
+              const isClosed = !hours || hours === 'closed';
 
-            return (
-              <div
-                key={day}
-                className={`flex items-center justify-between py-1.5 ${
-                  isToday ? 'text-yellow-400 font-medium' : 'text-gray-400'
-                }`}
-              >
-                <span className={isToday ? 'relative' : ''}>
-                  {isToday && (
-                    <span className="absolute -left-3 top-1/2 -translate-y-1/2 w-1.5 h-1.5 bg-yellow-400 rounded-full" />
-                  )}
-                  {DAY_LABELS[day]}
-                </span>
-                <span className={isClosed ? 'text-red-400/70' : ''}>
-                  {formatHours(hours)}
-                </span>
-              </div>
-            );
-          })}
+              return (
+                <div
+                  key={day}
+                  className={`flex items-center justify-between py-1.5 ${
+                    isToday ? 'text-yellow-400 font-medium' : 'text-gray-400'
+                  }`}
+                >
+                  <span className={isToday ? 'relative' : ''}>
+                    {isToday && (
+                      <span className="absolute -left-3 top-1/2 -translate-y-1/2 w-1.5 h-1.5 bg-yellow-400 rounded-full" />
+                    )}
+                    {DAY_LABELS[day]}
+                  </span>
+                  <span className={isClosed ? 'text-red-400/70' : ''}>
+                    {formatHours(hours)}
+                  </span>
+                </div>
+              );
+            })}
+          </div>
         </div>
-      </div>
+      )}
 
       {/* Contact Info */}
       <div className="border-t border-white/10 pt-6">

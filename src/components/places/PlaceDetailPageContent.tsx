@@ -102,20 +102,30 @@ export default function PlaceDetailPageContent({ venue, similarVenues, events = 
   const [shareModalOpen, setShareModalOpen] = useState(false);
 
   // Parse opening hours from JSON
-  const openingHours = useMemo(() => {
-    if (!venue.opening_hours) return {};
+  const { openingHours, hideHours } = useMemo(() => {
+    let hours: OpeningHours = {};
+    if (!venue.opening_hours) return { openingHours: hours, hideHours: false };
     if (typeof venue.opening_hours === 'string') {
       try {
-        return JSON.parse(venue.opening_hours);
+        hours = JSON.parse(venue.opening_hours);
       } catch {
-        return {};
+        return { openingHours: {}, hideHours: false };
       }
+    } else {
+      hours = venue.opening_hours as OpeningHours;
     }
-    return venue.opening_hours as OpeningHours;
+    // Extract hideHours flag from the opening_hours object
+    const hideHoursFlag = (hours as Record<string, unknown>).hideHours === true;
+    return { openingHours: hours, hideHours: hideHoursFlag };
   }, [venue.opening_hours]);
 
   // Calculate if open now and today's hours
   const { isOpen, todayHours } = useMemo(() => {
+    // If hours are hidden, don't show open/closed status
+    if (hideHours) {
+      return { isOpen: null, todayHours: null };
+    }
+
     const now = new Date();
     const days = ['sunday', 'monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday'];
     const today = days[now.getDay()];
@@ -153,7 +163,7 @@ export default function PlaceDetailPageContent({ venue, similarVenues, events = 
       isOpen: isCurrentlyOpen,
       todayHours: `${formatTime(hours.open)} - ${formatTime(hours.close)}`,
     };
-  }, [openingHours]);
+  }, [openingHours, hideHours]);
 
   const placeUrl = typeof window !== 'undefined'
     ? window.location.href
@@ -274,6 +284,7 @@ export default function PlaceDetailPageContent({ venue, similarVenues, events = 
             <div className="space-y-6">
               <PlaceHours
                 openingHours={openingHours}
+                hideHours={hideHours}
                 phone={venue.phone || undefined}
                 email={venue.email || undefined}
                 website={venue.website || undefined}

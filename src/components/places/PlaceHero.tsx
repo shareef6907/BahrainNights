@@ -16,8 +16,8 @@ interface PlaceHeroProps {
   area: string;
   coverImage: string;
   logo: string;
-  isOpen: boolean;
-  todayHours: string;
+  isOpen: boolean | null;
+  todayHours: string | null;
   onShareClick: () => void;
   venueId?: string | null; // Database UUID for like functionality
 }
@@ -173,14 +173,16 @@ export default function PlaceHero({
                 <span>{area}</span>
               </div>
 
-              {/* Open/Closed Status */}
-              <div className={`flex items-center gap-1.5 ${isOpen ? 'text-green-400' : 'text-red-400'}`}>
-                <Clock className="w-4 h-4" />
-                <span className="font-medium">{isOpen ? 'Open Now' : 'Closed'}</span>
-                {todayHours && (
-                  <span className="text-gray-400">• {todayHours}</span>
-                )}
-              </div>
+              {/* Open/Closed Status - only show if hours are not hidden */}
+              {isOpen !== null && (
+                <div className={`flex items-center gap-1.5 ${isOpen ? 'text-green-400' : 'text-red-400'}`}>
+                  <Clock className="w-4 h-4" />
+                  <span className="font-medium">{isOpen ? 'Open Now' : 'Closed'}</span>
+                  {todayHours && (
+                    <span className="text-gray-400">• {todayHours}</span>
+                  )}
+                </div>
+              )}
 
               {/* Rating (Placeholder) */}
               <div className="flex items-center gap-1 text-gray-400">

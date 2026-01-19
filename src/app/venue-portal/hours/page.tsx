@@ -10,6 +10,8 @@ import {
   AlertCircle,
   ToggleLeft,
   ToggleRight,
+  EyeOff,
+  Eye,
 } from 'lucide-react';
 
 interface DayHours {
@@ -64,6 +66,7 @@ export default function VenueHoursPage() {
     friday: { ...DEFAULT_HOURS },
     saturday: { ...DEFAULT_HOURS },
   });
+  const [hideHours, setHideHours] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
   const [isSaving, setIsSaving] = useState(false);
   const [message, setMessage] = useState<{ type: 'success' | 'error'; text: string } | null>(null);
@@ -81,6 +84,11 @@ export default function VenueHoursPage() {
 
         if (savedHours && typeof savedHours === 'object') {
           const parsedHours: OpeningHours = { ...hours };
+
+          // Load hideHours flag
+          if (savedHours.hideHours !== undefined) {
+            setHideHours(savedHours.hideHours);
+          }
 
           DAYS.forEach((day) => {
             if (savedHours[day]) {
@@ -146,7 +154,9 @@ export default function VenueHoursPage() {
 
     try {
       // Convert to database format
-      const dbHours: Record<string, { open: string; close: string } | 'closed'> = {};
+      const dbHours: Record<string, { open: string; close: string } | 'closed' | boolean> = {
+        hideHours, // Include the hide flag
+      };
 
       DAYS.forEach((day) => {
         if (hours[day].isClosed) {
@@ -215,6 +225,46 @@ export default function VenueHoursPage() {
         </motion.div>
       )}
 
+      {/* Hide Hours Toggle */}
+      <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        className="bg-white/5 border border-white/10 rounded-2xl p-6"
+      >
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-3">
+            {hideHours ? (
+              <EyeOff className="w-5 h-5 text-orange-400" />
+            ) : (
+              <Eye className="w-5 h-5 text-green-400" />
+            )}
+            <div>
+              <p className="text-white font-medium">
+                {hideHours ? 'Opening Hours Hidden' : 'Opening Hours Visible'}
+              </p>
+              <p className="text-gray-400 text-sm">
+                {hideHours
+                  ? 'Opening hours will not be displayed on your venue page'
+                  : 'Opening hours will be shown on your venue page'}
+              </p>
+            </div>
+          </div>
+          <button
+            type="button"
+            onClick={() => setHideHours(!hideHours)}
+            className={`relative w-14 h-8 rounded-full transition-colors ${
+              hideHours ? 'bg-orange-500' : 'bg-green-500'
+            }`}
+          >
+            <span
+              className={`absolute top-1 w-6 h-6 bg-white rounded-full transition-transform ${
+                hideHours ? 'left-7' : 'left-1'
+              }`}
+            />
+          </button>
+        </div>
+      </motion.div>
+
       {/* Hours Form */}
       <motion.form
         initial={{ opacity: 0, y: 20 }}
@@ -223,7 +273,7 @@ export default function VenueHoursPage() {
         className="bg-white/5 border border-white/10 rounded-2xl overflow-hidden"
       >
         {/* Days List */}
-        <div className="divide-y divide-white/10">
+        <div className={`divide-y divide-white/10 ${hideHours ? 'opacity-50' : ''}`}>
           {DAYS.map((day, index) => (
             <motion.div
               key={day}
