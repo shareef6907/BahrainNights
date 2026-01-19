@@ -631,11 +631,18 @@ export default function RegisterVenuePage() {
                     type="text"
                     name="instagram"
                     value={formData.instagram}
-                    onChange={handleInputChange}
+                    onChange={(e) => {
+                      // Auto-strip @ symbol if entered
+                      const value = e.target.value.replace(/^@/, '');
+                      setFormData(prev => ({ ...prev, instagram: value }));
+                    }}
                     className="w-full bg-gray-900/50 border border-gray-700 rounded-lg pl-10 pr-4 py-3 text-white placeholder-gray-500 focus:border-orange-500 focus:ring-1 focus:ring-orange-500 outline-none transition-all"
-                    placeholder="@yourvenue"
+                    placeholder="yourvenue"
                   />
                 </div>
+                <p className="text-xs text-gray-500 mt-1">
+                  Username only, without the @ symbol
+                </p>
               </div>
               <div className="md:col-span-2">
                 <label className="block text-sm text-gray-400 mb-2">YouTube Video URL</label>

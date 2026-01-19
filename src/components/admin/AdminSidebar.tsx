@@ -51,6 +51,11 @@ const navItems = [
     icon: Building2,
   },
   {
+    name: 'Venue Changes',
+    href: '/admin/venue-changes',
+    icon: ClipboardCheck,
+  },
+  {
     name: 'Events',
     href: '/admin/events',
     icon: Calendar,
@@ -109,11 +114,6 @@ const navItems = [
     name: 'Users',
     href: '/admin/users',
     icon: Users,
-  },
-  {
-    name: 'Venue Changes',
-    href: '/admin/venue-changes',
-    icon: ClipboardCheck,
   },
 ];
 

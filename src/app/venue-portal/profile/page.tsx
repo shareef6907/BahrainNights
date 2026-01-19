@@ -745,10 +745,17 @@ export default function VenueProfilePage() {
               type="text"
               name="instagram"
               value={formData.instagram}
-              onChange={handleChange}
+              onChange={(e) => {
+                // Auto-strip @ symbol if entered
+                const value = e.target.value.replace(/^@/, '');
+                setFormData(prev => ({ ...prev, instagram: value }));
+              }}
               className="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-xl text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-yellow-400/50 focus:border-transparent"
-              placeholder="@yourvenue"
+              placeholder="yourvenue"
             />
+            <p className="text-xs text-gray-500 mt-1">
+              Username only, without the @ symbol
+            </p>
           </div>
         </div>
 

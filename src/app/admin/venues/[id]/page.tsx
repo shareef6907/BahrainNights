@@ -896,8 +896,11 @@ export default function AdminVenueEditPage({ params }: { params: Promise<{ id: s
                   type="text"
                   name="instagram"
                   value={formData.instagram}
-                  onChange={handleInputChange}
-                  placeholder="@username"
+                  onChange={(e) => {
+                    const value = e.target.value.replace(/^@/, '');
+                    setFormData(prev => ({ ...prev, instagram: value }));
+                  }}
+                  placeholder="username (without @)"
                   className="w-full px-4 py-2 bg-white/5 border border-white/10 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-cyan-500/50"
                 />
               </div>
