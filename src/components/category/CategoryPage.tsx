@@ -18,6 +18,10 @@ interface CategoryPageProps {
 
 // Convert database venue to Place type
 function venueToPlace(venue: Venue): Place {
+  // Extract hideHours from opening_hours if it exists
+  const openingHours = (venue.opening_hours as OpeningHours & { hideHours?: boolean }) || {};
+  const hideHours = openingHours.hideHours === true;
+
   return {
     id: venue.id,
     name: venue.name,
@@ -33,7 +37,8 @@ function venueToPlace(venue: Venue): Place {
     email: venue.email || undefined,
     website: venue.website || undefined,
     instagram: venue.instagram || undefined,
-    openingHours: (venue.opening_hours as OpeningHours) || {},
+    openingHours: openingHours,
+    hideHours: hideHours,
     features: venue.features || [],
     images: venue.cover_image_url
       ? [venue.cover_image_url, ...(venue.gallery || [])]

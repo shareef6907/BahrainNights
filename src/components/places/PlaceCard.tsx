@@ -29,6 +29,7 @@ export interface Place {
   website?: string;
   instagram?: string;
   openingHours: OpeningHours;
+  hideHours?: boolean; // If true, don't show open/closed status
   features: string[];
   images: string[];
   logo: string;
@@ -141,10 +142,12 @@ function PlaceCard({ place, index }: PlaceCardProps) {
               <h3 className="text-lg font-bold text-white group-hover:text-yellow-400 transition-colors line-clamp-1">
                 {place.name}
               </h3>
-              <div className={`flex items-center gap-1.5 flex-shrink-0 ${open ? 'text-green-400' : 'text-red-400'}`}>
-                <div className={`w-2 h-2 rounded-full ${open ? 'bg-green-400' : 'bg-red-400'}`} />
-                <span className="text-xs font-medium">{open ? 'Open' : 'Closed'}</span>
-              </div>
+              {!place.hideHours && (
+                <div className={`flex items-center gap-1.5 flex-shrink-0 ${open ? 'text-green-400' : 'text-red-400'}`}>
+                  <div className={`w-2 h-2 rounded-full ${open ? 'bg-green-400' : 'bg-red-400'}`} />
+                  <span className="text-xs font-medium">{open ? 'Open' : 'Closed'}</span>
+                </div>
+              )}
             </div>
 
             {/* Cuisine/Type Tags */}
