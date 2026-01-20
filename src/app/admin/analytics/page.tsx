@@ -75,8 +75,11 @@ interface AnalyticsData {
       totalPageViews: number;
       uniqueVisitors: number;
       today: number;
+      todayPageViews: number;
       thisWeek: number;
+      weekPageViews: number;
       thisMonth: number;
+      monthPageViews: number;
     };
   };
   visitorsByCountry: Record<string, { pageViews: number; uniqueVisitors: number }>;
@@ -375,15 +378,18 @@ export default function AnalyticsPage() {
             </div>
             <div className="bg-gray-800/50 rounded-lg p-4">
               <p className="text-gray-400 text-sm">Today</p>
-              <p className="text-2xl font-bold text-green-400">{formatNumber(overview.visitors?.today || 0)}</p>
+              <p className="text-2xl font-bold text-green-400">{formatNumber(overview.visitors?.todayPageViews || 0)}</p>
+              <p className="text-xs text-gray-500">{formatNumber(overview.visitors?.today || 0)} unique</p>
             </div>
             <div className="bg-gray-800/50 rounded-lg p-4">
               <p className="text-gray-400 text-sm">This Week</p>
-              <p className="text-2xl font-bold text-cyan-400">{formatNumber(overview.visitors?.thisWeek || 0)}</p>
+              <p className="text-2xl font-bold text-cyan-400">{formatNumber(overview.visitors?.weekPageViews || 0)}</p>
+              <p className="text-xs text-gray-500">{formatNumber(overview.visitors?.thisWeek || 0)} unique</p>
             </div>
             <div className="bg-gray-800/50 rounded-lg p-4">
               <p className="text-gray-400 text-sm">This Month</p>
-              <p className="text-2xl font-bold text-purple-400">{formatNumber(overview.visitors?.thisMonth || 0)}</p>
+              <p className="text-2xl font-bold text-purple-400">{formatNumber(overview.visitors?.monthPageViews || 0)}</p>
+              <p className="text-xs text-gray-500">{formatNumber(overview.visitors?.thisMonth || 0)} unique</p>
             </div>
           </div>
         </motion.div>

@@ -284,8 +284,11 @@ export async function GET() {
     let totalPageViews = 0;
     let uniqueVisitors = 0;
     let visitorsToday = 0;
+    let todayPageViews = 0;
     let visitorsThisWeek = 0;
+    let weekPageViews = 0;
     let visitorsThisMonth = 0;
+    let monthPageViews = 0;
     let visitorsByCountry: Record<string, { pageViews: number; uniqueVisitors: number }> = {};
     let dailyTraffic: { date: string; views: number; visitors: number }[] = [];
 
@@ -296,46 +299,75 @@ export async function GET() {
         .select('*', { count: 'exact', head: true });
       totalPageViews = pageViewCount || 0;
 
-      // Today's stats - use UTC for consistency
+      // Date boundaries - use UTC for consistency
       const now = new Date();
       const todayStart = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate(), 0, 0, 0, 0));
-
-      const { data: todayViews } = await supabase
-        .from('page_views')
-        .select('ip_hash')
-        .gte('created_at', todayStart.toISOString());
-
-      const todayUniqueIPs = new Set((todayViews as { ip_hash: string | null }[] | null)?.map(v => v.ip_hash).filter(Boolean) || []);
-      visitorsToday = todayUniqueIPs.size;
-
-      // This week's stats - last 7 days with hours reset to 0 for consistency
       const weekStart = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate() - 7, 0, 0, 0, 0));
-
-      const { data: weekViews } = await supabase
-        .from('page_views')
-        .select('ip_hash')
-        .gte('created_at', weekStart.toISOString());
-
-      const weekUniqueIPs = new Set((weekViews as { ip_hash: string | null }[] | null)?.map(v => v.ip_hash).filter(Boolean) || []);
-      visitorsThisWeek = weekUniqueIPs.size;
-
-      // This month's stats - from 1st of current month UTC
       const monthStartUTC = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), 1, 0, 0, 0, 0));
 
-      const { data: monthViews } = await supabase
-        .from('page_views')
-        .select('ip_hash')
-        .gte('created_at', monthStartUTC.toISOString());
+      // Helper to fetch ALL records with pagination (Supabase has 1000 row default limit)
+      // Returns both total page views and unique visitors for a time period
+      const fetchVisitorStats = async (startDate: string): Promise<{ pageViews: number; uniqueVisitors: number }> => {
+        const uniqueIps = new Set<string>();
+        let offset = 0;
+        let hasMore = true;
+        let totalFetched = 0;
 
-      const monthUniqueIPs = new Set((monthViews as { ip_hash: string | null }[] | null)?.map(v => v.ip_hash).filter(Boolean) || []);
-      visitorsThisMonth = monthUniqueIPs.size;
+        while (hasMore) {
+          const { data } = await supabase
+            .from('page_views')
+            .select('ip_hash')
+            .gte('created_at', startDate)
+            .range(offset, offset + 999);
 
-      // Total unique visitors (all time)
-      const { data: allViews } = await supabase
-        .from('page_views')
-        .select('ip_hash');
+          if (data && data.length > 0) {
+            totalFetched += data.length;
+            (data as { ip_hash: string | null }[]).forEach(v => {
+              if (v.ip_hash) uniqueIps.add(v.ip_hash);
+            });
+            offset += 1000;
+            hasMore = data.length === 1000;
+          } else {
+            hasMore = false;
+          }
+        }
 
-      const allUniqueIPs = new Set((allViews as { ip_hash: string | null }[] | null)?.map(v => v.ip_hash).filter(Boolean) || []);
+        return { pageViews: totalFetched, uniqueVisitors: uniqueIps.size };
+      };
+
+      // Fetch stats for each time period
+      const todayStats = await fetchVisitorStats(todayStart.toISOString());
+      visitorsToday = todayStats.uniqueVisitors;
+      todayPageViews = todayStats.pageViews;
+
+      const weekStats = await fetchVisitorStats(weekStart.toISOString());
+      visitorsThisWeek = weekStats.uniqueVisitors;
+      weekPageViews = weekStats.pageViews;
+
+      const monthStats = await fetchVisitorStats(monthStartUTC.toISOString());
+      visitorsThisMonth = monthStats.uniqueVisitors;
+      monthPageViews = monthStats.pageViews;
+
+      // Total unique visitors (all time) - fetch all pages
+      const allUniqueIPs = new Set<string>();
+      let allOffset = 0;
+      let hasMoreAll = true;
+      while (hasMoreAll) {
+        const { data } = await supabase
+          .from('page_views')
+          .select('ip_hash')
+          .range(allOffset, allOffset + 999);
+
+        if (data && data.length > 0) {
+          (data as { ip_hash: string | null }[]).forEach(v => {
+            if (v.ip_hash) allUniqueIPs.add(v.ip_hash);
+          });
+          allOffset += 1000;
+          hasMoreAll = data.length === 1000;
+        } else {
+          hasMoreAll = false;
+        }
+      }
       uniqueVisitors = allUniqueIPs.size;
 
       // Visitors by country - count both page views and unique visitors
@@ -379,26 +411,39 @@ export async function GET() {
           .sort((a, b) => (b[1] as { pageViews: number }).pageViews - (a[1] as { pageViews: number }).pageViews)
       );
 
-      // Daily traffic for last 30 days - use UTC for consistency
+      // Daily traffic for last 30 days - use UTC for consistency with pagination
       const thirtyDaysAgo = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate() - 30, 0, 0, 0, 0));
 
-      const { data: dailyViews } = await supabase
-        .from('page_views')
-        .select('created_at, ip_hash')
-        .gte('created_at', thirtyDaysAgo.toISOString())
-        .order('created_at', { ascending: true });
-
       const dailyStats: Record<string, { views: number; visitors: Set<string> }> = {};
-      (dailyViews as { created_at: string; ip_hash: string | null }[] | null)?.forEach((v) => {
-        const date = v.created_at.split('T')[0];
-        if (!dailyStats[date]) {
-          dailyStats[date] = { views: 0, visitors: new Set() };
+
+      // Fetch daily views with pagination
+      let dailyOffset = 0;
+      let hasMoreDaily = true;
+      while (hasMoreDaily) {
+        const { data: dailyBatch } = await supabase
+          .from('page_views')
+          .select('created_at, ip_hash')
+          .gte('created_at', thirtyDaysAgo.toISOString())
+          .order('created_at', { ascending: true })
+          .range(dailyOffset, dailyOffset + 999);
+
+        if (dailyBatch && dailyBatch.length > 0) {
+          (dailyBatch as { created_at: string; ip_hash: string | null }[]).forEach((v) => {
+            const date = v.created_at.split('T')[0];
+            if (!dailyStats[date]) {
+              dailyStats[date] = { views: 0, visitors: new Set() };
+            }
+            dailyStats[date].views++;
+            if (v.ip_hash) {
+              dailyStats[date].visitors.add(v.ip_hash);
+            }
+          });
+          dailyOffset += 1000;
+          hasMoreDaily = dailyBatch.length === 1000;
+        } else {
+          hasMoreDaily = false;
         }
-        dailyStats[date].views++;
-        if (v.ip_hash) {
-          dailyStats[date].visitors.add(v.ip_hash);
-        }
-      });
+      }
 
       dailyTraffic = Object.entries(dailyStats)
         .map(([date, stats]) => ({
@@ -464,8 +509,11 @@ export async function GET() {
           totalPageViews,
           uniqueVisitors,
           today: visitorsToday,
+          todayPageViews,
           thisWeek: visitorsThisWeek,
+          weekPageViews,
           thisMonth: visitorsThisMonth,
+          monthPageViews,
         },
       },
       visitorsByCountry,
