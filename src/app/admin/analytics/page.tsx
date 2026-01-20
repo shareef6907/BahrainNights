@@ -370,8 +370,8 @@ export default function AnalyticsPage() {
           <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
             <div className="bg-gray-800/50 rounded-lg p-4">
               <p className="text-gray-400 text-sm">Total Visitors</p>
-              <p className="text-2xl font-bold text-white">{formatNumber(overview.visitors?.totalPageViews || 0)}</p>
-              <p className="text-xs text-gray-500">{formatNumber(overview.visitors?.uniqueVisitors || 0)} unique</p>
+              <p className="text-2xl font-bold text-white">{formatNumber(overview.visitors?.uniqueVisitors || 0)}</p>
+              <p className="text-xs text-gray-500">{formatNumber(overview.visitors?.totalPageViews || 0)} page views</p>
             </div>
             <div className="bg-gray-800/50 rounded-lg p-4">
               <p className="text-gray-400 text-sm">Today</p>
