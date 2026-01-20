@@ -369,27 +369,31 @@ export default function AnalyticsPage() {
           </div>
           <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
             <div className="bg-gray-800/50 rounded-lg p-4">
-              <p className="text-gray-400 text-sm">Total Page Views</p>
+              <p className="text-gray-400 text-sm">Total Visitors</p>
               <p className="text-2xl font-bold text-white">{formatNumber(overview.visitors?.totalPageViews || 0)}</p>
-            </div>
-            <div className="bg-gray-800/50 rounded-lg p-4">
-              <p className="text-gray-400 text-sm">Unique Visitors</p>
-              <p className="text-2xl font-bold text-white">{formatNumber(overview.visitors?.uniqueVisitors || 0)}</p>
+              <p className="text-xs text-gray-500">{formatNumber(overview.visitors?.uniqueVisitors || 0)} unique</p>
             </div>
             <div className="bg-gray-800/50 rounded-lg p-4">
               <p className="text-gray-400 text-sm">Today</p>
-              <p className="text-2xl font-bold text-green-400">{formatNumber(overview.visitors?.todayPageViews || 0)}</p>
-              <p className="text-xs text-gray-500">{formatNumber(overview.visitors?.today || 0)} unique</p>
+              <p className="text-lg font-bold text-green-400">{formatNumber(overview.visitors?.todayPageViews || 0)} <span className="text-sm font-normal text-gray-400">visits</span></p>
+              <p className="text-lg font-bold text-green-300">{formatNumber(overview.visitors?.today || 0)} <span className="text-sm font-normal text-gray-400">unique</span></p>
             </div>
             <div className="bg-gray-800/50 rounded-lg p-4">
               <p className="text-gray-400 text-sm">This Week</p>
-              <p className="text-2xl font-bold text-cyan-400">{formatNumber(overview.visitors?.weekPageViews || 0)}</p>
-              <p className="text-xs text-gray-500">{formatNumber(overview.visitors?.thisWeek || 0)} unique</p>
+              <p className="text-lg font-bold text-cyan-400">{formatNumber(overview.visitors?.weekPageViews || 0)} <span className="text-sm font-normal text-gray-400">visits</span></p>
+              <p className="text-lg font-bold text-cyan-300">{formatNumber(overview.visitors?.thisWeek || 0)} <span className="text-sm font-normal text-gray-400">unique</span></p>
             </div>
             <div className="bg-gray-800/50 rounded-lg p-4">
               <p className="text-gray-400 text-sm">This Month</p>
-              <p className="text-2xl font-bold text-purple-400">{formatNumber(overview.visitors?.monthPageViews || 0)}</p>
-              <p className="text-xs text-gray-500">{formatNumber(overview.visitors?.thisMonth || 0)} unique</p>
+              <p className="text-lg font-bold text-purple-400">{formatNumber(overview.visitors?.monthPageViews || 0)} <span className="text-sm font-normal text-gray-400">visits</span></p>
+              <p className="text-lg font-bold text-purple-300">{formatNumber(overview.visitors?.thisMonth || 0)} <span className="text-sm font-normal text-gray-400">unique</span></p>
+            </div>
+            <div className="bg-gray-800/50 rounded-lg p-4">
+              <p className="text-gray-400 text-sm">Avg Pages/Visitor</p>
+              <p className="text-2xl font-bold text-amber-400">
+                {overview.visitors?.uniqueVisitors ? (overview.visitors.totalPageViews / overview.visitors.uniqueVisitors).toFixed(1) : '0'}
+              </p>
+              <p className="text-xs text-gray-500">pages per person</p>
             </div>
           </div>
         </motion.div>
