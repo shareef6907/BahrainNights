@@ -285,6 +285,8 @@ export async function GET() {
     let uniqueVisitors = 0;
     let visitorsToday = 0;
     let todayPageViews = 0;
+    let todayNewVisitors = 0;
+    let todayReturningVisitors = 0;
     let visitorsThisWeek = 0;
     let weekPageViews = 0;
     let visitorsThisMonth = 0;
@@ -306,19 +308,24 @@ export async function GET() {
       const monthStartUTC = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), 1, 0, 0, 0, 0));
 
       // Helper to fetch ALL records with pagination (Supabase has 1000 row default limit)
-      // Returns both total page views and unique visitors for a time period
-      const fetchVisitorStats = async (startDate: string): Promise<{ pageViews: number; uniqueVisitors: number }> => {
+      // Returns both total page views, unique visitors, and the Set of IPs
+      const fetchVisitorStatsWithIPs = async (startDate: string, endDate?: string): Promise<{ pageViews: number; uniqueVisitors: number; ips: Set<string> }> => {
         const uniqueIps = new Set<string>();
         let offset = 0;
         let hasMore = true;
         let totalFetched = 0;
 
         while (hasMore) {
-          const { data } = await supabase
+          let query = supabase
             .from('page_views')
             .select('ip_hash')
-            .gte('created_at', startDate)
-            .range(offset, offset + 999);
+            .gte('created_at', startDate);
+
+          if (endDate) {
+            query = query.lt('created_at', endDate);
+          }
+
+          const { data } = await query.range(offset, offset + 999);
 
           if (data && data.length > 0) {
             totalFetched += data.length;
@@ -332,13 +339,32 @@ export async function GET() {
           }
         }
 
-        return { pageViews: totalFetched, uniqueVisitors: uniqueIps.size };
+        return { pageViews: totalFetched, uniqueVisitors: uniqueIps.size, ips: uniqueIps };
       };
 
-      // Fetch stats for each time period
-      const todayStats = await fetchVisitorStats(todayStart.toISOString());
+      // Simple version without returning IPs
+      const fetchVisitorStats = async (startDate: string): Promise<{ pageViews: number; uniqueVisitors: number }> => {
+        const result = await fetchVisitorStatsWithIPs(startDate);
+        return { pageViews: result.pageViews, uniqueVisitors: result.uniqueVisitors };
+      };
+
+      // Fetch today's stats with IPs
+      const todayStats = await fetchVisitorStatsWithIPs(todayStart.toISOString());
       visitorsToday = todayStats.uniqueVisitors;
       todayPageViews = todayStats.pageViews;
+
+      // Get IPs from before today to calculate new vs returning
+      const beforeTodayStats = await fetchVisitorStatsWithIPs('2000-01-01T00:00:00.000Z', todayStart.toISOString());
+      const beforeTodayIPs = beforeTodayStats.ips;
+
+      // Calculate new vs returning visitors for today
+      todayStats.ips.forEach(ip => {
+        if (beforeTodayIPs.has(ip)) {
+          todayReturningVisitors++;
+        } else {
+          todayNewVisitors++;
+        }
+      });
 
       const weekStats = await fetchVisitorStats(weekStart.toISOString());
       visitorsThisWeek = weekStats.uniqueVisitors;
@@ -510,6 +536,8 @@ export async function GET() {
           uniqueVisitors,
           today: visitorsToday,
           todayPageViews,
+          todayNewVisitors,
+          todayReturningVisitors,
           thisWeek: visitorsThisWeek,
           weekPageViews,
           thisMonth: visitorsThisMonth,
