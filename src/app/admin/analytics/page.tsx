@@ -80,8 +80,12 @@ interface AnalyticsData {
       todayReturningVisitors: number;
       thisWeek: number;
       weekPageViews: number;
+      weekNewVisitors: number;
+      weekReturningVisitors: number;
       thisMonth: number;
       monthPageViews: number;
+      monthNewVisitors: number;
+      monthReturningVisitors: number;
     };
   };
   visitorsByCountry: Record<string, { pageViews: number; uniqueVisitors: number }>;
@@ -388,6 +392,9 @@ export default function AnalyticsPage() {
             <div className="bg-gray-800/50 rounded-lg p-4">
               <p className="text-gray-400 text-sm">This Week Unique Visitors</p>
               <p className="text-2xl font-bold text-cyan-300">{formatNumber(overview.visitors?.thisWeek || 0)}</p>
+              <p className="text-xs text-gray-500 mt-1">
+                {formatNumber(overview.visitors?.weekNewVisitors || 0)} new, {formatNumber(overview.visitors?.weekReturningVisitors || 0)} returning
+              </p>
             </div>
             <div className="bg-gray-800/50 rounded-lg p-4">
               <p className="text-gray-400 text-sm">This Month Page Views</p>
@@ -396,6 +403,9 @@ export default function AnalyticsPage() {
             <div className="bg-gray-800/50 rounded-lg p-4">
               <p className="text-gray-400 text-sm">This Month Unique Visitors</p>
               <p className="text-2xl font-bold text-purple-300">{formatNumber(overview.visitors?.thisMonth || 0)}</p>
+              <p className="text-xs text-gray-500 mt-1">
+                {formatNumber(overview.visitors?.monthNewVisitors || 0)} new, {formatNumber(overview.visitors?.monthReturningVisitors || 0)} returning
+              </p>
             </div>
           </div>
         </motion.div>

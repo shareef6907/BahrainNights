@@ -289,8 +289,12 @@ export async function GET() {
     let todayReturningVisitors = 0;
     let visitorsThisWeek = 0;
     let weekPageViews = 0;
+    let weekNewVisitors = 0;
+    let weekReturningVisitors = 0;
     let visitorsThisMonth = 0;
     let monthPageViews = 0;
+    let monthNewVisitors = 0;
+    let monthReturningVisitors = 0;
     let visitorsByCountry: Record<string, { pageViews: number; uniqueVisitors: number }> = {};
     let dailyTraffic: { date: string; views: number; visitors: number }[] = [];
 
@@ -366,13 +370,39 @@ export async function GET() {
         }
       });
 
-      const weekStats = await fetchVisitorStats(weekStart.toISOString());
+      // Week stats with new/returning calculation
+      const weekStats = await fetchVisitorStatsWithIPs(weekStart.toISOString());
       visitorsThisWeek = weekStats.uniqueVisitors;
       weekPageViews = weekStats.pageViews;
 
-      const monthStats = await fetchVisitorStats(monthStartUTC.toISOString());
+      // Get IPs from before this week
+      const beforeWeekStats = await fetchVisitorStatsWithIPs('2000-01-01T00:00:00.000Z', weekStart.toISOString());
+      const beforeWeekIPs = beforeWeekStats.ips;
+
+      weekStats.ips.forEach(ip => {
+        if (beforeWeekIPs.has(ip)) {
+          weekReturningVisitors++;
+        } else {
+          weekNewVisitors++;
+        }
+      });
+
+      // Month stats with new/returning calculation
+      const monthStats = await fetchVisitorStatsWithIPs(monthStartUTC.toISOString());
       visitorsThisMonth = monthStats.uniqueVisitors;
       monthPageViews = monthStats.pageViews;
+
+      // Get IPs from before this month
+      const beforeMonthStats = await fetchVisitorStatsWithIPs('2000-01-01T00:00:00.000Z', monthStartUTC.toISOString());
+      const beforeMonthIPs = beforeMonthStats.ips;
+
+      monthStats.ips.forEach(ip => {
+        if (beforeMonthIPs.has(ip)) {
+          monthReturningVisitors++;
+        } else {
+          monthNewVisitors++;
+        }
+      });
 
       // Total unique visitors (all time) - fetch all pages
       const allUniqueIPs = new Set<string>();
@@ -540,8 +570,12 @@ export async function GET() {
           todayReturningVisitors,
           thisWeek: visitorsThisWeek,
           weekPageViews,
+          weekNewVisitors,
+          weekReturningVisitors,
           thisMonth: visitorsThisMonth,
           monthPageViews,
+          monthNewVisitors,
+          monthReturningVisitors,
         },
       },
       visitorsByCountry,
