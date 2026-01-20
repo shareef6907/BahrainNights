@@ -122,13 +122,13 @@ export default function PlaceHero({
           <motion.div
             initial={{ opacity: 0, scale: 0.8 }}
             animate={{ opacity: 1, scale: 1 }}
-            className="relative w-20 h-20 md:w-28 md:h-28 lg:w-32 lg:h-32 bg-white rounded-2xl shadow-2xl overflow-hidden flex-shrink-0 border-4 border-slate-950"
+            className="relative w-20 h-20 md:w-28 md:h-28 lg:w-32 lg:h-32 rounded-2xl shadow-2xl overflow-hidden flex-shrink-0 ring-2 ring-white/20"
           >
             <Image
               src={logo}
               alt={`${name} logo`}
               fill
-              className="object-cover"
+              className="object-contain"
               sizes="(max-width: 768px) 80px, 128px"
             />
           </motion.div>
