@@ -184,8 +184,8 @@ export default function PlaceHours({
         <div className="border-t border-white/10 pt-6 mt-6">
           <h3 className="text-lg font-bold text-white mb-4">Location</h3>
 
-          {/* Map Embed - only if lat/lng available */}
-          {latitude && longitude && (
+          {/* Map Embed - use lat/lng if available, otherwise use address */}
+          {(latitude && longitude) ? (
             <div className="relative h-40 bg-slate-800 rounded-xl overflow-hidden mb-4">
               <iframe
                 src={`https://www.openstreetmap.org/export/embed.html?bbox=${longitude - 0.005},${latitude - 0.005},${longitude + 0.005},${latitude + 0.005}&layer=mapnik&marker=${latitude},${longitude}`}
@@ -197,6 +197,35 @@ export default function PlaceHours({
               {/* Map Overlay for click */}
               <button
                 onClick={() => window.open(`https://www.google.com/maps/search/?api=1&query=${latitude},${longitude}`, '_blank')}
+                className="absolute inset-0 bg-transparent hover:bg-white/5 transition-colors flex items-center justify-center opacity-0 hover:opacity-100"
+                aria-label="Open in Google Maps"
+              >
+                <div className="px-4 py-2 bg-black/80 backdrop-blur-sm rounded-xl text-white text-sm font-medium flex items-center gap-2">
+                  <ExternalLink className="w-4 h-4" />
+                  Open in Google Maps
+                </div>
+              </button>
+            </div>
+          ) : address && (
+            <div className="relative h-40 bg-slate-800 rounded-xl overflow-hidden mb-4">
+              <iframe
+                src={`https://maps.google.com/maps?q=${encodeURIComponent(address + (area ? ', ' + area + ', Bahrain' : ', Bahrain'))}&output=embed`}
+                className="w-full h-full border-0"
+                style={{ filter: 'invert(90%) hue-rotate(180deg) brightness(95%) contrast(90%)' }}
+                title={`Map showing ${venueName || 'venue location'}`}
+                loading="lazy"
+                referrerPolicy="no-referrer-when-downgrade"
+              />
+
+              {/* Map Overlay for click */}
+              <button
+                onClick={() => {
+                  if (googleMapsUrl) {
+                    window.open(googleMapsUrl, '_blank');
+                  } else {
+                    window.open(`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(address + (area ? ', ' + area + ', Bahrain' : ', Bahrain'))}`, '_blank');
+                  }
+                }}
                 className="absolute inset-0 bg-transparent hover:bg-white/5 transition-colors flex items-center justify-center opacity-0 hover:opacity-100"
                 aria-label="Open in Google Maps"
               >
