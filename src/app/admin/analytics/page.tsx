@@ -22,7 +22,7 @@ import {
   Globe,
   Activity,
 } from 'lucide-react';
-import AdminLayout from '@/components/admin/AdminLayout';
+// AdminLayout is provided by /admin/layout.tsx - don't wrap again
 
 interface AnalyticsData {
   overview: {
@@ -212,33 +212,29 @@ export default function AnalyticsPage() {
 
   if (isLoading && !data) {
     return (
-      <AdminLayout>
-        <div className="p-8 flex items-center justify-center min-h-[60vh]">
-          <div className="text-center">
-            <Loader2 className="w-12 h-12 text-cyan-400 animate-spin mx-auto mb-4" />
-            <p className="text-gray-400">Loading analytics data...</p>
-          </div>
+      <div className="p-8 flex items-center justify-center min-h-[60vh]">
+        <div className="text-center">
+          <Loader2 className="w-12 h-12 text-cyan-400 animate-spin mx-auto mb-4" />
+          <p className="text-gray-400">Loading analytics data...</p>
         </div>
-      </AdminLayout>
+      </div>
     );
   }
 
   if (error && !data) {
     return (
-      <AdminLayout>
-        <div className="p-8 flex items-center justify-center min-h-[60vh]">
-          <div className="text-center">
-            <AlertCircle className="w-12 h-12 text-red-400 mx-auto mb-4" />
-            <p className="text-red-400 mb-4">{error}</p>
-            <button
-              onClick={fetchAnalytics}
-              className="px-4 py-2 bg-cyan-500 text-white rounded-lg hover:bg-cyan-600"
-            >
-              Retry
-            </button>
-          </div>
+      <div className="p-8 flex items-center justify-center min-h-[60vh]">
+        <div className="text-center">
+          <AlertCircle className="w-12 h-12 text-red-400 mx-auto mb-4" />
+          <p className="text-red-400 mb-4">{error}</p>
+          <button
+            onClick={fetchAnalytics}
+            className="px-4 py-2 bg-cyan-500 text-white rounded-lg hover:bg-cyan-600"
+          >
+            Retry
+          </button>
         </div>
-      </AdminLayout>
+      </div>
     );
   }
 
@@ -251,8 +247,7 @@ export default function AnalyticsPage() {
   const maxEventCategory = Math.max(...Object.values(eventsByCategory), 1);
 
   return (
-    <AdminLayout>
-      <div className="p-4 md:p-6 lg:p-8">
+    <div className="p-4 md:p-6 lg:p-8">
         {/* Header */}
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-6">
           <div>
@@ -916,6 +911,5 @@ export default function AnalyticsPage() {
           All statistics are fetched in real-time from the database. Auto-refreshes every 30 seconds.
         </motion.div>
       </div>
-    </AdminLayout>
   );
 }
