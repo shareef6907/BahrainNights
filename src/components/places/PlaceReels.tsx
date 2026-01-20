@@ -58,7 +58,6 @@ export default function PlaceReels({ reels }: PlaceReelsProps) {
             <InstagramReelEmbed
               reelUrl={reel.instagram_url}
               className="w-full"
-              autoPlay={true}
               showControls={true}
             />
           </motion.div>
