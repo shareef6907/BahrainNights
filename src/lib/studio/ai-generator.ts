@@ -192,7 +192,7 @@ export async function fetchEventsForAI(): Promise<string> {
   }
 }
 
-// Fetch cinema data for AI context
+// Fetch cinema data for AI context (VOX movies only)
 export async function fetchCinemaForAI(): Promise<string> {
   try {
     const supabase = getAdminClient();
@@ -201,6 +201,7 @@ export async function fetchCinemaForAI(): Promise<string> {
       .from('movies')
       .select('title, rating, genres, runtime_minutes')
       .eq('is_now_showing', true)
+      .or('scraped_from.is.null,scraped_from.cs.{vox}')
       .order('rating', { ascending: false })
       .limit(10);
 

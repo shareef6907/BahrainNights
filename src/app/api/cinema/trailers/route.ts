@@ -22,12 +22,13 @@ export async function GET(request: NextRequest) {
 
     const supabase = getAdminClient();
 
-    // Fetch more movies to ensure we include Avatar even if it has an older release date
+    // Fetch VOX movies only (or manual entries without scraped_from)
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const { data: movies, error } = await (supabase as any)
       .from('movies')
       .select('id, title, synopsis, genre, trailer_url, trailer_key, poster_url, backdrop_url, release_date')
       .eq('is_now_showing', true)
+      .or('scraped_from.is.null,scraped_from.cs.{vox}')
       .order('release_date', { ascending: false })
       .limit(50) as { data: Movie[] | null; error: { message: string } | null };
 
