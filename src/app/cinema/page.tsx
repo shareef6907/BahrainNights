@@ -74,6 +74,28 @@ function convertToMovieFormat(dbMovie: DBMovie): Movie {
   };
 }
 
+// Filter and deduplicate movies
+function filterValidMovies(movies: DBMovie[]): DBMovie[] {
+  // Filter movies with valid poster URLs
+  const validMovies = movies.filter(movie => {
+    const poster = movie.poster_url || '';
+    // Must have valid poster URL (not placeholder, not null, starts with http)
+    if (!poster.startsWith('http') || poster.includes('placeholder') || poster.includes('null')) {
+      return false;
+    }
+    return true;
+  });
+
+  // Remove duplicates by title (case-insensitive)
+  const seen = new Set<string>();
+  return validMovies.filter(movie => {
+    const key = movie.title.toLowerCase().trim();
+    if (seen.has(key)) return false;
+    seen.add(key);
+    return true;
+  });
+}
+
 // Fetch all movies on the server (VOX only + manual entries)
 async function getMovies() {
   const [nowShowingRes, comingSoonRes] = await Promise.all([
@@ -93,8 +115,12 @@ async function getMovies() {
       .order('release_date', { ascending: true })
   ]);
 
-  const nowShowing = (nowShowingRes.data || []).map((m: DBMovie) => convertToMovieFormat(m));
-  const comingSoon = (comingSoonRes.data || []).map((m: DBMovie) => convertToMovieFormat(m));
+  // Filter out invalid posters and duplicates
+  const filteredNowShowing = filterValidMovies(nowShowingRes.data || []);
+  const filteredComingSoon = filterValidMovies(comingSoonRes.data || []);
+
+  const nowShowing = filteredNowShowing.map((m: DBMovie) => convertToMovieFormat(m));
+  const comingSoon = filteredComingSoon.map((m: DBMovie) => convertToMovieFormat(m));
 
   return { nowShowing, comingSoon };
 }

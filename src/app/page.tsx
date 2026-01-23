@@ -99,15 +99,36 @@ async function getMovies(): Promise<HomepageMovie[]> {
     .not('language', 'in', `(${indianLanguages.join(',')})`)
     // Only show VOX movies or manual entries (no scraped_from)
     .or('scraped_from.is.null,scraped_from.cs.{vox}')
+    // Must have a valid poster URL (starts with http)
+    .like('poster_url', 'http%')
     .order('tmdb_rating', { ascending: false })
-    .limit(4);
+    .limit(8); // Fetch more to filter duplicates
 
   if (error) {
     console.error('Error fetching movies:', error);
     return [];
   }
 
-  return data || [];
+  // Filter out movies with placeholder images and duplicates
+  const validMovies = (data || []).filter((movie: HomepageMovie) => {
+    const poster = movie.poster_url || '';
+    // Exclude placeholder images
+    if (poster.includes('placeholder') || poster.includes('null') || !poster.startsWith('http')) {
+      return false;
+    }
+    return true;
+  });
+
+  // Remove duplicates by title (case-insensitive)
+  const seen = new Set<string>();
+  const uniqueMovies = validMovies.filter((movie: HomepageMovie) => {
+    const key = movie.title.toLowerCase().trim();
+    if (seen.has(key)) return false;
+    seen.add(key);
+    return true;
+  });
+
+  return uniqueMovies.slice(0, 4);
 }
 
 // Fetch international events for homepage section
