@@ -74,22 +74,22 @@ function convertToMovieFormat(dbMovie: DBMovie): Movie {
   };
 }
 
-// Fetch all movies on the server (excluding Mukta-only movies)
+// Fetch all movies on the server (VOX only + manual entries)
 async function getMovies() {
   const [nowShowingRes, comingSoonRes] = await Promise.all([
     supabaseAdmin
       .from('movies')
       .select('*')
       .eq('is_now_showing', true)
-      // Exclude movies that are ONLY from Mukta - only show VOX, Cineco, Seef, or manual entries
-      .or('scraped_from.is.null,scraped_from.cs.{vox},scraped_from.cs.{cineco},scraped_from.cs.{seef}')
+      // Only show VOX movies or manual entries (no scraped_from)
+      .or('scraped_from.is.null,scraped_from.cs.{vox}')
       .order('tmdb_rating', { ascending: false }),
     supabaseAdmin
       .from('movies')
       .select('*')
       .eq('is_coming_soon', true)
-      // Exclude movies that are ONLY from Mukta - only show VOX, Cineco, Seef, or manual entries
-      .or('scraped_from.is.null,scraped_from.cs.{vox},scraped_from.cs.{cineco},scraped_from.cs.{seef}')
+      // Only show VOX movies or manual entries (no scraped_from)
+      .or('scraped_from.is.null,scraped_from.cs.{vox}')
       .order('release_date', { ascending: true })
   ]);
 
@@ -147,8 +147,8 @@ export default async function CinemaPage() {
     <>
       <MovieListSchema
         movies={nowShowing}
-        pageTitle="Movies Now Showing in Bahrain"
-        pageDescription="Find movies now showing in Bahrain cinemas - Cineco, VOX, Cinépolis, and more"
+        pageTitle="Movies Now Showing in Bahrain - VOX Cinemas"
+        pageDescription="Find movies now showing at VOX Cinemas Bahrain - VOX City Centre and VOX The Avenues"
         pageUrl="https://bahrainnights.com/cinema"
       />
       <Suspense fallback={null}>
@@ -165,12 +165,12 @@ export default async function CinemaPage() {
 
 // Metadata for SEO
 export const metadata = {
-  title: 'Cinema in Bahrain - Movies Now Showing & Coming Soon',
-  description: 'Find movies now showing in Bahrain cinemas. Check what\'s playing at Cineco, VOX, Cinépolis, and Mukta A2 Cinemas. Watch trailers, see showtimes, and book tickets online.',
-  keywords: ['cinema in Bahrain', 'movies in Bahrain', 'Bahrain cinema', 'now showing Bahrain', 'Cineco', 'VOX Bahrain', 'movie showtimes Bahrain'],
+  title: 'Cinema in Bahrain - Movies Now Showing & Coming Soon | VOX Cinemas',
+  description: 'Find movies now showing at VOX Cinemas Bahrain. Check what\'s playing at VOX City Centre and VOX The Avenues. Watch trailers, see showtimes, and book tickets online.',
+  keywords: ['cinema in Bahrain', 'movies in Bahrain', 'Bahrain cinema', 'now showing Bahrain', 'VOX Bahrain', 'VOX City Centre', 'VOX The Avenues', 'movie showtimes Bahrain'],
   openGraph: {
-    title: 'Cinema in Bahrain - Movies Now Showing & Coming Soon | BahrainNights',
-    description: 'Find movies now showing in Bahrain cinemas. Check what\'s playing at Cineco, VOX, Cinépolis, and Mukta A2 Cinemas.',
+    title: 'Cinema in Bahrain - Movies Now Showing & Coming Soon | VOX Cinemas',
+    description: 'Find movies now showing at VOX Cinemas Bahrain. Check what\'s playing at VOX City Centre and VOX The Avenues.',
     url: 'https://bahrainnights.com/cinema',
     type: 'website',
   },

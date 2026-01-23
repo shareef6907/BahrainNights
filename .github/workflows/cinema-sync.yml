@@ -1,18 +1,18 @@
-name: Cinema Sync
+name: Cinema Sync - VOX Bahrain
 
-# What this does:
-# 1. Runs the main scraper (scrape-cinemas.js)
-# 2. Runs the sync script to fix any missing data (sync-cinemas.js)
-# 3. Runs every 4 hours automatically
+# VOX Bahrain Cinema Scraper
+# Runs daily at 6 AM Bahrain time (3 AM UTC)
+# Scrapes VOX City Centre Bahrain and VOX The Avenues
 
 on:
   schedule:
-    - cron: '0 */4 * * *'
+    - cron: '0 3 * * *'  # 3 AM UTC = 6 AM Bahrain
   workflow_dispatch:  # Allow manual runs
 
 jobs:
-  sync:
+  scrape-vox:
     runs-on: ubuntu-latest
+    timeout-minutes: 30
     steps:
       - uses: actions/checkout@v4
 
@@ -21,23 +21,27 @@ jobs:
           node-version: '20'
           cache: 'npm'
 
-      # Install Puppeteer browser for scraping
+      # Install Chromium for Puppeteer
       - name: Install browser
-        run: sudo apt-get update && sudo apt-get install -y chromium-browser
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y chromium-browser
 
-      - run: npm install
+      - name: Install dependencies
+        run: npm install
 
-      # Step 1: Run main scraper
-      - name: Scrape Cinemas
+      # Run VOX Bahrain scraper
+      - name: Scrape VOX Bahrain
         env:
           SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
           SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
           TMDB_API_KEY: ${{ secrets.TMDB_API_KEY }}
-        run: node scripts/scrape-cinemas.js || true  # Continue even if scraper fails
+          PUPPETEER_EXECUTABLE_PATH: /usr/bin/chromium-browser
+        run: node scripts/scrape-vox-bahrain.js
 
-      # Step 2: Sync and fix data
-      - name: Sync Cinema Data
+      # Run cleanup for old movies
+      - name: Cleanup old movies
         env:
           SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
           SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
-        run: node scripts/sync-cinemas.js
+        run: node scripts/cleanup-cinema.js || true
