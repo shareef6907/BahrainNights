@@ -161,10 +161,14 @@ export default function CinemaPageClient({
       });
   }, [activeTab, nowShowingMovies, comingSoonMovies, searchQuery, selectedGenre, selectedLanguage, sortBy]);
 
-  // Filter out movies without valid poster images for the featured slider
-  // Sort by IMDB rating (highest first) so best movies get top slider positions
+  // Filter for VOX Cinema movies with valid images for the featured slider
+  // Sort by release date (newest first) to highlight new releases
   const featuredMovies = nowShowingMovies
     .filter((movie) => {
+      // Must be available at VOX Cinema
+      const isInVox = movie.scrapedFrom?.some(cinema =>
+        cinema.toLowerCase().includes('vox')
+      );
       // Must have a real poster URL (not placeholder)
       const hasValidPoster = movie.poster &&
         !movie.poster.includes('placeholder') &&
@@ -175,9 +179,14 @@ export default function CinemaPageClient({
         !movie.backdrop.includes('placeholder') &&
         !movie.backdrop.includes('null') &&
         movie.backdrop.startsWith('http');
-      return hasValidPoster && hasValidBackdrop;
+      return isInVox && hasValidPoster && hasValidBackdrop;
     })
-    .sort((a, b) => b.rating - a.rating) // Highest rating = 1st slide
+    .sort((a, b) => {
+      // Sort by release date (newest first)
+      const dateA = a.releaseDate ? new Date(a.releaseDate).getTime() : 0;
+      const dateB = b.releaseDate ? new Date(b.releaseDate).getTime() : 0;
+      return dateB - dateA;
+    })
     .slice(0, 7);
 
   const handleMovieClick = (movie: Movie) => {
