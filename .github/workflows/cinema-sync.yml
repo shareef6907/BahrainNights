@@ -1,13 +1,13 @@
 name: Cinema Sync - VOX Bahrain
 
 # VOX Bahrain Cinema Scraper
-# Runs daily at 6 AM Bahrain time (3 AM UTC)
+# Runs Monday, Thursday, Friday at 6 AM Bahrain time (3 AM UTC)
 # Scrapes VOX City Centre Bahrain and VOX The Avenues
 # Uses JSON-LD structured data - no browser needed!
 
 on:
   schedule:
-    - cron: '0 3 * * *'  # 3 AM UTC = 6 AM Bahrain
+    - cron: '0 3 * * 1,4,5'  # 3 AM UTC = 6 AM Bahrain | Mon, Thu, Fri
   workflow_dispatch:  # Allow manual runs
 
 jobs:
@@ -23,7 +23,7 @@ jobs:
           cache: 'npm'
 
       - name: Install dependencies
-        run: npm ci
+        run: npm install --legacy-peer-deps
 
       # Run VOX Bahrain scraper (TypeScript with JSON-LD parsing)
       - name: Scrape VOX Bahrain
