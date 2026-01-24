@@ -194,9 +194,18 @@ async function updateDatabase(
 
 /**
  * Mark movies no longer at VOX as inactive
+ * SAFETY: Only cleanup if we have enough scraped movies to indicate a successful scrape
  */
 async function cleanupOldMovies(currentSlugs: string[]): Promise<void> {
   console.log('\nCleaning up old movies...');
+
+  // SAFETY CHECK: Don't cleanup if we scraped very few movies
+  // This prevents wiping the database if the scrape partially failed
+  if (currentSlugs.length < 3) {
+    console.log(`  ⚠️  Skipping cleanup: only ${currentSlugs.length} movies scraped (minimum 3 required)`);
+    console.log('  This prevents accidental data loss from partial scrape failures.');
+    return;
+  }
 
   try {
     // Get all movies that have 'vox' in scraped_from
@@ -284,6 +293,24 @@ async function main(): Promise<void> {
   try {
     // Run the scraper
     const { nowShowing, comingSoon } = await scrapeVOXBahrain();
+
+    // CRITICAL: If no movies were scraped, preserve existing data
+    if (nowShowing.length === 0 && comingSoon.length === 0) {
+      console.log('\n' + '='.repeat(60));
+      console.log('⚠️  WARNING: NO MOVIES SCRAPED!');
+      console.log('='.repeat(60));
+      console.log('The VOX website might be blocking requests or experiencing issues.');
+      console.log('Skipping database update to PRESERVE EXISTING DATA.');
+      console.log('Existing movies in database will NOT be removed.');
+      console.log('\n' + '='.repeat(60));
+
+      // Log the failed run
+      await logScraperRun(0, 0, 1, 0, 0);
+
+      // Exit with code 0 to not fail the workflow
+      // This prevents retries that could also fail
+      process.exit(0);
+    }
 
     // Update database
     const { added, updated, errors } = await updateDatabase(nowShowing, comingSoon);

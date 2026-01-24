@@ -7,6 +7,25 @@
 
 import * as cheerio from 'cheerio';
 
+// Comprehensive browser-like headers to avoid bot detection
+const BROWSER_HEADERS: Record<string, string> = {
+  'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
+  'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.7',
+  'Accept-Language': 'en-US,en;q=0.9,ar;q=0.8',
+  'Accept-Encoding': 'gzip, deflate, br',
+  'Cache-Control': 'no-cache',
+  'Pragma': 'no-cache',
+  'Sec-Ch-Ua': '"Not_A Brand";v="8", "Chromium";v="120", "Google Chrome";v="120"',
+  'Sec-Ch-Ua-Mobile': '?0',
+  'Sec-Ch-Ua-Platform': '"Windows"',
+  'Sec-Fetch-Dest': 'document',
+  'Sec-Fetch-Mode': 'navigate',
+  'Sec-Fetch-Site': 'none',
+  'Sec-Fetch-User': '?1',
+  'Upgrade-Insecure-Requests': '1',
+  'Connection': 'keep-alive',
+};
+
 // Types
 export interface ScrapedMovie {
   title: string;
@@ -57,28 +76,50 @@ export const VOX_URLS = {
   comingSoon: 'https://bhr.voxcinemas.com/movies/comingsoon'
 };
 
-// User agent for requests
-const USER_AGENT = 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36';
-
 /**
- * Fetch HTML content from a URL
+ * Fetch HTML content from a URL with retry logic and proper headers
  */
-async function fetchHTML(url: string): Promise<string> {
-  const response = await fetch(url, {
-    headers: {
-      'User-Agent': USER_AGENT,
-      'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8',
-      'Accept-Language': 'en-US,en;q=0.5',
-      'Cache-Control': 'no-cache',
-      'Pragma': 'no-cache'
-    }
-  });
+async function fetchHTML(url: string, maxRetries = 3): Promise<string> {
+  let lastError: Error | null = null;
 
-  if (!response.ok) {
-    throw new Error(`Failed to fetch ${url}: ${response.status} ${response.statusText}`);
+  for (let attempt = 1; attempt <= maxRetries; attempt++) {
+    try {
+      console.log(`  Fetch attempt ${attempt}/${maxRetries} for ${url}`);
+
+      // Create abort controller for timeout
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 30000); // 30 second timeout
+
+      const response = await fetch(url, {
+        headers: BROWSER_HEADERS,
+        signal: controller.signal,
+        redirect: 'follow',
+      });
+
+      clearTimeout(timeoutId);
+
+      if (!response.ok) {
+        throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+      }
+
+      const html = await response.text();
+      console.log(`  Success: received ${html.length} bytes`);
+      return html;
+
+    } catch (error) {
+      lastError = error instanceof Error ? error : new Error(String(error));
+      console.log(`  Attempt ${attempt} failed: ${lastError.message}`);
+
+      if (attempt < maxRetries) {
+        // Exponential backoff: 2s, 4s, 6s
+        const delay = attempt * 2000;
+        console.log(`  Waiting ${delay / 1000}s before retry...`);
+        await new Promise(resolve => setTimeout(resolve, delay));
+      }
+    }
   }
 
-  return response.text();
+  throw lastError || new Error(`Failed to fetch ${url} after ${maxRetries} attempts`);
 }
 
 /**
