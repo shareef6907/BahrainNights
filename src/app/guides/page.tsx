@@ -34,7 +34,7 @@ const guides = [
     emoji: '🥂',
     category: 'Dining',
     readTime: '6 min read',
-    isLive: false,
+    isLive: true,
   },
   {
     title: 'F1 Bahrain Grand Prix 2026',
@@ -43,7 +43,7 @@ const guides = [
     emoji: '🏎️',
     category: 'Events',
     readTime: '12 min read',
-    isLive: false,
+    isLive: true,
   },
   {
     title: 'Ramadan in Bahrain 2026',
@@ -52,7 +52,7 @@ const guides = [
     emoji: '🌙',
     category: 'Culture',
     readTime: '7 min read',
-    isLive: false,
+    isLive: true,
   },
 ];
 
