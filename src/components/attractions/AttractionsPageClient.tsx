@@ -6,6 +6,7 @@ import { Search, Filter, MapPin, Star, ExternalLink, ChevronDown, X } from 'luci
 import Link from 'next/link';
 import { useTranslation } from '@/lib/i18n/TranslationContext';
 import AttractionModal, { AttractionData } from './AttractionModal';
+import { RelatedGuides } from '@/components/SEO';
 
 export interface Attraction {
   id: string;
@@ -313,6 +314,13 @@ export default function AttractionsPageClient({ initialAttractions, categories }
               </motion.div>
             )}
           </AnimatePresence>
+        </div>
+      </section>
+
+      {/* Related Guides */}
+      <section className="px-4 pb-8">
+        <div className="max-w-4xl mx-auto">
+          <RelatedGuides />
         </div>
       </section>
 
