@@ -50,7 +50,7 @@ const tourTypeFilters = [
   { id: 'all', name: 'All Tours', icon: '🗺️' },
   { id: 'Cultural', name: 'Cultural', icon: '🏛️' },
   { id: 'Food', name: 'Food Tours', icon: '🍽️' },
-  { id: 'Desert', name: 'Desert Safari', icon: '🏜️' },
+  { id: 'Pearl', name: 'Pearl Diving', icon: '🦪' },
   { id: 'Boat', name: 'Boat Tours', icon: '⛵' },
   { id: 'Walking', name: 'Walking Tours', icon: '🚶' },
   { id: 'Private', name: 'Private Tours', icon: '🎯' },
@@ -163,7 +163,7 @@ export default function ToursPageClient({ initialTours }: ToursPageClientProps) 
               transition={{ delay: 0.1 }}
               className="text-lg md:text-xl text-gray-300 max-w-2xl mx-auto"
             >
-              Discover Bahrain with expert local guides. Cultural tours, desert safaris, food experiences, and more.
+              Discover Bahrain with expert local guides. Cultural heritage tours, pearl diving, food experiences, and more.
             </motion.p>
           </div>
         </div>

@@ -101,12 +101,12 @@ export default async function ToursPage() {
 
 // Metadata for SEO
 export const metadata = {
-  title: 'Tours & Experiences in Bahrain - Cultural, Desert Safari, Food Tours',
-  description: 'Book the best tours and experiences in Bahrain. Cultural tours, desert safaris, food tours, boat trips, and private guided experiences with local experts.',
-  keywords: ['Bahrain tours', 'desert safari Bahrain', 'cultural tours Bahrain', 'food tours Bahrain', 'local guides Bahrain', 'private tours Bahrain', 'things to do Bahrain'],
+  title: 'Tours & Experiences in Bahrain - Cultural, Pearl Diving, Food Tours',
+  description: 'Book the best tours and experiences in Bahrain. Cultural heritage tours, pearl diving, food tours, boat trips to islands, and private guided experiences with local experts.',
+  keywords: ['Bahrain tours', 'pearl diving Bahrain', 'cultural tours Bahrain', 'food tours Bahrain', 'local guides Bahrain', 'private tours Bahrain', 'things to do Bahrain', 'island tours Bahrain'],
   openGraph: {
     title: 'Tours & Experiences in Bahrain | BahrainNights',
-    description: 'Discover Bahrain with expert local guides. Cultural tours, desert safaris, food experiences, and more.',
+    description: 'Discover Bahrain with expert local guides. Cultural tours, pearl diving, food experiences, and island boat trips.',
     url: 'https://www.bahrainnights.com/tours',
     type: 'website',
     images: [

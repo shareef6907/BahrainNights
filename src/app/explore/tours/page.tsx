@@ -85,5 +85,5 @@ function ToursLoading() {
 // Metadata for SEO
 export const metadata = {
   title: 'Tours & Adventures in Bahrain - Explore Experiences',
-  description: 'Discover amazing tours and adventures in Bahrain. Desert safaris, cultural tours, boat trips, food experiences, and more.',
+  description: 'Discover amazing tours and adventures in Bahrain. Pearl diving, cultural tours, island boat trips, food experiences, and more.',
 };
