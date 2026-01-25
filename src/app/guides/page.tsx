@@ -25,7 +25,7 @@ const guides = [
     emoji: '🌙',
     category: 'Nightlife',
     readTime: '8 min read',
-    isLive: false,
+    isLive: true,
   },
   {
     title: 'Best Brunches in Bahrain',
