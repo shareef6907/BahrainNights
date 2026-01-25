@@ -31,6 +31,7 @@ export function HeroTrailerPlayer() {
   const [isMobile, setIsMobile] = useState(false);
   const [isMuted, setIsMuted] = useState(true); // UI state for mute toggle
   const [isLoading, setIsLoading] = useState(true);
+  const [isDeviceReady, setIsDeviceReady] = useState(false); // Wait for device detection before rendering iframe
   const [showMobileHint, setShowMobileHint] = useState(false);
   const [videoError, setVideoError] = useState(false); // Track if current video has error/unavailable
   const autoAdvanceRef = useRef<NodeJS.Timeout | null>(null);
@@ -62,6 +63,8 @@ export function HeroTrailerPlayer() {
       setIsMuted(mobile);
       // Show sound hint on touch devices
       setShowMobileHint(mobile);
+      // Mark device detection as complete - now safe to render iframe
+      setIsDeviceReady(true);
     };
 
     checkDevice();
@@ -257,8 +260,8 @@ export function HeroTrailerPlayer() {
           alt={currentMovie?.title}
           className="w-full h-full object-cover"
         />
-        {/* YouTube iframe overlays the backdrop - hidden when video has error */}
-        {iframeUrl && !videoError && (
+        {/* YouTube iframe overlays the backdrop - wait for device detection to ensure correct mute state for autoplay */}
+        {iframeUrl && !videoError && isDeviceReady && (
           <iframe
             ref={iframeRef}
             key={`trailer-${currentIndex}`} // Only re-render on trailer change, NOT on mute toggle
