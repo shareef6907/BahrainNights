@@ -268,7 +268,7 @@ export default function NightlifeGuidePage() {
           </p>
           <div className="flex flex-wrap justify-center gap-4">
             <Link 
-              href="/nightclubs"
+              href="/places?category=nightclub"
               className="px-8 py-3 bg-purple-500 hover:bg-purple-400 text-white font-bold rounded-lg transition-colors"
             >
               Browse Nightclubs

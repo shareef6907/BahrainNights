@@ -301,7 +301,7 @@ export default function BrunchesGuidePage() {
           </p>
           <div className="flex flex-wrap justify-center gap-4">
             <Link 
-              href="/restaurants"
+              href="/places?category=restaurant"
               className="px-8 py-3 bg-amber-500 hover:bg-amber-400 text-black font-bold rounded-lg transition-colors"
             >
               Browse Restaurants

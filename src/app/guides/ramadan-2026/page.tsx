@@ -315,7 +315,7 @@ export default function RamadanGuidePage() {
               Ramadan Events
             </Link>
             <Link 
-              href="/restaurants"
+              href="/places?category=restaurant"
               className="px-8 py-3 bg-white/10 hover:bg-white/20 text-white font-bold rounded-lg transition-colors"
             >
               Iftar Restaurants
