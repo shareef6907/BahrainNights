@@ -109,6 +109,22 @@ const regionalGuides = [
     readTime: '8 min read',
   },
   {
+    title: 'Events in Dubai This Weekend',
+    description: 'What\'s on in Dubai - brunches, events, concerts, and weekend activities.',
+    href: '/guides/dubai-events',
+    emoji: '📅',
+    category: 'Dubai',
+    readTime: '7 min read',
+  },
+  {
+    title: 'Concerts in Dubai',
+    description: 'Live music events, concerts, and shows at Coca-Cola Arena and more.',
+    href: '/guides/dubai-concerts',
+    emoji: '🎵',
+    category: 'Dubai',
+    readTime: '6 min read',
+  },
+  {
     title: 'Parties in Abu Dhabi',
     description: 'Abu Dhabi nightlife - Yas Island clubs, beach parties, and F1 weekend.',
     href: '/guides/abu-dhabi-parties',
@@ -124,6 +140,14 @@ const regionalGuides = [
     category: 'Qatar',
     readTime: '6 min read',
   },
+  {
+    title: 'Concerts in Saudi Arabia',
+    description: 'MDL Beast, Soundstorm, Riyadh Season - concerts in the Kingdom.',
+    href: '/guides/saudi-concerts',
+    emoji: '🇸🇦',
+    category: 'Saudi',
+    readTime: '7 min read',
+  },
 ];
 
 const categoryColors: Record<string, string> = {
@@ -137,6 +161,7 @@ const categoryColors: Record<string, string> = {
   Dubai: 'bg-pink-500/20 text-pink-400',
   'Abu Dhabi': 'bg-blue-500/20 text-blue-400',
   Qatar: 'bg-rose-500/20 text-rose-400',
+  Saudi: 'bg-green-500/20 text-green-400',
 };
 
 export default function GuidesPage() {
