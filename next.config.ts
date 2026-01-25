@@ -33,10 +33,8 @@ const securityHeaders = [
 ];
 
 const nextConfig: NextConfig = {
-  // Ignore ESLint errors during production builds (they're mostly 'any' type warnings)
-  eslint: {
-    ignoreDuringBuilds: true,
-  },
+  // Turbopack config (Next.js 16 default bundler)
+  turbopack: {},
 
   // Enable compression
   compress: true,
