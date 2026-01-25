@@ -43,7 +43,7 @@ const categories = [
       { name: 'Hotel Lounges', desc: 'Upscale cocktail bars' },
       { name: 'Live Music Venues', desc: 'Jazz, rock, and local talent' },
     ],
-    link: '/nightclubs',
+    link: '/guides/nightlife',
   },
   {
     title: 'Cultural Experiences',
@@ -69,7 +69,7 @@ const categories = [
       { name: 'Block 338', desc: 'Artsy cafes and restaurants' },
       { name: 'Fine Dining', desc: 'Michelin-quality experiences' },
     ],
-    link: '/restaurants',
+    link: '/places',
   },
   {
     title: 'Family Activities',
@@ -106,11 +106,11 @@ const topPicks = [
   },
   {
     title: 'Best for Couples',
-    items: ['Sunset at Amwaj', 'Rooftop Dining', 'Desert Safari', 'Spa Day'],
+    items: ['Sunset at Amwaj', 'Rooftop Dining', 'Tree of Life', 'Spa Day'],
   },
   {
     title: 'Best for Adventure',
-    items: ['F1 Experience', 'Skydiving', 'Jet Skiing', 'Desert Camping'],
+    items: ['F1 Track Experience', 'Scuba Diving', 'Jet Skiing', 'Kayak Mangroves'],
   },
 ];
 
