@@ -20,6 +20,11 @@ const SponsorsSection = dynamic(
   { loading: () => null, ssr: false }
 );
 
+const NewsletterSignup = dynamic(
+  () => import('@/components/newsletter').then(mod => ({ default: mod.NewsletterSignup })),
+  { loading: () => null, ssr: false }
+);
+
 // Lazy load modals - only loaded when user interacts with movies
 const MovieModal = dynamic(() => import('@/components/cinema/MovieModal'), {
   loading: () => null,
@@ -927,6 +932,18 @@ export default function HomePageClient({ initialMovies, initialStats, initialTod
 
       {/* Sponsors Section */}
       <SponsorsSection />
+
+      {/* Newsletter Section */}
+      <section className="px-4 py-16">
+        <div className="max-w-2xl mx-auto">
+          <NewsletterSignup 
+            variant="banner"
+            title="Stay in the Loop"
+            description="Get weekly updates on the best events, new restaurants, and insider tips for Bahrain."
+            source="homepage"
+          />
+        </div>
+      </section>
 
       {/* Footer */}
       <footer className="border-t border-white/10 px-4 py-16">
