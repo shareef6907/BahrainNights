@@ -26,6 +26,14 @@ const bahrainGuides = [
     readTime: '8 min read',
   },
   {
+    title: 'Bahrain Tourist Attractions',
+    description: 'Complete guide to tourist attractions including UNESCO sites, museums, and landmarks.',
+    href: '/guides/tourist-attractions',
+    emoji: '🏛️',
+    category: 'Sightseeing',
+    readTime: '10 min read',
+  },
+  {
     title: 'Bahrain Nightlife Guide',
     description: 'The best clubs, bars, lounges and late-night spots in Manama, Adliya, and Juffair.',
     href: '/guides/nightlife',
@@ -58,6 +66,14 @@ const bahrainGuides = [
     readTime: '6 min read',
   },
   {
+    title: 'Best Brunch in Bahrain',
+    description: 'Complete Friday and Saturday brunch guide with prices and reviews.',
+    href: '/guides/brunch',
+    emoji: '🍳',
+    category: 'Dining',
+    readTime: '8 min read',
+  },
+  {
     title: 'Best Restaurants in Bahrain',
     description: 'Top restaurants for fine dining, local cuisine, and every budget.',
     href: '/guides/restaurants',
@@ -66,12 +82,76 @@ const bahrainGuides = [
     readTime: '8 min read',
   },
   {
+    title: 'Best Cafes in Bahrain',
+    description: 'Specialty coffee, cozy spots, and Instagram-worthy cafes.',
+    href: '/guides/cafes',
+    emoji: '☕',
+    category: 'Dining',
+    readTime: '7 min read',
+  },
+  {
+    title: 'Best Shisha Lounges in Bahrain',
+    description: 'Top hookah spots from traditional cafes to rooftop lounges.',
+    href: '/guides/shisha',
+    emoji: '💨',
+    category: 'Dining',
+    readTime: '6 min read',
+  },
+  {
     title: 'Beach Clubs in Bahrain',
     description: 'Best beach clubs, pool day passes, and beach party venues.',
     href: '/guides/beach-clubs',
     emoji: '🏖️',
     category: 'Beach',
     readTime: '7 min read',
+  },
+  {
+    title: 'Best Hotels in Bahrain',
+    description: 'Luxury, beach, and budget hotels - complete accommodation guide.',
+    href: '/guides/hotels',
+    emoji: '🏨',
+    category: 'Hotels',
+    readTime: '10 min read',
+  },
+  {
+    title: 'Family Activities in Bahrain',
+    description: 'Best things to do with family - waterparks, museums, attractions.',
+    href: '/guides/family-activities',
+    emoji: '👨‍👩‍👧‍👦',
+    category: 'Family',
+    readTime: '8 min read',
+  },
+  {
+    title: 'Things to Do with Kids in Bahrain',
+    description: 'Kid-friendly activities for toddlers to teens.',
+    href: '/guides/things-to-do-with-kids',
+    emoji: '👶',
+    category: 'Family',
+    readTime: '8 min read',
+  },
+  {
+    title: 'Free Things to Do in Bahrain',
+    description: 'Budget-friendly attractions from beaches to UNESCO sites.',
+    href: '/guides/free-things-to-do',
+    emoji: '🆓',
+    category: 'Budget',
+    readTime: '7 min read',
+  },
+  {
+    title: 'Romantic Things to Do in Bahrain',
+    description: 'Date ideas, romantic restaurants, and couples experiences.',
+    href: '/guides/romantic',
+    emoji: '❤️',
+    category: 'Couples',
+    readTime: '7 min read',
+  },
+  {
+    title: 'Things to Do This Weekend',
+    description: 'What\'s on this weekend - events, brunches, and activities.',
+    href: '/guides/things-to-do-this-weekend',
+    emoji: '📅',
+    category: 'Events',
+    readTime: '6 min read',
   },
   {
     title: 'Concerts in Bahrain',
@@ -150,6 +230,65 @@ const regionalGuides = [
   },
 ];
 
+const areaGuides = [
+  {
+    title: 'Things to Do in Seef',
+    description: 'Shopping, beach clubs, and hotels in the commercial hub.',
+    href: '/guides/seef',
+    emoji: '🛍️',
+    category: 'Area',
+    readTime: '6 min read',
+  },
+  {
+    title: 'Things to Do in Manama',
+    description: 'The capital - souqs, museums, and cultural attractions.',
+    href: '/guides/manama',
+    emoji: '🏙️',
+    category: 'Area',
+    readTime: '8 min read',
+  },
+  {
+    title: 'Things to Do in Riffa',
+    description: 'Golf, heritage, and residential Bahrain.',
+    href: '/guides/riffa',
+    emoji: '⛳',
+    category: 'Area',
+    readTime: '5 min read',
+  },
+  {
+    title: 'Amwaj Islands Guide',
+    description: 'Beaches, marina, and waterfront dining.',
+    href: '/guides/amwaj',
+    emoji: '🏝️',
+    category: 'Area',
+    readTime: '6 min read',
+  },
+  {
+    title: 'Restaurants in Juffair',
+    description: 'Dining guide to Juffair - international, late-night, and more.',
+    href: '/guides/juffair-dining',
+    emoji: '🍴',
+    category: 'Area',
+    readTime: '7 min read',
+  },
+  {
+    title: 'Nightlife in Juffair',
+    description: 'Bars, clubs, and nightlife in the expat hub.',
+    href: '/guides/nightlife-juffair',
+    emoji: '🌃',
+    category: 'Area',
+    readTime: '6 min read',
+  },
+  {
+    title: 'Nightlife in Adliya',
+    description: 'Trendy bars, cafes, and the arts district.',
+    href: '/guides/nightlife-adliya',
+    emoji: '🎭',
+    category: 'Area',
+    readTime: '6 min read',
+  },
+];
+
 const categoryColors: Record<string, string> = {
   Essential: 'bg-yellow-500/20 text-yellow-400',
   Sightseeing: 'bg-emerald-500/20 text-emerald-400',
@@ -158,6 +297,11 @@ const categoryColors: Record<string, string> = {
   Beach: 'bg-cyan-500/20 text-cyan-400',
   Events: 'bg-red-500/20 text-red-400',
   Culture: 'bg-amber-500/20 text-amber-400',
+  Hotels: 'bg-blue-500/20 text-blue-400',
+  Family: 'bg-pink-500/20 text-pink-400',
+  Budget: 'bg-green-500/20 text-green-400',
+  Couples: 'bg-rose-500/20 text-rose-400',
+  Area: 'bg-teal-500/20 text-teal-400',
   Dubai: 'bg-pink-500/20 text-pink-400',
   'Abu Dhabi': 'bg-blue-500/20 text-blue-400',
   Qatar: 'bg-rose-500/20 text-rose-400',
@@ -222,8 +366,49 @@ export default function GuidesPage() {
         </div>
       </section>
 
-      {/* Regional Guides */}
+      {/* Area Guides */}
       <section className="py-12 px-4 bg-black/30">
+        <div className="max-w-6xl mx-auto">
+          <h2 className="text-2xl font-bold mb-8 flex items-center gap-2">
+            <MapPin className="w-7 h-7 text-teal-400" />
+            Area Guides
+          </h2>
+          <p className="text-gray-400 mb-8">
+            Explore different areas of Bahrain with our detailed local guides.
+          </p>
+          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {areaGuides.map((guide) => (
+              <Link
+                key={guide.href}
+                href={guide.href}
+                className="group relative bg-white/5 rounded-2xl p-6 hover:bg-white/10 transition-all"
+              >
+                <div className="flex flex-col h-full">
+                  <div className="flex items-center gap-3 mb-3">
+                    <span className="text-3xl">{guide.emoji}</span>
+                    <span className={`text-xs px-2 py-0.5 rounded ${categoryColors[guide.category] || 'bg-gray-500/20 text-gray-400'}`}>
+                      {guide.category}
+                    </span>
+                  </div>
+                  <h2 className="text-lg font-bold mb-2 group-hover:text-teal-400 transition-colors">
+                    {guide.title}
+                  </h2>
+                  <p className="text-gray-400 text-sm mb-4 flex-1">{guide.description}</p>
+                  <div className="flex items-center justify-between">
+                    <span className="text-xs text-gray-500">{guide.readTime}</span>
+                    <span className="inline-flex items-center gap-1 text-teal-400 text-sm font-medium">
+                      Read <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
+                    </span>
+                  </div>
+                </div>
+              </Link>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* Regional Guides */}
+      <section className="py-12 px-4">
         <div className="max-w-6xl mx-auto">
           <h2 className="text-2xl font-bold mb-8 flex items-center gap-2">
             <Globe className="w-7 h-7 text-yellow-400" />
