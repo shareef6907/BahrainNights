@@ -155,15 +155,15 @@ export default async function InternationalPage() {
     <>
       <BreadcrumbSchema
         items={[
-          { name: 'Home', url: 'https://bahrainnights.com' },
-          { name: 'International Events', url: 'https://bahrainnights.com/international' },
+          { name: 'Home', url: 'https://www.bahrainnights.com' },
+          { name: 'International Events', url: 'https://www.bahrainnights.com/international' },
         ]}
       />
       <EventListSchema
         events={schemaEvents}
         pageTitle="International Events"
         pageDescription="Discover concerts, shows, and experiences across UAE, Saudi Arabia, Qatar, and more"
-        pageUrl="https://bahrainnights.com/international"
+        pageUrl="https://www.bahrainnights.com/international"
       />
       <InternationalPageClient
         events={internationalEvents}

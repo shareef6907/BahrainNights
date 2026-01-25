@@ -37,9 +37,9 @@ export default function AttractionListSchema({
       item: {
         '@type': 'TouristAttraction',
         name: attraction.title,
-        url: `https://bahrainnights.com/attractions/${attraction.id}`,
+        url: `https://www.bahrainnights.com/attractions/${attraction.id}`,
         description: attraction.description?.slice(0, 200) || attraction.title,
-        image: attraction.image_url || 'https://bahrainnights.com/og-image.jpg',
+        image: attraction.image_url || 'https://www.bahrainnights.com/og-image.jpg',
         address: {
           '@type': 'PostalAddress',
           streetAddress: attraction.location || 'Bahrain',

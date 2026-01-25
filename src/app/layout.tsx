@@ -18,7 +18,7 @@ const inter = Inter({
 });
 
 export const metadata: Metadata = {
-  metadataBase: new URL('https://bahrainnights.com'),
+  metadataBase: new URL('https://www.bahrainnights.com'),
   title: {
     default: "BahrainNights - Events, Nightlife & Things to Do in Bahrain",
     template: "%s | BahrainNights"
@@ -44,7 +44,7 @@ export const metadata: Metadata = {
     telephone: true,
   },
   alternates: {
-    canonical: "https://bahrainnights.com",
+    canonical: "https://www.bahrainnights.com",
   },
   icons: {
     icon: [
@@ -60,7 +60,7 @@ export const metadata: Metadata = {
   openGraph: {
     title: "BahrainNights - Events, Nightlife & Things to Do in Bahrain",
     description: "Discover the best events, restaurants, nightlife, cinema, and things to do in Bahrain. Your complete guide to happenings in Bahrain.",
-    url: "https://bahrainnights.com",
+    url: "https://www.bahrainnights.com",
     siteName: "BahrainNights",
     images: [
       {
@@ -73,13 +73,7 @@ export const metadata: Metadata = {
     locale: "en_US",
     type: "website",
   },
-  twitter: {
-    card: "summary_large_image",
-    title: "BahrainNights - Events, Nightlife & Things to Do in Bahrain",
-    description: "Discover the best events, restaurants, nightlife, cinema, and things to do in Bahrain.",
-    images: ["/og-image.png"],
-    creator: "@bahaborainNights",
-  },
+  // Twitter metadata removed - no account yet
   robots: {
     index: true,
     follow: true,
@@ -91,9 +85,7 @@ export const metadata: Metadata = {
       'max-snippet': -1,
     },
   },
-  verification: {
-    google: 'your-google-verification-code',
-  },
+  // Google verification handled via Search Console
 };
 
 export default function RootLayout({
@@ -131,12 +123,12 @@ export default function RootLayout({
               '@graph': [
                 {
                   '@type': 'Organization',
-                  '@id': 'https://bahrainnights.com/#organization',
+                  '@id': 'https://www.bahrainnights.com/#organization',
                   name: 'BahrainNights',
-                  url: 'https://bahrainnights.com',
+                  url: 'https://www.bahrainnights.com',
                   logo: {
                     '@type': 'ImageObject',
-                    url: 'https://bahrainnights.com/logo.png',
+                    url: 'https://www.bahrainnights.com/logo.png',
                     width: 512,
                     height: 512
                   },
@@ -161,18 +153,18 @@ export default function RootLayout({
                 },
                 {
                   '@type': 'WebSite',
-                  '@id': 'https://bahrainnights.com/#website',
-                  url: 'https://bahrainnights.com',
+                  '@id': 'https://www.bahrainnights.com/#website',
+                  url: 'https://www.bahrainnights.com',
                   name: 'BahrainNights',
                   description: 'Discover events, dining, nightlife, and entertainment in Bahrain and the region.',
                   publisher: {
-                    '@id': 'https://bahrainnights.com/#organization'
+                    '@id': 'https://www.bahrainnights.com/#organization'
                   },
                   potentialAction: {
                     '@type': 'SearchAction',
                     target: {
                       '@type': 'EntryPoint',
-                      urlTemplate: 'https://bahrainnights.com/search?q={search_term_string}'
+                      urlTemplate: 'https://www.bahrainnights.com/search?q={search_term_string}'
                     },
                     'query-input': 'required name=search_term_string'
                   }

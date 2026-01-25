@@ -282,7 +282,7 @@ export default async function EventsPage() {
         events={schemaEvents}
         pageTitle="Events in Bahrain"
         pageDescription="Discover concerts, nightlife, comedy, and more events in Bahrain"
-        pageUrl="https://bahrainnights.com/events"
+        pageUrl="https://www.bahrainnights.com/events"
       />
       <Suspense fallback={null}>
         <EventsPageClient initialEvents={events} familyAttractions={attractions} />
@@ -299,10 +299,10 @@ export const metadata = {
   openGraph: {
     title: 'Events in Bahrain - Concerts, Shows & Happenings | BahrainNights',
     description: 'Discover the best events happening in Bahrain. Find concerts, shows, parties, family activities, and cultural events.',
-    url: 'https://bahrainnights.com/events',
+    url: 'https://www.bahrainnights.com/events',
     type: 'website',
   },
   alternates: {
-    canonical: 'https://bahrainnights.com/events',
+    canonical: 'https://www.bahrainnights.com/events',
   },
 };

@@ -78,7 +78,7 @@ export default function EventDetailClient({ event, similarEvents }: EventDetailC
 
   const eventUrl = typeof window !== 'undefined'
     ? `${window.location.origin}/events/${event.slug}`
-    : `https://bahrainnights.com/events/${event.slug}`;
+    : `https://www.bahrainnights.com/events/${event.slug}`;
 
   return (
     <>

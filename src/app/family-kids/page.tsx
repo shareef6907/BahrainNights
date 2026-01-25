@@ -82,7 +82,7 @@ export const metadata = {
   openGraph: {
     title: 'Family & Kids Activities in Bahrain | BahrainNights',
     description: 'Discover the best family-friendly attractions and activities in Bahrain. Perfect for parents looking for fun things to do with kids.',
-    url: 'https://bahrainnights.com/family-kids',
+    url: 'https://www.bahrainnights.com/family-kids',
     type: 'website',
     images: [
       {
@@ -94,6 +94,6 @@ export const metadata = {
     ],
   },
   alternates: {
-    canonical: 'https://bahrainnights.com/family-kids',
+    canonical: 'https://www.bahrainnights.com/family-kids',
   },
 };

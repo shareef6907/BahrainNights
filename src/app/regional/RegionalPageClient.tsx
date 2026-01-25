@@ -1,9 +1,9 @@
 'use client';
 
 import { useState } from 'react';
-import { HeroTrailerPlayer } from '@/components/blog/HeroTrailerPlayer';
-import { BlogRow } from '@/components/blog/BlogRow';
-import { BlogModal } from '@/components/blog/BlogModal';
+import { HeroTrailerPlayer } from '@/components/regional/HeroTrailerPlayer';
+import { BlogRow } from '@/components/regional/BlogRow';
+import { BlogModal } from '@/components/regional/BlogModal';
 
 interface BlogArticle {
   id: string;
@@ -37,7 +37,7 @@ interface Props {
   latest: BlogArticle[];
 }
 
-export function BlogPageClient({
+export function RegionalPageClient({
   featured,
   bahrain,
   dubai,
@@ -118,7 +118,7 @@ export function BlogPageClient({
                 icon="🇧🇭"
                 articles={bahrain}
                 onSelectArticle={handleSelectArticle}
-                seeAllLink="/blog/places-to-go/bahrain"
+                seeAllLink="/regional/places-to-go/bahrain"
               />
             )}
 
@@ -129,7 +129,7 @@ export function BlogPageClient({
                 icon="🇦🇪"
                 articles={dubai}
                 onSelectArticle={handleSelectArticle}
-                seeAllLink="/blog/places-to-go/uae"
+                seeAllLink="/regional/places-to-go/uae"
               />
             )}
 
@@ -140,7 +140,7 @@ export function BlogPageClient({
                 icon="🇦🇪"
                 articles={abuDhabi}
                 onSelectArticle={handleSelectArticle}
-                seeAllLink="/blog/places-to-go/uae"
+                seeAllLink="/regional/places-to-go/uae"
               />
             )}
 
@@ -151,7 +151,7 @@ export function BlogPageClient({
                 icon="🇸🇦"
                 articles={riyadh}
                 onSelectArticle={handleSelectArticle}
-                seeAllLink="/blog/places-to-go/saudi-arabia"
+                seeAllLink="/regional/places-to-go/saudi-arabia"
               />
             )}
 
@@ -162,7 +162,7 @@ export function BlogPageClient({
                 icon="🇸🇦"
                 articles={jeddah}
                 onSelectArticle={handleSelectArticle}
-                seeAllLink="/blog/places-to-go/saudi-arabia"
+                seeAllLink="/regional/places-to-go/saudi-arabia"
               />
             )}
 
@@ -173,7 +173,7 @@ export function BlogPageClient({
                 icon="🇶🇦"
                 articles={doha}
                 onSelectArticle={handleSelectArticle}
-                seeAllLink="/blog/places-to-go/qatar"
+                seeAllLink="/regional/places-to-go/qatar"
               />
             )}
 
@@ -184,7 +184,7 @@ export function BlogPageClient({
                 icon="🇬🇧"
                 articles={london}
                 onSelectArticle={handleSelectArticle}
-                seeAllLink="/blog/places-to-go/uk"
+                seeAllLink="/regional/places-to-go/uk"
               />
             )}
           </>

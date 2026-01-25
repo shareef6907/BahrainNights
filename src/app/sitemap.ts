@@ -1,7 +1,7 @@
 import { MetadataRoute } from 'next';
 import { createClient } from '@supabase/supabase-js';
 
-const BASE_URL = 'https://bahrainnights.com';
+const BASE_URL = 'https://www.bahrainnights.com';
 
 // Create Supabase client for server-side operations
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!;
@@ -44,6 +44,12 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       lastModified: new Date(),
       changeFrequency: 'daily',
       priority: 0.9,
+    },
+    {
+      url: `${BASE_URL}/regional`,
+      lastModified: new Date(),
+      changeFrequency: 'daily',
+      priority: 0.8,
     },
     {
       url: `${BASE_URL}/offers`,
@@ -247,5 +253,26 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     console.error('Error fetching movies for sitemap:', error);
   }
 
-  return [...staticPages, ...eventPages, ...venuePages, ...moviePages];
+  // Fetch regional articles (international events coverage)
+  let regionalPages: MetadataRoute.Sitemap = [];
+  try {
+    const { data: articles } = await supabase
+      .from('blog_articles')
+      .select('slug, published_at')
+      .eq('status', 'published')
+      .limit(500);
+
+    if (articles) {
+      regionalPages = articles.map((article) => ({
+        url: `${BASE_URL}/regional/${article.slug}`,
+        lastModified: article.published_at ? new Date(article.published_at) : new Date(),
+        changeFrequency: 'weekly' as const,
+        priority: 0.6,
+      }));
+    }
+  } catch (error) {
+    console.error('Error fetching regional articles for sitemap:', error);
+  }
+
+  return [...staticPages, ...eventPages, ...venuePages, ...moviePages, ...regionalPages];
 }

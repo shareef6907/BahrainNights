@@ -65,7 +65,7 @@ export default async function AttractionsPage() {
         attractions={attractions}
         pageTitle="Attractions & Experiences in Bahrain"
         pageDescription="Discover tours, water sports, and experiences in Bahrain"
-        pageUrl="https://bahrainnights.com/attractions"
+        pageUrl="https://www.bahrainnights.com/attractions"
       />
       <Suspense fallback={<AttractionsLoadingSkeleton />}>
         <AttractionsPageClient
@@ -114,7 +114,7 @@ export const metadata = {
   openGraph: {
     title: 'Attractions & Experiences in Bahrain | BahrainNights',
     description: 'Explore the best tours, water sports, and experiences in Bahrain',
-    url: 'https://bahrainnights.com/attractions',
+    url: 'https://www.bahrainnights.com/attractions',
     type: 'website',
     images: [
       {
@@ -126,6 +126,6 @@ export const metadata = {
     ],
   },
   alternates: {
-    canonical: 'https://bahrainnights.com/attractions',
+    canonical: 'https://www.bahrainnights.com/attractions',
   },
 };

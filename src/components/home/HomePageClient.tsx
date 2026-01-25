@@ -394,7 +394,7 @@ export default function HomePageClient({ initialMovies, initialStats, initialTod
   const allCategories = [
     { icon: "🎢", name: t.categories.attractions, description: t.categories.attractionsDesc, count: stats.attractions, color: "from-teal-500 to-emerald-500", href: "/attractions", countLabel: t.categories.listings },
     { icon: "🎭", name: t.categories.events, description: t.categories.eventsDesc, count: stats.events, color: "from-purple-500 to-pink-500", href: "/events", countLabel: t.categories.listings },
-    { icon: "📝", name: t.categories.blog, description: t.categories.blogDesc, count: stats.blog, color: "from-rose-500 to-pink-500", href: "/blog", countLabel: t.categories.articles },
+    { icon: "📝", name: t.categories.blog, description: t.categories.blogDesc, count: stats.blog, color: "from-rose-500 to-pink-500", href: "/regional", countLabel: t.categories.articles },
     { icon: "🍽️", name: t.categories.dining, description: t.categories.diningDesc, count: stats.venues, color: "from-orange-500 to-red-500", href: "/places", countLabel: t.categories.listings },
     { icon: "🎬", name: t.categories.cinema, description: t.categories.cinemaDesc, count: stats.cinema, color: "from-blue-500 to-cyan-500", href: "/cinema", countLabel: t.categories.listings },
     { icon: "🏷️", name: t.categories.offers, description: t.categories.offersDesc, count: stats.offers, color: "from-green-500 to-emerald-500", href: "/offers", countLabel: t.categories.listings },

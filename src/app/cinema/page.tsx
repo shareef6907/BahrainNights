@@ -175,7 +175,7 @@ export default async function CinemaPage() {
         movies={nowShowing}
         pageTitle="Movies Now Showing in Bahrain - VOX Cinemas"
         pageDescription="Find movies now showing at VOX Cinemas Bahrain - VOX City Centre and VOX The Avenues"
-        pageUrl="https://bahrainnights.com/cinema"
+        pageUrl="https://www.bahrainnights.com/cinema"
       />
       <Suspense fallback={null}>
         <CinemaPageClient
@@ -197,10 +197,10 @@ export const metadata = {
   openGraph: {
     title: 'Cinema in Bahrain - Movies Now Showing & Coming Soon | VOX Cinemas',
     description: 'Find movies now showing at VOX Cinemas Bahrain. Check what\'s playing at VOX City Centre and VOX The Avenues.',
-    url: 'https://bahrainnights.com/cinema',
+    url: 'https://www.bahrainnights.com/cinema',
     type: 'website',
   },
   alternates: {
-    canonical: 'https://bahrainnights.com/cinema',
+    canonical: 'https://www.bahrainnights.com/cinema',
   },
 };

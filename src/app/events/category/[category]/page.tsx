@@ -53,7 +53,7 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
     openGraph: {
       title: `${info.label} Events in Bahrain | BahrainNights`,
       description: `Discover the best ${info.description.toLowerCase()} in Bahrain.`,
-      url: `https://bahrainnights.com/events/category/${category}`,
+      url: `https://www.bahrainnights.com/events/category/${category}`,
     },
   };
 }

@@ -152,8 +152,8 @@ export default function EventSchema({ event }: EventSchemaProps) {
   const eventEndDate = event.end_date || eventDate;
   const eventEndTime = event.end_time || eventTime;
 
-  const eventImage = event.cover_url || event.featured_image || event.image_url || 'https://bahrainnights.com/og-image.jpg';
-  const eventUrl = event.affiliate_url || event.booking_url || (event.slug ? `https://bahrainnights.com/events/${event.slug}` : 'https://bahrainnights.com/events');
+  const eventImage = event.cover_url || event.featured_image || event.image_url || 'https://www.bahrainnights.com/og-image.jpg';
+  const eventUrl = event.affiliate_url || event.booking_url || (event.slug ? `https://www.bahrainnights.com/events/${event.slug}` : 'https://www.bahrainnights.com/events');
   const countryInfo = getCountryInfo(event.country);
   const priceInfo = parsePrice(event.price);
   const performerName = extractPerformerFromTitle(event.title);
@@ -199,7 +199,7 @@ export default function EventSchema({ event }: EventSchemaProps) {
     organizer: {
       '@type': 'Organization',
       name: event.venue_name || 'BahrainNights',
-      url: 'https://bahrainnights.com',
+      url: 'https://www.bahrainnights.com',
     },
     performer: {
       '@type': 'PerformingGroup',

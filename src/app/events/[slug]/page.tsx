@@ -217,7 +217,7 @@ export async function generateMetadata({ params }: PageProps) {
       title: event.title,
       description: event.description?.slice(0, 160),
       images: [event.cover_url || event.image_url || getDefaultImage(event.category)],
-      url: `https://bahrainnights.com/events/${slug}`,
+      url: `https://www.bahrainnights.com/events/${slug}`,
       type: 'website',
     },
   };

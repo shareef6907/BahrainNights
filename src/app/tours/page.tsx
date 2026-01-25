@@ -107,7 +107,7 @@ export const metadata = {
   openGraph: {
     title: 'Tours & Experiences in Bahrain | BahrainNights',
     description: 'Discover Bahrain with expert local guides. Cultural tours, desert safaris, food experiences, and more.',
-    url: 'https://bahrainnights.com/tours',
+    url: 'https://www.bahrainnights.com/tours',
     type: 'website',
     images: [
       {
@@ -119,6 +119,6 @@ export const metadata = {
     ],
   },
   alternates: {
-    canonical: 'https://bahrainnights.com/tours',
+    canonical: 'https://www.bahrainnights.com/tours',
   },
 };

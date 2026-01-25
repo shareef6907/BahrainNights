@@ -448,7 +448,7 @@ export async function GET(request: NextRequest) {
         ${recentArticles.map(article => `
           <div class="article-item">
             <div class="article-info">
-              <a href="/blog/${article.slug}" target="_blank">${article.title}</a>
+              <a href="/regional/${article.slug}" target="_blank">${article.title}</a>
               <div class="article-meta">
                 <span class="article-date">${new Date(article.created_at).toLocaleDateString()}</span>
                 <span class="article-country">${article.country || 'unknown'}</span>
@@ -519,7 +519,7 @@ export async function GET(request: NextRequest) {
               if (data.articles && data.articles.length > 0) {
                 html += '<br><br><strong>Generated articles:</strong><ul style="margin-top:10px">';
                 data.articles.forEach(a => {
-                  html += '<li style="margin:8px 0"><a href="/blog/' + a.slug + '" target="_blank" style="color:#f59e0b">' + a.article_title + '</a></li>';
+                  html += '<li style="margin:8px 0"><a href="/regional/' + a.slug + '" target="_blank" style="color:#f59e0b">' + a.article_title + '</a></li>';
                 });
                 html += '</ul>';
               }

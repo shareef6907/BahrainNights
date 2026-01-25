@@ -281,7 +281,7 @@ export const metadata = {
   openGraph: {
     title: 'BahrainNights | Events, Venues & Nightlife in Bahrain',
     description: "Your curated guide to Bahrain's best experiences",
-    url: 'https://bahrainnights.com',
+    url: 'https://www.bahrainnights.com',
     siteName: 'BahrainNights',
     type: 'website',
     images: [

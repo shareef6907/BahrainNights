@@ -172,7 +172,7 @@ export default function PlaceDetailPageContent({ venue, similarVenues, events = 
 
   const placeUrl = typeof window !== 'undefined'
     ? window.location.href
-    : `https://bahrainnights.com/places/${venue.slug}`;
+    : `https://www.bahrainnights.com/places/${venue.slug}`;
 
   // Get images for gallery
   const images = venue.gallery && venue.gallery.length > 0

@@ -95,7 +95,7 @@ export default async function CountryBlogPage({ params, searchParams }: Props) {
           <div className="max-w-6xl mx-auto">
             <div className="flex flex-wrap justify-center gap-3">
               <Link
-                href={`/blog/country/${country}`}
+                href={`/regional/country/${country}`}
                 className="px-4 py-2 bg-yellow-400 text-black rounded-full text-sm font-medium"
               >
                 All Cities
@@ -103,7 +103,7 @@ export default async function CountryBlogPage({ params, searchParams }: Props) {
               {locationInfo.cities.map((c) => (
                 <Link
                   key={c}
-                  href={`/blog/country/${country}?city=${c.toLowerCase()}`}
+                  href={`/regional/country/${country}?city=${c.toLowerCase()}`}
                   className="px-4 py-2 bg-white/10 hover:bg-white/20 border border-white/20 rounded-full text-sm transition-colors"
                 >
                   {c}
@@ -119,9 +119,9 @@ export default async function CountryBlogPage({ params, searchParams }: Props) {
         <section className="px-4 pb-8">
           <div className="max-w-6xl mx-auto">
             <nav className="flex items-center gap-2 text-sm text-gray-500">
-              <Link href="/blog" className="hover:text-white transition-colors">Blog</Link>
+              <Link href="/regional" className="hover:text-white transition-colors">Blog</Link>
               <span>/</span>
-              <Link href={`/blog/country/${country}`} className="hover:text-white transition-colors">
+              <Link href={`/regional/country/${country}`} className="hover:text-white transition-colors">
                 {locationInfo.name}
               </Link>
               <span>/</span>
@@ -139,7 +139,7 @@ export default async function CountryBlogPage({ params, searchParams }: Props) {
               {articles.map((article) => (
                 <Link
                   key={article.id}
-                  href={`/blog/${article.slug}`}
+                  href={`/regional/${article.slug}`}
                   className="group block bg-white/5 border border-white/10 rounded-xl overflow-hidden hover:border-yellow-400/50 transition-all"
                 >
                   {article.featured_image ? (
@@ -178,7 +178,7 @@ export default async function CountryBlogPage({ params, searchParams }: Props) {
                 No articles for {locationName} yet.
               </p>
               <Link
-                href={`/blog/places-to-go/${country}`}
+                href={`/regional/places-to-go/${country}`}
                 className="inline-block text-yellow-400 hover:text-yellow-300 font-medium"
               >
                 View {locationInfo.name} Guide &rarr;
@@ -191,13 +191,13 @@ export default async function CountryBlogPage({ params, searchParams }: Props) {
       {/* Back Links */}
       <div className="text-center pb-16 flex justify-center gap-6">
         <Link
-          href={`/blog/places-to-go/${country}`}
+          href={`/regional/places-to-go/${country}`}
           className="text-yellow-400 hover:text-yellow-300 font-medium"
         >
           {locationInfo.name} Guide
         </Link>
         <Link
-          href="/blog"
+          href="/regional"
           className="text-gray-400 hover:text-white font-medium"
         >
           All Articles

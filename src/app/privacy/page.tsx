@@ -257,7 +257,7 @@ export default function PrivacyPage() {
             <div className="bg-gray-900 rounded-xl p-6 mt-4">
               <p className="font-semibold text-white mb-2">BahrainNights</p>
               <p>Email: <a href="mailto:info@bahrainnights.com" className="text-amber-400 hover:underline">info@bahrainnights.com</a></p>
-              <p>Website: <a href="https://bahrainnights.com" className="text-amber-400 hover:underline">bahrainnights.com</a></p>
+              <p>Website: <a href="https://www.bahrainnights.com" className="text-amber-400 hover:underline">bahrainnights.com</a></p>
               <p className="mt-4 text-gray-400">Manama, Kingdom of Bahrain</p>
             </div>
           </div>

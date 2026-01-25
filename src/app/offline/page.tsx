@@ -35,7 +35,7 @@ export default function OfflinePage() {
               🎭 Events
             </Link>
             <Link
-              href="/blog"
+              href="/regional"
               className="bg-gray-800 hover:bg-gray-700 text-white px-4 py-2 rounded-lg transition-colors"
             >
               📰 Blog

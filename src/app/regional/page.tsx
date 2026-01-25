@@ -1,15 +1,19 @@
 import { Metadata } from 'next';
 import { getAdminClient } from '@/lib/supabase/server';
-import { BlogPageClient } from './BlogPageClient';
+import { RegionalPageClient } from './RegionalPageClient';
 
 export const metadata: Metadata = {
-  title: 'Blog | BahrainNights - Events, Culture & Nightlife',
-  description: 'Discover the best places to go, events to attend, and experiences to have across Bahrain, UAE, Saudi Arabia, Qatar, and UK. Your guide to entertainment in the Middle East.',
-  keywords: ['bahrain events', 'things to do in bahrain', 'places to go in uae', 'dubai nightlife', 'qatar events', 'middle east entertainment'],
+  title: 'Regional Events | BahrainNights - Middle East Entertainment Guide',
+  description: 'Discover the best events, concerts, and experiences across Bahrain, UAE, Saudi Arabia, Qatar, and UK. Your complete guide to entertainment in the Middle East.',
+  keywords: ['middle east events', 'dubai events', 'saudi arabia events', 'qatar events', 'uae concerts', 'regional entertainment', 'gulf events'],
   openGraph: {
-    title: 'Blog | BahrainNights',
+    title: 'Regional Events | BahrainNights',
     description: 'Your guide to the best events and experiences across the Middle East',
+    url: 'https://www.bahrainnights.com/regional',
     type: 'website',
+  },
+  alternates: {
+    canonical: 'https://www.bahrainnights.com/regional',
   },
 };
 
@@ -110,7 +114,7 @@ export default async function BlogPage() {
   );
 
   return (
-    <BlogPageClient
+    <RegionalPageClient
       featured={featured}
       bahrain={bahrain}
       dubai={dubai}

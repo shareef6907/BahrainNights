@@ -214,7 +214,7 @@ export default function CinemaPageClient({
         '@type': 'WebPage',
         name: 'Cinema in Bahrain - Movies Now Showing & Coming Soon | BahrainNights',
         description: 'Find movies now showing in Bahrain cinemas. Check what\'s playing at Cineco, VOX, Cinépolis, and Mukta A2 Cinemas.',
-        url: 'https://bahrainnights.com/cinema'
+        url: 'https://www.bahrainnights.com/cinema'
       },
       {
         '@type': 'ItemList',
@@ -236,7 +236,7 @@ export default function CinemaPageClient({
               bestRating: 10,
               worstRating: 0
             } : undefined,
-            url: `https://bahrainnights.com/cinema?movie=${movie.slug}`
+            url: `https://www.bahrainnights.com/cinema?movie=${movie.slug}`
           }
         }))
       }

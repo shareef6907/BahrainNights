@@ -48,8 +48,8 @@ export default function VenueSchema({ venue }: VenueSchemaProps) {
     '@type': getSchemaType(venue.category),
     name: venue.name,
     description: venue.description?.slice(0, 500) || `${venue.name} in Bahrain`,
-    url: `https://bahrainnights.com/places/${venue.slug}`,
-    image: venue.cover_url || venue.cover_image_url || venue.image_url || venue.logo_url || 'https://bahrainnights.com/og-image.jpg',
+    url: `https://www.bahrainnights.com/places/${venue.slug}`,
+    image: venue.cover_url || venue.cover_image_url || venue.image_url || venue.logo_url || 'https://www.bahrainnights.com/og-image.jpg',
     address: {
       '@type': 'PostalAddress',
       streetAddress: venue.address || venue.location || 'Bahrain',

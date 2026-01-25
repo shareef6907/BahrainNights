@@ -40,7 +40,7 @@ export default function EventListSchema({
       item: {
         '@type': 'Event',
         name: event.title,
-        url: `https://bahrainnights.com/events/${event.slug}`,
+        url: `https://www.bahrainnights.com/events/${event.slug}`,
         description: event.description?.slice(0, 200) || event.title,
         startDate: event.start_date || event.date || new Date().toISOString(),
         location: {
@@ -52,7 +52,7 @@ export default function EventListSchema({
             addressCountry: 'BH',
           },
         },
-        image: event.cover_url || event.image_url || 'https://bahrainnights.com/og-image.jpg',
+        image: event.cover_url || event.image_url || 'https://www.bahrainnights.com/og-image.jpg',
       },
     })),
   };

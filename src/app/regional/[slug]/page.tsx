@@ -192,9 +192,9 @@ export default async function ArticlePage({ params }: Props) {
       <article className={`max-w-3xl mx-auto px-4 py-8 ${article.featured_image ? '-mt-32 relative z-10' : 'pt-32'}`}>
         {/* Breadcrumb */}
         <nav className="text-sm text-gray-500 mb-4 flex items-center gap-2">
-          <Link href="/blog" className="hover:text-white transition-colors">Blog</Link>
+          <Link href="/regional" className="hover:text-white transition-colors">Blog</Link>
           <span>/</span>
-          <Link href={`/blog/places-to-go/${article.country}`} className="hover:text-white transition-colors capitalize">
+          <Link href={`/regional/places-to-go/${article.country}`} className="hover:text-white transition-colors capitalize">
             {article.country.replace('-', ' ')}
           </Link>
           {article.city && (
@@ -306,7 +306,7 @@ export default async function ArticlePage({ params }: Props) {
           <p className="text-gray-400 text-sm mb-4">Share this article</p>
           <div className="flex gap-3">
             <a
-              href={`https://twitter.com/intent/tweet?text=${encodeURIComponent(article.title)}&url=${encodeURIComponent(`https://bahrainnights.com/blog/${article.slug}`)}`}
+              href={`https://twitter.com/intent/tweet?text=${encodeURIComponent(article.title)}&url=${encodeURIComponent(`https://www.bahrainnights.com/regional/${article.slug}`)}`}
               target="_blank"
               rel="noopener noreferrer"
               className="w-10 h-10 bg-white/5 hover:bg-white/10 border border-white/10 rounded-full flex items-center justify-center transition-colors"
@@ -315,7 +315,7 @@ export default async function ArticlePage({ params }: Props) {
               𝕏
             </a>
             <a
-              href={`https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(`https://bahrainnights.com/blog/${article.slug}`)}`}
+              href={`https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(`https://www.bahrainnights.com/regional/${article.slug}`)}`}
               target="_blank"
               rel="noopener noreferrer"
               className="w-10 h-10 bg-white/5 hover:bg-white/10 border border-white/10 rounded-full flex items-center justify-center transition-colors"
@@ -324,7 +324,7 @@ export default async function ArticlePage({ params }: Props) {
               f
             </a>
             <a
-              href={`https://wa.me/?text=${encodeURIComponent(`${article.title} https://bahrainnights.com/blog/${article.slug}`)}`}
+              href={`https://wa.me/?text=${encodeURIComponent(`${article.title} https://www.bahrainnights.com/regional/${article.slug}`)}`}
               target="_blank"
               rel="noopener noreferrer"
               className="w-10 h-10 bg-white/5 hover:bg-white/10 border border-white/10 rounded-full flex items-center justify-center transition-colors"
@@ -346,7 +346,7 @@ export default async function ArticlePage({ params }: Props) {
             {related.map((item) => (
               <Link
                 key={item.id}
-                href={`/blog/${item.slug}`}
+                href={`/regional/${item.slug}`}
                 className="group block bg-white/5 border border-white/10 rounded-xl overflow-hidden hover:border-yellow-400/50 transition-all"
               >
                 {item.featured_image ? (
@@ -380,7 +380,7 @@ export default async function ArticlePage({ params }: Props) {
         {/* Back to Blog */}
         <div className="text-center pb-16">
           <Link
-            href="/blog"
+            href="/regional"
             className="inline-block text-yellow-400 hover:text-yellow-300 font-medium"
           >
             &larr; Back to Blog

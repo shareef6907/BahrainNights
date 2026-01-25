@@ -158,16 +158,16 @@ export default async function CountryPage({ params }: Props) {
     <>
       <BreadcrumbSchema
         items={[
-          { name: 'Home', url: 'https://bahrainnights.com' },
-          { name: 'International', url: 'https://bahrainnights.com/international' },
-          { name: countryConfig.fullName, url: `https://bahrainnights.com/international/${country}` },
+          { name: 'Home', url: 'https://www.bahrainnights.com' },
+          { name: 'International', url: 'https://www.bahrainnights.com/international' },
+          { name: countryConfig.fullName, url: `https://www.bahrainnights.com/international/${country}` },
         ]}
       />
       <EventListSchema
         events={schemaEvents}
         pageTitle={`Events in ${countryConfig.fullName}`}
         pageDescription={`Discover concerts, shows, and experiences in ${countryConfig.fullName}`}
-        pageUrl={`https://bahrainnights.com/international/${country}`}
+        pageUrl={`https://www.bahrainnights.com/international/${country}`}
       />
       <CountryPageClient
         country={countryConfig}

@@ -142,7 +142,7 @@ export default async function CornerstonePage({ params }: Props) {
             {locationInfo.cities.map((city) => (
               <Link
                 key={city}
-                href={`/blog/country/${location}?city=${city.toLowerCase()}`}
+                href={`/regional/country/${location}?city=${city.toLowerCase()}`}
                 className="bg-white/5 hover:bg-white/10 border border-white/10 hover:border-yellow-400/50 rounded-xl p-6 text-center transition-all duration-300 group"
               >
                 <h3 className="font-bold text-lg text-white group-hover:text-yellow-400 transition-colors">
@@ -266,7 +266,7 @@ export default async function CornerstonePage({ params }: Props) {
       {/* Back to Blog */}
       <div className="text-center pb-16">
         <Link
-          href="/blog"
+          href="/regional"
           className="inline-block text-yellow-400 hover:text-yellow-300 font-medium"
         >
           &larr; Back to Blog
@@ -294,7 +294,7 @@ interface ArticleCardProps {
 
 function ArticleCard({ article, featured }: ArticleCardProps) {
   return (
-    <Link href={`/blog/${article.slug}`} className="group block">
+    <Link href={`/regional/${article.slug}`} className="group block">
       <article className={`bg-white/5 border border-white/10 rounded-xl overflow-hidden hover:border-yellow-400/50 transition-all duration-300 ${featured ? 'ring-2 ring-yellow-400/20' : ''}`}>
         {article.featured_image ? (
           <div className="aspect-video relative overflow-hidden">

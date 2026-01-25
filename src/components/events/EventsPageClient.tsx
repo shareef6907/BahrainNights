@@ -322,7 +322,7 @@ export default function EventsPageClient({ initialEvents, familyAttractions = []
           }
         },
         image: event.image,
-        url: `https://bahrainnights.com/events/${event.slug}`,
+        url: `https://www.bahrainnights.com/events/${event.slug}`,
         offers: event.isFree ? {
           '@type': 'Offer',
           price: '0',

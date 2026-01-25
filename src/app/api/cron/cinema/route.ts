@@ -15,7 +15,7 @@ export async function GET(request: Request) {
     }
 
     // Get the base URL for internal API call
-    const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://bahrainnights.com';
+    const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://www.bahrainnights.com';
 
     // Call the cinema sync agent
     const response = await fetch(`${baseUrl}/api/agents/cinema/run`, {

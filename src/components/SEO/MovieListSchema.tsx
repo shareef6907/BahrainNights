@@ -39,9 +39,9 @@ export default function MovieListSchema({
       item: {
         '@type': 'Movie',
         name: movie.title,
-        url: `https://bahrainnights.com/cinema/${movie.slug}`,
+        url: `https://www.bahrainnights.com/cinema/${movie.slug}`,
         description: movie.description?.slice(0, 200) || movie.title,
-        image: movie.poster_url || 'https://bahrainnights.com/og-image.jpg',
+        image: movie.poster_url || 'https://www.bahrainnights.com/og-image.jpg',
         ...(movie.rating && {
           aggregateRating: {
             '@type': 'AggregateRating',
