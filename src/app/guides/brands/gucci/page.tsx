@@ -147,13 +147,13 @@ export default function GucciBahrainPage() {
             {[
               { label: 'Stores', value: '3', icon: ShoppingBag },
               { label: 'Flagship', value: 'Moda Mall', icon: Star },
-              { label: 'Also At', value: 'City Centre', icon: MapPin },
-              { label: 'Also At', value: 'Marassi Galleria', icon: MapPin },
-            ].map((stat) => (
-              <div key={stat.label} className="bg-white/5 backdrop-blur-sm rounded-xl p-4 text-center">
+              { label: '', value: 'City Centre', icon: MapPin },
+              { label: '', value: 'Marassi Galleria', icon: MapPin },
+            ].map((stat, index) => (
+              <div key={`${stat.value}-${index}`} className="bg-white/5 backdrop-blur-sm rounded-xl p-4 text-center">
                 <stat.icon className="w-6 h-6 mx-auto mb-2 text-green-400" />
                 <div className="text-2xl font-bold">{stat.value}</div>
-                <div className="text-sm text-gray-400">{stat.label}</div>
+                {stat.label && <div className="text-sm text-gray-400">{stat.label}</div>}
               </div>
             ))}
           </div>
