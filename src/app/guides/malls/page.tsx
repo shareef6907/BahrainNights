@@ -2,7 +2,7 @@ import { Metadata } from 'next';
 import Link from 'next/link';
 import { 
   ShoppingBag, Clock, MapPin, Star,
-  ArrowRight, Users, DollarSign, Car, Coffee
+  ArrowRight, DollarSign, Car
 } from 'lucide-react';
 import BreadcrumbSchema from '@/components/SEO/BreadcrumbSchema';
 
@@ -37,6 +37,7 @@ const malls = [
     parking: '7,000+ spaces (free)',
     hours: 'Sat-Wed 10AM-10PM, Thu-Fri 10AM-12AM',
     bestFor: 'One-stop shopping, families, entertainment',
+    href: '/guides/malls/city-centre-bahrain',
   },
   {
     name: 'Seef Mall',
@@ -52,6 +53,7 @@ const malls = [
     parking: '5,000+ spaces (free)',
     hours: 'Sat-Wed 10AM-10PM, Thu-Fri 10AM-12AM',
     bestFor: 'Family shopping, mid-range brands',
+    href: '/guides/malls/seef-mall',
   },
   {
     name: 'The Avenues Bahrain',
@@ -67,6 +69,7 @@ const malls = [
     parking: '4,000+ spaces',
     hours: 'Sat-Wed 10AM-10PM, Thu-Fri 10AM-12AM',
     bestFor: 'Luxury shopping, fine dining, special occasions',
+    href: '/guides/malls/the-avenues',
   },
   {
     name: 'Moda Mall',
@@ -82,6 +85,7 @@ const malls = [
     parking: 'BWTC parking (paid)',
     hours: 'Sat-Thu 10AM-10PM, Fri 2PM-10PM',
     bestFor: 'Luxury shopping, business travelers',
+    href: '/guides/malls/moda-mall',
   },
   {
     name: 'Bahrain Mall',
@@ -97,6 +101,7 @@ const malls = [
     parking: '3,000+ spaces (free)',
     hours: 'Sat-Wed 9AM-10PM, Thu-Fri 9AM-11PM',
     bestFor: 'Budget shopping, families with kids',
+    href: '/guides/malls/bahrain-mall',
   },
   {
     name: 'Oasis Mall',
@@ -112,6 +117,7 @@ const malls = [
     parking: '1,500+ spaces (free)',
     hours: 'Sat-Wed 9AM-10PM, Thu-Fri 9AM-11PM',
     bestFor: 'Juffair residents, quick shopping',
+    href: null,
   },
   {
     name: 'Enma Mall',
@@ -127,6 +133,7 @@ const malls = [
     parking: '2,000+ spaces (free)',
     hours: 'Sat-Wed 9AM-10PM, Thu-Fri 9AM-11PM',
     bestFor: 'Riffa residents, family shopping',
+    href: null,
   },
   {
     name: 'Dragon City',
@@ -142,6 +149,7 @@ const malls = [
     parking: '3,000+ spaces (free)',
     hours: 'Sat-Thu 10AM-10PM, Fri 4PM-10PM',
     bestFor: 'Bargain hunting, bulk buying, electronics',
+    href: null,
   },
 ];
 
@@ -258,7 +266,13 @@ export default function MallsPage() {
                   <div className="flex-1">
                     <div className="flex items-start justify-between mb-3">
                       <div>
-                        <h3 className="text-xl font-bold">{mall.name}</h3>
+                        {mall.href ? (
+                          <Link href={mall.href} className="hover:text-pink-400 transition-colors">
+                            <h3 className="text-xl font-bold">{mall.name}</h3>
+                          </Link>
+                        ) : (
+                          <h3 className="text-xl font-bold">{mall.name}</h3>
+                        )}
                         <p className="text-pink-400 text-sm flex items-center gap-1">
                           <MapPin className="w-4 h-4" />
                           {mall.location} • {mall.type}
@@ -287,6 +301,15 @@ export default function MallsPage() {
                     <p className="text-sm text-gray-400 mb-2">
                       <strong>Popular Brands:</strong> {typeof mall.brands === 'string' ? mall.brands : mall.brands.join(', ')}
                     </p>
+                    
+                    {mall.href && (
+                      <Link 
+                        href={mall.href}
+                        className="inline-flex items-center gap-1 text-pink-400 hover:text-pink-300 text-sm font-medium mt-2"
+                      >
+                        View Complete Guide <ArrowRight className="w-4 h-4" />
+                      </Link>
+                    )}
                   </div>
                   
                   <div className="lg:w-1/4 space-y-2 text-sm bg-black/20 rounded-xl p-4">
