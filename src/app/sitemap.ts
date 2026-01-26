@@ -1,19 +1,30 @@
 import { MetadataRoute } from 'next';
-import { createClient } from '@supabase/supabase-js';
+import { createClient, SupabaseClient } from '@supabase/supabase-js';
 
 const BASE_URL = 'https://www.bahrainnights.com';
 
-// Create Supabase client for server-side operations
-const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!;
-const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY!;
+// Lazy initialization to avoid build-time errors
+let _supabase: SupabaseClient | null = null;
 
-function getSupabaseClient() {
-  return createClient(supabaseUrl, supabaseServiceKey, {
+function getSupabaseClient(): SupabaseClient | null {
+  if (_supabase) return _supabase;
+  
+  const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
+  const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
+  
+  if (!supabaseUrl || !supabaseServiceKey) {
+    console.warn('Supabase env vars not available for sitemap generation');
+    return null;
+  }
+  
+  _supabase = createClient(supabaseUrl, supabaseServiceKey, {
     auth: {
       autoRefreshToken: false,
       persistSession: false
     }
   });
+  
+  return _supabase;
 }
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
@@ -674,6 +685,11 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       priority: 0.3,
     },
   ];
+
+  // If Supabase is not available (build time), return only static pages
+  if (!supabase) {
+    return staticPages;
+  }
 
   // Fetch published events (exclude hidden)
   let eventPages: MetadataRoute.Sitemap = [];
