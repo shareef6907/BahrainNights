@@ -60,8 +60,12 @@ export default async function InternationalPage() {
   // Fetch all international events (not from Bahrain)
   // Filter: start_date >= today OR date >= today OR end_date >= today (for ongoing events)
   // This ensures we show upcoming events AND ongoing events (started in past but still running)
-  const { data: events, error } = await supabaseAdmin
-    .from('events')
+  let events = null;
+  let error = null;
+  
+  try {
+    const result = await supabaseAdmin
+      .from('events')
     .select(`
       id,
       title,
@@ -81,10 +85,16 @@ export default async function InternationalPage() {
       city
     `)
     .neq('country', 'Bahrain')
-    .eq('status', 'published')
-    .eq('is_active', true)
-    .or(`start_date.gte.${today},date.gte.${today},end_date.gte.${today}`)
-    .order('start_date', { ascending: true, nullsFirst: false });
+      .eq('status', 'published')
+      .eq('is_active', true)
+      .or(`start_date.gte.${today},date.gte.${today},end_date.gte.${today}`)
+      .order('start_date', { ascending: true, nullsFirst: false });
+    events = result.data;
+    error = result.error;
+  } catch (e) {
+    console.error('Error fetching international events (may be build time):', e);
+    events = [];
+  }
 
   if (error) {
     console.error('Error fetching international events:', error);
