@@ -3,33 +3,37 @@ import { supabaseAdmin } from '@/lib/supabase';
 
 export const dynamic = 'force-dynamic';
 
-// One-time fix for Bapco Golf event category
+// One-time fix for miscategorized sports events
 export async function GET() {
   try {
-    // Find events with "Bapco" and "Golf" or "Championship" in title that are wrongly categorized
-    const { data: events, error: findError } = await supabaseAdmin
+    // Find ALL events with sports-related keywords that are wrongly categorized
+    const { data: allEvents, error: findError } = await supabaseAdmin
       .from('events')
       .select('id, title, category')
-      .or('title.ilike.%Bapco%,title.ilike.%Golf%,title.ilike.%Championship%')
-      .in('category', ['nightlife', 'music', 'arts']);
+      .or('title.ilike.%golf%,title.ilike.%championship%,title.ilike.%basketball%,title.ilike.%bapco%,title.ilike.%f1%,title.ilike.%grand prix%,title.ilike.%football%,title.ilike.%tennis%')
+      .neq('category', 'sports');
 
     if (findError) {
       return NextResponse.json({ error: findError.message }, { status: 500 });
     }
 
-    // Filter to golf-related events
-    const golfEvents = (events || []).filter(e => 
-      e.title.toLowerCase().includes('golf') || 
-      (e.title.toLowerCase().includes('bapco') && e.title.toLowerCase().includes('championship'))
-    );
+    // Filter to actual sports events (exclude music festivals with "championship" etc)
+    const sportsKeywords = ['golf', 'basketball', 'football', 'tennis', 'f1', 'grand prix', 'bapco energies', 'racing'];
+    const sportsEvents = (allEvents || []).filter(e => {
+      const titleLower = e.title.toLowerCase();
+      return sportsKeywords.some(keyword => titleLower.includes(keyword));
+    });
 
-    if (golfEvents.length === 0) {
-      return NextResponse.json({ message: 'No misclassified golf events found', events });
+    if (sportsEvents.length === 0) {
+      return NextResponse.json({ 
+        message: 'No misclassified sports events found', 
+        checkedEvents: allEvents?.length || 0 
+      });
     }
 
     // Update them to sports
     const updates = [];
-    for (const event of golfEvents) {
+    for (const event of sportsEvents) {
       const { error: updateError } = await supabaseAdmin
         .from('events')
         .update({ category: 'sports' })
@@ -43,7 +47,7 @@ export async function GET() {
     }
 
     return NextResponse.json({ 
-      message: `Fixed ${golfEvents.length} golf event(s)`,
+      message: `Fixed ${sportsEvents.length} sports event(s)`,
       updates 
     });
   } catch (error) {
