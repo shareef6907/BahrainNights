@@ -27,7 +27,7 @@ const mallInfo = {
   name: 'Enma Mall',
   tagline: 'Riffa\'s Premier Family Shopping Destination',
   address: 'Riffa, Southern Governorate, Kingdom of Bahrain',
-  website: 'https://www.enmamall.bh',
+  website: '', // Website unavailable
   mapsLink: 'https://www.google.com/maps/dir/?api=1&destination=Enma+Mall+Riffa+Bahrain',
   hours: {
     regular: 'Sat-Wed: 9:00 AM - 10:00 PM',

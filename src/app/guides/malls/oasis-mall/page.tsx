@@ -27,7 +27,7 @@ const mallInfo = {
   name: 'Oasis Mall',
   tagline: 'Juffair\'s Convenient Neighborhood Shopping Destination',
   address: 'Juffair, Capital Governorate, Kingdom of Bahrain',
-  website: 'https://www.oasismall.bh',
+  website: '', // Website unavailable
   mapsLink: 'https://www.google.com/maps/dir/?api=1&destination=Oasis+Mall+Juffair+Bahrain',
   hours: {
     regular: 'Sat-Wed: 9:00 AM - 10:00 PM',

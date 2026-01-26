@@ -27,7 +27,7 @@ const mallInfo = {
   name: 'Bahrain Mall',
   tagline: 'Family-Friendly Shopping & Entertainment',
   address: 'Road 3804, Block 338, Sanabis, Kingdom of Bahrain',
-  website: 'https://www.bahrainmall.com.bh',
+  website: '', // Website unavailable
   mapsLink: 'https://www.google.com/maps/dir/?api=1&destination=Bahrain+Mall+Bahrain',
   hours: {
     regular: 'Sat-Wed: 9:00 AM - 10:00 PM',
@@ -267,14 +267,14 @@ export default function BahrainMallPage() {
                   >
                     Get Directions
                   </a>
-                  <a 
+                  {mallInfo.website && <a 
                     href={mallInfo.website}
                     target="_blank"
                     rel="noopener noreferrer"
                     className="px-4 py-2 bg-white/10 hover:bg-white/20 rounded-lg transition-colors text-sm flex items-center gap-1"
                   >
                     Website <ExternalLink className="w-3 h-3" />
-                  </a>
+                  </a>}
                 </div>
               </div>
             </div>

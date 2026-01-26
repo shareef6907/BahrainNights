@@ -27,7 +27,7 @@ const mallInfo = {
   name: 'Marassi Galleria',
   tagline: 'Bahrain\'s Premier Beachfront Luxury Destination',
   address: 'Diyar Al Muharraq, Muharraq, Kingdom of Bahrain',
-  website: 'https://www.marassigalleria.com',
+  website: '', // Website unavailable
   mapsLink: 'https://www.google.com/maps/dir/?api=1&destination=Marassi+Galleria+Bahrain',
   hours: {
     regular: 'Sat-Wed: 10:00 AM - 10:00 PM',

@@ -27,7 +27,7 @@ const mallInfo = {
   name: 'Moda Mall',
   tagline: 'Bahrain\'s Exclusive Luxury Shopping Destination',
   address: 'Bahrain World Trade Center, King Faisal Highway, Manama, Bahrain',
-  website: 'https://www.modamall.com.bh',
+  website: '', // Website unavailable
   mapsLink: 'https://www.google.com/maps/dir/?api=1&destination=Moda+Mall+Bahrain',
   hours: {
     regular: 'Sat-Thu: 10:00 AM - 10:00 PM',

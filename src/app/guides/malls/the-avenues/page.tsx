@@ -27,7 +27,7 @@ const mallInfo = {
   name: 'The Avenues Bahrain',
   tagline: 'Premium Lifestyle Destination at Bahrain Bay',
   address: 'Bahrain Bay, Manama, Kingdom of Bahrain',
-  website: 'https://www.theavenuesbahrain.com',
+  website: '', // Website unavailable
   mapsLink: 'https://www.google.com/maps/dir/?api=1&destination=The+Avenues+Bahrain',
   hours: {
     regular: 'Sat-Wed: 10:00 AM - 10:00 PM',
