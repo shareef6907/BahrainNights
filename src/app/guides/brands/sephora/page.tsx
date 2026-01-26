@@ -1,7 +1,7 @@
 import { Metadata } from 'next';
 import Link from 'next/link';
 import { 
-  MapPin, Clock, Phone, ExternalLink, 
+  MapPin, Clock, ExternalLink, 
   Sparkles, ShoppingBag, Star, Info
 } from 'lucide-react';
 import BreadcrumbSchema from '@/components/SEO/BreadcrumbSchema';
@@ -28,7 +28,6 @@ const storeLocations = [
     mall: 'City Centre Bahrain',
     address: 'City Centre Bahrain, Seef District, Manama',
     floor: 'Ground Floor',
-    phone: '+973 1717 8700',
     hours: 'Sun-Wed: 10:00 AM - 10:00 PM, Thu-Sat: 10:00 AM - 12:00 AM',
     products: ['Makeup', 'Skincare', 'Fragrance', 'Haircare', 'Beauty Tools', 'Sephora Collection', 'Exclusive Brands'],
     features: ['Largest Sephora in Bahrain', 'Beauty services', 'Sephora Collection', 'Fragrance bar'],

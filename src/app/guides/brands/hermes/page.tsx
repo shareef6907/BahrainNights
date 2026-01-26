@@ -1,7 +1,7 @@
 import { Metadata } from 'next';
 import Link from 'next/link';
 import { 
-  MapPin, Clock, Phone, ExternalLink, 
+  MapPin, Clock, ExternalLink, 
   Sparkles, ShoppingBag, Star, Info
 } from 'lucide-react';
 import BreadcrumbSchema from '@/components/SEO/BreadcrumbSchema';
@@ -28,7 +28,6 @@ const storeLocations = [
     mall: 'Moda Mall (Bahrain World Trade Center)',
     address: 'Bahrain World Trade Center, King Faisal Highway, Manama',
     floor: 'Ground Floor',
-    phone: '+973 1753 5600',
     hours: 'Sun-Thu: 10:00 AM - 10:00 PM, Fri-Sat: 10:00 AM - 11:00 PM',
     products: ['Leather Goods', 'Silk Scarves', 'Ready-to-Wear', 'Accessories', 'Shoes', 'Watches', 'Jewelry', 'Fragrances', 'Home'],
     features: ['Full collection', 'Exclusive pieces', 'Personal shopping by appointment'],
@@ -184,12 +183,6 @@ export default function HermesBahrainPage() {
                         <Clock className="w-4 h-4 text-gray-500" />
                         {store.hours}
                       </p>
-                      {store.phone && (
-                        <p className="flex items-center gap-2 text-gray-300">
-                          <Phone className="w-4 h-4 text-gray-500" />
-                          {store.phone}
-                        </p>
-                      )}
                     </div>
 
                     <div className="mb-4">

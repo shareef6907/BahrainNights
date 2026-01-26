@@ -1,7 +1,7 @@
 import { Metadata } from 'next';
 import Link from 'next/link';
 import { 
-  MapPin, Clock, Phone, ExternalLink, 
+  MapPin, Clock, ExternalLink, 
   Sparkles, UtensilsCrossed, Star, Info
 } from 'lucide-react';
 import BreadcrumbSchema from '@/components/SEO/BreadcrumbSchema';

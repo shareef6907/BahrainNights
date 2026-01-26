@@ -134,7 +134,7 @@ export default function RootLayout({
                   },
                   description: "Bahrain's premier guide to events, dining, nightlife, and entertainment. Discover the best things to do in Bahrain and the region.",
                   sameAs: [
-                    'https://instagram.com/BahrainNights',
+                    'https://instagram.com/bh.nights',
                     'https://facebook.com/BahrainNights',
                     'https://twitter.com/BahrainNights'
                   ],

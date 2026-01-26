@@ -1,14 +1,14 @@
 import { Metadata } from 'next';
 import Link from 'next/link';
 import { 
-  MapPin, Clock, Phone, ExternalLink, 
+  MapPin, Clock, ExternalLink, 
   Sparkles, ShoppingBag, Star, Info, Monitor
 } from 'lucide-react';
 import BreadcrumbSchema from '@/components/SEO/BreadcrumbSchema';
 
 export const metadata: Metadata = {
   title: 'Apple Store Bahrain - Authorized Resellers & Shopping Guide 2026',
-  description: 'Find Apple products in Bahrain. Complete guide to Apple authorized resellers including iMachines, iWorld, Virgin Megastore & Lulu. iPhone, MacBook, iPad locations.',
+  description: 'Find Apple products in Bahrain. Complete guide to Apple authorized resellers including iMachines, iWorld, Virgin Megastore & Lulu. iMacBook, iPad locations.',
   keywords: 'Apple Store Bahrain, Apple authorized reseller Bahrain, buy iPhone Bahrain, MacBook Bahrain, iPad Bahrain, iMachines Bahrain, iWorld Bahrain, Apple products Bahrain',
   openGraph: {
     title: 'Apple Store Bahrain - Authorized Resellers & Shopping Guide 2026',
@@ -28,7 +28,6 @@ const storeLocations = [
     mall: 'City Centre Bahrain',
     address: 'City Centre Bahrain, Seef District, Manama',
     floor: 'Ground Floor',
-    phone: '+973 1758 3000',
     website: 'https://imachines.bh',
     hours: 'Sun-Wed: 10:00 AM - 10:00 PM, Thu-Sat: 10:00 AM - 12:00 AM',
     products: ['iPhone', 'MacBook', 'iPad', 'Apple Watch', 'AirPods', 'Accessories', 'AppleCare'],
@@ -42,7 +41,6 @@ const storeLocations = [
     mall: 'Seef Mall',
     address: 'Seef Mall, Seef District, Manama',
     floor: 'Ground Floor',
-    phone: '+973 1758 3000',
     website: 'https://imachines.bh',
     hours: 'Sun-Thu: 10:00 AM - 10:00 PM, Fri-Sat: 10:00 AM - 11:00 PM',
     products: ['iPhone', 'MacBook', 'iPad', 'Apple Watch', 'AirPods', 'Accessories'],
@@ -56,7 +54,6 @@ const storeLocations = [
     mall: 'The Avenues Bahrain',
     address: 'The Avenues, Bahrain Bay, Manama',
     floor: 'Ground Floor',
-    phone: '+973 1600 0900',
     website: 'https://iworld.bh',
     hours: 'Sun-Wed: 10:00 AM - 10:00 PM, Thu-Sat: 10:00 AM - 12:00 AM',
     products: ['iPhone', 'MacBook', 'iPad', 'Apple Watch', 'AirPods', 'Accessories'],
@@ -70,7 +67,6 @@ const storeLocations = [
     mall: 'City Centre Bahrain',
     address: 'City Centre Bahrain, Seef District, Manama',
     floor: 'Ground Floor',
-    phone: '+973 1600 0900',
     website: 'https://iworld.bh',
     hours: 'Sun-Wed: 10:00 AM - 10:00 PM, Thu-Sat: 10:00 AM - 12:00 AM',
     products: ['iPhone', 'MacBook', 'iPad', 'Apple Watch', 'AirPods', 'Accessories'],
@@ -181,7 +177,7 @@ export default function AppleBahrainPage() {
               <span className="text-gray-400"> in Bahrain</span>
             </h1>
             <p className="text-xl text-gray-400 max-w-2xl mx-auto">
-              Your complete guide to Apple authorized resellers in Bahrain. Find iPhone, MacBook, iPad and more at iMachines, iWorld, and other retailers.
+              Your complete guide to Apple authorized resellers in Bahrain. Find iMacBook, iPad and more at iMachines, iWorld, and other retailers.
             </p>
           </div>
           
@@ -235,12 +231,6 @@ export default function AppleBahrainPage() {
                         <Clock className="w-4 h-4 text-gray-500" />
                         {store.hours}
                       </div>
-                      {store.phone && (
-                        <div className="flex items-center gap-2">
-                          <Phone className="w-4 h-4 text-gray-500" />
-                          {store.phone}
-                        </div>
-                      )}
                     </div>
 
                     <div className="flex flex-wrap gap-2 mb-4">

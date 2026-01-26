@@ -1,7 +1,7 @@
 import { Metadata } from 'next';
 import Link from 'next/link';
 import { 
-  MapPin, Clock, Phone, ExternalLink, 
+  MapPin, Clock, ExternalLink, 
   Sparkles, ShoppingBag, Star, Info, Home
 } from 'lucide-react';
 import BreadcrumbSchema from '@/components/SEO/BreadcrumbSchema';
@@ -26,7 +26,6 @@ const storeInfo = {
   name: 'IKEA Bahrain',
   address: 'IKEA, Sitra, Kingdom of Bahrain',
   fullAddress: 'Building 2101, Road 5228, Block 952, Sitra, Bahrain',
-  phone: '8000 1120',
   hours: 'Daily: 10:00 AM - 10:00 PM',
   ramadanHours: 'Ramadan hours may vary',
   mapsLink: 'https://www.google.com/maps/search/IKEA+Bahrain+Sitra',
@@ -193,10 +192,6 @@ export default function IKEABahrainPage() {
                   <p className="flex items-center gap-2 text-yellow-400 text-xs">
                     <Info className="w-4 h-4" />
                     {storeInfo.ramadanHours}
-                  </p>
-                  <p className="flex items-center gap-2 text-gray-300">
-                    <Phone className="w-4 h-4 text-gray-500" />
-                    {storeInfo.phone}
                   </p>
                 </div>
 
@@ -381,7 +376,6 @@ export default function IKEABahrainPage() {
               addressLocality: 'Sitra',
               addressCountry: 'BH',
             },
-            telephone: '8000 1120',
             openingHours: 'Mo-Su 10:00-22:00',
             url: 'https://www.ikea.com/bh/',
           }),

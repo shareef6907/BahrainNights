@@ -1,7 +1,7 @@
 import { Metadata } from 'next';
 import Link from 'next/link';
 import { 
-  MapPin, Clock, Phone, ExternalLink, 
+  MapPin, Clock, ExternalLink, 
   Sparkles, ShoppingBag, Star, Info
 } from 'lucide-react';
 import BreadcrumbSchema from '@/components/SEO/BreadcrumbSchema';
@@ -28,7 +28,6 @@ const storeLocations = [
     mall: 'Moda Mall (Bahrain World Trade Center)',
     address: 'Bahrain World Trade Center, King Faisal Highway, Manama',
     floor: 'Ground Floor',
-    phone: '+973 1753 5500',
     hours: 'Sun-Thu: 10:00 AM - 10:00 PM, Fri-Sat: 10:00 AM - 11:00 PM',
     products: ['Handbags', 'Leather Goods', 'Ready-to-Wear', 'Shoes', 'Accessories', 'Eyewear', 'Watches', 'Jewelry', 'Fragrances'],
     features: ['Full collection', 'Exclusive items', 'Personal shopping'],
@@ -40,7 +39,6 @@ const storeLocations = [
     mall: 'City Centre Bahrain',
     address: 'City Centre Bahrain, Seef District, Manama',
     floor: 'Ground Floor',
-    phone: '+973 1717 2000',
     hours: 'Sun-Wed: 10:00 AM - 10:00 PM, Thu-Sat: 10:00 AM - 12:00 AM',
     products: ['Handbags', 'Leather Goods', 'Shoes', 'Accessories', 'Selected Ready-to-Wear'],
     features: ['Convenient location', 'Good selection', 'Extended weekend hours'],
@@ -196,12 +194,6 @@ export default function GucciBahrainPage() {
                         <Clock className="w-4 h-4 text-gray-500" />
                         {store.hours}
                       </p>
-                      {store.phone && (
-                        <p className="flex items-center gap-2 text-gray-300">
-                          <Phone className="w-4 h-4 text-gray-500" />
-                          {store.phone}
-                        </p>
-                      )}
                     </div>
 
                     <div className="mb-4">

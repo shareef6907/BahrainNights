@@ -1,7 +1,7 @@
 import { Metadata } from 'next';
 import Link from 'next/link';
 import { 
-  MapPin, Clock, Phone, ExternalLink, 
+  MapPin, Clock, ExternalLink, 
   Sparkles, ShoppingBag, Star, Info, Users
 } from 'lucide-react';
 import BreadcrumbSchema from '@/components/SEO/BreadcrumbSchema';
@@ -28,7 +28,6 @@ const storeLocations = [
     mall: 'City Centre Bahrain',
     address: 'City Centre Bahrain, Seef District, Manama',
     floor: 'Ground Floor & First Floor',
-    phone: '+973 1717 8200',
     hours: 'Sun-Wed: 10:00 AM - 10:00 PM, Thu-Sat: 10:00 AM - 12:00 AM',
     products: ['Women\'s Fashion', 'Men\'s Fashion', 'Kids\' Fashion', 'H&M Home', 'Divided', 'Sport'],
     features: ['Largest store in Bahrain', 'Two floors', 'Full collection', 'H&M Home section'],
@@ -40,7 +39,6 @@ const storeLocations = [
     mall: 'Seef Mall',
     address: 'Seef Mall, Seef District, Manama',
     floor: 'Ground Floor',
-    phone: '+973 1758 1100',
     hours: 'Sun-Thu: 10:00 AM - 10:00 PM, Fri-Sat: 10:00 AM - 11:00 PM',
     products: ['Women\'s Fashion', 'Men\'s Fashion', 'Kids\' Fashion', 'Divided'],
     features: ['Convenient location', 'Good selection'],
@@ -52,7 +50,6 @@ const storeLocations = [
     mall: 'The Avenues Bahrain',
     address: 'The Avenues, Bahrain Bay, Manama',
     floor: 'Ground Floor',
-    phone: '+973 1711 6100',
     hours: 'Sun-Wed: 10:00 AM - 10:00 PM, Thu-Sat: 10:00 AM - 12:00 AM',
     products: ['Women\'s Fashion', 'Men\'s Fashion', 'Kids\' Fashion', 'Divided', 'Sport'],
     features: ['Modern store', 'Full collection'],

@@ -1,7 +1,7 @@
 import { Metadata } from 'next';
 import Link from 'next/link';
 import { 
-  MapPin, Clock, Phone, ExternalLink, 
+  MapPin, Clock, ExternalLink, 
   Sparkles, ShoppingBag, Star, Info
 } from 'lucide-react';
 import BreadcrumbSchema from '@/components/SEO/BreadcrumbSchema';
@@ -28,7 +28,6 @@ const storeLocations = [
     mall: 'City Centre Bahrain',
     address: 'City Centre Bahrain, Seef District, Manama',
     floor: 'Ground Floor',
-    phone: '+973 1717 8400',
     hours: 'Sun-Wed: 10:00 AM - 10:00 PM, Thu-Sat: 10:00 AM - 12:00 AM',
     products: ['Running Shoes', 'Basketball', 'Football', 'Training', 'Lifestyle', 'Jordan', 'Apparel', 'Kids'],
     features: ['Largest Nike store', 'Jordan section', 'Nike by You customization'],
@@ -40,7 +39,6 @@ const storeLocations = [
     mall: 'Seef Mall',
     address: 'Seef Mall, Seef District, Manama',
     floor: 'Ground Floor',
-    phone: '+973 1758 1200',
     hours: 'Sun-Thu: 10:00 AM - 10:00 PM, Fri-Sat: 10:00 AM - 11:00 PM',
     products: ['Running Shoes', 'Training', 'Lifestyle', 'Apparel', 'Kids'],
     features: ['Good selection', 'Popular location'],
