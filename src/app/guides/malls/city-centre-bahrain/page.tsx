@@ -29,7 +29,7 @@ const mallInfo = {
   address: 'Road 2835, Block 428, Seef District, Manama, Bahrain',
   phone: '+973 17 177 177',
   website: 'https://www.citycentrebahrain.com',
-  mapsLink: 'https://www.google.com/maps/place/City+Centre+Bahrain',
+  mapsLink: 'https://www.google.com/maps/dir/?api=1&destination=City+Centre+Bahrain',
   hours: {
     regular: 'Sat-Wed: 10:00 AM - 10:00 PM',
     weekend: 'Thu-Fri: 10:00 AM - 12:00 AM',

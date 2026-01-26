@@ -27,9 +27,9 @@ const mallInfo = {
   name: 'Bahrain Mall',
   tagline: 'Family-Friendly Shopping & Entertainment',
   address: 'Road 3804, Block 338, Sanabis, Kingdom of Bahrain',
-  phone: '+973 17 554 444',
+  phone: '+973 1755 8101',
   website: 'https://www.bahrainmall.com.bh',
-  mapsLink: 'https://www.google.com/maps/place/Bahrain+Mall',
+  mapsLink: 'https://www.google.com/maps/dir/?api=1&destination=Bahrain+Mall+Bahrain',
   hours: {
     regular: 'Sat-Wed: 9:00 AM - 10:00 PM',
     weekend: 'Thu-Fri: 9:00 AM - 11:00 PM',

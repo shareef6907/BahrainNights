@@ -53,8 +53,8 @@ export default function ExploreGrid({
 
   // Determine the correct URL path based on category
   const getItemUrl = (item: ExploreItem) => {
-    // Kids/Family attractions use the /attractions/ route
-    if (category === 'kids') {
+    // Kids/Family attractions and Tours use the /attractions/ route
+    if (category === 'kids' || category === 'tours') {
       return `/attractions/${item.slug}`;
     }
     // Other categories use /explore/{category}/ route

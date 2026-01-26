@@ -29,7 +29,7 @@ const mallInfo = {
   address: 'Bahrain Bay, Manama, Kingdom of Bahrain',
   phone: '+973 77 123 456',
   website: 'https://www.theavenuesbahrain.com',
-  mapsLink: 'https://www.google.com/maps/place/The+Avenues+Bahrain',
+  mapsLink: 'https://www.google.com/maps/dir/?api=1&destination=The+Avenues+Bahrain',
   hours: {
     regular: 'Sat-Wed: 10:00 AM - 10:00 PM',
     weekend: 'Thu-Fri: 10:00 AM - 12:00 AM',

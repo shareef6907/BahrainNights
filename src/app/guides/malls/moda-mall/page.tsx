@@ -29,7 +29,7 @@ const mallInfo = {
   address: 'Bahrain World Trade Center, King Faisal Highway, Manama, Bahrain',
   phone: '+973 17 531 166',
   website: 'https://www.modamall.com.bh',
-  mapsLink: 'https://www.google.com/maps/place/Moda+Mall+Bahrain',
+  mapsLink: 'https://www.google.com/maps/dir/?api=1&destination=Moda+Mall+Bahrain',
   hours: {
     regular: 'Sat-Thu: 10:00 AM - 10:00 PM',
     friday: 'Fri: 2:00 PM - 10:00 PM',

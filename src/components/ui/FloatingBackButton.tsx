@@ -32,12 +32,12 @@ export default function FloatingBackButton() {
   return (
     <button
       onClick={handleBack}
-      className="fixed top-4 left-4 z-50 lg:hidden
+      className="fixed top-20 left-4 z-[60] lg:hidden
         w-10 h-10 rounded-full
-        bg-black/30 backdrop-blur-sm
+        bg-black/60 backdrop-blur-md border border-white/20
         flex items-center justify-center
-        hover:bg-black/50 active:scale-95
-        transition-all duration-200"
+        hover:bg-black/80 active:scale-95
+        transition-all duration-200 shadow-lg"
       aria-label="Go back"
     >
       <ArrowLeft className="w-5 h-5 text-white" />
