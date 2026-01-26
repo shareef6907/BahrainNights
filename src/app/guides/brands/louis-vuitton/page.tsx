@@ -147,7 +147,7 @@ export default function LouisVuittonBahrainPage() {
             {[
               { label: 'Stores', value: '3', icon: ShoppingBag },
               { label: 'Flagship', value: 'Moda Mall', icon: Star },
-              { label: 'Also At', value: 'City Centre, Marassi', icon: MapPin },
+              { label: 'Locations', value: '3 Stores', icon: MapPin },
             ].map((stat) => (
               <div key={stat.label} className="bg-white/5 backdrop-blur-sm rounded-xl p-4 text-center">
                 <stat.icon className="w-6 h-6 mx-auto mb-2 text-amber-400" />
