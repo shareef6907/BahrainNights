@@ -251,14 +251,6 @@ export default function SouqAlBarahaPage() {
                   >
                     Get Directions
                   </a>
-                  <a 
-                    href={souqInfo.website}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="px-4 py-2 bg-white/10 hover:bg-white/20 rounded-lg transition-colors text-sm flex items-center gap-1"
-                  >
-                    Diyar Website <ExternalLink className="w-3 h-3" />
-                  </a>
                 </div>
               </div>
             </div>

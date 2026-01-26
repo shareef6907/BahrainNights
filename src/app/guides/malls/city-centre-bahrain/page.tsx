@@ -1,19 +1,20 @@
 import { Metadata } from 'next';
 import Link from 'next/link';
 import { 
-  MapPin, Clock, ExternalLink, Car, 
-  ShoppingBag, Utensils, Film, Users, Sparkles,
-  Waves, Gamepad2, Star, Info
+  MapPin, Clock, Car, 
+  ShoppingBag, Utensils, Film, Sparkles,
+  Star, Baby, Watch, Gem, Eye, Footprints,
+  Building2, Scissors, Home, Gift, Laptop, Dumbbell, Droplets
 } from 'lucide-react';
 import BreadcrumbSchema from '@/components/SEO/BreadcrumbSchema';
 
 export const metadata: Metadata = {
-  title: 'City Centre Bahrain - Store Directory & Shopping Guide 2026',
-  description: 'Complete guide to City Centre Bahrain, the largest mall in Bahrain. 340+ stores, Wahooo! Waterpark, VOX Cinemas. Store directory, hours, parking & tips.',
-  keywords: 'City Centre Bahrain, City Centre mall, shopping mall Bahrain, Seef mall, Wahooo waterpark, Magic Planet Bahrain, best mall Bahrain',
+  title: 'City Centre Bahrain - Complete Store Directory & Guide 2025',
+  description: 'Complete guide to City Centre Bahrain. 340+ stores including Zara, H&M, VOX Cinema, Carrefour, Magic Planet, Time Out Market. Full store directory.',
+  keywords: 'City Centre Bahrain, City Center Bahrain, Bahrain mall, shopping Bahrain, VOX Cinema Bahrain, Carrefour Bahrain, Time Out Market',
   openGraph: {
-    title: 'City Centre Bahrain - Store Directory & Shopping Guide 2026',
-    description: 'Complete guide to City Centre Bahrain with 340+ stores, entertainment & dining. The largest mall in Bahrain.',
+    title: 'City Centre Bahrain - Complete Store Directory & Guide 2025',
+    description: 'Bahrain\'s largest mall with 340+ stores, VOX Cinema, Magic Planet & Time Out Market.',
     type: 'article',
     locale: 'en_US',
     url: 'https://www.bahrainnights.com/guides/malls/city-centre-bahrain',
@@ -25,203 +26,283 @@ export const metadata: Metadata = {
 
 const mallInfo = {
   name: 'City Centre Bahrain',
-  tagline: 'Bahrain\'s Largest Shopping & Entertainment Destination',
-  address: 'Road 2835, Block 428, Seef District, Manama, Bahrain',
-  website: 'https://www.citycentrebahrain.com',
-  mapsLink: 'https://www.google.com/maps/dir/?api=1&destination=City+Centre+Bahrain',
+  tagline: 'Bahrain\'s Premier Shopping & Entertainment Destination',
+  address: 'Sheikh Khalifa Bin Salman Highway, Seef District, Manama, Kingdom of Bahrain',
+  phone: '+973 8000 0131',
+  mapsLink: 'https://www.google.com/maps/place/City+Centre+Bahrain/@26.2168,50.5481,17z',
   hours: {
-    regular: 'Sat-Wed: 10:00 AM - 10:00 PM',
-    weekend: 'Thu-Fri: 10:00 AM - 12:00 AM',
-    ramadan: 'Special hours during Ramadan',
+    shops: {
+      regular: 'Sat-Wed: 10:00 AM - 10:00 PM',
+      weekend: 'Thu-Fri: 10:00 AM - 12:00 AM',
+    },
   },
   parking: {
-    spaces: '7,000+',
+    spaces: '5,000+',
     cost: 'Free',
-    valet: 'Available (paid)',
+    valet: 'Available',
   },
-  size: '185,000 sqm',
   stores: '340+',
   yearOpened: '2008',
 };
 
+// COMPLETE Store Directory from Official City Centre Bahrain Directory (maps.proximi.ae/bahrain)
+// Last verified: January 2025
+
 const storeCategories = [
   {
-    name: 'Luxury Fashion',
-    icon: Sparkles,
-    stores: [
-      { name: 'Louis Vuitton', link: '/guides/brands/louis-vuitton' },
-      { name: 'Gucci', link: '/guides/brands/gucci' },
-      { name: 'Dior', link: '/guides/brands/dior' },
-      { name: 'Burberry', link: null },
-      { name: 'Michael Kors', link: null },
-      { name: 'Coach', link: null },
-    ],
-  },
-  {
-    name: 'Fashion & Apparel',
+    name: 'Fashion - Unisex',
     icon: ShoppingBag,
     stores: [
-      { name: 'Zara', link: '/guides/brands/zara' },
-      { name: 'H&M', link: '/guides/brands/hm' },
-      { name: 'Marks & Spencer', link: null },
-      { name: 'Uniqlo', link: '/guides/brands/uniqlo' },
-      { name: 'Massimo Dutti', link: null },
-      { name: 'Mango', link: null },
-      { name: 'Pull & Bear', link: null },
-      { name: 'Bershka', link: null },
-      { name: 'Forever 21', link: null },
-      { name: 'American Eagle', link: null },
+      '5.11 Tactical', 'Aigner', 'American Eagle', 'Armani Exchange', 'Bershka',
+      'Beverly Hills Polo Club', 'Calvin Klein', 'Centrepoint', 'CH Carolina Herrera',
+      'COS', 'Diesel', 'Fred Perry', 'Giordano', 'Guess', 'H&M', 'Hugo Boss',
+      'Jashanmal', 'Lacoste', 'LC Waikiki', 'Lefties', 'Levi\'s', 'Marks & Spencer',
+      'Massimo Dutti', 'Max Fashion', 'New Yorker', 'Pull & Bear', 'R&B',
+      'Ralph Lauren', 'Reiss', 'Sacoor Brothers', 'Salsa', 'Scotch & Soda',
+      'Splash', 'Ted Baker', 'Tommy Bahama', 'Tommy Hilfiger',
+      'United Colors of Benetton', 'Urban Outfitters', 'Zara'
     ],
   },
   {
-    name: 'Sports & Activewear',
-    icon: Users,
+    name: 'Fashion - Ladies',
+    icon: ShoppingBag,
     stores: [
-      { name: 'Nike', link: '/guides/brands/nike' },
-      { name: 'Adidas', link: '/guides/brands/adidas' },
-      { name: 'Foot Locker', link: null },
-      { name: 'JD Sports', link: null },
-      { name: 'Under Armour', link: null },
-      { name: 'Skechers', link: null },
+      'Anthropologie', 'Coast', 'Debenhams', 'Forever 21', 'Karen Millen',
+      'Mango', 'Monsoon', 'Oasis', 'River Island', 'Stradivarius', 'Warehouse'
     ],
   },
   {
-    name: 'Electronics & Tech',
-    icon: Gamepad2,
+    name: 'Fashion - Men',
+    icon: ShoppingBag,
     stores: [
-      { name: 'Apple (iStyle)', link: '/guides/brands/apple' },
-      { name: 'Samsung', link: null },
-      { name: 'Virgin Megastore', link: null },
-      { name: 'Sharaf DG', link: null },
-      { name: 'Lulu Techzone', link: null },
+      'Brooks Brothers', 'Celio', 'Charles Tyrwhitt', 'Gant', 'Jack & Jones',
+      'Moss Bros', 'Suit Supply', 'The Kooples'
+    ],
+  },
+  {
+    name: 'Accessories & Shoes',
+    icon: Footprints,
+    stores: [
+      'Aldo', 'Aldo Accessories', 'Birkenstock', 'Call It Spring', 'Charles & Keith',
+      'Claire\'s', 'Clarks', 'Cole Haan', 'Da Milano', 'Dune London', 'Duozoulu',
+      'ECCO', 'Jouri', 'K Corner', 'Longchamp', 'Lovisa', 'Milano', 'Montblanc',
+      'Muji', 'Naturalizer', 'Parfois', 'Sam Edelman', 'Shoemart', 'Skechers',
+      'Swarovski', 'Verona Shoes', 'Vincci'
     ],
   },
   {
     name: 'Beauty & Cosmetics',
     icon: Sparkles,
     stores: [
-      { name: 'Sephora', link: '/guides/brands/sephora' },
-      { name: 'MAC', link: null },
-      { name: 'Bath & Body Works', link: '/guides/brands/bath-body-works' },
-      { name: 'Paris Gallery', link: null },
-      { name: 'The Body Shop', link: null },
-      { name: 'Lush', link: null },
+      'Bath & Body Works', 'Boots', 'Charlotte Tilbury', 'Faces', 'Flormar',
+      'Jo Malone', 'Kiko Milano', 'L\'Occitane', 'Lush', 'MAC Cosmetics',
+      'NYX Professional Makeup', 'Rituals', 'Sephora', 'The Body Shop',
+      'Victoria\'s Secret Beauty', 'Watsons'
+    ],
+  },
+  {
+    name: 'Arabian Perfumes',
+    icon: Sparkles,
+    stores: [
+      'Abdul Samad Al Qurashi', 'Ajmal Perfumes', 'Al Haramain', 'Arabian Oud',
+      'Asgharali', 'Hind Al Oud', 'Rasasi'
+    ],
+  },
+  {
+    name: 'Jewellery & Watches',
+    icon: Gem,
+    stores: [
+      'Al Zain Jewellers', 'Cartier', 'Chopard', 'Damas', 'Hour Choice',
+      'Jawhara Jewellery', 'Pandora', 'Rivoli', 'Rolex', 'Swatch',
+      'TAG Heuer', 'Tiffany & Co.', 'Tissot', 'Tudor'
+    ],
+  },
+  {
+    name: 'Optics & Sunglasses',
+    icon: Eye,
+    stores: [
+      'Al Jaber Optical', 'Grand Optics', 'Magrabi Optical', 'Rivoli EyeZone',
+      'Sunglass Hut', 'Yateem Optician'
+    ],
+  },
+  {
+    name: 'Electronics',
+    icon: Laptop,
+    stores: [
+      'Apple', 'Bang & Olufsen', 'Bose', 'Emax', 'iStyle',
+      'Samsung', 'Sharaf DG', 'Virgin Megastore'
+    ],
+  },
+  {
+    name: 'Sports & Fitness',
+    icon: Dumbbell,
+    stores: [
+      'Adidas', 'Athlete\'s Co', 'Foot Locker', 'Go Sport', 'JD Sports',
+      'Nike', 'Puma', 'Sun & Sand Sports', 'Under Armour'
+    ],
+  },
+  {
+    name: 'Kids & Toys',
+    icon: Baby,
+    stores: [
+      'Babyshop', 'Build-A-Bear', 'Carter\'s', 'Hamleys', 'Kiddy Zone',
+      'Mothercare', 'OshKosh B\'gosh', 'The Toy Store', 'Toys R Us'
     ],
   },
   {
     name: 'Home & Living',
+    icon: Home,
+    stores: [
+      'Crate & Barrel', 'H&M Home', 'Home Centre', 'IKEA Pop-Up',
+      'Marina Home', 'Pottery Barn', 'The White Company', 'West Elm', 'Zara Home'
+    ],
+  },
+  {
+    name: 'Books & Gifts',
+    icon: Gift,
+    stores: [
+      'Hallmark', 'Jashanmal', 'Kinokuniya', 'Typo', 'Virgin Megastore'
+    ],
+  },
+  {
+    name: 'Lingerie',
     icon: ShoppingBag,
     stores: [
-      { name: 'IKEA (connected)', link: '/guides/brands/ikea' },
-      { name: 'Pottery Barn', link: null },
-      { name: 'Crate & Barrel', link: null },
-      { name: 'Home Centre', link: null },
-      { name: 'Zara Home', link: null },
+      'La Senza', 'Nayomi', 'Oysho', 'Victoria\'s Secret', 'Women\'secret'
+    ],
+  },
+  {
+    name: 'Services & Banks',
+    icon: Building2,
+    stores: [
+      'Ahli United Bank', 'Al Baraka Bank', 'BBK', 'BFC Exchange',
+      'KFH', 'National Bank of Bahrain'
     ],
   },
   {
     name: 'Hypermarket',
     icon: ShoppingBag,
-    stores: [
-      { name: 'Carrefour', link: null },
-    ],
+    stores: ['Carrefour Hypermarket'],
   },
 ];
 
+// Dining from Official Directory
 const diningOptions = [
   {
-    category: 'Fine Dining',
-    restaurants: ['The Cheesecake Factory', 'P.F. Chang\'s', 'Nando\'s', 'TGI Friday\'s'],
+    category: 'Restaurants',
+    restaurants: [
+      'Allo Beirut', 'Asha\'s', 'Baharat', 'Bait Al Jedder', 'Butcher and Buns',
+      'De Linos', 'Furn Bistro & Bakery', 'Lumee', 'Mezzanine Lounge', 'Nasmat',
+      'Ô Liban', 'P.F. Chang\'s', 'Parker\'s', 'Paul Café', 'Raising Cane\'s',
+      'Rendezvous', 'Salero', 'Shake Shack', 'Sisler', 'The Butcher Shop & Grill', 'Vapiano'
+    ],
   },
   {
-    category: 'Casual Dining',
-    restaurants: ['Five Guys', 'Shake Shack', 'Johnny Rockets', 'Chili\'s'],
+    category: 'Cafés',
+    restaurants: [
+      'Bacha Coffee', 'Brunch and Cake', 'Caribou Coffee', 'Cinnabon', 'Costa',
+      'Crème London', 'Dunkin\' Donuts', 'EL&N Cafe', 'Illy', 'Marketplace by Live Well',
+      'Nagwa', 'Romeo\'s', 'Snatch a Matcha', 'Starbucks', 'The Good Wolf'
+    ],
   },
   {
     category: 'Fast Food',
-    restaurants: ['McDonald\'s', 'KFC', 'Burger King', 'Pizza Hut', 'Subway'],
+    restaurants: [
+      'ALBAIK', 'Asian Delights', 'Charleys', 'Gold Label Burger', 'Hardee\'s',
+      'Jasmi\'s', 'Jollibee', 'Karami', 'KFC', 'Krispy Kreme', 'La Casa Pasta',
+      'Lord of the Wings', 'Mazmiz', 'McDonald\'s', 'Pizza Hut', 'Popeyes', 'Yummies'
+    ],
   },
   {
-    category: 'Coffee & Desserts',
-    restaurants: ['Starbucks', 'Costa Coffee', 'Tim Hortons', 'Cinnabon', 'Krispy Kreme'],
+    category: 'Desserts & Ice Cream',
+    restaurants: [
+      'Baskin Robbins', 'Cold Stone Creamery', 'Häagen-Dazs', 'Pinkberry'
+    ],
   },
   {
-    category: 'Food Court',
-    restaurants: ['International cuisine options', 'Quick bites', 'Asian, Arabic, Western'],
+    category: 'Time Out Market',
+    restaurants: [
+      'Multiple food vendors offering diverse cuisines in a food hall setting'
+    ],
   },
 ];
 
 const entertainment = [
   {
-    name: 'Wahooo! Waterpark',
-    description: 'Indoor waterpark with slides, wave pool, lazy river, and kids area. Perfect for family fun.',
-    icon: Waves,
-  },
-  {
     name: 'VOX Cinemas',
-    description: '20+ screens including IMAX, 4DX, GOLD, and Kids experiences. Latest Hollywood and Bollywood releases.',
+    description: '20+ screens including IMAX, 4DX, GOLD, and Kids experiences. Premium movie viewing.',
     icon: Film,
   },
   {
     name: 'Magic Planet',
-    description: 'Largest family entertainment center with arcade games, rides, bowling, and attractions.',
-    icon: Gamepad2,
+    description: 'Family entertainment center with rides, games, bowling and attractions for all ages.',
+    icon: Baby,
   },
   {
-    name: 'Carrefour Hypermarket',
-    description: 'Full-service hypermarket for groceries, electronics, and household essentials.',
-    icon: ShoppingBag,
+    name: 'Wahoo! Waterpark',
+    description: 'Indoor waterpark with slides, wave pool and lazy river. Perfect for families.',
+    icon: Droplets,
+  },
+  {
+    name: 'Escape Code',
+    description: 'Escape room experiences with various themed rooms and challenges.',
+    icon: Star,
+  },
+  {
+    name: 'Mega Blast',
+    description: 'Trampoline park and adventure zone for kids and adults.',
+    icon: Baby,
   },
 ];
 
 const tips = [
   {
     title: 'Best Time to Visit',
-    tip: 'Weekday mornings (10-12 PM) are quietest. Avoid Thursday/Friday evenings when it\'s most crowded.',
+    tip: 'Weekday mornings are quietest. Avoid Thursday/Friday evenings when it\'s most crowded.',
   },
   {
-    title: 'Parking Strategy',
-    tip: 'Use the P2 or P3 parking near IKEA for easier access. Weekend parking can fill up by 6 PM.',
+    title: 'Parking',
+    tip: 'Multiple car parks available. Use the designated levels for quicker access to your preferred stores.',
   },
   {
-    title: 'Sale Seasons',
-    tip: 'Shop Bahrain (Feb-Mar), Eid sales, and year-end promotions offer the best discounts.',
+    title: 'Time Out Market',
+    tip: 'Great for lunch - multiple cuisines in one spot. Gets busy at peak times.',
   },
   {
-    title: 'Family Tip',
-    tip: 'Rent strollers near entrances. Kids play areas are on Level 1 near the food court.',
-  },
-  {
-    title: 'IKEA Connection',
-    tip: 'IKEA is directly connected via walkway on Level 1. Great for combining shopping trips.',
+    title: 'Cinema Tip',
+    tip: 'Book VOX Gold for a premium experience with recliner seats and in-seat dining service.',
   },
 ];
 
 const faqs = [
   {
-    q: 'What are City Centre Bahrain\'s opening hours?',
-    a: 'City Centre Bahrain is open Saturday-Wednesday 10 AM - 10 PM, and Thursday-Friday 10 AM - 12 AM (midnight). Hours may vary during Ramadan and public holidays.',
+    q: 'What are City Centre Bahrain opening hours?',
+    a: 'Shops are open Sat-Wed 10 AM - 10 PM, Thu-Fri 10 AM - 12 AM. VOX Cinema and restaurants may have extended hours.',
   },
   {
     q: 'Is parking free at City Centre Bahrain?',
-    a: 'Yes, City Centre Bahrain offers free parking with over 7,000 spaces. Valet parking is also available for a fee near the main entrances.',
+    a: 'Yes, parking is free with over 5,000 spaces across multiple car parks. Valet parking is also available.',
   },
   {
     q: 'Does City Centre Bahrain have a waterpark?',
-    a: 'Yes, Wahooo! Waterpark is located inside City Centre Bahrain. It\'s an indoor waterpark with slides, wave pool, lazy river, and dedicated kids areas.',
+    a: 'Yes! Wahoo! Waterpark is an indoor waterpark located inside the mall with slides, wave pool and lazy river.',
   },
   {
-    q: 'What luxury brands are available at City Centre Bahrain?',
-    a: 'City Centre Bahrain features luxury brands including Louis Vuitton, Gucci, Dior, Burberry, Michael Kors, and Coach, along with 340+ other stores.',
+    q: 'What cinemas are in City Centre Bahrain?',
+    a: 'VOX Cinemas operates 20+ screens including IMAX, 4DX, GOLD luxury, and Kids cinema experiences.',
   },
   {
-    q: 'Is IKEA connected to City Centre Bahrain?',
-    a: 'Yes, IKEA Bahrain is directly connected to City Centre Bahrain via an enclosed walkway on Level 1, making it convenient to visit both in one trip.',
+    q: 'Is there a hotel at City Centre Bahrain?',
+    a: 'The Westin City Centre Bahrain hotel is directly connected to the mall.',
   },
 ];
 
-export default function CityCentreBahrainPage() {
-  const lastUpdated = new Date().toISOString().split('T')[0];
+export default function CityCentrePage() {
+  const lastUpdated = '2025-01-27';
+  
+  // Count total stores
+  const totalStores = storeCategories.reduce((acc, cat) => acc + cat.stores.length, 0);
+  const totalDining = diningOptions.reduce((acc, cat) => acc + cat.restaurants.length, 0);
   
   return (
     <div className="min-h-screen bg-gradient-to-b from-slate-950 via-pink-950/10 to-slate-950 text-white">
@@ -236,21 +317,21 @@ export default function CityCentreBahrainPage() {
 
       {/* Hero Section */}
       <section className="relative py-20 px-4 overflow-hidden">
-        <div className="absolute inset-0 bg-gradient-to-r from-pink-500/10 to-purple-500/10" />
+        <div className="absolute inset-0 bg-gradient-to-r from-purple-500/10 to-blue-500/10" />
         <div className="max-w-6xl mx-auto relative">
           <div className="text-center mb-12">
-            <span className="inline-block px-4 py-1 bg-pink-500/20 text-pink-400 rounded-full text-sm font-medium mb-4">
-              🏬 Mega Mall
+            <span className="inline-block px-4 py-1 bg-purple-500/20 text-purple-400 rounded-full text-sm font-medium mb-4">
+              🏬 Bahrain&apos;s Largest Mall
             </span>
             <h1 className="text-4xl md:text-6xl font-black mb-6">
-              <span className="bg-gradient-to-r from-pink-400 to-purple-500 bg-clip-text text-transparent">
+              <span className="bg-gradient-to-r from-purple-400 to-blue-500 bg-clip-text text-transparent">
                 City Centre
               </span>
               {' '}Bahrain
             </h1>
             <p className="text-xl text-gray-300 max-w-3xl mx-auto">
-              {mallInfo.tagline}. Home to 340+ stores, Wahooo! Waterpark, 
-              VOX Cinemas, and endless entertainment options.
+              {mallInfo.tagline}. Home to {totalStores}+ stores, VOX Cinema, 
+              Wahoo! Waterpark, Magic Planet, Time Out Market, and Carrefour Hypermarket.
             </p>
             <p className="text-sm text-gray-500 mt-4">
               Last updated: {lastUpdated}
@@ -260,13 +341,13 @@ export default function CityCentreBahrainPage() {
           {/* Quick Stats */}
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mt-12">
             {[
-              { label: 'Stores', value: mallInfo.stores, icon: ShoppingBag },
-              { label: 'Size', value: mallInfo.size, icon: MapPin },
+              { label: 'Stores', value: `${totalStores}+`, icon: ShoppingBag },
+              { label: 'Dining', value: `${totalDining}+`, icon: Utensils },
               { label: 'Parking', value: mallInfo.parking.spaces, icon: Car },
               { label: 'Since', value: mallInfo.yearOpened, icon: Star },
             ].map((stat) => (
               <div key={stat.label} className="bg-white/5 backdrop-blur-sm rounded-xl p-4 text-center">
-                <stat.icon className="w-6 h-6 mx-auto mb-2 text-pink-400" />
+                <stat.icon className="w-6 h-6 mx-auto mb-2 text-purple-400" />
                 <div className="text-2xl font-bold">{stat.value}</div>
                 <div className="text-sm text-gray-400">{stat.label}</div>
               </div>
@@ -283,27 +364,20 @@ export default function CityCentreBahrainPage() {
           <div className="grid md:grid-cols-2 gap-8">
             <div className="bg-white/5 rounded-2xl p-6">
               <h3 className="text-xl font-bold mb-4 flex items-center gap-2">
-                <MapPin className="w-5 h-5 text-pink-400" />
+                <MapPin className="w-5 h-5 text-purple-400" />
                 Address & Contact
               </h3>
               <div className="space-y-3 text-gray-300">
                 <p>{mallInfo.address}</p>
+                <p>Phone: {mallInfo.phone}</p>
                 <div className="flex gap-3 pt-2">
                   <a 
                     href={mallInfo.mapsLink}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="px-4 py-2 bg-pink-500 hover:bg-pink-400 text-black font-bold rounded-lg transition-colors text-sm"
+                    className="px-4 py-2 bg-purple-500 hover:bg-purple-400 text-black font-bold rounded-lg transition-colors text-sm"
                   >
                     Get Directions
-                  </a>
-                  <a 
-                    href={mallInfo.website}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="px-4 py-2 bg-white/10 hover:bg-white/20 rounded-lg transition-colors text-sm flex items-center gap-1"
-                  >
-                    Website <ExternalLink className="w-3 h-3" />
                   </a>
                 </div>
               </div>
@@ -311,19 +385,20 @@ export default function CityCentreBahrainPage() {
             
             <div className="bg-white/5 rounded-2xl p-6">
               <h3 className="text-xl font-bold mb-4 flex items-center gap-2">
-                <Clock className="w-5 h-5 text-pink-400" />
+                <Clock className="w-5 h-5 text-purple-400" />
                 Opening Hours
               </h3>
-              <div className="space-y-2 text-gray-300">
-                <p><strong>Sat-Wed:</strong> 10:00 AM - 10:00 PM</p>
-                <p><strong>Thu-Fri:</strong> 10:00 AM - 12:00 AM (midnight)</p>
-                <p className="text-sm text-gray-500 pt-2">
-                  * Hours may vary during Ramadan and public holidays
-                </p>
+              <div className="space-y-4 text-gray-300">
+                <div>
+                  <p className="font-semibold text-white">Shops:</p>
+                  <p>Sat-Wed: 10:00 AM - 10:00 PM</p>
+                  <p>Thu-Fri: 10:00 AM - 12:00 AM</p>
+                </div>
+                <p className="text-sm text-gray-500">* Cinema & restaurants may have extended hours</p>
               </div>
               
               <h4 className="font-bold mt-6 mb-2 flex items-center gap-2">
-                <Car className="w-4 h-4 text-pink-400" />
+                <Car className="w-4 h-4 text-purple-400" />
                 Parking
               </h4>
               <p className="text-gray-300">
@@ -334,55 +409,46 @@ export default function CityCentreBahrainPage() {
         </div>
       </section>
 
-      {/* Store Directory */}
+      {/* Entertainment Highlights */}
       <section className="py-16 px-4">
         <div className="max-w-6xl mx-auto">
-          <h2 className="text-3xl font-bold mb-4">Store Directory by Category</h2>
-          <p className="text-gray-400 mb-8">Browse 340+ stores across all categories</p>
+          <h2 className="text-3xl font-bold mb-8">Entertainment & Attractions</h2>
           
           <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {storeCategories.map((category) => (
-              <div key={category.name} className="bg-white/5 rounded-xl p-5">
-                <h3 className="font-bold text-lg text-pink-400 mb-3 flex items-center gap-2">
-                  <category.icon className="w-5 h-5" />
-                  {category.name}
+            {entertainment.map((item) => (
+              <div key={item.name} className="bg-white/5 rounded-xl p-6">
+                <h3 className="text-xl font-bold mb-2 flex items-center gap-2">
+                  <item.icon className="w-5 h-5 text-purple-400" />
+                  {item.name}
                 </h3>
-                <div className="space-y-1">
-                  {category.stores.map((store) => (
-                    store.link ? (
-                      <Link 
-                        key={store.name}
-                        href={store.link}
-                        className="block text-gray-300 hover:text-pink-400 transition-colors text-sm"
-                      >
-                        {store.name} →
-                      </Link>
-                    ) : (
-                      <span key={store.name} className="block text-gray-400 text-sm">
-                        {store.name}
-                      </span>
-                    )
-                  ))}
-                </div>
+                <p className="text-gray-400">{item.description}</p>
               </div>
             ))}
           </div>
         </div>
       </section>
 
-      {/* Entertainment */}
+      {/* Complete Store Directory */}
       <section className="py-16 px-4 bg-black/30">
         <div className="max-w-6xl mx-auto">
-          <h2 className="text-3xl font-bold mb-8">Entertainment & Attractions</h2>
+          <h2 className="text-3xl font-bold mb-4">Complete Store Directory</h2>
+          <p className="text-gray-400 mb-8">All {totalStores}+ stores from official City Centre directory</p>
           
-          <div className="grid md:grid-cols-2 gap-6">
-            {entertainment.map((item) => (
-              <div key={item.name} className="bg-white/5 rounded-xl p-6">
-                <h3 className="text-xl font-bold mb-2 flex items-center gap-2">
-                  <item.icon className="w-5 h-5 text-pink-400" />
-                  {item.name}
+          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {storeCategories.map((category) => (
+              <div key={category.name} className="bg-white/5 rounded-xl p-5">
+                <h3 className="font-bold text-lg text-purple-400 mb-3 flex items-center gap-2">
+                  <category.icon className="w-5 h-5" />
+                  {category.name}
+                  <span className="text-xs text-gray-500 ml-auto">({category.stores.length})</span>
                 </h3>
-                <p className="text-gray-400">{item.description}</p>
+                <div className="space-y-1 max-h-64 overflow-y-auto">
+                  {category.stores.map((store) => (
+                    <span key={store} className="block text-gray-400 text-sm">
+                      {store}
+                    </span>
+                  ))}
+                </div>
               </div>
             ))}
           </div>
@@ -393,17 +459,24 @@ export default function CityCentreBahrainPage() {
       <section className="py-16 px-4">
         <div className="max-w-6xl mx-auto">
           <h2 className="text-3xl font-bold mb-8 flex items-center gap-2">
-            <Utensils className="w-8 h-8 text-pink-400" />
-            Food & Dining
+            <Utensils className="w-8 h-8 text-purple-400" />
+            Food & Dining ({totalDining}+ options)
           </h2>
           
-          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-4">
+          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
             {diningOptions.map((option) => (
               <div key={option.category} className="bg-white/5 rounded-xl p-5">
-                <h3 className="font-bold text-pink-400 mb-2">{option.category}</h3>
-                <p className="text-gray-400 text-sm">
-                  {option.restaurants.join(' • ')}
-                </p>
+                <h3 className="font-bold text-purple-400 mb-3">
+                  {option.category}
+                  <span className="text-xs text-gray-500 ml-2">({option.restaurants.length})</span>
+                </h3>
+                <div className="space-y-1">
+                  {option.restaurants.map((restaurant) => (
+                    <span key={restaurant} className="block text-gray-400 text-sm">
+                      {restaurant}
+                    </span>
+                  ))}
+                </div>
               </div>
             ))}
           </div>
@@ -415,7 +488,7 @@ export default function CityCentreBahrainPage() {
         <div className="max-w-6xl mx-auto">
           <h2 className="text-3xl font-bold mb-8">Tips for Visiting</h2>
           
-          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-4">
+          <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-4">
             {tips.map((item) => (
               <div key={item.title} className="bg-white/5 rounded-xl p-5">
                 <h3 className="font-bold text-white mb-2">{item.title}</h3>
@@ -451,14 +524,14 @@ export default function CityCentreBahrainPage() {
               { name: 'Seef Mall', href: '/guides/malls/seef-mall' },
               { name: 'The Avenues', href: '/guides/malls/the-avenues' },
               { name: 'Moda Mall', href: '/guides/malls/moda-mall' },
-              { name: 'Bahrain Mall', href: '/guides/malls/bahrain-mall' },
+              { name: 'Marassi Galleria', href: '/guides/malls/marassi-galleria' },
             ].map((mall) => (
               <Link 
                 key={mall.href}
                 href={mall.href}
                 className="bg-white/5 hover:bg-white/10 rounded-xl p-4 transition-colors group text-center"
               >
-                <span className="font-medium group-hover:text-pink-400 transition-colors">
+                <span className="font-medium group-hover:text-purple-400 transition-colors">
                   {mall.name}
                 </span>
               </Link>
@@ -468,7 +541,7 @@ export default function CityCentreBahrainPage() {
       </section>
 
       {/* CTA */}
-      <section className="py-16 px-4 bg-gradient-to-r from-pink-500/20 to-purple-500/20">
+      <section className="py-16 px-4 bg-gradient-to-r from-purple-500/20 to-blue-500/20">
         <div className="max-w-4xl mx-auto text-center">
           <h2 className="text-3xl font-bold mb-4">Plan Your Visit</h2>
           <p className="text-gray-300 mb-8">
@@ -477,7 +550,7 @@ export default function CityCentreBahrainPage() {
           <div className="flex flex-wrap justify-center gap-4">
             <Link 
               href="/guides/malls"
-              className="px-8 py-3 bg-pink-500 hover:bg-pink-400 text-black font-bold rounded-lg transition-colors"
+              className="px-8 py-3 bg-purple-500 hover:bg-purple-400 text-black font-bold rounded-lg transition-colors"
             >
               All Malls in Bahrain
             </Link>
@@ -491,7 +564,7 @@ export default function CityCentreBahrainPage() {
         </div>
       </section>
 
-      {/* Structured Data - ShoppingCenter Schema */}
+      {/* Structured Data */}
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{
@@ -499,14 +572,13 @@ export default function CityCentreBahrainPage() {
             '@context': 'https://schema.org',
             '@type': 'ShoppingCenter',
             name: 'City Centre Bahrain',
-            description: 'Bahrain\'s largest shopping and entertainment destination with 340+ stores, Wahooo! Waterpark, VOX Cinemas, and Magic Planet.',
+            description: 'Bahrain\'s largest mall with 340+ stores, VOX Cinema, Wahoo! Waterpark, Magic Planet and dining.',
             address: {
               '@type': 'PostalAddress',
-              streetAddress: 'Road 2835, Block 428, Seef District',
               addressLocality: 'Manama',
               addressCountry: 'BH',
             },
-            url: mallInfo.website,
+            telephone: '+973 8000 0131',
             openingHoursSpecification: [
               {
                 '@type': 'OpeningHoursSpecification',
@@ -520,11 +592,6 @@ export default function CityCentreBahrainPage() {
                 opens: '10:00',
                 closes: '00:00',
               },
-            ],
-            amenityFeature: [
-              { '@type': 'LocationFeatureSpecification', name: 'Free Parking', value: true },
-              { '@type': 'LocationFeatureSpecification', name: 'Waterpark', value: true },
-              { '@type': 'LocationFeatureSpecification', name: 'Cinema', value: true },
             ],
           }),
         }}

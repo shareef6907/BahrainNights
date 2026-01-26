@@ -1,19 +1,19 @@
 import { Metadata } from 'next';
 import Link from 'next/link';
 import { 
-  MapPin, Clock, ExternalLink, Car, 
-  ShoppingBag, Utensils, Gem, Sparkles,
-  Star, Building2, Crown
+  MapPin, Clock, Car, 
+  ShoppingBag, Utensils, Sparkles,
+  Star, Gem, Building2
 } from 'lucide-react';
 import BreadcrumbSchema from '@/components/SEO/BreadcrumbSchema';
 
 export const metadata: Metadata = {
-  title: 'Moda Mall Bahrain - Luxury Store Directory & Shopping Guide 2026',
-  description: 'Complete guide to Moda Mall at Bahrain World Trade Center. Luxury brands including Chanel, Dior, Burberry. Store directory, hours & shopping tips.',
-  keywords: 'Moda Mall Bahrain, BWTC mall, luxury shopping Bahrain, Chanel Bahrain, designer brands Manama, high-end shopping Bahrain',
+  title: 'Moda Mall Bahrain - Luxury Shopping at World Trade Center 2025',
+  description: 'Complete guide to Moda Mall at Bahrain World Trade Center. Luxury brands, designer fashion, premium dining in the iconic twin towers of Manama.',
+  keywords: 'Moda Mall, Bahrain World Trade Center, luxury shopping Bahrain, designer brands Bahrain, premium mall Manama',
   openGraph: {
-    title: 'Moda Mall Bahrain - Luxury Store Directory & Shopping Guide 2026',
-    description: 'Complete guide to Moda Mall - Bahrain\'s exclusive luxury shopping destination at the World Trade Center.',
+    title: 'Moda Mall Bahrain - Luxury Shopping Guide 2025',
+    description: 'Luxury shopping destination at Bahrain World Trade Center with designer brands and premium dining.',
     type: 'article',
     locale: 'en_US',
     url: 'https://www.bahrainnights.com/guides/malls/moda-mall',
@@ -25,140 +25,98 @@ export const metadata: Metadata = {
 
 const mallInfo = {
   name: 'Moda Mall',
-  tagline: 'Bahrain\'s Exclusive Luxury Shopping Destination',
-  address: 'Bahrain World Trade Center, King Faisal Highway, Manama, Bahrain',
-  website: '', // Website unavailable
-  mapsLink: 'https://www.google.com/maps/dir/?api=1&destination=Moda+Mall+Bahrain',
+  tagline: 'Luxury Shopping at Bahrain World Trade Center',
+  address: 'Bahrain World Trade Center, Manama, Kingdom of Bahrain',
+  mapsLink: 'https://www.google.com/maps/place/Moda+Mall/@26.2379,50.5841,17z',
   hours: {
-    regular: 'Sat-Thu: 10:00 AM - 10:00 PM',
-    friday: 'Fri: 2:00 PM - 10:00 PM',
+    regular: 'Sat-Wed: 10:00 AM - 10:00 PM',
+    weekend: 'Thu-Fri: 10:00 AM - 12:00 AM',
   },
   parking: {
-    spaces: '2,000+',
-    cost: 'Paid (BWTC parking)',
+    spaces: '1,500+',
+    cost: 'Free',
     valet: 'Available',
   },
-  size: '45,000 sqm',
-  stores: '120+',
-  yearOpened: '2006',
 };
 
 const storeCategories = [
   {
-    name: 'Haute Couture & Luxury Fashion',
-    icon: Crown,
-    stores: [
-      { name: 'Chanel', link: '/guides/brands/chanel' },
-      { name: 'Dior', link: '/guides/brands/dior' },
-      { name: 'Louis Vuitton', link: '/guides/brands/louis-vuitton' },
-      { name: 'Burberry', link: null },
-      { name: 'Fendi', link: null },
-      { name: 'Valentino', link: null },
-      { name: 'Givenchy', link: null },
-      { name: 'Salvatore Ferragamo', link: null },
-    ],
-  },
-  {
-    name: 'Fine Jewelry & Watches',
+    name: 'Luxury & Designer',
     icon: Gem,
     stores: [
-      { name: 'Bvlgari', link: null },
-      { name: 'Chopard', link: null },
-      { name: 'Rolex', link: null },
-      { name: 'Cartier', link: null },
-      { name: 'Tiffany & Co.', link: null },
-      { name: 'Van Cleef & Arpels', link: null },
-      { name: 'Omega', link: null },
-      { name: 'IWC', link: null },
+      'High-end fashion brands', 'Designer boutiques', 'Luxury accessories',
+      'Premium watches', 'Fine jewellery'
     ],
+    note: 'Focus on luxury and designer brands',
   },
   {
-    name: 'Designer Accessories',
+    name: 'Fashion',
     icon: ShoppingBag,
     stores: [
-      { name: 'Hermès', link: '/guides/brands/hermes' },
-      { name: 'Gucci', link: '/guides/brands/gucci' },
-      { name: 'Prada', link: null },
-      { name: 'Bottega Veneta', link: null },
-      { name: 'Loewe', link: null },
-      { name: 'Celine', link: null },
+      'High-end fashion', 'Designer apparel', 'Premium footwear'
     ],
   },
   {
-    name: 'Premium Beauty',
+    name: 'Beauty & Cosmetics',
     icon: Sparkles,
     stores: [
-      { name: 'Chanel Beauty', link: '/guides/brands/chanel' },
-      { name: 'Dior Beauty', link: '/guides/brands/dior' },
-      { name: 'La Mer', link: null },
-      { name: 'La Prairie', link: null },
-      { name: 'Tom Ford Beauty', link: null },
+      'Premium perfumes', 'Luxury cosmetics', 'Skincare boutiques'
     ],
   },
 ];
 
 const diningOptions = [
   {
-    category: 'Fine Dining',
-    restaurants: ['La Vinoteca', 'Masso', 'Re Napoli'],
-  },
-  {
-    category: 'Premium Cafes',
-    restaurants: ['Café Milano', 'Le Café', 'TWG Tea'],
-  },
-  {
-    category: 'Hotel Connected',
-    restaurants: ['Sheraton Hotel restaurants & bars nearby'],
+    category: 'Premium Dining',
+    restaurants: [
+      'High-end restaurants', 'Cafés with views', 'Fine dining options'
+    ],
   },
 ];
 
 const tips = [
   {
-    title: 'Dress Code',
-    tip: 'Smart casual recommended. This is Bahrain\'s most upscale mall.',
+    title: 'Iconic Location',
+    tip: 'Located in the famous Bahrain World Trade Center twin towers with wind turbines.',
   },
   {
-    title: 'Personal Shopping',
-    tip: 'Most luxury boutiques offer personal shopping appointments for VIP service.',
+    title: 'Luxury Focus',
+    tip: 'Specializes in luxury and designer brands - perfect for high-end shopping.',
   },
   {
-    title: 'Best Time',
-    tip: 'Weekday mornings for personalized attention. Less crowded than mega malls.',
+    title: 'Central Location',
+    tip: 'In the heart of Manama\'s business district with easy access.',
   },
   {
-    title: 'Parking',
-    tip: 'Use BWTC parking (paid). Valet is recommended for convenience.',
-  },
-  {
-    title: 'Business Travelers',
-    tip: 'Connected to Sheraton Hotel, perfect for business visitors.',
+    title: 'Premium Experience',
+    tip: 'Offers a more intimate, upscale shopping experience than larger malls.',
   },
 ];
 
 const faqs = [
   {
-    q: 'What luxury brands are in Moda Mall Bahrain?',
-    a: 'Moda Mall features top luxury brands including Chanel, Dior, Louis Vuitton, Hermès, Gucci, Burberry, Fendi, and prestigious watch brands like Rolex, Cartier, and Chopard.',
-  },
-  {
     q: 'Where is Moda Mall located?',
-    a: 'Moda Mall is located inside the iconic Bahrain World Trade Center (BWTC) on King Faisal Highway in Manama, connected to the Sheraton Hotel.',
+    a: 'Moda Mall is located in the iconic Bahrain World Trade Center twin towers in Manama.',
   },
   {
-    q: 'Is parking free at Moda Mall?',
-    a: 'Parking at Moda Mall uses the BWTC parking facilities which are paid. Valet parking is available for convenience.',
+    q: 'What type of stores are in Moda Mall?',
+    a: 'Moda Mall focuses on luxury and designer brands, high-end fashion, and premium dining.',
   },
   {
     q: 'What are Moda Mall opening hours?',
-    a: 'Moda Mall is open Saturday-Thursday 10 AM - 10 PM, and Friday 2 PM - 10 PM. Individual luxury boutiques may have slightly different hours.',
+    a: 'Saturday-Wednesday: 10 AM - 10 PM. Thursday-Friday: 10 AM - 12 Midnight.',
+  },
+  {
+    q: 'Is parking available at Moda Mall?',
+    a: 'Yes, free parking is available with over 1,500 spaces. Valet parking is also offered.',
   },
 ];
 
 export default function ModaMallPage() {
-  const lastUpdated = new Date().toISOString().split('T')[0];
+  const lastUpdated = '2025-01-27';
   
   return (
-    <div className="min-h-screen bg-gradient-to-b from-slate-950 via-amber-950/10 to-slate-950 text-white">
+    <div className="min-h-screen bg-gradient-to-b from-slate-950 via-rose-950/10 to-slate-950 text-white">
       <BreadcrumbSchema
         items={[
           { name: 'Home', url: 'https://www.bahrainnights.com' },
@@ -170,21 +128,20 @@ export default function ModaMallPage() {
 
       {/* Hero Section */}
       <section className="relative py-20 px-4 overflow-hidden">
-        <div className="absolute inset-0 bg-gradient-to-r from-amber-500/10 to-yellow-500/10" />
+        <div className="absolute inset-0 bg-gradient-to-r from-rose-500/10 to-pink-500/10" />
         <div className="max-w-6xl mx-auto relative">
           <div className="text-center mb-12">
-            <span className="inline-block px-4 py-1 bg-amber-500/20 text-amber-400 rounded-full text-sm font-medium mb-4">
-              👑 Luxury Mall
+            <span className="inline-block px-4 py-1 bg-rose-500/20 text-rose-400 rounded-full text-sm font-medium mb-4">
+              💎 Luxury Mall • World Trade Center
             </span>
             <h1 className="text-4xl md:text-6xl font-black mb-6">
-              <span className="bg-gradient-to-r from-amber-400 to-yellow-500 bg-clip-text text-transparent">
+              <span className="bg-gradient-to-r from-rose-400 to-pink-500 bg-clip-text text-transparent">
                 Moda Mall
               </span>
-              {' '}Bahrain
             </h1>
             <p className="text-xl text-gray-300 max-w-3xl mx-auto">
-              {mallInfo.tagline}. Located in the iconic Bahrain World Trade Center, 
-              home to the world&apos;s finest luxury fashion, jewelry, and watch brands.
+              {mallInfo.tagline}. Experience luxury shopping in the iconic twin towers 
+              with designer brands, high-end fashion, and premium dining.
             </p>
             <p className="text-sm text-gray-500 mt-4">
               Last updated: {lastUpdated}
@@ -192,15 +149,14 @@ export default function ModaMallPage() {
           </div>
 
           {/* Quick Stats */}
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mt-12">
+          <div className="grid grid-cols-2 md:grid-cols-3 gap-4 mt-12">
             {[
-              { label: 'Luxury Stores', value: mallInfo.stores, icon: Crown },
-              { label: 'Location', value: 'BWTC', icon: Building2 },
+              { label: 'Focus', value: 'Luxury', icon: Gem },
               { label: 'Parking', value: mallInfo.parking.spaces, icon: Car },
-              { label: 'Since', value: mallInfo.yearOpened, icon: Star },
+              { label: 'Location', value: 'BWTC', icon: Building2 },
             ].map((stat) => (
               <div key={stat.label} className="bg-white/5 backdrop-blur-sm rounded-xl p-4 text-center">
-                <stat.icon className="w-6 h-6 mx-auto mb-2 text-amber-400" />
+                <stat.icon className="w-6 h-6 mx-auto mb-2 text-rose-400" />
                 <div className="text-2xl font-bold">{stat.value}</div>
                 <div className="text-sm text-gray-400">{stat.label}</div>
               </div>
@@ -217,27 +173,20 @@ export default function ModaMallPage() {
           <div className="grid md:grid-cols-2 gap-8">
             <div className="bg-white/5 rounded-2xl p-6">
               <h3 className="text-xl font-bold mb-4 flex items-center gap-2">
-                <MapPin className="w-5 h-5 text-amber-400" />
+                <MapPin className="w-5 h-5 text-rose-400" />
                 Address & Contact
               </h3>
               <div className="space-y-3 text-gray-300">
                 <p>{mallInfo.address}</p>
+                <p className="text-sm text-gray-400">Located in the iconic twin towers with wind turbines</p>
                 <div className="flex gap-3 pt-2">
                   <a 
                     href={mallInfo.mapsLink}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="px-4 py-2 bg-amber-500 hover:bg-amber-400 text-black font-bold rounded-lg transition-colors text-sm"
+                    className="px-4 py-2 bg-rose-500 hover:bg-rose-400 text-black font-bold rounded-lg transition-colors text-sm"
                   >
                     Get Directions
-                  </a>
-                  <a 
-                    href={mallInfo.website}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="px-4 py-2 bg-white/10 hover:bg-white/20 rounded-lg transition-colors text-sm flex items-center gap-1"
-                  >
-                    Website <ExternalLink className="w-3 h-3" />
                   </a>
                 </div>
               </div>
@@ -245,80 +194,74 @@ export default function ModaMallPage() {
             
             <div className="bg-white/5 rounded-2xl p-6">
               <h3 className="text-xl font-bold mb-4 flex items-center gap-2">
-                <Clock className="w-5 h-5 text-amber-400" />
+                <Clock className="w-5 h-5 text-rose-400" />
                 Opening Hours
               </h3>
-              <div className="space-y-2 text-gray-300">
-                <p><strong>Sat-Thu:</strong> 10:00 AM - 10:00 PM</p>
-                <p><strong>Friday:</strong> 2:00 PM - 10:00 PM</p>
-                <p className="text-sm text-gray-500 pt-2">
-                  * Individual boutiques may have different hours
-                </p>
+              <div className="space-y-4 text-gray-300">
+                <p><strong>Sat-Wed:</strong> 10:00 AM - 10:00 PM</p>
+                <p><strong>Thu-Fri:</strong> 10:00 AM - 12:00 AM</p>
               </div>
               
               <h4 className="font-bold mt-6 mb-2 flex items-center gap-2">
-                <Car className="w-4 h-4 text-amber-400" />
+                <Car className="w-4 h-4 text-rose-400" />
                 Parking
               </h4>
               <p className="text-gray-300">
-                BWTC parking • {mallInfo.parking.cost} • Valet recommended
+                {mallInfo.parking.spaces} spaces • {mallInfo.parking.cost} • Valet available
               </p>
             </div>
           </div>
         </div>
       </section>
 
-      {/* Store Directory */}
+      {/* Store Categories */}
       <section className="py-16 px-4">
         <div className="max-w-6xl mx-auto">
-          <h2 className="text-3xl font-bold mb-4">Luxury Brand Directory</h2>
-          <p className="text-gray-400 mb-8">Discover world-class luxury brands</p>
+          <h2 className="text-3xl font-bold mb-4">Shopping</h2>
+          <p className="text-gray-400 mb-8">Luxury and designer brands in an exclusive setting</p>
           
-          <div className="grid md:grid-cols-2 gap-6">
+          <div className="grid md:grid-cols-3 gap-6">
             {storeCategories.map((category) => (
               <div key={category.name} className="bg-white/5 rounded-xl p-5">
-                <h3 className="font-bold text-lg text-amber-400 mb-3 flex items-center gap-2">
+                <h3 className="font-bold text-lg text-rose-400 mb-3 flex items-center gap-2">
                   <category.icon className="w-5 h-5" />
                   {category.name}
                 </h3>
-                <div className="grid grid-cols-2 gap-1">
+                <div className="space-y-1">
                   {category.stores.map((store) => (
-                    store.link ? (
-                      <Link 
-                        key={store.name}
-                        href={store.link}
-                        className="text-gray-300 hover:text-amber-400 transition-colors text-sm"
-                      >
-                        {store.name} →
-                      </Link>
-                    ) : (
-                      <span key={store.name} className="text-gray-400 text-sm">
-                        {store.name}
-                      </span>
-                    )
+                    <span key={store} className="block text-gray-400 text-sm">
+                      {store}
+                    </span>
                   ))}
                 </div>
+                {category.note && (
+                  <p className="text-xs text-gray-500 mt-2 italic">{category.note}</p>
+                )}
               </div>
             ))}
           </div>
         </div>
       </section>
 
-      {/* Food & Dining */}
+      {/* Dining */}
       <section className="py-16 px-4 bg-black/30">
         <div className="max-w-6xl mx-auto">
           <h2 className="text-3xl font-bold mb-8 flex items-center gap-2">
-            <Utensils className="w-8 h-8 text-amber-400" />
+            <Utensils className="w-8 h-8 text-rose-400" />
             Dining
           </h2>
           
-          <div className="grid md:grid-cols-3 gap-4">
+          <div className="max-w-md">
             {diningOptions.map((option) => (
               <div key={option.category} className="bg-white/5 rounded-xl p-5">
-                <h3 className="font-bold text-amber-400 mb-2">{option.category}</h3>
-                <p className="text-gray-400 text-sm">
-                  {option.restaurants.join(' • ')}
-                </p>
+                <h3 className="font-bold text-rose-400 mb-3">{option.category}</h3>
+                <div className="space-y-1">
+                  {option.restaurants.map((restaurant) => (
+                    <span key={restaurant} className="block text-gray-400 text-sm">
+                      {restaurant}
+                    </span>
+                  ))}
+                </div>
               </div>
             ))}
           </div>
@@ -330,7 +273,7 @@ export default function ModaMallPage() {
         <div className="max-w-6xl mx-auto">
           <h2 className="text-3xl font-bold mb-8">Tips for Visiting</h2>
           
-          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-4">
+          <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-4">
             {tips.map((item) => (
               <div key={item.title} className="bg-white/5 rounded-xl p-5">
                 <h3 className="font-bold text-white mb-2">{item.title}</h3>
@@ -363,17 +306,17 @@ export default function ModaMallPage() {
           <h2 className="text-2xl font-bold mb-8">Explore More Malls</h2>
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
             {[
-              { name: 'The Avenues', href: '/guides/malls/the-avenues' },
+              { name: 'Marassi Galleria', href: '/guides/malls/marassi-galleria' },
               { name: 'City Centre Bahrain', href: '/guides/malls/city-centre-bahrain' },
+              { name: 'The Avenues', href: '/guides/malls/the-avenues' },
               { name: 'Seef Mall', href: '/guides/malls/seef-mall' },
-              { name: 'Bahrain Mall', href: '/guides/malls/bahrain-mall' },
             ].map((mall) => (
               <Link 
                 key={mall.href}
                 href={mall.href}
                 className="bg-white/5 hover:bg-white/10 rounded-xl p-4 transition-colors group text-center"
               >
-                <span className="font-medium group-hover:text-amber-400 transition-colors">
+                <span className="font-medium group-hover:text-rose-400 transition-colors">
                   {mall.name}
                 </span>
               </Link>
@@ -383,25 +326,27 @@ export default function ModaMallPage() {
       </section>
 
       {/* CTA */}
-      <section className="py-16 px-4 bg-gradient-to-r from-amber-500/20 to-yellow-500/20">
+      <section className="py-16 px-4 bg-gradient-to-r from-rose-500/20 to-pink-500/20">
         <div className="max-w-4xl mx-auto text-center">
-          <h2 className="text-3xl font-bold mb-4">Discover Luxury Shopping</h2>
+          <h2 className="text-3xl font-bold mb-4">Plan Your Visit</h2>
           <p className="text-gray-300 mb-8">
-            Explore all luxury brand guides in Bahrain
+            Experience luxury shopping at Bahrain World Trade Center
           </p>
           <div className="flex flex-wrap justify-center gap-4">
             <Link 
-              href="/guides/brands/chanel"
-              className="px-8 py-3 bg-amber-500 hover:bg-amber-400 text-black font-bold rounded-lg transition-colors"
-            >
-              Chanel Guide
-            </Link>
-            <Link 
               href="/guides/malls"
+              className="px-8 py-3 bg-rose-500 hover:bg-rose-400 text-black font-bold rounded-lg transition-colors"
+            >
+              All Malls in Bahrain
+            </Link>
+            <a 
+              href={mallInfo.mapsLink}
+              target="_blank"
+              rel="noopener noreferrer"
               className="px-8 py-3 bg-white/10 hover:bg-white/20 text-white font-bold rounded-lg transition-colors"
             >
-              All Malls
-            </Link>
+              Get Directions
+            </a>
           </div>
         </div>
       </section>
@@ -413,27 +358,26 @@ export default function ModaMallPage() {
           __html: JSON.stringify({
             '@context': 'https://schema.org',
             '@type': 'ShoppingCenter',
-            name: 'Moda Mall Bahrain',
-            description: 'Bahrain\'s exclusive luxury shopping destination at the World Trade Center featuring Chanel, Dior, Louis Vuitton, and prestigious watch brands.',
+            name: 'Moda Mall',
+            description: 'Luxury shopping destination at Bahrain World Trade Center with designer brands and premium dining.',
             address: {
               '@type': 'PostalAddress',
-              streetAddress: 'Bahrain World Trade Center, King Faisal Highway',
+              streetAddress: 'Bahrain World Trade Center',
               addressLocality: 'Manama',
               addressCountry: 'BH',
             },
-            url: mallInfo.website,
             openingHoursSpecification: [
               {
                 '@type': 'OpeningHoursSpecification',
-                dayOfWeek: ['Saturday', 'Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday'],
+                dayOfWeek: ['Saturday', 'Sunday', 'Monday', 'Tuesday', 'Wednesday'],
                 opens: '10:00',
                 closes: '22:00',
               },
               {
                 '@type': 'OpeningHoursSpecification',
-                dayOfWeek: ['Friday'],
-                opens: '14:00',
-                closes: '22:00',
+                dayOfWeek: ['Thursday', 'Friday'],
+                opens: '10:00',
+                closes: '00:00',
               },
             ],
           }),

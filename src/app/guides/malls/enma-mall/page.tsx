@@ -276,14 +276,6 @@ export default function EnmaMallPage() {
                   >
                     Get Directions
                   </a>
-                  <a 
-                    href={mallInfo.website}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="px-4 py-2 bg-white/10 hover:bg-white/20 rounded-lg transition-colors text-sm flex items-center gap-1"
-                  >
-                    Website <ExternalLink className="w-3 h-3" />
-                  </a>
                 </div>
               </div>
             </div>

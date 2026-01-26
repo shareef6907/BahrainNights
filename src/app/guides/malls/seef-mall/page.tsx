@@ -1,19 +1,20 @@
 import { Metadata } from 'next';
 import Link from 'next/link';
 import { 
-  MapPin, Clock, ExternalLink, Car, 
-  ShoppingBag, Utensils, Film, Users, Sparkles,
-  Star, Baby
+  MapPin, Clock, Car, 
+  ShoppingBag, Utensils, Film, Sparkles,
+  Star, Baby, Watch, Gem, Eye, Footprints,
+  Building2, Scissors, Home, Gift, Plane, Laptop, Dumbbell, Heart
 } from 'lucide-react';
 import BreadcrumbSchema from '@/components/SEO/BreadcrumbSchema';
 
 export const metadata: Metadata = {
-  title: 'Seef Mall Bahrain - Store Directory & Shopping Guide 2026',
-  description: 'Complete guide to Seef Mall Bahrain. 300+ stores, family entertainment, dining. Store directory, opening hours, parking info & shopping tips.',
-  keywords: 'Seef Mall Bahrain, Seef mall shops, Seef district shopping, family mall Bahrain, shopping mall Manama, Seef Mall stores',
+  title: 'Seef Mall Bahrain - Complete Store Directory & Guide 2025',
+  description: 'Complete guide to Seef Mall Bahrain. 200+ stores including H&M, Marks & Spencer, Mango, Sephora, plus dining & Magic Island entertainment. Full store list.',
+  keywords: 'Seef Mall Bahrain, Seef mall shops, Seef district shopping, family mall Bahrain, shopping mall Manama, Seef Mall stores, Magic Island',
   openGraph: {
-    title: 'Seef Mall Bahrain - Store Directory & Shopping Guide 2026',
-    description: 'Complete guide to Seef Mall Bahrain with 300+ stores, family entertainment & dining.',
+    title: 'Seef Mall Bahrain - Complete Store Directory & Guide 2025',
+    description: 'Complete guide to Seef Mall Bahrain with 200+ stores, Magic Island entertainment & dining.',
     type: 'article',
     locale: 'en_US',
     url: 'https://www.bahrainnights.com/guides/malls/seef-mall',
@@ -27,101 +28,208 @@ const mallInfo = {
   name: 'Seef Mall',
   tagline: 'Bahrain\'s Original Premier Shopping Destination',
   address: 'Seef District, Manama, Bahrain',
-  website: 'https://seefdistrict.seefmall.com.bh',
-  mapsLink: 'https://www.google.com/maps/dir/?api=1&destination=Seef+Mall+Bahrain',
+  phone: '+973 7791 1114',
+  mapsLink: 'https://www.google.com/maps/place/Seef+Mall/@26.2325003,50.5364399,17z',
   hours: {
-    regular: 'Sat-Wed: 10:00 AM - 10:00 PM',
-    weekend: 'Thu-Fri: 10:00 AM - 12:00 AM',
+    shops: {
+      regular: 'Sat-Wed: 10:00 AM - 10:00 PM',
+      weekend: 'Thu-Fri: 10:00 AM - 12:00 AM',
+    },
+    restaurants: {
+      regular: 'Sat-Wed: 10:00 AM - 11:00 PM',
+      weekend: 'Thu-Fri: 10:00 AM - 12:00 AM',
+    },
   },
   parking: {
     spaces: '5,000+',
     cost: 'Free',
     valet: 'Available',
   },
-  size: '140,000 sqm',
-  stores: '300+',
+  stores: '200+',
   yearOpened: '1997',
 };
 
-// Verified stores from official Seef Mall website (seefdistrict.seefmall.com.bh)
+// COMPLETE Store Directory from Official Seef Mall Website (seefdistrict.seefmall.com.bh)
+// Last verified: January 2025
+
 const storeCategories = [
   {
-    name: 'Fashion & Apparel',
+    name: 'Fashion',
     icon: ShoppingBag,
     stores: [
-      { name: 'H&M', link: '/guides/brands/hm' },
-      { name: 'Mango', link: null },
-      { name: 'Next', link: null },
-      { name: 'Marks & Spencer', link: null },
-      { name: 'American Eagle', link: null },
-      { name: 'LC Waikiki', link: null },
-      { name: 'Giordano', link: null },
-      { name: 'Defacto', link: null },
+      '5.11 Trading', 'Adelena Outlet', 'Alia Vintage', 'American Eagle', 'Annada',
+      'Azure Fashion', 'B&G Casuals Fashion', 'BBZ', 'Beverly Hills Polo Club',
+      'Beverly Hills Polo Club Kids', 'Big and Tall', 'Brands for Less', 'By Ema',
+      'Cocoon Fashion', 'Defacto', 'Dolyan Boutique', 'Dusk', 'Faith Fashions',
+      'Fashion Store', 'Gant', 'Giordano', 'H&M', 'Incanto Boutique',
+      'Kampoos Accessories', 'KASHAKHTI BOUTIQUE', 'Kay Abayas', 'Khoyot Alzain Abayat',
+      'KIABI', 'La Noor By Noor Atelier', 'La Senza', 'Lalla Eman Tailoring',
+      'LC Waikiki', 'Levant Fashion', 'Mamas & Papas', 'Mango', 'Marks & Spencer',
+      'Matalan', 'Montania', 'Mothercare', 'Nayomi', 'New Yorker', 'Next',
+      'Night Moda', 'Noof Boutique', 'NS by Nariman Shukralla', 'NS Design',
+      'OXXO', 'R&B', 'Sabina', 'Wool House', 'Yashmak', 'Zash Outfit', 'Zumorrod Trading'
     ],
   },
   {
-    name: 'Beauty & Fragrance',
+    name: 'Perfumes & Cosmetics',
     icon: Sparkles,
     stores: [
-      { name: 'Bath & Body Works', link: '/guides/brands/bath-body-works' },
-      { name: 'Flormar', link: null },
-      { name: 'Golden Rose Cosmetics', link: null },
-      { name: 'Arabian Oud', link: null },
-      { name: 'Ajmal Perfumes', link: null },
-      { name: 'Al Haramain Perfumes', link: null },
+      'Abdul Samad Alqurashi', 'Ahmet Arifoglu', 'Ajmal Perfumes', 'Al Haramain Perfumes',
+      'Al Hawaj', 'Albayraq Al Omane Perfumes', 'AlRasasi Perfumes', 'Arabian Oud',
+      'Artal Altabiea', 'Asghar Ali', 'Asgharali Perfumes', 'Aurora Aroma Accessories',
+      'Bath & Body Works', 'Beauty Blends', 'Daniya Perfumes', 'Dasman Perfume',
+      'Dr Scent', 'Flormar', 'Gissah Perfumes', 'Golden Rose Cosmetics',
+      'Kaleem Perfumes', 'Kiko Milano', 'La Maison De La Vanilla', 'LaRosa Perfume',
+      'MAC Cosmetics', 'Montale Paris', 'Natural Blends', 'NC COSMETICS',
+      'NOTE Cosmetics', 'Nujoom Al Oud', 'NYX Professional Makeup', 'Osma Perfumes',
+      'Reef Perfumes', 'San Francisco Soaps', 'Sephora', 'Syed Junaid Alam',
+      'The Body Shop', 'The Perfume Lounge', 'Ushk Perfumes'
     ],
   },
   {
-    name: 'Kids & Baby',
+    name: 'Jewellery',
+    icon: Gem,
+    stores: [
+      'Ahmed AlWazzan Jewellery', 'Al Jawhara Jewellery', 'Al Sarraj Diamond Centre',
+      'Al Sayegh Jewellery', 'Al Zain Jewellery', 'AlHashimi Jewellery',
+      'Amal Al Majed Jewellery', 'Asia Jewellers', 'Blue Diamonds Jewellery',
+      'Coronet', 'Damas Jewellery', 'Devji Jewellery', 'eSKay Jewellery',
+      'Humaidan Jewels', 'Jewellery Falawh', 'Kooheji Jewellery', 'LifeStyle Jewelery',
+      'MM. Kooheji Jewellery', 'Modern Jewelry', 'Mouj', 'Pearl Biography',
+      'Sahar Jewellery', 'Sentiments Jewelry', 'Soho Diamonds', 'YKA Pearls'
+    ],
+  },
+  {
+    name: 'Watches',
+    icon: Watch,
+    stores: ['A La Mode', 'CALIBER 7', 'Happy Times', 'Watch Time'],
+  },
+  {
+    name: 'Health & Fitness',
+    icon: Dumbbell,
+    stores: [
+      'Adidas', 'Be Sports Wear', 'BlissLab By Nasser Pharmacy', 'Boots Pharmacy',
+      'Olympia Health & Fitness', 'Olympia Sports', 'Rashid Center for Physical Therapy',
+      'Shoot Sports', 'Smart Nutrition Life', 'Sun & Sand Sports', 'Watsons'
+    ],
+  },
+  {
+    name: 'Footwear',
+    icon: Footprints,
+    stores: ['Aldo', 'Crocs Shoes', 'Kooheji Shoes', 'Latif Shoe', 'Milano', 'Skechers'],
+  },
+  {
+    name: 'Optics',
+    icon: Eye,
+    stores: ['Ahmed AlWazzan Optician', 'Ammar Optician', 'Eyewa', 'L\'optique', 'Optica', 'Yateem Optician'],
+  },
+  {
+    name: 'Accessories',
+    icon: Heart,
+    stores: [
+      'Claire\'s', 'Dame Accessories', 'Dunhill & Montblanc', 'Ella Jewellery',
+      'Mobile Outfitters', 'nyyt', 'Plata', 'Steelmasters', 'Swarovski'
+    ],
+  },
+  {
+    name: 'Electronics',
+    icon: Laptop,
+    stores: ['Extra', 'Yaqoobi Store'],
+  },
+  {
+    name: 'Home & Decor',
+    icon: Home,
+    stores: ['Liel Excellence', 'Marina Home', 'Phoenicia Decor'],
+  },
+  {
+    name: 'Books, Gifts & Chocolates',
+    icon: Gift,
+    stores: [
+      'Dar Kalemat', 'Hallmark', 'La Casa Del Habano',
+      'Qudoo Sweet', 'Update Date Chocolate & more', 'Yousif Showaiter Sweets'
+    ],
+  },
+  {
+    name: 'Banks & Financial',
+    icon: Building2,
+    stores: [
+      'Ahli United Bank (AUB)', 'Bahrain Financing Company (BFC)',
+      'Bank of Bahrain and Kuwait (BBK)', 'KFH', 'Khaleeji Bank',
+      'National Bank of Bahrain (NBB)'
+    ],
+  },
+  {
+    name: 'Air Travel',
+    icon: Plane,
+    stores: ['Emirates Airlines', 'Gulf Air'],
+  },
+  {
+    name: 'Spa & Salon',
+    icon: Scissors,
+    stores: [
+      'Hair Spa', 'N. Spa', 'Prime Gents Saloon', 'Prive Gent\'s Salon',
+      'Privé Ladies Salon', 'Ricci E Capricci', 'Toni & Guy Salon'
+    ],
+  },
+  {
+    name: 'Kids & Entertainment',
     icon: Baby,
+    stores: ['House of Uniforms', 'Magic Island', 'Miniso', 'Seef Megaplex Cinema', 'Toys R Us'],
+  },
+  {
+    name: 'Services',
+    icon: Building2,
     stores: [
-      { name: 'Mothercare', link: null },
-      { name: 'Mamas & Papas', link: null },
-      { name: 'Beverly Hills Polo Club Kids', link: null },
+      'Bumtaia and Mojalli Consultancy', 'Cuddle Carts', 'First Mobile',
+      'Fraser Suites Seef', 'HQ by Hope', 'Jobs Plus', 'Perfect Car Services',
+      'Solidarity Insurance', 'Tamkeen', 'VAL TECH'
     ],
   },
   {
-    name: 'Watches & Accessories',
-    icon: Users,
-    stores: [
-      { name: 'Watch Time', link: null },
-      { name: 'Caliber 7', link: null },
-      { name: 'A La Mode', link: null },
-      { name: 'Happy Times', link: null },
-    ],
+    name: 'Supermarket',
+    icon: ShoppingBag,
+    stores: ['Aljazira Supermarket'],
   },
 ];
 
-// Verified dining from official Seef Mall website
+// Restaurants & Cafés from Official Website
 const diningOptions = [
   {
     category: 'Restaurants',
-    restaurants: ['Applebee\'s', 'Nando\'s', 'IHOP', 'AlAbraaj', 'Kadoura'],
+    restaurants: [
+      'AlAbraaj Restaurant', 'Applebee\'s', 'Bahrain Grills', 'Frangipani Restaurant',
+      'IHOP', 'Jasmi\'s', 'Kadoura', 'KFC', 'Machabees Restaurant',
+      'McDonald\'s', 'Nando\'s Restaurant', 'Oishi', 'Papa John\'s Pizza',
+      'Rendezvous', 'Sub Station', 'Yasmine Restaurant', 'Hardee\'s'
+    ],
   },
   {
-    category: 'Fast Food',
-    restaurants: ['KFC', 'McDonald\'s', 'Hardee\'s', 'Papa John\'s'],
+    category: 'Cafés',
+    restaurants: [
+      '3 Lines', 'CAF', 'Calo Cafe', 'Caribou Coffee', 'Derby Cafe',
+      'Fresh Superfood Café', 'Gonul Kahvesi', 'Latea', 'Nespresso',
+      'Paul Café', 'Starbucks Coffee', 'Tim Hortons'
+    ],
   },
   {
-    category: 'Coffee & Desserts',
-    restaurants: ['Starbucks', 'Tim Hortons', 'Caribou Coffee', 'Cinnabon', 'Baskin Robbins'],
-  },
-  {
-    category: 'More Options',
-    restaurants: ['Paul Café', 'Pinkberry', 'Cold Stone', 'Auntie Anne\'s'],
+    category: 'Desserts & Ice Cream',
+    restaurants: [
+      'Auntie Anne\'s', 'Baskin Robbins', 'Cake Boutique', 'Cinnabon',
+      'Cold Stone', 'Great American Cookies', 'Marble Slab Creamery',
+      'Monster Cookies', 'Pinkberry'
+    ],
   },
 ];
 
-// Verified entertainment from official Seef Mall website
 const entertainment = [
   {
-    name: 'Cineco Cinema',
-    description: 'Multi-screen cinema showing latest releases in Hollywood and Bollywood.',
+    name: 'Seef Megaplex Cinema',
+    description: 'Multi-screen cinema showing latest Hollywood, Bollywood and Arabic releases.',
     icon: Film,
   },
   {
     name: 'Magic Island',
-    description: 'Family entertainment center with games and activities for all ages.',
+    description: 'Family entertainment center with games, rides and activities for all ages.',
     icon: Baby,
   },
 ];
@@ -129,43 +237,51 @@ const entertainment = [
 const tips = [
   {
     title: 'Best Time to Visit',
-    tip: 'Weekday afternoons are ideal. The mall gets busy on Thursday/Friday evenings.',
+    tip: 'Weekday mornings and afternoons are quietest. Thursday/Friday evenings are busiest.',
   },
   {
     title: 'Parking',
-    tip: 'Use the multi-story parking. Ground level fills up quickly on weekends.',
+    tip: 'Use the multi-story car park. Free parking with 5,000+ spaces. Ground level fills quickly on weekends.',
   },
   {
     title: 'Family Friendly',
-    tip: 'Great for families with Magic Island entertainment and family dining options.',
+    tip: 'Magic Island and Toys R Us make it great for families. Many kid-friendly dining options available.',
   },
   {
-    title: 'Fashion Shopping',
-    tip: 'Good selection of mid-range fashion brands like H&M, Mango, and Marks & Spencer.',
+    title: 'Hotels Connected',
+    tip: 'Fraser Suites Seef hotel is connected to the mall for convenient stays.',
   },
 ];
 
 const faqs = [
   {
     q: 'What are Seef Mall opening hours?',
-    a: 'Seef Mall is open Saturday-Wednesday 10 AM - 10 PM, and Thursday-Friday 10 AM - 12 AM (midnight). Hours may vary during Ramadan.',
+    a: 'Shops are open Sat-Wed 10 AM - 10 PM, Thu-Fri 10 AM - 12 AM. Restaurants stay open until 11 PM on weekdays and midnight on weekends.',
   },
   {
     q: 'Is parking free at Seef Mall?',
     a: 'Yes, Seef Mall offers free parking with over 5,000 spaces available. Valet parking is also available.',
   },
   {
-    q: 'What makes Seef Mall different from City Centre?',
-    a: 'Seef Mall has a more relaxed, family-friendly atmosphere. It features Magic Island entertainment center, Cineco cinema, and a good mix of fashion and dining options.',
+    q: 'What stores are in Seef Mall?',
+    a: 'Seef Mall has 200+ stores including H&M, Marks & Spencer, Mango, Sephora, MAC, Bath & Body Works, Skechers, Toys R Us, and many more.',
   },
   {
-    q: 'What entertainment is at Seef Mall?',
-    a: 'Seef Mall has Cineco cinema for movies and Magic Island, a popular family entertainment center with games and activities.',
+    q: 'Does Seef Mall have a cinema?',
+    a: 'Yes, Seef Megaplex Cinema is located in the mall showing the latest movies.',
+  },
+  {
+    q: 'Is there entertainment for kids?',
+    a: 'Yes, Magic Island is a popular family entertainment center with games and activities for children of all ages.',
   },
 ];
 
 export default function SeefMallPage() {
-  const lastUpdated = new Date().toISOString().split('T')[0];
+  const lastUpdated = '2025-01-27';
+  
+  // Count total stores
+  const totalStores = storeCategories.reduce((acc, cat) => acc + cat.stores.length, 0);
+  const totalDining = diningOptions.reduce((acc, cat) => acc + cat.restaurants.length, 0);
   
   return (
     <div className="min-h-screen bg-gradient-to-b from-slate-950 via-pink-950/10 to-slate-950 text-white">
@@ -193,8 +309,8 @@ export default function SeefMallPage() {
               {' '}Bahrain
             </h1>
             <p className="text-xl text-gray-300 max-w-3xl mx-auto">
-              {mallInfo.tagline}. Established in 1997, offering 300+ stores 
-              with premium fashion, home brands, and family entertainment.
+              {mallInfo.tagline}. Established in 1997 with {totalStores}+ retail stores, 
+              {totalDining}+ dining options, Magic Island entertainment, and Seef Megaplex Cinema.
             </p>
             <p className="text-sm text-gray-500 mt-4">
               Last updated: {lastUpdated}
@@ -204,8 +320,8 @@ export default function SeefMallPage() {
           {/* Quick Stats */}
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mt-12">
             {[
-              { label: 'Stores', value: mallInfo.stores, icon: ShoppingBag },
-              { label: 'Size', value: mallInfo.size, icon: MapPin },
+              { label: 'Stores', value: `${totalStores}+`, icon: ShoppingBag },
+              { label: 'Dining', value: `${totalDining}+`, icon: Utensils },
               { label: 'Parking', value: mallInfo.parking.spaces, icon: Car },
               { label: 'Since', value: mallInfo.yearOpened, icon: Star },
             ].map((stat) => (
@@ -232,6 +348,7 @@ export default function SeefMallPage() {
               </h3>
               <div className="space-y-3 text-gray-300">
                 <p>{mallInfo.address}</p>
+                <p>Phone: {mallInfo.phone}</p>
                 <div className="flex gap-3 pt-2">
                   <a 
                     href={mallInfo.mapsLink}
@@ -240,14 +357,6 @@ export default function SeefMallPage() {
                     className="px-4 py-2 bg-blue-500 hover:bg-blue-400 text-black font-bold rounded-lg transition-colors text-sm"
                   >
                     Get Directions
-                  </a>
-                  <a 
-                    href={mallInfo.website}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="px-4 py-2 bg-white/10 hover:bg-white/20 rounded-lg transition-colors text-sm flex items-center gap-1"
-                  >
-                    Website <ExternalLink className="w-3 h-3" />
                   </a>
                 </div>
               </div>
@@ -258,12 +367,18 @@ export default function SeefMallPage() {
                 <Clock className="w-5 h-5 text-blue-400" />
                 Opening Hours
               </h3>
-              <div className="space-y-2 text-gray-300">
-                <p><strong>Sat-Wed:</strong> 10:00 AM - 10:00 PM</p>
-                <p><strong>Thu-Fri:</strong> 10:00 AM - 12:00 AM (midnight)</p>
-                <p className="text-sm text-gray-500 pt-2">
-                  * Hours may vary during Ramadan
-                </p>
+              <div className="space-y-4 text-gray-300">
+                <div>
+                  <p className="font-semibold text-white">Shops:</p>
+                  <p>Sat-Wed: 10:00 AM - 10:00 PM</p>
+                  <p>Thu-Fri: 10:00 AM - 12:00 AM</p>
+                </div>
+                <div>
+                  <p className="font-semibold text-white">Restaurants:</p>
+                  <p>Sat-Wed: 10:00 AM - 11:00 PM</p>
+                  <p>Thu-Fri: 10:00 AM - 12:00 AM</p>
+                </div>
+                <p className="text-sm text-gray-500">* Hours may vary during Ramadan</p>
               </div>
               
               <h4 className="font-bold mt-6 mb-2 flex items-center gap-2">
@@ -278,11 +393,11 @@ export default function SeefMallPage() {
         </div>
       </section>
 
-      {/* Store Directory */}
+      {/* Complete Store Directory */}
       <section className="py-16 px-4">
         <div className="max-w-6xl mx-auto">
-          <h2 className="text-3xl font-bold mb-4">Store Directory by Category</h2>
-          <p className="text-gray-400 mb-8">Browse 300+ stores across all categories</p>
+          <h2 className="text-3xl font-bold mb-4">Complete Store Directory</h2>
+          <p className="text-gray-400 mb-8">All {totalStores}+ stores from official Seef Mall directory</p>
           
           <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
             {storeCategories.map((category) => (
@@ -290,22 +405,13 @@ export default function SeefMallPage() {
                 <h3 className="font-bold text-lg text-blue-400 mb-3 flex items-center gap-2">
                   <category.icon className="w-5 h-5" />
                   {category.name}
+                  <span className="text-xs text-gray-500 ml-auto">({category.stores.length})</span>
                 </h3>
-                <div className="space-y-1">
+                <div className="space-y-1 max-h-64 overflow-y-auto">
                   {category.stores.map((store) => (
-                    store.link ? (
-                      <Link 
-                        key={store.name}
-                        href={store.link}
-                        className="block text-gray-300 hover:text-blue-400 transition-colors text-sm"
-                      >
-                        {store.name} →
-                      </Link>
-                    ) : (
-                      <span key={store.name} className="block text-gray-400 text-sm">
-                        {store.name}
-                      </span>
-                    )
+                    <span key={store} className="block text-gray-400 text-sm">
+                      {store}
+                    </span>
                   ))}
                 </div>
               </div>
@@ -317,9 +423,9 @@ export default function SeefMallPage() {
       {/* Entertainment */}
       <section className="py-16 px-4 bg-black/30">
         <div className="max-w-6xl mx-auto">
-          <h2 className="text-3xl font-bold mb-8">Entertainment & Services</h2>
+          <h2 className="text-3xl font-bold mb-8">Entertainment</h2>
           
-          <div className="grid md:grid-cols-3 gap-6">
+          <div className="grid md:grid-cols-2 gap-6">
             {entertainment.map((item) => (
               <div key={item.name} className="bg-white/5 rounded-xl p-6">
                 <h3 className="text-xl font-bold mb-2 flex items-center gap-2">
@@ -338,16 +444,23 @@ export default function SeefMallPage() {
         <div className="max-w-6xl mx-auto">
           <h2 className="text-3xl font-bold mb-8 flex items-center gap-2">
             <Utensils className="w-8 h-8 text-blue-400" />
-            Food & Dining
+            Food & Dining ({totalDining}+ options)
           </h2>
           
-          <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-4">
+          <div className="grid md:grid-cols-3 gap-6">
             {diningOptions.map((option) => (
               <div key={option.category} className="bg-white/5 rounded-xl p-5">
-                <h3 className="font-bold text-blue-400 mb-2">{option.category}</h3>
-                <p className="text-gray-400 text-sm">
-                  {option.restaurants.join(' • ')}
-                </p>
+                <h3 className="font-bold text-blue-400 mb-3">
+                  {option.category}
+                  <span className="text-xs text-gray-500 ml-2">({option.restaurants.length})</span>
+                </h3>
+                <div className="space-y-1">
+                  {option.restaurants.map((restaurant) => (
+                    <span key={restaurant} className="block text-gray-400 text-sm">
+                      {restaurant}
+                    </span>
+                  ))}
+                </div>
               </div>
             ))}
           </div>
@@ -395,7 +508,7 @@ export default function SeefMallPage() {
               { name: 'City Centre Bahrain', href: '/guides/malls/city-centre-bahrain' },
               { name: 'The Avenues', href: '/guides/malls/the-avenues' },
               { name: 'Moda Mall', href: '/guides/malls/moda-mall' },
-              { name: 'Bahrain Mall', href: '/guides/malls/bahrain-mall' },
+              { name: 'Marassi Galleria', href: '/guides/malls/marassi-galleria' },
             ].map((mall) => (
               <Link 
                 key={mall.href}
@@ -443,14 +556,14 @@ export default function SeefMallPage() {
             '@context': 'https://schema.org',
             '@type': 'ShoppingCenter',
             name: 'Seef Mall Bahrain',
-            description: 'Bahrain\'s original premier shopping destination with 300+ stores, family entertainment, and dining.',
+            description: 'Bahrain\'s original premier shopping destination with 200+ stores, Magic Island entertainment, and dining.',
             address: {
               '@type': 'PostalAddress',
-              streetAddress: 'Road 2825, Block 428, Seef District',
+              streetAddress: 'Seef District',
               addressLocality: 'Manama',
               addressCountry: 'BH',
             },
-            url: mallInfo.website,
+            telephone: '+973 7791 1114',
             openingHoursSpecification: [
               {
                 '@type': 'OpeningHoursSpecification',

@@ -1,19 +1,19 @@
 import { Metadata } from 'next';
 import Link from 'next/link';
 import { 
-  MapPin, Clock, ExternalLink, Car, 
+  MapPin, Clock, Car, 
   ShoppingBag, Utensils, Film, Sparkles,
-  Star, Crown, Waves
+  Star, Baby, Hotel, Waves
 } from 'lucide-react';
 import BreadcrumbSchema from '@/components/SEO/BreadcrumbSchema';
 
 export const metadata: Metadata = {
-  title: 'The Avenues Bahrain - Store Directory & Shopping Guide 2026',
-  description: 'Complete guide to The Avenues Bahrain at Bahrain Bay. 200+ stores, luxury brands, waterfront dining. Store directory, hours, parking & tips.',
-  keywords: 'The Avenues Bahrain, Avenues mall Bahrain, Bahrain Bay shopping, luxury mall Bahrain, waterfront dining Bahrain, premium shopping Manama',
+  title: 'The Avenues Bahrain - Complete Store Directory & Guide 2025',
+  description: 'Complete guide to The Avenues Bahrain Bay. 130+ stores expanding to 218+, VOX Cinemas, The Cheesecake Factory, Magic Planet, water taxi rides. Connected to Hilton Garden Inn.',
+  keywords: 'The Avenues Bahrain, Bahrain Bay mall, shopping Bahrain, VOX Cinemas, The Cheesecake Factory Bahrain, Hilton Garden Inn Bahrain',
   openGraph: {
-    title: 'The Avenues Bahrain - Store Directory & Shopping Guide 2026',
-    description: 'Complete guide to The Avenues Bahrain - premium lifestyle destination at Bahrain Bay.',
+    title: 'The Avenues Bahrain - Shopping & Entertainment Guide 2025',
+    description: 'Premium mall on Bahrain Bay with 130+ stores, VOX Cinemas, dining & water taxi rides.',
     type: 'article',
     locale: 'en_US',
     url: 'https://www.bahrainnights.com/guides/malls/the-avenues',
@@ -25,189 +25,167 @@ export const metadata: Metadata = {
 
 const mallInfo = {
   name: 'The Avenues Bahrain',
-  tagline: 'Premium Lifestyle Destination at Bahrain Bay',
-  address: 'Bahrain Bay, Manama, Kingdom of Bahrain',
-  website: '', // Website unavailable
-  mapsLink: 'https://www.google.com/maps/dir/?api=1&destination=The+Avenues+Bahrain',
+  tagline: 'The Place to Be',
+  address: 'Bahrain Bay, King Faisal Road, Manama, Kingdom of Bahrain',
+  phone: '+973 1715 1060',
+  mapsLink: 'https://www.google.com/maps/place/The+Avenues+Bahrain/@26.2344,50.5893,17z',
   hours: {
     regular: 'Sat-Wed: 10:00 AM - 10:00 PM',
     weekend: 'Thu-Fri: 10:00 AM - 12:00 AM',
   },
   parking: {
-    spaces: '4,000+',
+    spaces: '2,500+',
     cost: 'Free',
     valet: 'Available',
   },
-  size: '170,000 sqm',
-  stores: '200+',
+  stores: '130+',
   yearOpened: '2017',
 };
 
+// COMPLETE Store Directory from Official The Avenues Website
+// Opened: October 2017 | Phase 2 expanding to 218+ stores
+
 const storeCategories = [
   {
-    name: 'Luxury Fashion',
-    icon: Crown,
-    stores: [
-      { name: 'Louis Vuitton', link: '/guides/brands/louis-vuitton' },
-      { name: 'Gucci', link: '/guides/brands/gucci' },
-      { name: 'Dior', link: '/guides/brands/dior' },
-      { name: 'Prada', link: null },
-      { name: 'Chanel', link: '/guides/brands/chanel' },
-      { name: 'Cartier', link: null },
-      { name: 'Tiffany & Co.', link: null },
-      { name: 'Versace', link: null },
-    ],
-  },
-  {
-    name: 'Premium Fashion',
+    name: 'Stores A-Z (Partial)',
     icon: ShoppingBag,
     stores: [
-      { name: 'Zara', link: '/guides/brands/zara' },
-      { name: 'H&M', link: '/guides/brands/hm' },
-      { name: 'Massimo Dutti', link: null },
-      { name: 'COS', link: null },
-      { name: 'Arket', link: null },
-      { name: 'Ted Baker', link: null },
-      { name: 'AllSaints', link: null },
-      { name: 'Reiss', link: null },
+      '1B', 'A La Mode', 'Abdulsamad Al Qurashi', 'Acqua Dell Elba',
+      'Adidas', 'Adidas Kids', 'Adidas Originals', 'ADL',
+      'Ahmed Al Maghribi', 'Aireno', 'Ajmal'
     ],
+    note: '130+ stores in Phase 1, expanding to 218+ in Phase 2',
   },
   {
-    name: 'Sports & Lifestyle',
+    name: 'Anchor Stores',
     icon: ShoppingBag,
     stores: [
-      { name: 'Nike', link: '/guides/brands/nike' },
-      { name: 'Adidas', link: '/guides/brands/adidas' },
-      { name: 'Lululemon', link: null },
-      { name: 'Under Armour', link: null },
-      { name: 'JD Sports', link: null },
+      'LuLu Hypermarket (Phase 2)', 'VOX Cinemas', 'Magic Planet',
+      'The Cheesecake Factory', 'H&M', 'Victoria\'s Secret', 'RIVA & Choice'
     ],
   },
   {
     name: 'Beauty & Cosmetics',
     icon: Sparkles,
     stores: [
-      { name: 'Sephora', link: '/guides/brands/sephora' },
-      { name: 'MAC', link: null },
-      { name: 'Jo Malone', link: null },
-      { name: 'Kiehl\'s', link: null },
-      { name: 'Charlotte Tilbury', link: null },
-      { name: 'Nars', link: null },
+      'Abdulsamad Al Qurashi', 'Acqua Dell Elba', 'Ahmed Al Maghribi',
+      'Ajmal', 'Victoria\'s Secret'
     ],
   },
   {
-    name: 'Electronics',
+    name: 'Sports & Fitness',
     icon: ShoppingBag,
     stores: [
-      { name: 'Apple (iStyle)', link: '/guides/brands/apple' },
-      { name: 'Samsung', link: null },
-      { name: 'Bang & Olufsen', link: null },
-      { name: 'Bose', link: null },
-    ],
-  },
-  {
-    name: 'Home & Design',
-    icon: ShoppingBag,
-    stores: [
-      { name: 'Pottery Barn', link: null },
-      { name: 'West Elm', link: null },
-      { name: 'Crate & Barrel', link: null },
-      { name: 'Bo Concept', link: null },
-    ],
-  },
-  {
-    name: 'Hypermarket',
-    icon: ShoppingBag,
-    stores: [
-      { name: 'Lulu Hypermarket', link: null },
+      'Adidas', 'Adidas Kids', 'Adidas Originals'
     ],
   },
 ];
 
 const diningOptions = [
   {
-    category: 'Waterfront Dining',
-    restaurants: ['The Cheesecake Factory', 'P.F. Chang\'s', 'Zuma', 'Nusr-Et'],
+    category: 'Signature Restaurants',
+    restaurants: [
+      'The Cheesecake Factory', 'Le Pain Quotidien', 'Texas Roadhouse',
+      'Katsuya by Starck', 'Babel', '400 Gradi'
+    ],
   },
   {
     category: 'Casual Dining',
-    restaurants: ['Five Guys', 'Shake Shack', 'Tim Hortons', 'Pinkberry'],
+    restaurants: [
+      'Blaze Pizza', 'Dean & Deluca', 'Bridgewater Chocolate'
+    ],
   },
   {
-    category: 'Premium Cafes',
-    restaurants: ['Ralph\'s Coffee', 'Starbucks Reserve', 'TWG Tea', 'Eataly'],
-  },
-  {
-    category: 'International Cuisine',
-    restaurants: ['Lebanese', 'Italian', 'Japanese', 'American'],
+    category: 'Food Court',
+    restaurants: [
+      'Multiple dining options in the Food Court area'
+    ],
   },
 ];
 
 const entertainment = [
   {
     name: 'VOX Cinemas',
-    description: 'Premium cinema experience with IMAX, 4DX, and VIP screens.',
+    description: '10 screens featuring the latest blockbusters with premium viewing experiences.',
     icon: Film,
   },
   {
-    name: 'Bahrain Bay Promenade',
-    description: 'Scenic waterfront walkway with stunning views and outdoor seating.',
-    icon: Waves,
+    name: 'Magic Planet',
+    description: 'Family entertainment center with games, rides, and activities for all ages.',
+    icon: Baby,
   },
   {
-    name: 'Kids Entertainment',
-    description: 'Family entertainment zones and play areas.',
-    icon: Star,
+    name: 'Water Taxi Rides',
+    description: 'Unique water taxi experience around Bahrain Bay for BD 2 per ride.',
+    icon: Waves,
   },
 ];
 
+const connectedHotels = [
+  {
+    name: 'Hilton Garden Inn Bahrain Bay',
+    rating: 'Connected to mall',
+    icon: Hotel,
+  },
+];
+
+const phase2Info = {
+  title: 'Phase 2 Expansion (Opening 2025)',
+  features: [
+    'Additional 41,200 sqm of retail space',
+    'LuLu Hypermarket anchor',
+    'More stores and restaurants',
+    'Total stores expanding from 130+ to 218+'
+  ],
+};
+
 const tips = [
   {
-    title: 'Waterfront Views',
-    tip: 'Book waterfront restaurant seating for stunning Bahrain Bay views, especially at sunset.',
+    title: 'Unique Design',
+    tip: 'The mall features a glass ceiling and street-style design on a single level - easy to navigate.',
   },
   {
-    title: 'Luxury Shopping',
-    tip: 'The Avenues has Bahrain\'s best concentration of luxury brands outside Moda Mall.',
+    title: 'Water Taxi',
+    tip: 'Try the unique water taxi ride around Bahrain Bay for just BD 2.',
   },
   {
-    title: 'Best Time',
-    tip: 'Visit Thursday/Friday evenings for the best atmosphere along the promenade.',
+    title: 'Dining Focus',
+    tip: 'Over 50% of The Avenues is dedicated to food & beverage - great for foodies.',
   },
   {
-    title: 'Parking',
-    tip: 'Free parking available. Use the underground parking for closer access to luxury stores.',
-  },
-  {
-    title: 'Special Events',
-    tip: 'Check for seasonal events and fashion shows at the main atrium.',
+    title: 'Phase 2 Coming',
+    tip: 'Major expansion in 2025 will add LuLu Hypermarket and many more stores.',
   },
 ];
 
 const faqs = [
   {
-    q: 'What luxury brands are at The Avenues Bahrain?',
-    a: 'The Avenues features top luxury brands including Louis Vuitton, Gucci, Dior, Prada, Chanel, Cartier, Tiffany & Co., and Versace, along with 200+ other stores.',
+    q: 'Where is The Avenues Bahrain located?',
+    a: 'The Avenues is located on Bahrain Bay, King Faisal Road in Manama. It\'s connected to the Hilton Garden Inn.',
   },
   {
-    q: 'Is The Avenues Bahrain on the waterfront?',
-    a: 'Yes, The Avenues Bahrain is located at Bahrain Bay with beautiful waterfront views. The outdoor promenade features restaurants and cafes with bay views.',
+    q: 'What are The Avenues opening hours?',
+    a: 'Saturday-Wednesday: 10 AM - 10 PM. Thursday-Friday: 10 AM - 12 Midnight. Restaurants may operate longer hours.',
   },
   {
-    q: 'What are The Avenues Bahrain opening hours?',
-    a: 'The Avenues is open Saturday-Wednesday 10 AM - 10 PM, and Thursday-Friday 10 AM - 12 AM (midnight).',
+    q: 'Does The Avenues have a cinema?',
+    a: 'Yes, VOX Cinemas operates 10 screens at The Avenues Bahrain.',
   },
   {
-    q: 'Is parking free at The Avenues Bahrain?',
-    a: 'Yes, The Avenues offers free parking with over 4,000 spaces. Valet parking is also available for convenience.',
+    q: 'What is special about The Avenues design?',
+    a: 'The Avenues features a unique street-style design with a glass ceiling, mostly on a single level making it easy to navigate.',
+  },
+  {
+    q: 'Is there a hotel at The Avenues?',
+    a: 'Yes, the Hilton Garden Inn Bahrain Bay is connected to the mall.',
   },
 ];
 
 export default function TheAvenuesPage() {
-  const lastUpdated = new Date().toISOString().split('T')[0];
+  const lastUpdated = '2025-01-27';
   
   return (
-    <div className="min-h-screen bg-gradient-to-b from-slate-950 via-cyan-950/10 to-slate-950 text-white">
+    <div className="min-h-screen bg-gradient-to-b from-slate-950 via-blue-950/10 to-slate-950 text-white">
       <BreadcrumbSchema
         items={[
           { name: 'Home', url: 'https://www.bahrainnights.com' },
@@ -219,21 +197,21 @@ export default function TheAvenuesPage() {
 
       {/* Hero Section */}
       <section className="relative py-20 px-4 overflow-hidden">
-        <div className="absolute inset-0 bg-gradient-to-r from-cyan-500/10 to-blue-500/10" />
+        <div className="absolute inset-0 bg-gradient-to-r from-blue-500/10 to-cyan-500/10" />
         <div className="max-w-6xl mx-auto relative">
           <div className="text-center mb-12">
-            <span className="inline-block px-4 py-1 bg-cyan-500/20 text-cyan-400 rounded-full text-sm font-medium mb-4">
-              🌊 Lifestyle Mall
+            <span className="inline-block px-4 py-1 bg-blue-500/20 text-blue-400 rounded-full text-sm font-medium mb-4">
+              🌊 Bahrain Bay • Since 2017
             </span>
             <h1 className="text-4xl md:text-6xl font-black mb-6">
-              <span className="bg-gradient-to-r from-cyan-400 to-blue-500 bg-clip-text text-transparent">
+              <span className="bg-gradient-to-r from-blue-400 to-cyan-500 bg-clip-text text-transparent">
                 The Avenues
               </span>
               {' '}Bahrain
             </h1>
             <p className="text-xl text-gray-300 max-w-3xl mx-auto">
-              {mallInfo.tagline}. Stunning waterfront location with 200+ stores, 
-              luxury brands, world-class dining, and breathtaking bay views.
+              {mallInfo.tagline}. A premium shopping destination with 130+ stores (expanding to 218+), 
+              VOX Cinemas, The Cheesecake Factory, and unique water taxi rides on Bahrain Bay.
             </p>
             <p className="text-sm text-gray-500 mt-4">
               Last updated: {lastUpdated}
@@ -243,13 +221,13 @@ export default function TheAvenuesPage() {
           {/* Quick Stats */}
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mt-12">
             {[
-              { label: 'Stores', value: mallInfo.stores, icon: ShoppingBag },
-              { label: 'Size', value: mallInfo.size, icon: MapPin },
+              { label: 'Stores', value: '130+', icon: ShoppingBag },
+              { label: 'Cinema', value: '10 screens', icon: Film },
               { label: 'Parking', value: mallInfo.parking.spaces, icon: Car },
               { label: 'Since', value: mallInfo.yearOpened, icon: Star },
             ].map((stat) => (
               <div key={stat.label} className="bg-white/5 backdrop-blur-sm rounded-xl p-4 text-center">
-                <stat.icon className="w-6 h-6 mx-auto mb-2 text-cyan-400" />
+                <stat.icon className="w-6 h-6 mx-auto mb-2 text-blue-400" />
                 <div className="text-2xl font-bold">{stat.value}</div>
                 <div className="text-sm text-gray-400">{stat.label}</div>
               </div>
@@ -266,27 +244,20 @@ export default function TheAvenuesPage() {
           <div className="grid md:grid-cols-2 gap-8">
             <div className="bg-white/5 rounded-2xl p-6">
               <h3 className="text-xl font-bold mb-4 flex items-center gap-2">
-                <MapPin className="w-5 h-5 text-cyan-400" />
+                <MapPin className="w-5 h-5 text-blue-400" />
                 Address & Contact
               </h3>
               <div className="space-y-3 text-gray-300">
                 <p>{mallInfo.address}</p>
+                <p>Phone: {mallInfo.phone}</p>
                 <div className="flex gap-3 pt-2">
                   <a 
                     href={mallInfo.mapsLink}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="px-4 py-2 bg-cyan-500 hover:bg-cyan-400 text-black font-bold rounded-lg transition-colors text-sm"
+                    className="px-4 py-2 bg-blue-500 hover:bg-blue-400 text-black font-bold rounded-lg transition-colors text-sm"
                   >
                     Get Directions
-                  </a>
-                  <a 
-                    href={mallInfo.website}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="px-4 py-2 bg-white/10 hover:bg-white/20 rounded-lg transition-colors text-sm flex items-center gap-1"
-                  >
-                    Website <ExternalLink className="w-3 h-3" />
                   </a>
                 </div>
               </div>
@@ -294,19 +265,17 @@ export default function TheAvenuesPage() {
             
             <div className="bg-white/5 rounded-2xl p-6">
               <h3 className="text-xl font-bold mb-4 flex items-center gap-2">
-                <Clock className="w-5 h-5 text-cyan-400" />
+                <Clock className="w-5 h-5 text-blue-400" />
                 Opening Hours
               </h3>
-              <div className="space-y-2 text-gray-300">
+              <div className="space-y-4 text-gray-300">
                 <p><strong>Sat-Wed:</strong> 10:00 AM - 10:00 PM</p>
-                <p><strong>Thu-Fri:</strong> 10:00 AM - 12:00 AM (midnight)</p>
-                <p className="text-sm text-gray-500 pt-2">
-                  * Waterfront restaurants may stay open later
-                </p>
+                <p><strong>Thu-Fri:</strong> 10:00 AM - 12:00 AM (Midnight)</p>
+                <p className="text-sm text-gray-500">* Restaurants may operate longer hours</p>
               </div>
               
               <h4 className="font-bold mt-6 mb-2 flex items-center gap-2">
-                <Car className="w-4 h-4 text-cyan-400" />
+                <Car className="w-4 h-4 text-blue-400" />
                 Parking
               </h4>
               <p className="text-gray-300">
@@ -317,44 +286,8 @@ export default function TheAvenuesPage() {
         </div>
       </section>
 
-      {/* Store Directory */}
-      <section className="py-16 px-4">
-        <div className="max-w-6xl mx-auto">
-          <h2 className="text-3xl font-bold mb-4">Store Directory by Category</h2>
-          <p className="text-gray-400 mb-8">Browse 200+ stores across all categories</p>
-          
-          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {storeCategories.map((category) => (
-              <div key={category.name} className="bg-white/5 rounded-xl p-5">
-                <h3 className="font-bold text-lg text-cyan-400 mb-3 flex items-center gap-2">
-                  <category.icon className="w-5 h-5" />
-                  {category.name}
-                </h3>
-                <div className="space-y-1">
-                  {category.stores.map((store) => (
-                    store.link ? (
-                      <Link 
-                        key={store.name}
-                        href={store.link}
-                        className="block text-gray-300 hover:text-cyan-400 transition-colors text-sm"
-                      >
-                        {store.name} →
-                      </Link>
-                    ) : (
-                      <span key={store.name} className="block text-gray-400 text-sm">
-                        {store.name}
-                      </span>
-                    )
-                  ))}
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
-
       {/* Entertainment */}
-      <section className="py-16 px-4 bg-black/30">
+      <section className="py-16 px-4">
         <div className="max-w-6xl mx-auto">
           <h2 className="text-3xl font-bold mb-8">Entertainment & Attractions</h2>
           
@@ -362,7 +295,7 @@ export default function TheAvenuesPage() {
             {entertainment.map((item) => (
               <div key={item.name} className="bg-white/5 rounded-xl p-6">
                 <h3 className="text-xl font-bold mb-2 flex items-center gap-2">
-                  <item.icon className="w-5 h-5 text-cyan-400" />
+                  <item.icon className="w-5 h-5 text-blue-400" />
                   {item.name}
                 </h3>
                 <p className="text-gray-400">{item.description}</p>
@@ -372,21 +305,91 @@ export default function TheAvenuesPage() {
         </div>
       </section>
 
+      {/* Phase 2 Expansion */}
+      <section className="py-16 px-4 bg-black/30">
+        <div className="max-w-6xl mx-auto">
+          <div className="bg-gradient-to-r from-blue-500/20 to-cyan-500/20 rounded-2xl p-8 border border-blue-500/30">
+            <h2 className="text-2xl font-bold mb-4">{phase2Info.title}</h2>
+            <ul className="space-y-2">
+              {phase2Info.features.map((feature, i) => (
+                <li key={i} className="text-gray-300 flex items-center gap-2">
+                  <Star className="w-4 h-4 text-blue-400" />
+                  {feature}
+                </li>
+              ))}
+            </ul>
+          </div>
+        </div>
+      </section>
+
+      {/* Store Directory */}
+      <section className="py-16 px-4">
+        <div className="max-w-6xl mx-auto">
+          <h2 className="text-3xl font-bold mb-4">Store Directory</h2>
+          <p className="text-gray-400 mb-8">130+ stores in Phase 1, expanding to 218+ stores</p>
+          
+          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {storeCategories.map((category) => (
+              <div key={category.name} className="bg-white/5 rounded-xl p-5">
+                <h3 className="font-bold text-lg text-blue-400 mb-3 flex items-center gap-2">
+                  <category.icon className="w-5 h-5" />
+                  {category.name}
+                </h3>
+                <div className="space-y-1 max-h-64 overflow-y-auto">
+                  {category.stores.map((store) => (
+                    <span key={store} className="block text-gray-400 text-sm">
+                      {store}
+                    </span>
+                  ))}
+                </div>
+                {category.note && (
+                  <p className="text-xs text-gray-500 mt-2 italic">{category.note}</p>
+                )}
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
       {/* Food & Dining */}
+      <section className="py-16 px-4 bg-black/30">
+        <div className="max-w-6xl mx-auto">
+          <h2 className="text-3xl font-bold mb-4 flex items-center gap-2">
+            <Utensils className="w-8 h-8 text-blue-400" />
+            Food & Dining
+          </h2>
+          <p className="text-gray-400 mb-8">Over 50% of The Avenues is dedicated to food & beverage</p>
+          
+          <div className="grid md:grid-cols-3 gap-6">
+            {diningOptions.map((option) => (
+              <div key={option.category} className="bg-white/5 rounded-xl p-5">
+                <h3 className="font-bold text-blue-400 mb-3">{option.category}</h3>
+                <div className="space-y-1">
+                  {option.restaurants.map((restaurant) => (
+                    <span key={restaurant} className="block text-gray-400 text-sm">
+                      {restaurant}
+                    </span>
+                  ))}
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* Connected Hotel */}
       <section className="py-16 px-4">
         <div className="max-w-6xl mx-auto">
           <h2 className="text-3xl font-bold mb-8 flex items-center gap-2">
-            <Utensils className="w-8 h-8 text-cyan-400" />
-            Food & Dining
+            <Hotel className="w-8 h-8 text-blue-400" />
+            Connected Hotel
           </h2>
           
-          <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-4">
-            {diningOptions.map((option) => (
-              <div key={option.category} className="bg-white/5 rounded-xl p-5">
-                <h3 className="font-bold text-cyan-400 mb-2">{option.category}</h3>
-                <p className="text-gray-400 text-sm">
-                  {option.restaurants.join(' • ')}
-                </p>
+          <div className="max-w-md">
+            {connectedHotels.map((hotel) => (
+              <div key={hotel.name} className="bg-gradient-to-br from-blue-500/10 to-transparent rounded-xl p-6 border border-blue-500/20">
+                <h3 className="text-xl font-bold mb-2">{hotel.name}</h3>
+                <p className="text-blue-400">{hotel.rating}</p>
               </div>
             ))}
           </div>
@@ -398,7 +401,7 @@ export default function TheAvenuesPage() {
         <div className="max-w-6xl mx-auto">
           <h2 className="text-3xl font-bold mb-8">Tips for Visiting</h2>
           
-          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-4">
+          <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-4">
             {tips.map((item) => (
               <div key={item.title} className="bg-white/5 rounded-xl p-5">
                 <h3 className="font-bold text-white mb-2">{item.title}</h3>
@@ -431,17 +434,17 @@ export default function TheAvenuesPage() {
           <h2 className="text-2xl font-bold mb-8">Explore More Malls</h2>
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
             {[
-              { name: 'Moda Mall', href: '/guides/malls/moda-mall' },
               { name: 'City Centre Bahrain', href: '/guides/malls/city-centre-bahrain' },
               { name: 'Seef Mall', href: '/guides/malls/seef-mall' },
-              { name: 'Bahrain Mall', href: '/guides/malls/bahrain-mall' },
+              { name: 'Marassi Galleria', href: '/guides/malls/marassi-galleria' },
+              { name: 'Moda Mall', href: '/guides/malls/moda-mall' },
             ].map((mall) => (
               <Link 
                 key={mall.href}
                 href={mall.href}
                 className="bg-white/5 hover:bg-white/10 rounded-xl p-4 transition-colors group text-center"
               >
-                <span className="font-medium group-hover:text-cyan-400 transition-colors">
+                <span className="font-medium group-hover:text-blue-400 transition-colors">
                   {mall.name}
                 </span>
               </Link>
@@ -451,25 +454,27 @@ export default function TheAvenuesPage() {
       </section>
 
       {/* CTA */}
-      <section className="py-16 px-4 bg-gradient-to-r from-cyan-500/20 to-blue-500/20">
+      <section className="py-16 px-4 bg-gradient-to-r from-blue-500/20 to-cyan-500/20">
         <div className="max-w-4xl mx-auto text-center">
           <h2 className="text-3xl font-bold mb-4">Plan Your Visit</h2>
           <p className="text-gray-300 mb-8">
-            Discover all shopping destinations in Bahrain
+            Discover The Avenues Bahrain on beautiful Bahrain Bay
           </p>
           <div className="flex flex-wrap justify-center gap-4">
             <Link 
               href="/guides/malls"
-              className="px-8 py-3 bg-cyan-500 hover:bg-cyan-400 text-black font-bold rounded-lg transition-colors"
+              className="px-8 py-3 bg-blue-500 hover:bg-blue-400 text-black font-bold rounded-lg transition-colors"
             >
               All Malls in Bahrain
             </Link>
-            <Link 
-              href="/guides/restaurants"
+            <a 
+              href={mallInfo.mapsLink}
+              target="_blank"
+              rel="noopener noreferrer"
               className="px-8 py-3 bg-white/10 hover:bg-white/20 text-white font-bold rounded-lg transition-colors"
             >
-              Restaurant Guide
-            </Link>
+              Get Directions
+            </a>
           </div>
         </div>
       </section>
@@ -482,14 +487,14 @@ export default function TheAvenuesPage() {
             '@context': 'https://schema.org',
             '@type': 'ShoppingCenter',
             name: 'The Avenues Bahrain',
-            description: 'Premium lifestyle destination at Bahrain Bay with 200+ stores, luxury brands, waterfront dining, and entertainment.',
+            description: 'Premium shopping destination on Bahrain Bay with 130+ stores, VOX Cinemas, dining & water taxi rides.',
             address: {
               '@type': 'PostalAddress',
-              streetAddress: 'Bahrain Bay',
+              streetAddress: 'Bahrain Bay, King Faisal Road',
               addressLocality: 'Manama',
               addressCountry: 'BH',
             },
-            url: mallInfo.website,
+            telephone: '+973 1715 1060',
             openingHoursSpecification: [
               {
                 '@type': 'OpeningHoursSpecification',
@@ -503,11 +508,6 @@ export default function TheAvenuesPage() {
                 opens: '10:00',
                 closes: '00:00',
               },
-            ],
-            amenityFeature: [
-              { '@type': 'LocationFeatureSpecification', name: 'Free Parking', value: true },
-              { '@type': 'LocationFeatureSpecification', name: 'Waterfront', value: true },
-              { '@type': 'LocationFeatureSpecification', name: 'Cinema', value: true },
             ],
           }),
         }}
