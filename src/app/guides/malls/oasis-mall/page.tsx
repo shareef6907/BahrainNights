@@ -1,7 +1,7 @@
 import { Metadata } from 'next';
 import Link from 'next/link';
 import { 
-  MapPin, Clock, Phone, ExternalLink, Car, 
+  MapPin, Clock, ExternalLink, Car, 
   ShoppingBag, Utensils, Film, Users, Sparkles,
   Dumbbell, Baby, Star, Coffee
 } from 'lucide-react';
@@ -27,7 +27,6 @@ const mallInfo = {
   name: 'Oasis Mall',
   tagline: 'Juffair\'s Convenient Neighborhood Shopping Destination',
   address: 'Juffair, Capital Governorate, Kingdom of Bahrain',
-  phone: '+973 17 000 000',
   website: 'https://www.oasismall.bh',
   mapsLink: 'https://www.google.com/maps/dir/?api=1&destination=Oasis+Mall+Juffair+Bahrain',
   hours: {
@@ -265,10 +264,6 @@ export default function OasisMallPage() {
               </h3>
               <div className="space-y-3 text-gray-300">
                 <p>{mallInfo.address}</p>
-                <p className="flex items-center gap-2">
-                  <Phone className="w-4 h-4 text-gray-500" />
-                  {mallInfo.phone}
-                </p>
                 <div className="flex gap-3 pt-2">
                   <a 
                     href={mallInfo.mapsLink}
@@ -487,7 +482,6 @@ export default function OasisMallPage() {
               addressLocality: 'Manama',
               addressCountry: 'BH',
             },
-            telephone: mallInfo.phone,
             url: mallInfo.website,
             openingHoursSpecification: [
               {

@@ -1,7 +1,7 @@
 import { Metadata } from 'next';
 import Link from 'next/link';
 import { 
-  MapPin, Clock, Phone, ExternalLink, Car, 
+  MapPin, Clock, ExternalLink, Car, 
   ShoppingBag, Utensils, Gem, Sparkles,
   Star, Building2, Crown
 } from 'lucide-react';
@@ -27,7 +27,6 @@ const mallInfo = {
   name: 'Moda Mall',
   tagline: 'Bahrain\'s Exclusive Luxury Shopping Destination',
   address: 'Bahrain World Trade Center, King Faisal Highway, Manama, Bahrain',
-  phone: '+973 17 531 166',
   website: 'https://www.modamall.com.bh',
   mapsLink: 'https://www.google.com/maps/dir/?api=1&destination=Moda+Mall+Bahrain',
   hours: {
@@ -223,10 +222,6 @@ export default function ModaMallPage() {
               </h3>
               <div className="space-y-3 text-gray-300">
                 <p>{mallInfo.address}</p>
-                <p className="flex items-center gap-2">
-                  <Phone className="w-4 h-4 text-gray-500" />
-                  {mallInfo.phone}
-                </p>
                 <div className="flex gap-3 pt-2">
                   <a 
                     href={mallInfo.mapsLink}
@@ -426,7 +421,6 @@ export default function ModaMallPage() {
               addressLocality: 'Manama',
               addressCountry: 'BH',
             },
-            telephone: mallInfo.phone,
             url: mallInfo.website,
             openingHoursSpecification: [
               {

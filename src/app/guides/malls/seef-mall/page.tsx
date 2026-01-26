@@ -1,7 +1,7 @@
 import { Metadata } from 'next';
 import Link from 'next/link';
 import { 
-  MapPin, Clock, Phone, ExternalLink, Car, 
+  MapPin, Clock, ExternalLink, Car, 
   ShoppingBag, Utensils, Film, Users, Sparkles,
   Star, Baby, ShoppingCart
 } from 'lucide-react';
@@ -27,7 +27,6 @@ const mallInfo = {
   name: 'Seef Mall',
   tagline: 'Bahrain\'s Original Premier Shopping Destination',
   address: 'Road 2825, Block 428, Seef District, Manama, Bahrain',
-  phone: '+973 7791 1114',
   website: 'https://www.seefmall.com',
   mapsLink: 'https://www.google.com/maps/dir/?api=1&destination=Seef+Mall+Bahrain',
   hours: {
@@ -255,10 +254,6 @@ export default function SeefMallPage() {
               </h3>
               <div className="space-y-3 text-gray-300">
                 <p>{mallInfo.address}</p>
-                <p className="flex items-center gap-2">
-                  <Phone className="w-4 h-4 text-gray-500" />
-                  {mallInfo.phone}
-                </p>
                 <div className="flex gap-3 pt-2">
                   <a 
                     href={mallInfo.mapsLink}
@@ -477,7 +472,6 @@ export default function SeefMallPage() {
               addressLocality: 'Manama',
               addressCountry: 'BH',
             },
-            telephone: mallInfo.phone,
             url: mallInfo.website,
             openingHoursSpecification: [
               {

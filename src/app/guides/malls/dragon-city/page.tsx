@@ -1,7 +1,7 @@
 import { Metadata } from 'next';
 import Link from 'next/link';
 import { 
-  MapPin, Clock, Phone, ExternalLink, Car, 
+  MapPin, Clock, ExternalLink, Car, 
   ShoppingBag, Utensils, Users, Package,
   Lightbulb, Sofa, Wrench, Star, Building
 } from 'lucide-react';
@@ -27,7 +27,6 @@ const mallInfo = {
   name: 'Dragon City Bahrain',
   tagline: 'Bahrain\'s Largest Wholesale & Retail Trading Center',
   address: 'Diyar Al Muharraq, Muharraq Governorate, Kingdom of Bahrain',
-  phone: '+973 17 000 000',
   website: 'https://www.dragoncity.bh',
   mapsLink: 'https://www.google.com/maps/dir/?api=1&destination=Dragon+City+Bahrain',
   hours: {
@@ -270,10 +269,6 @@ export default function DragonCityPage() {
               <div className="space-y-3 text-gray-300">
                 <p>{mallInfo.address}</p>
                 <p className="text-sm text-gray-400">Near Bahrain International Airport and Khalifa Bin Salman Port</p>
-                <p className="flex items-center gap-2">
-                  <Phone className="w-4 h-4 text-gray-500" />
-                  {mallInfo.phone}
-                </p>
                 <div className="flex gap-3 pt-2">
                   <a 
                     href={mallInfo.mapsLink}
@@ -492,7 +487,6 @@ export default function DragonCityPage() {
               addressLocality: 'Muharraq',
               addressCountry: 'BH',
             },
-            telephone: mallInfo.phone,
             url: mallInfo.website,
             openingHoursSpecification: [
               {

@@ -1,7 +1,7 @@
 import { Metadata } from 'next';
 import Link from 'next/link';
 import { 
-  MapPin, Clock, Phone, ExternalLink, Car, 
+  MapPin, Clock, ExternalLink, Car, 
   ShoppingBag, Utensils, Film, Users, Sparkles,
   Waves, Fish, Star, Building2, Hotel
 } from 'lucide-react';
@@ -27,7 +27,6 @@ const mallInfo = {
   name: 'Marassi Galleria',
   tagline: 'Bahrain\'s Premier Beachfront Luxury Destination',
   address: 'Diyar Al Muharraq, Muharraq, Kingdom of Bahrain',
-  phone: '+973 17 000 000',
   website: 'https://www.marassigalleria.com',
   mapsLink: 'https://www.google.com/maps/dir/?api=1&destination=Marassi+Galleria+Bahrain',
   hours: {
@@ -279,10 +278,6 @@ export default function MarassiGalleriaPage() {
               </h3>
               <div className="space-y-3 text-gray-300">
                 <p>{mallInfo.address}</p>
-                <p className="flex items-center gap-2">
-                  <Phone className="w-4 h-4 text-gray-500" />
-                  {mallInfo.phone}
-                </p>
                 <div className="flex gap-3 pt-2">
                   <a 
                     href={mallInfo.mapsLink}
@@ -501,7 +496,6 @@ export default function MarassiGalleriaPage() {
               addressLocality: 'Muharraq',
               addressCountry: 'BH',
             },
-            telephone: mallInfo.phone,
             url: mallInfo.website,
             openingHoursSpecification: [
               {
