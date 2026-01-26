@@ -396,13 +396,16 @@ https://bahrainnights.com
 Unsubscribe: https://bahrainnights.com/unsubscribe
 `;
 
-    return NextResponse.json({ 
+    const response = NextResponse.json({ 
       html: htmlContent,
       text: textContent,
       eventsCount: events.length,
       internationalCount: intlEvents.length,
       subject: `🔥 What's Happening in Bahrain - ${monthName}`,
+      version: 'v2-html-template',
     });
+    response.headers.set('Cache-Control', 'no-store, no-cache, must-revalidate');
+    return response;
   } catch (error) {
     console.error('Newsletter generation error:', error);
     return NextResponse.json({ 
