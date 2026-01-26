@@ -85,7 +85,7 @@ const faqs = [
   },
   {
     q: 'Is Hermès cheaper in Bahrain?',
-    a: 'Bahrain has no VAT, making Hermès products competitively priced. However, Hermès maintains consistent global pricing, so savings come primarily from tax differences.',
+    a: 'Hermès maintains consistent global pricing across all markets. Prices in Bahrain are generally comparable to Dubai and other GCC countries.',
   },
   {
     q: 'What is the most affordable Hermès item?',
@@ -136,7 +136,6 @@ export default function HermesBahrainPage() {
               { label: 'Boutiques', value: '2', icon: ShoppingBag },
               { label: 'Locations', value: 'Moda Mall, Marassi', icon: MapPin },
               { label: 'Since', value: '1837', icon: Star },
-              { label: 'VAT', value: '0%', icon: Sparkles },
             ].map((stat) => (
               <div key={stat.label} className="bg-white/5 backdrop-blur-sm rounded-xl p-4 text-center">
                 <stat.icon className="w-6 h-6 mx-auto mb-2 text-orange-400" />

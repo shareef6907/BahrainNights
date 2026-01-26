@@ -83,8 +83,8 @@ const shoppingTips = [
     tip: 'Dior releases unique cruise collections. Ask about limited edition items exclusive to the Middle East.',
   },
   {
-    title: 'Tax-Free Luxury',
-    tip: 'With 0% VAT in Bahrain, luxury purchases are competitively priced compared to taxed markets.',
+    title: 'Personal Styling',
+    tip: 'Book a private appointment for personalized styling advice and first access to new arrivals.',
   },
 ];
 
@@ -157,7 +157,6 @@ export default function DiorBahrainPage() {
               { label: 'Boutiques', value: '2', icon: ShoppingBag },
               { label: 'Beauty Counters', value: '3+', icon: Sparkles },
               { label: 'Locations', value: 'Moda Mall, Marassi', icon: MapPin },
-              { label: 'VAT', value: '0%', icon: Star },
             ].map((stat) => (
               <div key={stat.label} className="bg-white/5 backdrop-blur-sm rounded-xl p-4 text-center">
                 <stat.icon className="w-6 h-6 mx-auto mb-2 text-gray-400" />

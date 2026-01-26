@@ -97,7 +97,7 @@ const faqs = [
   },
   {
     q: 'Is Gucci cheaper in Bahrain than Europe?',
-    a: 'Bahrain has no VAT, which can make items more affordable compared to European prices. However, prices are generally aligned with global pricing minus local taxes.',
+    a: 'Gucci prices in Bahrain are generally aligned with regional GCC pricing. Prices may differ from Europe due to regional pricing strategies and currency fluctuations.',
   },
   {
     q: 'Does Gucci Bahrain have the latest collections?',
@@ -148,7 +148,6 @@ export default function GucciBahrainPage() {
               { label: 'Stores', value: '3', icon: ShoppingBag },
               { label: 'Flagship', value: 'Moda Mall', icon: Star },
               { label: 'Also At', value: 'City Centre, Marassi', icon: MapPin },
-              { label: 'VAT', value: '0%', icon: Sparkles },
             ].map((stat) => (
               <div key={stat.label} className="bg-white/5 backdrop-blur-sm rounded-xl p-4 text-center">
                 <stat.icon className="w-6 h-6 mx-auto mb-2 text-green-400" />

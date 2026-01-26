@@ -69,8 +69,8 @@ const shoppingTips = [
     tip: 'For personalized attention and less crowds, visit Monday to Wednesday mornings.',
   },
   {
-    title: 'Duty-Free Advantage',
-    tip: 'Bahrain has no VAT, making luxury purchases more attractive than many other destinations.',
+    title: 'Seasonal Collections',
+    tip: 'Chanel releases new collections seasonally. Ask about limited edition pieces exclusive to the Middle East.',
   },
   {
     title: 'New Collections',
@@ -100,7 +100,7 @@ const faqs = [
   },
   {
     q: 'Is Chanel cheaper in Bahrain?',
-    a: 'Bahrain has no VAT, which can make luxury items more affordable compared to countries with high sales tax. Prices are generally comparable to Dubai but may be lower than Europe.',
+    a: 'Chanel prices in Bahrain are generally comparable to Dubai and other GCC countries. Prices may vary from Europe due to regional pricing strategies.',
   },
   {
     q: 'Does Chanel Bahrain have the full collection?',
@@ -151,7 +151,6 @@ export default function ChanelBahrainPage() {
               { label: 'Boutiques', value: '2', icon: ShoppingBag },
               { label: 'Beauty Counters', value: '2+', icon: Sparkles },
               { label: 'Locations', value: 'Moda Mall, Marassi', icon: MapPin },
-              { label: 'VAT', value: '0%', icon: Star },
             ].map((stat) => (
               <div key={stat.label} className="bg-white/5 backdrop-blur-sm rounded-xl p-4 text-center">
                 <stat.icon className="w-6 h-6 mx-auto mb-2 text-white/70" />

@@ -66,8 +66,8 @@ const shoppingTips = [
     tip: 'Louis Vuitton offers complimentary hot stamping to personalize your leather goods with initials. Ask in-store.',
   },
   {
-    title: 'Tax-Free Shopping',
-    tip: 'Bahrain has 0% VAT, making luxury purchases more attractive. No tax refund paperwork needed.',
+    title: 'Personal Shopping',
+    tip: 'Request a dedicated sales associate for a more personalized shopping experience with expert advice.',
   },
   {
     title: 'New Arrivals',
@@ -97,7 +97,7 @@ const faqs = [
   },
   {
     q: 'Is Louis Vuitton cheaper in Bahrain?',
-    a: 'Bahrain has no VAT (0%), which can make luxury items more affordable than countries with high sales tax. Prices are generally similar to Dubai and other GCC countries.',
+    a: 'Louis Vuitton prices in Bahrain are generally similar to Dubai and other GCC countries. Prices are aligned with regional pricing standards.',
   },
   {
     q: 'Does Louis Vuitton Bahrain offer personalization?',
@@ -148,7 +148,6 @@ export default function LouisVuittonBahrainPage() {
               { label: 'Stores', value: '3', icon: ShoppingBag },
               { label: 'Flagship', value: 'Moda Mall', icon: Star },
               { label: 'Also At', value: 'City Centre, Marassi', icon: MapPin },
-              { label: 'VAT', value: '0%', icon: Sparkles },
             ].map((stat) => (
               <div key={stat.label} className="bg-white/5 backdrop-blur-sm rounded-xl p-4 text-center">
                 <stat.icon className="w-6 h-6 mx-auto mb-2 text-amber-400" />
