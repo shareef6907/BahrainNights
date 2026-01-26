@@ -92,7 +92,7 @@ export const SEO_CONFIG = {
       email: 'help@bahrainnights.com'
     },
     sameAs: [
-      'https://www.instagram.com/bahrainnights',
+      'https://www.instagram.com/bh.nights',
       'https://www.facebook.com/bahrainnights',
       'https://twitter.com/bahrainnights'
     ]

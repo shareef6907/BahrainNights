@@ -314,7 +314,7 @@ export async function GET() {
                     <p style="margin: 0; color: #D1D5DB; font-size: 14px; line-height: 1.6;">
                       <strong style="color: #ffffff;">🎫 Pro tip:</strong> Book tickets early for popular events - they sell out fast!<br/><br/>
                       <strong style="color: #ffffff;">🍽️ Dining hack:</strong> Weekday lunches = shorter waits at new restaurants.<br/><br/>
-                      <strong style="color: #ffffff;">📱 Stay updated:</strong> Follow us on Instagram <a href="https://instagram.com/bahrainnights" style="color: #F59E0B;">@bahrainnights</a>
+                      <strong style="color: #ffffff;">📱 Stay updated:</strong> Follow us on Instagram <a href="https://instagram.com/bh.nights" style="color: #F59E0B;">@bh.nights</a>
                     </p>
                   </td>
                 </tr>
@@ -329,7 +329,7 @@ export async function GET() {
               <table cellpadding="0" cellspacing="0" style="margin: 0 auto 20px auto;">
                 <tr>
                   <td style="padding: 0 10px;">
-                    <a href="https://instagram.com/bahrainnights" style="display: inline-block; width: 40px; height: 40px; background: #1E1E2E; border-radius: 10px; line-height: 40px; text-align: center; text-decoration: none; font-size: 18px;">📸</a>
+                    <a href="https://instagram.com/bh.nights" style="display: inline-block; width: 40px; height: 40px; background: #1E1E2E; border-radius: 10px; line-height: 40px; text-align: center; text-decoration: none; font-size: 18px;">📸</a>
                   </td>
                   <td style="padding: 0 10px;">
                     <a href="https://twitter.com/bahaborababy" style="display: inline-block; width: 40px; height: 40px; background: #1E1E2E; border-radius: 10px; line-height: 40px; text-align: center; text-decoration: none; font-size: 18px;">🐦</a>
@@ -387,7 +387,7 @@ ${intlEvents.map((e: any) => `• ${e.title} - ${e.city || e.country} (${formatD
 💡 INSIDER TIPS
 • Book tickets early - popular events sell out fast!
 • Weekday lunches = shorter waits at new restaurants
-• Follow us on Instagram @bahrainnights
+• Follow us on Instagram @bh.nights
 
 ---
 BahrainNights - Your guide to what's happening

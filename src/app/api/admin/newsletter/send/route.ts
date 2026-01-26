@@ -19,21 +19,22 @@ async function sendWithResend(to: string[], subject: string, html: string, text:
 
   const results = [];
   for (const batch of batches) {
+    // Resend batch API expects an array directly, not wrapped in an object
+    const emailPayload = batch.map(email => ({
+      from: 'BahrainNights <newsletter@bahrainnights.com>',
+      to: email,
+      subject,
+      html,
+      text,
+    }));
+
     const response = await fetch('https://api.resend.com/emails/batch', {
       method: 'POST',
       headers: {
         'Authorization': `Bearer ${RESEND_API_KEY}`,
         'Content-Type': 'application/json',
       },
-      body: JSON.stringify({
-        emails: batch.map(email => ({
-          from: 'BahrainNights <newsletter@bahrainnights.com>',
-          to: email,
-          subject,
-          html,
-          text,
-        })),
-      }),
+      body: JSON.stringify(emailPayload),
     });
 
     if (!response.ok) {
