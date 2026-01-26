@@ -2,18 +2,18 @@ import { Metadata } from 'next';
 import Link from 'next/link';
 import { 
   MapPin, Clock, Phone, ExternalLink, Car, 
-  ShoppingBag, Utensils, Gamepad2, Baby,
-  Star, Snowflake, ShoppingCart
+  ShoppingBag, Utensils, Baby,
+  Star, ShoppingCart
 } from 'lucide-react';
 import BreadcrumbSchema from '@/components/SEO/BreadcrumbSchema';
 
 export const metadata: Metadata = {
   title: 'Bahrain Mall - Store Directory & Shopping Guide 2026',
-  description: 'Complete guide to Bahrain Mall in Sanabis. 120+ stores, ice skating, bowling, LuLu Hypermarket. Store directory, opening hours, parking & family tips.',
-  keywords: 'Bahrain Mall, Bahrain Mall Sanabis, ice skating Bahrain, family mall Bahrain, budget shopping Bahrain, LuLu Hypermarket Bahrain',
+  description: 'Complete guide to Bahrain Mall in Sanabis. 120+ stores, Carrefour Hypermarket, Fun Zone, family dining. Store directory, opening hours, parking & tips.',
+  keywords: 'Bahrain Mall, Bahrain Mall Sanabis, Carrefour Bahrain, family mall Bahrain, budget shopping Bahrain, shopping mall Manama',
   openGraph: {
     title: 'Bahrain Mall - Store Directory & Shopping Guide 2026',
-    description: 'Complete guide to Bahrain Mall - family-friendly shopping with ice skating, bowling & entertainment.',
+    description: 'Complete guide to Bahrain Mall - family-friendly shopping with Carrefour, Fun Zone & great value brands.',
     type: 'article',
     locale: 'en_US',
     url: 'https://www.bahrainnights.com/guides/malls/bahrain-mall',
@@ -35,11 +35,11 @@ const mallInfo = {
     weekend: 'Thu-Fri: 9:00 AM - 11:00 PM',
   },
   parking: {
-    spaces: '3,000+',
+    spaces: '1,600+',
     cost: 'Free',
     valet: 'Available',
   },
-  size: '60,000 sqm',
+  size: '70,000 sqm',
   stores: '120+',
   yearOpened: '2002',
 };
@@ -99,7 +99,7 @@ const storeCategories = [
     name: 'Hypermarket',
     icon: ShoppingCart,
     stores: [
-      { name: 'LuLu Hypermarket', link: null },
+      { name: 'Carrefour Hypermarket', link: null },
     ],
   },
 ];
@@ -125,70 +125,70 @@ const diningOptions = [
 
 const entertainment = [
   {
-    name: 'Ice Skating Rink',
-    description: 'Olympic-size ice skating rink - one of the best in Bahrain. Perfect for families and date nights.',
-    icon: Snowflake,
-  },
-  {
-    name: 'Bowling Center',
-    description: 'Multi-lane bowling alley with modern facilities and cosmic bowling nights.',
-    icon: Gamepad2,
-  },
-  {
     name: 'Fun Zone / Play Area',
-    description: 'Kids entertainment center with games, rides, and play areas.',
+    description: 'Kids entertainment center with games, rides, and play areas for families.',
     icon: Baby,
   },
   {
-    name: 'LuLu Hypermarket',
-    description: 'One of the largest hypermarkets in Bahrain with groceries, fresh food, and electronics.',
+    name: 'Carrefour Hypermarket',
+    description: 'Large Carrefour hypermarket with groceries, fresh food, household items, and electronics.',
     icon: ShoppingCart,
+  },
+  {
+    name: 'Family Dining',
+    description: 'Wide variety of family restaurants and food court with affordable options.',
+    icon: Utensils,
+  },
+  {
+    name: 'Budget Fashion',
+    description: 'Great value fashion stores including Centrepoint, Max, Splash, and LC Waikiki.',
+    icon: ShoppingBag,
   },
 ];
 
 const tips = [
   {
     title: 'Best for Families',
-    tip: 'Bahrain Mall is ideal for families with kids due to ice skating, bowling, and play areas.',
+    tip: 'Bahrain Mall is ideal for families with its Fun Zone play areas and family-friendly dining.',
   },
   {
     title: 'Budget-Friendly',
     tip: 'Great for value shopping with stores like Centrepoint, Max, and LC Waikiki.',
   },
   {
-    title: 'Ice Skating',
-    tip: 'Book ice skating sessions in advance on weekends. Skate rental included in entry fee.',
+    title: 'Carrefour Hypermarket',
+    tip: 'Visit Carrefour for competitive prices on groceries, fresh food, and household items.',
   },
   {
-    title: 'LuLu Hypermarket',
-    tip: 'Visit LuLu for competitive prices on groceries and household items.',
+    title: 'Convenient Location',
+    tip: 'Centrally located in Sanabis, easy access from Manama and surrounding areas.',
   },
   {
     title: 'Parking',
-    tip: 'Free parking available. Use the rear entrance for easier access to LuLu.',
+    tip: 'Free parking available with 1,600+ spaces. Can get busy on weekends.',
   },
 ];
 
 const faqs = [
-  {
-    q: 'Does Bahrain Mall have ice skating?',
-    a: 'Yes, Bahrain Mall features a popular Olympic-size ice skating rink, one of the best in Bahrain. Skate rental is included in the entry fee.',
-  },
   {
     q: 'What are Bahrain Mall opening hours?',
     a: 'Bahrain Mall is open Saturday-Wednesday 9 AM - 10 PM, and Thursday-Friday 9 AM - 11 PM. Hours may vary during Ramadan.',
   },
   {
     q: 'Is parking free at Bahrain Mall?',
-    a: 'Yes, Bahrain Mall offers free parking with over 3,000 spaces available for visitors.',
+    a: 'Yes, Bahrain Mall offers free parking with over 1,600 spaces available for visitors.',
   },
   {
     q: 'Is Bahrain Mall good for families?',
-    a: 'Yes, Bahrain Mall is one of the most family-friendly malls in Bahrain with ice skating, bowling, kids play areas, and family dining options.',
+    a: 'Yes, Bahrain Mall is family-friendly with Fun Zone kids play areas, family dining options, and budget-friendly shopping.',
   },
   {
     q: 'Does Bahrain Mall have a hypermarket?',
-    a: 'Yes, Bahrain Mall features LuLu Hypermarket, one of the largest supermarkets in Bahrain with groceries, fresh food, electronics, and household items.',
+    a: 'Yes, Bahrain Mall features Carrefour Hypermarket with groceries, fresh food, electronics, and household items.',
+  },
+  {
+    q: 'What stores are in Bahrain Mall?',
+    a: 'Bahrain Mall has 120+ stores including Centrepoint, Max, Splash, LC Waikiki, Home Centre, Carrefour, and many more budget-friendly brands.',
   },
 ];
 
@@ -220,8 +220,8 @@ export default function BahrainMallPage() {
               </span>
             </h1>
             <p className="text-xl text-gray-300 max-w-3xl mx-auto">
-              {mallInfo.tagline}. Home to 120+ stores, ice skating rink, 
-              bowling, LuLu Hypermarket, and great value shopping.
+              {mallInfo.tagline}. Home to 120+ stores, Carrefour Hypermarket, 
+              Fun Zone for kids, and great value budget shopping.
             </p>
             <p className="text-sm text-gray-500 mt-4">
               Last updated: {lastUpdated}
@@ -232,7 +232,7 @@ export default function BahrainMallPage() {
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mt-12">
             {[
               { label: 'Stores', value: mallInfo.stores, icon: ShoppingBag },
-              { label: 'Ice Skating', value: 'Yes', icon: Snowflake },
+              { label: 'Carrefour', value: 'Yes', icon: ShoppingCart },
               { label: 'Parking', value: mallInfo.parking.spaces, icon: Car },
               { label: 'Since', value: mallInfo.yearOpened, icon: Star },
             ].map((stat) => (
@@ -474,7 +474,7 @@ export default function BahrainMallPage() {
             '@context': 'https://schema.org',
             '@type': 'ShoppingCenter',
             name: 'Bahrain Mall',
-            description: 'Family-friendly shopping mall with 120+ stores, ice skating rink, bowling, and LuLu Hypermarket.',
+            description: 'Family-friendly shopping mall with 120+ stores, Carrefour Hypermarket, and Fun Zone for kids.',
             address: {
               '@type': 'PostalAddress',
               streetAddress: 'Road 3804, Block 338, Sanabis',
@@ -499,8 +499,8 @@ export default function BahrainMallPage() {
             ],
             amenityFeature: [
               { '@type': 'LocationFeatureSpecification', name: 'Free Parking', value: true },
-              { '@type': 'LocationFeatureSpecification', name: 'Ice Skating', value: true },
-              { '@type': 'LocationFeatureSpecification', name: 'Bowling', value: true },
+              { '@type': 'LocationFeatureSpecification', name: 'Carrefour Hypermarket', value: true },
+              { '@type': 'LocationFeatureSpecification', name: 'Kids Play Area', value: true },
             ],
           }),
         }}
