@@ -134,7 +134,7 @@ export default function HermesBahrainPage() {
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mt-12">
             {[
               { label: 'Boutiques', value: '2', icon: ShoppingBag },
-              { label: 'Flagship', value: 'Moda Mall', icon: Star },
+              { label: '', value: 'Moda Mall', icon: MapPin },
               { label: '', value: 'Marassi Galleria', icon: MapPin },
               { label: 'Since', value: '1837', icon: Sparkles },
             ].map((stat, index) => (

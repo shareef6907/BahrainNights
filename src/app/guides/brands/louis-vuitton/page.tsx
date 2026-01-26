@@ -146,7 +146,7 @@ export default function LouisVuittonBahrainPage() {
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mt-12">
             {[
               { label: 'Stores', value: '3', icon: ShoppingBag },
-              { label: 'Flagship', value: 'Moda Mall', icon: Star },
+              { label: '', value: 'Moda Mall', icon: MapPin },
               { label: '', value: 'City Centre', icon: MapPin },
               { label: '', value: 'Marassi Galleria', icon: MapPin },
             ].map((stat, index) => (

@@ -150,7 +150,7 @@ export default function ChanelBahrainPage() {
             {[
               { label: 'Boutiques', value: '2', icon: ShoppingBag },
               { label: 'Beauty Counters', value: '2+', icon: Sparkles },
-              { label: 'Flagship', value: 'Moda Mall', icon: Star },
+              { label: '', value: 'Moda Mall', icon: MapPin },
               { label: '', value: 'Marassi Galleria', icon: MapPin },
             ].map((stat, index) => (
               <div key={`${stat.value}-${index}`} className="bg-white/5 backdrop-blur-sm rounded-xl p-4 text-center">
