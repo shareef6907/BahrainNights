@@ -50,13 +50,6 @@ const gyms = [
     mapsLink: 'https://www.google.com/maps/search/Al+Nakheel+Premium+Fitness+Bahrain+Bay',
   },
   {
-    name: 'Iron Park Gym',
-    area: 'Manama',
-    rating: 4.6,
-    reviews: 235,
-    mapsLink: 'https://www.google.com/maps/search/Iron+Park+Gym+Bahrain',
-  },
-  {
     name: 'Train Fitness',
     area: 'Manama',
     rating: 4.9,
