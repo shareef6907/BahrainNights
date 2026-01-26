@@ -299,9 +299,8 @@ export default function HomePageClient({ initialMovies, initialStats, initialTod
       href: '/explore',
       dropdown: [
         { name: t.nav.shoppingMarkets, icon: '🛍️', href: '/explore/shopping' },
-        { name: t.nav.hotelsStaycations, icon: '🏨', href: '/explore/hotels' },
         { name: t.nav.spasWellness, icon: '💆', href: '/explore/spas' },
-        { name: t.nav.communityEvents, icon: '🤝', href: '/explore/community' },
+        { name: t.nav.hotelsStaycations, icon: '🏨', href: '/explore/hotels' },
       ]
     },
     {

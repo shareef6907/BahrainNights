@@ -9,7 +9,7 @@ import {
   ShoppingBag,
   Ship,
   Baby,
-  Users,
+
   ArrowRight,
   Star,
   MapPin,
@@ -35,19 +35,18 @@ interface FeaturedData {
   byCategory: Record<string, FeaturedVenue[]>;
   all: FeaturedVenue[];
 }
-
 // Category data (static structure, names/taglines come from translations)
 const exploreCategoriesConfig = [
   {
-    id: 'hotels',
-    nameKey: 'hotels',
-    taglineKey: 'hotelsTagline',
-    icon: Hotel,
-    emoji: '🏨',
-    image: 'https://images.unsplash.com/photo-1566073771259-6a8506099945?w=800',
-    color: '#3B82F6',
-    gradient: 'from-blue-600/80 to-blue-900/90',
-    categoryPath: '/explore/hotels',
+    id: 'shopping',
+    nameKey: 'shopping',
+    taglineKey: 'shoppingTagline',
+    icon: ShoppingBag,
+    emoji: '🛍️',
+    image: 'https://images.unsplash.com/photo-1555529669-e69e7aa0ba9a?w=800',
+    color: '#F59E0B',
+    gradient: 'from-amber-600/80 to-amber-900/90',
+    categoryPath: '/explore/shopping',
   },
   {
     id: 'spas',
@@ -61,15 +60,15 @@ const exploreCategoriesConfig = [
     categoryPath: '/explore/spas',
   },
   {
-    id: 'shopping',
-    nameKey: 'shopping',
-    taglineKey: 'shoppingTagline',
-    icon: ShoppingBag,
-    emoji: '🛍️',
-    image: 'https://images.unsplash.com/photo-1555529669-e69e7aa0ba9a?w=800',
-    color: '#F59E0B',
-    gradient: 'from-amber-600/80 to-amber-900/90',
-    categoryPath: '/explore/shopping',
+    id: 'hotels',
+    nameKey: 'hotels',
+    taglineKey: 'hotelsTagline',
+    icon: Hotel,
+    emoji: '🏨',
+    image: 'https://images.unsplash.com/photo-1566073771259-6a8506099945?w=800',
+    color: '#3B82F6',
+    gradient: 'from-blue-600/80 to-blue-900/90',
+    categoryPath: '/explore/hotels',
   },
   {
     id: 'tours',
@@ -92,17 +91,6 @@ const exploreCategoriesConfig = [
     color: '#22C55E',
     gradient: 'from-green-600/80 to-green-900/90',
     categoryPath: '/explore/kids',
-  },
-  {
-    id: 'community',
-    nameKey: 'community',
-    taglineKey: 'communityTagline',
-    icon: Users,
-    emoji: '🤝',
-    image: 'https://images.unsplash.com/photo-1529156069898-49953e39b3ac?w=800',
-    color: '#F97316',
-    gradient: 'from-orange-600/80 to-orange-900/90',
-    categoryPath: '/explore/community',
   },
 ];
 
