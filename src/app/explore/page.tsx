@@ -47,7 +47,7 @@ const exploreCategoriesConfig = [
     image: 'https://images.unsplash.com/photo-1566073771259-6a8506099945?w=800',
     color: '#3B82F6',
     gradient: 'from-blue-600/80 to-blue-900/90',
-    categoryPath: '/places?category=hotel',
+    categoryPath: '/explore/hotels',
   },
   {
     id: 'spas',
@@ -58,7 +58,7 @@ const exploreCategoriesConfig = [
     image: 'https://images.unsplash.com/photo-1544161515-4ab6ce6db874?w=800',
     color: '#A855F7',
     gradient: 'from-purple-600/80 to-purple-900/90',
-    categoryPath: '/places?category=spa',
+    categoryPath: '/explore/spas',
   },
   {
     id: 'shopping',

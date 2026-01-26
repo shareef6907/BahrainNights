@@ -17,36 +17,37 @@ const categoryDisplay: Record<string, { label: string; icon: string }> = {
   family: { label: 'Family', icon: '👨‍👩‍👧‍👦' },
 };
 
-// Fetch featured events for "Happening Today" - ONLY today's events
+// Fetch upcoming events - show next 4 events regardless of date
 async function getTodayEvents(): Promise<TodayEvent[]> {
   const today = new Date().toISOString().split('T')[0];
 
-  // Fetch all today's events in a single query and group by category
-  const { data: allTodayEvents, error } = await supabaseAdmin
+  // Fetch upcoming events (today and future) - not just today
+  const { data: upcomingEvents, error } = await supabaseAdmin
     .from('events')
     .select('id, title, slug, venue_name, time, cover_url, category, date, is_featured, view_count')
     .eq('status', 'published')
     .eq('is_hidden', false)
     .eq('country', 'Bahrain')
-    .eq('date', today)
+    .gte('date', today)
+    .order('date', { ascending: true })
     .order('is_featured', { ascending: false })
     .order('view_count', { ascending: false })
     .limit(20);
 
-  if (error || !allTodayEvents) {
-    console.error('Error fetching today events:', error);
+  if (error || !upcomingEvents) {
+    console.error('Error fetching upcoming events:', error);
     return [];
   }
 
-  // Group by category and take the best event from each
+  // Group by category and take the best event from each for diversity
   const categoryOrder = ['music', 'sports', 'arts', 'dining', 'community', 'shopping', 'nightlife', 'special', 'family'];
   const seenCategories = new Set<string>();
   const events: TodayEvent[] = [];
 
-  // First pass: get one event per category
+  // First pass: get one event per category (from soonest events)
   for (const category of categoryOrder) {
     if (events.length >= 4) break;
-    const event = allTodayEvents.find(e => e.category === category && !seenCategories.has(e.category));
+    const event = upcomingEvents.find(e => e.category === category && !seenCategories.has(e.category));
     if (event) {
       seenCategories.add(event.category);
       const catInfo = categoryDisplay[event.category] || { label: event.category, icon: '📅' };
@@ -63,10 +64,10 @@ async function getTodayEvents(): Promise<TodayEvent[]> {
     }
   }
 
-  // Second pass: fill remaining slots with any events
+  // Second pass: fill remaining slots with soonest events
   if (events.length < 4) {
     const existingIds = new Set(events.map(e => e.id));
-    for (const event of allTodayEvents) {
+    for (const event of upcomingEvents) {
       if (events.length >= 4) break;
       if (!existingIds.has(event.id)) {
         const catInfo = categoryDisplay[event.category] || { label: event.category, icon: '📅' };

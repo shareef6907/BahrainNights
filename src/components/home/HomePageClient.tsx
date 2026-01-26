@@ -813,7 +813,7 @@ export default function HomePageClient({ initialMovies, initialStats, initialTod
         </div>
       </section>
 
-      {/* Happening Today */}
+      {/* Upcoming Events */}
       <section className="px-4 mb-12 md:mb-24">
         <div className="max-w-7xl mx-auto">
           <motion.div
@@ -824,9 +824,9 @@ export default function HomePageClient({ initialMovies, initialStats, initialTod
             variants={fadeIn}
           >
             <h2 className="text-3xl md:text-5xl font-bold flex items-center gap-3">
-              🔥 {t.home.sections.happeningToday}
+              🔥 {t.home.sections.upcomingEvents || 'Upcoming Events'}
             </h2>
-            <Link href="/events/today" className="text-yellow-500 hover:text-yellow-400 flex items-center space-x-2 transition-colors group">
+            <Link href="/events" className="text-yellow-500 hover:text-yellow-400 flex items-center space-x-2 transition-colors group">
               <span className="font-medium">{t.home.sections.viewAll}</span>
               <ChevronRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
             </Link>
@@ -875,7 +875,7 @@ export default function HomePageClient({ initialMovies, initialStats, initialTod
               ))
             ) : (
               <div className="col-span-4 text-center py-12">
-                <p className="text-gray-400">No upcoming events found. Check back soon!</p>
+                <p className="text-gray-400">More events coming soon!</p>
                 <Link href="/events" className="text-yellow-500 hover:text-yellow-400 mt-2 inline-block">Browse all events →</Link>
               </div>
             )}
