@@ -7,9 +7,9 @@ import {
 import BreadcrumbSchema from '@/components/SEO/BreadcrumbSchema';
 
 export const metadata: Metadata = {
-  title: 'Best Malls in Bahrain 2025 | Shopping Guide & Mall Directory',
-  description: 'Discover the best malls in Bahrain! Complete shopping guide to City Centre, Seef Mall, The Avenues, Moda Mall & more. Find brands, dining, entertainment.',
-  keywords: 'malls in Bahrain, shopping Bahrain, City Centre Bahrain, Seef Mall, The Avenues Bahrain, Moda Mall, shopping centers Bahrain, best malls Manama',
+  title: 'Best Malls in Bahrain 2026 | Shopping Guide & Mall Directory',
+  description: 'Discover the best malls in Bahrain! Complete guide to Marassi Galleria, City Centre, Seef Mall, The Avenues & more. Find brands, dining, entertainment.',
+  keywords: 'malls in Bahrain, shopping Bahrain, Marassi Galleria, City Centre Bahrain, Seef Mall, The Avenues Bahrain, Moda Mall, shopping centers Bahrain',
   openGraph: {
     title: 'Best Malls in Bahrain 2025 | Shopping Guide & Mall Directory',
     description: 'Your complete guide to shopping malls in Bahrain.',
@@ -44,10 +44,10 @@ const malls = [
     location: 'Seef District',
     type: 'Premium Mall',
     rating: 5,
-    size: '140,000 sqm',
-    stores: '300+ stores',
-    description: 'One of Bahrain\'s original premier shopping destinations, featuring a mix of high-street and mid-range brands with excellent dining options.',
-    highlights: ['Fuddruckers', 'Geant Hypermarket', 'Kids entertainment', 'Fashion galleries'],
+    size: '135,000 sqm',
+    stores: '250+ stores',
+    description: 'Bahrain\'s first authentic mall and premier family shopping destination, known for distinctive architecture and excellent mix of brands and entertainment.',
+    highlights: ['Geant Hypermarket', 'Magic Island', 'Cinema complex', 'Fashion galleries'],
     brands: ['Massimo Dutti', 'Mango', 'Next', 'Pottery Barn', 'Crate & Barrel', 'Bath & Body Works'],
     dining: 'Food court + restaurants',
     parking: '5,000+ spaces (free)',
@@ -56,19 +56,35 @@ const malls = [
     href: '/guides/malls/seef-mall',
   },
   {
+    name: 'Marassi Galleria',
+    location: 'Diyar Al Muharraq',
+    type: 'Luxury Mall',
+    rating: 5,
+    size: '200,000 sqm',
+    stores: '400+ stores',
+    description: 'Bahrain\'s premier beachfront luxury destination featuring high-end brands, the Kingdom\'s largest aquarium, diverse dining, and connected to 5-star hotels.',
+    highlights: ['Marassi Aquarium', 'Beachfront location', 'Luxury brands', 'VOX Cinemas', 'Connected to Address Hotel'],
+    brands: ['Al Fardan Jewellery', 'Aigner', 'ALDO', 'Ajmal Perfumes', 'AZADEA brands'],
+    dining: 'Premium restaurants + international cuisine',
+    parking: 'Covered parking (free)',
+    hours: 'Sat-Wed 10AM-10PM, Thu-Fri 10AM-12AM',
+    bestFor: 'Luxury shopping, beachfront dining, family entertainment',
+    href: null,
+  },
+  {
     name: 'The Avenues Bahrain',
     location: 'Bahrain Bay',
     type: 'Lifestyle Mall',
     rating: 5,
-    size: '170,000 sqm',
-    stores: '200+ stores',
-    description: 'Bahrain\'s newest premium lifestyle destination with stunning architecture, luxury brands, waterfront dining, and Below Zero ice skating rink.',
-    highlights: ['Below Zero Ice Rink', 'Bahrain Bay views', 'Luxury brands', 'Outdoor promenade', 'Cinema complex'],
-    brands: ['Louis Vuitton', 'Gucci', 'Dior', 'Prada', 'Chanel', 'Cartier', 'Tiffany & Co.'],
+    size: '40,000 sqm',
+    stores: '130+ stores',
+    description: 'Premium waterfront lifestyle destination along 1.5km seafront with stunning Bahrain Bay views, luxury brands, Below Zero ice skating rink, and VOX Cinemas.',
+    highlights: ['Below Zero Ice Rink', 'Bahrain Bay waterfront', 'VOX Cinemas', 'Outdoor promenade', '50% restaurants/cafes'],
+    brands: ['Christian Dior', 'Swarovski', 'H&M', 'Cheesecake Factory', 'Shake Shack'],
     dining: 'Premium restaurants + waterfront cafes',
     parking: '4,000+ spaces',
     hours: 'Sat-Wed 10AM-10PM, Thu-Fri 10AM-12AM',
-    bestFor: 'Luxury shopping, fine dining, ice skating',
+    bestFor: 'Waterfront dining, ice skating, cinema',
     href: '/guides/malls/the-avenues',
   },
   {
@@ -77,11 +93,11 @@ const malls = [
     type: 'Luxury Mall',
     rating: 5,
     size: '45,000 sqm',
-    stores: '120+ stores',
-    description: 'Exclusive luxury shopping destination housed in the iconic Bahrain World Trade Centre, featuring high-end fashion and jewelry brands.',
-    highlights: ['BWTC location', 'Premium fashion', 'Jewelry quarter', 'Sheraton connected'],
-    brands: ['Burberry', 'Fendi', 'Valentino', 'Bvlgari', 'Chopard', 'Rolex'],
-    dining: 'Premium restaurants',
+    stores: '90+ stores',
+    description: 'Bahrain\'s premier luxury shopping destination housed in the iconic World Trade Centre, featuring the Kingdom\'s largest portfolio of high-end fashion and jewelry brands.',
+    highlights: ['BWTC location', 'Luxury fashion', '50+ jewelry brands', 'Premium dining'],
+    brands: ['Louis Vuitton', 'Dior', 'Gucci', 'Bvlgari', 'Rolex', 'Cartier'],
+    dining: 'Premium restaurants + cafes',
     parking: 'BWTC parking (paid)',
     hours: 'Sat-Thu 10AM-10PM, Fri 2PM-10PM',
     bestFor: 'Luxury shopping, business travelers',
@@ -173,10 +189,10 @@ const shoppingTips = [
 ];
 
 const mallsByCategory = [
-  { category: 'Luxury Shopping', malls: ['The Avenues', 'Moda Mall'] },
-  { category: 'Family Entertainment', malls: ['City Centre', 'The Avenues'] },
+  { category: 'Luxury Shopping', malls: ['Marassi Galleria', 'Moda Mall', 'The Avenues'] },
+  { category: 'Family Entertainment', malls: ['City Centre', 'Marassi Galleria'] },
   { category: 'Budget Shopping', malls: ['Dragon City', 'Bahrain Mall'] },
-  { category: 'Premium Brands', malls: ['Seef Mall', 'The Avenues'] },
+  { category: 'Beachfront/Waterfront', malls: ['Marassi Galleria', 'The Avenues'] },
 ];
 
 export default function MallsPage() {
@@ -218,7 +234,7 @@ export default function MallsPage() {
           {/* Quick Stats */}
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mt-12">
             {[
-              { label: 'Major Malls', value: '8+', icon: ShoppingBag },
+              { label: 'Major Malls', value: '9+', icon: ShoppingBag },
               { label: 'Total Stores', value: '2,000+', icon: Star },
               { label: 'VAT Rate', value: '0%', icon: DollarSign },
               { label: 'Free Parking', value: 'Most Malls', icon: Car },
