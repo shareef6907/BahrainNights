@@ -40,11 +40,21 @@ const storeLocations = [
     mall: 'The Avenues Bahrain',
     address: 'The Avenues, Bahrain Bay, Manama',
     floor: 'Ground Floor',
-    phone: '+973 1711 6600',
     hours: 'Sun-Wed: 10:00 AM - 10:00 PM, Thu-Sat: 10:00 AM - 12:00 AM',
     products: ['Makeup', 'Skincare', 'Fragrance', 'Haircare', 'Beauty Tools', 'Sephora Collection'],
     features: ['Modern store', 'Good selection', 'Beauty advisors'],
     mapsLink: 'https://www.google.com/maps/search/Sephora+Avenues+Bahrain',
+    isPrimary: false,
+  },
+  {
+    name: 'Sephora - Marassi Galleria',
+    mall: 'Marassi Galleria',
+    address: 'Marassi Galleria, Diyar Al Muharraq, Bahrain',
+    floor: 'Ground Floor',
+    hours: 'Sun-Wed: 10:00 AM - 10:00 PM, Thu-Sat: 10:00 AM - 12:00 AM',
+    products: ['Makeup', 'Skincare', 'Fragrance', 'Haircare', 'Beauty Tools', 'Sephora Collection'],
+    features: ['Beachfront mall', 'Premium location', 'Near Marassi Aquarium'],
+    mapsLink: 'https://www.google.com/maps/search/Sephora+Marassi+Galleria+Bahrain',
     isPrimary: false,
   },
 ];
@@ -84,7 +94,7 @@ const relatedBrands = [
 const faqs = [
   {
     q: 'Where is Sephora in Bahrain?',
-    a: 'Sephora has stores at City Centre Bahrain (the largest) and The Avenues Bahrain. Both offer the full range of makeup, skincare, and fragrance.',
+    a: 'Sephora has 3 stores in Bahrain - City Centre Bahrain (the largest), The Avenues Bahrain, and Marassi Galleria. All offer the full range of makeup, skincare, and fragrance.',
   },
   {
     q: 'Does Sephora Bahrain have Fenty Beauty?',
@@ -140,7 +150,7 @@ export default function SephoraBahrainPage() {
           {/* Quick Info */}
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mt-12">
             {[
-              { label: 'Stores', value: '2', icon: ShoppingBag },
+              { label: 'Stores', value: '3', icon: ShoppingBag },
               { label: 'Flagship', value: 'City Centre', icon: Star },
               { label: 'Brands', value: '100+', icon: Sparkles },
               { label: 'Exclusive', value: 'Fenty+', icon: Info },

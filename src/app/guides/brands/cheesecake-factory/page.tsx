@@ -22,14 +22,24 @@ export const metadata: Metadata = {
   },
 };
 
-const storeInfo = {
-  name: 'The Cheesecake Factory - City Centre Bahrain',
-  address: 'City Centre Bahrain, Ground Floor, Seef District, Manama',
-  phone: '+973 1717 8888',
-  hours: 'Sun-Wed: 11:00 AM - 11:00 PM, Thu-Sat: 11:00 AM - 12:00 AM',
-  mapsLink: 'https://www.google.com/maps/search/Cheesecake+Factory+City+Centre+Bahrain',
-  features: ['Full menu', 'Famous cheesecakes', 'American portions', 'Family-friendly', 'Reservations accepted'],
-};
+const storeLocations = [
+  {
+    name: 'The Cheesecake Factory - City Centre Bahrain',
+    address: 'City Centre Bahrain, Ground Floor, Seef District, Manama',
+    hours: 'Sun-Wed: 11:00 AM - 11:00 PM, Thu-Sat: 11:00 AM - 12:00 AM',
+    mapsLink: 'https://www.google.com/maps/search/Cheesecake+Factory+City+Centre+Bahrain',
+    features: ['Full menu', 'Famous cheesecakes', 'American portions', 'Family-friendly', 'Reservations accepted'],
+    isPrimary: true,
+  },
+  {
+    name: 'The Cheesecake Factory - Marassi Galleria',
+    address: 'Marassi Galleria, Diyar Al Muharraq, Bahrain',
+    hours: 'Sun-Wed: 11:00 AM - 11:00 PM, Thu-Sat: 11:00 AM - 12:00 AM',
+    mapsLink: 'https://www.google.com/maps/search/Cheesecake+Factory+Marassi+Galleria+Bahrain',
+    features: ['Full menu', 'Famous cheesecakes', 'Beachfront mall', 'Near Marassi Aquarium', 'Reservations accepted'],
+    isPrimary: false,
+  },
+];
 
 const popularItems = [
   { category: 'Cheesecakes', items: ['Original', 'Dulce de Leche', 'Godiva Chocolate', 'Fresh Strawberry', 'Tiramisu', 'Oreo Dream Extreme'] },
@@ -67,7 +77,7 @@ const relatedBrands = [
 const faqs = [
   {
     q: 'Where is The Cheesecake Factory in Bahrain?',
-    a: 'The Cheesecake Factory is located at City Centre Bahrain in the Seef District. It\'s currently the only Cheesecake Factory location in Bahrain.',
+    a: 'The Cheesecake Factory has 2 locations in Bahrain - City Centre Bahrain in the Seef District and Marassi Galleria in Diyar Al Muharraq.',
   },
   {
     q: 'Do I need a reservation for Cheesecake Factory Bahrain?',
@@ -123,7 +133,7 @@ export default function CheesecakeFactoryBahrainPage() {
           {/* Quick Info */}
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mt-12">
             {[
-              { label: 'Location', value: '1', icon: MapPin },
+              { label: 'Locations', value: '2', icon: MapPin },
               { label: 'Menu Items', value: '250+', icon: UtensilsCrossed },
               { label: 'Cheesecakes', value: '30+', icon: Sparkles },
               { label: 'Style', value: 'American', icon: Star },
@@ -138,56 +148,63 @@ export default function CheesecakeFactoryBahrainPage() {
         </div>
       </section>
 
-      {/* Location */}
+      {/* Locations */}
       <section className="py-16 px-4">
         <div className="max-w-6xl mx-auto">
-          <h2 className="text-3xl font-bold mb-4">Location</h2>
-          <p className="text-gray-400 mb-8">The only Cheesecake Factory in Bahrain.</p>
+          <h2 className="text-3xl font-bold mb-4">Locations</h2>
+          <p className="text-gray-400 mb-8">Find The Cheesecake Factory in Bahrain.</p>
           
-          <div className="bg-white/5 backdrop-blur-sm rounded-2xl p-6 border border-amber-500/10">
-            <div className="flex flex-col lg:flex-row lg:items-start gap-6">
-              <div className="flex-1">
-                <h3 className="text-xl font-bold text-amber-400 mb-4">{storeInfo.name}</h3>
-                
-                <div className="space-y-2 text-sm mb-4">
-                  <p className="flex items-center gap-2 text-gray-300">
-                    <MapPin className="w-4 h-4 text-gray-500" />
-                    {storeInfo.address}
-                  </p>
-                  <p className="flex items-center gap-2 text-gray-300">
-                    <Clock className="w-4 h-4 text-gray-500" />
-                    {storeInfo.hours}
-                  </p>
-                  <p className="flex items-center gap-2 text-gray-300">
-                    <Phone className="w-4 h-4 text-gray-500" />
-                    {storeInfo.phone}
-                  </p>
-                </div>
+          <div className="space-y-6">
+            {storeLocations.map((store) => (
+              <div key={store.name} className="bg-white/5 backdrop-blur-sm rounded-2xl p-6 border border-amber-500/10">
+                <div className="flex flex-col lg:flex-row lg:items-start gap-6">
+                  <div className="flex-1">
+                    <div className="flex items-center gap-3 mb-4">
+                      <h3 className="text-xl font-bold text-amber-400">{store.name}</h3>
+                      {store.isPrimary && (
+                        <span className="px-2 py-0.5 bg-amber-500 text-black text-xs font-bold rounded">
+                          FLAGSHIP
+                        </span>
+                      )}
+                    </div>
+                    
+                    <div className="space-y-2 text-sm mb-4">
+                      <p className="flex items-center gap-2 text-gray-300">
+                        <MapPin className="w-4 h-4 text-gray-500" />
+                        {store.address}
+                      </p>
+                      <p className="flex items-center gap-2 text-gray-300">
+                        <Clock className="w-4 h-4 text-gray-500" />
+                        {store.hours}
+                      </p>
+                    </div>
 
-                <div>
-                  <p className="text-sm text-gray-500 mb-2">Features:</p>
-                  <div className="flex flex-wrap gap-2">
-                    {storeInfo.features.map((feature) => (
-                      <span key={feature} className="px-2 py-1 bg-amber-500/10 text-amber-300 text-xs rounded">
-                        {feature}
-                      </span>
-                    ))}
+                    <div>
+                      <p className="text-sm text-gray-500 mb-2">Features:</p>
+                      <div className="flex flex-wrap gap-2">
+                        {store.features.map((feature) => (
+                          <span key={feature} className="px-2 py-1 bg-amber-500/10 text-amber-300 text-xs rounded">
+                            {feature}
+                          </span>
+                        ))}
+                      </div>
+                    </div>
+                  </div>
+                  
+                  <div className="lg:min-w-[200px]">
+                    <a 
+                      href={store.mapsLink}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="flex items-center justify-center gap-2 w-full px-4 py-3 bg-amber-500 text-black font-bold rounded-lg hover:bg-amber-400 transition-colors"
+                    >
+                      <MapPin className="w-4 h-4" />
+                      Get Directions
+                    </a>
                   </div>
                 </div>
               </div>
-              
-              <div className="lg:min-w-[200px]">
-                <a 
-                  href={storeInfo.mapsLink}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="flex items-center justify-center gap-2 w-full px-4 py-3 bg-amber-500 text-black font-bold rounded-lg hover:bg-amber-400 transition-colors"
-                >
-                  <MapPin className="w-4 h-4" />
-                  Get Directions
-                </a>
-              </div>
-            </div>
+            ))}
           </div>
         </div>
       </section>
@@ -321,7 +338,7 @@ export default function CheesecakeFactoryBahrainPage() {
           __html: JSON.stringify({
             '@context': 'https://schema.org',
             '@type': 'Restaurant',
-            name: 'The Cheesecake Factory - City Centre Bahrain',
+            name: 'The Cheesecake Factory Bahrain',
             servesCuisine: 'American',
             address: {
               '@type': 'PostalAddress',
@@ -329,7 +346,6 @@ export default function CheesecakeFactoryBahrainPage() {
               addressLocality: 'Seef',
               addressCountry: 'BH',
             },
-            telephone: '+973 1717 8888',
             openingHours: 'Su-We 11:00-23:00, Th-Sa 11:00-24:00',
           }),
         }}

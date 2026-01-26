@@ -55,6 +55,14 @@ const mallLocations = [
     features: ['Seating', 'Free WiFi'],
     mapsLink: 'https://www.google.com/maps/search/Starbucks+Bahrain+Mall',
   },
+  {
+    name: 'Starbucks Reserve - Marassi Galleria',
+    type: 'Mall',
+    address: 'Marassi Galleria, Diyar Al Muharraq',
+    hours: 'Sun-Wed: 10:00 AM - 10:00 PM, Thu-Sat: 10:00 AM - 12:00 AM',
+    features: ['Starbucks Reserve', 'Seating', 'Free WiFi', 'Beachfront mall'],
+    mapsLink: 'https://www.google.com/maps/search/Starbucks+Marassi+Galleria+Bahrain',
+  },
 ];
 
 const standaloneLocations = [

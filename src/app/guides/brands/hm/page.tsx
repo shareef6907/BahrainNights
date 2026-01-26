@@ -64,11 +64,21 @@ const storeLocations = [
     mall: 'Bahrain Mall',
     address: 'Bahrain Mall, Sanabis, Manama',
     floor: 'Ground Floor',
-    phone: '+973 1755 0100',
     hours: 'Sun-Thu: 10:00 AM - 10:00 PM, Fri-Sat: 10:00 AM - 11:00 PM',
     products: ['Women\'s Fashion', 'Men\'s Fashion', 'Kids\' Fashion'],
     features: ['Compact store', 'Essential collections'],
     mapsLink: 'https://www.google.com/maps/search/H%26M+Bahrain+Mall',
+    isPrimary: false,
+  },
+  {
+    name: 'H&M - Marassi Galleria',
+    mall: 'Marassi Galleria',
+    address: 'Marassi Galleria, Diyar Al Muharraq, Bahrain',
+    floor: 'Ground Floor',
+    hours: 'Sun-Wed: 10:00 AM - 10:00 PM, Thu-Sat: 10:00 AM - 12:00 AM',
+    products: ['Women\'s Fashion', 'Men\'s Fashion', 'Kids\' Fashion', 'Divided', 'Sport'],
+    features: ['Beachfront mall', 'Premium location', 'Near Marassi Aquarium'],
+    mapsLink: 'https://www.google.com/maps/search/H%26M+Marassi+Galleria+Bahrain',
     isPrimary: false,
   },
 ];
@@ -102,7 +112,7 @@ const relatedBrands = [
 const faqs = [
   {
     q: 'How many H&M stores are there in Bahrain?',
-    a: 'H&M has at least 4 stores in Bahrain - City Centre Bahrain (flagship), Seef Mall, The Avenues Bahrain, and Bahrain Mall.',
+    a: 'H&M has 5 stores in Bahrain - City Centre Bahrain (flagship), Seef Mall, The Avenues Bahrain, Bahrain Mall, and Marassi Galleria.',
   },
   {
     q: 'Which is the biggest H&M in Bahrain?',

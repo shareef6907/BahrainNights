@@ -56,6 +56,17 @@ const storeLocations = [
     mapsLink: 'https://www.google.com/maps/search/Bath+Body+Works+Avenues+Bahrain',
     isPrimary: false,
   },
+  {
+    name: 'Bath & Body Works - Marassi Galleria',
+    mall: 'Marassi Galleria',
+    address: 'Marassi Galleria, Diyar Al Muharraq, Bahrain',
+    floor: 'Ground Floor',
+    hours: 'Sun-Wed: 10:00 AM - 10:00 PM, Thu-Sat: 10:00 AM - 12:00 AM',
+    products: ['Body Care', 'Hand Soaps', 'Candles', 'Home Fragrance', 'Fragrance Mists'],
+    features: ['Beachfront mall', 'Premium location', 'Near Marassi Aquarium'],
+    mapsLink: 'https://www.google.com/maps/search/Bath+Body+Works+Marassi+Galleria+Bahrain',
+    isPrimary: false,
+  },
 ];
 
 const popularScents = [
@@ -93,7 +104,7 @@ const relatedBrands = [
 const faqs = [
   {
     q: 'Where is Bath & Body Works in Bahrain?',
-    a: 'Bath & Body Works has stores at City Centre Bahrain (largest), Seef Mall, and The Avenues Bahrain.',
+    a: 'Bath & Body Works has 4 stores in Bahrain - City Centre Bahrain (largest), Seef Mall, The Avenues Bahrain, and Marassi Galleria.',
   },
   {
     q: 'Does Bath & Body Works Bahrain have sales?',
@@ -149,7 +160,7 @@ export default function BathBodyWorksBahrainPage() {
           {/* Quick Info */}
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mt-12">
             {[
-              { label: 'Stores', value: '3+', icon: ShoppingBag },
+              { label: 'Stores', value: '4+', icon: ShoppingBag },
               { label: 'Flagship', value: 'City Centre', icon: Star },
               { label: 'Candles', value: '3-Wick', icon: Sparkles },
               { label: 'Sales', value: 'B3G3', icon: Info },

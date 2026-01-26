@@ -52,11 +52,21 @@ const storeLocations = [
     mall: 'The Avenues Bahrain',
     address: 'The Avenues, Bahrain Bay, Manama',
     floor: 'Ground Floor',
-    phone: '+973 1711 6300',
     hours: 'Sun-Wed: 10:00 AM - 10:00 PM, Thu-Sat: 10:00 AM - 12:00 AM',
     products: ['Running Shoes', 'Basketball', 'Training', 'Lifestyle', 'Jordan', 'Apparel'],
     features: ['Modern store', 'Full collection'],
     mapsLink: 'https://www.google.com/maps/search/Nike+Avenues+Bahrain',
+    isPrimary: false,
+  },
+  {
+    name: 'Nike - Marassi Galleria',
+    mall: 'Marassi Galleria',
+    address: 'Marassi Galleria, Diyar Al Muharraq, Bahrain',
+    floor: 'Ground Floor',
+    hours: 'Sun-Wed: 10:00 AM - 10:00 PM, Thu-Sat: 10:00 AM - 12:00 AM',
+    products: ['Running Shoes', 'Training', 'Lifestyle', 'Apparel', 'Kids'],
+    features: ['Beachfront mall', 'Premium location', 'Near Marassi Aquarium'],
+    mapsLink: 'https://www.google.com/maps/search/Nike+Marassi+Galleria+Bahrain',
     isPrimary: false,
   },
 ];
@@ -111,7 +121,7 @@ const relatedBrands = [
 const faqs = [
   {
     q: 'How many Nike stores are there in Bahrain?',
-    a: 'Nike has at least 3 dedicated stores in Bahrain - City Centre Bahrain (flagship), Seef Mall, and The Avenues Bahrain. Nike products are also available at multi-brand retailers.',
+    a: 'Nike has 4 dedicated stores in Bahrain - City Centre Bahrain (flagship), Seef Mall, The Avenues Bahrain, and Marassi Galleria. Nike products are also available at multi-brand retailers.',
   },
   {
     q: 'Which is the biggest Nike store in Bahrain?',
@@ -167,7 +177,7 @@ export default function NikeBahrainPage() {
           {/* Quick Info */}
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mt-12">
             {[
-              { label: 'Nike Stores', value: '3+', icon: ShoppingBag },
+              { label: 'Nike Stores', value: '4+', icon: ShoppingBag },
               { label: 'Flagship', value: 'City Centre', icon: Star },
               { label: 'Jordan', value: 'Available', icon: Sparkles },
               { label: 'Multi-Retail', value: '3+', icon: Info },

@@ -39,6 +39,14 @@ const storeLocations = [
     mapsLink: 'https://www.google.com/maps/search/Shake+Shack+Avenues+Bahrain',
     isPrimary: false,
   },
+  {
+    name: 'Shake Shack - Marassi Galleria',
+    address: 'Marassi Galleria, Diyar Al Muharraq',
+    hours: 'Sun-Wed: 10:00 AM - 10:00 PM, Thu-Sat: 10:00 AM - 12:00 AM',
+    features: ['Dine-in', 'Takeaway', 'Full menu', 'Beachfront mall'],
+    mapsLink: 'https://www.google.com/maps/search/Shake+Shack+Marassi+Galleria+Bahrain',
+    isPrimary: false,
+  },
 ];
 
 const popularItems = [
@@ -81,7 +89,7 @@ const relatedBrands = [
 const faqs = [
   {
     q: 'Where is Shake Shack in Bahrain?',
-    a: 'Shake Shack has locations at City Centre Bahrain and The Avenues Bahrain. Both offer the full menu including burgers, fries, and shakes.',
+    a: 'Shake Shack has 3 locations in Bahrain - City Centre Bahrain, The Avenues Bahrain, and Marassi Galleria. All offer the full menu including burgers, fries, and shakes.',
   },
   {
     q: 'What is the most popular item at Shake Shack?',
@@ -137,7 +145,7 @@ export default function ShakeShackBahrainPage() {
           {/* Quick Info */}
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mt-12">
             {[
-              { label: 'Locations', value: '2', icon: MapPin },
+              { label: 'Locations', value: '3', icon: MapPin },
               { label: 'Famous For', value: 'ShackBurger', icon: UtensilsCrossed },
               { label: 'Origin', value: 'NYC', icon: Star },
               { label: 'Style', value: 'Fast Casual', icon: Sparkles },

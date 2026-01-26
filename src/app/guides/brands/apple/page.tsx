@@ -54,11 +54,22 @@ const storeLocations = [
     mall: 'Seef Mall',
     address: 'Seef Mall, Seef District, Manama',
     floor: 'Ground Floor',
-    phone: '+973 1758 1400',
     hours: 'Sun-Thu: 10:00 AM - 10:00 PM, Fri-Sat: 10:00 AM - 11:00 PM',
     products: ['iPhone', 'MacBook', 'iPad', 'Apple Watch', 'AirPods', 'Accessories'],
     features: ['Apple Premium Reseller', 'Good selection'],
     mapsLink: 'https://www.google.com/maps/search/iStyle+Seef+Mall+Bahrain',
+    isPrimary: false,
+    type: 'Premium Reseller',
+  },
+  {
+    name: 'iStyle - Marassi Galleria',
+    mall: 'Marassi Galleria',
+    address: 'Marassi Galleria, Diyar Al Muharraq, Bahrain',
+    floor: 'Ground Floor',
+    hours: 'Sun-Wed: 10:00 AM - 10:00 PM, Thu-Sat: 10:00 AM - 12:00 AM',
+    products: ['iPhone', 'MacBook', 'iPad', 'Apple Watch', 'AirPods', 'Accessories'],
+    features: ['Apple Premium Reseller', 'Beachfront mall', 'Near Marassi Aquarium'],
+    mapsLink: 'https://www.google.com/maps/search/iStyle+Marassi+Galleria+Bahrain',
     isPrimary: false,
     type: 'Premium Reseller',
   },
@@ -121,7 +132,7 @@ const faqs = [
   },
   {
     q: 'Where can I buy iPhone in Bahrain?',
-    a: 'You can buy iPhone from iStyle (Apple Premium Reseller) at City Centre, Seef Mall, and The Avenues. Also available at Virgin Megastore, Lulu Hypermarket, and Jarir Bookstore.',
+    a: 'You can buy iPhone from iStyle (Apple Premium Reseller) at City Centre, Seef Mall, The Avenues, and Marassi Galleria. Also available at Virgin Megastore, Lulu Hypermarket, and Jarir Bookstore.',
   },
   {
     q: 'Can I get AppleCare in Bahrain?',
@@ -173,7 +184,7 @@ export default function AppleBahrainPage() {
           {/* Quick Info */}
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mt-12">
             {[
-              { label: 'iStyle Stores', value: '3+', icon: ShoppingBag },
+              { label: 'iStyle Stores', value: '4+', icon: ShoppingBag },
               { label: 'Premium Reseller', value: 'iStyle', icon: Star },
               { label: 'Other Resellers', value: '3+', icon: Monitor },
               { label: 'VAT', value: '0%', icon: Sparkles },

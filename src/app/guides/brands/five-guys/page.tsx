@@ -39,6 +39,14 @@ const storeLocations = [
     mapsLink: 'https://www.google.com/maps/search/Five+Guys+Avenues+Bahrain',
     isPrimary: false,
   },
+  {
+    name: 'Five Guys - Marassi Galleria',
+    address: 'Marassi Galleria, Diyar Al Muharraq',
+    hours: 'Sun-Wed: 10:00 AM - 10:00 PM, Thu-Sat: 10:00 AM - 12:00 AM',
+    features: ['Dine-in', 'Takeaway', 'Full menu', 'Free peanuts', 'Beachfront mall'],
+    mapsLink: 'https://www.google.com/maps/search/Five+Guys+Marassi+Galleria+Bahrain',
+    isPrimary: false,
+  },
 ];
 
 const freeToppings = [
@@ -85,7 +93,7 @@ const relatedBrands = [
 const faqs = [
   {
     q: 'Where is Five Guys in Bahrain?',
-    a: 'Five Guys has locations at City Centre Bahrain and The Avenues Bahrain. Both serve the full menu including burgers, fries, and milkshakes.',
+    a: 'Five Guys has 3 locations in Bahrain - City Centre Bahrain, The Avenues Bahrain, and Marassi Galleria. All serve the full menu including burgers, fries, and milkshakes.',
   },
   {
     q: 'Are toppings really free at Five Guys?',
@@ -141,7 +149,7 @@ export default function FiveGuysBahrainPage() {
           {/* Quick Info */}
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mt-12">
             {[
-              { label: 'Locations', value: '2', icon: MapPin },
+              { label: 'Locations', value: '3', icon: MapPin },
               { label: 'Free Toppings', value: '15+', icon: Sparkles },
               { label: 'Origin', value: 'Virginia', icon: Star },
               { label: 'Famous For', value: 'Cajun Fries', icon: UtensilsCrossed },
