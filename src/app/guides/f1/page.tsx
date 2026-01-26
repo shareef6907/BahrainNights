@@ -7,11 +7,11 @@ import {
 import BreadcrumbSchema from '@/components/SEO/BreadcrumbSchema';
 
 export const metadata: Metadata = {
-  title: 'F1 Bahrain Grand Prix 2025 | Tickets, Events & Complete Guide',
+  title: 'F1 Bahrain Grand Prix 2026 | Tickets, Events & Complete Guide',
   description: 'Complete guide to F1 Bahrain Grand Prix! Tickets, race schedule, best viewing spots, concerts, parties, hotels, and everything for race weekend.',
-  keywords: 'F1 Bahrain, Bahrain Grand Prix 2025, F1 tickets Bahrain, Bahrain International Circuit, Formula 1 Bahrain, race weekend Bahrain',
+  keywords: 'F1 Bahrain, Bahrain Grand Prix 2026, F1 tickets Bahrain, Bahrain International Circuit, Formula 1 Bahrain, race weekend Bahrain',
   openGraph: {
-    title: 'F1 Bahrain Grand Prix 2025 | Complete Race Weekend Guide',
+    title: 'F1 Bahrain Grand Prix 2026 | Complete Race Weekend Guide',
     description: 'Your guide to F1 weekend in Bahrain.',
     type: 'article',
     locale: 'en_US',
@@ -250,7 +250,7 @@ export default function F1Page() {
           <h2 className="text-3xl font-bold mb-8 text-center">FAQs</h2>
           <div className="space-y-4">
             {[
-              { q: 'When is F1 Bahrain Grand Prix 2025?', a: 'Typically held in February/March as one of the opening races. Exact dates announced by FIA. Check bahraingp.com for official dates.' },
+              { q: 'When is F1 Bahrain Grand Prix 2026?', a: 'Typically held in February/March as one of the opening races. Exact dates announced by FIA. Check bahraingp.com for official dates.' },
               { q: 'How much are F1 tickets in Bahrain?', a: 'General admission from BD 25, grandstands BD 40-200, Paddock Club BD 500+. Book early for best prices.' },
               { q: 'Are concerts included with F1 tickets?', a: 'Yes! All ticket holders can attend post-race and qualifying concerts at the circuit.' },
               { q: 'How do I get to the circuit?', a: 'Free shuttle buses from Bahrain Mall and other locations included with tickets. Taxis available but expensive.' },
@@ -266,10 +266,10 @@ export default function F1Page() {
 
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify({
         '@context': 'https://schema.org', '@type': 'Article',
-        headline: 'F1 Bahrain Grand Prix 2025',
+        headline: 'F1 Bahrain Grand Prix 2026',
         description: 'Complete guide to F1 race weekend in Bahrain.',
         author: { '@type': 'Organization', name: 'BahrainNights' },
-        datePublished: '2025-01-26', dateModified: lastUpdated,
+        datePublished: '2026-01-26', dateModified: lastUpdated,
       })}} />
     </div>
   );

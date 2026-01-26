@@ -7,11 +7,11 @@ import {
 import BreadcrumbSchema from '@/components/SEO/BreadcrumbSchema';
 
 export const metadata: Metadata = {
-  title: 'Best Shisha Lounges in Bahrain 2025 | Hookah Cafes & Spots',
+  title: 'Best Shisha Lounges in Bahrain 2026 | Hookah Cafes & Spots',
   description: 'Discover the best shisha lounges in Bahrain! From rooftop spots to traditional cafes, explore top hookah places in Manama, Adliya, Juffair. Complete shisha guide.',
   keywords: 'best shisha in Bahrain, hookah Bahrain, shisha lounges Bahrain, shisha cafes Manama, Bahrain hookah bars, shisha spots Bahrain',
   openGraph: {
-    title: 'Best Shisha Lounges in Bahrain 2025 | Hookah Cafes & Spots',
+    title: 'Best Shisha Lounges in Bahrain 2026 | Hookah Cafes & Spots',
     description: 'Your complete guide to the best shisha lounges in Bahrain - rooftop spots, traditional cafes, and premium experiences.',
     type: 'article',
     locale: 'en_US',
@@ -426,7 +426,7 @@ export default function ShishaGuidePage() {
           __html: JSON.stringify({
             '@context': 'https://schema.org',
             '@type': 'Article',
-            headline: 'Best Shisha Lounges in Bahrain 2025',
+            headline: 'Best Shisha Lounges in Bahrain 2026',
             description: 'Complete guide to the best shisha and hookah lounges in Bahrain including traditional cafes and rooftop spots.',
             author: {
               '@type': 'Organization',
@@ -437,7 +437,7 @@ export default function ShishaGuidePage() {
               '@type': 'Organization',
               name: 'BahrainNights',
             },
-            datePublished: '2025-01-26',
+            datePublished: '2026-01-26',
             dateModified: lastUpdated,
             mainEntityOfPage: {
               '@type': 'WebPage',

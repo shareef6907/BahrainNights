@@ -7,11 +7,11 @@ import {
 import BreadcrumbSchema from '@/components/SEO/BreadcrumbSchema';
 
 export const metadata: Metadata = {
-  title: 'Free Things to Do in Bahrain 2025 | Budget-Friendly Activities',
+  title: 'Free Things to Do in Bahrain 2026 | Budget-Friendly Activities',
   description: 'Discover free things to do in Bahrain! From UNESCO sites to beautiful beaches, explore the best free attractions and activities. Complete budget guide for Bahrain.',
   keywords: 'free things to do in Bahrain, free activities Bahrain, budget Bahrain, cheap things to do Bahrain, free attractions Bahrain, Bahrain on a budget',
   openGraph: {
-    title: 'Free Things to Do in Bahrain 2025 | Budget-Friendly Activities',
+    title: 'Free Things to Do in Bahrain 2026 | Budget-Friendly Activities',
     description: 'Your complete guide to free activities in Bahrain - beaches, heritage sites, parks, and more.',
     type: 'article',
     locale: 'en_US',
@@ -447,7 +447,7 @@ export default function FreeThingsToDoPage() {
           __html: JSON.stringify({
             '@context': 'https://schema.org',
             '@type': 'Article',
-            headline: 'Free Things to Do in Bahrain 2025',
+            headline: 'Free Things to Do in Bahrain 2026',
             description: 'Complete guide to free activities and attractions in Bahrain including beaches, heritage sites, and parks.',
             author: {
               '@type': 'Organization',
@@ -458,7 +458,7 @@ export default function FreeThingsToDoPage() {
               '@type': 'Organization',
               name: 'BahrainNights',
             },
-            datePublished: '2025-01-26',
+            datePublished: '2026-01-26',
             dateModified: lastUpdated,
             mainEntityOfPage: {
               '@type': 'WebPage',

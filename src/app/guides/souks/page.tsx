@@ -7,11 +7,11 @@ import {
 import BreadcrumbSchema from '@/components/SEO/BreadcrumbSchema';
 
 export const metadata: Metadata = {
-  title: 'Traditional Souks in Bahrain 2025 | Gold Souq, Bab Al Bahrain Market',
+  title: 'Traditional Souks in Bahrain 2026 | Gold Souq, Bab Al Bahrain Market',
   description: 'Explore traditional souks in Bahrain! Complete guide to Bab Al Bahrain, Gold Souq, Muharraq Souq, spice markets, and authentic Bahraini shopping.',
   keywords: 'souks Bahrain, Gold Souq Bahrain, Bab Al Bahrain, traditional market Bahrain, Muharraq Souq, spice market Bahrain, shopping Manama old town',
   openGraph: {
-    title: 'Traditional Souks in Bahrain 2025 | Gold Souq, Bab Al Bahrain Market',
+    title: 'Traditional Souks in Bahrain 2026 | Gold Souq, Bab Al Bahrain Market',
     description: 'Your guide to traditional markets and souks in Bahrain.',
     type: 'article',
     locale: 'en_US',
@@ -419,7 +419,7 @@ export default function SouksPage() {
           __html: JSON.stringify({
             '@context': 'https://schema.org',
             '@type': 'Article',
-            headline: 'Traditional Souks in Bahrain 2025 | Gold Souq, Bab Al Bahrain Market',
+            headline: 'Traditional Souks in Bahrain 2026 | Gold Souq, Bab Al Bahrain Market',
             description: 'Complete guide to traditional souks in Bahrain including Gold Souq, Bab Al Bahrain, and Muharraq markets.',
             author: {
               '@type': 'Organization',
@@ -430,7 +430,7 @@ export default function SouksPage() {
               '@type': 'Organization',
               name: 'BahrainNights',
             },
-            datePublished: '2025-01-26',
+            datePublished: '2026-01-26',
             dateModified: lastUpdated,
             mainEntityOfPage: {
               '@type': 'WebPage',

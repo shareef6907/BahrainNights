@@ -11,7 +11,7 @@ export const metadata: Metadata = {
   description: 'Discover the best malls in Bahrain! Complete guide to Marassi Galleria, City Centre, Seef Mall, The Avenues & more. Find brands, dining, entertainment.',
   keywords: 'malls in Bahrain, shopping Bahrain, Marassi Galleria, City Centre Bahrain, Seef Mall, The Avenues Bahrain, Moda Mall, shopping centers Bahrain',
   openGraph: {
-    title: 'Best Malls in Bahrain 2025 | Shopping Guide & Mall Directory',
+    title: 'Best Malls in Bahrain 2026 | Shopping Guide & Mall Directory',
     description: 'Your complete guide to shopping malls in Bahrain.',
     type: 'article',
     locale: 'en_US',
@@ -441,7 +441,7 @@ export default function MallsPage() {
               },
               {
                 q: 'Is there VAT on shopping in Bahrain?',
-                a: 'Bahrain has 0% VAT on retail shopping (as of 2025), making it excellent value compared to UAE\'s 5% VAT. What you see is what you pay.',
+                a: 'Bahrain has 0% VAT on retail shopping (as of 2026), making it excellent value compared to UAE\'s 5% VAT. What you see is what you pay.',
               },
               {
                 q: 'What are mall hours in Bahrain?',
@@ -464,7 +464,7 @@ export default function MallsPage() {
           __html: JSON.stringify({
             '@context': 'https://schema.org',
             '@type': 'Article',
-            headline: 'Best Malls in Bahrain 2025 | Shopping Guide & Mall Directory',
+            headline: 'Best Malls in Bahrain 2026 | Shopping Guide & Mall Directory',
             description: 'Complete guide to shopping malls in Bahrain including City Centre, Seef Mall, The Avenues, and more.',
             author: {
               '@type': 'Organization',
@@ -475,7 +475,7 @@ export default function MallsPage() {
               '@type': 'Organization',
               name: 'BahrainNights',
             },
-            datePublished: '2025-01-26',
+            datePublished: '2026-01-26',
             dateModified: lastUpdated,
             mainEntityOfPage: {
               '@type': 'WebPage',

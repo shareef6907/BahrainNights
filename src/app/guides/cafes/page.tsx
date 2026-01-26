@@ -7,11 +7,11 @@ import {
 import BreadcrumbSchema from '@/components/SEO/BreadcrumbSchema';
 
 export const metadata: Metadata = {
-  title: 'Best Cafes in Bahrain 2025 | Coffee Shops & Specialty Coffee',
+  title: 'Best Cafes in Bahrain 2026 | Coffee Shops & Specialty Coffee',
   description: 'Discover the best cafes in Bahrain! From specialty coffee to Instagram-worthy spots, explore top coffee shops in Manama, Adliya, Seef. Complete cafe guide with reviews.',
   keywords: 'best cafes in Bahrain, coffee shops Bahrain, specialty coffee Bahrain, Bahrain cafes, Adliya cafes, Manama coffee, work-friendly cafes Bahrain',
   openGraph: {
-    title: 'Best Cafes in Bahrain 2025 | Coffee Shops & Specialty Coffee',
+    title: 'Best Cafes in Bahrain 2026 | Coffee Shops & Specialty Coffee',
     description: 'Your complete guide to the best cafes in Bahrain - specialty coffee, cozy spots, and Instagram-worthy coffee shops.',
     type: 'article',
     locale: 'en_US',
@@ -449,7 +449,7 @@ export default function CafesGuidePage() {
           __html: JSON.stringify({
             '@context': 'https://schema.org',
             '@type': 'Article',
-            headline: 'Best Cafes in Bahrain 2025',
+            headline: 'Best Cafes in Bahrain 2026',
             description: 'Complete guide to the best cafes in Bahrain including specialty coffee, patisseries, and work-friendly spots.',
             author: {
               '@type': 'Organization',
@@ -460,7 +460,7 @@ export default function CafesGuidePage() {
               '@type': 'Organization',
               name: 'BahrainNights',
             },
-            datePublished: '2025-01-26',
+            datePublished: '2026-01-26',
             dateModified: lastUpdated,
             mainEntityOfPage: {
               '@type': 'WebPage',

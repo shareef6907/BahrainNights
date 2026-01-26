@@ -7,11 +7,11 @@ import {
 import BreadcrumbSchema from '@/components/SEO/BreadcrumbSchema';
 
 export const metadata: Metadata = {
-  title: 'Things to Do in Bahrain with Kids 2025 | Kid-Friendly Activities',
+  title: 'Things to Do in Bahrain with Kids 2026 | Kid-Friendly Activities',
   description: 'Best things to do in Bahrain with kids! From water parks to play areas, discover top kid-friendly activities and attractions. Complete guide for parents visiting Bahrain.',
   keywords: 'things to do in Bahrain with kids, kid-friendly Bahrain, Bahrain kids activities, children activities Bahrain, family days out Bahrain, toddler activities Bahrain',
   openGraph: {
-    title: 'Things to Do in Bahrain with Kids 2025 | Kid-Friendly Activities',
+    title: 'Things to Do in Bahrain with Kids 2026 | Kid-Friendly Activities',
     description: 'Your complete guide to kid-friendly activities in Bahrain - water parks, play areas, and fun for children of all ages.',
     type: 'article',
     locale: 'en_US',
@@ -471,7 +471,7 @@ export default function ThingsToDoWithKidsPage() {
           __html: JSON.stringify({
             '@context': 'https://schema.org',
             '@type': 'Article',
-            headline: 'Things to Do in Bahrain with Kids 2025',
+            headline: 'Things to Do in Bahrain with Kids 2026',
             description: 'Complete guide to kid-friendly activities in Bahrain including waterparks, play areas, and educational attractions.',
             author: {
               '@type': 'Organization',
@@ -482,7 +482,7 @@ export default function ThingsToDoWithKidsPage() {
               '@type': 'Organization',
               name: 'BahrainNights',
             },
-            datePublished: '2025-01-26',
+            datePublished: '2026-01-26',
             dateModified: lastUpdated,
             mainEntityOfPage: {
               '@type': 'WebPage',

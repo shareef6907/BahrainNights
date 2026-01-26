@@ -7,11 +7,11 @@ import {
 import BreadcrumbSchema from '@/components/SEO/BreadcrumbSchema';
 
 export const metadata: Metadata = {
-  title: 'Things to Do in Riffa 2025 | Riffa Guide Bahrain',
+  title: 'Things to Do in Riffa 2026 | Riffa Guide Bahrain',
   description: 'Discover things to do in Riffa, Bahrain! Explore attractions, malls, dining, and activities in East and West Riffa. Complete local guide.',
   keywords: 'things to do in Riffa, Riffa Bahrain, Riffa attractions, East Riffa, West Riffa, Riffa Mall, Riffa Fort, Riffa golf',
   openGraph: {
-    title: 'Things to Do in Riffa 2025 | Riffa Guide Bahrain',
+    title: 'Things to Do in Riffa 2026 | Riffa Guide Bahrain',
     description: 'Your complete guide to Riffa - residential heart of Bahrain with golf, malls, and local attractions.',
     type: 'article',
     locale: 'en_US',
@@ -301,11 +301,11 @@ export default function RiffaGuidePage() {
           __html: JSON.stringify({
             '@context': 'https://schema.org',
             '@type': 'Article',
-            headline: 'Things to Do in Riffa 2025',
+            headline: 'Things to Do in Riffa 2026',
             description: 'Complete guide to Riffa, Bahrain - historic fort, golf, and local attractions.',
             author: { '@type': 'Organization', name: 'BahrainNights' },
             publisher: { '@type': 'Organization', name: 'BahrainNights' },
-            datePublished: '2025-01-26',
+            datePublished: '2026-01-26',
             dateModified: lastUpdated,
           }),
         }}

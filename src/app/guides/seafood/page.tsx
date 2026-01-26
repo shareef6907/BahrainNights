@@ -7,11 +7,11 @@ import {
 import BreadcrumbSchema from '@/components/SEO/BreadcrumbSchema';
 
 export const metadata: Metadata = {
-  title: 'Best Seafood Restaurants in Bahrain 2025 | Fresh Fish, Lobster & Shrimp',
+  title: 'Best Seafood Restaurants in Bahrain 2026 | Fresh Fish, Lobster & Shrimp',
   description: 'Discover the best seafood restaurants in Bahrain! Complete guide to fresh fish, lobster, shrimp, and waterfront dining from fine dining to local catches.',
   keywords: 'seafood Bahrain, best fish restaurant Bahrain, lobster Bahrain, fresh seafood Manama, waterfront dining Bahrain, fish market restaurant',
   openGraph: {
-    title: 'Best Seafood Restaurants in Bahrain 2025 | Fresh Fish, Lobster & Shrimp',
+    title: 'Best Seafood Restaurants in Bahrain 2026 | Fresh Fish, Lobster & Shrimp',
     description: 'Your guide to the best seafood restaurants in Bahrain.',
     type: 'article',
     locale: 'en_US',
@@ -410,10 +410,10 @@ export default function SeafoodPage() {
       {/* Schema */}
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify({
         '@context': 'https://schema.org', '@type': 'Article',
-        headline: 'Best Seafood Restaurants in Bahrain 2025',
+        headline: 'Best Seafood Restaurants in Bahrain 2026',
         description: 'Complete guide to seafood restaurants in Bahrain.',
         author: { '@type': 'Organization', name: 'BahrainNights' },
-        datePublished: '2025-01-26', dateModified: lastUpdated,
+        datePublished: '2026-01-26', dateModified: lastUpdated,
       })}} />
     </div>
   );

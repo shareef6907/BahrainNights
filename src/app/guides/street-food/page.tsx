@@ -7,11 +7,11 @@ import {
 import BreadcrumbSchema from '@/components/SEO/BreadcrumbSchema';
 
 export const metadata: Metadata = {
-  title: 'Street Food in Bahrain 2025 | Shawarma, Falafel & Local Eats',
+  title: 'Street Food in Bahrain 2026 | Shawarma, Falafel & Local Eats',
   description: 'Discover the best street food in Bahrain! Complete guide to shawarma, falafel, samosas, local snacks, and cheap eats across Manama and beyond.',
   keywords: 'street food Bahrain, shawarma Bahrain, falafel Bahrain, cheap eats Manama, local food Bahrain, best shawarma Bahrain, Bahrain snacks',
   openGraph: {
-    title: 'Street Food in Bahrain 2025 | Shawarma, Falafel & Local Eats',
+    title: 'Street Food in Bahrain 2026 | Shawarma, Falafel & Local Eats',
     description: 'Your guide to the best street food and cheap eats in Bahrain.',
     type: 'article',
     locale: 'en_US',
@@ -299,10 +299,10 @@ export default function StreetFoodPage() {
 
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify({
         '@context': 'https://schema.org', '@type': 'Article',
-        headline: 'Street Food in Bahrain 2025',
+        headline: 'Street Food in Bahrain 2026',
         description: 'Complete guide to street food in Bahrain.',
         author: { '@type': 'Organization', name: 'BahrainNights' },
-        datePublished: '2025-01-26', dateModified: lastUpdated,
+        datePublished: '2026-01-26', dateModified: lastUpdated,
       })}} />
     </div>
   );

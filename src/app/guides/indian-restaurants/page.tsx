@@ -7,11 +7,11 @@ import {
 import BreadcrumbSchema from '@/components/SEO/BreadcrumbSchema';
 
 export const metadata: Metadata = {
-  title: 'Best Indian Restaurants in Bahrain 2025 | Curry, Biryani & Fine Dining',
+  title: 'Best Indian Restaurants in Bahrain 2026 | Curry, Biryani & Fine Dining',
   description: 'Discover the best Indian restaurants in Bahrain! Complete guide to Indian fine dining, street food, biryani spots, vegetarian options, and authentic cuisine.',
   keywords: 'Indian restaurants Bahrain, best Indian food Bahrain, biryani Bahrain, curry Bahrain, Indian fine dining Manama, vegetarian Indian Bahrain',
   openGraph: {
-    title: 'Best Indian Restaurants in Bahrain 2025 | Curry, Biryani & Fine Dining',
+    title: 'Best Indian Restaurants in Bahrain 2026 | Curry, Biryani & Fine Dining',
     description: 'Your guide to the best Indian restaurants in Bahrain.',
     type: 'article',
     locale: 'en_US',
@@ -468,7 +468,7 @@ export default function IndianRestaurantsPage() {
           __html: JSON.stringify({
             '@context': 'https://schema.org',
             '@type': 'Article',
-            headline: 'Best Indian Restaurants in Bahrain 2025 | Curry, Biryani & Fine Dining',
+            headline: 'Best Indian Restaurants in Bahrain 2026 | Curry, Biryani & Fine Dining',
             description: 'Complete guide to Indian restaurants in Bahrain from fine dining to budget options.',
             author: {
               '@type': 'Organization',
@@ -479,7 +479,7 @@ export default function IndianRestaurantsPage() {
               '@type': 'Organization',
               name: 'BahrainNights',
             },
-            datePublished: '2025-01-26',
+            datePublished: '2026-01-26',
             dateModified: lastUpdated,
             mainEntityOfPage: {
               '@type': 'WebPage',

@@ -7,11 +7,11 @@ import {
 import BreadcrumbSchema from '@/components/SEO/BreadcrumbSchema';
 
 export const metadata: Metadata = {
-  title: 'Summer Activities in Bahrain 2025 | Beat the Heat Guide',
+  title: 'Summer Activities in Bahrain 2026 | Beat the Heat Guide',
   description: 'How to survive and enjoy summer in Bahrain! Best indoor activities, water parks, mall entertainment, hotel deals, and cool ways to beat the 40°C+ heat.',
   keywords: 'summer Bahrain, things to do summer Bahrain, beat the heat Bahrain, indoor activities Bahrain, water parks Bahrain, summer deals Bahrain',
   openGraph: {
-    title: 'Summer Activities in Bahrain 2025 | Beat the Heat Guide',
+    title: 'Summer Activities in Bahrain 2026 | Beat the Heat Guide',
     description: 'Your guide to surviving summer in Bahrain.',
     type: 'article',
     locale: 'en_US',
@@ -282,10 +282,10 @@ export default function SummerPage() {
 
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify({
         '@context': 'https://schema.org', '@type': 'Article',
-        headline: 'Summer Activities in Bahrain 2025',
+        headline: 'Summer Activities in Bahrain 2026',
         description: 'Complete guide to surviving and enjoying summer in Bahrain.',
         author: { '@type': 'Organization', name: 'BahrainNights' },
-        datePublished: '2025-01-26', dateModified: lastUpdated,
+        datePublished: '2026-01-26', dateModified: lastUpdated,
       })}} />
     </div>
   );

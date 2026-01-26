@@ -7,11 +7,11 @@ import {
 import BreadcrumbSchema from '@/components/SEO/BreadcrumbSchema';
 
 export const metadata: Metadata = {
-  title: 'Best Restaurants in Juffair 2025 | Juffair Dining Guide Bahrain',
+  title: 'Best Restaurants in Juffair 2026 | Juffair Dining Guide Bahrain',
   description: 'Find the best restaurants in Juffair, Bahrain! From international cuisine to late-night eats, explore the top dining spots in Juffair. Complete restaurant guide.',
   keywords: 'best restaurants in Juffair, Juffair restaurants, Juffair dining, where to eat Juffair, Juffair food, restaurants near Juffair Bahrain',
   openGraph: {
-    title: 'Best Restaurants in Juffair 2025 | Juffair Dining Guide Bahrain',
+    title: 'Best Restaurants in Juffair 2026 | Juffair Dining Guide Bahrain',
     description: 'Your complete guide to restaurants in Juffair - international cuisine, late-night eats, and local favorites.',
     type: 'article',
     locale: 'en_US',
@@ -342,11 +342,11 @@ export default function JuffairDiningPage() {
           __html: JSON.stringify({
             '@context': 'https://schema.org',
             '@type': 'Article',
-            headline: 'Best Restaurants in Juffair 2025',
+            headline: 'Best Restaurants in Juffair 2026',
             description: 'Complete guide to restaurants in Juffair, Bahrain - international cuisine, late-night eats, and dining recommendations.',
             author: { '@type': 'Organization', name: 'BahrainNights' },
             publisher: { '@type': 'Organization', name: 'BahrainNights' },
-            datePublished: '2025-01-26',
+            datePublished: '2026-01-26',
             dateModified: lastUpdated,
           }),
         }}

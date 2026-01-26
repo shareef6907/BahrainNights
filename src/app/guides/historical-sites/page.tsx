@@ -7,11 +7,11 @@ import {
 import BreadcrumbSchema from '@/components/SEO/BreadcrumbSchema';
 
 export const metadata: Metadata = {
-  title: 'Historical Sites in Bahrain 2025 | UNESCO Heritage, Forts & Ruins',
+  title: 'Historical Sites in Bahrain 2026 | UNESCO Heritage, Forts & Ruins',
   description: 'Explore Bahrain\'s historical sites! Complete guide to Bahrain Fort (UNESCO), Qal\'at al-Bahrain, burial mounds, Portuguese fort, Tree of Life & ancient Dilmun.',
   keywords: 'historical sites Bahrain, Bahrain Fort, UNESCO Bahrain, Qal\'at al-Bahrain, burial mounds Bahrain, Tree of Life, Dilmun civilization, forts Bahrain',
   openGraph: {
-    title: 'Historical Sites in Bahrain 2025 | UNESCO Heritage, Forts & Ruins',
+    title: 'Historical Sites in Bahrain 2026 | UNESCO Heritage, Forts & Ruins',
     description: 'Your guide to historical sites and UNESCO heritage in Bahrain.',
     type: 'article',
     locale: 'en_US',
@@ -467,7 +467,7 @@ export default function HistoricalSitesPage() {
           __html: JSON.stringify({
             '@context': 'https://schema.org',
             '@type': 'Article',
-            headline: 'Historical Sites in Bahrain 2025 | UNESCO Heritage, Forts & Ruins',
+            headline: 'Historical Sites in Bahrain 2026 | UNESCO Heritage, Forts & Ruins',
             description: 'Complete guide to historical sites in Bahrain including UNESCO World Heritage Sites and ancient Dilmun ruins.',
             author: {
               '@type': 'Organization',
@@ -478,7 +478,7 @@ export default function HistoricalSitesPage() {
               '@type': 'Organization',
               name: 'BahrainNights',
             },
-            datePublished: '2025-01-26',
+            datePublished: '2026-01-26',
             dateModified: lastUpdated,
             mainEntityOfPage: {
               '@type': 'WebPage',

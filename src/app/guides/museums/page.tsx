@@ -7,11 +7,11 @@ import {
 import BreadcrumbSchema from '@/components/SEO/BreadcrumbSchema';
 
 export const metadata: Metadata = {
-  title: 'Museums in Bahrain 2025 | National Museum, Art & Cultural Sites',
+  title: 'Museums in Bahrain 2026 | National Museum, Art & Cultural Sites',
   description: 'Discover museums in Bahrain! Complete guide to Bahrain National Museum, Beit Al Quran, Currency Museum, art galleries, and cultural attractions.',
   keywords: 'museums Bahrain, Bahrain National Museum, Beit Al Quran, museums Manama, art galleries Bahrain, cultural attractions Bahrain, history museum Bahrain',
   openGraph: {
-    title: 'Museums in Bahrain 2025 | National Museum, Art & Cultural Sites',
+    title: 'Museums in Bahrain 2026 | National Museum, Art & Cultural Sites',
     description: 'Your guide to museums and cultural attractions in Bahrain.',
     type: 'article',
     locale: 'en_US',
@@ -434,7 +434,7 @@ export default function MuseumsPage() {
           __html: JSON.stringify({
             '@context': 'https://schema.org',
             '@type': 'Article',
-            headline: 'Museums in Bahrain 2025 | National Museum, Art & Cultural Sites',
+            headline: 'Museums in Bahrain 2026 | National Museum, Art & Cultural Sites',
             description: 'Complete guide to museums in Bahrain including National Museum, Beit Al Quran, and cultural attractions.',
             author: {
               '@type': 'Organization',
@@ -445,7 +445,7 @@ export default function MuseumsPage() {
               '@type': 'Organization',
               name: 'BahrainNights',
             },
-            datePublished: '2025-01-26',
+            datePublished: '2026-01-26',
             dateModified: lastUpdated,
             mainEntityOfPage: {
               '@type': 'WebPage',

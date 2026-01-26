@@ -7,11 +7,11 @@ import {
 import BreadcrumbSchema from '@/components/SEO/BreadcrumbSchema';
 
 export const metadata: Metadata = {
-  title: 'Best Hotels in Bahrain 2025 | Luxury, Beach & Budget Options',
+  title: 'Best Hotels in Bahrain 2026 | Luxury, Beach & Budget Options',
   description: 'Find the best hotels in Bahrain! From luxury 5-star resorts to budget-friendly options, explore top hotels in Manama, Seef, and near attractions. Complete hotel guide.',
   keywords: 'best hotels in Bahrain, Bahrain hotels, luxury hotels Bahrain, beach hotels Bahrain, 5 star hotels Bahrain, hotels near Bahrain attractions, Manama hotels',
   openGraph: {
-    title: 'Best Hotels in Bahrain 2025 | Luxury, Beach & Budget Options',
+    title: 'Best Hotels in Bahrain 2026 | Luxury, Beach & Budget Options',
     description: 'Your complete guide to the best hotels in Bahrain - luxury resorts, beach hotels, and budget options for every traveler.',
     type: 'article',
     locale: 'en_US',
@@ -492,7 +492,7 @@ export default function HotelsGuidePage() {
           __html: JSON.stringify({
             '@context': 'https://schema.org',
             '@type': 'Article',
-            headline: 'Best Hotels in Bahrain 2025',
+            headline: 'Best Hotels in Bahrain 2026',
             description: 'Complete guide to the best hotels in Bahrain including luxury resorts, beach hotels, and budget options.',
             author: {
               '@type': 'Organization',
@@ -503,7 +503,7 @@ export default function HotelsGuidePage() {
               '@type': 'Organization',
               name: 'BahrainNights',
             },
-            datePublished: '2025-01-26',
+            datePublished: '2026-01-26',
             dateModified: lastUpdated,
             mainEntityOfPage: {
               '@type': 'WebPage',

@@ -7,11 +7,11 @@ import {
 import BreadcrumbSchema from '@/components/SEO/BreadcrumbSchema';
 
 export const metadata: Metadata = {
-  title: 'Expat Guide to Bahrain 2025 | Living, Working & Settling In',
+  title: 'Expat Guide to Bahrain 2026 | Living, Working & Settling In',
   description: 'Essential guide for expats moving to Bahrain! Housing, visas, healthcare, schools, cost of living, and tips for settling into life in the Kingdom.',
   keywords: 'expat Bahrain, living in Bahrain, moving to Bahrain, Bahrain cost of living, expat life Bahrain, working in Bahrain, Bahrain visa work',
   openGraph: {
-    title: 'Expat Guide to Bahrain 2025 | Living, Working & Settling In',
+    title: 'Expat Guide to Bahrain 2026 | Living, Working & Settling In',
     description: 'Your complete guide to expat life in Bahrain.',
     type: 'article',
     locale: 'en_US',
@@ -257,10 +257,10 @@ export default function ExpatPage() {
 
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify({
         '@context': 'https://schema.org', '@type': 'Article',
-        headline: 'Expat Guide to Bahrain 2025',
+        headline: 'Expat Guide to Bahrain 2026',
         description: 'Complete guide for expats moving to and living in Bahrain.',
         author: { '@type': 'Organization', name: 'BahrainNights' },
-        datePublished: '2025-01-26', dateModified: lastUpdated,
+        datePublished: '2026-01-26', dateModified: lastUpdated,
       })}} />
     </div>
   );

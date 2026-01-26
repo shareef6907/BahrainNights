@@ -7,11 +7,11 @@ import {
 import BreadcrumbSchema from '@/components/SEO/BreadcrumbSchema';
 
 export const metadata: Metadata = {
-  title: 'Best Brunch in Bahrain 2025 | Friday Brunch Guide & Prices',
+  title: 'Best Brunch in Bahrain 2026 | Friday Brunch Guide & Prices',
   description: 'Find the best brunch in Bahrain! Complete guide to Friday brunches with prices, reviews, and booking tips. From budget-friendly to luxury - all Bahrain brunch spots.',
   keywords: 'best brunch in Bahrain, Friday brunch Bahrain, Bahrain brunch, brunch deals Bahrain, hotel brunch Bahrain, Saturday brunch Bahrain, brunch prices Bahrain',
   openGraph: {
-    title: 'Best Brunch in Bahrain 2025 | Friday Brunch Guide & Prices',
+    title: 'Best Brunch in Bahrain 2026 | Friday Brunch Guide & Prices',
     description: 'Your complete guide to Friday and Saturday brunches in Bahrain - prices, venues, and booking tips.',
     type: 'article',
     locale: 'en_US',
@@ -438,7 +438,7 @@ export default function BrunchGuidePage() {
           __html: JSON.stringify({
             '@context': 'https://schema.org',
             '@type': 'Article',
-            headline: 'Best Brunch in Bahrain 2025',
+            headline: 'Best Brunch in Bahrain 2026',
             description: 'Complete guide to Friday and Saturday brunches in Bahrain with prices, venues, and booking tips.',
             author: {
               '@type': 'Organization',
@@ -449,7 +449,7 @@ export default function BrunchGuidePage() {
               '@type': 'Organization',
               name: 'BahrainNights',
             },
-            datePublished: '2025-01-26',
+            datePublished: '2026-01-26',
             dateModified: lastUpdated,
             mainEntityOfPage: {
               '@type': 'WebPage',

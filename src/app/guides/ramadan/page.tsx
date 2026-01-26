@@ -7,11 +7,11 @@ import {
 import BreadcrumbSchema from '@/components/SEO/BreadcrumbSchema';
 
 export const metadata: Metadata = {
-  title: 'Ramadan in Bahrain 2025 | Iftar, Traditions & Visitor Guide',
+  title: 'Ramadan in Bahrain 2026 | Iftar, Traditions & Visitor Guide',
   description: 'Complete guide to Ramadan in Bahrain! Best iftar venues, cultural experiences, traditions, mosque visits, and tips for visitors during the holy month.',
-  keywords: 'Ramadan Bahrain, iftar Bahrain, Ramadan 2025, Bahrain Ramadan guide, iftar tents Bahrain, Ramadan traditions Bahrain, visiting Bahrain Ramadan',
+  keywords: 'Ramadan Bahrain, iftar Bahrain, Ramadan 2026, Bahrain Ramadan guide, iftar tents Bahrain, Ramadan traditions Bahrain, visiting Bahrain Ramadan',
   openGraph: {
-    title: 'Ramadan in Bahrain 2025 | Iftar, Traditions & Visitor Guide',
+    title: 'Ramadan in Bahrain 2026 | Iftar, Traditions & Visitor Guide',
     description: 'Your guide to experiencing Ramadan in Bahrain.',
     type: 'article',
     locale: 'en_US',
@@ -259,7 +259,7 @@ export default function RamadanPage() {
           <div className="space-y-4">
             {[
               { q: 'Can non-Muslims eat during Ramadan in Bahrain?', a: 'Yes, but not in public. Hotels serve meals discreetly in designated areas. Eating, drinking, and smoking in public during daylight hours is prohibited.' },
-              { q: 'When is Ramadan 2025?', a: 'Ramadan 2025 is expected to begin around February 28 - March 1, depending on moon sighting. Dates are confirmed closer to the time.' },
+              { q: 'When is Ramadan 2026?', a: 'Ramadan 2026 is expected to begin around February 28 - March 1, depending on moon sighting. Dates are confirmed closer to the time.' },
               { q: 'Can tourists visit Bahrain during Ramadan?', a: 'Absolutely! It\'s a unique cultural experience. Just be respectful of local customs and fasting hours.' },
             ].map((faq, i) => (
               <div key={i} className="bg-white/5 rounded-xl p-6">
@@ -273,10 +273,10 @@ export default function RamadanPage() {
 
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify({
         '@context': 'https://schema.org', '@type': 'Article',
-        headline: 'Ramadan in Bahrain 2025',
+        headline: 'Ramadan in Bahrain 2026',
         description: 'Complete guide to Ramadan in Bahrain including iftar venues and visitor tips.',
         author: { '@type': 'Organization', name: 'BahrainNights' },
-        datePublished: '2025-01-26', dateModified: lastUpdated,
+        datePublished: '2026-01-26', dateModified: lastUpdated,
       })}} />
     </div>
   );

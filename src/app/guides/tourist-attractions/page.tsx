@@ -7,11 +7,11 @@ import {
 import BreadcrumbSchema from '@/components/SEO/BreadcrumbSchema';
 
 export const metadata: Metadata = {
-  title: 'Bahrain Tourist Attractions 2025 | Top Sights & Landmarks',
+  title: 'Bahrain Tourist Attractions 2026 | Top Sights & Landmarks',
   description: 'Discover Bahrain tourist attractions! From UNESCO sites to modern marvels, explore the best landmarks, museums, and sights in Bahrain. Complete visitor guide.',
   keywords: 'Bahrain tourist attractions, Bahrain landmarks, things to see in Bahrain, Bahrain sightseeing, Bahrain points of interest, UNESCO sites Bahrain, Bahrain tourism',
   openGraph: {
-    title: 'Bahrain Tourist Attractions 2025 | Top Sights & Landmarks',
+    title: 'Bahrain Tourist Attractions 2026 | Top Sights & Landmarks',
     description: 'Your complete guide to Bahrain\'s tourist attractions - UNESCO sites, museums, landmarks, and must-see sights.',
     type: 'article',
     locale: 'en_US',
@@ -454,7 +454,7 @@ export default function TouristAttractionsPage() {
           __html: JSON.stringify({
             '@context': 'https://schema.org',
             '@type': 'Article',
-            headline: 'Bahrain Tourist Attractions 2025',
+            headline: 'Bahrain Tourist Attractions 2026',
             description: 'Complete guide to Bahrain\'s tourist attractions including UNESCO sites, museums, and landmarks.',
             author: {
               '@type': 'Organization',
@@ -465,7 +465,7 @@ export default function TouristAttractionsPage() {
               '@type': 'Organization',
               name: 'BahrainNights',
             },
-            datePublished: '2025-01-26',
+            datePublished: '2026-01-26',
             dateModified: lastUpdated,
             mainEntityOfPage: {
               '@type': 'WebPage',

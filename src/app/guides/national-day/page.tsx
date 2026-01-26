@@ -7,11 +7,11 @@ import {
 import BreadcrumbSchema from '@/components/SEO/BreadcrumbSchema';
 
 export const metadata: Metadata = {
-  title: 'Bahrain National Day 2025 | December 16-17 Celebrations Guide',
+  title: 'Bahrain National Day 2026 | December 16-17 Celebrations Guide',
   description: 'Complete guide to Bahrain National Day! Events, fireworks, parades, activities, and celebrations on December 16-17 across the kingdom.',
   keywords: 'Bahrain National Day, December 16 Bahrain, Bahrain independence day, national day events, Bahrain celebrations, fireworks Bahrain',
   openGraph: {
-    title: 'Bahrain National Day 2025 | December 16-17 Celebrations',
+    title: 'Bahrain National Day 2026 | December 16-17 Celebrations',
     description: 'Your guide to National Day celebrations in Bahrain.',
     type: 'article',
     locale: 'en_US',
@@ -247,10 +247,10 @@ export default function NationalDayPage() {
 
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify({
         '@context': 'https://schema.org', '@type': 'Article',
-        headline: 'Bahrain National Day 2025',
+        headline: 'Bahrain National Day 2026',
         description: 'Complete guide to Bahrain National Day celebrations on December 16-17.',
         author: { '@type': 'Organization', name: 'BahrainNights' },
-        datePublished: '2025-01-26', dateModified: lastUpdated,
+        datePublished: '2026-01-26', dateModified: lastUpdated,
       })}} />
     </div>
   );

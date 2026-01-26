@@ -7,11 +7,11 @@ import {
 import BreadcrumbSchema from '@/components/SEO/BreadcrumbSchema';
 
 export const metadata: Metadata = {
-  title: 'Best Spas in Bahrain 2025 | Luxury Wellness & Massage Guide',
+  title: 'Best Spas in Bahrain 2026 | Luxury Wellness & Massage Guide',
   description: 'Discover the best spas in Bahrain! Complete guide to luxury hotel spas, wellness centers, massage therapy, hammams, and relaxation retreats.',
   keywords: 'spas Bahrain, best spa Bahrain, massage Bahrain, wellness Bahrain, luxury spa Manama, hammam Bahrain, Four Seasons spa, Ritz Carlton spa Bahrain',
   openGraph: {
-    title: 'Best Spas in Bahrain 2025 | Luxury Wellness & Massage Guide',
+    title: 'Best Spas in Bahrain 2026 | Luxury Wellness & Massage Guide',
     description: 'Your guide to the best spas and wellness experiences in Bahrain.',
     type: 'article',
     locale: 'en_US',
@@ -441,7 +441,7 @@ export default function SpasPage() {
           __html: JSON.stringify({
             '@context': 'https://schema.org',
             '@type': 'Article',
-            headline: 'Best Spas in Bahrain 2025 | Luxury Wellness & Massage Guide',
+            headline: 'Best Spas in Bahrain 2026 | Luxury Wellness & Massage Guide',
             description: 'Complete guide to spas in Bahrain including luxury hotel spas, hammams, and day spas.',
             author: {
               '@type': 'Organization',
@@ -452,7 +452,7 @@ export default function SpasPage() {
               '@type': 'Organization',
               name: 'BahrainNights',
             },
-            datePublished: '2025-01-26',
+            datePublished: '2026-01-26',
             dateModified: lastUpdated,
             mainEntityOfPage: {
               '@type': 'WebPage',

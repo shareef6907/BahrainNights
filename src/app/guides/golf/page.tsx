@@ -7,11 +7,11 @@ import {
 import BreadcrumbSchema from '@/components/SEO/BreadcrumbSchema';
 
 export const metadata: Metadata = {
-  title: 'Golf Courses in Bahrain 2025 | Royal Golf Club & Driving Ranges',
+  title: 'Golf Courses in Bahrain 2026 | Royal Golf Club & Driving Ranges',
   description: 'Discover golf in Bahrain! Complete guide to Royal Golf Club, Awali Golf Club, driving ranges, green fees, memberships, and golf facilities.',
   keywords: 'golf Bahrain, Royal Golf Club Bahrain, Awali Golf Club, golf courses Bahrain, driving range Bahrain, golf membership Bahrain, best golf Manama',
   openGraph: {
-    title: 'Golf Courses in Bahrain 2025 | Royal Golf Club & Driving Ranges',
+    title: 'Golf Courses in Bahrain 2026 | Royal Golf Club & Driving Ranges',
     description: 'Your guide to playing golf in Bahrain.',
     type: 'article',
     locale: 'en_US',
@@ -402,7 +402,7 @@ export default function GolfPage() {
           __html: JSON.stringify({
             '@context': 'https://schema.org',
             '@type': 'Article',
-            headline: 'Golf Courses in Bahrain 2025 | Royal Golf Club & Driving Ranges',
+            headline: 'Golf Courses in Bahrain 2026 | Royal Golf Club & Driving Ranges',
             description: 'Complete guide to golf in Bahrain including Royal Golf Club, Awali Golf Club, and driving ranges.',
             author: {
               '@type': 'Organization',
@@ -413,7 +413,7 @@ export default function GolfPage() {
               '@type': 'Organization',
               name: 'BahrainNights',
             },
-            datePublished: '2025-01-26',
+            datePublished: '2026-01-26',
             dateModified: lastUpdated,
             mainEntityOfPage: {
               '@type': 'WebPage',

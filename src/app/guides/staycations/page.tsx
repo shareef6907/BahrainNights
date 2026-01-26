@@ -7,11 +7,11 @@ import {
 import BreadcrumbSchema from '@/components/SEO/BreadcrumbSchema';
 
 export const metadata: Metadata = {
-  title: 'Best Staycations in Bahrain 2025 | Hotel Packages & Deals',
+  title: 'Best Staycations in Bahrain 2026 | Hotel Packages & Deals',
   description: 'Discover the best staycation deals in Bahrain! Complete guide to luxury hotel packages, beach resorts, spa retreats, and weekend getaway offers.',
   keywords: 'staycation Bahrain, hotel packages Bahrain, weekend getaway Bahrain, luxury hotels Bahrain, beach resort Bahrain, hotel deals Manama',
   openGraph: {
-    title: 'Best Staycations in Bahrain 2025 | Hotel Packages & Deals',
+    title: 'Best Staycations in Bahrain 2026 | Hotel Packages & Deals',
     description: 'Your guide to the best staycation deals in Bahrain.',
     type: 'article',
     locale: 'en_US',
@@ -429,7 +429,7 @@ export default function StaycationsPage() {
           __html: JSON.stringify({
             '@context': 'https://schema.org',
             '@type': 'Article',
-            headline: 'Best Staycations in Bahrain 2025 | Hotel Packages & Deals',
+            headline: 'Best Staycations in Bahrain 2026 | Hotel Packages & Deals',
             description: 'Complete guide to staycation packages in Bahrain including luxury hotels and beach resorts.',
             author: {
               '@type': 'Organization',
@@ -440,7 +440,7 @@ export default function StaycationsPage() {
               '@type': 'Organization',
               name: 'BahrainNights',
             },
-            datePublished: '2025-01-26',
+            datePublished: '2026-01-26',
             dateModified: lastUpdated,
             mainEntityOfPage: {
               '@type': 'WebPage',

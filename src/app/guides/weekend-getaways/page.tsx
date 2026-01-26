@@ -7,11 +7,11 @@ import {
 import BreadcrumbSchema from '@/components/SEO/BreadcrumbSchema';
 
 export const metadata: Metadata = {
-  title: 'Weekend Getaways from Bahrain 2025 | Dubai, Qatar, Saudi & Beyond',
+  title: 'Weekend Getaways from Bahrain 2026 | Dubai, Qatar, Saudi & Beyond',
   description: 'Best weekend getaways from Bahrain! Quick escapes to Dubai, Doha, Al Khobar, and beyond. Flight times, visa info, and trip ideas for short breaks.',
   keywords: 'weekend getaway Bahrain, trips from Bahrain, Dubai from Bahrain, Doha from Bahrain, Saudi from Bahrain, short trips Bahrain',
   openGraph: {
-    title: 'Weekend Getaways from Bahrain 2025 | Dubai, Qatar, Saudi',
+    title: 'Weekend Getaways from Bahrain 2026 | Dubai, Qatar, Saudi',
     description: 'Your guide to weekend escapes from Bahrain.',
     type: 'article',
     locale: 'en_US',
@@ -275,10 +275,10 @@ export default function WeekendGetawaysPage() {
 
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify({
         '@context': 'https://schema.org', '@type': 'Article',
-        headline: 'Weekend Getaways from Bahrain 2025',
+        headline: 'Weekend Getaways from Bahrain 2026',
         description: 'Complete guide to weekend trips from Bahrain.',
         author: { '@type': 'Organization', name: 'BahrainNights' },
-        datePublished: '2025-01-26', dateModified: lastUpdated,
+        datePublished: '2026-01-26', dateModified: lastUpdated,
       })}} />
     </div>
   );

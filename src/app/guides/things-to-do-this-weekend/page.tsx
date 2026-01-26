@@ -7,11 +7,11 @@ import {
 import BreadcrumbSchema from '@/components/SEO/BreadcrumbSchema';
 
 export const metadata: Metadata = {
-  title: 'Things to Do in Bahrain This Weekend 2025 | Weekend Events Guide',
+  title: 'Things to Do in Bahrain This Weekend 2026 | Weekend Events Guide',
   description: 'Find the best things to do in Bahrain this weekend! From brunches to parties, discover events, activities, and entertainment happening this Friday, Saturday, Sunday.',
   keywords: 'things to do in Bahrain this weekend, Bahrain weekend events, what to do this weekend Bahrain, weekend activities Bahrain, Bahrain Friday Saturday',
   openGraph: {
-    title: 'Things to Do in Bahrain This Weekend 2025 | Weekend Events Guide',
+    title: 'Things to Do in Bahrain This Weekend 2026 | Weekend Events Guide',
     description: 'Your complete guide to weekend events and activities in Bahrain - brunches, parties, concerts, and more.',
     type: 'article',
     locale: 'en_US',
@@ -468,7 +468,7 @@ export default function ThisWeekendGuidePage() {
           __html: JSON.stringify({
             '@context': 'https://schema.org',
             '@type': 'Article',
-            headline: 'Things to Do in Bahrain This Weekend 2025',
+            headline: 'Things to Do in Bahrain This Weekend 2026',
             description: 'Complete guide to weekend activities, events, brunches, and nightlife in Bahrain.',
             author: {
               '@type': 'Organization',
@@ -479,7 +479,7 @@ export default function ThisWeekendGuidePage() {
               '@type': 'Organization',
               name: 'BahrainNights',
             },
-            datePublished: '2025-01-26',
+            datePublished: '2026-01-26',
             dateModified: lastUpdated,
             mainEntityOfPage: {
               '@type': 'WebPage',

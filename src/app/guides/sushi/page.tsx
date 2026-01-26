@@ -7,11 +7,11 @@ import {
 import BreadcrumbSchema from '@/components/SEO/BreadcrumbSchema';
 
 export const metadata: Metadata = {
-  title: 'Best Sushi in Bahrain 2025 | Japanese Restaurants & Omakase',
+  title: 'Best Sushi in Bahrain 2026 | Japanese Restaurants & Omakase',
   description: 'Discover the best sushi restaurants in Bahrain! Complete guide to Japanese dining, omakase experiences, sushi bars, and authentic Japanese cuisine.',
   keywords: 'sushi Bahrain, Japanese restaurant Bahrain, best sushi Manama, omakase Bahrain, sashimi Bahrain, Japanese food Bahrain',
   openGraph: {
-    title: 'Best Sushi in Bahrain 2025 | Japanese Restaurants & Omakase',
+    title: 'Best Sushi in Bahrain 2026 | Japanese Restaurants & Omakase',
     description: 'Your guide to the best sushi and Japanese restaurants in Bahrain.',
     type: 'article',
     locale: 'en_US',
@@ -303,10 +303,10 @@ export default function SushiPage() {
 
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify({
         '@context': 'https://schema.org', '@type': 'Article',
-        headline: 'Best Sushi in Bahrain 2025',
+        headline: 'Best Sushi in Bahrain 2026',
         description: 'Complete guide to sushi restaurants in Bahrain.',
         author: { '@type': 'Organization', name: 'BahrainNights' },
-        datePublished: '2025-01-26', dateModified: lastUpdated,
+        datePublished: '2026-01-26', dateModified: lastUpdated,
       })}} />
     </div>
   );

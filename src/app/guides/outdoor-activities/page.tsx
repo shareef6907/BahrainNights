@@ -7,11 +7,11 @@ import {
 import BreadcrumbSchema from '@/components/SEO/BreadcrumbSchema';
 
 export const metadata: Metadata = {
-  title: 'Outdoor Activities in Bahrain 2025 | Desert Safari, Water Sports & More',
+  title: 'Outdoor Activities in Bahrain 2026 | Desert Safari, Water Sports & More',
   description: 'Discover outdoor activities in Bahrain! Complete guide to desert safaris, water sports, camping, kayaking, diving, horse riding, and adventure experiences.',
   keywords: 'outdoor activities Bahrain, desert safari Bahrain, water sports Bahrain, kayaking Bahrain, diving Bahrain, camping Bahrain, horse riding Bahrain',
   openGraph: {
-    title: 'Outdoor Activities in Bahrain 2025 | Desert Safari, Water Sports & More',
+    title: 'Outdoor Activities in Bahrain 2026 | Desert Safari, Water Sports & More',
     description: 'Your guide to outdoor adventures in Bahrain.',
     type: 'article',
     locale: 'en_US',
@@ -418,7 +418,7 @@ export default function OutdoorActivitiesPage() {
           __html: JSON.stringify({
             '@context': 'https://schema.org',
             '@type': 'Article',
-            headline: 'Outdoor Activities in Bahrain 2025 | Desert Safari, Water Sports & More',
+            headline: 'Outdoor Activities in Bahrain 2026 | Desert Safari, Water Sports & More',
             description: 'Complete guide to outdoor activities in Bahrain including desert safaris, diving, and water sports.',
             author: {
               '@type': 'Organization',
@@ -429,7 +429,7 @@ export default function OutdoorActivitiesPage() {
               '@type': 'Organization',
               name: 'BahrainNights',
             },
-            datePublished: '2025-01-26',
+            datePublished: '2026-01-26',
             dateModified: lastUpdated,
             mainEntityOfPage: {
               '@type': 'WebPage',

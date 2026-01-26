@@ -7,11 +7,11 @@ import {
 import BreadcrumbSchema from '@/components/SEO/BreadcrumbSchema';
 
 export const metadata: Metadata = {
-  title: 'First Time in Bahrain 2025 | Essential Visitor Guide',
+  title: 'First Time in Bahrain 2026 | Essential Visitor Guide',
   description: 'First time visiting Bahrain? Complete guide with visa info, getting around, cultural tips, must-see attractions, and everything first-time visitors need to know.',
   keywords: 'first time Bahrain, visiting Bahrain, Bahrain travel guide, Bahrain visa, Bahrain tips, what to know Bahrain, Bahrain tourist guide',
   openGraph: {
-    title: 'First Time in Bahrain 2025 | Essential Visitor Guide',
+    title: 'First Time in Bahrain 2026 | Essential Visitor Guide',
     description: 'Your essential first-time visitor guide to Bahrain.',
     type: 'article',
     locale: 'en_US',
@@ -286,10 +286,10 @@ export default function FirstTimePage() {
 
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify({
         '@context': 'https://schema.org', '@type': 'Article',
-        headline: 'First Time in Bahrain 2025',
+        headline: 'First Time in Bahrain 2026',
         description: 'Essential guide for first-time visitors to Bahrain.',
         author: { '@type': 'Organization', name: 'BahrainNights' },
-        datePublished: '2025-01-26', dateModified: lastUpdated,
+        datePublished: '2026-01-26', dateModified: lastUpdated,
       })}} />
     </div>
   );

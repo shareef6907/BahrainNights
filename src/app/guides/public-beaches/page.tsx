@@ -7,11 +7,11 @@ import {
 import BreadcrumbSchema from '@/components/SEO/BreadcrumbSchema';
 
 export const metadata: Metadata = {
-  title: 'Public Beaches in Bahrain 2025 | Free Beaches & Swimming Spots',
+  title: 'Public Beaches in Bahrain 2026 | Free Beaches & Swimming Spots',
   description: 'Discover free public beaches in Bahrain! Complete guide to Marassi Beach, Al Jazayer, Karbabad Beach, and the best free swimming spots with facilities info.',
   keywords: 'public beaches Bahrain, free beaches Bahrain, Marassi Beach, Al Jazayer Beach, swimming Bahrain, beach access Bahrain, best beaches Manama',
   openGraph: {
-    title: 'Public Beaches in Bahrain 2025 | Free Beaches & Swimming Spots',
+    title: 'Public Beaches in Bahrain 2026 | Free Beaches & Swimming Spots',
     description: 'Your guide to free public beaches in Bahrain.',
     type: 'article',
     locale: 'en_US',
@@ -282,10 +282,10 @@ export default function PublicBeachesPage() {
 
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify({
         '@context': 'https://schema.org', '@type': 'Article',
-        headline: 'Public Beaches in Bahrain 2025',
+        headline: 'Public Beaches in Bahrain 2026',
         description: 'Complete guide to free public beaches in Bahrain.',
         author: { '@type': 'Organization', name: 'BahrainNights' },
-        datePublished: '2025-01-26', dateModified: lastUpdated,
+        datePublished: '2026-01-26', dateModified: lastUpdated,
       })}} />
     </div>
   );

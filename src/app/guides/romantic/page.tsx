@@ -7,11 +7,11 @@ import {
 import BreadcrumbSchema from '@/components/SEO/BreadcrumbSchema';
 
 export const metadata: Metadata = {
-  title: 'Romantic Things to Do in Bahrain 2025 | Date Ideas & Couples Guide',
+  title: 'Romantic Things to Do in Bahrain 2026 | Date Ideas & Couples Guide',
   description: 'Discover romantic things to do in Bahrain for couples! From sunset dinners to luxury spas, explore the best date night ideas and romantic experiences in Bahrain.',
   keywords: 'romantic things to do Bahrain, date ideas Bahrain, couples Bahrain, romantic dinner Bahrain, date night Bahrain, anniversary Bahrain, honeymoon Bahrain',
   openGraph: {
-    title: 'Romantic Things to Do in Bahrain 2025 | Date Ideas & Couples Guide',
+    title: 'Romantic Things to Do in Bahrain 2026 | Date Ideas & Couples Guide',
     description: 'Your complete guide to romantic experiences in Bahrain - fine dining, sunsets, spas, and unforgettable date nights.',
     type: 'article',
     locale: 'en_US',
@@ -443,7 +443,7 @@ export default function RomanticGuidePage() {
           __html: JSON.stringify({
             '@context': 'https://schema.org',
             '@type': 'Article',
-            headline: 'Romantic Things to Do in Bahrain 2025',
+            headline: 'Romantic Things to Do in Bahrain 2026',
             description: 'Complete guide to romantic activities, date ideas, and couples experiences in Bahrain.',
             author: {
               '@type': 'Organization',
@@ -454,7 +454,7 @@ export default function RomanticGuidePage() {
               '@type': 'Organization',
               name: 'BahrainNights',
             },
-            datePublished: '2025-01-26',
+            datePublished: '2026-01-26',
             dateModified: lastUpdated,
             mainEntityOfPage: {
               '@type': 'WebPage',

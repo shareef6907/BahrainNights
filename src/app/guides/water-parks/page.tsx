@@ -7,11 +7,11 @@ import {
 import BreadcrumbSchema from '@/components/SEO/BreadcrumbSchema';
 
 export const metadata: Metadata = {
-  title: 'Water Parks in Bahrain 2025 | Wahooo!, Lost Paradise & More',
+  title: 'Water Parks in Bahrain 2026 | Wahooo!, Lost Paradise & More',
   description: 'Discover the best water parks in Bahrain! Complete guide to Wahooo! Waterpark, Lost Paradise of Dilmun, prices, slides, and family fun. Beat the heat!',
   keywords: 'water parks Bahrain, Wahooo Bahrain, Lost Paradise Dilmun, water slides Bahrain, waterpark Bahrain, family fun Bahrain, wave pool Bahrain, lazy river Bahrain',
   openGraph: {
-    title: 'Water Parks in Bahrain 2025 | Wahooo!, Lost Paradise & More',
+    title: 'Water Parks in Bahrain 2026 | Wahooo!, Lost Paradise & More',
     description: 'Your guide to the best water parks and aquatic fun in Bahrain.',
     type: 'article',
     locale: 'en_US',
@@ -367,7 +367,7 @@ export default function WaterParksPage() {
           __html: JSON.stringify({
             '@context': 'https://schema.org',
             '@type': 'Article',
-            headline: 'Water Parks in Bahrain 2025 | Wahooo!, Lost Paradise & More',
+            headline: 'Water Parks in Bahrain 2026 | Wahooo!, Lost Paradise & More',
             description: 'Complete guide to water parks in Bahrain including Wahooo! and Lost Paradise of Dilmun.',
             author: {
               '@type': 'Organization',
@@ -378,7 +378,7 @@ export default function WaterParksPage() {
               '@type': 'Organization',
               name: 'BahrainNights',
             },
-            datePublished: '2025-01-26',
+            datePublished: '2026-01-26',
             dateModified: lastUpdated,
             mainEntityOfPage: {
               '@type': 'WebPage',

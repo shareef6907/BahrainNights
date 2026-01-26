@@ -7,11 +7,11 @@ import {
 import BreadcrumbSchema from '@/components/SEO/BreadcrumbSchema';
 
 export const metadata: Metadata = {
-  title: 'Best Arabic Restaurants in Bahrain 2025 | Lebanese, Khaleeji & Middle Eastern',
+  title: 'Best Arabic Restaurants in Bahrain 2026 | Lebanese, Khaleeji & Middle Eastern',
   description: 'Discover the best Arabic restaurants in Bahrain! Complete guide to Lebanese, Khaleeji, Syrian, and Middle Eastern cuisine with mezze, grills, and authentic dishes.',
   keywords: 'Arabic restaurants Bahrain, Lebanese restaurant Bahrain, Middle Eastern food Bahrain, best mezze Bahrain, Khaleeji food Manama, shawarma Bahrain',
   openGraph: {
-    title: 'Best Arabic Restaurants in Bahrain 2025 | Lebanese, Khaleeji & Middle Eastern',
+    title: 'Best Arabic Restaurants in Bahrain 2026 | Lebanese, Khaleeji & Middle Eastern',
     description: 'Your guide to the best Arabic restaurants in Bahrain.',
     type: 'article',
     locale: 'en_US',
@@ -468,11 +468,11 @@ export default function ArabicRestaurantsPage() {
           __html: JSON.stringify({
             '@context': 'https://schema.org',
             '@type': 'Article',
-            headline: 'Best Arabic Restaurants in Bahrain 2025',
+            headline: 'Best Arabic Restaurants in Bahrain 2026',
             description: 'Complete guide to Arabic restaurants in Bahrain including Lebanese, Khaleeji, and Middle Eastern cuisine.',
             author: { '@type': 'Organization', name: 'BahrainNights' },
             publisher: { '@type': 'Organization', name: 'BahrainNights' },
-            datePublished: '2025-01-26',
+            datePublished: '2026-01-26',
             dateModified: lastUpdated,
           }),
         }}

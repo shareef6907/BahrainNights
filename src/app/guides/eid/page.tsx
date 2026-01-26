@@ -7,11 +7,11 @@ import {
 import BreadcrumbSchema from '@/components/SEO/BreadcrumbSchema';
 
 export const metadata: Metadata = {
-  title: 'Eid Celebrations in Bahrain 2025 | Events, Activities & Guide',
+  title: 'Eid Celebrations in Bahrain 2026 | Events, Activities & Guide',
   description: 'Complete guide to Eid celebrations in Bahrain! Best events, activities, family fun, dining, and what to do during Eid Al-Fitr and Eid Al-Adha.',
   keywords: 'Eid Bahrain, Eid Al Fitr Bahrain, Eid Al Adha Bahrain, Eid celebrations, Eid events Bahrain, Bahrain holidays, Eid activities',
   openGraph: {
-    title: 'Eid Celebrations in Bahrain 2025 | Events, Activities & Guide',
+    title: 'Eid Celebrations in Bahrain 2026 | Events, Activities & Guide',
     description: 'Your guide to celebrating Eid in Bahrain.',
     type: 'article',
     locale: 'en_US',
@@ -26,7 +26,7 @@ const eidInfo = [
   {
     name: 'Eid Al-Fitr',
     meaning: 'Festival of Breaking Fast',
-    when: 'End of Ramadan (March/April 2025)',
+    when: 'End of Ramadan (March/April 2026)',
     duration: '3-4 days holiday',
     traditions: ['Eid prayers', 'Family gatherings', 'Gift-giving (Eidiya)', 'Feasting', 'New clothes', 'Charity'],
     vibe: 'Celebratory after month of fasting',
@@ -34,7 +34,7 @@ const eidInfo = [
   {
     name: 'Eid Al-Adha',
     meaning: 'Festival of Sacrifice',
-    when: 'After Hajj pilgrimage (June 2025)',
+    when: 'After Hajj pilgrimage (June 2026)',
     duration: '4-5 days holiday',
     traditions: ['Eid prayers', 'Sacrifice ritual', 'Meat distribution', 'Family gatherings', 'Charity'],
     vibe: 'Spiritual, commemorative',
@@ -244,7 +244,7 @@ export default function EidPage() {
           <h2 className="text-3xl font-bold mb-8 text-center">FAQs</h2>
           <div className="space-y-4">
             {[
-              { q: 'When is Eid in 2025?', a: 'Eid Al-Fitr is expected around late March 2025. Eid Al-Adha around early June 2025. Exact dates depend on moon sighting.' },
+              { q: 'When is Eid in 2026?', a: 'Eid Al-Fitr is expected around late March 2026. Eid Al-Adha around early June 2026. Exact dates depend on moon sighting.' },
               { q: 'How long is Eid holiday?', a: 'Eid Al-Fitr is typically 3-4 days, Eid Al-Adha 4-5 days. Government and schools get official holidays.' },
               { q: 'What is Eidiya?', a: 'Cash gifts given to children during Eid, similar to Christmas money. Usually from elder relatives.' },
             ].map((faq, i) => (
@@ -259,10 +259,10 @@ export default function EidPage() {
 
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify({
         '@context': 'https://schema.org', '@type': 'Article',
-        headline: 'Eid Celebrations in Bahrain 2025',
+        headline: 'Eid Celebrations in Bahrain 2026',
         description: 'Complete guide to Eid celebrations in Bahrain.',
         author: { '@type': 'Organization', name: 'BahrainNights' },
-        datePublished: '2025-01-26', dateModified: lastUpdated,
+        datePublished: '2026-01-26', dateModified: lastUpdated,
       })}} />
     </div>
   );

@@ -7,11 +7,11 @@ import {
 import BreadcrumbSchema from '@/components/SEO/BreadcrumbSchema';
 
 export const metadata: Metadata = {
-  title: 'Things to Do in Seef Bahrain 2025 | Seef Guide',
+  title: 'Things to Do in Seef Bahrain 2026 | Seef Guide',
   description: 'Discover things to do in Seef, Bahrain! From shopping malls to beach clubs, explore the best attractions, restaurants, and nightlife in Seef district. Complete area guide.',
   keywords: 'things to do in Seef, Seef Bahrain, Seef Mall, Seef nightlife, Seef restaurants, shopping in Seef, Seef beach clubs',
   openGraph: {
-    title: 'Things to Do in Seef Bahrain 2025 | Seef Guide',
+    title: 'Things to Do in Seef Bahrain 2026 | Seef Guide',
     description: 'Your complete guide to Seef district - shopping, dining, beaches, and entertainment.',
     type: 'article',
     locale: 'en_US',
@@ -290,11 +290,11 @@ export default function SeefGuidePage() {
           __html: JSON.stringify({
             '@context': 'https://schema.org',
             '@type': 'Article',
-            headline: 'Things to Do in Seef Bahrain 2025',
+            headline: 'Things to Do in Seef Bahrain 2026',
             description: 'Complete guide to Seef district including shopping, beaches, dining, and hotels.',
             author: { '@type': 'Organization', name: 'BahrainNights' },
             publisher: { '@type': 'Organization', name: 'BahrainNights' },
-            datePublished: '2025-01-26',
+            datePublished: '2026-01-26',
             dateModified: lastUpdated,
           }),
         }}

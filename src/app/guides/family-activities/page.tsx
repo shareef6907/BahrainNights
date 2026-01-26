@@ -7,11 +7,11 @@ import {
 import BreadcrumbSchema from '@/components/SEO/BreadcrumbSchema';
 
 export const metadata: Metadata = {
-  title: 'Family Activities in Bahrain 2025 | Best Things to Do with Family',
+  title: 'Family Activities in Bahrain 2026 | Best Things to Do with Family',
   description: 'Discover the best family activities in Bahrain! From water parks to museums, explore top family-friendly attractions and activities in Bahrain. Complete guide for families.',
   keywords: 'family activities Bahrain, things to do with family Bahrain, family fun Bahrain, Bahrain family attractions, kid-friendly Bahrain, family outings Bahrain',
   openGraph: {
-    title: 'Family Activities in Bahrain 2025 | Best Things to Do with Family',
+    title: 'Family Activities in Bahrain 2026 | Best Things to Do with Family',
     description: 'Your complete guide to family activities in Bahrain - water parks, museums, and fun attractions for all ages.',
     type: 'article',
     locale: 'en_US',
@@ -417,7 +417,7 @@ export default function FamilyActivitiesPage() {
           __html: JSON.stringify({
             '@context': 'https://schema.org',
             '@type': 'Article',
-            headline: 'Best Family Activities in Bahrain 2025',
+            headline: 'Best Family Activities in Bahrain 2026',
             description: 'Complete guide to family activities and attractions in Bahrain including water parks, museums, and kid-friendly venues.',
             author: {
               '@type': 'Organization',
@@ -428,7 +428,7 @@ export default function FamilyActivitiesPage() {
               '@type': 'Organization',
               name: 'BahrainNights',
             },
-            datePublished: '2025-01-26',
+            datePublished: '2026-01-26',
             dateModified: lastUpdated,
             mainEntityOfPage: {
               '@type': 'WebPage',

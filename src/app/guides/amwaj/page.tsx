@@ -7,11 +7,11 @@ import {
 import BreadcrumbSchema from '@/components/SEO/BreadcrumbSchema';
 
 export const metadata: Metadata = {
-  title: 'Amwaj Islands Guide 2025 | Things to Do in Amwaj Bahrain',
+  title: 'Amwaj Islands Guide 2026 | Things to Do in Amwaj Bahrain',
   description: 'Discover Amwaj Islands, Bahrain! From beach clubs to waterfront dining, explore the best attractions, restaurants, and activities. Complete Amwaj guide.',
   keywords: 'Amwaj Islands, things to do Amwaj, Amwaj Bahrain, Amwaj beach, Amwaj restaurants, Dragon Hotel, Marassi Galleria',
   openGraph: {
-    title: 'Amwaj Islands Guide 2025 | Things to Do in Amwaj Bahrain',
+    title: 'Amwaj Islands Guide 2026 | Things to Do in Amwaj Bahrain',
     description: 'Your complete guide to Amwaj Islands - beaches, marina, restaurants, and waterfront living.',
     type: 'article',
     locale: 'en_US',
@@ -294,11 +294,11 @@ export default function AmwajGuidePage() {
           __html: JSON.stringify({
             '@context': 'https://schema.org',
             '@type': 'Article',
-            headline: 'Amwaj Islands Guide 2025',
+            headline: 'Amwaj Islands Guide 2026',
             description: 'Complete guide to Amwaj Islands, Bahrain - beaches, marina, restaurants, and waterfront activities.',
             author: { '@type': 'Organization', name: 'BahrainNights' },
             publisher: { '@type': 'Organization', name: 'BahrainNights' },
-            datePublished: '2025-01-26',
+            datePublished: '2026-01-26',
             dateModified: lastUpdated,
           }),
         }}

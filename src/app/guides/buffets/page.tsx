@@ -7,11 +7,11 @@ import {
 import BreadcrumbSchema from '@/components/SEO/BreadcrumbSchema';
 
 export const metadata: Metadata = {
-  title: 'Best Buffets in Bahrain 2025 | Friday Brunch, Hotel Buffets & All-You-Can-Eat',
+  title: 'Best Buffets in Bahrain 2026 | Friday Brunch, Hotel Buffets & All-You-Can-Eat',
   description: 'Discover the best buffets in Bahrain! Complete guide to Friday brunches, hotel buffets, international spreads, and all-you-can-eat dining.',
   keywords: 'buffets Bahrain, Friday brunch Bahrain, hotel buffet Bahrain, all you can eat Bahrain, best brunch Manama, international buffet Bahrain',
   openGraph: {
-    title: 'Best Buffets in Bahrain 2025 | Friday Brunch, Hotel Buffets',
+    title: 'Best Buffets in Bahrain 2026 | Friday Brunch, Hotel Buffets',
     description: 'Your guide to the best buffets and brunches in Bahrain.',
     type: 'article',
     locale: 'en_US',
@@ -313,10 +313,10 @@ export default function BuffetsPage() {
 
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify({
         '@context': 'https://schema.org', '@type': 'Article',
-        headline: 'Best Buffets in Bahrain 2025',
+        headline: 'Best Buffets in Bahrain 2026',
         description: 'Complete guide to buffets and Friday brunches in Bahrain.',
         author: { '@type': 'Organization', name: 'BahrainNights' },
-        datePublished: '2025-01-26', dateModified: lastUpdated,
+        datePublished: '2026-01-26', dateModified: lastUpdated,
       })}} />
     </div>
   );

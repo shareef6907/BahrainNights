@@ -7,11 +7,11 @@ import {
 import BreadcrumbSchema from '@/components/SEO/BreadcrumbSchema';
 
 export const metadata: Metadata = {
-  title: 'Things to Do in Manama 2025 | Manama City Guide Bahrain',
+  title: 'Things to Do in Manama 2026 | Manama City Guide Bahrain',
   description: 'Discover things to do in Manama, Bahrain! From traditional souqs to modern attractions, explore the best sights, restaurants, and activities in the capital. Complete guide.',
   keywords: 'things to do in Manama, Manama guide, Manama Bahrain, Manama attractions, Manama souq, downtown Manama, Manama restaurants',
   openGraph: {
-    title: 'Things to Do in Manama 2025 | Manama City Guide Bahrain',
+    title: 'Things to Do in Manama 2026 | Manama City Guide Bahrain',
     description: 'Your complete guide to Manama - the capital of Bahrain with souqs, museums, dining, and culture.',
     type: 'article',
     locale: 'en_US',
@@ -294,11 +294,11 @@ export default function ManamaGuidePage() {
           __html: JSON.stringify({
             '@context': 'https://schema.org',
             '@type': 'Article',
-            headline: 'Things to Do in Manama 2025',
+            headline: 'Things to Do in Manama 2026',
             description: 'Complete guide to Manama, Bahrain\'s capital - souqs, museums, restaurants, and attractions.',
             author: { '@type': 'Organization', name: 'BahrainNights' },
             publisher: { '@type': 'Organization', name: 'BahrainNights' },
-            datePublished: '2025-01-26',
+            datePublished: '2026-01-26',
             dateModified: lastUpdated,
           }),
         }}

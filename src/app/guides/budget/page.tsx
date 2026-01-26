@@ -7,11 +7,11 @@ import {
 import BreadcrumbSchema from '@/components/SEO/BreadcrumbSchema';
 
 export const metadata: Metadata = {
-  title: 'Bahrain on a Budget 2025 | Free & Cheap Things to Do',
+  title: 'Bahrain on a Budget 2026 | Free & Cheap Things to Do',
   description: 'Explore Bahrain without breaking the bank! Complete guide to free attractions, cheap eats, budget tips, and affordable activities in Bahrain.',
   keywords: 'budget Bahrain, cheap things to do Bahrain, free attractions Bahrain, budget travel Bahrain, affordable Bahrain, backpacking Bahrain',
   openGraph: {
-    title: 'Bahrain on a Budget 2025 | Free & Cheap Things to Do',
+    title: 'Bahrain on a Budget 2026 | Free & Cheap Things to Do',
     description: 'Your guide to affordable Bahrain.',
     type: 'article',
     locale: 'en_US',
@@ -273,10 +273,10 @@ export default function BudgetPage() {
 
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify({
         '@context': 'https://schema.org', '@type': 'Article',
-        headline: 'Bahrain on a Budget 2025',
+        headline: 'Bahrain on a Budget 2026',
         description: 'Complete guide to budget travel in Bahrain.',
         author: { '@type': 'Organization', name: 'BahrainNights' },
-        datePublished: '2025-01-26', dateModified: lastUpdated,
+        datePublished: '2026-01-26', dateModified: lastUpdated,
       })}} />
     </div>
   );
