@@ -66,10 +66,11 @@ const brandCategories = [
 
 // Mall data
 const malls = [
+  { name: 'Marassi Galleria', area: 'Diyar Al Muharraq', stores: '400+' },
   { name: 'City Centre Bahrain', area: 'Seef', stores: '340+' },
   { name: 'Seef Mall', area: 'Seef', stores: '160+' },
-  { name: 'Moda Mall', area: 'Manama', stores: '80+' },
   { name: 'The Avenues', area: 'Bahrain Bay', stores: '200+' },
+  { name: 'Moda Mall', area: 'Manama', stores: '80+' },
   { name: 'Bahrain Mall', area: 'Sanabis', stores: '120+' },
 ];
 
