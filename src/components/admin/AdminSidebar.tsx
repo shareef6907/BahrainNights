@@ -25,6 +25,7 @@ import {
   MapPin,
   Ticket,
   FileText,
+  Mail,
 } from 'lucide-react';
 import { useAuth } from '@/lib/auth-context';
 
@@ -104,6 +105,11 @@ const navItems = [
     name: 'Analytics',
     href: '/admin/analytics',
     icon: BarChart3,
+  },
+  {
+    name: 'Newsletter',
+    href: '/admin/newsletter',
+    icon: Mail,
   },
   {
     name: 'Members',

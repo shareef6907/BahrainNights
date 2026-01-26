@@ -37,6 +37,7 @@ const pageTitles: Record<string, string> = {
   '/admin/studio/settings': 'Studio Settings',
   '/admin/platinumlist-attractions': 'Platinumlist Attractions',
   '/admin/platinumlist-events': 'Platinumlist Events',
+  '/admin/newsletter': 'Newsletter Management',
 };
 
 export default function AdminLayout({ children }: AdminLayoutProps) {

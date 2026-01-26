@@ -933,15 +933,13 @@ export default function HomePageClient({ initialMovies, initialStats, initialTod
       <SponsorsSection />
 
       {/* Newsletter Section */}
-      <section className="px-4 py-16">
-        <div className="max-w-2xl mx-auto">
-          <NewsletterSignup 
-            variant="banner"
-            title="Stay in the Loop"
-            description="Get weekly updates on the best events, new restaurants, and insider tips for Bahrain."
-            source="homepage"
-          />
-        </div>
+      <section className="mb-12 md:mb-24">
+        <NewsletterSignup 
+          variant="premium"
+          title="Be the First to Know"
+          description="Weekly newsletter launching soon — get exclusive updates on events, dining, and nightlife in Bahrain."
+          source="homepage"
+        />
       </section>
 
       {/* Footer */}
