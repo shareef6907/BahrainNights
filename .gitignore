@@ -50,3 +50,7 @@ scripts/scrapers/**/node_modules/
 
 # Playwright test screenshots
 .playwright-mcp/
+
+# Local environment files
+.env.local
+.env*.local

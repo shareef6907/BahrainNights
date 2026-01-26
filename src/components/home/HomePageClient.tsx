@@ -301,6 +301,8 @@ export default function HomePageClient({ initialMovies, initialStats, initialTod
         { name: t.nav.shoppingMarkets, icon: '🛍️', href: '/explore/shopping' },
         { name: t.nav.spasWellness, icon: '💆', href: '/explore/spas' },
         { name: t.nav.hotelsStaycations, icon: '🏨', href: '/explore/hotels' },
+        { name: t.nav.toursExperiences || 'Tours & Experiences', icon: '🚤', href: '/explore/tours' },
+        { name: t.nav.kidsActivities || 'Kids Activities', icon: '👶', href: '/explore/kids' },
       ]
     },
     {
