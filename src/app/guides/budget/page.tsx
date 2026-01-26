@@ -94,7 +94,7 @@ const freeActivities = [
   'Explore Manama Souq (just looking!)',
   'Beach day at Marassi',
   'Visit free museums',
-  'Photograph Arad Fort at night',
+  'Visit Al Fateh Grand Mosque (free tours)',
   'Walk along Bahrain Fort',
   'People watch at The Avenues',
   'Morning jog along the Corniche',
