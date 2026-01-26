@@ -11,17 +11,19 @@ export const revalidate = 0;
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!;
 const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY!;
 
-// Fetch tours/attractions from database (same as kids page - attractions table)
+// Fetch tours/attractions from database - only Platinum List sourced items
 async function getTours(): Promise<ExploreItem[]> {
   const supabase = createClient(supabaseUrl, supabaseServiceKey, {
     auth: { autoRefreshToken: false, persistSession: false }
   });
 
-  // Fetch from attractions table (same data source as kids page)
+  // Fetch from attractions table - only show Platinum List items with valid booking URLs
   const { data, error } = await supabase
     .from('attractions')
     .select('*')
     .eq('is_active', true)
+    .eq('source', 'platinumlist')
+    .not('booking_url', 'is', null)
     .order('is_featured', { ascending: false })
     .order('tripadvisor_rating', { ascending: false, nullsFirst: false });
 

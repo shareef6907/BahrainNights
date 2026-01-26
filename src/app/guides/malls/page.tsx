@@ -167,6 +167,22 @@ const malls = [
     bestFor: 'Bargain hunting, bulk buying, electronics',
     href: null,
   },
+  {
+    name: 'Souq Al Baraha',
+    location: 'Diyar Al Muharraq',
+    type: 'Traditional Souq',
+    rating: 4,
+    size: 'Open-air waterfront',
+    stores: '50+ shops',
+    description: 'Charming traditional-style waterfront souq with Bahraini architecture, boutiques, restaurants, and a scenic promenade overlooking the water.',
+    highlights: ['Waterfront promenade', 'Traditional architecture', 'Al fresco dining', 'Local artisans'],
+    brands: 'Local boutiques, traditional shops',
+    dining: 'Waterfront restaurants + cafes',
+    parking: '500+ spaces (free)',
+    hours: 'Daily 10AM-10PM, Thu-Fri until 12AM',
+    bestFor: 'Waterfront dining, evening walks, photography',
+    href: '/guides/malls/souq-al-baraha',
+  },
 ];
 
 const shoppingTips = [
