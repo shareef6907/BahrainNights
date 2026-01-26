@@ -15,7 +15,9 @@ import {
   Send,
   Eye,
   Sparkles,
-  TrendingUp
+  TrendingUp,
+  AlertCircle,
+  X
 } from 'lucide-react';
 
 interface Subscriber {
@@ -34,19 +36,46 @@ interface Stats {
   thisMonth: number;
 }
 
+interface GeneratedNewsletter {
+  html: string;
+  text: string;
+  subject: string;
+  eventsCount: number;
+  internationalCount: number;
+}
+
 export default function NewsletterAdminPage() {
   const [subscribers, setSubscribers] = useState<Subscriber[]>([]);
   const [stats, setStats] = useState<Stats>({ total: 0, active: 0, unsubscribed: 0, thisMonth: 0 });
   const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState('');
   const [statusFilter, setStatusFilter] = useState<'all' | 'subscribed' | 'unsubscribed'>('all');
+  
+  // Newsletter state
   const [showGenerator, setShowGenerator] = useState(false);
-  const [generatedContent, setGeneratedContent] = useState('');
+  const [newsletter, setNewsletter] = useState<GeneratedNewsletter | null>(null);
   const [generating, setGenerating] = useState(false);
+  const [sending, setSending] = useState(false);
+  const [sendResult, setSendResult] = useState<{ success: boolean; message: string } | null>(null);
+  const [showPreview, setShowPreview] = useState(false);
+  const [testEmail, setTestEmail] = useState('');
 
   useEffect(() => {
     fetchSubscribers();
+    checkTableExists();
   }, []);
+
+  const checkTableExists = async () => {
+    try {
+      const response = await fetch('/api/admin/newsletter/init');
+      const data = await response.json();
+      if (!data.exists) {
+        console.log('Newsletter table needs to be created');
+      }
+    } catch (error) {
+      console.error('Error checking table:', error);
+    }
+  };
 
   const fetchSubscribers = async () => {
     setLoading(true);
@@ -95,17 +124,63 @@ export default function NewsletterAdminPage() {
 
   const generateNewsletter = async () => {
     setGenerating(true);
+    setSendResult(null);
     try {
       const response = await fetch('/api/admin/newsletter/generate');
       if (response.ok) {
         const data = await response.json();
-        setGeneratedContent(data.content || '');
+        setNewsletter(data);
         setShowGenerator(true);
+      } else {
+        const error = await response.json();
+        setSendResult({ success: false, message: error.error || 'Failed to generate' });
       }
     } catch (error) {
       console.error('Error generating newsletter:', error);
+      setSendResult({ success: false, message: 'Network error' });
     }
     setGenerating(false);
+  };
+
+  const sendNewsletter = async (isTest = false) => {
+    if (!newsletter) return;
+    
+    setSending(true);
+    setSendResult(null);
+    
+    try {
+      const response = await fetch('/api/admin/newsletter/send', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          subject: newsletter.subject,
+          html: newsletter.html,
+          text: newsletter.text,
+          testEmail: isTest ? testEmail : undefined,
+        }),
+      });
+
+      const data = await response.json();
+      
+      if (response.ok) {
+        setSendResult({ 
+          success: true, 
+          message: isTest 
+            ? `Test email sent to ${testEmail}` 
+            : `Newsletter sent to ${data.count} subscribers!` 
+        });
+      } else {
+        setSendResult({ 
+          success: false, 
+          message: data.error || 'Failed to send' 
+        });
+      }
+    } catch (error) {
+      console.error('Error sending newsletter:', error);
+      setSendResult({ success: false, message: 'Network error. Please try again.' });
+    }
+    
+    setSending(false);
   };
 
   const formatDate = (dateStr: string) => {
@@ -133,7 +208,7 @@ export default function NewsletterAdminPage() {
           <button
             onClick={generateNewsletter}
             disabled={generating}
-            className="flex items-center gap-2 px-4 py-2 bg-purple-600 hover:bg-purple-500 text-white rounded-lg transition-colors disabled:opacity-50"
+            className="flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-purple-600 to-purple-500 hover:from-purple-500 hover:to-purple-400 text-white rounded-lg transition-all disabled:opacity-50 font-medium"
           >
             {generating ? <Loader2 className="w-4 h-4 animate-spin" /> : <Sparkles className="w-4 h-4" />}
             Generate Newsletter
@@ -197,41 +272,126 @@ export default function NewsletterAdminPage() {
       </div>
 
       {/* Newsletter Generator Modal */}
-      {showGenerator && (
+      {showGenerator && newsletter && (
         <div className="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-          <div className="bg-slate-900 border border-white/10 rounded-2xl w-full max-w-4xl max-h-[90vh] overflow-hidden">
-            <div className="flex items-center justify-between p-4 border-b border-white/10">
-              <h2 className="text-xl font-bold flex items-center gap-2">
-                <FileText className="w-5 h-5 text-purple-400" />
-                Generated Newsletter
-              </h2>
+          <div className="bg-slate-900 border border-white/10 rounded-2xl w-full max-w-5xl max-h-[90vh] overflow-hidden flex flex-col">
+            {/* Modal Header */}
+            <div className="flex items-center justify-between p-4 border-b border-white/10 flex-shrink-0">
+              <div>
+                <h2 className="text-xl font-bold flex items-center gap-2">
+                  <FileText className="w-5 h-5 text-purple-400" />
+                  Newsletter Preview
+                </h2>
+                <p className="text-sm text-gray-400 mt-1">
+                  {newsletter.eventsCount} events • {newsletter.internationalCount} international
+                </p>
+              </div>
               <div className="flex gap-2">
                 <button
                   onClick={() => setShowGenerator(false)}
-                  className="px-4 py-2 bg-white/10 hover:bg-white/20 rounded-lg transition-colors"
+                  className="p-2 hover:bg-white/10 rounded-lg transition-colors"
                 >
-                  Close
-                </button>
-                <button className="flex items-center gap-2 px-4 py-2 bg-yellow-500 hover:bg-yellow-400 text-black font-medium rounded-lg transition-colors">
-                  <Eye className="w-4 h-4" />
-                  Preview
-                </button>
-                <button className="flex items-center gap-2 px-4 py-2 bg-green-600 hover:bg-green-500 text-white font-medium rounded-lg transition-colors">
-                  <Send className="w-4 h-4" />
-                  Send to All
+                  <X className="w-5 h-5" />
                 </button>
               </div>
             </div>
-            <div className="p-4 overflow-y-auto max-h-[70vh]">
-              <textarea
-                value={generatedContent}
-                onChange={(e) => setGeneratedContent(e.target.value)}
-                className="w-full h-96 p-4 bg-white/5 border border-white/10 rounded-lg text-white font-mono text-sm resize-none focus:outline-none focus:border-yellow-500"
-                placeholder="Newsletter content will appear here..."
+
+            {/* Subject Line */}
+            <div className="p-4 border-b border-white/10 flex-shrink-0">
+              <label className="text-sm text-gray-400 block mb-2">Subject Line</label>
+              <input
+                type="text"
+                value={newsletter.subject}
+                onChange={(e) => setNewsletter({ ...newsletter, subject: e.target.value })}
+                className="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-lg text-white focus:outline-none focus:border-yellow-500"
               />
-              <p className="text-sm text-gray-500 mt-2">
-                Edit the content above before sending. The newsletter will be sent to {stats.active} active subscribers.
-              </p>
+            </div>
+
+            {/* Preview Toggle */}
+            <div className="p-4 border-b border-white/10 flex-shrink-0">
+              <div className="flex gap-2">
+                <button
+                  onClick={() => setShowPreview(false)}
+                  className={`px-4 py-2 rounded-lg transition-colors ${!showPreview ? 'bg-yellow-500 text-black font-medium' : 'bg-white/10 text-white'}`}
+                >
+                  Edit HTML
+                </button>
+                <button
+                  onClick={() => setShowPreview(true)}
+                  className={`px-4 py-2 rounded-lg transition-colors flex items-center gap-2 ${showPreview ? 'bg-yellow-500 text-black font-medium' : 'bg-white/10 text-white'}`}
+                >
+                  <Eye className="w-4 h-4" />
+                  Preview
+                </button>
+              </div>
+            </div>
+
+            {/* Content Area */}
+            <div className="flex-1 overflow-y-auto p-4">
+              {showPreview ? (
+                <div className="bg-white rounded-lg overflow-hidden">
+                  <iframe
+                    srcDoc={newsletter.html}
+                    className="w-full h-[600px] border-0"
+                    title="Newsletter Preview"
+                  />
+                </div>
+              ) : (
+                <textarea
+                  value={newsletter.html}
+                  onChange={(e) => setNewsletter({ ...newsletter, html: e.target.value })}
+                  className="w-full h-[500px] p-4 bg-white/5 border border-white/10 rounded-lg text-white font-mono text-sm resize-none focus:outline-none focus:border-yellow-500"
+                />
+              )}
+            </div>
+
+            {/* Send Result */}
+            {sendResult && (
+              <div className={`mx-4 mb-4 p-4 rounded-lg flex items-center gap-3 ${sendResult.success ? 'bg-green-500/20 border border-green-500/30' : 'bg-red-500/20 border border-red-500/30'}`}>
+                {sendResult.success ? (
+                  <CheckCircle className="w-5 h-5 text-green-400" />
+                ) : (
+                  <AlertCircle className="w-5 h-5 text-red-400" />
+                )}
+                <span className={sendResult.success ? 'text-green-400' : 'text-red-400'}>
+                  {sendResult.message}
+                </span>
+              </div>
+            )}
+
+            {/* Footer Actions */}
+            <div className="p-4 border-t border-white/10 flex-shrink-0">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-2">
+                  <input
+                    type="email"
+                    value={testEmail}
+                    onChange={(e) => setTestEmail(e.target.value)}
+                    placeholder="Test email address"
+                    className="px-3 py-2 bg-white/5 border border-white/10 rounded-lg text-white text-sm focus:outline-none focus:border-yellow-500 w-64"
+                  />
+                  <button
+                    onClick={() => sendNewsletter(true)}
+                    disabled={sending || !testEmail}
+                    className="flex items-center gap-2 px-4 py-2 bg-white/10 hover:bg-white/20 text-white rounded-lg transition-colors disabled:opacity-50"
+                  >
+                    {sending ? <Loader2 className="w-4 h-4 animate-spin" /> : <Send className="w-4 h-4" />}
+                    Send Test
+                  </button>
+                </div>
+                <button
+                  onClick={() => sendNewsletter(false)}
+                  disabled={sending || stats.active === 0}
+                  className="flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-green-600 to-green-500 hover:from-green-500 hover:to-green-400 text-white font-bold rounded-lg transition-all disabled:opacity-50"
+                >
+                  {sending ? (
+                    <Loader2 className="w-5 h-5 animate-spin" />
+                  ) : (
+                    <Send className="w-5 h-5" />
+                  )}
+                  Send to All ({stats.active} subscribers)
+                </button>
+              </div>
             </div>
           </div>
         </div>
@@ -277,6 +437,7 @@ export default function NewsletterAdminPage() {
           <div className="text-center py-12 text-gray-400">
             <Mail className="w-12 h-12 mx-auto mb-4 opacity-50" />
             <p>No subscribers found</p>
+            <p className="text-sm mt-2">Subscribers will appear here once people sign up</p>
           </div>
         ) : (
           <table className="w-full">
@@ -325,13 +486,29 @@ export default function NewsletterAdminPage() {
         )}
       </div>
 
-      {/* Info Box */}
-      <div className="mt-8 p-4 bg-yellow-500/10 border border-yellow-500/30 rounded-xl">
-        <h3 className="font-bold text-yellow-400 mb-2">📧 Newsletter Status</h3>
-        <p className="text-sm text-gray-300">
-          Bi-weekly newsletter is scheduled to send automatically. Emails will be sent from <code className="bg-black/30 px-1 rounded">noreply@bahrainnights.com</code>.
-          Use the &quot;Generate Newsletter&quot; button to create content based on upcoming events.
-        </p>
+      {/* Setup Info */}
+      <div className="mt-8 p-4 bg-blue-500/10 border border-blue-500/30 rounded-xl">
+        <h3 className="font-bold text-blue-400 mb-2 flex items-center gap-2">
+          <AlertCircle className="w-5 h-5" />
+          Email Sending Setup (Resend.com)
+        </h3>
+        <div className="text-sm text-gray-300 space-y-2">
+          <p>To send newsletters, configure Resend:</p>
+          <ol className="list-decimal list-inside space-y-1 text-gray-400">
+            <li>Go to <a href="https://resend.com" target="_blank" rel="noopener noreferrer" className="text-blue-400 hover:underline">resend.com</a> and create a free account (3,000 emails/month)</li>
+            <li>Get your API key from the dashboard</li>
+            <li>Add <code className="bg-black/30 px-1 rounded">RESEND_API_KEY=re_xxxxx</code> to your environment variables</li>
+            <li>Verify your domain by adding DNS records (see Resend dashboard)</li>
+          </ol>
+          <p className="mt-3 text-gray-500">
+            DNS records needed for <code className="bg-black/30 px-1 rounded">bahrainnights.com</code>:
+          </p>
+          <ul className="list-disc list-inside text-gray-500">
+            <li>SPF record (TXT)</li>
+            <li>DKIM record (TXT)</li>
+            <li>Optional: DMARC record (TXT)</li>
+          </ul>
+        </div>
       </div>
     </div>
   );

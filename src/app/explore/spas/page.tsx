@@ -1,7 +1,7 @@
 'use client';
 
 import { motion } from 'framer-motion';
-import { ArrowLeft, MapPin, ExternalLink, Dumbbell, Heart, Sparkles, Users } from 'lucide-react';
+import { ArrowLeft, MapPin, ExternalLink, Dumbbell, Heart, Users } from 'lucide-react';
 import Link from 'next/link';
 
 // Data verified on Google Maps - January 2026
@@ -160,44 +160,6 @@ const ladiesGyms = [
   },
 ];
 
-const spas = [
-  {
-    name: 'Cocoon Wellness Spa - Juffair',
-    area: 'Hilton Garden Inn, Juffair',
-    rating: 4.9,
-    reviews: 854,
-    mapsLink: 'https://www.google.com/maps/search/Cocoon+Wellness+Spa+Juffair',
-  },
-  {
-    name: 'Cocoon Wellness Spa - City Centre',
-    area: 'Hilton, City Centre Bahrain',
-    rating: 5.0,
-    reviews: 34,
-    mapsLink: 'https://www.google.com/maps/search/Cocoon+Wellness+Spa+City+Center+Bahrain',
-  },
-  {
-    name: 'Blossom Spa Bahrain',
-    area: 'Juffair',
-    rating: 4.5,
-    reviews: 153,
-    mapsLink: 'https://www.google.com/maps/search/Blossom+Spa+Bahrain',
-  },
-  {
-    name: 'Gulf Wellness Spa',
-    area: 'Juffair',
-    rating: 4.8,
-    reviews: 40,
-    mapsLink: 'https://www.google.com/maps/search/Gulf+Wellness+Spa+Bahrain',
-  },
-  {
-    name: 'FIT Gym & Spa',
-    area: 'Adliya',
-    rating: 4.4,
-    reviews: 273,
-    mapsLink: 'https://www.google.com/maps/search/FIT+Gym+Spa+Bahrain',
-  },
-];
-
 function VenueCard({ venue, icon }: { venue: typeof gyms[0]; icon: React.ReactNode }) {
   return (
     <a
@@ -255,10 +217,10 @@ export default function SpasPage() {
               </div>
               <div>
                 <h1 className="text-3xl md:text-4xl font-bold text-white">
-                  Gyms, Spas & Wellness
+                  Gyms & Fitness
                 </h1>
                 <p className="text-gray-400">
-                  Find the best fitness centers, studios, and spas in Bahrain
+                  Find the best gyms, fitness centers, and studios in Bahrain
                 </p>
               </div>
             </div>
@@ -331,23 +293,6 @@ export default function SpasPage() {
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
             {ladiesGyms.map((gym) => (
               <VenueCard key={gym.name} venue={gym} icon={<Heart className="w-5 h-5 text-pink-400" />} />
-            ))}
-          </div>
-        </motion.div>
-
-        {/* Day Spas & Wellness */}
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.5 }}
-        >
-          <div className="flex items-center gap-2 mb-6">
-            <Sparkles className="w-6 h-6 text-purple-400" />
-            <h2 className="text-2xl font-bold text-white">Day Spas & Wellness Centers</h2>
-          </div>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-            {spas.map((spa) => (
-              <VenueCard key={spa.name} venue={spa} icon={<Sparkles className="w-5 h-5 text-purple-400" />} />
             ))}
           </div>
         </motion.div>
