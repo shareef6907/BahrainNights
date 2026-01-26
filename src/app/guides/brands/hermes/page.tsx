@@ -35,6 +35,17 @@ const storeLocations = [
     mapsLink: 'https://www.google.com/maps/search/Hermes+Moda+Mall+Bahrain',
     isPrimary: true,
   },
+  {
+    name: 'Hermès - Marassi Galleria',
+    mall: 'Marassi Galleria',
+    address: 'Marassi Galleria, Road 6403, Diyar Al Muharraq, Bahrain',
+    floor: 'Ground Floor',
+    hours: 'Sun-Wed: 10:00 AM - 10:00 PM, Thu-Sat: 10:00 AM - 12:00 AM',
+    products: ['Leather Goods', 'Silk Scarves', 'Ready-to-Wear', 'Accessories', 'Shoes', 'Fragrances'],
+    features: ['Beachfront luxury mall', 'Premium boutique', 'Near Address Hotel'],
+    mapsLink: 'https://www.google.com/maps/search/Hermes+Marassi+Galleria+Bahrain',
+    isPrimary: false,
+  },
 ];
 
 const shoppingTips = [
@@ -66,7 +77,7 @@ const relatedBrands = [
 const faqs = [
   {
     q: 'Is Hermès available in Bahrain?',
-    a: 'Yes, Hermès has a boutique in Moda Mall at Bahrain World Trade Center offering leather goods, silk scarves, fashion, accessories, and fragrances.',
+    a: 'Yes, Hermès has two boutiques in Bahrain - the flagship at Moda Mall (Bahrain World Trade Center) and a new location at Marassi Galleria in Diyar Al Muharraq, offering leather goods, silk scarves, fashion, accessories, and fragrances.',
   },
   {
     q: 'Can I buy a Birkin bag in Bahrain?',
@@ -122,8 +133,8 @@ export default function HermesBahrainPage() {
           {/* Quick Info */}
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mt-12">
             {[
-              { label: 'Boutique', value: '1', icon: ShoppingBag },
-              { label: 'Location', value: 'Moda Mall', icon: MapPin },
+              { label: 'Boutiques', value: '2', icon: ShoppingBag },
+              { label: 'Locations', value: 'Moda Mall, Marassi', icon: MapPin },
               { label: 'Since', value: '1837', icon: Star },
               { label: 'VAT', value: '0%', icon: Sparkles },
             ].map((stat) => (
@@ -140,8 +151,8 @@ export default function HermesBahrainPage() {
       {/* Store Locations */}
       <section className="py-16 px-4">
         <div className="max-w-6xl mx-auto">
-          <h2 className="text-3xl font-bold mb-4">Hermès Boutique in Bahrain</h2>
-          <p className="text-gray-400 mb-8">The exclusive Hermès boutique in Bahrain.</p>
+          <h2 className="text-3xl font-bold mb-4">Hermès Boutiques in Bahrain</h2>
+          <p className="text-gray-400 mb-8">Two exclusive Hermès boutiques in Bahrain.</p>
           
           <div className="space-y-6">
             {storeLocations.map((store) => (

@@ -47,6 +47,17 @@ const storeLocations = [
     mapsLink: 'https://www.google.com/maps/search/Louis+Vuitton+City+Centre+Bahrain',
     isPrimary: false,
   },
+  {
+    name: 'Louis Vuitton - Marassi Galleria',
+    mall: 'Marassi Galleria',
+    address: 'Marassi Galleria, Diyar Al Muharraq, Bahrain',
+    floor: '1st Floor, Near Gate 3',
+    hours: 'Sun-Wed: 10:00 AM - 10:00 PM, Thu-Sat: 10:00 AM - 12:00 AM',
+    products: ['Leather Goods', 'Handbags', 'Small Leather Goods', 'Accessories', 'Selected Ready-to-Wear'],
+    features: ['Beachfront luxury mall', 'Premium boutique', 'Near Address Hotel'],
+    mapsLink: 'https://www.google.com/maps/search/Louis+Vuitton+Marassi+Galleria+Bahrain',
+    isPrimary: false,
+  },
 ];
 
 const shoppingTips = [
@@ -78,7 +89,7 @@ const relatedBrands = [
 const faqs = [
   {
     q: 'Is Louis Vuitton available in Bahrain?',
-    a: 'Yes, Louis Vuitton has two boutiques in Bahrain - the flagship store at Moda Mall (Bahrain World Trade Center) and another location at City Centre Bahrain.',
+    a: 'Yes, Louis Vuitton has three boutiques in Bahrain - the flagship store at Moda Mall (Bahrain World Trade Center), City Centre Bahrain, and the new location at Marassi Galleria in Diyar Al Muharraq.',
   },
   {
     q: 'Which Louis Vuitton store in Bahrain is bigger?',
@@ -134,9 +145,9 @@ export default function LouisVuittonBahrainPage() {
           {/* Quick Info */}
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mt-12">
             {[
-              { label: 'Stores', value: '2', icon: ShoppingBag },
+              { label: 'Stores', value: '3', icon: ShoppingBag },
               { label: 'Flagship', value: 'Moda Mall', icon: Star },
-              { label: 'Also At', value: 'City Centre', icon: MapPin },
+              { label: 'Also At', value: 'City Centre, Marassi', icon: MapPin },
               { label: 'VAT', value: '0%', icon: Sparkles },
             ].map((stat) => (
               <div key={stat.label} className="bg-white/5 backdrop-blur-sm rounded-xl p-4 text-center">
@@ -153,7 +164,7 @@ export default function LouisVuittonBahrainPage() {
       <section className="py-16 px-4">
         <div className="max-w-6xl mx-auto">
           <h2 className="text-3xl font-bold mb-4">Louis Vuitton Stores in Bahrain</h2>
-          <p className="text-gray-400 mb-8">Two boutiques serving the Kingdom of Bahrain.</p>
+          <p className="text-gray-400 mb-8">Three boutiques serving the Kingdom of Bahrain.</p>
           
           <div className="space-y-6">
             {storeLocations.map((store) => (

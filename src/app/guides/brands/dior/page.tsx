@@ -35,6 +35,17 @@ const storeLocations = [
     mapsLink: 'https://www.google.com/maps/search/Dior+Moda+Mall+Bahrain',
     isPrimary: true,
   },
+  {
+    name: 'Dior - Marassi Galleria',
+    mall: 'Marassi Galleria',
+    address: 'Shop 2149, Marassi Galleria, Road 6403, Diyar Al Muharraq, Bahrain',
+    floor: 'Shop 2149',
+    hours: 'Sun-Wed: 10:00 AM - 10:00 PM, Thu-Sat: 10:00 AM - 12:00 AM',
+    products: ['Ready-to-Wear', 'Handbags', 'Accessories', 'Shoes', 'Fragrances', 'Beauty'],
+    features: ['Beachfront luxury mall', 'Premium boutique', 'Near Address Hotel'],
+    mapsLink: 'https://www.google.com/maps/search/Dior+Marassi+Galleria+Bahrain',
+    isPrimary: false,
+  },
 ];
 
 const beautyCounters = [
@@ -87,11 +98,11 @@ const relatedBrands = [
 const faqs = [
   {
     q: 'Is Dior available in Bahrain?',
-    a: 'Yes, Dior has a flagship boutique in Moda Mall at Bahrain World Trade Center offering fashion, accessories, and beauty. Dior beauty products are also available at Paris Gallery, Faces, and Sephora stores.',
+    a: 'Yes, Dior has two boutiques in Bahrain - the flagship at Moda Mall (Bahrain World Trade Center) and a new location at Marassi Galleria in Diyar Al Muharraq. Dior beauty products are also available at Paris Gallery, Faces, and Sephora stores.',
   },
   {
     q: 'Which mall has Dior in Bahrain?',
-    a: 'The main Dior boutique is located in Moda Mall at Bahrain World Trade Center. For Dior beauty products only, you can visit Paris Gallery and Faces in various malls.',
+    a: 'Dior boutiques are located in Moda Mall at Bahrain World Trade Center and Marassi Galleria in Diyar Al Muharraq. For Dior beauty products only, you can also visit Paris Gallery and Faces in various malls.',
   },
   {
     q: 'Does Dior Bahrain sell Lady Dior bags?',
@@ -143,9 +154,9 @@ export default function DiorBahrainPage() {
           {/* Quick Info */}
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mt-12">
             {[
-              { label: 'Boutique', value: '1', icon: ShoppingBag },
+              { label: 'Boutiques', value: '2', icon: ShoppingBag },
               { label: 'Beauty Counters', value: '3+', icon: Sparkles },
-              { label: 'Main Location', value: 'Moda Mall', icon: MapPin },
+              { label: 'Locations', value: 'Moda Mall, Marassi', icon: MapPin },
               { label: 'VAT', value: '0%', icon: Star },
             ].map((stat) => (
               <div key={stat.label} className="bg-white/5 backdrop-blur-sm rounded-xl p-4 text-center">
@@ -161,8 +172,8 @@ export default function DiorBahrainPage() {
       {/* Store Locations */}
       <section className="py-16 px-4">
         <div className="max-w-6xl mx-auto">
-          <h2 className="text-3xl font-bold mb-4">Dior Boutique in Bahrain</h2>
-          <p className="text-gray-400 mb-8">The flagship Dior boutique in Bahrain.</p>
+          <h2 className="text-3xl font-bold mb-4">Dior Boutiques in Bahrain</h2>
+          <p className="text-gray-400 mb-8">Two Dior boutiques serving the Kingdom of Bahrain.</p>
           
           <div className="space-y-6">
             {storeLocations.map((store) => (
