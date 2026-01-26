@@ -69,7 +69,7 @@ const malls = [
     parking: 'Covered parking (free)',
     hours: 'Sat-Wed 10AM-10PM, Thu-Fri 10AM-12AM',
     bestFor: 'Luxury shopping, beachfront dining, family entertainment',
-    href: null,
+    href: '/guides/malls/marassi-galleria',
   },
   {
     name: 'The Avenues Bahrain',
@@ -133,7 +133,7 @@ const malls = [
     parking: '1,500+ spaces (free)',
     hours: 'Sat-Wed 9AM-10PM, Thu-Fri 9AM-11PM',
     bestFor: 'Juffair residents, quick shopping',
-    href: null,
+    href: '/guides/malls/oasis-mall',
   },
   {
     name: 'Enma Mall',
@@ -149,7 +149,7 @@ const malls = [
     parking: '2,000+ spaces (free)',
     hours: 'Sat-Wed 9AM-10PM, Thu-Fri 9AM-11PM',
     bestFor: 'Riffa residents, family shopping',
-    href: null,
+    href: '/guides/malls/enma-mall',
   },
   {
     name: 'Dragon City',
@@ -165,7 +165,7 @@ const malls = [
     parking: '3,000+ spaces (free)',
     hours: 'Sat-Thu 10AM-10PM, Fri 4PM-10PM',
     bestFor: 'Bargain hunting, bulk buying, electronics',
-    href: null,
+    href: '/guides/malls/dragon-city',
   },
   {
     name: 'Souq Al Baraha',
