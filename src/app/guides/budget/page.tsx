@@ -27,7 +27,7 @@ const freeAttractions = [
   { name: 'Bahrain Currency Museum', type: 'Museum', description: 'History of money in Bahrain' },
   { name: 'Oil Museum', type: 'Museum', description: 'Story of oil discovery' },
   { name: 'Tree of Life', type: 'Natural', description: 'Mysterious 400-year-old tree' },
-  { name: 'Marassi Beach', type: 'Beach', description: 'Beautiful public beach (parking fee)' },
+  { name: 'Jazair Beach', type: 'Beach', description: 'Beautiful free public beach in Hidd' },
   { name: 'Arad Fort', type: 'Historic', description: '15th century fort, stunning at night' },
   { name: 'Muharraq Heritage Walk', type: 'Culture', description: 'UNESCO pearling path' },
   { name: 'Al Fateh Mosque', type: 'Religious', description: 'Grand Mosque tours' },
@@ -75,7 +75,7 @@ const budgetTips = [
     category: 'Activities',
     tips: [
       'Many museums are free or under BD 2',
-      'Public beaches are free (Marassi)',
+      'Public beaches are free (Jazair Beach)',
       'Mall entertainment (window shopping, AC)',
       'Free walking tours occasionally offered',
     ],
@@ -92,7 +92,7 @@ const freeActivities = [
   'Watch sunset at Bahrain Bay',
   'Walk the Pearling Path in Muharraq',
   'Explore Manama Souq (just looking!)',
-  'Beach day at Marassi',
+  'Beach day at Jazair Beach',
   'Visit free museums',
   'Visit Al Fateh Grand Mosque (free tours)',
   'Walk along Bahrain Fort',
@@ -259,7 +259,7 @@ export default function BudgetPage() {
           <div className="space-y-4">
             {[
               { q: 'Is Bahrain expensive to visit?', a: 'Bahrain can be done on various budgets. Budget travelers can manage on BD 20-30/day with street food and free attractions. Mid-range is BD 50-100/day.' },
-              { q: 'What are the best free attractions in Bahrain?', a: 'Beit Al Quran, Tree of Life, Marassi Beach, Arad Fort, and Muharraq Heritage Walk are all free and excellent.' },
+              { q: 'What are the best free attractions in Bahrain?', a: 'Beit Al Quran, Tree of Life, Jazair Beach, Arad Fort, and Muharraq Heritage Walk are all free and excellent.' },
               { q: 'Where to eat cheap in Bahrain?', a: 'Street food in Juffair and Gudaibiya. Shawarma from 500 fils, full meals under BD 3. Souq food stalls also very affordable.' },
             ].map((faq, i) => (
               <div key={i} className="bg-white/5 rounded-xl p-6">
