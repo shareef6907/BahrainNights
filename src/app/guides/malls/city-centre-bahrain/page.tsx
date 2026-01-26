@@ -119,6 +119,13 @@ const storeCategories = [
       { name: 'Zara Home', link: null },
     ],
   },
+  {
+    name: 'Hypermarket',
+    icon: ShoppingBag,
+    stores: [
+      { name: 'Carrefour', link: null },
+    ],
+  },
 ];
 
 const diningOptions = [
