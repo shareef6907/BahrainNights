@@ -134,7 +134,8 @@ export default function HermesBahrainPage() {
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mt-12">
             {[
               { label: 'Boutiques', value: '2', icon: ShoppingBag },
-              { label: 'Locations', value: 'Moda Mall, Marassi', icon: MapPin },
+              { label: 'Also At', value: 'Moda Mall', icon: MapPin },
+              { label: 'Also At', value: 'Marassi Galleria', icon: MapPin },
               { label: 'Since', value: '1837', icon: Star },
             ].map((stat) => (
               <div key={stat.label} className="bg-white/5 backdrop-blur-sm rounded-xl p-4 text-center">
