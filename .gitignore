@@ -54,3 +54,6 @@ scripts/scrapers/**/node_modules/
 # Local environment files
 .env.local
 .env*.local
+
+# Supabase temp files
+supabase/.temp/
