@@ -3,7 +3,7 @@ import Link from 'next/link';
 import { 
   MapPin, Clock, ExternalLink, Car, 
   ShoppingBag, Utensils, Film, Users, Sparkles,
-  Star, Baby, ShoppingCart
+  Star, Baby
 } from 'lucide-react';
 import BreadcrumbSchema from '@/components/SEO/BreadcrumbSchema';
 
@@ -26,8 +26,8 @@ export const metadata: Metadata = {
 const mallInfo = {
   name: 'Seef Mall',
   tagline: 'Bahrain\'s Original Premier Shopping Destination',
-  address: 'Road 2825, Block 428, Seef District, Manama, Bahrain',
-  website: 'https://www.seefmall.com',
+  address: 'Seef District, Manama, Bahrain',
+  website: 'https://seefdistrict.seefmall.com.bh',
   mapsLink: 'https://www.google.com/maps/dir/?api=1&destination=Seef+Mall+Bahrain',
   hours: {
     regular: 'Sat-Wed: 10:00 AM - 10:00 PM',
@@ -43,52 +43,32 @@ const mallInfo = {
   yearOpened: '1997',
 };
 
+// Verified stores from official Seef Mall website (seefdistrict.seefmall.com.bh)
 const storeCategories = [
   {
     name: 'Fashion & Apparel',
     icon: ShoppingBag,
     stores: [
-      { name: 'Massimo Dutti', link: null },
+      { name: 'H&M', link: '/guides/brands/hm' },
       { name: 'Mango', link: null },
       { name: 'Next', link: null },
-      { name: 'Oysho', link: null },
-      { name: 'Springfield', link: null },
-      { name: 'Aldo', link: null },
-      { name: 'Charles & Keith', link: null },
-      { name: 'Nine West', link: null },
+      { name: 'Marks & Spencer', link: null },
+      { name: 'American Eagle', link: null },
+      { name: 'LC Waikiki', link: null },
+      { name: 'Giordano', link: null },
+      { name: 'Defacto', link: null },
     ],
   },
   {
     name: 'Beauty & Fragrance',
     icon: Sparkles,
     stores: [
-      { name: 'Sephora', link: '/guides/brands/sephora' },
       { name: 'Bath & Body Works', link: '/guides/brands/bath-body-works' },
-      { name: 'MAC', link: null },
-      { name: 'Victoria\'s Secret', link: null },
-      { name: 'The Body Shop', link: null },
-      { name: 'Lush', link: null },
-    ],
-  },
-  {
-    name: 'Home & Living',
-    icon: ShoppingBag,
-    stores: [
-      { name: 'Pottery Barn', link: null },
-      { name: 'Crate & Barrel', link: null },
-      { name: 'Williams Sonoma', link: null },
-      { name: 'West Elm', link: null },
-      { name: 'Zara Home', link: null },
-    ],
-  },
-  {
-    name: 'Sports & Activewear',
-    icon: Users,
-    stores: [
-      { name: 'Nike', link: '/guides/brands/nike' },
-      { name: 'Adidas', link: '/guides/brands/adidas' },
-      { name: 'Foot Locker', link: null },
-      { name: 'Sun & Sand Sports', link: null },
+      { name: 'Flormar', link: null },
+      { name: 'Golden Rose Cosmetics', link: null },
+      { name: 'Arabian Oud', link: null },
+      { name: 'Ajmal Perfumes', link: null },
+      { name: 'Al Haramain Perfumes', link: null },
     ],
   },
   {
@@ -96,55 +76,53 @@ const storeCategories = [
     icon: Baby,
     stores: [
       { name: 'Mothercare', link: null },
-      { name: 'Toys R Us', link: null },
-      { name: 'Petit Bateau', link: null },
-      { name: 'Carter\'s', link: null },
-      { name: 'OshKosh', link: null },
+      { name: 'Mamas & Papas', link: null },
+      { name: 'Beverly Hills Polo Club Kids', link: null },
     ],
   },
   {
-    name: 'Hypermarket',
-    icon: ShoppingCart,
+    name: 'Watches & Accessories',
+    icon: Users,
     stores: [
-      { name: 'Geant Hypermarket', link: null },
+      { name: 'Watch Time', link: null },
+      { name: 'Caliber 7', link: null },
+      { name: 'A La Mode', link: null },
+      { name: 'Happy Times', link: null },
     ],
   },
 ];
 
+// Verified dining from official Seef Mall website
 const diningOptions = [
   {
     category: 'Restaurants',
-    restaurants: ['Fuddruckers', 'Applebee\'s', 'Chili\'s', 'Texas Roadhouse'],
+    restaurants: ['Applebee\'s', 'Nando\'s', 'IHOP', 'AlAbraaj', 'Kadoura'],
   },
   {
-    category: 'Casual Dining',
-    restaurants: ['Pizza Hut', 'KFC', 'Hardee\'s', 'Subway', 'Papa John\'s'],
+    category: 'Fast Food',
+    restaurants: ['KFC', 'McDonald\'s', 'Hardee\'s', 'Papa John\'s'],
   },
   {
     category: 'Coffee & Desserts',
-    restaurants: ['Starbucks', 'Costa Coffee', 'Cinnabon', 'Baskin Robbins'],
+    restaurants: ['Starbucks', 'Tim Hortons', 'Caribou Coffee', 'Cinnabon', 'Baskin Robbins'],
   },
   {
-    category: 'Food Court',
-    restaurants: ['Arabic cuisine', 'Asian food', 'Western options', 'Indian food'],
+    category: 'More Options',
+    restaurants: ['Paul Café', 'Pinkberry', 'Cold Stone', 'Auntie Anne\'s'],
   },
 ];
 
+// Verified entertainment from official Seef Mall website
 const entertainment = [
   {
-    name: 'Cinema',
+    name: 'Cineco Cinema',
     description: 'Multi-screen cinema showing latest releases in Hollywood and Bollywood.',
     icon: Film,
   },
   {
-    name: 'Kids Play Area',
-    description: 'Dedicated play zones for children with games and activities.',
+    name: 'Magic Island',
+    description: 'Family entertainment center with games and activities for all ages.',
     icon: Baby,
-  },
-  {
-    name: 'Geant Hypermarket',
-    description: 'Full-service hypermarket for groceries and household items.',
-    icon: ShoppingCart,
   },
 ];
 
@@ -159,11 +137,11 @@ const tips = [
   },
   {
     title: 'Family Friendly',
-    tip: 'Great for families with dedicated kids areas and family dining options.',
+    tip: 'Great for families with Magic Island entertainment and family dining options.',
   },
   {
-    title: 'Home Decor',
-    tip: 'Seef Mall is known for premium home brands like Pottery Barn and Crate & Barrel.',
+    title: 'Fashion Shopping',
+    tip: 'Good selection of mid-range fashion brands like H&M, Mango, and Marks & Spencer.',
   },
 ];
 
@@ -178,11 +156,11 @@ const faqs = [
   },
   {
     q: 'What makes Seef Mall different from City Centre?',
-    a: 'Seef Mall focuses on premium mid-range and home brands with stores like Pottery Barn, Crate & Barrel, and Williams Sonoma. It has a more relaxed atmosphere compared to City Centre.',
+    a: 'Seef Mall has a more relaxed, family-friendly atmosphere. It features Magic Island entertainment center, Cineco cinema, and a good mix of fashion and dining options.',
   },
   {
-    q: 'Does Seef Mall have a hypermarket?',
-    a: 'Yes, Seef Mall has Geant Hypermarket offering groceries, fresh produce, electronics, and household essentials.',
+    q: 'What entertainment is at Seef Mall?',
+    a: 'Seef Mall has Cineco cinema for movies and Magic Island, a popular family entertainment center with games and activities.',
   },
 ];
 

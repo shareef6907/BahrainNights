@@ -115,6 +115,13 @@ const storeCategories = [
       { name: 'Bo Concept', link: null },
     ],
   },
+  {
+    name: 'Hypermarket',
+    icon: ShoppingBag,
+    stores: [
+      { name: 'Lulu Hypermarket', link: null },
+    ],
+  },
 ];
 
 const diningOptions = [
