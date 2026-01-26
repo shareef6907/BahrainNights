@@ -80,33 +80,43 @@ export default async function CountryPage({ params }: Props) {
 
   // Fetch events for this country
   // Filter: start_date >= today OR date >= today OR end_date >= today (for ongoing events)
-  const { data: events, error } = await supabaseAdmin
-    .from('events')
-    .select(`
-      id,
-      title,
-      slug,
-      description,
-      category,
-      venue_name,
-      date,
-      time,
-      start_date,
-      start_time,
-      end_date,
-      end_time,
-      featured_image,
-      cover_url,
-      affiliate_url,
-      country,
-      city
-    `)
-    .eq('country', countryConfig.dbName)
-    .eq('status', 'published')
-    .eq('is_active', true)
-    .or(`start_date.gte.${today},date.gte.${today},end_date.gte.${today}`)
-    .order('start_date', { ascending: true, nullsFirst: false })
-    .limit(100);
+  let events = null;
+  let error = null;
+  
+  try {
+    const result = await supabaseAdmin
+      .from('events')
+      .select(`
+        id,
+        title,
+        slug,
+        description,
+        category,
+        venue_name,
+        date,
+        time,
+        start_date,
+        start_time,
+        end_date,
+        end_time,
+        featured_image,
+        cover_url,
+        affiliate_url,
+        country,
+        city
+      `)
+      .eq('country', countryConfig.dbName)
+      .eq('status', 'published')
+      .eq('is_active', true)
+      .or(`start_date.gte.${today},date.gte.${today},end_date.gte.${today}`)
+      .order('start_date', { ascending: true, nullsFirst: false })
+      .limit(100);
+    events = result.data;
+    error = result.error;
+  } catch (e) {
+    console.error(`Error fetching events for ${countryConfig.name} (may be build time):`, e);
+    events = [];
+  }
 
   if (error) {
     console.error(`Error fetching events for ${countryConfig.name}:`, error);
