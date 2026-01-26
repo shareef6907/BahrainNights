@@ -25,7 +25,7 @@ export const metadata: Metadata = {
 const beachClubs = [
   {
     name: 'Coral Bay',
-    location: 'Amwaj Islands',
+    location: 'Budaiya',
     type: 'Beach & Pool Club',
     rating: 5,
     price: 'BD 15-25 day pass',

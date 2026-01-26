@@ -109,7 +109,7 @@ const buffets = [
   },
   {
     name: 'Coral Bay Brunch',
-    location: 'Coral Bay, Amwaj',
+    location: 'Coral Bay, Budaiya',
     type: 'Beach Club Brunch',
     rating: 4,
     price: 'BD 30-45 per person',

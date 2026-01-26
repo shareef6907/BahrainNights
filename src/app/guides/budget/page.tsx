@@ -36,7 +36,6 @@ const freeAttractions = [
 ];
 
 const cheapEats = [
-  { name: 'Al Abraaj', cuisine: 'Shawarma', price: '500 fils - BD 2', location: 'Juffair' },
   { name: 'Falafel Moe', cuisine: 'Falafel', price: '300-800 fils', location: 'Adliya' },
   { name: 'Tandoori Hut', cuisine: 'Indian', price: 'BD 3-8', location: 'Gudaibiya' },
   { name: 'Karak Shops', cuisine: 'Tea & Snacks', price: '100-300 fils', location: 'Everywhere' },

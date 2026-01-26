@@ -24,17 +24,6 @@ export const metadata: Metadata = {
 
 const streetFood = [
   {
-    name: 'Al Abraaj',
-    location: 'Juffair',
-    type: 'Syrian/Lebanese',
-    rating: 5,
-    price: '500 fils - BD 2',
-    description: 'Legendary late-night spot for the best shawarma in Bahrain. Fresh bread from the oven, perfectly seasoned meat.',
-    mustTry: ['Chicken shawarma', 'Meat shawarma', 'Fresh bread', 'Garlic sauce'],
-    hours: '10AM-2AM (best late night)',
-    vibe: 'Bustling, authentic, late-night crowd',
-  },
-  {
     name: 'Falafel Moe',
     location: 'Adliya',
     type: 'Falafel',
@@ -44,28 +33,6 @@ const streetFood = [
     mustTry: ['Falafel sandwich', 'Falafel plate', 'Hummus', 'Pickles'],
     hours: '11AM-11PM',
     vibe: 'Simple, queues, worth the wait',
-  },
-  {
-    name: 'Tamarind',
-    location: 'Adliya',
-    type: 'Indian Street Food',
-    rating: 4,
-    price: 'BD 1-3',
-    description: 'Authentic Indian street food favorites — chaat, pani puri, dosa, and more at great prices.',
-    mustTry: ['Pani puri', 'Bhel puri', 'Dosa', 'Samosa chaat'],
-    hours: '11AM-11PM',
-    vibe: 'Casual, flavorful, authentic',
-  },
-  {
-    name: 'Jasmi\'s',
-    location: 'Multiple locations',
-    type: 'Filipino/Asian',
-    rating: 4,
-    price: 'BD 1-3',
-    description: 'Popular spot for affordable Filipino and Asian food. Great chicken and rice dishes.',
-    mustTry: ['Chicken inasal', 'Sisig', 'Halo-halo', 'Rice meals'],
-    hours: '10AM-12AM',
-    vibe: 'Casual, filling, good value',
   },
   {
     name: 'Jasmis Grill',
@@ -317,7 +284,7 @@ export default function StreetFoodPage() {
           <h2 className="text-3xl font-bold mb-8 text-center">FAQs</h2>
           <div className="space-y-4">
             {[
-              { q: 'Where is the best shawarma in Bahrain?', a: 'Al Abraaj in Juffair is legendary. Late night (11PM+) is when the magic happens.' },
+              { q: 'Where can I find good shawarma in Bahrain?', a: 'Juffair and Gudaibiya have many excellent shawarma spots. Late night (11PM+) is when the magic happens.' },
               { q: 'Is street food safe in Bahrain?', a: 'Generally yes. Stick to busy spots with high turnover. Fresh preparation is a good sign.' },
               { q: 'What is karak?', a: 'Strong tea made with cardamom, saffron, and condensed milk. Essential late-night Bahrain experience.' },
             ].map((faq, i) => (

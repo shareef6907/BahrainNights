@@ -89,7 +89,7 @@ const partiesAndEvents = [
   { name: 'After-Race Parties', location: 'Hotels, clubs', description: 'Major parties at hotels and beach clubs all weekend' },
   { name: 'Bahrain Bay Events', location: 'Bahrain Bay', description: 'Pre-race atmosphere, viewing screens, festivities' },
   { name: 'Hotel Rooftop Parties', location: 'Four Seasons, Ritz', description: 'Exclusive parties with race-themed events' },
-  { name: 'Beach Club Events', location: 'Coral Bay, Amwaj', description: 'Pool parties and weekend celebrations' },
+  { name: 'Beach Club Events', location: 'Various beach clubs', description: 'Pool parties and weekend celebrations' },
 ];
 
 export default function F1Page() {

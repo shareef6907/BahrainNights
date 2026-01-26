@@ -24,9 +24,9 @@ const areas = [
     vibe: 'Artsy, Casual, Hipster',
     bestFor: 'Cocktails, live music, date nights',
     spots: [
+      { name: 'Colony', type: 'Gastropub', highlight: 'Trendy food & drinks' },
       { name: 'Block 338', type: 'Bar Street', highlight: 'Multiple venues in one area' },
-      { name: 'Coco&apos;s', type: 'Lounge', highlight: 'Trendy rooftop vibes' },
-      { name: 'JJ&apos;s Irish Pub', type: 'Pub', highlight: 'Live music & sports' },
+      { name: 'JJ\'s Irish Pub', type: 'Pub', highlight: 'Live music & sports' },
     ],
   },
   {
@@ -35,9 +35,9 @@ const areas = [
     vibe: 'Energetic, Party, International',
     bestFor: 'Dancing, clubs, late nights',
     spots: [
-      { name: 'CK&apos;s', type: 'Nightclub', highlight: 'Famous Bahrain institution' },
+      { name: 'Hotel Entertainment Venues', type: 'Various', highlight: 'Multiple options' },
       { name: 'Aloft Rooftop', type: 'Lounge', highlight: 'City views & cocktails' },
-      { name: 'Club D', type: 'Nightclub', highlight: 'Popular with expats' },
+      { name: 'Late Night Spots', type: 'Various', highlight: 'Open until late' },
     ],
   },
   {
@@ -53,13 +53,23 @@ const areas = [
   },
   {
     name: 'Amwaj Islands',
-    description: 'Beach clubs and relaxed waterfront venues',
+    description: 'Island getaway with beach clubs and waterfront dining',
     vibe: 'Beach, Relaxed, Premium',
-    bestFor: 'Beach parties, sunset drinks',
+    bestFor: 'Beach day, sunset drinks',
     spots: [
-      { name: 'Coral Bay', type: 'Beach Club', highlight: 'Beach parties & events' },
+      { name: 'Solymar', type: 'Beach Club', highlight: 'Beach vibes & events' },
       { name: 'Dragon Hotel', type: 'Hotel Bar', highlight: 'Asian fusion & drinks' },
-      { name: 'Marassi Galleria', type: 'Mixed', highlight: 'Restaurants & bars' },
+      { name: 'Waterfront Venues', type: 'Various', highlight: 'Restaurants & cafes' },
+    ],
+  },
+  {
+    name: 'Diyar Al Muharraq',
+    description: 'Modern waterfront development with Marassi Galleria',
+    vibe: 'Waterfront, Modern, Family-friendly',
+    bestFor: 'Waterfront dining, casual evening',
+    spots: [
+      { name: 'Marassi Galleria', type: 'Mixed', highlight: 'Restaurants & cafes' },
+      { name: 'Waterfront Promenade', type: 'Various', highlight: 'Sea views & dining' },
     ],
   },
 ];
@@ -78,7 +88,7 @@ const tips = [
   {
     icon: MapPin,
     title: 'Getting Around',
-    content: 'Use Uber/Careem for safe transport. Taxis are also available. Don&apos;t drink and drive - penalties are severe.',
+    content: 'Use Uber/Careem for safe transport. Taxis are also available. Don\'t drink and drive - penalties are severe.',
   },
   {
     icon: Users,
@@ -88,10 +98,10 @@ const tips = [
 ];
 
 const eventTypes = [
-  { name: 'Live Music', desc: 'Jazz, rock, Filipino bands', venues: 'JJ&apos;s, Sherlock Holmes, Lanterns' },
-  { name: 'DJ Nights', desc: 'House, hip-hop, R&B', venues: 'CK&apos;s, Club D, Coral Bay' },
+  { name: 'Live Music', desc: 'Jazz, rock, Filipino bands', venues: 'JJ\'s, Sherlock Holmes, various hotels' },
+  { name: 'DJ Nights', desc: 'House, hip-hop, R&B', venues: 'Various clubs and lounges' },
   { name: 'Themed Parties', desc: '80s, 90s, Latin nights', venues: 'Various rotating venues' },
-  { name: 'Beach Parties', desc: 'Pool parties & beach events', venues: 'Coral Bay, Lost Paradise' },
+  { name: 'Beach Parties', desc: 'Pool parties & beach events', venues: 'Various beach clubs' },
 ];
 
 export default function NightlifeGuidePage() {

@@ -132,7 +132,7 @@ const cuisineGuide = [
     cuisine: 'Seafood',
     icon: Fish,
     description: 'Fresh Gulf seafood including hammour, shrimp, and crab in various styles.',
-    topPicks: ['Ocean', 'Fish Market (Intercontinental)', 'Al Abraaj'],
+    topPicks: ['Ocean', 'Fish Market (Intercontinental)', 'Bahrain Fish House'],
     tip: 'Friday fish market at Manama Souq is great for fresh catches.',
   },
   {
@@ -167,11 +167,11 @@ const diningAreas = [
     topSpots: ['CUT', 're/Asian', 'Bahrain Bay Kitchen'],
   },
   {
-    area: 'Amwaj Islands',
-    vibe: 'Beach, relaxed',
-    description: 'Waterfront restaurants with marina views and beach club vibes.',
-    bestFor: 'Casual weekend dining, beach day',
-    topSpots: ['Trader Vic\'s', 'Marassi Galleria restaurants', 'Dragon'],
+    area: 'Diyar Al Muharraq',
+    vibe: 'Waterfront, modern',
+    description: 'Home to Marassi Galleria with diverse waterfront dining options and beautiful sea views.',
+    bestFor: 'Waterfront dining, family outings, weekend meals',
+    topSpots: ['Marassi Galleria restaurants', 'Waterfront cafes', 'Family restaurants'],
   },
   {
     area: 'Juffair',

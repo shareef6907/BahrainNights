@@ -24,6 +24,16 @@ export const metadata: Metadata = {
 
 const adliyaVenues = [
   {
+    name: 'Colony',
+    type: 'Gastro Pub & Lounge',
+    description: 'Trendy gastropub with great food, craft drinks, and a stylish atmosphere. A must-visit in Adliya.',
+    vibe: 'Trendy, upscale casual, social',
+    music: 'DJ sets, Lounge',
+    bestNights: 'Thursday-Saturday',
+    hours: '12 PM - 2 AM',
+    tip: 'Great for both dinner and drinks. Reservations recommended on weekends.',
+  },
+  {
     name: 'JJ\'s Irish Pub',
     type: 'Live Music Pub',
     description: 'Legendary live music venue with bands playing nightly. The go-to spot for rock and pop covers.',
@@ -116,7 +126,7 @@ export default function AdliyaNightlifePage() {
               {' '}Nightlife
             </h1>
             <p className="text-xl text-gray-300 max-w-3xl mx-auto">
-              Adliya is Bahrain&apos;s artsy, creative neighborhood. Home to Block 338, 
+              Adliya is Bahrain's artsy, creative neighborhood. Home to Block 338, 
               live music venues, and a more relaxed bar scene.
             </p>
             <p className="text-sm text-gray-500 mt-4">Last updated: {lastUpdated}</p>

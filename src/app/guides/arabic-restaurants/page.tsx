@@ -178,14 +178,14 @@ const restaurants = [
 const cuisineTypes = [
   { type: 'Lebanese', description: 'Mezze, grills, hummus, fattoush', examples: 'Zahle, Abd El Wahab, Em Sherif' },
   { type: 'Khaleeji', description: 'Machboos, harees, Gulf specialties', examples: 'Layali Zaman, Sablat Al Zain' },
-  { type: 'Syrian', description: 'Shawarma, kibbeh, similar to Lebanese', examples: 'Al Abraaj' },
+  { type: 'Syrian', description: 'Shawarma, kibbeh, similar to Lebanese', examples: 'Various Syrian restaurants' },
   { type: 'Armenian', description: 'Soujok, manti, unique preparations', examples: 'Mamig' },
 ];
 
 const dishes = [
   { dish: 'Mezze', description: 'Assorted appetizers - hummus, mutabbal, tabbouleh, etc.', where: 'Zahle, Abd El Wahab' },
   { dish: 'Machboos', description: 'Bahraini spiced rice with meat or fish', where: 'Layali Zaman, Sablat Al Zain' },
-  { dish: 'Shawarma', description: 'Marinated meat in bread with garlic sauce', where: 'Al Abraaj, Al Safir' },
+  { dish: 'Shawarma', description: 'Marinated meat in bread with garlic sauce', where: 'Syrian and Lebanese restaurants' },
   { dish: 'Mixed Grill', description: 'Assorted grilled meats - kebab, tikka, chops', where: 'Zahle, Em Sherif' },
   { dish: 'Fattoush', description: 'Fresh salad with crispy bread and sumac', where: 'Abd El Wahab, Mirai' },
   { dish: 'Kunafa', description: 'Sweet cheese pastry with syrup', where: 'Em Sherif, Zahle' },
