@@ -44,6 +44,7 @@ export const en = {
     hotelsStaycations: 'Hotels & Staycations',
     spasWellness: 'Spas & Wellness',
     shoppingMarkets: 'Shopping & Markets',
+    kidsActivities: 'Kids Activities',
     toursExperiences: 'Tours & Experiences',
     communityEvents: 'Community Events',
     // Attractions dropdown

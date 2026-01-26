@@ -2,17 +2,17 @@ import { Metadata } from 'next';
 import Link from 'next/link';
 import { 
   MapPin, Clock, ExternalLink, 
-  Sparkles, ShoppingBag, Star, Info
+  Sparkles, ShoppingBag, Star, Info, AlertTriangle, Plane
 } from 'lucide-react';
 import BreadcrumbSchema from '@/components/SEO/BreadcrumbSchema';
 
 export const metadata: Metadata = {
-  title: 'Gucci Bahrain - Store Locations & Shopping Guide 2026',
-  description: 'Find Gucci stores in Bahrain. Complete guide to Gucci locations at Moda Mall and City Centre. Store hours, directions & tips for shopping Gucci in Bahrain.',
-  keywords: 'Gucci Bahrain, Gucci store Bahrain, where to buy Gucci Bahrain, Gucci Moda Mall, Gucci bags Bahrain, Gucci City Centre Bahrain',
+  title: 'Gucci Bahrain - Store Status & Shopping Guide 2026',
+  description: 'Looking for Gucci in Bahrain? The Moda Mall Gucci store has closed. Find alternatives and where to shop Gucci near Bahrain.',
+  keywords: 'Gucci Bahrain, Gucci store Bahrain, where to buy Gucci Bahrain, Gucci Moda Mall closed, Gucci bags Bahrain, Gucci Dubai',
   openGraph: {
-    title: 'Gucci Bahrain - Store Locations & Shopping Guide 2026',
-    description: 'Find Gucci stores in Bahrain. Complete guide to Gucci locations at Moda Mall and City Centre.',
+    title: 'Gucci Bahrain - Store Status & Shopping Guide 2026',
+    description: 'Looking for Gucci in Bahrain? Find alternatives and where to shop Gucci near Bahrain.',
     type: 'article',
     locale: 'en_US',
     url: 'https://www.bahrainnights.com/guides/brands/gucci',
@@ -22,84 +22,56 @@ export const metadata: Metadata = {
   },
 };
 
-const storeLocations = [
+const nearbyLocations = [
   {
-    name: 'Gucci - Moda Mall',
-    mall: 'Moda Mall (Bahrain World Trade Center)',
-    address: 'Bahrain World Trade Center, King Faisal Highway, Manama',
-    floor: 'Ground Floor',
-    hours: 'Sun-Thu: 10:00 AM - 10:00 PM, Fri-Sat: 10:00 AM - 11:00 PM',
-    products: ['Handbags', 'Leather Goods', 'Ready-to-Wear', 'Shoes', 'Accessories', 'Eyewear', 'Watches', 'Jewelry', 'Fragrances'],
-    features: ['Full collection', 'Exclusive items', 'Personal shopping'],
-    mapsLink: 'https://www.google.com/maps/search/Gucci+Moda+Mall+Bahrain',
-    isPrimary: true,
+    name: 'Gucci - The Dubai Mall',
+    city: 'Dubai, UAE',
+    distance: '~45 min flight',
+    mall: 'The Dubai Mall',
+    features: ['Flagship store', 'Full collection', 'Largest selection in GCC'],
+    mapsLink: 'https://www.google.com/maps/search/Gucci+Dubai+Mall',
   },
   {
-    name: 'Gucci - City Centre Bahrain',
-    mall: 'City Centre Bahrain',
-    address: 'City Centre Bahrain, Seef District, Manama',
-    floor: 'Ground Floor',
-    hours: 'Sun-Wed: 10:00 AM - 10:00 PM, Thu-Sat: 10:00 AM - 12:00 AM',
-    products: ['Handbags', 'Leather Goods', 'Shoes', 'Accessories', 'Selected Ready-to-Wear'],
-    features: ['Convenient location', 'Good selection', 'Extended weekend hours'],
-    mapsLink: 'https://www.google.com/maps/search/Gucci+City+Centre+Bahrain',
-    isPrimary: false,
+    name: 'Gucci - Mall of the Emirates',
+    city: 'Dubai, UAE',
+    distance: '~45 min flight',
+    mall: 'Mall of the Emirates',
+    features: ['Full boutique', 'Ready-to-wear', 'Accessories'],
+    mapsLink: 'https://www.google.com/maps/search/Gucci+Mall+of+Emirates+Dubai',
   },
   {
-    name: 'Gucci - Marassi Galleria',
-    mall: 'Marassi Galleria',
-    address: 'Marassi Galleria, Marassi Al Bahrain, Diyar Al Muharraq',
-    floor: 'Ground Floor',
-    hours: 'Sun-Wed: 10:00 AM - 10:00 PM, Thu-Sat: 10:00 AM - 12:00 AM',
-    products: ['Handbags', 'Leather Goods', 'Shoes', 'Accessories', 'Selected Ready-to-Wear'],
-    features: ['Beachfront luxury mall', 'Premium boutique', 'Near Address Hotel'],
-    mapsLink: 'https://www.google.com/maps/search/Gucci+Marassi+Galleria+Bahrain',
-    isPrimary: false,
+    name: 'Gucci - The Avenues Kuwait',
+    city: 'Kuwait City, Kuwait',
+    distance: '~1 hour flight',
+    mall: 'The Avenues',
+    features: ['Regional flagship', 'Full collection'],
+    mapsLink: 'https://www.google.com/maps/search/Gucci+Avenues+Kuwait',
   },
 ];
 
-const shoppingTips = [
-  {
-    title: 'Know Your Lines',
-    tip: 'Gucci has distinct lines - GG Marmont, Dionysus, Jackie, and Horsebit are iconic. Research what you want beforehand.',
-  },
-  {
-    title: 'Check Both Locations',
-    tip: 'Inventory varies between Moda Mall and City Centre. If you can\'t find your item, try the other store.',
-  },
-  {
-    title: 'Sales Periods',
-    tip: 'Gucci rarely discounts in-store but may have end-of-season sales. Ask about any current promotions.',
-  },
-  {
-    title: 'VIP Program',
-    tip: 'High-spending customers may qualify for Gucci\'s VIP program with early access to new collections.',
-  },
-];
-
-const relatedBrands = [
-  { name: 'Louis Vuitton', href: '/guides/brands/louis-vuitton', emoji: '👜' },
-  { name: 'Chanel', href: '/guides/brands/chanel', emoji: '🖤' },
-  { name: 'Dior', href: '/guides/brands/dior', emoji: '💄' },
-  { name: 'Hermès', href: '/guides/brands/hermes', emoji: '🧣' },
+const alternatives = [
+  { name: 'Louis Vuitton', href: '/guides/brands/louis-vuitton', emoji: '👜', available: true, location: 'Marassi Galleria' },
+  { name: 'Chanel', href: '/guides/brands/chanel', emoji: '🖤', available: true, location: 'The Avenues, Marassi Galleria' },
+  { name: 'Dior', href: '/guides/brands/dior', emoji: '💄', available: true, location: 'City Centre, The Avenues, Marassi' },
+  { name: 'Hermès', href: '/guides/brands/hermes', emoji: '🧣', available: true, location: 'Marassi Galleria' },
 ];
 
 const faqs = [
   {
     q: 'Is Gucci available in Bahrain?',
-    a: 'Yes, Gucci has three boutiques in Bahrain - the flagship store at Moda Mall (Bahrain World Trade Center), City Centre Bahrain, and the new location at Marassi Galleria in Diyar Al Muharraq.',
+    a: 'Unfortunately, there are currently no Gucci stores in Bahrain. The Gucci boutique at Moda Mall (Bahrain World Trade Center) has permanently closed. The nearest Gucci stores are in Dubai and Kuwait.',
   },
   {
-    q: 'Which mall has Gucci in Bahrain?',
-    a: 'Gucci is available at Moda Mall (BWTC), City Centre Bahrain, and Marassi Galleria. The Moda Mall location is the flagship with a larger selection.',
+    q: 'Why did Gucci close in Bahrain?',
+    a: 'The Gucci store at Moda Mall has permanently closed. While the exact reasons haven\'t been publicly disclosed, many luxury brands have been consolidating their GCC presence. Dubai remains the primary luxury hub for the region.',
   },
   {
-    q: 'Is Gucci cheaper in Bahrain than Europe?',
-    a: 'Gucci prices in Bahrain are generally aligned with regional GCC pricing. Prices may differ from Europe due to regional pricing strategies and currency fluctuations.',
+    q: 'Where is the nearest Gucci store to Bahrain?',
+    a: 'The nearest Gucci stores are in Dubai, UAE (approximately 45 minutes by flight). The Dubai Mall has a flagship Gucci store with the full collection. Mall of the Emirates also has a Gucci boutique.',
   },
   {
-    q: 'Does Gucci Bahrain have the latest collections?',
-    a: 'Yes, both Gucci stores in Bahrain receive new collections shortly after global releases. The Moda Mall flagship typically gets the widest selection.',
+    q: 'Can I buy Gucci online and ship to Bahrain?',
+    a: 'Yes, you can shop on gucci.com and select UAE or regional delivery options. Some items may be available for delivery to Bahrain through Gucci\'s official website or authorized online retailers.',
   },
 ];
 
@@ -122,8 +94,8 @@ export default function GucciBahrainPage() {
         <div className="absolute inset-0 bg-gradient-to-r from-green-900/20 to-red-900/20" />
         <div className="max-w-6xl mx-auto relative">
           <div className="text-center mb-12">
-            <span className="inline-block px-4 py-1 bg-green-500/20 text-green-400 rounded-full text-sm font-medium mb-4">
-              🐍 Luxury Fashion
+            <span className="inline-block px-4 py-1 bg-yellow-500/20 text-yellow-400 rounded-full text-sm font-medium mb-4">
+              ⚠️ Store Closed
             </span>
             <h1 className="text-4xl md:text-6xl font-black mb-6">
               <span className="text-green-400">GUCCI</span>
@@ -131,41 +103,42 @@ export default function GucciBahrainPage() {
               <span className="text-gray-400">in Bahrain</span>
             </h1>
             <p className="text-xl text-gray-300 max-w-3xl mx-auto">
-              Founded in Florence in 1921, Gucci is one of the world&apos;s leading luxury fashion brands. 
-              Known for its eclectic contemporary style, iconic GG logo, and Italian craftsmanship, 
-              Gucci offers fashion, leather goods, and accessories at two locations in Bahrain.
+              Unfortunately, Gucci no longer has a physical store in Bahrain. 
+              The boutique at Moda Mall has permanently closed. Here&apos;s where you 
+              can find Gucci near Bahrain and alternative luxury brands available locally.
             </p>
             <p className="text-sm text-gray-500 mt-4">
               Last updated: {lastUpdated}
             </p>
           </div>
 
-          {/* Quick Info */}
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mt-12">
-            {[
-              { label: 'Stores', value: '3', icon: ShoppingBag },
-              { label: '', value: 'Moda Mall', icon: MapPin },
-              { label: '', value: 'City Centre', icon: MapPin },
-              { label: '', value: 'Marassi Galleria', icon: MapPin },
-            ].map((stat, index) => (
-              <div key={`${stat.value}-${index}`} className="bg-white/5 backdrop-blur-sm rounded-xl p-4 text-center">
-                <stat.icon className="w-6 h-6 mx-auto mb-2 text-green-400" />
-                <div className="text-2xl font-bold">{stat.value}</div>
-                {stat.label && <div className="text-sm text-gray-400">{stat.label}</div>}
+          {/* Status Alert */}
+          <div className="max-w-2xl mx-auto bg-yellow-500/10 border border-yellow-500/30 rounded-2xl p-6 mt-8">
+            <div className="flex items-start gap-4">
+              <AlertTriangle className="w-8 h-8 text-yellow-500 flex-shrink-0" />
+              <div>
+                <h2 className="text-lg font-bold text-yellow-400 mb-2">No Gucci Stores in Bahrain</h2>
+                <p className="text-gray-300">
+                  The Gucci store at Moda Mall (Bahrain World Trade Center) has permanently closed. 
+                  For Gucci purchases, the nearest stores are in Dubai, UAE.
+                </p>
               </div>
-            ))}
+            </div>
           </div>
         </div>
       </section>
 
-      {/* Store Locations */}
+      {/* Nearest Locations */}
       <section className="py-16 px-4">
         <div className="max-w-6xl mx-auto">
-          <h2 className="text-3xl font-bold mb-4">Gucci Stores in Bahrain</h2>
-          <p className="text-gray-400 mb-8">Three boutiques serving the Kingdom of Bahrain.</p>
+          <h2 className="text-3xl font-bold mb-4 flex items-center gap-3">
+            <Plane className="w-8 h-8 text-green-400" />
+            Nearest Gucci Stores
+          </h2>
+          <p className="text-gray-400 mb-8">Find Gucci boutiques within a short flight from Bahrain.</p>
           
           <div className="space-y-6">
-            {storeLocations.map((store) => (
+            {nearbyLocations.map((store) => (
               <div 
                 key={store.name}
                 className="bg-white/5 backdrop-blur-sm rounded-2xl p-6 border border-green-500/10"
@@ -174,44 +147,22 @@ export default function GucciBahrainPage() {
                   <div className="flex-1">
                     <div className="flex items-center gap-3 mb-3">
                       <h3 className="text-xl font-bold text-green-400">{store.name}</h3>
-                      {store.isPrimary && (
-                        <span className="px-2 py-0.5 bg-green-500 text-black text-xs font-bold rounded">
-                          FLAGSHIP
-                        </span>
-                      )}
+                      <span className="px-2 py-0.5 bg-blue-500/20 text-blue-400 text-xs font-bold rounded">
+                        {store.distance}
+                      </span>
                     </div>
                     
                     <div className="space-y-2 text-sm mb-4">
                       <p className="flex items-center gap-2 text-gray-300">
                         <MapPin className="w-4 h-4 text-gray-500" />
-                        {store.address}
+                        {store.city} - {store.mall}
                       </p>
-                      <p className="flex items-center gap-2 text-gray-300">
-                        <Info className="w-4 h-4 text-gray-500" />
-                        {store.floor}
-                      </p>
-                      <p className="flex items-center gap-2 text-gray-300">
-                        <Clock className="w-4 h-4 text-gray-500" />
-                        {store.hours}
-                      </p>
-                    </div>
-
-                    <div className="mb-4">
-                      <p className="text-sm text-gray-500 mb-2">Products Available:</p>
-                      <div className="flex flex-wrap gap-2">
-                        {store.products.map((product) => (
-                          <span key={product} className="px-2 py-1 bg-green-500/10 text-green-300 text-xs rounded">
-                            {product}
-                          </span>
-                        ))}
-                      </div>
                     </div>
 
                     <div>
-                      <p className="text-sm text-gray-500 mb-2">Features:</p>
                       <div className="flex flex-wrap gap-2">
                         {store.features.map((feature) => (
-                          <span key={feature} className="px-2 py-1 bg-white/10 text-gray-300 text-xs rounded">
+                          <span key={feature} className="px-2 py-1 bg-green-500/10 text-green-300 text-xs rounded">
                             {feature}
                           </span>
                         ))}
@@ -227,53 +178,69 @@ export default function GucciBahrainPage() {
                       className="flex items-center justify-center gap-2 w-full px-4 py-3 bg-green-500 text-black font-bold rounded-lg hover:bg-green-400 transition-colors"
                     >
                       <MapPin className="w-4 h-4" />
-                      Get Directions
+                      View Location
                     </a>
                   </div>
                 </div>
               </div>
             ))}
           </div>
-          
-          <div className="mt-6 p-4 bg-yellow-500/10 border border-yellow-500/20 rounded-lg">
-            <p className="text-yellow-400 text-sm flex items-start gap-2">
-              <Info className="w-4 h-4 mt-0.5 flex-shrink-0" />
-              Store locations may change. Please verify current location before visiting.
-            </p>
-          </div>
         </div>
       </section>
 
-      {/* Shopping Tips */}
+      {/* Online Shopping */}
       <section className="py-16 px-4 bg-black/30">
         <div className="max-w-6xl mx-auto">
-          <h2 className="text-3xl font-bold mb-8">Tips for Shopping Gucci in Bahrain</h2>
+          <h2 className="text-3xl font-bold mb-8">Shop Gucci Online</h2>
           
-          <div className="grid md:grid-cols-2 gap-4">
-            {shoppingTips.map((item) => (
-              <div key={item.title} className="bg-white/5 rounded-xl p-5">
-                <h3 className="font-bold text-green-400 mb-2">{item.title}</h3>
-                <p className="text-gray-400 text-sm">{item.tip}</p>
-              </div>
-            ))}
+          <div className="grid md:grid-cols-2 gap-6">
+            <div className="bg-white/5 rounded-xl p-6">
+              <h3 className="font-bold text-green-400 mb-3">Official Website</h3>
+              <p className="text-gray-400 text-sm mb-4">
+                Shop the full Gucci collection on gucci.com with regional shipping options.
+              </p>
+              <a 
+                href="https://www.gucci.com"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-flex items-center gap-2 text-green-400 hover:text-green-300"
+              >
+                Visit gucci.com <ExternalLink className="w-4 h-4" />
+              </a>
+            </div>
+            
+            <div className="bg-white/5 rounded-xl p-6">
+              <h3 className="font-bold text-green-400 mb-3">Authorized Retailers</h3>
+              <p className="text-gray-400 text-sm mb-4">
+                Some luxury department stores and multi-brand boutiques may carry Gucci items.
+              </p>
+              <p className="text-xs text-gray-500">
+                Check authenticity carefully when buying from third-party sellers.
+              </p>
+            </div>
           </div>
         </div>
       </section>
 
-      {/* Related Brands */}
+      {/* Alternative Luxury Brands */}
       <section className="py-16 px-4">
         <div className="max-w-6xl mx-auto">
-          <h2 className="text-2xl font-bold mb-8">Related Luxury Brands in Bahrain</h2>
+          <h2 className="text-2xl font-bold mb-4">Luxury Brands Available in Bahrain</h2>
+          <p className="text-gray-400 mb-8">While Gucci isn&apos;t available, these luxury brands have stores in Bahrain:</p>
+          
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-            {relatedBrands.map((brand) => (
+            {alternatives.map((brand) => (
               <Link 
                 key={brand.href}
                 href={brand.href}
-                className="bg-white/5 hover:bg-white/10 rounded-xl p-4 transition-colors group text-center"
+                className="bg-white/5 hover:bg-white/10 rounded-xl p-4 transition-colors group"
               >
                 <span className="text-2xl mb-2 block">{brand.emoji}</span>
-                <span className="font-medium group-hover:text-green-400 transition-colors">
+                <span className="font-bold text-lg group-hover:text-green-400 transition-colors block">
                   {brand.name}
+                </span>
+                <span className="text-xs text-gray-500 block mt-1">
+                  {brand.location}
                 </span>
               </Link>
             ))}
@@ -300,22 +267,22 @@ export default function GucciBahrainPage() {
       {/* CTA */}
       <section className="py-16 px-4 bg-gradient-to-r from-green-500/10 to-red-500/10">
         <div className="max-w-4xl mx-auto text-center">
-          <h2 className="text-3xl font-bold mb-4">Explore More Shopping in Bahrain</h2>
+          <h2 className="text-3xl font-bold mb-4">Explore Luxury Shopping in Bahrain</h2>
           <p className="text-gray-300 mb-8">
-            Discover other luxury brands and shopping destinations.
+            Discover the luxury brands that are available in Bahrain.
           </p>
           <div className="flex flex-wrap justify-center gap-4">
             <Link 
-              href="/guides/brands/dior"
+              href="/guides/brands/louis-vuitton"
               className="px-8 py-3 bg-green-500 hover:bg-green-400 text-black font-bold rounded-lg transition-colors"
             >
-              Dior Guide
+              Louis Vuitton Guide
             </Link>
             <Link 
-              href="/guides"
+              href="/explore/shopping"
               className="px-8 py-3 bg-white/10 hover:bg-white/20 text-white font-bold rounded-lg transition-colors"
             >
-              All Guides
+              All Shopping
             </Link>
           </div>
         </div>
@@ -328,8 +295,8 @@ export default function GucciBahrainPage() {
           __html: JSON.stringify({
             '@context': 'https://schema.org',
             '@type': 'Article',
-            headline: 'Gucci Bahrain - Store Locations & Shopping Guide 2026',
-            description: 'Find Gucci stores in Bahrain. Complete guide to Gucci locations at Moda Mall and City Centre.',
+            headline: 'Gucci Bahrain - Store Status & Shopping Guide 2026',
+            description: 'Looking for Gucci in Bahrain? The Moda Mall Gucci store has closed. Find alternatives and where to shop Gucci near Bahrain.',
             author: {
               '@type': 'Organization',
               name: 'BahrainNights',

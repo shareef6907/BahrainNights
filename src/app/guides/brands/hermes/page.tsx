@@ -8,8 +8,8 @@ import BreadcrumbSchema from '@/components/SEO/BreadcrumbSchema';
 
 export const metadata: Metadata = {
   title: 'Hermès Bahrain - Store Locations & Shopping Guide 2026',
-  description: 'Find Hermès stores in Bahrain. Complete guide to Hermès at Moda Mall. Birkin bags, scarves, leather goods & more. Store hours, directions & shopping tips.',
-  keywords: 'Hermès Bahrain, Hermes Bahrain, Hermès store Bahrain, Birkin bag Bahrain, Hermès Moda Mall, Hermès scarf Bahrain',
+  description: 'Find Hermès store in Bahrain. Complete guide to Hermès at Marassi Galleria. Birkin bags, scarves, leather goods & more. Store hours, directions & shopping tips.',
+  keywords: 'Hermès Bahrain, Hermes Bahrain, Hermès store Bahrain, Birkin bag Bahrain, Hermès Marassi Galleria, Hermès scarf Bahrain',
   openGraph: {
     title: 'Hermès Bahrain - Store Locations & Shopping Guide 2026',
     description: 'Find Hermès stores in Bahrain. Complete guide to Hermès at Moda Mall.',
@@ -24,26 +24,17 @@ export const metadata: Metadata = {
 
 const storeLocations = [
   {
-    name: 'Hermès - Moda Mall',
-    mall: 'Moda Mall (Bahrain World Trade Center)',
-    address: 'Bahrain World Trade Center, King Faisal Highway, Manama',
-    floor: 'Ground Floor',
-    hours: 'Sun-Thu: 10:00 AM - 10:00 PM, Fri-Sat: 10:00 AM - 11:00 PM',
-    products: ['Leather Goods', 'Silk Scarves', 'Ready-to-Wear', 'Accessories', 'Shoes', 'Watches', 'Jewelry', 'Fragrances', 'Home'],
-    features: ['Full collection', 'Exclusive pieces', 'Personal shopping by appointment'],
-    mapsLink: 'https://www.google.com/maps/search/Hermes+Moda+Mall+Bahrain',
-    isPrimary: true,
-  },
-  {
     name: 'Hermès - Marassi Galleria',
     mall: 'Marassi Galleria',
-    address: 'Marassi Galleria, Road 6403, Diyar Al Muharraq, Bahrain',
+    address: 'Marassi Galleria, Road 6403, Diyar Al Muharraq',
     floor: 'Ground Floor',
     hours: 'Sun-Wed: 10:00 AM - 10:00 PM, Thu-Sat: 10:00 AM - 12:00 AM',
-    products: ['Leather Goods', 'Silk Scarves', 'Ready-to-Wear', 'Accessories', 'Shoes', 'Fragrances'],
-    features: ['Beachfront luxury mall', 'Premium boutique', 'Near Address Hotel'],
+    products: ['Leather Goods', 'Silk Scarves', 'Ready-to-Wear', 'Accessories', 'Shoes', 'Watches', 'Jewelry', 'Fragrances', 'Home'],
+    features: ['Full collection', 'Exclusive pieces', 'Personal shopping by appointment', 'Beachfront luxury mall', 'Near Address Hotel'],
     mapsLink: 'https://www.google.com/maps/search/Hermes+Marassi+Galleria+Bahrain',
-    isPrimary: false,
+    isPrimary: true,
+    rating: 3.5,
+    reviews: 158,
   },
 ];
 
@@ -76,7 +67,7 @@ const relatedBrands = [
 const faqs = [
   {
     q: 'Is Hermès available in Bahrain?',
-    a: 'Yes, Hermès has two boutiques in Bahrain - the flagship at Moda Mall (Bahrain World Trade Center) and a new location at Marassi Galleria in Diyar Al Muharraq, offering leather goods, silk scarves, fashion, accessories, and fragrances.',
+    a: 'Yes, Hermès has one boutique in Bahrain at Marassi Galleria in Diyar Al Muharraq (3.5★, 158 reviews), offering the full collection including leather goods, silk scarves, fashion, accessories, watches, jewelry, and fragrances.',
   },
   {
     q: 'Can I buy a Birkin bag in Bahrain?',

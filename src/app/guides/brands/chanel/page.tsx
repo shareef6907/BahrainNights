@@ -8,8 +8,8 @@ import BreadcrumbSchema from '@/components/SEO/BreadcrumbSchema';
 
 export const metadata: Metadata = {
   title: 'Chanel Bahrain - Store Locations & Shopping Guide 2026',
-  description: 'Find Chanel stores in Bahrain. Complete guide to Chanel locations at Moda Mall and luxury boutiques. Store hours, directions & tips for shopping Chanel in Bahrain.',
-  keywords: 'Chanel Bahrain, Chanel store Bahrain, where to buy Chanel Bahrain, Chanel Moda Mall, Chanel perfume Bahrain, Chanel bags Bahrain',
+  description: 'Find Chanel stores in Bahrain. Complete guide to Chanel locations at The Avenues and Marassi Galleria. Store hours, directions & tips for shopping Chanel in Bahrain.',
+  keywords: 'Chanel Bahrain, Chanel store Bahrain, where to buy Chanel Bahrain, Chanel The Avenues, Chanel Marassi Galleria, Chanel perfume Bahrain, Chanel bags Bahrain',
   openGraph: {
     title: 'Chanel Bahrain - Store Locations & Shopping Guide 2026',
     description: 'Find Chanel stores in Bahrain. Complete guide to Chanel locations at Moda Mall and luxury boutiques.',
@@ -24,26 +24,30 @@ export const metadata: Metadata = {
 
 const storeLocations = [
   {
-    name: 'Chanel - Moda Mall',
-    mall: 'Moda Mall (Bahrain World Trade Center)',
-    address: 'Bahrain World Trade Center, King Faisal Highway, Manama',
-    floor: 'Ground Floor',
-    hours: 'Sun-Thu: 10:00 AM - 10:00 PM, Fri-Sat: 10:00 AM - 11:00 PM',
-    products: ['Haute Couture', 'Ready-to-Wear', 'Handbags', 'Accessories', 'Fragrance', 'Beauty', 'Fine Jewelry', 'Watches'],
-    features: ['Full boutique experience', 'Personal styling', 'Beauty counter'],
-    mapsLink: 'https://www.google.com/maps/search/Chanel+Moda+Mall+Bahrain',
-    isPrimary: true,
-  },
-  {
     name: 'Chanel - Marassi Galleria',
     mall: 'Marassi Galleria',
     address: 'Marassi Galleria, Marassi Al Bahrain, Diyar Al Muharraq',
-    floor: 'Level 2',
+    floor: 'Ground Floor',
+    hours: 'Sun-Wed: 10:00 AM - 10:00 PM, Thu-Sat: 10:00 AM - 12:00 AM',
+    products: ['Haute Couture', 'Ready-to-Wear', 'Handbags', 'Accessories', 'Fragrance', 'Beauty', 'Fine Jewelry', 'Watches'],
+    features: ['Flagship store', 'Full boutique experience', 'Personal styling', 'Beauty counter', 'Near Address Hotel'],
+    mapsLink: 'https://www.google.com/maps/search/Chanel+Marassi+Galleria+Bahrain',
+    isPrimary: true,
+    rating: 4.7,
+    reviews: 71,
+  },
+  {
+    name: 'Chanel - The Avenues',
+    mall: 'The Avenues Bahrain',
+    address: 'The Avenues Mall, Bahrain Bay, Manama',
+    floor: 'Ground Floor',
     hours: 'Sun-Wed: 10:00 AM - 10:00 PM, Thu-Sat: 10:00 AM - 12:00 AM',
     products: ['Ready-to-Wear', 'Handbags', 'Accessories', 'Fragrance', 'Beauty', 'Fine Jewelry', 'Watches'],
-    features: ['Beachfront luxury mall', 'Premium boutique', 'Near Address Hotel'],
-    mapsLink: 'https://www.google.com/maps/search/Chanel+Marassi+Galleria+Bahrain',
+    features: ['Premium location', 'Bahrain Bay waterfront', 'Full collection'],
+    mapsLink: 'https://www.google.com/maps/search/Chanel+The+Avenues+Bahrain',
     isPrimary: false,
+    rating: 4.3,
+    reviews: 65,
   },
 ];
 
@@ -91,11 +95,11 @@ const relatedBrands = [
 const faqs = [
   {
     q: 'Is Chanel available in Bahrain?',
-    a: 'Yes, Chanel has two boutiques in Bahrain - the flagship at Moda Mall (Bahrain World Trade Center) and a new location at Marassi Galleria in Diyar Al Muharraq, offering fashion, accessories, and beauty products.',
+    a: 'Yes, Chanel has two boutiques in Bahrain - the flagship at Marassi Galleria (4.7★ rating) and The Avenues Mall (4.3★ rating), both offering fashion, accessories, and beauty products.',
   },
   {
     q: 'Which mall has Chanel in Bahrain?',
-    a: 'Chanel boutiques are located in Moda Mall at Bahrain World Trade Center and Marassi Galleria (Level 2) in Diyar Al Muharraq. Chanel beauty products are also available at Paris Gallery and Faces stores in various malls.',
+    a: 'Chanel boutiques are located at Marassi Galleria in Diyar Al Muharraq (flagship store) and The Avenues Mall in Bahrain Bay. Chanel beauty products are also available at Paris Gallery and Faces stores in various malls.',
   },
   {
     q: 'Is Chanel cheaper in Bahrain?',
@@ -103,7 +107,7 @@ const faqs = [
   },
   {
     q: 'Does Chanel Bahrain have the full collection?',
-    a: 'The Moda Mall boutique offers a comprehensive collection including ready-to-wear, handbags, accessories, beauty, fine jewelry, and watches. Some limited pieces may require special ordering.',
+    a: 'The Marassi Galleria flagship boutique offers a comprehensive collection including ready-to-wear, handbags, accessories, beauty, fine jewelry, and watches. Some limited pieces may require special ordering.',
   },
 ];
 
@@ -149,8 +153,8 @@ export default function ChanelBahrainPage() {
             {[
               { label: 'Boutiques', value: '2', icon: ShoppingBag },
               { label: 'Beauty Counters', value: '2+', icon: Sparkles },
-              { label: '', value: 'Moda Mall', icon: MapPin },
               { label: '', value: 'Marassi Galleria', icon: MapPin },
+              { label: '', value: 'The Avenues', icon: MapPin },
             ].map((stat, index) => (
               <div key={`${stat.value}-${index}`} className="bg-white/5 backdrop-blur-sm rounded-xl p-4 text-center">
                 <stat.icon className="w-6 h-6 mx-auto mb-2 text-white/70" />
@@ -392,26 +396,31 @@ export default function ChanelBahrainPage() {
           __html: JSON.stringify({
             '@context': 'https://schema.org',
             '@type': 'Store',
-            name: 'Chanel - Moda Mall Bahrain',
+            name: 'Chanel - Marassi Galleria Bahrain',
             image: 'https://www.bahrainnights.com/images/brands/chanel.jpg',
             address: {
               '@type': 'PostalAddress',
-              streetAddress: 'Bahrain World Trade Center, King Faisal Highway',
-              addressLocality: 'Manama',
+              streetAddress: 'Marassi Galleria, Diyar Al Muharraq',
+              addressLocality: 'Muharraq',
               addressCountry: 'BH',
+            },
+            aggregateRating: {
+              '@type': 'AggregateRating',
+              ratingValue: '4.7',
+              reviewCount: '71',
             },
             openingHoursSpecification: [
               {
                 '@type': 'OpeningHoursSpecification',
-                dayOfWeek: ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday'],
+                dayOfWeek: ['Sunday', 'Monday', 'Tuesday', 'Wednesday'],
                 opens: '10:00',
                 closes: '22:00',
               },
               {
                 '@type': 'OpeningHoursSpecification',
-                dayOfWeek: ['Friday', 'Saturday'],
+                dayOfWeek: ['Thursday', 'Friday', 'Saturday'],
                 opens: '10:00',
-                closes: '23:00',
+                closes: '00:00',
               },
             ],
             brand: {

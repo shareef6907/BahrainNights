@@ -8,8 +8,8 @@ import BreadcrumbSchema from '@/components/SEO/BreadcrumbSchema';
 
 export const metadata: Metadata = {
   title: 'Dior Bahrain - Store Locations & Shopping Guide 2026',
-  description: 'Find Dior stores in Bahrain. Complete guide to Dior locations at Moda Mall. Beauty counters, fashion boutique, store hours & shopping tips.',
-  keywords: 'Dior Bahrain, Dior store Bahrain, where to buy Dior Bahrain, Dior Moda Mall, Dior beauty Bahrain, Dior bags Bahrain',
+  description: 'Find Dior stores in Bahrain. Complete guide to 3 Dior boutiques at City Centre, The Avenues & Marassi Galleria. Beauty counters, fashion boutique, store hours & shopping tips.',
+  keywords: 'Dior Bahrain, Dior store Bahrain, where to buy Dior Bahrain, Dior City Centre, Dior The Avenues, Dior Marassi Galleria, Dior beauty Bahrain',
   openGraph: {
     title: 'Dior Bahrain - Store Locations & Shopping Guide 2026',
     description: 'Find Dior stores in Bahrain. Complete guide to Dior locations at Moda Mall.',
@@ -24,26 +24,43 @@ export const metadata: Metadata = {
 
 const storeLocations = [
   {
-    name: 'Dior - Moda Mall',
-    mall: 'Moda Mall (Bahrain World Trade Center)',
-    address: 'Bahrain World Trade Center, King Faisal Highway, Manama',
-    floor: 'Ground Floor',
-    hours: 'Sun-Thu: 10:00 AM - 10:00 PM, Fri-Sat: 10:00 AM - 11:00 PM',
-    products: ['Ready-to-Wear', 'Handbags', 'Accessories', 'Shoes', 'Fine Jewelry', 'Watches', 'Fragrances', 'Beauty'],
-    features: ['Full collection', 'Beauty corner', 'Personal styling'],
-    mapsLink: 'https://www.google.com/maps/search/Dior+Moda+Mall+Bahrain',
-    isPrimary: true,
-  },
-  {
-    name: 'Dior - Marassi Galleria',
+    name: 'DIOR Bahrain Marassi',
     mall: 'Marassi Galleria',
     address: 'Shop 2149, Marassi Galleria, Road 6403, Diyar Al Muharraq, Bahrain',
-    floor: 'Shop 2149',
+    floor: 'Ground Floor',
     hours: 'Sun-Wed: 10:00 AM - 10:00 PM, Thu-Sat: 10:00 AM - 12:00 AM',
-    products: ['Ready-to-Wear', 'Handbags', 'Accessories', 'Shoes', 'Fragrances', 'Beauty'],
-    features: ['Beachfront luxury mall', 'Premium boutique', 'Near Address Hotel'],
-    mapsLink: 'https://www.google.com/maps/search/Dior+Marassi+Galleria+Bahrain',
+    products: ['Ready-to-Wear', 'Handbags', 'Accessories', 'Shoes', 'Fine Jewelry', 'Watches', 'Fragrances', 'Beauty'],
+    features: ['Flagship boutique', 'Full collection', 'Beachfront luxury mall', 'Near Address Hotel'],
+    mapsLink: 'https://www.google.com/maps/search/DIOR+Marassi+Galleria+Bahrain',
+    isPrimary: true,
+    rating: 4.4,
+    reviews: 52,
+  },
+  {
+    name: 'MAISON CHRISTIAN DIOR - The Avenues',
+    mall: 'The Avenues Bahrain',
+    address: 'The Avenues Mall, Bahrain Bay, Manama',
+    floor: 'Ground Floor',
+    hours: 'Sun-Wed: 10:00 AM - 10:00 PM, Thu-Sat: 10:00 AM - 12:00 AM',
+    products: ['Ready-to-Wear', 'Handbags', 'Accessories', 'Fragrances', 'Beauty'],
+    features: ['Premium location', 'Bahrain Bay waterfront', 'Maison collection'],
+    mapsLink: 'https://www.google.com/maps/search/Maison+Christian+Dior+Avenues+Bahrain',
     isPrimary: false,
+    rating: 4.3,
+    reviews: 22,
+  },
+  {
+    name: 'Christian Dior Boutique - City Centre',
+    mall: 'City Centre Bahrain',
+    address: 'City Centre Bahrain, Seef District, Manama',
+    floor: 'Ground Floor',
+    hours: 'Sun-Wed: 10:00 AM - 10:00 PM, Thu-Sat: 10:00 AM - 12:00 AM',
+    products: ['Ready-to-Wear', 'Handbags', 'Accessories', 'Fragrances', 'Beauty'],
+    features: ['Central location', 'Good accessibility', 'Popular mall'],
+    mapsLink: 'https://www.google.com/maps/search/Dior+City+Centre+Bahrain',
+    isPrimary: false,
+    rating: 4.2,
+    reviews: 17,
   },
 ];
 
@@ -97,7 +114,7 @@ const relatedBrands = [
 const faqs = [
   {
     q: 'Is Dior available in Bahrain?',
-    a: 'Yes, Dior has two boutiques in Bahrain - the flagship at Moda Mall (Bahrain World Trade Center) and a new location at Marassi Galleria in Diyar Al Muharraq. Dior beauty products are also available at Paris Gallery, Faces, and Sephora stores.',
+    a: 'Yes, Dior has three boutiques in Bahrain - the flagship at Marassi Galleria (4.4★), Maison Christian Dior at The Avenues (4.3★), and City Centre Bahrain (4.2★). Dior beauty products are also available at Paris Gallery, Faces, and Sephora stores.',
   },
   {
     q: 'Which mall has Dior in Bahrain?',

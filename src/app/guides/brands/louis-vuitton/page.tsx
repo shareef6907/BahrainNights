@@ -8,8 +8,8 @@ import BreadcrumbSchema from '@/components/SEO/BreadcrumbSchema';
 
 export const metadata: Metadata = {
   title: 'Louis Vuitton Bahrain - Store Locations & Shopping Guide 2026',
-  description: 'Find Louis Vuitton stores in Bahrain. Complete guide to LV locations at Moda Mall and City Centre Bahrain. Store hours, directions & shopping tips.',
-  keywords: 'Louis Vuitton Bahrain, LV Bahrain, Louis Vuitton store Bahrain, where to buy Louis Vuitton Bahrain, Louis Vuitton Moda Mall, LV bags Bahrain',
+  description: 'Find Louis Vuitton store in Bahrain. Complete guide to LV at Marassi Galleria. Store hours, directions & shopping tips.',
+  keywords: 'Louis Vuitton Bahrain, LV Bahrain, Louis Vuitton store Bahrain, where to buy Louis Vuitton Bahrain, Louis Vuitton Marassi Galleria, LV bags Bahrain',
   openGraph: {
     title: 'Louis Vuitton Bahrain - Store Locations & Shopping Guide 2026',
     description: 'Find Louis Vuitton stores in Bahrain. Complete guide to LV locations at Moda Mall and City Centre Bahrain.',
@@ -24,37 +24,17 @@ export const metadata: Metadata = {
 
 const storeLocations = [
   {
-    name: 'Louis Vuitton - Moda Mall',
-    mall: 'Moda Mall (Bahrain World Trade Center)',
-    address: 'Bahrain World Trade Center, King Faisal Highway, Manama',
-    floor: 'Ground Floor',
-    hours: 'Sun-Thu: 10:00 AM - 10:00 PM, Fri-Sat: 10:00 AM - 11:00 PM',
-    products: ['Leather Goods', 'Handbags', 'Travel Bags', 'Small Leather Goods', 'Accessories', 'Shoes', 'Ready-to-Wear', 'Watches', 'Jewelry'],
-    features: ['Full collection', 'Personalization services', 'Expert advisors'],
-    mapsLink: 'https://www.google.com/maps/search/Louis+Vuitton+Moda+Mall+Bahrain',
-    isPrimary: true,
-  },
-  {
-    name: 'Louis Vuitton - City Centre Bahrain',
-    mall: 'City Centre Bahrain',
-    address: 'City Centre Bahrain, Seef District, Manama',
-    floor: 'Ground Floor',
-    hours: 'Sun-Wed: 10:00 AM - 10:00 PM, Thu-Sat: 10:00 AM - 12:00 AM',
-    products: ['Leather Goods', 'Handbags', 'Small Leather Goods', 'Accessories', 'Selected Ready-to-Wear'],
-    features: ['Popular location', 'Good selection', 'Hot stamping available'],
-    mapsLink: 'https://www.google.com/maps/search/Louis+Vuitton+City+Centre+Bahrain',
-    isPrimary: false,
-  },
-  {
     name: 'Louis Vuitton - Marassi Galleria',
     mall: 'Marassi Galleria',
     address: 'Marassi Galleria, Diyar Al Muharraq, Bahrain',
-    floor: '1st Floor, Near Gate 3',
+    floor: 'Ground Floor',
     hours: 'Sun-Wed: 10:00 AM - 10:00 PM, Thu-Sat: 10:00 AM - 12:00 AM',
-    products: ['Leather Goods', 'Handbags', 'Small Leather Goods', 'Accessories', 'Selected Ready-to-Wear'],
-    features: ['Beachfront luxury mall', 'Premium boutique', 'Near Address Hotel'],
+    products: ['Leather Goods', 'Handbags', 'Travel Bags', 'Small Leather Goods', 'Accessories', 'Shoes', 'Ready-to-Wear', 'Watches', 'Jewelry'],
+    features: ['Full collection', 'Personalization services', 'Hot stamping available', 'Premium beachfront location', 'Near Address Hotel'],
     mapsLink: 'https://www.google.com/maps/search/Louis+Vuitton+Marassi+Galleria+Bahrain',
-    isPrimary: false,
+    isPrimary: true,
+    rating: 3.3,
+    reviews: 93,
   },
 ];
 
@@ -87,11 +67,11 @@ const relatedBrands = [
 const faqs = [
   {
     q: 'Is Louis Vuitton available in Bahrain?',
-    a: 'Yes, Louis Vuitton has three boutiques in Bahrain - the flagship store at Moda Mall (Bahrain World Trade Center), City Centre Bahrain, and the new location at Marassi Galleria in Diyar Al Muharraq.',
+    a: 'Yes, Louis Vuitton has one boutique in Bahrain located at Marassi Galleria in Diyar Al Muharraq, offering the full LV collection including leather goods, fashion, and accessories.',
   },
   {
-    q: 'Which Louis Vuitton store in Bahrain is bigger?',
-    a: 'The Moda Mall location is the flagship store with a larger selection including watches, jewelry, and the full ready-to-wear collection. City Centre Bahrain focuses more on leather goods and accessories.',
+    q: 'Where is the Louis Vuitton store in Bahrain?',
+    a: 'The Louis Vuitton boutique is located at Marassi Galleria, a premium beachfront mall in Diyar Al Muharraq. It offers the full collection including watches, jewelry, and ready-to-wear.',
   },
   {
     q: 'Is Louis Vuitton cheaper in Bahrain?',
@@ -99,7 +79,7 @@ const faqs = [
   },
   {
     q: 'Does Louis Vuitton Bahrain offer personalization?',
-    a: 'Yes, both stores offer complimentary hot stamping service to add your initials to eligible leather goods. Some items may also be available for special orders.',
+    a: 'Yes, the Marassi Galleria store offers complimentary hot stamping service to add your initials to eligible leather goods. Some items may also be available for special orders.',
   },
 ];
 
@@ -133,7 +113,7 @@ export default function LouisVuittonBahrainPage() {
             <p className="text-xl text-gray-300 max-w-3xl mx-auto">
               Founded in Paris in 1854, Louis Vuitton is the world&apos;s most valuable luxury brand. 
               Known for its iconic monogram canvas and exceptional craftsmanship, LV offers 
-              leather goods, fashion, and accessories at two locations in Bahrain.
+              leather goods, fashion, and accessories at Marassi Galleria in Bahrain.
             </p>
             <p className="text-sm text-gray-500 mt-4">
               Last updated: {lastUpdated}
@@ -143,9 +123,9 @@ export default function LouisVuittonBahrainPage() {
           {/* Quick Info */}
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mt-12">
             {[
-              { label: 'Stores', value: '3', icon: ShoppingBag },
-              { label: '', value: 'Moda Mall', icon: MapPin },
-              { label: '', value: 'City Centre', icon: MapPin },
+              { label: 'Store', value: '1', icon: ShoppingBag },
+              { label: 'Rating', value: '3.3★', icon: Star },
+              { label: 'Reviews', value: '93', icon: Sparkles },
               { label: '', value: 'Marassi Galleria', icon: MapPin },
             ].map((stat, index) => (
               <div key={`${stat.value}-${index}`} className="bg-white/5 backdrop-blur-sm rounded-xl p-4 text-center">
@@ -161,8 +141,8 @@ export default function LouisVuittonBahrainPage() {
       {/* Store Locations */}
       <section className="py-16 px-4">
         <div className="max-w-6xl mx-auto">
-          <h2 className="text-3xl font-bold mb-4">Louis Vuitton Stores in Bahrain</h2>
-          <p className="text-gray-400 mb-8">Three boutiques serving the Kingdom of Bahrain.</p>
+          <h2 className="text-3xl font-bold mb-4">Louis Vuitton Store in Bahrain</h2>
+          <p className="text-gray-400 mb-8">One flagship boutique serving the Kingdom of Bahrain at the prestigious Marassi Galleria.</p>
           
           <div className="space-y-6">
             {storeLocations.map((store) => (
@@ -356,26 +336,31 @@ export default function LouisVuittonBahrainPage() {
           __html: JSON.stringify({
             '@context': 'https://schema.org',
             '@type': 'Store',
-            name: 'Louis Vuitton - Moda Mall Bahrain',
+            name: 'Louis Vuitton - Marassi Galleria Bahrain',
             image: 'https://www.bahrainnights.com/images/brands/louis-vuitton.jpg',
             address: {
               '@type': 'PostalAddress',
-              streetAddress: 'Bahrain World Trade Center, King Faisal Highway',
-              addressLocality: 'Manama',
+              streetAddress: 'Marassi Galleria, Diyar Al Muharraq',
+              addressLocality: 'Muharraq',
               addressCountry: 'BH',
+            },
+            aggregateRating: {
+              '@type': 'AggregateRating',
+              ratingValue: '3.3',
+              reviewCount: '93',
             },
             openingHoursSpecification: [
               {
                 '@type': 'OpeningHoursSpecification',
-                dayOfWeek: ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday'],
+                dayOfWeek: ['Sunday', 'Monday', 'Tuesday', 'Wednesday'],
                 opens: '10:00',
                 closes: '22:00',
               },
               {
                 '@type': 'OpeningHoursSpecification',
-                dayOfWeek: ['Friday', 'Saturday'],
+                dayOfWeek: ['Thursday', 'Friday', 'Saturday'],
                 opens: '10:00',
-                closes: '23:00',
+                closes: '00:00',
               },
             ],
             brand: {
