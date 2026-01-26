@@ -3,7 +3,7 @@ import { supabaseAdmin } from '@/lib/supabase';
 
 export const dynamic = 'force-dynamic';
 
-interface Event {
+interface NewsletterEvent {
   id: string;
   title: string;
   slug: string;
@@ -38,7 +38,7 @@ function formatDate(dateStr: string): string {
   });
 }
 
-function generateEventCard(event: Event, featured = false): string {
+function generateEventCard(event: any, featured = false): string {
   const cat = getCategoryColor(event.category);
   const imageUrl = event.cover_url || 'https://images.unsplash.com/photo-1492684223066-81342ee5ff30?w=600&h=400&fit=crop';
   const eventUrl = `https://bahrainnights.com/events/${event.slug}`;
@@ -117,7 +117,7 @@ function generateEventCard(event: Event, featured = false): string {
     </td>`;
 }
 
-function generateInternationalCard(event: Event): string {
+function generateInternationalCard(event: any): string {
   const imageUrl = event.cover_url || 'https://images.unsplash.com/photo-1540575467063-178a50c2df87?w=400&h=250&fit=crop';
   
   return `
@@ -228,7 +228,7 @@ export async function GET() {
                     <h3 style="margin: 0; color: #F59E0B; font-size: 12px; font-weight: 700; text-transform: uppercase; letter-spacing: 1px;">⭐ Featured Event</h3>
                   </td>
                 </tr>
-                ${generateEventCard(featuredEvent as Event, true)}
+                ${generateEventCard(featuredEvent as NewsletterEvent, true)}
               </table>
             </td>
           </tr>
@@ -247,9 +247,9 @@ export async function GET() {
                 <tr>
                   <td>
                     <table width="100%" cellpadding="0" cellspacing="0">
-                      ${otherEvents.reduce((acc: string, event: Event, i: number) => {
+                      ${otherEvents.reduce((acc: string, event: any, i: number) => {
                         if (i % 2 === 0) acc += '<tr>';
-                        acc += generateEventCard(event as Event);
+                        acc += generateEventCard(event as NewsletterEvent);
                         if (i % 2 === 1 || i === otherEvents.length - 1) acc += '</tr>';
                         return acc;
                       }, '')}
@@ -283,7 +283,7 @@ export async function GET() {
                   <td>
                     <table width="100%" cellpadding="0" cellspacing="0">
                       <tr>
-                        ${intlEvents.slice(0, 3).map((e: Event) => generateInternationalCard(e as Event)).join('')}
+                        ${intlEvents.slice(0, 3).map((e: any) => generateInternationalCard(e as NewsletterEvent)).join('')}
                       </tr>
                     </table>
                   </td>
@@ -370,18 +370,18 @@ Hey there! 👋
 Here's what's happening in Bahrain this month:
 
 ${featuredEvent ? `⭐ FEATURED EVENT
-${(featuredEvent as Event).title}
-📅 ${formatDate((featuredEvent as Event).date)}
-📍 ${(featuredEvent as Event).venue_name || 'TBA'}
-🔗 https://bahrainnights.com/events/${(featuredEvent as Event).slug}
+${(featuredEvent as NewsletterEvent).title}
+📅 ${formatDate((featuredEvent as NewsletterEvent).date)}
+📍 ${(featuredEvent as NewsletterEvent).venue_name || 'TBA'}
+🔗 https://bahrainnights.com/events/${(featuredEvent as NewsletterEvent).slug}
 
 ` : ''}
 🔥 MORE EVENTS
-${otherEvents.map((e: Event) => `• ${e.title} - ${formatDate(e.date)} at ${e.venue_name || 'TBA'}`).join('\n')}
+${otherEvents.map((e: any) => `• ${e.title} - ${formatDate(e.date)} at ${e.venue_name || 'TBA'}`).join('\n')}
 
 ${intlEvents.length > 0 ? `
 🌍 INTERNATIONAL EVENTS
-${intlEvents.map((e: Event) => `• ${e.title} - ${e.city || e.country} (${formatDate(e.date)})`).join('\n')}
+${intlEvents.map((e: any) => `• ${e.title} - ${e.city || e.country} (${formatDate(e.date)})`).join('\n')}
 ` : ''}
 
 💡 INSIDER TIPS

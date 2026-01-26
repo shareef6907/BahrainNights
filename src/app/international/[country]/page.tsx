@@ -80,8 +80,8 @@ export default async function CountryPage({ params }: Props) {
 
   // Fetch events for this country
   // Filter: start_date >= today OR date >= today OR end_date >= today (for ongoing events)
-  let events = null;
-  let error = null;
+  let events: any[] | null = null;
+  let error: any = null;
   
   try {
     const result = await supabaseAdmin

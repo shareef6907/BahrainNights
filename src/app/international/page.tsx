@@ -60,8 +60,8 @@ export default async function InternationalPage() {
   // Fetch all international events (not from Bahrain)
   // Filter: start_date >= today OR date >= today OR end_date >= today (for ongoing events)
   // This ensures we show upcoming events AND ongoing events (started in past but still running)
-  let events = null;
-  let error = null;
+  let events: any[] | null = null;
+  let error: any = null;
   
   try {
     const result = await supabaseAdmin
