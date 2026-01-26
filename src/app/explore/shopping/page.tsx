@@ -29,9 +29,9 @@ const brandCategories = [
     brands: [
       { name: 'Zara', slug: 'zara', emoji: '👗' },
       { name: 'H&M', slug: 'hm', emoji: '👕' },
-      { name: 'Uniqlo', slug: 'uniqlo', emoji: '🧥' },
       { name: 'Nike', slug: 'nike', emoji: '👟' },
       { name: 'Adidas', slug: 'adidas', emoji: '👟' },
+      { name: 'Massimo Dutti', slug: 'massimo-dutti', emoji: '👔' },
     ],
   },
   {
