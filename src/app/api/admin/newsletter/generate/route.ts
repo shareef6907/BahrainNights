@@ -139,6 +139,33 @@ function generateInternationalCard(event: any): string {
     </td>`;
 }
 
+function generateMovieCard(movie: any): string {
+  const posterUrl = movie.poster_url || movie.tmdb_poster_path 
+    ? `https://image.tmdb.org/t/p/w300${movie.tmdb_poster_path}`
+    : 'https://images.unsplash.com/photo-1489599849927-2ee91cede3ba?w=300&h=450&fit=crop';
+  const movieUrl = `https://bahrainnights.com/cinema/${movie.slug}`;
+  const releaseDate = movie.release_date ? new Date(movie.release_date).toLocaleDateString('en-US', { month: 'short', day: 'numeric' }) : '';
+  
+  return `
+    <td width="25%" style="padding: 6px; vertical-align: top;">
+      <table width="100%" cellpadding="0" cellspacing="0" style="background: #1E1E2E; border-radius: 8px; overflow: hidden;">
+        <tr>
+          <td>
+            <a href="${movieUrl}" style="text-decoration: none;">
+              <img src="${posterUrl}" alt="${movie.title}" width="100%" height="140" style="display: block; object-fit: cover;" />
+            </a>
+          </td>
+        </tr>
+        <tr>
+          <td style="padding: 10px;">
+            <h4 style="margin: 0; color: #ffffff; font-size: 11px; font-weight: 600; line-height: 1.3; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">${movie.title}</h4>
+            ${releaseDate ? `<p style="margin: 4px 0 0 0; color: #9CA3AF; font-size: 10px;">📅 ${releaseDate}</p>` : ''}
+          </td>
+        </tr>
+      </table>
+    </td>`;
+}
+
 export async function GET() {
   try {
     const today = new Date().toISOString().split('T')[0];
@@ -168,7 +195,25 @@ export async function GET() {
       .order('date', { ascending: true })
       .limit(6);
 
+    // Fetch movies - Now Showing
+    const { data: nowShowingMovies } = await supabaseAdmin
+      .from('movies')
+      .select('id, title, slug, poster_url, tmdb_poster_path, release_date, tmdb_rating')
+      .eq('is_now_showing', true)
+      .order('tmdb_rating', { ascending: false })
+      .limit(8);
+
+    // Fetch movies - Coming Soon
+    const { data: comingSoonMovies } = await supabaseAdmin
+      .from('movies')
+      .select('id, title, slug, poster_url, tmdb_poster_path, release_date')
+      .eq('is_coming_soon', true)
+      .order('release_date', { ascending: true })
+      .limit(4);
+
     const monthName = new Date().toLocaleDateString('en-US', { month: 'long', year: 'numeric' });
+    const nowShowing = nowShowingMovies || [];
+    const comingSoon = comingSoonMovies || [];
     const events = bahrainEvents || [];
     const intlEvents = internationalEvents || [];
     
@@ -300,6 +345,74 @@ export async function GET() {
           </tr>
           ` : ''}
           
+          ${nowShowing.length > 0 ? `
+          <!-- Movies Section -->
+          <tr>
+            <td style="padding: 30px; background: linear-gradient(135deg, #4C1D95 0%, #1E1B4B 100%);">
+              <table width="100%" cellpadding="0" cellspacing="0">
+                <tr>
+                  <td style="padding-bottom: 15px;">
+                    <h3 style="margin: 0; color: #ffffff; font-size: 18px; font-weight: 700;">🎬 Now Showing in Cinemas</h3>
+                    <p style="margin: 5px 0 0 0; color: #C4B5FD; font-size: 13px;">Catch these films on the big screen!</p>
+                  </td>
+                </tr>
+                <tr>
+                  <td>
+                    <table width="100%" cellpadding="0" cellspacing="0">
+                      <tr>
+                        ${nowShowing.slice(0, 4).map((m: any) => generateMovieCard(m)).join('')}
+                      </tr>
+                    </table>
+                  </td>
+                </tr>
+                ${nowShowing.length > 4 ? `
+                <tr>
+                  <td style="padding-top: 10px;">
+                    <table width="100%" cellpadding="0" cellspacing="0">
+                      <tr>
+                        ${nowShowing.slice(4, 8).map((m: any) => generateMovieCard(m)).join('')}
+                      </tr>
+                    </table>
+                  </td>
+                </tr>
+                ` : ''}
+                <tr>
+                  <td style="padding-top: 15px; text-align: center;">
+                    <a href="https://bahrainnights.com/cinema" style="display: inline-block; background: #7C3AED; color: #ffffff; padding: 12px 24px; border-radius: 8px; text-decoration: none; font-weight: 600; font-size: 13px;">
+                      View All Movies & Showtimes →
+                    </a>
+                  </td>
+                </tr>
+              </table>
+            </td>
+          </tr>
+          ` : ''}
+          
+          ${comingSoon.length > 0 ? `
+          <!-- Coming Soon -->
+          <tr>
+            <td style="padding: 20px 30px 30px 30px; background: #0F0F1A;">
+              <table width="100%" cellpadding="0" cellspacing="0">
+                <tr>
+                  <td style="padding-bottom: 15px;">
+                    <h3 style="margin: 0; color: #ffffff; font-size: 18px; font-weight: 700;">🎥 Coming Soon</h3>
+                    <p style="margin: 5px 0 0 0; color: #9CA3AF; font-size: 13px;">Mark your calendars!</p>
+                  </td>
+                </tr>
+                <tr>
+                  <td>
+                    <table width="100%" cellpadding="0" cellspacing="0">
+                      <tr>
+                        ${comingSoon.slice(0, 4).map((m: any) => generateMovieCard(m)).join('')}
+                      </tr>
+                    </table>
+                  </td>
+                </tr>
+              </table>
+            </td>
+          </tr>
+          ` : ''}
+          
           <!-- Tips Section -->
           <tr>
             <td style="padding: 30px; background: #0F0F1A;">
@@ -384,6 +497,17 @@ ${intlEvents.length > 0 ? `
 ${intlEvents.map((e: any) => `• ${e.title} - ${e.city || e.country} (${formatDate(e.date)})`).join('\n')}
 ` : ''}
 
+${nowShowing.length > 0 ? `
+🎬 NOW SHOWING IN CINEMAS
+${nowShowing.slice(0, 6).map((m: any) => `• ${m.title}`).join('\n')}
+See all movies: https://bahrainnights.com/cinema
+` : ''}
+
+${comingSoon.length > 0 ? `
+🎥 COMING SOON
+${comingSoon.slice(0, 4).map((m: any) => `• ${m.title}${m.release_date ? ` (${new Date(m.release_date).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })})` : ''}`).join('\n')}
+` : ''}
+
 💡 INSIDER TIPS
 • Book tickets early - popular events sell out fast!
 • Weekday lunches = shorter waits at new restaurants
@@ -401,8 +525,10 @@ Unsubscribe: https://bahrainnights.com/unsubscribe
       text: textContent,
       eventsCount: events.length,
       internationalCount: intlEvents.length,
+      moviesNowShowing: nowShowing.length,
+      moviesComingSoon: comingSoon.length,
       subject: `🔥 What's Happening in Bahrain - ${monthName}`,
-      version: 'v2-html-template',
+      version: 'v3-with-movies',
     });
     response.headers.set('Cache-Control', 'no-store, no-cache, must-revalidate');
     return response;
