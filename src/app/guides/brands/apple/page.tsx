@@ -8,8 +8,8 @@ import BreadcrumbSchema from '@/components/SEO/BreadcrumbSchema';
 
 export const metadata: Metadata = {
   title: 'Apple Store Bahrain - Authorized Resellers & Shopping Guide 2026',
-  description: 'Find Apple products in Bahrain. Complete guide to Apple authorized resellers including iStyle, Virgin Megastore & Lulu. iPhone, MacBook, iPad locations.',
-  keywords: 'Apple Store Bahrain, Apple authorized reseller Bahrain, buy iPhone Bahrain, MacBook Bahrain, iPad Bahrain, iStyle Bahrain, Apple products Bahrain',
+  description: 'Find Apple products in Bahrain. Complete guide to Apple authorized resellers including iMachines, iWorld, Virgin Megastore & Lulu. iPhone, MacBook, iPad locations.',
+  keywords: 'Apple Store Bahrain, Apple authorized reseller Bahrain, buy iPhone Bahrain, MacBook Bahrain, iPad Bahrain, iMachines Bahrain, iWorld Bahrain, Apple products Bahrain',
   openGraph: {
     title: 'Apple Store Bahrain - Authorized Resellers & Shopping Guide 2026',
     description: 'Find Apple products in Bahrain. Complete guide to Apple authorized resellers.',
@@ -24,54 +24,60 @@ export const metadata: Metadata = {
 
 const storeLocations = [
   {
-    name: 'iStyle - City Centre Bahrain',
+    name: 'iMachines - City Centre Bahrain',
     mall: 'City Centre Bahrain',
     address: 'City Centre Bahrain, Seef District, Manama',
     floor: 'Ground Floor',
-    phone: '+973 1717 8600',
+    phone: '+973 1758 3000',
+    website: 'https://imachines.bh',
     hours: 'Sun-Wed: 10:00 AM - 10:00 PM, Thu-Sat: 10:00 AM - 12:00 AM',
     products: ['iPhone', 'MacBook', 'iPad', 'Apple Watch', 'AirPods', 'Accessories', 'AppleCare'],
-    features: ['Apple Premium Reseller', 'Full product range', 'Technical support', 'Trade-in service'],
-    mapsLink: 'https://www.google.com/maps/search/iStyle+City+Centre+Bahrain',
+    features: ['Apple Authorized Reseller', 'Apple Authorized Service Centre', 'Full product range', 'Trade-in service', 'Business solutions'],
+    mapsLink: 'https://www.google.com/maps/search/iMachines+City+Centre+Bahrain',
     isPrimary: true,
-    type: 'Premium Reseller',
+    type: 'Authorized Reseller & Service Centre',
   },
   {
-    name: 'iStyle - The Avenues Bahrain',
-    mall: 'The Avenues Bahrain',
-    address: 'The Avenues, Bahrain Bay, Manama',
-    floor: 'Ground Floor',
-    phone: '+973 1711 6500',
-    hours: 'Sun-Wed: 10:00 AM - 10:00 PM, Thu-Sat: 10:00 AM - 12:00 AM',
-    products: ['iPhone', 'MacBook', 'iPad', 'Apple Watch', 'AirPods', 'Accessories'],
-    features: ['Apple Premium Reseller', 'Modern store', 'Full range'],
-    mapsLink: 'https://www.google.com/maps/search/iStyle+Avenues+Bahrain',
-    isPrimary: false,
-    type: 'Premium Reseller',
-  },
-  {
-    name: 'iStyle - Seef Mall',
+    name: 'iMachines - Seef Mall',
     mall: 'Seef Mall',
     address: 'Seef Mall, Seef District, Manama',
     floor: 'Ground Floor',
+    phone: '+973 1758 3000',
+    website: 'https://imachines.bh',
     hours: 'Sun-Thu: 10:00 AM - 10:00 PM, Fri-Sat: 10:00 AM - 11:00 PM',
     products: ['iPhone', 'MacBook', 'iPad', 'Apple Watch', 'AirPods', 'Accessories'],
-    features: ['Apple Premium Reseller', 'Good selection'],
-    mapsLink: 'https://www.google.com/maps/search/iStyle+Seef+Mall+Bahrain',
+    features: ['Apple Authorized Reseller', 'Good selection', 'Service support'],
+    mapsLink: 'https://www.google.com/maps/search/iMachines+Seef+Mall+Bahrain',
     isPrimary: false,
-    type: 'Premium Reseller',
+    type: 'Authorized Reseller',
   },
   {
-    name: 'iStyle - Marassi Galleria',
-    mall: 'Marassi Galleria',
-    address: 'Marassi Galleria, Diyar Al Muharraq, Bahrain',
+    name: 'iWorld - The Avenues Bahrain',
+    mall: 'The Avenues Bahrain',
+    address: 'The Avenues, Bahrain Bay, Manama',
     floor: 'Ground Floor',
+    phone: '+973 1600 0900',
+    website: 'https://iworld.bh',
     hours: 'Sun-Wed: 10:00 AM - 10:00 PM, Thu-Sat: 10:00 AM - 12:00 AM',
     products: ['iPhone', 'MacBook', 'iPad', 'Apple Watch', 'AirPods', 'Accessories'],
-    features: ['Apple Premium Reseller', 'Beachfront mall', 'Near Marassi Aquarium'],
-    mapsLink: 'https://www.google.com/maps/search/iStyle+Marassi+Galleria+Bahrain',
+    features: ['Apple Authorized Reseller', 'Modern store', 'Full range', 'Trade-in available'],
+    mapsLink: 'https://www.google.com/maps/search/iWorld+Avenues+Bahrain',
+    isPrimary: true,
+    type: 'Authorized Reseller',
+  },
+  {
+    name: 'iWorld - Bahrain City Centre',
+    mall: 'City Centre Bahrain',
+    address: 'City Centre Bahrain, Seef District, Manama',
+    floor: 'Ground Floor',
+    phone: '+973 1600 0900',
+    website: 'https://iworld.bh',
+    hours: 'Sun-Wed: 10:00 AM - 10:00 PM, Thu-Sat: 10:00 AM - 12:00 AM',
+    products: ['iPhone', 'MacBook', 'iPad', 'Apple Watch', 'AirPods', 'Accessories'],
+    features: ['Apple Authorized Reseller', 'Workshop services', 'Financing available'],
+    mapsLink: 'https://www.google.com/maps/search/iWorld+City+Centre+Bahrain',
     isPrimary: false,
-    type: 'Premium Reseller',
+    type: 'Authorized Reseller',
   },
 ];
 
@@ -102,19 +108,19 @@ const otherResellers = [
 const shoppingTips = [
   {
     title: 'No Official Apple Store',
-    tip: 'Bahrain doesn\'t have an official Apple Store. iStyle is the Apple Premium Reseller with the best selection and support.',
+    tip: 'Bahrain doesn\'t have an official Apple Store. iMachines and iWorld are Apple Authorized Resellers with the best selection and support.',
   },
   {
-    title: 'AppleCare+',
-    tip: 'Purchase AppleCare+ at the time of buying your device. iStyle can help set it up immediately.',
+    title: 'Service & Repairs',
+    tip: 'iMachines is an Apple Authorized Service Centre - they can handle repairs and AppleCare services.',
   },
   {
     title: 'Trade-In Programs',
-    tip: 'iStyle offers trade-in for old Apple devices. Check their current promotions for upgrade deals.',
+    tip: 'Both iMachines and iWorld offer trade-in for old Apple devices. Check their current promotions for upgrade deals.',
   },
   {
     title: 'Price Comparison',
-    tip: 'Compare prices between iStyle, Virgin, Lulu, and Jarir. Promotions vary by retailer.',
+    tip: 'Compare prices between iMachines, iWorld, Virgin, Lulu, and Jarir. Promotions vary by retailer.',
   },
 ];
 
@@ -128,15 +134,15 @@ const relatedBrands = [
 const faqs = [
   {
     q: 'Is there an official Apple Store in Bahrain?',
-    a: 'No, Bahrain doesn\'t have an official Apple Store. However, iStyle operates as an Apple Premium Reseller with multiple locations offering the full Apple product range and services.',
+    a: 'No, Bahrain doesn\'t have an official Apple Store. However, iMachines and iWorld operate as Apple Authorized Resellers with multiple locations offering the full Apple product range and services.',
   },
   {
     q: 'Where can I buy iPhone in Bahrain?',
-    a: 'You can buy iPhone from iStyle (Apple Premium Reseller) at City Centre, Seef Mall, The Avenues, and Marassi Galleria. Also available at Virgin Megastore, Lulu Hypermarket, and Jarir Bookstore.',
+    a: 'You can buy iPhone from iMachines and iWorld (Apple Authorized Resellers) at City Centre, Seef Mall, and The Avenues. Also available at Virgin Megastore, Lulu Hypermarket, and Jarir Bookstore.',
   },
   {
-    q: 'Can I get AppleCare in Bahrain?',
-    a: 'Yes, AppleCare+ is available for purchase at iStyle stores. They can also help with Apple service and repairs as an authorized service provider.',
+    q: 'Where can I get Apple repairs in Bahrain?',
+    a: 'iMachines is an Apple Authorized Service Centre and can handle official Apple repairs and AppleCare services.',
   },
   {
     q: 'Are Apple products cheaper in Bahrain?',
@@ -149,48 +155,46 @@ export default function AppleBahrainPage() {
   
   return (
     <div className="min-h-screen bg-gradient-to-b from-slate-950 via-slate-900 to-slate-950 text-white">
-      <BreadcrumbSchema
+      <BreadcrumbSchema 
         items={[
           { name: 'Home', url: 'https://www.bahrainnights.com' },
           { name: 'Guides', url: 'https://www.bahrainnights.com/guides' },
-          { name: 'Brands', url: 'https://www.bahrainnights.com/guides' },
+          { name: 'Brands', url: 'https://www.bahrainnights.com/guides/brands' },
           { name: 'Apple', url: 'https://www.bahrainnights.com/guides/brands/apple' },
         ]}
       />
-
+      
       {/* Hero Section */}
       <section className="relative py-20 px-4 overflow-hidden">
-        <div className="absolute inset-0 bg-gradient-to-r from-gray-800/30 to-black/50" />
-        <div className="max-w-6xl mx-auto relative">
+        <div className="absolute inset-0 bg-gradient-to-r from-gray-900/50 to-slate-900/50" />
+        <div className="max-w-6xl mx-auto relative z-10">
+          <Link href="/guides/brands" className="inline-flex items-center gap-2 text-gray-400 hover:text-white mb-6 transition-colors">
+            ← Back to Brand Guides
+          </Link>
+          
           <div className="text-center mb-12">
             <span className="inline-block px-4 py-1 bg-gray-500/20 text-gray-300 rounded-full text-sm font-medium mb-4">
-              📱 Technology
+              Shopping Guide
             </span>
             <h1 className="text-4xl md:text-6xl font-black mb-6">
-              <span className="text-gray-200">Apple</span>
-              {' '}
-              <span className="text-gray-400">in Bahrain</span>
+              <span className="text-white">Apple</span>
+              <span className="text-gray-400"> in Bahrain</span>
             </h1>
-            <p className="text-xl text-gray-300 max-w-3xl mx-auto">
-              While Bahrain doesn&apos;t have an official Apple Store, you can find the 
-              complete range of Apple products at authorized resellers. iStyle is the 
-              Apple Premium Reseller with multiple locations offering sales, support, and service.
-            </p>
-            <p className="text-sm text-gray-500 mt-4">
-              Last updated: {lastUpdated}
+            <p className="text-xl text-gray-400 max-w-2xl mx-auto">
+              Your complete guide to Apple authorized resellers in Bahrain. Find iPhone, MacBook, iPad and more at iMachines, iWorld, and other retailers.
             </p>
           </div>
-
-          {/* Quick Info */}
+          
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mt-12">
             {[
-              { label: 'iStyle Stores', value: '4+', icon: ShoppingBag },
-              { label: 'Premium Reseller', value: 'iStyle', icon: Star },
-              { label: 'Other Resellers', value: '3+', icon: Monitor },
+              { label: 'Authorized Resellers', value: '2', icon: ShoppingBag },
+              { label: 'Store Locations', value: '4+', icon: MapPin },
+              { label: 'Service Centre', value: '1', icon: Monitor },
+              { label: 'Other Retailers', value: '3+', icon: Star },
             ].map((stat) => (
-              <div key={stat.label} className="bg-white/5 backdrop-blur-sm rounded-xl p-4 text-center">
+              <div key={stat.label} className="bg-white/5 backdrop-blur-sm rounded-xl p-4 text-center border border-white/10">
                 <stat.icon className="w-6 h-6 mx-auto mb-2 text-gray-400" />
-                <div className="text-2xl font-bold">{stat.value}</div>
+                <div className="text-2xl font-bold text-white">{stat.value}</div>
                 <div className="text-sm text-gray-400">{stat.label}</div>
               </div>
             ))}
@@ -198,75 +202,77 @@ export default function AppleBahrainPage() {
         </div>
       </section>
 
-      {/* iStyle Locations */}
+      {/* Main Stores Section */}
       <section className="py-16 px-4">
         <div className="max-w-6xl mx-auto">
-          <h2 className="text-3xl font-bold mb-4">iStyle - Apple Premium Reseller</h2>
-          <p className="text-gray-400 mb-8">The best place to buy Apple products in Bahrain.</p>
-          
-          <div className="space-y-6">
-            {storeLocations.map((store) => (
-              <div 
-                key={store.name}
-                className="bg-white/5 backdrop-blur-sm rounded-2xl p-6 border border-gray-500/10"
-              >
-                <div className="flex flex-col lg:flex-row lg:items-start gap-6">
+          <h2 className="text-3xl font-bold mb-8">Apple Authorized Resellers</h2>
+          <div className="grid gap-6">
+            {storeLocations.map((store, index) => (
+              <div key={index} className={`bg-white/5 backdrop-blur-sm rounded-2xl p-6 border ${store.isPrimary ? 'border-gray-400/30' : 'border-white/10'}`}>
+                <div className="flex flex-col md:flex-row gap-6">
                   <div className="flex-1">
-                    <div className="flex items-center gap-3 mb-3">
-                      <h3 className="text-xl font-bold text-white">{store.name}</h3>
-                      <span className="px-2 py-0.5 bg-gray-700 text-gray-200 text-xs font-medium rounded">
-                        {store.type}
-                      </span>
+                    <div className="flex items-start justify-between mb-4">
+                      <div>
+                        <h3 className="text-xl font-bold text-white">{store.name}</h3>
+                        <p className="text-gray-400">{store.mall}</p>
+                        <span className="inline-block mt-2 px-3 py-1 bg-gray-500/20 text-gray-300 text-xs rounded-full">
+                          {store.type}
+                        </span>
+                      </div>
+                      {store.isPrimary && (
+                        <span className="px-3 py-1 bg-green-500/20 text-green-400 text-xs font-medium rounded-full">
+                          Recommended
+                        </span>
+                      )}
                     </div>
                     
-                    <div className="space-y-2 text-sm mb-4">
-                      <p className="flex items-center gap-2 text-gray-300">
+                    <div className="space-y-2 text-sm text-gray-300 mb-4">
+                      <div className="flex items-center gap-2">
                         <MapPin className="w-4 h-4 text-gray-500" />
                         {store.address}
-                      </p>
-                      <p className="flex items-center gap-2 text-gray-300">
-                        <Info className="w-4 h-4 text-gray-500" />
-                        {store.floor}
-                      </p>
-                      <p className="flex items-center gap-2 text-gray-300">
+                      </div>
+                      <div className="flex items-center gap-2">
                         <Clock className="w-4 h-4 text-gray-500" />
                         {store.hours}
-                      </p>
+                      </div>
+                      {store.phone && (
+                        <div className="flex items-center gap-2">
+                          <Phone className="w-4 h-4 text-gray-500" />
+                          {store.phone}
+                        </div>
+                      )}
                     </div>
 
-                    <div className="mb-4">
-                      <p className="text-sm text-gray-500 mb-2">Products:</p>
-                      <div className="flex flex-wrap gap-2">
-                        {store.products.map((product) => (
-                          <span key={product} className="px-2 py-1 bg-gray-700/50 text-gray-200 text-xs rounded">
-                            {product}
-                          </span>
-                        ))}
-                      </div>
+                    <div className="flex flex-wrap gap-2 mb-4">
+                      {store.features.map((feature) => (
+                        <span key={feature} className="px-2 py-1 bg-gray-500/10 text-gray-300 text-xs rounded">
+                          {feature}
+                        </span>
+                      ))}
                     </div>
 
-                    <div>
-                      <p className="text-sm text-gray-500 mb-2">Features:</p>
-                      <div className="flex flex-wrap gap-2">
-                        {store.features.map((feature) => (
-                          <span key={feature} className="px-2 py-1 bg-white/10 text-gray-300 text-xs rounded">
-                            {feature}
-                          </span>
-                        ))}
-                      </div>
+                    <div className="flex gap-3">
+                      <a 
+                        href={store.mapsLink}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="inline-flex items-center gap-2 px-4 py-2 bg-gray-600 hover:bg-gray-500 rounded-lg text-sm font-medium transition-colors"
+                      >
+                        <MapPin className="w-4 h-4" />
+                        View on Maps
+                      </a>
+                      {store.website && (
+                        <a 
+                          href={store.website}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="inline-flex items-center gap-2 px-4 py-2 bg-white/10 hover:bg-white/20 rounded-lg text-sm font-medium transition-colors"
+                        >
+                          <ExternalLink className="w-4 h-4" />
+                          Website
+                        </a>
+                      )}
                     </div>
-                  </div>
-                  
-                  <div className="lg:min-w-[200px]">
-                    <a 
-                      href={store.mapsLink}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="flex items-center justify-center gap-2 w-full px-4 py-3 bg-gray-700 text-white font-bold rounded-lg hover:bg-gray-600 transition-colors"
-                    >
-                      <MapPin className="w-4 h-4" />
-                      Get Directions
-                    </a>
                   </div>
                 </div>
               </div>
@@ -276,31 +282,22 @@ export default function AppleBahrainPage() {
       </section>
 
       {/* Other Resellers */}
-      <section className="py-16 px-4 bg-black/30">
+      <section className="py-16 px-4 bg-white/5">
         <div className="max-w-6xl mx-auto">
-          <h2 className="text-3xl font-bold mb-4">Other Authorized Resellers</h2>
-          <p className="text-gray-400 mb-8">More places to buy Apple products in Bahrain.</p>
-          
-          <div className="grid md:grid-cols-3 gap-6">
-            {otherResellers.map((retailer) => (
-              <div key={retailer.name} className="bg-white/5 rounded-xl p-5">
-                <h3 className="font-bold text-lg text-white mb-1">{retailer.name}</h3>
-                <p className="text-xs text-gray-500 mb-2">{retailer.type}</p>
-                <p className="text-sm text-gray-400 mb-3">{retailer.location}</p>
-                <div className="flex flex-wrap gap-2 mb-4">
-                  {retailer.products.map((product) => (
-                    <span key={product} className="px-2 py-1 bg-white/10 text-xs rounded">
-                      {product}
-                    </span>
-                  ))}
-                </div>
+          <h2 className="text-2xl font-bold mb-6">Other Apple Retailers</h2>
+          <div className="grid md:grid-cols-3 gap-4">
+            {otherResellers.map((reseller, index) => (
+              <div key={index} className="bg-white/5 rounded-xl p-4 border border-white/10">
+                <h3 className="font-bold text-white mb-1">{reseller.name}</h3>
+                <p className="text-sm text-gray-400 mb-2">{reseller.location}</p>
+                <p className="text-xs text-gray-500 mb-3">{reseller.products.join(', ')}</p>
                 <a 
-                  href={retailer.mapsLink}
+                  href={reseller.mapsLink}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="text-sm text-gray-300 hover:underline flex items-center gap-1"
+                  className="text-gray-400 hover:text-white text-sm inline-flex items-center gap-1"
                 >
-                  Find on Maps <ExternalLink className="w-3 h-3" />
+                  <MapPin className="w-3 h-3" /> Find Location
                 </a>
               </div>
             ))}
@@ -311,13 +308,30 @@ export default function AppleBahrainPage() {
       {/* Shopping Tips */}
       <section className="py-16 px-4">
         <div className="max-w-6xl mx-auto">
-          <h2 className="text-3xl font-bold mb-8">Tips for Buying Apple in Bahrain</h2>
-          
+          <h2 className="text-2xl font-bold mb-6 flex items-center gap-2">
+            <Sparkles className="w-6 h-6 text-yellow-500" />
+            Shopping Tips
+          </h2>
           <div className="grid md:grid-cols-2 gap-4">
-            {shoppingTips.map((item) => (
-              <div key={item.title} className="bg-white/5 rounded-xl p-5">
-                <h3 className="font-bold text-white mb-2">{item.title}</h3>
-                <p className="text-gray-400 text-sm">{item.tip}</p>
+            {shoppingTips.map((tip, index) => (
+              <div key={index} className="bg-white/5 rounded-xl p-4 border border-white/10">
+                <h3 className="font-bold text-white mb-2">{tip.title}</h3>
+                <p className="text-sm text-gray-400">{tip.tip}</p>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* FAQs */}
+      <section className="py-16 px-4 bg-white/5">
+        <div className="max-w-6xl mx-auto">
+          <h2 className="text-2xl font-bold mb-6">Frequently Asked Questions</h2>
+          <div className="space-y-4">
+            {faqs.map((faq, index) => (
+              <div key={index} className="bg-white/5 rounded-xl p-4 border border-white/10">
+                <h3 className="font-bold text-white mb-2">{faq.q}</h3>
+                <p className="text-sm text-gray-400">{faq.a}</p>
               </div>
             ))}
           </div>
@@ -325,108 +339,28 @@ export default function AppleBahrainPage() {
       </section>
 
       {/* Related Brands */}
-      <section className="py-16 px-4 bg-black/30">
+      <section className="py-16 px-4">
         <div className="max-w-6xl mx-auto">
-          <h2 className="text-2xl font-bold mb-8">Related Brands in Bahrain</h2>
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+          <h2 className="text-2xl font-bold mb-6">Related Brand Guides</h2>
+          <div className="flex flex-wrap gap-3">
             {relatedBrands.map((brand) => (
-              <Link 
-                key={brand.href}
+              <Link
+                key={brand.name}
                 href={brand.href}
-                className="bg-white/5 hover:bg-white/10 rounded-xl p-4 transition-colors group text-center"
+                className="inline-flex items-center gap-2 px-4 py-2 bg-white/10 hover:bg-white/20 rounded-full text-sm font-medium transition-colors"
               >
-                <span className="text-2xl mb-2 block">{brand.emoji}</span>
-                <span className="font-medium group-hover:text-white transition-colors">
-                  {brand.name}
-                </span>
+                <span>{brand.emoji}</span>
+                {brand.name}
               </Link>
             ))}
           </div>
         </div>
       </section>
 
-      {/* FAQ Section */}
-      <section className="py-16 px-4">
-        <div className="max-w-4xl mx-auto">
-          <h2 className="text-3xl font-bold mb-8 text-center">Frequently Asked Questions</h2>
-          
-          <div className="space-y-4">
-            {faqs.map((faq, i) => (
-              <div key={i} className="bg-white/5 rounded-xl p-6">
-                <h3 className="font-bold mb-2">{faq.q}</h3>
-                <p className="text-gray-400">{faq.a}</p>
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* CTA */}
-      <section className="py-16 px-4 bg-gradient-to-r from-gray-800/20 to-gray-900/20">
-        <div className="max-w-4xl mx-auto text-center">
-          <h2 className="text-3xl font-bold mb-4">Explore More Shopping in Bahrain</h2>
-          <p className="text-gray-300 mb-8">
-            Discover other lifestyle brands and shopping destinations.
-          </p>
-          <div className="flex flex-wrap justify-center gap-4">
-            <Link 
-              href="/guides/brands/ikea"
-              className="px-8 py-3 bg-gray-700 hover:bg-gray-600 text-white font-bold rounded-lg transition-colors"
-            >
-              IKEA Guide
-            </Link>
-            <Link 
-              href="/guides"
-              className="px-8 py-3 bg-white/10 hover:bg-white/20 text-white font-bold rounded-lg transition-colors"
-            >
-              All Guides
-            </Link>
-          </div>
-        </div>
-      </section>
-
-      {/* Structured Data */}
-      <script
-        type="application/ld+json"
-        dangerouslySetInnerHTML={{
-          __html: JSON.stringify({
-            '@context': 'https://schema.org',
-            '@type': 'Article',
-            headline: 'Apple Store Bahrain - Authorized Resellers & Shopping Guide 2026',
-            description: 'Find Apple products in Bahrain. Complete guide to Apple authorized resellers.',
-            author: {
-              '@type': 'Organization',
-              name: 'BahrainNights',
-              url: 'https://bahrainnights.com',
-            },
-            publisher: {
-              '@type': 'Organization',
-              name: 'BahrainNights',
-            },
-            datePublished: '2026-01-26',
-            dateModified: lastUpdated,
-          }),
-        }}
-      />
-      
-      {/* FAQ Schema */}
-      <script
-        type="application/ld+json"
-        dangerouslySetInnerHTML={{
-          __html: JSON.stringify({
-            '@context': 'https://schema.org',
-            '@type': 'FAQPage',
-            mainEntity: faqs.map((faq) => ({
-              '@type': 'Question',
-              name: faq.q,
-              acceptedAnswer: {
-                '@type': 'Answer',
-                text: faq.a,
-              },
-            })),
-          }),
-        }}
-      />
+      {/* Last Updated */}
+      <div className="py-8 px-4 text-center text-gray-500 text-sm">
+        Last updated: {lastUpdated}
+      </div>
     </div>
   );
 }
