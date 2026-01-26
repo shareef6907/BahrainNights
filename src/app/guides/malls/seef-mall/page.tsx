@@ -27,7 +27,7 @@ const mallInfo = {
   name: 'Seef Mall',
   tagline: 'Bahrain\'s Original Premier Shopping Destination',
   address: 'Road 2825, Block 428, Seef District, Manama, Bahrain',
-  phone: '+973 17 581 111',
+  phone: '+973 7791 1114',
   website: 'https://www.seefmall.com',
   mapsLink: 'https://www.google.com/maps/dir/?api=1&destination=Seef+Mall+Bahrain',
   hours: {

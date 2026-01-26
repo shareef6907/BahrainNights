@@ -27,7 +27,7 @@ const mallInfo = {
   name: 'The Avenues Bahrain',
   tagline: 'Premium Lifestyle Destination at Bahrain Bay',
   address: 'Bahrain Bay, Manama, Kingdom of Bahrain',
-  phone: '+973 77 123 456',
+  phone: '+973 1715 1060',
   website: 'https://www.theavenuesbahrain.com',
   mapsLink: 'https://www.google.com/maps/dir/?api=1&destination=The+Avenues+Bahrain',
   hours: {

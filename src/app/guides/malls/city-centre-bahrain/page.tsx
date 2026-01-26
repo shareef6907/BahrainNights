@@ -27,7 +27,7 @@ const mallInfo = {
   name: 'City Centre Bahrain',
   tagline: 'Bahrain\'s Largest Shopping & Entertainment Destination',
   address: 'Road 2835, Block 428, Seef District, Manama, Bahrain',
-  phone: '+973 17 177 177',
+  phone: '+973 8000 0131',
   website: 'https://www.citycentrebahrain.com',
   mapsLink: 'https://www.google.com/maps/dir/?api=1&destination=City+Centre+Bahrain',
   hours: {

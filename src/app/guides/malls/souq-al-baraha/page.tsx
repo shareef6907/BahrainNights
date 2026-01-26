@@ -27,7 +27,7 @@ const souqInfo = {
   name: 'Souq Al Baraha',
   tagline: 'Traditional Waterfront Souq in Diyar Al Muharraq',
   address: 'Diyar Al Muharraq, Muharraq Governorate, Kingdom of Bahrain',
-  phone: '+973 1700 0000',
+  phone: '+973 1333 3060',
   website: 'https://www.diyar.bh',
   mapsLink: 'https://www.google.com/maps/dir/?api=1&destination=Souq+Al+Baraha+Diyar+Al+Muharraq+Bahrain',
   hours: {
