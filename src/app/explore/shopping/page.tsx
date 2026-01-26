@@ -66,12 +66,12 @@ const brandCategories = [
 
 // Mall data
 const malls = [
-  { name: 'Marassi Galleria', area: 'Diyar Al Muharraq', stores: '400+' },
-  { name: 'City Centre Bahrain', area: 'Seef', stores: '340+' },
-  { name: 'Seef Mall', area: 'Seef', stores: '160+' },
-  { name: 'The Avenues', area: 'Bahrain Bay', stores: '200+' },
-  { name: 'Moda Mall', area: 'Manama', stores: '80+' },
-  { name: 'Bahrain Mall', area: 'Sanabis', stores: '120+' },
+  { name: 'Marassi Galleria', slug: 'marassi-galleria', area: 'Diyar Al Muharraq', stores: '400+', emoji: '🏬' },
+  { name: 'City Centre Bahrain', slug: 'city-centre-bahrain', area: 'Seef', stores: '340+', emoji: '🛍️' },
+  { name: 'Seef Mall', slug: 'seef-mall', area: 'Seef', stores: '160+', emoji: '🏪' },
+  { name: 'The Avenues', slug: 'the-avenues', area: 'Bahrain Bay', stores: '200+', emoji: '✨' },
+  { name: 'Moda Mall', slug: 'moda-mall', area: 'Manama', stores: '80+', emoji: '💎' },
+  { name: 'Bahrain Mall', slug: 'bahrain-mall', area: 'Sanabis', stores: '120+', emoji: '🎁' },
 ];
 
 export default function ShoppingPage() {
@@ -126,21 +126,29 @@ export default function ShoppingPage() {
             <Store className="w-5 h-5 text-amber-400" />
             Major Malls
           </h2>
-          <div className="flex flex-wrap gap-3">
+          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-4">
             {malls.map((mall) => (
-              <div
+              <Link
                 key={mall.name}
-                className="px-4 py-2 bg-white/5 border border-white/10 rounded-xl text-sm"
+                href={`/guides/malls/${mall.slug}`}
+                className="group bg-white/5 border border-white/10 rounded-xl p-4 hover:bg-white/10 hover:border-amber-500/30 transition-all"
               >
-                <span className="text-white font-medium">{mall.name}</span>
-                <span className="text-gray-500 ml-2">• {mall.area}</span>
-              </div>
+                <div className="text-2xl mb-2">{mall.emoji}</div>
+                <h3 className="font-semibold text-white group-hover:text-amber-400 transition-colors text-sm">
+                  {mall.name}
+                </h3>
+                <p className="text-xs text-gray-500 mt-1">{mall.area}</p>
+                <p className="text-xs text-amber-400/80 mt-1">{mall.stores} stores</p>
+              </Link>
             ))}
+          </div>
+          <div className="mt-4">
             <Link
               href="/guides/malls"
-              className="px-4 py-2 bg-amber-500/20 border border-amber-500/30 rounded-xl text-sm text-amber-400 hover:bg-amber-500/30 transition-colors"
+              className="inline-flex items-center gap-2 px-4 py-2 bg-amber-500/20 border border-amber-500/30 rounded-xl text-sm text-amber-400 hover:bg-amber-500/30 transition-colors"
             >
-              View All Malls →
+              View All Malls
+              <ArrowRight className="w-4 h-4" />
             </Link>
           </div>
         </motion.div>

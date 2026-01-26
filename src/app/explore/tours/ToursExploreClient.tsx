@@ -1,12 +1,19 @@
 'use client';
 
 import { useState, useMemo } from 'react';
+import dynamic from 'next/dynamic';
 import { motion } from 'framer-motion';
 import { ArrowLeft, Plus } from 'lucide-react';
 import Link from 'next/link';
 import ExploreGrid, { ExploreItem } from '@/components/explore/ExploreGrid';
 import ExploreFilters, { FilterConfig } from '@/components/explore/ExploreFilters';
 import { useTranslation } from '@/lib/i18n';
+
+// Lazy load the modal for better performance
+const TourModal = dynamic(() => import('@/components/tours/TourModal'), {
+  loading: () => null,
+  ssr: false,
+});
 
 interface ToursExploreClientProps {
   initialTours: ExploreItem[];
@@ -15,6 +22,20 @@ interface ToursExploreClientProps {
 export default function ToursExploreClient({ initialTours }: ToursExploreClientProps) {
   const { t } = useTranslation();
   const [activeFilters, setActiveFilters] = useState<Record<string, string[]>>({});
+  
+  // Modal state
+  const [selectedTour, setSelectedTour] = useState<ExploreItem | null>(null);
+  const [isModalOpen, setIsModalOpen] = useState(false);
+
+  const handleTourClick = (tour: ExploreItem) => {
+    setSelectedTour(tour);
+    setIsModalOpen(true);
+  };
+
+  const handleCloseModal = () => {
+    setIsModalOpen(false);
+    setSelectedTour(null);
+  };
 
   // Filter configurations - same as kids page since we're showing attractions
   const filterConfigs: FilterConfig[] = [
@@ -159,8 +180,16 @@ export default function ToursExploreClient({ initialTours }: ToursExploreClientP
           items={filteredTours}
           category="tours"
           emptyMessage={t.familyKids.emptyMessage}
+          onItemClick={handleTourClick}
         />
       </section>
+
+      {/* Tour Modal */}
+      <TourModal
+        tour={selectedTour}
+        isOpen={isModalOpen}
+        onClose={handleCloseModal}
+      />
 
       {/* Register Venue CTA */}
       <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pb-16">

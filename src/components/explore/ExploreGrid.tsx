@@ -32,6 +32,7 @@ interface ExploreGridProps {
   items: ExploreItem[];
   category: string;
   emptyMessage?: string;
+  onItemClick?: (item: ExploreItem) => void;
 }
 
 const categoryColors: Record<string, string> = {
@@ -47,6 +48,7 @@ export default function ExploreGrid({
   items,
   category,
   emptyMessage = 'No items found',
+  onItemClick,
 }: ExploreGridProps) {
   const { t } = useTranslation();
   const color = categoryColors[category] || '#6B7280';
@@ -69,6 +71,25 @@ export default function ExploreGrid({
     );
   }
 
+  // Wrapper component that handles click vs link behavior
+  const ItemWrapper = ({ item, children }: { item: ExploreItem; children: React.ReactNode }) => {
+    if (onItemClick) {
+      return (
+        <button
+          onClick={() => onItemClick(item)}
+          className="block group w-full text-left"
+        >
+          {children}
+        </button>
+      );
+    }
+    return (
+      <Link href={getItemUrl(item)} className="block group">
+        {children}
+      </Link>
+    );
+  };
+
   return (
     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
       {items.map((item, index) => (
@@ -78,10 +99,7 @@ export default function ExploreGrid({
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: index * 0.05 }}
         >
-          <Link
-            href={getItemUrl(item)}
-            className="block group"
-          >
+          <ItemWrapper item={item}>
             <div className="bg-white/5 border border-white/10 rounded-2xl overflow-hidden hover:border-white/20 transition-all hover:bg-white/10">
               {/* Image */}
               <div className="relative h-48 overflow-hidden">
@@ -206,7 +224,7 @@ export default function ExploreGrid({
                 </div>
               </div>
             </div>
-          </Link>
+          </ItemWrapper>
         </motion.div>
       ))}
     </div>

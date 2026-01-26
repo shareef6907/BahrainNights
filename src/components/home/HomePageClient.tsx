@@ -300,7 +300,7 @@ export default function HomePageClient({ initialMovies, initialStats, initialTod
       dropdown: [
         { name: t.nav.hotelsStaycations, icon: '🏨', href: '/explore?category=hotels' },
         { name: t.nav.spasWellness, icon: '💆', href: '/explore?category=spas' },
-        { name: t.nav.shoppingMarkets, icon: '🛍️', href: '/explore?category=shopping' },
+        { name: t.nav.shoppingMarkets, icon: '🛍️', href: '/explore/shopping' },
         { name: t.nav.toursExperiences, icon: '🗺️', href: '/explore?category=tours' },
         { name: t.nav.communityEvents, icon: '🤝', href: '/explore?category=community' },
       ]
