@@ -145,8 +145,7 @@ function generateMovieCard(movie: any): string {
     : movie.poster_path 
       ? `https://image.tmdb.org/t/p/w300${movie.poster_path}`
       : 'https://images.unsplash.com/photo-1489599849927-2ee91cede3ba?w=300&h=450&fit=crop';
-  const movieUrl = `https://bahrainnights.com/cinema/${movie.slug}`;
-  const releaseDate = movie.release_date ? new Date(movie.release_date).toLocaleDateString('en-US', { month: 'short', day: 'numeric' }) : '';
+  const movieUrl = `https://bahrainnights.com/cinema`;
   
   return `
     <td width="25%" style="padding: 6px; vertical-align: top;">
@@ -161,7 +160,6 @@ function generateMovieCard(movie: any): string {
         <tr>
           <td style="padding: 10px;">
             <h4 style="margin: 0; color: #ffffff; font-size: 11px; font-weight: 600; line-height: 1.3; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">${movie.title}</h4>
-            ${releaseDate ? `<p style="margin: 4px 0 0 0; color: #9CA3AF; font-size: 10px;">📅 ${releaseDate}</p>` : ''}
           </td>
         </tr>
       </table>
@@ -197,19 +195,21 @@ export async function GET() {
       .order('date', { ascending: true })
       .limit(6);
 
-    // Fetch movies - Now Showing
+    // Fetch movies - Now Showing at VOX Cinemas
     const { data: nowShowingMovies } = await supabaseAdmin
       .from('movies')
-      .select('id, title, slug, poster_url, poster_path, release_date, tmdb_rating')
+      .select('id, title, slug, poster_url, poster_path, tmdb_rating')
       .eq('is_now_showing', true)
+      .eq('cinema_source', 'vox')
       .order('tmdb_rating', { ascending: false })
       .limit(8);
 
-    // Fetch movies - Coming Soon
+    // Fetch movies - Coming Soon to VOX Cinemas
     const { data: comingSoonMovies } = await supabaseAdmin
       .from('movies')
-      .select('id, title, slug, poster_url, poster_path, release_date')
+      .select('id, title, slug, poster_url, poster_path')
       .eq('is_coming_soon', true)
+      .eq('cinema_source', 'vox')
       .order('release_date', { ascending: true })
       .limit(4);
 
@@ -354,7 +354,7 @@ export async function GET() {
               <table width="100%" cellpadding="0" cellspacing="0">
                 <tr>
                   <td style="padding-bottom: 15px;">
-                    <h3 style="margin: 0; color: #ffffff; font-size: 18px; font-weight: 700;">🎬 Now Showing in Cinemas</h3>
+                    <h3 style="margin: 0; color: #ffffff; font-size: 18px; font-weight: 700;">🎬 Now Showing at VOX Cinemas</h3>
                     <p style="margin: 5px 0 0 0; color: #C4B5FD; font-size: 13px;">Catch these films on the big screen!</p>
                   </td>
                 </tr>
@@ -397,7 +397,7 @@ export async function GET() {
               <table width="100%" cellpadding="0" cellspacing="0">
                 <tr>
                   <td style="padding-bottom: 15px;">
-                    <h3 style="margin: 0; color: #ffffff; font-size: 18px; font-weight: 700;">🎥 Coming Soon</h3>
+                    <h3 style="margin: 0; color: #ffffff; font-size: 18px; font-weight: 700;">🎥 Coming Soon to VOX Cinemas</h3>
                     <p style="margin: 5px 0 0 0; color: #9CA3AF; font-size: 13px;">Mark your calendars!</p>
                   </td>
                 </tr>
@@ -500,14 +500,14 @@ ${intlEvents.map((e: any) => `• ${e.title} - ${e.city || e.country} (${formatD
 ` : ''}
 
 ${nowShowing.length > 0 ? `
-🎬 NOW SHOWING IN CINEMAS
+🎬 NOW SHOWING AT VOX CINEMAS
 ${nowShowing.slice(0, 6).map((m: any) => `• ${m.title}`).join('\n')}
 See all movies: https://bahrainnights.com/cinema
 ` : ''}
 
 ${comingSoon.length > 0 ? `
-🎥 COMING SOON
-${comingSoon.slice(0, 4).map((m: any) => `• ${m.title}${m.release_date ? ` (${new Date(m.release_date).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })})` : ''}`).join('\n')}
+🎥 COMING SOON TO VOX CINEMAS
+${comingSoon.slice(0, 4).map((m: any) => `• ${m.title}`).join('\n')}
 ` : ''}
 
 💡 INSIDER TIPS
