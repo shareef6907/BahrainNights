@@ -106,23 +106,23 @@ const diningOptions = [
 
 const highlights = [
   {
-    name: 'Waterfront Promenade',
-    description: 'Beautiful walkway along the water with stunning views, perfect for evening strolls.',
-    icon: Waves,
-  },
-  {
     name: 'Traditional Architecture',
-    description: 'Designed in authentic Bahraini style with wind towers, arched walkways, and coral stone facades.',
+    description: 'Designed to recreate a traditional Bahraini market streetscape with spacious courtyards, arched walkways, high ceilings, and wooden shop doors.',
     icon: Building2,
   },
   {
-    name: 'Al Fresco Dining',
-    description: 'Multiple restaurants and cafes with outdoor seating overlooking the waterfront.',
+    name: 'Open-Air & Air-Conditioned Areas',
+    description: 'A blend of open-air walkways and air-conditioned sections, giving the feel of wandering through a traditional souq with modern comfort.',
+    icon: Waves,
+  },
+  {
+    name: 'Restaurants & Cafes',
+    description: 'Multiple restaurants and cafes offering diverse cuisines, from traditional Bahraini food to international options.',
     icon: Utensils,
   },
   {
-    name: 'Local Artisans',
-    description: 'Support local businesses with traditional crafts, perfumes, and Bahraini products.',
+    name: 'Local Artisans & Crafts',
+    description: 'A hub for Bahraini crafts with shops selling perfumes, handicrafts, arts, antiques, spices, and traditional products.',
     icon: Compass,
   },
 ];

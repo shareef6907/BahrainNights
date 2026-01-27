@@ -33,7 +33,7 @@ const mallInfo = {
     weekend: 'Thu-Fri: 10:00 AM - 12:00 AM',
   },
   parking: {
-    spaces: '2,500+',
+    spaces: '1,400+',
     cost: 'Free',
     valet: 'Available',
   },

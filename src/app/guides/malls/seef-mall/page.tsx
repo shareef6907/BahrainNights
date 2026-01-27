@@ -173,7 +173,7 @@ const storeCategories = [
   {
     name: 'Kids & Entertainment',
     icon: Baby,
-    stores: ['House of Uniforms', 'Magic Island', 'Miniso', 'Seef Megaplex Cinema', 'Toys R Us'],
+    stores: ['House of Uniforms', 'Magic Island', 'Miniso', 'Cineco Cinema', 'Toys R Us'],
   },
   {
     name: 'Services',
@@ -222,8 +222,8 @@ const diningOptions = [
 
 const entertainment = [
   {
-    name: 'Seef Megaplex Cinema',
-    description: 'Multi-screen cinema showing latest Hollywood, Bollywood and Arabic releases.',
+    name: 'Cineco Cinema',
+    description: '16-hall cinema complex showing the latest Hollywood, Bollywood and Arabic releases.',
     icon: Film,
   },
   {
@@ -267,7 +267,7 @@ const faqs = [
   },
   {
     q: 'Does Seef Mall have a cinema?',
-    a: 'Yes, Seef Megaplex Cinema is located in the mall showing the latest movies.',
+    a: 'Yes, Cineco operates a 16-hall cinema complex at Seef Mall.',
   },
   {
     q: 'Is there entertainment for kids?',

@@ -4,17 +4,17 @@ import {
   MapPin, Clock, Car, 
   ShoppingBag, Utensils, Film, Sparkles,
   Star, Baby, Watch, Gem, Eye, Footprints,
-  Building2, Scissors, Home, Gift, Laptop, Dumbbell, Droplets
+  Building2, Scissors, Home, Gift, Laptop, Dumbbell
 } from 'lucide-react';
 import BreadcrumbSchema from '@/components/SEO/BreadcrumbSchema';
 
 export const metadata: Metadata = {
   title: 'City Centre Bahrain - Complete Store Directory & Guide 2025',
-  description: 'Complete guide to City Centre Bahrain. 340+ stores including Zara, H&M, VOX Cinema, Carrefour, Magic Planet, Time Out Market. Full store directory.',
-  keywords: 'City Centre Bahrain, City Center Bahrain, Bahrain mall, shopping Bahrain, VOX Cinema Bahrain, Carrefour Bahrain, Time Out Market',
+  description: 'Complete guide to City Centre Bahrain. 340+ stores including Zara, H&M, Cineco Cinema, Carrefour, Magic Planet, Time Out Market. Full store directory.',
+  keywords: 'City Centre Bahrain, City Center Bahrain, Bahrain mall, shopping Bahrain, Cineco Cinema Bahrain, Carrefour Bahrain, Time Out Market',
   openGraph: {
     title: 'City Centre Bahrain - Complete Store Directory & Guide 2025',
-    description: 'Bahrain\'s largest mall with 340+ stores, VOX Cinema, Magic Planet & Time Out Market.',
+    description: 'Bahrain\'s largest mall with 340+ stores, Cineco Cinema, Magic Planet & Time Out Market.',
     type: 'article',
     locale: 'en_US',
     url: 'https://www.bahrainnights.com/guides/malls/city-centre-bahrain',
@@ -228,8 +228,8 @@ const diningOptions = [
 
 const entertainment = [
   {
-    name: 'VOX Cinemas',
-    description: '20+ screens including IMAX, 4DX, GOLD, and Kids experiences. Premium movie viewing.',
+    name: 'Cineco Cinemas',
+    description: '20-screen cinema complex with premium viewing experiences.',
     icon: Film,
   },
   {
@@ -238,9 +238,9 @@ const entertainment = [
     icon: Baby,
   },
   {
-    name: 'Wahoo! Waterpark',
-    description: 'Indoor waterpark with slides, wave pool and lazy river. Perfect for families.',
-    icon: Droplets,
+    name: 'Time Out Market',
+    description: 'Popular food hall featuring multiple cuisines and vendors in one vibrant space.',
+    icon: Utensils,
   },
   {
     name: 'Escape Code',
@@ -269,7 +269,7 @@ const tips = [
   },
   {
     title: 'Cinema Tip',
-    tip: 'Book VOX Gold for a premium experience with recliner seats and in-seat dining service.',
+    tip: 'Cineco operates 20 screens — book early for weekend showings of new releases.',
   },
 ];
 
@@ -283,16 +283,16 @@ const faqs = [
     a: 'Yes, parking is free with over 5,000 spaces across multiple car parks. Valet parking is also available.',
   },
   {
-    q: 'Does City Centre Bahrain have a waterpark?',
-    a: 'Yes! Wahoo! Waterpark is an indoor waterpark located inside the mall with slides, wave pool and lazy river.',
+    q: 'What entertainment is at City Centre Bahrain?',
+    a: 'City Centre Bahrain features Cineco Cinema with 20 screens, Magic Planet family entertainment center, Escape Code escape rooms, and Mega Blast trampoline park.',
   },
   {
     q: 'What cinemas are in City Centre Bahrain?',
-    a: 'VOX Cinemas operates 20+ screens including IMAX, 4DX, GOLD luxury, and Kids cinema experiences.',
+    a: 'Cineco operates a 20-screen cinema complex at City Centre Bahrain.',
   },
   {
     q: 'Is there a hotel at City Centre Bahrain?',
-    a: 'The Westin City Centre Bahrain hotel is directly connected to the mall.',
+    a: 'Yes, there are hotels connected to the mall complex for convenient stays.',
   },
 ];
 
@@ -329,8 +329,8 @@ export default function CityCentrePage() {
               {' '}Bahrain
             </h1>
             <p className="text-xl text-gray-300 max-w-3xl mx-auto">
-              {mallInfo.tagline}. Home to {totalStores}+ stores, VOX Cinema, 
-              Wahoo! Waterpark, Magic Planet, Time Out Market, and Carrefour Hypermarket.
+              {mallInfo.tagline}. Home to {totalStores}+ stores, Cineco Cinema, 
+              Magic Planet, Time Out Market, and Carrefour Hypermarket.
             </p>
             <p className="text-sm text-gray-500 mt-4">
               Last updated: {lastUpdated}
@@ -570,7 +570,7 @@ export default function CityCentrePage() {
             '@context': 'https://schema.org',
             '@type': 'ShoppingCenter',
             name: 'City Centre Bahrain',
-            description: 'Bahrain\'s largest mall with 340+ stores, VOX Cinema, Wahoo! Waterpark, Magic Planet and dining.',
+            description: 'Bahrain\'s largest mall with 340+ stores, Cineco Cinema, Magic Planet and dining.',
             address: {
               '@type': 'PostalAddress',
               addressLocality: 'Manama',
