@@ -417,6 +417,7 @@ export default function HomePageClient({ initialMovies, initialStats, initialTod
     { label: `🎭 ${t.home.quickFilters.events}`, href: '/events' },
     { label: `🍽️ ${t.home.quickFilters.dining}`, href: '/places' },
     { label: `🎬 ${t.home.quickFilters.cinema}`, href: '/cinema' },
+    { label: `🛍️ Shopping`, href: '/explore/shopping' },
     { label: `🌍 Regional`, href: '/regional' },
   ];
 
