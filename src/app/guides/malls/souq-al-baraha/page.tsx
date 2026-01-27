@@ -137,8 +137,8 @@ const tips = [
     tip: 'The souq comes alive in the evening with families dining and walking along the promenade.',
   },
   {
-    title: 'Photography',
-    tip: 'Great spot for photography with traditional architecture and water views as backdrop.',
+    title: 'Scenic Views',
+    tip: 'Beautiful traditional architecture makes for great phone photos. Note: professional photography may require permission.',
   },
   {
     title: 'Combine with Diyar',
