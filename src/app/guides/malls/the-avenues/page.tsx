@@ -244,7 +244,7 @@ export default function TheAvenuesPage() {
             <div className="bg-white/5 rounded-2xl p-6">
               <h3 className="text-xl font-bold mb-4 flex items-center gap-2">
                 <MapPin className="w-5 h-5 text-blue-400" />
-                Address & Contact
+                Address
               </h3>
               <div className="space-y-3 text-gray-300">
                 <p>{mallInfo.address}</p>
