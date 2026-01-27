@@ -140,9 +140,11 @@ function generateInternationalCard(event: any): string {
 }
 
 function generateMovieCard(movie: any): string {
-  const posterUrl = movie.poster_url || movie.tmdb_poster_path 
-    ? `https://image.tmdb.org/t/p/w300${movie.tmdb_poster_path}`
-    : 'https://images.unsplash.com/photo-1489599849927-2ee91cede3ba?w=300&h=450&fit=crop';
+  const posterUrl = movie.poster_url 
+    ? movie.poster_url 
+    : movie.poster_path 
+      ? `https://image.tmdb.org/t/p/w300${movie.poster_path}`
+      : 'https://images.unsplash.com/photo-1489599849927-2ee91cede3ba?w=300&h=450&fit=crop';
   const movieUrl = `https://bahrainnights.com/cinema/${movie.slug}`;
   const releaseDate = movie.release_date ? new Date(movie.release_date).toLocaleDateString('en-US', { month: 'short', day: 'numeric' }) : '';
   
@@ -198,7 +200,7 @@ export async function GET() {
     // Fetch movies - Now Showing
     const { data: nowShowingMovies } = await supabaseAdmin
       .from('movies')
-      .select('id, title, slug, poster_url, tmdb_poster_path, release_date, tmdb_rating')
+      .select('id, title, slug, poster_url, poster_path, release_date, tmdb_rating')
       .eq('is_now_showing', true)
       .order('tmdb_rating', { ascending: false })
       .limit(8);
@@ -206,7 +208,7 @@ export async function GET() {
     // Fetch movies - Coming Soon
     const { data: comingSoonMovies } = await supabaseAdmin
       .from('movies')
-      .select('id, title, slug, poster_url, tmdb_poster_path, release_date')
+      .select('id, title, slug, poster_url, poster_path, release_date')
       .eq('is_coming_soon', true)
       .order('release_date', { ascending: true })
       .limit(4);
