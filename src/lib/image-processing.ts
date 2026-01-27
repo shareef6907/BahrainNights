@@ -1,6 +1,4 @@
 import sharp from 'sharp';
-import path from 'path';
-import fs from 'fs/promises';
 
 // Configuration
 const MAX_WIDTH = 1920;

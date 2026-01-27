@@ -155,7 +155,7 @@ export default function CheesecakeFactoryBahrainPage() {
                       <h3 className="text-xl font-bold text-amber-400">{store.name}</h3>
                       {store.isPrimary && (
                         <span className="px-2 py-0.5 bg-amber-500 text-black text-xs font-bold rounded">
-                          FLAGSHIP
+                          MAIN STORE
                         </span>
                       )}
                     </div>

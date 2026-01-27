@@ -1,7 +1,7 @@
 import { SignJWT, jwtVerify } from 'jose';
 import { cookies } from 'next/headers';
 import { NextResponse } from 'next/server';
-import { getPublicUserById, getPublicUserByGoogleId, upsertPublicUser, updatePublicUserLastLogin } from '@/lib/db/public-users';
+import { getPublicUserById, upsertPublicUser, updatePublicUserLastLogin } from '@/lib/db/public-users';
 import type { PublicUser } from '@/types/database';
 
 // Types

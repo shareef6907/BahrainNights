@@ -4,7 +4,7 @@ import { useState, useEffect, useRef } from 'react';
 import dynamic from 'next/dynamic';
 import Link from 'next/link';
 import { motion, AnimatePresence } from 'framer-motion';
-import { MapPin, Clock, Star, ChevronRight, ChevronDown, Menu, X, Sparkles, Plus, Play, Building2, LogIn } from 'lucide-react';
+import { MapPin, Clock, Star, ChevronRight, ChevronDown, Menu, X, Play, Building2, LogIn } from 'lucide-react';
 import GlobalSearch from '@/components/search/GlobalSearch';
 import { useTranslation } from '@/lib/i18n/TranslationContext';
 import { Movie } from '@/components/cinema/MovieCard';

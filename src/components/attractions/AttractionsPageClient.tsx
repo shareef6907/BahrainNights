@@ -2,7 +2,7 @@
 
 import { useState, useMemo } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Search, Filter, MapPin, Star, ExternalLink, ChevronDown, X } from 'lucide-react';
+import { Search, Filter, MapPin, ExternalLink, X } from 'lucide-react';
 import Link from 'next/link';
 import { useTranslation } from '@/lib/i18n/TranslationContext';
 import AttractionModal, { AttractionData } from './AttractionModal';

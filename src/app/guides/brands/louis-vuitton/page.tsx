@@ -49,7 +49,7 @@ const shoppingTips = [
   },
   {
     title: 'New Arrivals',
-    tip: 'The Marassi Galleria flagship carries the full collection including exclusives.',
+    tip: 'The Marassi Galleria main store carries the full collection including exclusives.',
   },
   {
     title: 'Waitlists',
@@ -142,7 +142,7 @@ export default function LouisVuittonBahrainPage() {
       <section className="py-16 px-4">
         <div className="max-w-6xl mx-auto">
           <h2 className="text-3xl font-bold mb-4">Louis Vuitton Store in Bahrain</h2>
-          <p className="text-gray-400 mb-8">One flagship boutique serving the Kingdom of Bahrain at the prestigious Marassi Galleria.</p>
+          <p className="text-gray-400 mb-8">One main boutique serving the Kingdom of Bahrain at the prestigious Marassi Galleria.</p>
           
           <div className="space-y-6">
             {storeLocations.map((store) => (
@@ -156,7 +156,7 @@ export default function LouisVuittonBahrainPage() {
                       <h3 className="text-xl font-bold text-amber-400">{store.name}</h3>
                       {store.isPrimary && (
                         <span className="px-2 py-0.5 bg-amber-500 text-black text-xs font-bold rounded">
-                          FLAGSHIP
+                          MAIN STORE
                         </span>
                       )}
                     </div>

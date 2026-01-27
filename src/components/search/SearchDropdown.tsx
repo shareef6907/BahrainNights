@@ -1,7 +1,6 @@
 'use client';
 
 import { motion, AnimatePresence } from 'framer-motion';
-import Link from 'next/link';
 import Image from 'next/image';
 import { Calendar, MapPin, Film, Ticket, ArrowRight, Loader2 } from 'lucide-react';
 import { SearchSuggestion } from '@/lib/searchData';

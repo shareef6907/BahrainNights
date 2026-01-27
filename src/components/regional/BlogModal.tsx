@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect, useCallback } from 'react';
-import { X, Calendar, Clock, Eye, Play, Share2, ArrowRight, MapPin, Ticket } from 'lucide-react';
+import { X, Clock, Eye, Play, Share2, ArrowRight, MapPin, Ticket } from 'lucide-react';
 import Link from 'next/link';
 
 interface BlogArticle {

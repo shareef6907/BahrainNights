@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { X, Link2, Check, MessageCircle } from 'lucide-react';
+import { X, Link2, Check } from 'lucide-react';
 
 interface ShareModalProps {
   isOpen: boolean;

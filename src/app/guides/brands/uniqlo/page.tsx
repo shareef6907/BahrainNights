@@ -28,7 +28,7 @@ const nearbyLocations = [
     city: 'Dubai, UAE',
     distance: '~45 min flight',
     mall: 'The Dubai Mall',
-    features: ['Flagship store', 'Full collection', 'All product lines'],
+    features: ['Main store', 'Full collection', 'All product lines'],
     mapsLink: 'https://www.google.com/maps/search/Uniqlo+Dubai+Mall',
   },
   {

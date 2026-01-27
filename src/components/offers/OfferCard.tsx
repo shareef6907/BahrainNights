@@ -3,7 +3,7 @@
 import React from 'react';
 import { motion } from 'framer-motion';
 import Image from 'next/image';
-import { MapPin, Clock, Calendar, Sparkles, Wine, UtensilsCrossed, Tag, Users, ChevronRight } from 'lucide-react';
+import { MapPin, Clock, Sparkles, Wine, UtensilsCrossed, Tag, ChevronRight } from 'lucide-react';
 
 export interface Offer {
   id: string;

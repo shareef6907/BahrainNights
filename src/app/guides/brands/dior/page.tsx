@@ -30,7 +30,7 @@ const storeLocations = [
     floor: 'Ground Floor',
     hours: 'Sun-Wed: 10:00 AM - 10:00 PM, Thu-Sat: 10:00 AM - 12:00 AM',
     products: ['Ready-to-Wear', 'Handbags', 'Accessories', 'Shoes', 'Fine Jewelry', 'Watches', 'Fragrances', 'Beauty'],
-    features: ['Flagship boutique', 'Full collection', 'Beachfront luxury mall', 'Near Address Hotel'],
+    features: ['Main boutique', 'Full collection', 'Beachfront luxury mall', 'Near Address Hotel'],
     mapsLink: 'https://www.google.com/maps/search/DIOR+Marassi+Galleria+Bahrain',
     isPrimary: true,
     rating: 4.4,
@@ -114,7 +114,7 @@ const relatedBrands = [
 const faqs = [
   {
     q: 'Is Dior available in Bahrain?',
-    a: 'Yes, Dior has three boutiques in Bahrain - the flagship at Marassi Galleria (4.4★), Maison Christian Dior at The Avenues (4.3★), and City Centre Bahrain (4.2★). Dior beauty products are also available at Paris Gallery, Faces, and Sephora stores.',
+    a: 'Yes, Dior has three boutiques in Bahrain - the main store at Marassi Galleria (4.4★), Maison Christian Dior at The Avenues (4.3★), and City Centre Bahrain (4.2★). Dior beauty products are also available at Paris Gallery, Faces, and Sephora stores.',
   },
   {
     q: 'Which mall has Dior in Bahrain?',
@@ -203,7 +203,7 @@ export default function DiorBahrainPage() {
                       <h3 className="text-xl font-bold text-white">{store.name}</h3>
                       {store.isPrimary && (
                         <span className="px-2 py-0.5 bg-white text-black text-xs font-bold rounded">
-                          FLAGSHIP
+                          MAIN STORE
                         </span>
                       )}
                     </div>

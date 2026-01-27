@@ -1,7 +1,7 @@
 'use client';
 
 import { motion } from 'framer-motion';
-import { Filter, ChevronDown, X, Grid, Calendar as CalendarIcon, SlidersHorizontal } from 'lucide-react';
+import { Filter, ChevronDown, X, Grid, Calendar as CalendarIcon } from 'lucide-react';
 import { useState, useRef, useEffect } from 'react';
 
 export interface FilterState {

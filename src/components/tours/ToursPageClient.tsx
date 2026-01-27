@@ -2,7 +2,7 @@
 
 import { useState, useMemo } from 'react';
 import { motion } from 'framer-motion';
-import { Search, MapPin, Clock, Star, Filter, Grid3X3, List, ChevronRight, Users, Globe, BadgeCheck } from 'lucide-react';
+import { Search, Clock, Star, Filter, Grid3X3, List, ChevronRight, Users, Globe, BadgeCheck } from 'lucide-react';
 import Link from 'next/link';
 import Image from 'next/image';
 import AdBanner from '@/components/ads/AdBanner';

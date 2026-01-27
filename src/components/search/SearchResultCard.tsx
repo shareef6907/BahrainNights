@@ -3,7 +3,7 @@
 import { motion } from 'framer-motion';
 import Link from 'next/link';
 import Image from 'next/image';
-import { Calendar, MapPin, Clock, Star, Tag, Film, Ticket } from 'lucide-react';
+import { Calendar, MapPin, Star, Tag, Film, Ticket } from 'lucide-react';
 import { SearchItem } from '@/lib/searchData';
 
 interface SearchResultCardProps {

@@ -2,7 +2,7 @@
 
 import { useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { X, MapPin, ExternalLink, Clock, Users, Star, DollarSign, ChevronRight } from 'lucide-react';
+import { X, MapPin, Clock, Users, Star, DollarSign, ChevronRight } from 'lucide-react';
 import Image from 'next/image';
 import Link from 'next/link';
 import type { ExploreItem } from '@/components/explore/ExploreGrid';

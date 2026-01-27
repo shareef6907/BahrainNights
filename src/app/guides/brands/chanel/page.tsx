@@ -30,7 +30,7 @@ const storeLocations = [
     floor: 'Ground Floor',
     hours: 'Sun-Wed: 10:00 AM - 10:00 PM, Thu-Sat: 10:00 AM - 12:00 AM',
     products: ['Haute Couture', 'Ready-to-Wear', 'Handbags', 'Accessories', 'Fragrance', 'Beauty', 'Fine Jewelry', 'Watches'],
-    features: ['Flagship store', 'Full boutique experience', 'Personal styling', 'Beauty counter', 'Near Address Hotel'],
+    features: ['Main store', 'Full boutique experience', 'Personal styling', 'Beauty counter', 'Near Address Hotel'],
     mapsLink: 'https://www.google.com/maps/search/Chanel+Marassi+Galleria+Bahrain',
     isPrimary: true,
     rating: 4.7,
@@ -95,11 +95,11 @@ const relatedBrands = [
 const faqs = [
   {
     q: 'Is Chanel available in Bahrain?',
-    a: 'Yes, Chanel has two boutiques in Bahrain - the flagship at Marassi Galleria (4.7★ rating) and The Avenues Mall (4.3★ rating), both offering fashion, accessories, and beauty products.',
+    a: 'Yes, Chanel has two boutiques in Bahrain - the main store at Marassi Galleria (4.7★ rating) and The Avenues Mall (4.3★ rating), both offering fashion, accessories, and beauty products.',
   },
   {
     q: 'Which mall has Chanel in Bahrain?',
-    a: 'Chanel boutiques are located at Marassi Galleria in Diyar Al Muharraq (flagship store) and The Avenues Mall in Bahrain Bay. Chanel beauty products are also available at Paris Gallery and Faces stores in various malls.',
+    a: 'Chanel boutiques are located at Marassi Galleria in Diyar Al Muharraq (main store) and The Avenues Mall in Bahrain Bay. Chanel beauty products are also available at Paris Gallery and Faces stores in various malls.',
   },
   {
     q: 'Is Chanel cheaper in Bahrain?',
@@ -107,7 +107,7 @@ const faqs = [
   },
   {
     q: 'Does Chanel Bahrain have the full collection?',
-    a: 'The Marassi Galleria flagship boutique offers a comprehensive collection including ready-to-wear, handbags, accessories, beauty, fine jewelry, and watches. Some limited pieces may require special ordering.',
+    a: 'The Marassi Galleria main boutique offers a comprehensive collection including ready-to-wear, handbags, accessories, beauty, fine jewelry, and watches. Some limited pieces may require special ordering.',
   },
 ];
 
@@ -184,7 +184,7 @@ export default function ChanelBahrainPage() {
                       <h3 className="text-xl font-bold text-white">{store.name}</h3>
                       {store.isPrimary && (
                         <span className="px-2 py-0.5 bg-white text-black text-xs font-bold rounded">
-                          FLAGSHIP
+                          MAIN STORE
                         </span>
                       )}
                     </div>

@@ -98,7 +98,7 @@ const relatedBrands = [
 const faqs = [
   {
     q: 'How many H&M stores are there in Bahrain?',
-    a: 'H&M has 5 stores in Bahrain - City Centre Bahrain (flagship), Seef Mall, The Avenues Bahrain, Bahrain Mall, and Marassi Galleria.',
+    a: 'H&M has 5 stores in Bahrain - City Centre Bahrain (main store), Seef Mall, The Avenues Bahrain, Bahrain Mall, and Marassi Galleria.',
   },
   {
     q: 'Which is the biggest H&M in Bahrain?',
@@ -106,7 +106,7 @@ const faqs = [
   },
   {
     q: 'Does H&M Bahrain have H&M Home?',
-    a: 'Yes, the City Centre Bahrain flagship store has an H&M Home section with homeware, bedding, and decor items.',
+    a: 'Yes, the City Centre Bahrain main store has an H&M Home section with homeware, bedding, and decor items.',
   },
   {
     q: 'Can I shop H&M online in Bahrain?',
@@ -155,7 +155,7 @@ export default function HMBahrainPage() {
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mt-12">
             {[
               { label: 'Stores', value: '4+', icon: ShoppingBag },
-              { label: 'Flagship', value: 'City Centre', icon: Star },
+              { label: 'Main Store', value: 'City Centre', icon: Star },
               { label: 'Founded', value: '1947', icon: Sparkles },
               { label: 'Style', value: 'Affordable', icon: Users },
             ].map((stat) => (
@@ -187,7 +187,7 @@ export default function HMBahrainPage() {
                       <h3 className="text-xl font-bold text-red-400">{store.name}</h3>
                       {store.isPrimary && (
                         <span className="px-2 py-0.5 bg-red-500 text-white text-xs font-bold rounded">
-                          FLAGSHIP
+                          MAIN STORE
                         </span>
                       )}
                     </div>

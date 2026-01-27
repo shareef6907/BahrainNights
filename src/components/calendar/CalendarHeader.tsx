@@ -1,7 +1,7 @@
 'use client';
 
 import { motion } from 'framer-motion';
-import { ChevronLeft, ChevronRight, Calendar, List, Grid3X3, CalendarDays } from 'lucide-react';
+import { ChevronLeft, ChevronRight, List, Grid3X3, CalendarDays } from 'lucide-react';
 
 export type CalendarView = 'month' | 'week' | 'list';
 

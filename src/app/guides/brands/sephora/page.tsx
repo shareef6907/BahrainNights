@@ -161,7 +161,7 @@ export default function SephoraBahrainPage() {
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mt-12">
             {[
               { label: 'Stores', value: '3', icon: ShoppingBag },
-              { label: 'Flagship', value: 'City Centre', icon: Star },
+              { label: 'Main Store', value: 'City Centre', icon: Star },
               { label: 'Brands', value: '100+', icon: Sparkles },
               { label: 'Exclusive', value: 'Fenty+', icon: Info },
             ].map((stat) => (
@@ -193,7 +193,7 @@ export default function SephoraBahrainPage() {
                       <h3 className="text-xl font-bold text-pink-400">{store.name}</h3>
                       {store.isPrimary && (
                         <span className="px-2 py-0.5 bg-pink-500 text-white text-xs font-bold rounded">
-                          FLAGSHIP
+                          MAIN STORE
                         </span>
                       )}
                     </div>

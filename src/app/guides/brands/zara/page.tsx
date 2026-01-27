@@ -71,7 +71,7 @@ const shoppingTips = [
     tip: 'Major sales happen twice yearly - January and July. Be there early for the best selection.',
   },
   {
-    title: 'City Centre Flagship',
+    title: 'City Centre Main Store',
     tip: 'For the widest selection including TRF and limited edition items, visit the two-floor City Centre store.',
   },
   {
@@ -90,7 +90,7 @@ const relatedBrands = [
 const faqs = [
   {
     q: 'How many Zara stores are there in Bahrain?',
-    a: 'Zara has 5 stores in Bahrain - City Centre Bahrain (flagship), Seef Mall, The Avenues Bahrain, Bahrain Mall, and Marassi Galleria.',
+    a: 'Zara has 5 stores in Bahrain - City Centre Bahrain (main store), Seef Mall, The Avenues Bahrain, Bahrain Mall, and Marassi Galleria.',
   },
   {
     q: 'Which is the biggest Zara in Bahrain?',
@@ -136,7 +136,7 @@ export default function ZaraBahrainPage() {
             <p className="text-xl text-gray-300 max-w-3xl mx-auto">
               The Spanish fast-fashion giant founded in 1975, Zara is known for bringing 
               runway trends to the high street at affordable prices. Find Zara at their 
-              flagship store in City Centre Bahrain, offering the full collection.
+              main store in City Centre Bahrain, offering the full collection.
             </p>
             <p className="text-sm text-gray-500 mt-4">
               Last updated: {lastUpdated}
@@ -165,7 +165,7 @@ export default function ZaraBahrainPage() {
       <section className="py-16 px-4">
         <div className="max-w-6xl mx-auto">
           <h2 className="text-3xl font-bold mb-4">Zara Store in Bahrain</h2>
-          <p className="text-gray-400 mb-8">Zara has one flagship store in Bahrain at City Centre.</p>
+          <p className="text-gray-400 mb-8">Zara has one main store in Bahrain at City Centre.</p>
           
           <div className="space-y-6">
             {storeLocations.map((store) => (
@@ -179,7 +179,7 @@ export default function ZaraBahrainPage() {
                       <h3 className="text-xl font-bold text-white">{store.name}</h3>
                       {store.isPrimary && (
                         <span className="px-2 py-0.5 bg-white text-black text-xs font-bold rounded">
-                          FLAGSHIP
+                          MAIN STORE
                         </span>
                       )}
                     </div>

@@ -102,15 +102,15 @@ const relatedBrands = [
 const faqs = [
   {
     q: 'How many Adidas stores are there in Bahrain?',
-    a: 'Adidas has 4 dedicated stores in Bahrain - City Centre Bahrain (flagship), Seef Mall, The Avenues Bahrain, and Marassi Galleria. Adidas products are also available at multi-brand retailers.',
+    a: 'Adidas has 4 dedicated stores in Bahrain - City Centre Bahrain (main store), Seef Mall, The Avenues Bahrain, and Marassi Galleria. Adidas products are also available at multi-brand retailers.',
   },
   {
     q: 'Which is the biggest Adidas store in Bahrain?',
-    a: 'The City Centre Bahrain Adidas store is the largest and serves as the flagship, with comprehensive Originals and Performance collections.',
+    a: 'The City Centre Bahrain Adidas store is the largest and serves as the main store, with comprehensive Originals and Performance collections.',
   },
   {
     q: 'Does Adidas Bahrain sell Yeezy?',
-    a: 'Yeezy availability varies. Check with the City Centre flagship or follow Adidas Bahrain social media for limited release announcements.',
+    a: 'Yeezy availability varies. Check with the City Centre main store or follow Adidas Bahrain social media for limited release announcements.',
   },
   {
     q: 'Can I find Adidas Originals in Bahrain?',
@@ -159,7 +159,7 @@ export default function AdidasBahrainPage() {
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mt-12">
             {[
               { label: 'Adidas Stores', value: '4+', icon: ShoppingBag },
-              { label: 'Flagship', value: 'City Centre', icon: Star },
+              { label: 'Main Store', value: 'City Centre', icon: Star },
               { label: 'Originals', value: 'Available', icon: Sparkles },
               { label: 'Multi-Retail', value: '2+', icon: Info },
             ].map((stat) => (
@@ -191,7 +191,7 @@ export default function AdidasBahrainPage() {
                       <h3 className="text-xl font-bold text-white">{store.name}</h3>
                       {store.isPrimary && (
                         <span className="px-2 py-0.5 bg-white text-black text-xs font-bold rounded">
-                          FLAGSHIP
+                          MAIN STORE
                         </span>
                       )}
                     </div>

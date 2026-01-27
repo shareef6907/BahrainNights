@@ -176,7 +176,7 @@ export default function ShakeShackBahrainPage() {
                   <h3 className="text-xl font-bold text-green-400">{store.name}</h3>
                   {store.isPrimary && (
                     <span className="px-2 py-0.5 bg-green-500 text-black text-xs font-bold rounded">
-                      FLAGSHIP
+                      MAIN STORE
                     </span>
                   )}
                 </div>

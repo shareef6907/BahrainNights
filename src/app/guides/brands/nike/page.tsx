@@ -119,19 +119,19 @@ const relatedBrands = [
 const faqs = [
   {
     q: 'How many Nike stores are there in Bahrain?',
-    a: 'Nike has 4 dedicated stores in Bahrain - City Centre Bahrain (flagship), Seef Mall, The Avenues Bahrain, and Marassi Galleria. Nike products are also available at multi-brand retailers.',
+    a: 'Nike has 4 dedicated stores in Bahrain - City Centre Bahrain (main store), Seef Mall, The Avenues Bahrain, and Marassi Galleria. Nike products are also available at multi-brand retailers.',
   },
   {
     q: 'Which is the biggest Nike store in Bahrain?',
-    a: 'The City Centre Bahrain Nike store is the largest and serves as the flagship, with the widest selection including Jordan brand and Nike by You customization.',
+    a: 'The City Centre Bahrain Nike store is the largest and serves as the main store, with the widest selection including Jordan brand and Nike by You customization.',
   },
   {
     q: 'Does Nike Bahrain sell Jordan shoes?',
-    a: 'Yes, Jordan brand is available at Nike stores in Bahrain. The City Centre flagship has the best Jordan selection including retro releases.',
+    a: 'Yes, Jordan brand is available at Nike stores in Bahrain. The City Centre main store has the best Jordan selection including retro releases.',
   },
   {
     q: 'Can I customize Nike shoes in Bahrain?',
-    a: 'Yes, the Nike flagship at City Centre Bahrain offers Nike by You customization services for select shoe models.',
+    a: 'Yes, the Nike main store at City Centre Bahrain offers Nike by You customization services for select shoe models.',
   },
 ];
 
@@ -176,7 +176,7 @@ export default function NikeBahrainPage() {
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mt-12">
             {[
               { label: 'Nike Stores', value: '4+', icon: ShoppingBag },
-              { label: 'Flagship', value: 'City Centre', icon: Star },
+              { label: 'Main Store', value: 'City Centre', icon: Star },
               { label: 'Jordan', value: 'Available', icon: Sparkles },
               { label: 'Multi-Retail', value: '3+', icon: Info },
             ].map((stat) => (
@@ -208,7 +208,7 @@ export default function NikeBahrainPage() {
                       <h3 className="text-xl font-bold text-orange-400">{store.name}</h3>
                       {store.isPrimary && (
                         <span className="px-2 py-0.5 bg-orange-500 text-black text-xs font-bold rounded">
-                          FLAGSHIP
+                          MAIN STORE
                         </span>
                       )}
                     </div>

@@ -4,7 +4,7 @@ import { useState, useMemo, useEffect } from 'react';
 import { useSearchParams } from 'next/navigation';
 import dynamic from 'next/dynamic';
 import { motion } from 'framer-motion';
-import { Search, Film, Clock, AlertCircle } from 'lucide-react';
+import { Search, Film, Clock } from 'lucide-react';
 import FeaturedMovie from '@/components/cinema/FeaturedMovie';
 import MovieFilters from '@/components/cinema/MovieFilters';
 import MovieGrid from '@/components/cinema/MovieGrid';

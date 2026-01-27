@@ -1,8 +1,8 @@
 'use client';
 
-import { useState, useEffect, useMemo } from 'react';
+import { useState, useMemo } from 'react';
 import { motion } from 'framer-motion';
-import { Search, Loader2, X, MapPin, ChevronRight } from 'lucide-react';
+import { Search, Loader2, X, ChevronRight } from 'lucide-react';
 import Link from 'next/link';
 import PlaceCard, { Place, OpeningHours } from '@/components/places/PlaceCard';
 import { CategoryConfig, getRelatedCategories } from '@/lib/categories';

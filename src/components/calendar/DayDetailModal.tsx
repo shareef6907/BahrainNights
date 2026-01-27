@@ -3,7 +3,7 @@
 import { motion, AnimatePresence } from 'framer-motion';
 import { useEffect } from 'react';
 import Link from 'next/link';
-import { X, Calendar, MapPin, Clock, Download, ChevronRight } from 'lucide-react';
+import { X, Calendar, MapPin, Download, ChevronRight } from 'lucide-react';
 import { CalendarEvent } from './CalendarDay';
 import { EventCategory, categoryConfigs } from './CalendarFilters';
 

@@ -3,7 +3,6 @@
 import { motion } from 'framer-motion';
 import { MapPin, Phone, Navigation, ExternalLink } from 'lucide-react';
 import Image from 'next/image';
-import Link from 'next/link';
 
 interface VenueCardProps {
   name: string;
