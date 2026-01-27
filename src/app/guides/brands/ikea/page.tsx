@@ -24,7 +24,7 @@ export const metadata: Metadata = {
 
 const storeInfo = {
   name: 'IKEA Bahrain',
-  address: 'IKEA, Sitra, Kingdom of Bahrain',
+  address: 'IKEA, Salmabad, Kingdom of Bahrain',
   fullAddress: 'Building 2101, Road 5228, Block 952, Sitra, Bahrain',
   hours: 'Daily: 10:00 AM - 10:00 PM',
   ramadanHours: 'Ramadan hours may vary',

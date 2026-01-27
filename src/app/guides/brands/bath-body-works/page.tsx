@@ -56,17 +56,6 @@ const storeLocations = [
     mapsLink: 'https://www.google.com/maps/search/Bath+Body+Works+Avenues+Bahrain',
     isPrimary: false,
   },
-  {
-    name: 'Bath & Body Works - Marassi Galleria',
-    mall: 'Marassi Galleria',
-    address: 'Marassi Galleria, Diyar Al Muharraq, Bahrain',
-    floor: 'Ground Floor',
-    hours: 'Sun-Wed: 10:00 AM - 10:00 PM, Thu-Sat: 10:00 AM - 12:00 AM',
-    products: ['Body Care', 'Hand Soaps', 'Candles', 'Home Fragrance', 'Fragrance Mists'],
-    features: ['Beachfront mall', 'Premium location', 'Near Marassi Aquarium'],
-    mapsLink: 'https://www.google.com/maps/search/Bath+Body+Works+Marassi+Galleria+Bahrain',
-    isPrimary: false,
-  },
 ];
 
 const popularScents = [

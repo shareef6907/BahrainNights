@@ -24,27 +24,19 @@ export const metadata: Metadata = {
 
 const storeLocations = [
   {
-    name: 'Five Guys - City Centre Bahrain',
-    address: 'City Centre Bahrain, Food Court Area, Seef',
-    hours: 'Sun-Wed: 10:00 AM - 10:00 PM, Thu-Sat: 10:00 AM - 12:00 AM',
+    name: 'Five Guys - The Avenues Bahrain',
+    address: 'The Avenues Mall, Bahrain Bay, Manama',
+    hours: 'Sun-Wed: 10:00 AM - 12:00 AM, Thu-Sat: 10:00 AM - 12:00 AM',
     features: ['Dine-in', 'Takeaway', 'Full menu', 'Free peanuts'],
-    mapsLink: 'https://www.google.com/maps/search/Five+Guys+City+Centre+Bahrain',
+    mapsLink: 'https://www.google.com/maps/search/Five+Guys+Avenues+Bahrain',
     isPrimary: true,
   },
   {
-    name: 'Five Guys - The Avenues Bahrain',
-    address: 'The Avenues Bahrain, Bahrain Bay',
-    hours: 'Sun-Wed: 10:00 AM - 10:00 PM, Thu-Sat: 10:00 AM - 12:00 AM',
-    features: ['Dine-in', 'Takeaway', 'Full menu', 'Free peanuts'],
-    mapsLink: 'https://www.google.com/maps/search/Five+Guys+Avenues+Bahrain',
-    isPrimary: false,
-  },
-  {
-    name: 'Five Guys - Marassi Galleria',
-    address: 'Marassi Galleria, Diyar Al Muharraq',
-    hours: 'Sun-Wed: 10:00 AM - 10:00 PM, Thu-Sat: 10:00 AM - 12:00 AM',
-    features: ['Dine-in', 'Takeaway', 'Full menu', 'Free peanuts', 'Beachfront mall'],
-    mapsLink: 'https://www.google.com/maps/search/Five+Guys+Marassi+Galleria+Bahrain',
+    name: 'Five Guys - Juffair',
+    address: '490 W & 490Z Road 4021, Al Shabab Ave, Juffair',
+    hours: 'Sun-Wed: 10:00 AM - 2:00 AM, Thu-Sat: 10:00 AM - 2:00 AM',
+    features: ['Dine-in', 'Takeaway', 'Full menu', 'Free peanuts', 'Standalone location'],
+    mapsLink: 'https://www.google.com/maps/search/Five+Guys+Juffair+Bahrain',
     isPrimary: false,
   },
 ];

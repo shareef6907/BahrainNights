@@ -46,6 +46,17 @@ const storeLocations = [
     isPrimary: false,
   },
   {
+    name: 'Sephora - Seef Mall',
+    mall: 'Seef Mall',
+    address: 'Seef Mall, Road 2813, Seef District, Manama',
+    floor: 'Ground Floor',
+    hours: 'Sun-Wed: 10:00 AM - 10:00 PM, Thu-Sat: 10:00 AM - 12:00 AM',
+    products: ['Makeup', 'Skincare', 'Fragrance', 'Haircare', 'Beauty Tools', 'Sephora Collection'],
+    features: ['Convenient location', 'Beauty advisors', 'Good selection'],
+    mapsLink: 'https://www.google.com/maps/search/Sephora+Seef+Mall+Bahrain',
+    isPrimary: false,
+  },
+  {
     name: 'Sephora - Marassi Galleria',
     mall: 'Marassi Galleria',
     address: 'Marassi Galleria, Diyar Al Muharraq, Bahrain',

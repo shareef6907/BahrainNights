@@ -56,17 +56,6 @@ const storeLocations = [
     mapsLink: 'https://www.google.com/maps/search/Adidas+Avenues+Bahrain',
     isPrimary: false,
   },
-  {
-    name: 'Adidas - Marassi Galleria',
-    mall: 'Marassi Galleria',
-    address: 'Marassi Galleria, Diyar Al Muharraq, Bahrain',
-    floor: 'Ground Floor',
-    hours: 'Sun-Wed: 10:00 AM - 10:00 PM, Thu-Sat: 10:00 AM - 12:00 AM',
-    products: ['Running', 'Training', 'Originals', 'Lifestyle', 'Apparel', 'Kids'],
-    features: ['Beachfront mall', 'Premium location', 'Near Marassi Aquarium'],
-    mapsLink: 'https://www.google.com/maps/search/Adidas+Marassi+Galleria+Bahrain',
-    isPrimary: false,
-  },
 ];
 
 const multiRetailers = [

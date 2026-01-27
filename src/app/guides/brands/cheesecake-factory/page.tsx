@@ -8,11 +8,11 @@ import BreadcrumbSchema from '@/components/SEO/BreadcrumbSchema';
 
 export const metadata: Metadata = {
   title: 'Cheesecake Factory Bahrain - Location & Menu Guide 2026',
-  description: 'Find The Cheesecake Factory in Bahrain at City Centre. Complete guide with menu highlights, famous cheesecakes, hours, reservations & tips.',
-  keywords: 'Cheesecake Factory Bahrain, Cheesecake Factory City Centre Bahrain, Cheesecake Factory menu Bahrain, American restaurant Bahrain',
+  description: 'Find The Cheesecake Factory in Bahrain at The Avenues Mall. Complete guide with menu highlights, famous cheesecakes, hours, reservations & tips.',
+  keywords: 'Cheesecake Factory Bahrain, Cheesecake Factory The Avenues Bahrain, Cheesecake Factory menu Bahrain, American restaurant Bahrain',
   openGraph: {
     title: 'Cheesecake Factory Bahrain - Location & Menu Guide 2026',
-    description: 'Find The Cheesecake Factory in Bahrain at City Centre. Menu, cheesecakes, and reservations.',
+    description: 'Find The Cheesecake Factory in Bahrain at The Avenues Mall. Menu, cheesecakes, and reservations.',
     type: 'article',
     locale: 'en_US',
     url: 'https://www.bahrainnights.com/guides/brands/cheesecake-factory',
@@ -24,20 +24,12 @@ export const metadata: Metadata = {
 
 const storeLocations = [
   {
-    name: 'The Cheesecake Factory - City Centre Bahrain',
-    address: 'City Centre Bahrain, Ground Floor, Seef District, Manama',
+    name: 'The Cheesecake Factory - The Avenues Bahrain',
+    address: 'The Avenues, Bahrain Bay, Manama',
     hours: 'Sun-Wed: 11:00 AM - 11:00 PM, Thu-Sat: 11:00 AM - 12:00 AM',
-    mapsLink: 'https://www.google.com/maps/search/Cheesecake+Factory+City+Centre+Bahrain',
+    mapsLink: 'https://www.google.com/maps/search/Cheesecake+Factory+Avenues+Bahrain',
     features: ['Full menu', 'Famous cheesecakes', 'American portions', 'Family-friendly', 'Reservations accepted'],
     isPrimary: true,
-  },
-  {
-    name: 'The Cheesecake Factory - Marassi Galleria',
-    address: 'Marassi Galleria, Diyar Al Muharraq, Bahrain',
-    hours: 'Sun-Wed: 11:00 AM - 11:00 PM, Thu-Sat: 11:00 AM - 12:00 AM',
-    mapsLink: 'https://www.google.com/maps/search/Cheesecake+Factory+Marassi+Galleria+Bahrain',
-    features: ['Full menu', 'Famous cheesecakes', 'Beachfront mall', 'Near Marassi Aquarium', 'Reservations accepted'],
-    isPrimary: false,
   },
 ];
 
@@ -77,7 +69,7 @@ const relatedBrands = [
 const faqs = [
   {
     q: 'Where is The Cheesecake Factory in Bahrain?',
-    a: 'The Cheesecake Factory has 2 locations in Bahrain - City Centre Bahrain in the Seef District and Marassi Galleria in Diyar Al Muharraq.',
+    a: 'The Cheesecake Factory has 1 location in Bahrain at The Avenues Mall in Bahrain Bay, Manama.',
   },
   {
     q: 'Do I need a reservation for Cheesecake Factory Bahrain?',
@@ -123,7 +115,7 @@ export default function CheesecakeFactoryBahrainPage() {
             <p className="text-xl text-gray-300 max-w-3xl mx-auto">
               America&apos;s iconic restaurant famous for over 250 menu items and 30+ legendary 
               cheesecakes. Experience generous portions, an extensive menu, and those 
-              world-famous desserts at City Centre Bahrain.
+              world-famous desserts at The Avenues Bahrain.
             </p>
             <p className="text-sm text-gray-500 mt-4">
               Last updated: {lastUpdated}
@@ -315,7 +307,7 @@ export default function CheesecakeFactoryBahrainPage() {
             '@context': 'https://schema.org',
             '@type': 'Article',
             headline: 'Cheesecake Factory Bahrain - Location & Menu Guide 2026',
-            description: 'Find The Cheesecake Factory in Bahrain at City Centre. Menu, cheesecakes, and reservations.',
+            description: 'Find The Cheesecake Factory in Bahrain at The Avenues Mall. Menu, cheesecakes, and reservations.',
             author: {
               '@type': 'Organization',
               name: 'BahrainNights',
@@ -342,7 +334,7 @@ export default function CheesecakeFactoryBahrainPage() {
             servesCuisine: 'American',
             address: {
               '@type': 'PostalAddress',
-              streetAddress: 'City Centre Bahrain, Ground Floor',
+              streetAddress: 'The Avenues Mall, Bahrain Bay',
               addressLocality: 'Seef',
               addressCountry: 'BH',
             },

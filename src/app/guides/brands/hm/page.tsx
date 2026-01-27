@@ -57,17 +57,6 @@ const storeLocations = [
     isPrimary: false,
   },
   {
-    name: 'H&M - Bahrain Mall',
-    mall: 'Bahrain Mall',
-    address: 'Bahrain Mall, Sanabis, Manama',
-    floor: 'Ground Floor',
-    hours: 'Sun-Thu: 10:00 AM - 10:00 PM, Fri-Sat: 10:00 AM - 11:00 PM',
-    products: ['Women\'s Fashion', 'Men\'s Fashion', 'Kids\' Fashion'],
-    features: ['Compact store', 'Essential collections'],
-    mapsLink: 'https://www.google.com/maps/search/H%26M+Bahrain+Mall',
-    isPrimary: false,
-  },
-  {
     name: 'H&M - Marassi Galleria',
     mall: 'Marassi Galleria',
     address: 'Marassi Galleria, Diyar Al Muharraq, Bahrain',
