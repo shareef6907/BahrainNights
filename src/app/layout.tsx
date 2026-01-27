@@ -70,10 +70,15 @@ export const metadata: Metadata = {
         alt: "BahrainNights - Events, Nightlife & Things to Do in Bahrain",
       },
     ],
-    locale: "en_US",
+    locale: "en_BH",
     type: "website",
   },
-  // Twitter metadata removed - no account yet
+  twitter: {
+    card: 'summary_large_image',
+    title: 'BahrainNights - Events, Nightlife & Things to Do in Bahrain',
+    description: 'Discover the best events, restaurants, nightlife, cinema, and things to do in Bahrain.',
+    images: ['/og-image.png'],
+  },
   robots: {
     index: true,
     follow: true,
