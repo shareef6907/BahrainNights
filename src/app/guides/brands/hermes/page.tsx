@@ -12,7 +12,7 @@ export const metadata: Metadata = {
   keywords: 'Hermès Bahrain, Hermes Bahrain, Hermès store Bahrain, Birkin bag Bahrain, Hermès Marassi Galleria, Hermès scarf Bahrain',
   openGraph: {
     title: 'Hermès Bahrain - Store Locations & Shopping Guide 2026',
-    description: 'Find Hermès stores in Bahrain. Complete guide to Hermès at Moda Mall.',
+    description: 'Find Hermès stores in Bahrain. Complete guide to Hermès at Marassi Galleria.',
     type: 'article',
     locale: 'en_US',
     url: 'https://www.bahrainnights.com/guides/brands/hermes',
@@ -124,7 +124,7 @@ export default function HermesBahrainPage() {
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mt-12">
             {[
               { label: 'Boutiques', value: '2', icon: ShoppingBag },
-              { label: '', value: 'Moda Mall', icon: MapPin },
+              { label: '', value: 'Marassi Galleria', icon: MapPin },
               { label: '', value: 'Marassi Galleria', icon: MapPin },
               { label: 'Since', value: '1837', icon: Sparkles },
             ].map((stat, index) => (
@@ -309,7 +309,7 @@ export default function HermesBahrainPage() {
             '@context': 'https://schema.org',
             '@type': 'Article',
             headline: 'Hermès Bahrain - Store Locations & Shopping Guide 2026',
-            description: 'Find Hermès stores in Bahrain. Complete guide to Hermès at Moda Mall.',
+            description: 'Find Hermès stores in Bahrain. Complete guide to Hermès at Marassi Galleria.',
             author: {
               '@type': 'Organization',
               name: 'BahrainNights',

@@ -12,7 +12,7 @@ export const metadata: Metadata = {
   keywords: 'Dior Bahrain, Dior store Bahrain, where to buy Dior Bahrain, Dior City Centre, Dior The Avenues, Dior Marassi Galleria, Dior beauty Bahrain',
   openGraph: {
     title: 'Dior Bahrain - Store Locations & Shopping Guide 2026',
-    description: 'Find Dior stores in Bahrain. Complete guide to Dior locations at Moda Mall.',
+    description: 'Find Dior stores in Bahrain. Complete guide to Dior locations at Marassi Galleria.',
     type: 'article',
     locale: 'en_US',
     url: 'https://www.bahrainnights.com/guides/brands/dior',
@@ -118,15 +118,15 @@ const faqs = [
   },
   {
     q: 'Which mall has Dior in Bahrain?',
-    a: 'Dior boutiques are located in Moda Mall at Bahrain World Trade Center and Marassi Galleria in Diyar Al Muharraq. For Dior beauty products only, you can also visit Paris Gallery and Faces in various malls.',
+    a: 'The main Dior boutique is at Marassi Galleria in Diyar Al Muharraq. Dior is also available at The Avenues and City Centre Bahrain. For beauty products only, visit Paris Gallery and Faces in various malls.',
   },
   {
     q: 'Does Dior Bahrain sell Lady Dior bags?',
-    a: 'Yes, the Dior boutique at Moda Mall carries Lady Dior bags, though popular sizes and colors may have waitlists. Ask a sales associate about current availability.',
+    a: 'Yes, the Dior boutique at Marassi Galleria carries Lady Dior bags, though popular sizes and colors may have waitlists. Ask a sales associate about current availability.',
   },
   {
     q: 'Where can I buy Dior perfume in Bahrain?',
-    a: 'Dior fragrances are available at the Moda Mall boutique, Paris Gallery, Faces stores, and Sephora across multiple malls in Bahrain.',
+    a: 'Dior fragrances are available at the Marassi Galleria boutique, Paris Gallery, Faces stores, and Sephora across multiple malls in Bahrain.',
   },
 ];
 
@@ -170,10 +170,10 @@ export default function DiorBahrainPage() {
           {/* Quick Info */}
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mt-12">
             {[
-              { label: 'Boutiques', value: '2', icon: ShoppingBag },
+              { label: 'Boutiques', value: '3', icon: ShoppingBag },
               { label: 'Beauty Counters', value: '3+', icon: Sparkles },
-              { label: '', value: 'Moda Mall', icon: MapPin },
               { label: '', value: 'Marassi Galleria', icon: MapPin },
+              { label: '', value: 'The Avenues', icon: MapPin },
             ].map((stat, index) => (
               <div key={`${stat.value}-${index}`} className="bg-white/5 backdrop-blur-sm rounded-xl p-4 text-center">
                 <stat.icon className="w-6 h-6 mx-auto mb-2 text-gray-400" />
@@ -388,7 +388,7 @@ export default function DiorBahrainPage() {
             '@context': 'https://schema.org',
             '@type': 'Article',
             headline: 'Dior Bahrain - Store Locations & Shopping Guide 2026',
-            description: 'Find Dior stores in Bahrain. Complete guide to Dior locations at Moda Mall.',
+            description: 'Find Dior stores in Bahrain. Complete guide to Dior locations at Marassi Galleria.',
             author: {
               '@type': 'Organization',
               name: 'BahrainNights',

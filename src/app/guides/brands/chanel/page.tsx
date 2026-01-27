@@ -12,7 +12,7 @@ export const metadata: Metadata = {
   keywords: 'Chanel Bahrain, Chanel store Bahrain, where to buy Chanel Bahrain, Chanel The Avenues, Chanel Marassi Galleria, Chanel perfume Bahrain, Chanel bags Bahrain',
   openGraph: {
     title: 'Chanel Bahrain - Store Locations & Shopping Guide 2026',
-    description: 'Find Chanel stores in Bahrain. Complete guide to Chanel locations at Moda Mall and luxury boutiques.',
+    description: 'Find Chanel stores in Bahrain. Complete guide to Chanel locations at Marassi Galleria and luxury boutiques.',
     type: 'article',
     locale: 'en_US',
     url: 'https://www.bahrainnights.com/guides/brands/chanel',
@@ -369,7 +369,7 @@ export default function ChanelBahrainPage() {
             '@context': 'https://schema.org',
             '@type': 'Article',
             headline: 'Chanel Bahrain - Store Locations & Shopping Guide 2026',
-            description: 'Find Chanel stores in Bahrain. Complete guide to Chanel locations at Moda Mall and luxury boutiques.',
+            description: 'Find Chanel stores in Bahrain. Complete guide to Chanel locations at Marassi Galleria and luxury boutiques.',
             author: {
               '@type': 'Organization',
               name: 'BahrainNights',

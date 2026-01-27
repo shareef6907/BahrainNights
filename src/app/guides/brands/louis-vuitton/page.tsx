@@ -12,7 +12,7 @@ export const metadata: Metadata = {
   keywords: 'Louis Vuitton Bahrain, LV Bahrain, Louis Vuitton store Bahrain, where to buy Louis Vuitton Bahrain, Louis Vuitton Marassi Galleria, LV bags Bahrain',
   openGraph: {
     title: 'Louis Vuitton Bahrain - Store Locations & Shopping Guide 2026',
-    description: 'Find Louis Vuitton stores in Bahrain. Complete guide to LV locations at Moda Mall and City Centre Bahrain.',
+    description: 'Find Louis Vuitton stores in Bahrain. Complete guide to LV locations at Marassi Galleria.',
     type: 'article',
     locale: 'en_US',
     url: 'https://www.bahrainnights.com/guides/brands/louis-vuitton',
@@ -49,7 +49,7 @@ const shoppingTips = [
   },
   {
     title: 'New Arrivals',
-    tip: 'Check both stores - they receive different stock. Moda Mall often gets exclusives first.',
+    tip: 'The Marassi Galleria flagship carries the full collection including exclusives.',
   },
   {
     title: 'Waitlists',
@@ -309,7 +309,7 @@ export default function LouisVuittonBahrainPage() {
             '@context': 'https://schema.org',
             '@type': 'Article',
             headline: 'Louis Vuitton Bahrain - Store Locations & Shopping Guide 2026',
-            description: 'Find Louis Vuitton stores in Bahrain. Complete guide to LV locations at Moda Mall and City Centre Bahrain.',
+            description: 'Find Louis Vuitton stores in Bahrain. Complete guide to LV locations at Marassi Galleria.',
             author: {
               '@type': 'Organization',
               name: 'BahrainNights',
