@@ -291,6 +291,15 @@ export default function FirstTimePage() {
         author: { '@type': 'Organization', name: 'BahrainNights' },
         datePublished: '2026-01-26', dateModified: lastUpdated,
       })}} />
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify({
+        '@context': 'https://schema.org',
+        '@type': 'FAQPage',
+        mainEntity: [
+          { '@type': 'Question', name: 'Do I need a visa for Bahrain?', acceptedAnswer: { '@type': 'Answer', text: 'Many nationalities get visa on arrival (14 days). Check requirements for your passport. eVisa available online.' } },
+          { '@type': 'Question', name: 'Is Bahrain safe for tourists?', acceptedAnswer: { '@type': 'Answer', text: 'Yes, Bahrain is very safe with low crime. Normal travel precautions apply.' } },
+          { '@type': 'Question', name: 'What\'s the best time to visit Bahrain?', acceptedAnswer: { '@type': 'Answer', text: 'November to February offers perfect weather (15-25°C). Avoid May-September heat.' } },
+        ]
+      })}} />
     </div>
   );
 }

@@ -264,6 +264,15 @@ export default function EidPage() {
         author: { '@type': 'Organization', name: 'BahrainNights' },
         datePublished: '2026-01-26', dateModified: lastUpdated,
       })}} />
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify({
+        '@context': 'https://schema.org',
+        '@type': 'FAQPage',
+        mainEntity: [
+          { '@type': 'Question', name: 'When is Eid in 2026?', acceptedAnswer: { '@type': 'Answer', text: 'Eid Al-Fitr is expected around late March 2026. Eid Al-Adha around early June 2026. Exact dates depend on moon sighting.' } },
+          { '@type': 'Question', name: 'How long is Eid holiday?', acceptedAnswer: { '@type': 'Answer', text: 'Eid Al-Fitr is typically 3-4 days, Eid Al-Adha 4-5 days. Government and schools get official holidays.' } },
+          { '@type': 'Question', name: 'What is Eidiya?', acceptedAnswer: { '@type': 'Answer', text: 'Cash gifts given to children during Eid, similar to Christmas money. Usually from elder relatives.' } },
+        ]
+      })}} />
     </div>
   );
 }

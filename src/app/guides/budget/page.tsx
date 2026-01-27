@@ -278,6 +278,15 @@ export default function BudgetPage() {
         author: { '@type': 'Organization', name: 'BahrainNights' },
         datePublished: '2026-01-26', dateModified: lastUpdated,
       })}} />
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify({
+        '@context': 'https://schema.org',
+        '@type': 'FAQPage',
+        mainEntity: [
+          { '@type': 'Question', name: 'Is Bahrain expensive to visit?', acceptedAnswer: { '@type': 'Answer', text: 'Bahrain can be done on various budgets. Budget travelers can manage on BD 20-30/day with street food and free attractions. Mid-range is BD 50-100/day.' } },
+          { '@type': 'Question', name: 'What are the best free attractions in Bahrain?', acceptedAnswer: { '@type': 'Answer', text: 'Beit Al Quran, Tree of Life, Jazair Beach, Arad Fort, and Muharraq Heritage Walk are all free and excellent.' } },
+          { '@type': 'Question', name: 'Where to eat cheap in Bahrain?', acceptedAnswer: { '@type': 'Answer', text: 'Street food in Juffair and Gudaibiya. Shawarma from 500 fils, full meals under BD 3. Souq food stalls also very affordable.' } },
+        ]
+      })}} />
     </div>
   );
 }

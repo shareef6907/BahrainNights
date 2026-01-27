@@ -318,6 +318,15 @@ export default function BuffetsPage() {
         author: { '@type': 'Organization', name: 'BahrainNights' },
         datePublished: '2026-01-26', dateModified: lastUpdated,
       })}} />
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify({
+        '@context': 'https://schema.org',
+        '@type': 'FAQPage',
+        mainEntity: [
+          { '@type': 'Question', name: 'What is the best Friday brunch in Bahrain?', acceptedAnswer: { '@type': 'Answer', text: 'Four Seasons and Ritz-Carlton are considered the best luxury brunches. Gulf Hotel offers excellent value.' } },
+          { '@type': 'Question', name: 'How much does brunch cost in Bahrain?', acceptedAnswer: { '@type': 'Answer', text: 'Budget options from BD 8-15, mid-range BD 25-40, luxury BD 45-75 per person.' } },
+          { '@type': 'Question', name: 'Do I need to book for Friday brunch?', acceptedAnswer: { '@type': 'Answer', text: 'Yes! Popular brunches book out 1-2 weeks ahead. Always reserve in advance.' } },
+        ]
+      })}} />
     </div>
   );
 }

@@ -304,6 +304,15 @@ export default function StreetFoodPage() {
         author: { '@type': 'Organization', name: 'BahrainNights' },
         datePublished: '2026-01-26', dateModified: lastUpdated,
       })}} />
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify({
+        '@context': 'https://schema.org',
+        '@type': 'FAQPage',
+        mainEntity: [
+          { '@type': 'Question', name: 'Where can I find good shawarma in Bahrain?', acceptedAnswer: { '@type': 'Answer', text: 'Juffair and Gudaibiya have many excellent shawarma spots. Late night (11PM+) is when the magic happens.' } },
+          { '@type': 'Question', name: 'Is street food safe in Bahrain?', acceptedAnswer: { '@type': 'Answer', text: 'Generally yes. Stick to busy spots with high turnover. Fresh preparation is a good sign.' } },
+          { '@type': 'Question', name: 'What is karak?', acceptedAnswer: { '@type': 'Answer', text: 'Strong tea made with cardamom, saffron, and condensed milk. Essential late-night Bahrain experience.' } },
+        ]
+      })}} />
     </div>
   );
 }

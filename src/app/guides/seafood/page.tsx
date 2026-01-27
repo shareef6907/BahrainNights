@@ -415,6 +415,15 @@ export default function SeafoodPage() {
         author: { '@type': 'Organization', name: 'BahrainNights' },
         datePublished: '2026-01-26', dateModified: lastUpdated,
       })}} />
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify({
+        '@context': 'https://schema.org',
+        '@type': 'FAQPage',
+        mainEntity: [
+          { '@type': 'Question', name: 'What is the best fish to try in Bahrain?', acceptedAnswer: { '@type': 'Answer', text: 'Hammour (Gulf grouper) is the local favorite — firm white flesh, excellent grilled. Safi and sheiri are also delicious local options.' } },
+          { '@type': 'Question', name: 'Where is the best seafood in Bahrain?', acceptedAnswer: { '@type': 'Answer', text: 'For fine dining, CUT and La Mer at luxury hotels. For casual fresh fish, Fares Seafood. For authentic experience, Manama fish market.' } },
+          { '@type': 'Question', name: 'Is seafood expensive in Bahrain?', acceptedAnswer: { '@type': 'Answer', text: 'Ranges widely. Fish market meals from BD 3-10, casual restaurants BD 8-20, fine dining BD 30-80 per person.' } },
+        ]
+      })}} />
     </div>
   );
 }

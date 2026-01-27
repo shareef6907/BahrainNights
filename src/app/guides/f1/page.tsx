@@ -271,6 +271,16 @@ export default function F1Page() {
         author: { '@type': 'Organization', name: 'BahrainNights' },
         datePublished: '2026-01-26', dateModified: lastUpdated,
       })}} />
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify({
+        '@context': 'https://schema.org',
+        '@type': 'FAQPage',
+        mainEntity: [
+          { '@type': 'Question', name: 'When is F1 Bahrain Grand Prix 2026?', acceptedAnswer: { '@type': 'Answer', text: 'Typically held in February/March as one of the opening races. Exact dates announced by FIA. Check bahraingp.com for official dates.' } },
+          { '@type': 'Question', name: 'How much are F1 tickets in Bahrain?', acceptedAnswer: { '@type': 'Answer', text: 'General admission from BD 25, grandstands BD 40-200, Paddock Club BD 500+. Book early for best prices.' } },
+          { '@type': 'Question', name: 'Are concerts included with F1 tickets?', acceptedAnswer: { '@type': 'Answer', text: 'Yes! All ticket holders can attend post-race and qualifying concerts at the circuit.' } },
+          { '@type': 'Question', name: 'How do I get to the circuit?', acceptedAnswer: { '@type': 'Answer', text: 'Free shuttle buses from Bahrain Mall and other locations included with tickets. Taxis available but expensive.' } },
+        ]
+      })}} />
     </div>
   );
 }

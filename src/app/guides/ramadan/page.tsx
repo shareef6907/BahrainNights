@@ -278,6 +278,15 @@ export default function RamadanPage() {
         author: { '@type': 'Organization', name: 'BahrainNights' },
         datePublished: '2026-01-26', dateModified: lastUpdated,
       })}} />
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify({
+        '@context': 'https://schema.org',
+        '@type': 'FAQPage',
+        mainEntity: [
+          { '@type': 'Question', name: 'Can non-Muslims eat during Ramadan in Bahrain?', acceptedAnswer: { '@type': 'Answer', text: 'Yes, but not in public. Hotels serve meals discreetly in designated areas. Eating, drinking, and smoking in public during daylight hours is prohibited.' } },
+          { '@type': 'Question', name: 'When is Ramadan 2026?', acceptedAnswer: { '@type': 'Answer', text: 'Ramadan 2026 is expected to begin around February 28 - March 1, depending on moon sighting. Dates are confirmed closer to the time.' } },
+          { '@type': 'Question', name: 'Can tourists visit Bahrain during Ramadan?', acceptedAnswer: { '@type': 'Answer', text: 'Absolutely! It\'s a unique cultural experience. Just be respectful of local customs and fasting hours.' } },
+        ]
+      })}} />
     </div>
   );
 }

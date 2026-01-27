@@ -280,6 +280,15 @@ export default function WeekendGetawaysPage() {
         author: { '@type': 'Organization', name: 'BahrainNights' },
         datePublished: '2026-01-26', dateModified: lastUpdated,
       })}} />
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify({
+        '@context': 'https://schema.org',
+        '@type': 'FAQPage',
+        mainEntity: [
+          { '@type': 'Question', name: 'What\'s the easiest weekend trip from Bahrain?', acceptedAnswer: { '@type': 'Answer', text: 'Al Khobar, Saudi Arabia — just 30 minutes drive over the King Fahd Causeway. No flights needed!' } },
+          { '@type': 'Question', name: 'Can GCC residents travel visa-free?', acceptedAnswer: { '@type': 'Answer', text: 'Yes! GCC residents (not just citizens) can enter UAE, Qatar, Kuwait, Oman, and Saudi without visa.' } },
+          { '@type': 'Question', name: 'Best destination for a quick weekend?', acceptedAnswer: { '@type': 'Answer', text: 'Doha (30min flight) or Al Khobar (drive) for shortest trips. Dubai for most to do.' } },
+        ]
+      })}} />
     </div>
   );
 }

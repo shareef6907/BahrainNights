@@ -262,6 +262,15 @@ export default function ExpatPage() {
         author: { '@type': 'Organization', name: 'BahrainNights' },
         datePublished: '2026-01-26', dateModified: lastUpdated,
       })}} />
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify({
+        '@context': 'https://schema.org',
+        '@type': 'FAQPage',
+        mainEntity: [
+          { '@type': 'Question', name: 'Is Bahrain good for expats?', acceptedAnswer: { '@type': 'Answer', text: 'Yes! No income tax, diverse expat community, high safety, good quality of life, and central Gulf location. Ranked highly in expat surveys.' } },
+          { '@type': 'Question', name: 'What is the average expat salary in Bahrain?', acceptedAnswer: { '@type': 'Answer', text: 'Varies widely. Mid-level professionals BD 1,500-3,000/month. Management BD 3,000-8,000+. Includes housing allowance often.' } },
+          { '@type': 'Question', name: 'Do I need to speak Arabic in Bahrain?', acceptedAnswer: { '@type': 'Answer', text: 'No, English is widely spoken in business and daily life. Arabic useful but not essential for most expats.' } },
+        ]
+      })}} />
     </div>
   );
 }

@@ -287,6 +287,15 @@ export default function PublicBeachesPage() {
         author: { '@type': 'Organization', name: 'BahrainNights' },
         datePublished: '2026-01-26', dateModified: lastUpdated,
       })}} />
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify({
+        '@context': 'https://schema.org',
+        '@type': 'FAQPage',
+        mainEntity: [
+          { '@type': 'Question', name: 'What is the best public beach in Bahrain?', acceptedAnswer: { '@type': 'Answer', text: 'Marassi Beach in Diyar Al Muharraq is the best — clean, well-maintained, with facilities and lifeguards.' } },
+          { '@type': 'Question', name: 'Are public beaches free in Bahrain?', acceptedAnswer: { '@type': 'Answer', text: 'Yes! Entry is free. Some have paid parking (BD 1-2). Bring your own supplies as rentals are limited.' } },
+          { '@type': 'Question', name: 'Is it safe to swim at public beaches?', acceptedAnswer: { '@type': 'Answer', text: 'Yes, especially at Marassi which has lifeguards. Always check conditions and swim in designated areas.' } },
+        ]
+      })}} />
     </div>
   );
 }

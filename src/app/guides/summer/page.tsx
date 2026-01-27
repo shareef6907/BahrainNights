@@ -287,6 +287,15 @@ export default function SummerPage() {
         author: { '@type': 'Organization', name: 'BahrainNights' },
         datePublished: '2026-01-26', dateModified: lastUpdated,
       })}} />
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify({
+        '@context': 'https://schema.org',
+        '@type': 'FAQPage',
+        mainEntity: [
+          { '@type': 'Question', name: 'How hot does Bahrain get in summer?', acceptedAnswer: { '@type': 'Answer', text: 'Peak temperatures reach 45-48°C (113-118°F) in July-August. "Real feel" with humidity can be 50°C+.' } },
+          { '@type': 'Question', name: 'Can you do outdoor activities in summer?', acceptedAnswer: { '@type': 'Answer', text: 'Only before 8am or after 7pm. Midday outdoor activity is genuinely dangerous.' } },
+          { '@type': 'Question', name: 'Is summer a good time to visit Bahrain?', acceptedAnswer: { '@type': 'Answer', text: 'Not ideal for outdoor sightseeing, but excellent hotel deals, fewer tourists, and plenty of indoor activities.' } },
+        ]
+      })}} />
     </div>
   );
 }

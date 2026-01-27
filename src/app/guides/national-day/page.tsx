@@ -252,6 +252,15 @@ export default function NationalDayPage() {
         author: { '@type': 'Organization', name: 'BahrainNights' },
         datePublished: '2026-01-26', dateModified: lastUpdated,
       })}} />
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify({
+        '@context': 'https://schema.org',
+        '@type': 'FAQPage',
+        mainEntity: [
+          { '@type': 'Question', name: 'When is Bahrain National Day?', acceptedAnswer: { '@type': 'Answer', text: 'December 16-17 every year. December 16 commemorates independence (1971), December 17 marks the late Amir\'s accession.' } },
+          { '@type': 'Question', name: 'Is National Day a public holiday?', acceptedAnswer: { '@type': 'Answer', text: 'Yes, both December 16 and 17 are official public holidays in Bahrain.' } },
+          { '@type': 'Question', name: 'Where are the best fireworks?', acceptedAnswer: { '@type': 'Answer', text: 'Bahrain Bay has the main display. Hotels with bay views offer great vantage points. Beach clubs also have good views.' } },
+        ]
+      })}} />
     </div>
   );
 }

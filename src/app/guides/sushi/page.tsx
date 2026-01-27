@@ -308,6 +308,15 @@ export default function SushiPage() {
         author: { '@type': 'Organization', name: 'BahrainNights' },
         datePublished: '2026-01-26', dateModified: lastUpdated,
       })}} />
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify({
+        '@context': 'https://schema.org',
+        '@type': 'FAQPage',
+        mainEntity: [
+          { '@type': 'Question', name: 'What is the best sushi restaurant in Bahrain?', acceptedAnswer: { '@type': 'Answer', text: 'Bushido in Adliya is widely considered the best for omakase and premium sushi. Sato at Four Seasons is excellent for luxury dining.' } },
+          { '@type': 'Question', name: 'How much does sushi cost in Bahrain?', acceptedAnswer: { '@type': 'Answer', text: 'Ranges from BD 6-15 at casual spots like Yo! Sushi to BD 30-60 at fine dining restaurants for full omakase.' } },
+          { '@type': 'Question', name: 'What is omakase?', acceptedAnswer: { '@type': 'Answer', text: 'Omakase means "I leave it up to you" — the chef creates a tasting menu of their best dishes. Premium experience at BD 40-80.' } },
+        ]
+      })}} />
     </div>
   );
 }
