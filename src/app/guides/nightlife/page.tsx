@@ -9,6 +9,9 @@ export const metadata: Metadata = {
   title: 'Bahrain Nightlife Guide 2026 | Best Clubs, Bars & Lounges',
   description: 'Complete guide to Bahrain nightlife - discover the best nightclubs, bars, lounges, and late-night spots in Manama, Adliya, and Juffair.',
   keywords: 'Bahrain nightlife, Bahrain clubs, Bahrain bars, Manama nightlife, Adliya bars, Juffair clubs, best clubs Bahrain',
+  alternates: {
+    canonical: 'https://www.bahrainnights.com/guides/nightlife',
+  },
   openGraph: {
     title: 'Bahrain Nightlife Guide 2026 | Best Clubs, Bars & Lounges',
     description: 'Your ultimate guide to the best nightlife in Bahrain - clubs, bars, lounges, and more.',

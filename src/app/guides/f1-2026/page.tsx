@@ -9,6 +9,9 @@ export const metadata: Metadata = {
   title: 'F1 Bahrain Grand Prix 2026 Guide | Everything You Need to Know',
   description: 'Complete guide to the 2026 Bahrain Grand Prix - tickets, schedule, getting there, where to stay, and what to do during F1 weekend.',
   keywords: 'F1 Bahrain 2026, Bahrain Grand Prix, Formula 1 Bahrain, BIC tickets, F1 weekend Bahrain',
+  alternates: {
+    canonical: 'https://www.bahrainnights.com/guides/f1-2026',
+  },
   openGraph: {
     title: 'F1 Bahrain Grand Prix 2026 Guide',
     description: 'Your ultimate guide to F1 weekend in Bahrain - tickets, transport, accommodation and more.',

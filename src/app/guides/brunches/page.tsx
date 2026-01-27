@@ -9,6 +9,9 @@ export const metadata: Metadata = {
   title: 'Best Brunches in Bahrain 2026 | Friday Brunch Guide',
   description: 'Complete guide to the best Friday brunches in Bahrain - from budget-friendly to luxury experiences. Find the perfect brunch for every occasion.',
   keywords: 'Bahrain brunch, Friday brunch Bahrain, best brunch Bahrain, brunch deals Bahrain, hotel brunch Bahrain',
+  alternates: {
+    canonical: 'https://www.bahrainnights.com/guides/brunches',
+  },
   openGraph: {
     title: 'Best Brunches in Bahrain 2026 | Friday Brunch Guide',
     description: 'Your ultimate guide to Friday brunches in Bahrain - from casual to luxury.',

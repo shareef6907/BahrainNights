@@ -10,6 +10,9 @@ export const metadata: Metadata = {
   title: 'Ultimate Guide: Things to Do in Bahrain 2026 | BahrainNights',
   description: 'Discover the best things to do in Bahrain! From beaches and nightlife to culture, dining, and family activities. Your complete guide to exploring the Kingdom of Bahrain.',
   keywords: 'things to do in Bahrain, Bahrain activities, Bahrain attractions, what to do in Bahrain, Bahrain guide, visit Bahrain, Bahrain tourism',
+  alternates: {
+    canonical: 'https://www.bahrainnights.com/guides/things-to-do',
+  },
   openGraph: {
     title: 'Ultimate Guide: Things to Do in Bahrain 2026',
     description: 'Your complete guide to the best experiences in Bahrain - beaches, nightlife, culture, dining, and more.',

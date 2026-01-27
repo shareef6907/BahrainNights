@@ -9,6 +9,9 @@ export const metadata: Metadata = {
   title: 'Ramadan in Bahrain 2026 Guide | Iftar, Events & Tips',
   description: 'Complete guide to Ramadan in Bahrain 2026 - best iftar spots, suhoor venues, events, timings, and what to expect during the holy month.',
   keywords: 'Ramadan Bahrain 2026, iftar Bahrain, suhoor Bahrain, Ramadan events, Ramadan guide Bahrain',
+  alternates: {
+    canonical: 'https://www.bahrainnights.com/guides/ramadan-2026',
+  },
   openGraph: {
     title: 'Ramadan in Bahrain 2026 Guide',
     description: 'Your guide to experiencing Ramadan in Bahrain - iftar, suhoor, events and traditions.',
