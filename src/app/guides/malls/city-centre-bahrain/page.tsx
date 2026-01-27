@@ -28,7 +28,6 @@ const mallInfo = {
   name: 'City Centre Bahrain',
   tagline: 'Bahrain\'s Premier Shopping & Entertainment Destination',
   address: 'Sheikh Khalifa Bin Salman Highway, Seef District, Manama, Kingdom of Bahrain',
-  phone: '+973 8000 0131',
   mapsLink: 'https://www.google.com/maps/place/City+Centre+Bahrain/@26.2168,50.5481,17z',
   hours: {
     shops: {
@@ -369,7 +368,6 @@ export default function CityCentrePage() {
               </h3>
               <div className="space-y-3 text-gray-300">
                 <p>{mallInfo.address}</p>
-                <p>Phone: {mallInfo.phone}</p>
                 <div className="flex gap-3 pt-2">
                   <a 
                     href={mallInfo.mapsLink}
@@ -578,7 +576,6 @@ export default function CityCentrePage() {
               addressLocality: 'Manama',
               addressCountry: 'BH',
             },
-            telephone: '+973 8000 0131',
             openingHoursSpecification: [
               {
                 '@type': 'OpeningHoursSpecification',

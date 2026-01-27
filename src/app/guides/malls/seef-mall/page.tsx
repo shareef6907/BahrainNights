@@ -28,7 +28,6 @@ const mallInfo = {
   name: 'Seef Mall',
   tagline: 'Bahrain\'s Original Premier Shopping Destination',
   address: 'Seef District, Manama, Bahrain',
-  phone: '+973 7791 1114',
   mapsLink: 'https://www.google.com/maps/place/Seef+Mall/@26.2325003,50.5364399,17z',
   hours: {
     shops: {
@@ -348,7 +347,6 @@ export default function SeefMallPage() {
               </h3>
               <div className="space-y-3 text-gray-300">
                 <p>{mallInfo.address}</p>
-                <p>Phone: {mallInfo.phone}</p>
                 <div className="flex gap-3 pt-2">
                   <a 
                     href={mallInfo.mapsLink}
@@ -563,7 +561,6 @@ export default function SeefMallPage() {
               addressLocality: 'Manama',
               addressCountry: 'BH',
             },
-            telephone: '+973 7791 1114',
             openingHoursSpecification: [
               {
                 '@type': 'OpeningHoursSpecification',

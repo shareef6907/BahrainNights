@@ -27,7 +27,6 @@ const mallInfo = {
   name: 'Marassi Galleria',
   tagline: 'Bahrain\'s Premier Luxury Shopping Destination',
   address: 'Diyar Al Muharraq, Kingdom of Bahrain',
-  phone: '+973 1700 0123',
   mapsLink: 'https://www.google.com/maps/place/Marassi+Galleria/@26.3089,50.6281,17z',
   hours: {
     regular: 'Sat-Wed: 10:00 AM - 10:00 PM',

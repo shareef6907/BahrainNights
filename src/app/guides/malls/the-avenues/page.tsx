@@ -27,7 +27,6 @@ const mallInfo = {
   name: 'The Avenues Bahrain',
   tagline: 'The Place to Be',
   address: 'Bahrain Bay, King Faisal Road, Manama, Kingdom of Bahrain',
-  phone: '+973 1715 1060',
   mapsLink: 'https://www.google.com/maps/place/The+Avenues+Bahrain/@26.2344,50.5893,17z',
   hours: {
     regular: 'Sat-Wed: 10:00 AM - 10:00 PM',
@@ -249,7 +248,6 @@ export default function TheAvenuesPage() {
               </h3>
               <div className="space-y-3 text-gray-300">
                 <p>{mallInfo.address}</p>
-                <p>Phone: {mallInfo.phone}</p>
                 <div className="flex gap-3 pt-2">
                   <a 
                     href={mallInfo.mapsLink}
@@ -494,7 +492,6 @@ export default function TheAvenuesPage() {
               addressLocality: 'Manama',
               addressCountry: 'BH',
             },
-            telephone: '+973 1715 1060',
             openingHoursSpecification: [
               {
                 '@type': 'OpeningHoursSpecification',

@@ -110,20 +110,12 @@ const storeCategories = [
 
 const diningOptions = [
   {
-    category: 'Casual Dining',
-    restaurants: ['Chili\'s', 'Fuddruckers', 'Pizza Hut', 'Hardee\'s'],
-  },
-  {
-    category: 'Fast Food',
-    restaurants: ['McDonald\'s', 'KFC', 'Subway', 'Burger King'],
+    category: 'Restaurants & Food Court',
+    restaurants: ['ALBAIK', 'Texas Chicken', 'Joey\'s (Italian)', 'Mysore Cafe (Indian)', 'Kailash Parbat (Indian)'],
   },
   {
     category: 'Coffee & Desserts',
-    restaurants: ['Starbucks', 'Costa Coffee', 'Baskin Robbins', 'Cinnabon'],
-  },
-  {
-    category: 'Food Court',
-    restaurants: ['International cuisine', 'Quick bites', 'Local favorites'],
+    restaurants: ['Starbucks'],
   },
 ];
 
