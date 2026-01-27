@@ -87,20 +87,20 @@ const storeCategories = [
 
 const diningOptions = [
   {
-    category: 'Waterfront Restaurants',
-    restaurants: ['Seafood restaurants', 'Arabic cuisine', 'International dining', 'Grills'],
+    category: 'Restaurants',
+    restaurants: ['Maraq Al Baraha (Traditional Bahraini)', 'Freej Bin Rashdan', 'Al Kwar', 'Haji Patata', 'Mama Adhari', 'AlBaraha Cafe'],
+  },
+  {
+    category: 'Burgers & Quick Bites',
+    restaurants: ['Jan Burger'],
   },
   {
     category: 'Cafes & Coffee',
-    restaurants: ['Traditional Arabic coffee', 'Modern cafes', 'Tea houses', 'Shisha lounges'],
+    restaurants: ['Starbucks', 'Sophia (Bookstore & Coffee)', 'Black Drop', 'Shamshareef', 'KUMA Cafe'],
   },
   {
-    category: 'Quick Bites',
-    restaurants: ['Shawarma', 'Fresh juices', 'Ice cream', 'Street food'],
-  },
-  {
-    category: 'Desserts',
-    restaurants: ['Traditional Arabic sweets', 'Bakeries', 'Chocolate shops'],
+    category: 'Tea Houses',
+    restaurants: ['RaelChai (راعي الچاي)'],
   },
 ];
 
