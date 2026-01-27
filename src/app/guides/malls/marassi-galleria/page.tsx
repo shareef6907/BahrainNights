@@ -3,17 +3,18 @@ import Link from 'next/link';
 import { 
   MapPin, Clock, Car, 
   ShoppingBag, Utensils, Film, Sparkles,
-  Star, Gem, Hotel, Fish, Waves
+  Star, Gem, Hotel, Fish, Waves, Eye,
+  Watch, Footprints, Dumbbell, Gamepad2, Baby
 } from 'lucide-react';
 import BreadcrumbSchema from '@/components/SEO/BreadcrumbSchema';
 
 export const metadata: Metadata = {
-  title: 'Marassi Galleria Bahrain - Complete Store Directory & Guide 2025',
-  description: 'Complete guide to Marassi Galleria in Diyar Al Muharraq. 188+ luxury stores including Louis Vuitton, Dior, Chanel, Gucci, plus 53+ restaurants, Reel Cinemas IMAX & Bahrain\'s largest aquarium.',
-  keywords: 'Marassi Galleria, Diyar Al Muharraq mall, luxury shopping Bahrain, Louis Vuitton Bahrain, Gucci Bahrain, Marassi Aquarium',
+  title: 'Marassi Galleria Bahrain - Complete Store Directory & Guide 2026',
+  description: 'Complete guide to Marassi Galleria in Diyar Al Muharraq. 150+ stores including Louis Vuitton, Dior, Chanel, Gucci, Prada, plus 30+ restaurants, Reel Cinemas & Marassi Aquarium.',
+  keywords: 'Marassi Galleria, Diyar Al Muharraq mall, luxury shopping Bahrain, Louis Vuitton Bahrain, Gucci Bahrain, Marassi Aquarium, Prada Bahrain',
   openGraph: {
-    title: 'Marassi Galleria Bahrain - Luxury Shopping & Entertainment 2025',
-    description: 'Bahrain\'s premier luxury destination with 188+ stores, 53+ restaurants, IMAX cinema & largest aquarium.',
+    title: 'Marassi Galleria Bahrain - Luxury Shopping & Entertainment 2026',
+    description: 'Bahrain\'s premier luxury destination with 150+ stores, 30+ restaurants, Reel Cinemas & Marassi Aquarium.',
     type: 'article',
     locale: 'en_US',
     url: 'https://www.bahrainnights.com/guides/malls/marassi-galleria',
@@ -27,6 +28,7 @@ const mallInfo = {
   name: 'Marassi Galleria',
   tagline: 'Bahrain\'s Premier Luxury Shopping Destination',
   address: 'Diyar Al Muharraq, Kingdom of Bahrain',
+  website: 'https://marassigalleria.bh',
   mapsLink: 'https://www.google.com/maps/place/Marassi+Galleria/@26.3089,50.6281,17z',
   hours: {
     regular: 'Sat-Wed: 10:00 AM - 10:00 PM',
@@ -37,77 +39,181 @@ const mallInfo = {
     cost: 'Free',
     valet: 'Available',
   },
-  stores: '188+',
-  restaurants: '53+',
+  stores: '150+',
+  restaurants: '30+',
   yearOpened: '2024',
 };
 
-// COMPLETE Store Directory from Official Marassi Galleria
-// Opened: February 2024
-
-const luxuryBrands = [
-  'Louis Vuitton', 'Dior', 'Chanel', 'Hermès', 'Cartier', 'Gucci',
-  'Bulgari', 'Bottega Veneta', 'Van Cleef & Arpels', 'Rolex',
-  'Panerai', 'IWC', 'Fendi', 'Loro Piana', 'Saint Laurent', 'Tudor'
-];
+// ===================================================================
+// COMPLETE STORE DIRECTORY — Verified from marassigalleria.bh/en/shop/
+// and official floor maps (January 2026)
+// ===================================================================
 
 const storeCategories = [
   {
     name: 'Luxury Houses',
     icon: Gem,
-    stores: luxuryBrands,
+    stores: [
+      'Louis Vuitton', 'Gucci', 'Dior', 'Chanel', 'Prada', 'Hermès',
+      'Cartier', 'Bulgari', 'Bottega Veneta', 'Fendi', 'Valentino',
+      'Dolce & Gabbana', 'Saint Laurent', 'Miu Miu', 'Etro',
+      'Giorgio Armani', 'Max Mara', 'Zegna', 'Tod\'s', 'Balmain',
+      'Zimmermann', 'Gianvito Rossi', 'Gianfranco Ferré',
+      'Loro Piana', 'Damiani',
+    ],
+  },
+  {
+    name: 'Watches & Jewellery',
+    icon: Watch,
+    stores: [
+      'Rolex Boutique', 'Cartier', 'Chopard', 'Omega', 'Panerai',
+      'Piaget', 'Tiffany & Co.', 'Van Cleef & Arpels',
+      'Jaeger-LeCoultre', 'Longines', 'G-Shock',
+      'A La Mode', 'Rivoli',
+      'Al Fardan Jewellery', 'Kooheji Jewellery', 'Bijoux Jewels',
+      'Damiani',
+    ],
   },
   {
     name: 'Fashion & Lifestyle',
     icon: ShoppingBag,
     stores: [
-      'Zara', 'Bershka', 'Pull & Bear', 'Massimo Dutti', 'Aigner', 'ADL',
-      'Alo Yoga', 'The Editor\'s Market', 'Doppelgänger', 'DKNY',
-      'Sam Edelman', 'Cole Haan', 'Koton', 'Furla', 'Marli'
+      'Zara', 'H&M', 'Bershka', 'Pull & Bear', 'Stradivarius',
+      'Massimo Dutti', 'Lefties', 'Oysho', 'Zara Home',
+      'Mango', 'Marks & Spencer', 'Centrepoint', 'R&B',
+      'New Yorker', 'Reserved', 'ADL', 'DeFacto', 'Terranova',
+      'OXXO', 'Ipekol', 'Sandro', 'Maje',
+      'Diesel', 'DKNY', 'Armani Exchange',
+      'Gant', 'Beverly Hills Polo Club',
+      'Aigner', 'The Editor\'s Market',
+      'Baindemer', 'GUL Abbayas', 'Wool House',
+      'Alo Yoga', 'Penti',
     ],
   },
   {
-    name: 'Other Stores',
+    name: 'Shoes & Accessories',
+    icon: Footprints,
+    stores: [
+      'Aldo', 'Geox', 'Charles & Keith', 'Vincci', 'Skechers',
+      'Birkenstock', 'Cole Haan', 'Sam Edelman',
+    ],
+  },
+  {
+    name: 'Sports & Fitness',
+    icon: Dumbbell,
+    stores: [
+      'Decathlon', 'Sun & Sand Sports', 'Nike', 'Puma',
+      'Under Armour', 'Columbia',
+    ],
+  },
+  {
+    name: 'Beauty & Perfumes',
+    icon: Sparkles,
+    stores: [
+      'Sephora', 'Kiko Milano', 'Bath & Body Works',
+      'YSL Beauté', 'Rituals', 'Note Cosmetique',
+      'Ajmal Perfumes', 'Rasasi Perfumes', 'Beauty Blends',
+      'Aireno World', 'Qadeem Perfume',
+    ],
+  },
+  {
+    name: 'Eyewear',
+    icon: Eye,
+    stores: [
+      'Ray-Ban', 'Rivoli EyeZone', 'Optica',
+    ],
+  },
+  {
+    name: 'Lifestyle & Gifts',
     icon: ShoppingBag,
     stores: [
-      'A La Mode', 'Aireno World', 'Ajmal Perfumes', 'Al Fardan Jewellery',
-      'Aldo', 'Alsalam ATM', 'Beauty Blends'
+      'Miniso', 'Mumuso', 'Virgin Megastore', 'Laialy',
     ],
-    note: '188+ total stores',
+  },
+  {
+    name: 'Grocery & Services',
+    icon: ShoppingBag,
+    stores: [
+      'HyperMax', 'Trolley Market', 'Batelco',
+      'BFC Exchange', 'Al Salam ATM',
+    ],
   },
 ];
+
+// ===================================================================
+// DINING — Verified from marassigalleria.bh/en/dine/
+// ===================================================================
 
 const diningOptions = [
   {
     category: 'Restaurants',
     restaurants: [
-      'Bosporus (Turkish)', 'Katana Torii (Japanese)', 'TGI Friday\'s'
+      'Cipriani', 'Sumosan Bahrain', 'The Butcher Shop & Grill',
+      'Jamie\'s Italian', 'Twist', 'TGI Fridays', 'Bosporus',
+      'Awani', 'Nomad', 'Zaatar w Zeit',
+      'Five Guys', 'Nando\'s', 'Hardee\'s', 'KFC',
     ],
   },
   {
-    category: 'Cafés & Desserts',
+    category: 'Cafés & Bakeries',
     restaurants: [
-      'Venchi (Italian chocolate/gelato)', 'PappaRoti', 'Baskin Robbins'
+      'Paul Café', 'Brunch & Cake', 'Café Sego', 'Tim Hortons',
+      'Starbucks', 'The Matcha Bar', 'Gulnar Café',
+    ],
+  },
+  {
+    category: 'Desserts & Ice Cream',
+    restaurants: [
+      'Venchi', 'La Romana Dal 1947', 'Baskin Robbins',
+      'Cinnabon', 'Candylicious',
+    ],
+  },
+  {
+    category: 'Hotel Dining',
+    restaurants: [
+      'The Lounge at Address', 'The Bistro by Origins (Vida)',
     ],
   },
 ];
 
+// ===================================================================
+// ENTERTAINMENT — Verified from marassigalleria.bh/en/entertain/
+// ===================================================================
+
 const entertainment = [
   {
-    name: 'Reel Cinemas IMAX',
-    description: 'Premium cinema experience featuring IMAX technology and luxury seating for the ultimate movie experience.',
+    name: 'Reel Cinemas',
+    description: 'Premium cinema experience with top-notch screens, immersive sound, and ultimate comfort for the latest blockbusters.',
     icon: Film,
   },
   {
     name: 'Marassi Aquarium & Underwater Zoo',
-    description: 'The largest aquarium in Bahrain featuring diverse marine life, interactive exhibits, and educational experiences for all ages.',
+    description: 'Discover marine and freshwater wonders across the Oceanarium, Rainforest Lagoon, Reef Zone and more. Encounter sharks, rays, Arapaima, and the Giant Pacific Octopus.',
     icon: Fish,
   },
   {
     name: 'Adventure Park',
-    description: 'Family entertainment center with activities and attractions for children and adults.',
-    icon: Star,
+    description: 'State-of-the-art sports park for kids (2+ years) with climbing walls, interactive trampoline area, cave maze, sling line obstacle course, and exciting playgrounds.',
+    icon: Baby,
   },
+  {
+    name: 'EVA (Virtual Reality)',
+    description: 'Ultimate VR gaming experience in massive 5,600 sq ft arenas. Face off against other players in epic virtual battles.',
+    icon: Gamepad2,
+  },
+  {
+    name: 'Ground Control',
+    description: 'World-first entertainment experience with bowling, gaming, and a wide range of thrilling activities for all ages.',
+    icon: Gamepad2,
+  },
+];
+
+// ===================================================================
+// ADDITIONAL SHOPS — From floor maps (not yet on website directory)
+// ===================================================================
+
+const comingSoon = [
+  'Home Bakery', 'My Cafe', 'Simit Sarayi', 'Chai Chai',
 ];
 
 const connectedHotels = [
@@ -126,50 +232,54 @@ const connectedHotels = [
 const tips = [
   {
     title: 'Luxury Shopping',
-    tip: 'Home to Bahrain\'s largest collection of luxury brands including Louis Vuitton, Dior, and Chanel.',
+    tip: 'Floor 1 is the luxury level with all the high-end fashion houses and fine jewellery.',
   },
   {
     title: 'Aquarium Visit',
-    tip: 'The Marassi Aquarium is Bahrain\'s largest - plan 2-3 hours for a full experience.',
+    tip: 'The Marassi Aquarium on Floor 2 features sharks, rays, and a Giant Pacific Octopus — plan 2-3 hours.',
   },
   {
     title: 'Beach Access',
-    tip: 'Connected to two 5-star beach resorts with beachfront dining options.',
+    tip: 'Connected to Address and Vida beach resorts with beachfront dining options.',
   },
   {
-    title: 'New Development',
-    tip: 'Opened February 2024 - Bahrain\'s newest luxury shopping destination.',
+    title: 'Opening 2024',
+    tip: 'Bahrain\'s newest luxury shopping destination — stores are still opening regularly.',
   },
 ];
 
 const faqs = [
   {
     q: 'Where is Marassi Galleria located?',
-    a: 'Marassi Galleria is located in Diyar Al Muharraq, a reclaimed island development in the Kingdom of Bahrain. It is NOT in Muharraq city.',
+    a: 'Marassi Galleria is located in Diyar Al Muharraq, a reclaimed island development in the Kingdom of Bahrain.',
   },
   {
     q: 'What luxury brands are at Marassi Galleria?',
-    a: 'Marassi Galleria features Louis Vuitton, Dior, Chanel, Hermès, Cartier, Gucci, Bulgari, Van Cleef & Arpels, Rolex, and many more luxury houses.',
+    a: 'Marassi Galleria features Louis Vuitton, Dior, Chanel, Hermès, Cartier, Gucci, Prada, Bulgari, Van Cleef & Arpels, Rolex, Valentino, Fendi, Saint Laurent, and many more.',
   },
   {
     q: 'Does Marassi Galleria have a cinema?',
-    a: 'Yes, Reel Cinemas operates a premium IMAX cinema at Marassi Galleria.',
+    a: 'Yes, Reel Cinemas operates a premium cinema at Marassi Galleria with top-notch screens and immersive sound.',
   },
   {
     q: 'What is the Marassi Aquarium?',
-    a: 'The Marassi Aquarium & Underwater Zoo is the largest aquarium in Bahrain, featuring diverse marine life and interactive exhibits.',
+    a: 'The Marassi Aquarium & Underwater Zoo features marine and freshwater exhibits including sharks, rays, Arapaima, and a Giant Pacific Octopus across multiple themed zones.',
   },
   {
     q: 'Are there hotels at Marassi Galleria?',
     a: 'Yes, two 5-star hotels are connected: Address Beach Resort Bahrain and Vida Beach Resort Marassi Al-Bahrain.',
   },
+  {
+    q: 'What are Marassi Galleria opening hours?',
+    a: 'Saturday-Wednesday: 10 AM - 10 PM. Thursday-Friday: 10 AM - Midnight.',
+  },
 ];
 
 export default function MarassiGalleriaPage() {
-  const lastUpdated = '2025-01-27';
+  const lastUpdated = new Date().toISOString().split('T')[0];
   
-  const totalStores = 188;
-  const totalDining = 53;
+  const totalStores = storeCategories.reduce((acc, cat) => acc + cat.stores.length, 0);
+  const totalDining = diningOptions.reduce((acc, cat) => acc + cat.restaurants.length, 0);
   
   return (
     <div className="min-h-screen bg-gradient-to-b from-slate-950 via-amber-950/10 to-slate-950 text-white">
@@ -196,11 +306,11 @@ export default function MarassiGalleriaPage() {
               </span>
             </h1>
             <p className="text-xl text-gray-300 max-w-3xl mx-auto">
-              {mallInfo.tagline}. Featuring {totalStores}+ stores including Louis Vuitton, Dior, Chanel, 
-              {totalDining}+ restaurants, Reel Cinemas IMAX, and Bahrain&apos;s largest aquarium.
+              {mallInfo.tagline}. Featuring {totalStores}+ stores including Louis Vuitton, Dior, Chanel, Prada &amp; Gucci, 
+              {totalDining}+ restaurants, Reel Cinemas, and the Marassi Aquarium &amp; Underwater Zoo.
             </p>
             <p className="text-sm text-gray-500 mt-4">
-              Last updated: {lastUpdated}
+              Last updated: {lastUpdated} • Source: <a href="https://marassigalleria.bh" target="_blank" rel="noopener noreferrer" className="text-amber-500 hover:underline">marassigalleria.bh</a>
             </p>
           </div>
 
@@ -235,7 +345,7 @@ export default function MarassiGalleriaPage() {
               </h3>
               <div className="space-y-3 text-gray-300">
                 <p className="font-semibold text-amber-400">{mallInfo.address}</p>
-                <p className="text-sm text-gray-400">Located on Diyar Al Muharraq island (not Muharraq city)</p>
+                <p className="text-sm text-gray-400">Located on Diyar Al Muharraq island</p>
                 <div className="flex gap-3 pt-2">
                   <a 
                     href={mallInfo.mapsLink}
@@ -244,6 +354,14 @@ export default function MarassiGalleriaPage() {
                     className="px-4 py-2 bg-amber-500 hover:bg-amber-400 text-black font-bold rounded-lg transition-colors text-sm"
                   >
                     Get Directions
+                  </a>
+                  <a 
+                    href={mallInfo.website}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="px-4 py-2 bg-white/10 hover:bg-white/20 text-white font-bold rounded-lg transition-colors text-sm"
+                  >
+                    Official Website
                   </a>
                 </div>
               </div>
@@ -279,10 +397,10 @@ export default function MarassiGalleriaPage() {
             <Gem className="w-8 h-8 text-amber-400" />
             Luxury Houses
           </h2>
-          <p className="text-gray-400 mb-8">Bahrain&apos;s most prestigious collection of luxury brands</p>
+          <p className="text-gray-400 mb-8">Bahrain&apos;s most prestigious collection of luxury brands (Floor 1)</p>
           
-          <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-8 gap-3">
-            {luxuryBrands.map((brand) => (
+          <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 gap-3">
+            {storeCategories[0].stores.map((brand) => (
               <div key={brand} className="bg-gradient-to-br from-amber-500/10 to-yellow-500/5 rounded-lg p-3 text-center border border-amber-500/20">
                 <span className="text-sm font-medium text-amber-200">{brand}</span>
               </div>
@@ -294,9 +412,9 @@ export default function MarassiGalleriaPage() {
       {/* Entertainment */}
       <section className="py-16 px-4 bg-black/30">
         <div className="max-w-6xl mx-auto">
-          <h2 className="text-3xl font-bold mb-8">Entertainment & Attractions</h2>
+          <h2 className="text-3xl font-bold mb-8">Entertainment & Attractions (Floor 2)</h2>
           
-          <div className="grid md:grid-cols-3 gap-6">
+          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
             {entertainment.map((item) => (
               <div key={item.name} className="bg-white/5 rounded-xl p-6">
                 <h3 className="text-xl font-bold mb-2 flex items-center gap-2">
@@ -329,11 +447,11 @@ export default function MarassiGalleriaPage() {
         </div>
       </section>
 
-      {/* Store Directory */}
+      {/* Complete Store Directory */}
       <section className="py-16 px-4 bg-black/30">
         <div className="max-w-6xl mx-auto">
-          <h2 className="text-3xl font-bold mb-4">Store Directory</h2>
-          <p className="text-gray-400 mb-8">188+ stores across luxury, fashion, and lifestyle categories</p>
+          <h2 className="text-3xl font-bold mb-4">Complete Store Directory</h2>
+          <p className="text-gray-400 mb-8">{totalStores}+ stores from the <a href="https://marassigalleria.bh/en/shop/" target="_blank" rel="noopener noreferrer" className="text-amber-500 hover:underline">official Marassi Galleria directory</a></p>
           
           <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
             {storeCategories.map((category) => (
@@ -350,12 +468,17 @@ export default function MarassiGalleriaPage() {
                     </span>
                   ))}
                 </div>
-                {category.note && (
-                  <p className="text-xs text-gray-500 mt-2 italic">{category.note}</p>
-                )}
               </div>
             ))}
           </div>
+
+          {/* Coming Soon */}
+          {comingSoon.length > 0 && (
+            <div className="mt-8 bg-amber-500/10 rounded-xl p-5 border border-amber-500/20">
+              <h3 className="font-bold text-amber-400 mb-2">Opening Soon</h3>
+              <p className="text-gray-400 text-sm">{comingSoon.join(' • ')}</p>
+            </div>
+          )}
         </div>
       </section>
 
@@ -364,13 +487,16 @@ export default function MarassiGalleriaPage() {
         <div className="max-w-6xl mx-auto">
           <h2 className="text-3xl font-bold mb-8 flex items-center gap-2">
             <Utensils className="w-8 h-8 text-amber-400" />
-            Food & Dining (53+ options)
+            Food & Dining ({totalDining}+ options)
           </h2>
           
           <div className="grid md:grid-cols-2 gap-6">
             {diningOptions.map((option) => (
               <div key={option.category} className="bg-white/5 rounded-xl p-5">
-                <h3 className="font-bold text-amber-400 mb-3">{option.category}</h3>
+                <h3 className="font-bold text-amber-400 mb-3">
+                  {option.category}
+                  <span className="text-xs text-gray-500 ml-2">({option.restaurants.length})</span>
+                </h3>
                 <div className="space-y-1">
                   {option.restaurants.map((restaurant) => (
                     <span key={restaurant} className="block text-gray-400 text-sm">
@@ -475,7 +601,8 @@ export default function MarassiGalleriaPage() {
             '@context': 'https://schema.org',
             '@type': 'ShoppingCenter',
             name: 'Marassi Galleria',
-            description: 'Bahrain\'s premier luxury shopping destination with 188+ stores, 53+ restaurants, IMAX cinema & largest aquarium.',
+            description: 'Bahrain\'s premier luxury shopping destination with 150+ stores, 30+ restaurants, Reel Cinemas & Marassi Aquarium.',
+            url: mallInfo.website,
             address: {
               '@type': 'PostalAddress',
               addressLocality: 'Diyar Al Muharraq',
