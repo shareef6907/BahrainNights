@@ -956,14 +956,11 @@ export default function HomePageClient({ initialMovies, initialStats, initialTod
               </div>
               <p className="text-gray-400 mb-6">{t.footer.tagline}</p>
               <div className="flex space-x-4">
-                <a href="#" className="w-10 h-10 bg-white/5 rounded-full flex items-center justify-center hover:bg-white/10 transition-colors">
+                <a href="https://www.instagram.com/bh.nights" target="_blank" rel="noopener noreferrer" className="w-10 h-10 bg-white/5 rounded-full flex items-center justify-center hover:bg-white/10 transition-colors">
                   <span className="text-xl">📸</span>
                 </a>
-                <a href="#" className="w-10 h-10 bg-white/5 rounded-full flex items-center justify-center hover:bg-white/10 transition-colors">
+                <a href="https://facebook.com/BahrainNights" target="_blank" rel="noopener noreferrer" className="w-10 h-10 bg-white/5 rounded-full flex items-center justify-center hover:bg-white/10 transition-colors">
                   <span className="text-xl">👤</span>
-                </a>
-                <a href="#" className="w-10 h-10 bg-white/5 rounded-full flex items-center justify-center hover:bg-white/10 transition-colors">
-                  <span className="text-xl">🐦</span>
                 </a>
               </div>
             </div>
