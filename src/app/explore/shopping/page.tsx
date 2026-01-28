@@ -31,7 +31,7 @@ const brandCategories = [
       { name: 'H&M', slug: 'hm', emoji: '👕' },
       { name: 'Nike', slug: 'nike', emoji: '👟' },
       { name: 'Adidas', slug: 'adidas', emoji: '👟' },
-      { name: 'Massimo Dutti', slug: 'massimo-dutti', emoji: '👔' },
+      { name: 'Uniqlo', slug: 'uniqlo', emoji: '🧥' },
     ],
   },
   {
@@ -66,10 +66,10 @@ const brandCategories = [
 
 // Mall data
 const malls = [
-  { name: 'Marassi Galleria', slug: 'marassi-galleria', area: 'Diyar Al Muharraq', stores: '400+', emoji: '🏬' },
+  { name: 'Marassi Galleria', slug: 'marassi-galleria', area: 'Diyar Al Muharraq', stores: '150+', emoji: '🏬' },
   { name: 'City Centre Bahrain', slug: 'city-centre-bahrain', area: 'Seef', stores: '340+', emoji: '🛍️' },
-  { name: 'Seef Mall', slug: 'seef-mall', area: 'Seef', stores: '160+', emoji: '🏪' },
-  { name: 'The Avenues', slug: 'the-avenues', area: 'Bahrain Bay', stores: '200+', emoji: '✨' },
+  { name: 'Seef Mall', slug: 'seef-mall', area: 'Seef', stores: '200+', emoji: '🏪' },
+  { name: 'The Avenues', slug: 'the-avenues', area: 'Bahrain Bay', stores: '130+', emoji: '✨' },
   { name: 'Moda Mall', slug: 'moda-mall', area: 'Manama', stores: '80+', emoji: '💎' },
   { name: 'Bahrain Mall', slug: 'bahrain-mall', area: 'Sanabis', stores: '120+', emoji: '🎁' },
 ];

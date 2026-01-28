@@ -25,10 +25,10 @@ export const metadata: Metadata = {
 const storeInfo = {
   name: 'IKEA Bahrain',
   address: 'IKEA, Salmabad, Kingdom of Bahrain',
-  fullAddress: 'Building 2101, Road 5228, Block 952, Sitra, Bahrain',
+  fullAddress: 'Salmabad, Block 712, Road 100, Manama, Bahrain',
   hours: 'Daily: 10:00 AM - 10:00 PM',
   ramadanHours: 'Ramadan hours may vary',
-  mapsLink: 'https://www.google.com/maps/search/IKEA+Bahrain+Sitra',
+  mapsLink: 'https://www.google.com/maps/search/IKEA+Bahrain+Salmabad',
   website: 'https://www.ikea.com/bh/',
   features: ['Full showroom', 'Market Hall', 'Self-serve warehouse', 'IKEA Restaurant', 'Swedish Food Market', 'Småland (kids play area)', 'Delivery & assembly services'],
   sections: ['Living Room', 'Bedroom', 'Kitchen', 'Bathroom', 'Outdoor', 'Children\'s', 'Office', 'Storage', 'Textiles', 'Decoration'],

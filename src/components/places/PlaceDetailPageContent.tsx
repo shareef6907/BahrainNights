@@ -15,6 +15,7 @@ import SimilarPlaces from './SimilarPlaces';
 import PlaceShareModal from './PlaceShareModal';
 import PlaceYouTubeVideo from './PlaceYouTubeVideo';
 import PlaceReels, { VenueReel } from './PlaceReels';
+import CrossPromoServices from '@/components/CrossPromoServices';
 import type { Venue } from '@/types/database';
 import type { Place, OpeningHours } from './PlaceCard';
 
@@ -336,6 +337,11 @@ export default function PlaceDetailPageContent({ venue, similarVenues, events = 
               />
             </div>
           )}
+
+          {/* Event Production Services */}
+          <div className="mt-12">
+            <CrossPromoServices context="venue" compact />
+          </div>
         </div>
 
         {/* Mobile Sticky Bottom Bar */}

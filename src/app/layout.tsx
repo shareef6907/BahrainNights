@@ -156,7 +156,21 @@ export default function RootLayout({
                   address: {
                     '@type': 'PostalAddress',
                     addressCountry: 'Bahrain'
-                  }
+                  },
+                  subOrganization: [
+                    {
+                      '@type': 'Organization',
+                      name: 'Events Bahrain',
+                      url: 'https://www.eventsbahrain.com',
+                      description: 'Professional event equipment rental and production services in Bahrain. Sound systems, lighting, stages & LED screens.'
+                    },
+                    {
+                      '@type': 'Organization',
+                      name: 'Film Production Bahrain',
+                      url: 'https://www.filmproductionbahrain.com',
+                      description: 'Professional video and film production services in Bahrain. Corporate videos, event coverage, commercials & drone filming.'
+                    }
+                  ]
                 },
                 {
                   '@type': 'WebSite',

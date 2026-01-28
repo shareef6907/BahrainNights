@@ -90,7 +90,7 @@ const relatedBrands = [
 const faqs = [
   {
     q: 'How many Zara stores are there in Bahrain?',
-    a: 'Zara has 5 stores in Bahrain - City Centre Bahrain (main store), Seef Mall, The Avenues Bahrain, Bahrain Mall, and Marassi Galleria.',
+    a: 'Zara has stores in Bahrain including City Centre Bahrain (main two-floor store) and Marassi Galleria. Locations may change, so check before visiting.',
   },
   {
     q: 'Which is the biggest Zara in Bahrain?',
@@ -146,8 +146,8 @@ export default function ZaraBahrainPage() {
           {/* Quick Info */}
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mt-12">
             {[
-              { label: 'Store', value: '1', icon: ShoppingBag },
-              { label: 'Location', value: 'City Centre', icon: MapPin },
+              { label: 'Stores', value: '2+', icon: ShoppingBag },
+              { label: 'Main Store', value: 'City Centre', icon: MapPin },
               { label: 'Rating', value: '4.0★', icon: Star },
               { label: 'Reviews', value: '251', icon: Users },
             ].map((stat) => (
@@ -164,8 +164,8 @@ export default function ZaraBahrainPage() {
       {/* Store Locations */}
       <section className="py-16 px-4">
         <div className="max-w-6xl mx-auto">
-          <h2 className="text-3xl font-bold mb-4">Zara Store in Bahrain</h2>
-          <p className="text-gray-400 mb-8">Zara has one main store in Bahrain at City Centre.</p>
+          <h2 className="text-3xl font-bold mb-4">Zara Stores in Bahrain</h2>
+          <p className="text-gray-400 mb-8">Find Zara at these verified locations in Bahrain.</p>
           
           <div className="space-y-6">
             {storeLocations.map((store) => (
