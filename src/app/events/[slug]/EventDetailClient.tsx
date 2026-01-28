@@ -11,6 +11,7 @@ import EventGallery from '@/components/events/EventGallery';
 import ShareModal from '@/components/events/ShareModal';
 import AddToCalendar from '@/components/events/AddToCalendar';
 import SimilarEvents from '@/components/events/SimilarEvents';
+import CrossPromoServices from '@/components/CrossPromoServices';
 import { Event } from '@/components/events/EventCard';
 import { useTranslation } from '@/lib/i18n';
 
@@ -343,6 +344,9 @@ export default function EventDetailClient({ event, similarEvents }: EventDetailC
             </div>
           )}
         </div>
+
+        {/* Event Production Services */}
+        <CrossPromoServices context="event" compact />
 
         {/* Mobile Sticky Bottom Bar - only show if there's a URL */}
         {(event.bookingUrl || event.sourceUrl) && (

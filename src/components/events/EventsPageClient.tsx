@@ -7,6 +7,7 @@ import { Search, Calendar, MapPin, Clock, Filter, Grid3X3, List, ChevronRight, S
 import Link from 'next/link';
 import Image from 'next/image';
 import AdBanner from '@/components/ads/AdBanner';
+import CrossPromoServices from '@/components/CrossPromoServices';
 import { sortEventsWithFeatured } from '@/lib/utils/eventSorting';
 import { useTranslation } from '@/lib/i18n';
 import EventModal, { EventData } from '@/components/events/EventModal';
@@ -743,6 +744,11 @@ export default function EventsPageClient({ initialEvents, familyAttractions = []
         </div>
       </section>
     </div>
+
+      {/* Event Production Services */}
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pb-16">
+        <CrossPromoServices context="event" />
+      </div>
 
       {/* Event Modal */}
       <EventModal

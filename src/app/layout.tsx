@@ -141,7 +141,9 @@ export default function RootLayout({
                   sameAs: [
                     'https://instagram.com/bh.nights',
                     'https://facebook.com/BahrainNights',
-                    'https://twitter.com/BahrainNights'
+                    'https://twitter.com/BahrainNights',
+                    'https://www.eventsbahrain.com',
+                    'https://www.filmproductionbahrain.com'
                   ],
                   contactPoint: {
                     '@type': 'ContactPoint',

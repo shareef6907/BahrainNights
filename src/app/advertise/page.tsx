@@ -2,6 +2,7 @@
 
 import { motion } from 'framer-motion';
 import { Megaphone, Eye, Users, TrendingUp, Mail, Phone, CheckCircle, Sparkles, Target, Globe, Zap, Heart, Code } from 'lucide-react';
+import CrossPromoServices from '@/components/CrossPromoServices';
 
 const benefits = [
   {
@@ -306,6 +307,9 @@ export default function AdvertisePage() {
           </p>
         </motion.div>
       </section>
+
+      {/* Sister Company Services */}
+      <CrossPromoServices context="general" />
     </div>
   );
 }
