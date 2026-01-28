@@ -27,7 +27,7 @@ const storeLocations = [
     name: 'Chanel - Marassi Galleria',
     mall: 'Marassi Galleria',
     address: 'Marassi Galleria, Marassi Al Bahrain, Diyar Al Muharraq',
-    floor: 'Ground Floor',
+    floor: 'Level 2',
     hours: 'Sun-Wed: 10:00 AM - 10:00 PM, Thu-Sat: 10:00 AM - 12:00 AM',
     products: ['Haute Couture', 'Ready-to-Wear', 'Handbags', 'Accessories', 'Fragrance', 'Beauty', 'Fine Jewelry', 'Watches'],
     features: ['Main store', 'Full boutique experience', 'Personal styling', 'Beauty counter', 'Near Address Hotel'],
