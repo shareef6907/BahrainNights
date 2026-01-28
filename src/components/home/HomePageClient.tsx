@@ -47,6 +47,44 @@ const EventModal = dynamic(() => import('@/components/events/EventModal'), {
   ssr: false,
 });
 
+// NEW UNIQUE FEATURES - Lazy load for performance
+const MoodBasedDiscovery = dynamic(() => import('@/components/home/MoodBasedDiscovery'), {
+  loading: () => <div className="h-[300px] bg-slate-800/50 rounded-2xl animate-pulse" />,
+  ssr: false,
+});
+
+const HappeningNow = dynamic(() => import('@/components/home/HappeningNow'), {
+  loading: () => null,
+  ssr: false,
+});
+
+const SurpriseMe = dynamic(() => import('@/components/home/SurpriseMe'), {
+  loading: () => null,
+  ssr: false,
+});
+
+// 🌙 AI NIGHT PLANNER - Personalized itinerary builder (UNIQUE FEATURE!)
+const NightPlanner = dynamic(() => import('@/components/home/NightPlanner'), {
+  loading: () => null,
+  ssr: false,
+});
+
+// 📊 LIVE VIBE CHECK - Real-time crowd levels (UNIQUE FEATURE!)
+const VibeCheck = dynamic(() => import('@/components/home/VibeCheck'), {
+  loading: () => null,
+  ssr: false,
+});
+
+// 🗳️ SQUAD VOTE - Group decision maker (UNIQUE FEATURE!)
+const SquadVote = dynamic(() => import('@/components/home/SquadVote'), {
+  loading: () => null,
+  ssr: false,
+});
+
+// Import types for new features
+import type { HappeningNowEvent } from '@/components/home/HappeningNow';
+import type { SurpriseOption } from '@/components/home/SurpriseMe';
+
 // Animation variants - optimized for speed
 const fadeIn = {
   hidden: { opacity: 0, y: 20 },
@@ -216,9 +254,11 @@ interface HomePageClientProps {
   initialStats: { events: number; venues: number; cinema: number; offers: number; explore: number; attractions: number; blog: number };
   initialTodayEvents: TodayEvent[];
   initialInternationalEvents: HomepageInternationalEvent[];
+  initialHappeningNowEvents: HappeningNowEvent[];
+  initialSurpriseData: { events: SurpriseOption[], places: SurpriseOption[], attractions: SurpriseOption[] };
 }
 
-export default function HomePageClient({ initialMovies, initialStats, initialTodayEvents, initialInternationalEvents }: HomePageClientProps) {
+export default function HomePageClient({ initialMovies, initialStats, initialTodayEvents, initialInternationalEvents, initialHappeningNowEvents, initialSurpriseData }: HomePageClientProps) {
   const { t } = useTranslation();
 
   // International dropdown - hardcoded to show UAE, Saudi Arabia, Qatar
@@ -726,6 +766,11 @@ export default function HomePageClient({ initialMovies, initialStats, initialTod
         </div>
       </section>
 
+      {/* 🆕 HAPPENING NOW - Real-time events with countdown (UNIQUE FEATURE!) */}
+      {initialHappeningNowEvents && initialHappeningNowEvents.length > 0 && (
+        <HappeningNow events={initialHappeningNowEvents} />
+      )}
+
       {/* Cinema Section - NO LOADING STATE! Data pre-fetched on server */}
       <section className="px-4 mb-12 md:mb-24">
         <div className="max-w-7xl mx-auto">
@@ -884,6 +929,9 @@ export default function HomePageClient({ initialMovies, initialStats, initialTod
         </div>
       </section>
 
+      {/* 🆕 WHAT'S YOUR VIBE? - Mood-based discovery (UNIQUE FEATURE!) */}
+      <MoodBasedDiscovery />
+
       {/* Categories Grid - Updated to match main menu */}
       <section className="px-4 mb-12 md:mb-24">
         <div className="max-w-7xl mx-auto">
@@ -1020,6 +1068,22 @@ export default function HomePageClient({ initialMovies, initialStats, initialTod
           }}
         />
       )}
+
+      {/* 🆕 SURPRISE ME - Random picker floating button (UNIQUE FEATURE!) */}
+      <SurpriseMe 
+        events={initialSurpriseData.events}
+        places={initialSurpriseData.places}
+        attractions={initialSurpriseData.attractions}
+      />
+
+      {/* 🌙 AI NIGHT PLANNER - Plan your perfect evening (UNIQUE FEATURE!) */}
+      <NightPlanner />
+
+      {/* 📊 LIVE VIBE CHECK - Real-time crowd levels at venues (UNIQUE FEATURE!) */}
+      <VibeCheck />
+
+      {/* 🗳️ SQUAD VOTE - Group decision maker with shareable links (UNIQUE FEATURE!) */}
+      <SquadVote />
     </div>
   );
 }
