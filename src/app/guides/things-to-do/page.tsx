@@ -1,3 +1,4 @@
+import BreadcrumbSchema from '@/components/SEO/BreadcrumbSchema';
 import { Metadata } from 'next';
 import Link from 'next/link';
 import { 
@@ -120,6 +121,11 @@ const topPicks = [
 export default function ThingsToDoPage() {
   return (
     <div className="min-h-screen bg-gradient-to-b from-slate-950 via-slate-900 to-slate-950 text-white">
+      <BreadcrumbSchema items={[
+        { name: 'Home', url: 'https://www.bahrainnights.com' },
+        { name: 'Guides', url: 'https://www.bahrainnights.com/guides' },
+        { name: 'Things to Do in Bahrain', url: 'https://www.bahrainnights.com/guides/things-to-do' },
+      ]} />
       {/* Hero Section */}
       <section className="relative py-20 px-4 overflow-hidden">
         <div className="absolute inset-0 bg-gradient-to-r from-yellow-500/10 to-purple-500/10" />

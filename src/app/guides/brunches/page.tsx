@@ -1,3 +1,4 @@
+import BreadcrumbSchema from '@/components/SEO/BreadcrumbSchema';
 import { Metadata } from 'next';
 import Link from 'next/link';
 import { 
@@ -152,6 +153,11 @@ const byOccasion = [
 export default function BrunchesGuidePage() {
   return (
     <div className="min-h-screen bg-gradient-to-b from-slate-950 via-amber-950/10 to-slate-950 text-white">
+      <BreadcrumbSchema items={[
+        { name: 'Home', url: 'https://www.bahrainnights.com' },
+        { name: 'Guides', url: 'https://www.bahrainnights.com/guides' },
+        { name: 'Best Brunches in Bahrain', url: 'https://www.bahrainnights.com/guides/brunches' },
+      ]} />
       {/* Hero Section */}
       <section className="relative py-20 px-4 overflow-hidden">
         <div className="absolute inset-0 bg-gradient-to-r from-amber-500/10 to-orange-500/10" />
