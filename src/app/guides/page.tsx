@@ -1,11 +1,27 @@
 import { Metadata } from 'next';
 import Link from 'next/link';
 import { ArrowRight, BookOpen, Calendar, MapPin, Globe } from 'lucide-react';
+import InternalLinks, { eventLinks, placeLinks, exploreLinks } from '@/components/SEO/InternalLinks';
 
 export const metadata: Metadata = {
   title: 'Bahrain Travel Guides | BahrainNights',
   description: 'Expert travel guides for Bahrain - discover the best things to do, nightlife, dining, events, and local tips from BahrainNights.',
   keywords: 'Bahrain guide, Bahrain travel, things to do Bahrain, Bahrain tips, visit Bahrain',
+  alternates: {
+    canonical: 'https://www.bahrainnights.com/guides',
+  },
+  openGraph: {
+    title: 'Bahrain Travel Guides | BahrainNights',
+    description: 'Expert travel guides for Bahrain - discover the best things to do, nightlife, dining, events, and local tips.',
+    type: 'website',
+    locale: 'en_BH',
+    url: 'https://www.bahrainnights.com/guides',
+  },
+  twitter: {
+    card: 'summary_large_image',
+    title: 'Bahrain Travel Guides | BahrainNights',
+    description: 'Expert travel guides for Bahrain - discover the best things to do, nightlife, dining, events, and local tips.',
+  },
 };
 
 const bahrainGuides = [
@@ -498,6 +514,8 @@ export default function GuidesPage() {
           </form>
         </div>
       </section>
+
+      <InternalLinks title="Discover More on BahrainNights" links={[...eventLinks, ...placeLinks, ...exploreLinks]} />
     </div>
   );
 }

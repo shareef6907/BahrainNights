@@ -14,6 +14,11 @@ export const metadata: Metadata = {
     locale: 'en_BH',
     url: 'https://www.bahrainnights.com/explore',
   },
+  twitter: {
+    card: 'summary_large_image',
+    title: 'Explore Bahrain - Shopping, Hotels, Spas, Tours & More',
+    description: 'Explore everything Bahrain has to offer. Shopping malls, luxury hotels, spas, guided tours, and more.',
+  },
 };
 
 export default function ExploreLayout({ children }: { children: React.ReactNode }) {

@@ -14,6 +14,11 @@ export const metadata: Metadata = {
     locale: 'en_BH',
     url: 'https://www.bahrainnights.com/places',
   },
+  twitter: {
+    card: 'summary_large_image',
+    title: 'Best Restaurants, Bars, Cafes & Nightlife in Bahrain',
+    description: 'Discover the best dining and nightlife spots in Bahrain. Explore top restaurants, cafes, lounges, bars, and nightclubs.',
+  },
 };
 
 export default function PlacesLayout({ children }: { children: React.ReactNode }) {

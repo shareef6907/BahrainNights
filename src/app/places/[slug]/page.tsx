@@ -25,7 +25,18 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
   return {
     title: `${venue.name} | BahrainNights`,
     description: venue.description?.slice(0, 160) || `Discover ${venue.name} in ${venue.area}, Bahrain`,
+    alternates: {
+      canonical: `https://www.bahrainnights.com/places/${slug}`,
+    },
     openGraph: {
+      title: venue.name,
+      description: venue.description?.slice(0, 160) || `Discover ${venue.name} in ${venue.area}, Bahrain`,
+      images: venue.cover_image_url ? [venue.cover_image_url] : [],
+      url: `https://www.bahrainnights.com/places/${slug}`,
+      type: 'website',
+    },
+    twitter: {
+      card: 'summary_large_image',
       title: venue.name,
       description: venue.description?.slice(0, 160) || `Discover ${venue.name} in ${venue.area}, Bahrain`,
       images: venue.cover_image_url ? [venue.cover_image_url] : [],

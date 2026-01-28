@@ -213,12 +213,21 @@ export async function generateMetadata({ params }: PageProps) {
   return {
     title: `${event.title} | BahrainNights`,
     description: event.description?.slice(0, 160) || `${event.title} at ${event.venue_name}`,
+    alternates: {
+      canonical: `https://www.bahrainnights.com/events/${slug}`,
+    },
     openGraph: {
       title: event.title,
       description: event.description?.slice(0, 160),
       images: [event.cover_url || event.image_url || getDefaultImage(event.category)],
       url: `https://www.bahrainnights.com/events/${slug}`,
       type: 'website',
+    },
+    twitter: {
+      card: 'summary_large_image',
+      title: event.title,
+      description: event.description?.slice(0, 160) || `${event.title} at ${event.venue_name}`,
+      images: [event.cover_url || event.image_url || getDefaultImage(event.category)],
     },
   };
 }

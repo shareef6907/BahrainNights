@@ -203,4 +203,9 @@ export const metadata = {
   alternates: {
     canonical: 'https://www.bahrainnights.com/cinema',
   },
+  twitter: {
+    card: 'summary_large_image',
+    title: 'Cinema in Bahrain - Movies Now Showing & Coming Soon',
+    description: 'Find movies now showing at VOX Cinemas Bahrain. Check showtimes and book tickets online.',
+  },
 };

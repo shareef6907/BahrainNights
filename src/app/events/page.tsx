@@ -2,6 +2,7 @@ import { Suspense } from 'react';
 import { createClient } from '@supabase/supabase-js';
 import EventsPageClient, { Event, Attraction } from '@/components/events/EventsPageClient';
 import EventListSchema from '@/components/SEO/EventListSchema';
+import InternalLinks, { guideLinks, placeLinks } from '@/components/SEO/InternalLinks';
 
 // Force dynamic rendering to ensure fresh data on every request
 export const dynamic = 'force-dynamic';
@@ -287,6 +288,7 @@ export default async function EventsPage() {
       <Suspense fallback={null}>
         <EventsPageClient initialEvents={events} familyAttractions={attractions} />
       </Suspense>
+      <InternalLinks title="Explore Bahrain" links={[...guideLinks, ...placeLinks]} />
     </>
   );
 }
@@ -304,5 +306,10 @@ export const metadata = {
   },
   alternates: {
     canonical: 'https://www.bahrainnights.com/events',
+  },
+  twitter: {
+    card: 'summary_large_image',
+    title: 'Events in Bahrain - Concerts, Shows & Happenings | BahrainNights',
+    description: 'Discover the best events happening in Bahrain. Find concerts, shows, parties, family activities, and cultural events.',
   },
 };

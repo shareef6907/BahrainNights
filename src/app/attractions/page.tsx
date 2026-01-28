@@ -128,4 +128,9 @@ export const metadata = {
   alternates: {
     canonical: 'https://www.bahrainnights.com/attractions',
   },
+  twitter: {
+    card: 'summary_large_image',
+    title: 'Attractions & Experiences in Bahrain | BahrainNights',
+    description: 'Discover the best attractions, tours, water sports, and experiences in Bahrain.',
+  },
 };
