@@ -447,9 +447,6 @@ export async function GET() {
                     <a href="https://instagram.com/bh.nights" style="display: inline-block; width: 40px; height: 40px; background: #1E1E2E; border-radius: 10px; line-height: 40px; text-align: center; text-decoration: none; font-size: 18px;">📸</a>
                   </td>
                   <td style="padding: 0 10px;">
-                    <a href="https://twitter.com/bahaborababy" style="display: inline-block; width: 40px; height: 40px; background: #1E1E2E; border-radius: 10px; line-height: 40px; text-align: center; text-decoration: none; font-size: 18px;">🐦</a>
-                  </td>
-                  <td style="padding: 0 10px;">
                     <a href="https://bahrainnights.com" style="display: inline-block; width: 40px; height: 40px; background: #1E1E2E; border-radius: 10px; line-height: 40px; text-align: center; text-decoration: none; font-size: 18px;">🌐</a>
                   </td>
                 </tr>

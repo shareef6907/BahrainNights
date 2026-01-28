@@ -93,8 +93,7 @@ export const SEO_CONFIG = {
     },
     sameAs: [
       'https://www.instagram.com/bh.nights',
-      'https://www.facebook.com/bahrainnights',
-      'https://twitter.com/bahrainnights'
+      'https://www.facebook.com/bahrainnights'
     ]
   },
 
