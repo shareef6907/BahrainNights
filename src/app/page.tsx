@@ -254,14 +254,100 @@ async function getStats() {
   }
 }
 
+// Fetch happening now events (events happening today)
+async function getHappeningNowEvents() {
+  const today = new Date().toISOString().split('T')[0];
+  
+  const { data, error } = await supabaseAdmin
+    .from('events')
+    .select('id, title, slug, venue_name, cover_url, category, date, time, end_time')
+    .eq('status', 'published')
+    .eq('is_hidden', false)
+    .eq('country', 'Bahrain')
+    .eq('date', today)
+    .order('time', { ascending: true })
+    .limit(6);
+
+  if (error) {
+    console.error('Error fetching happening now events:', error);
+    return [];
+  }
+
+  return data || [];
+}
+
+// Fetch surprise me data (random events, places, attractions)
+async function getSurpriseData() {
+  const today = new Date().toISOString().split('T')[0];
+  
+  const [eventsResult, venuesResult, attractionsResult] = await Promise.all([
+    // Random upcoming events
+    supabaseAdmin
+      .from('events')
+      .select('id, title, slug, venue_name, cover_url, category, time')
+      .eq('status', 'published')
+      .eq('is_hidden', false)
+      .eq('country', 'Bahrain')
+      .gte('date', today)
+      .limit(10),
+    // Random venues/places
+    supabaseAdmin
+      .from('venues')
+      .select('id, name, slug, cover_url, category')
+      .limit(10),
+    // Random attractions
+    supabaseAdmin
+      .from('attractions')
+      .select('id, name, slug, featured_image, category')
+      .eq('is_active', true)
+      .limit(10),
+  ]);
+
+  const events = (eventsResult.data || []).map(e => ({
+    type: 'event' as const,
+    id: e.id,
+    title: e.title,
+    slug: e.slug,
+    image: e.cover_url || '/images/event-placeholder.jpg',
+    venue: e.venue_name,
+    category: e.category || 'Event',
+    time: e.time,
+    href: `/events/${e.slug}`,
+  }));
+
+  const places = (venuesResult.data || []).map(v => ({
+    type: 'place' as const,
+    id: v.id,
+    title: v.name,
+    slug: v.slug,
+    image: v.cover_url || '/images/venue-placeholder.jpg',
+    category: v.category || 'Venue',
+    href: `/venues/${v.slug}`,
+  }));
+
+  const attractions = (attractionsResult.data || []).map(a => ({
+    type: 'attraction' as const,
+    id: a.id,
+    title: a.name,
+    slug: a.slug,
+    image: a.featured_image || '/images/attraction-placeholder.jpg',
+    category: a.category || 'Attraction',
+    href: `/attractions/${a.slug}`,
+  }));
+
+  return { events, places, attractions };
+}
+
 // Server Component - data is fetched BEFORE the page renders
 export default async function BahrainNightsHomepage() {
   // Fetch all data on the server - NO loading state needed!
-  const [movies, stats, todayEvents, internationalEvents] = await Promise.all([
+  const [movies, stats, todayEvents, internationalEvents, happeningNowEvents, surpriseData] = await Promise.all([
     getMovies(),
     getStats(),
     getTodayEvents(),
-    getInternationalEvents()
+    getInternationalEvents(),
+    getHappeningNowEvents(),
+    getSurpriseData()
   ]);
 
   return (
@@ -270,6 +356,8 @@ export default async function BahrainNightsHomepage() {
       initialStats={stats}
       initialTodayEvents={todayEvents}
       initialInternationalEvents={internationalEvents}
+      initialHappeningNowEvents={happeningNowEvents}
+      initialSurpriseData={surpriseData}
     />
   );
 }
