@@ -75,12 +75,6 @@ const VibeCheck = dynamic(() => import('@/components/home/VibeCheck'), {
   ssr: false,
 });
 
-// 🗳️ SQUAD VOTE - Group decision maker (UNIQUE FEATURE!)
-const SquadVote = dynamic(() => import('@/components/home/SquadVote'), {
-  loading: () => null,
-  ssr: false,
-});
-
 // Import types for new features
 import type { HappeningNowEvent } from '@/components/home/HappeningNow';
 import type { SurpriseOption } from '@/components/home/SurpriseMe';
@@ -1081,9 +1075,6 @@ export default function HomePageClient({ initialMovies, initialStats, initialTod
 
       {/* 📊 LIVE VIBE CHECK - Real-time crowd levels at venues (UNIQUE FEATURE!) */}
       <VibeCheck />
-
-      {/* 🗳️ SQUAD VOTE - Group decision maker with shareable links (UNIQUE FEATURE!) */}
-      <SquadVote />
     </div>
   );
 }
