@@ -63,18 +63,6 @@ const SurpriseMe = dynamic(() => import('@/components/home/SurpriseMe'), {
   ssr: false,
 });
 
-// 🌙 AI NIGHT PLANNER - Personalized itinerary builder (UNIQUE FEATURE!)
-const NightPlanner = dynamic(() => import('@/components/home/NightPlanner'), {
-  loading: () => null,
-  ssr: false,
-});
-
-// 📊 LIVE VIBE CHECK - Real-time crowd levels (UNIQUE FEATURE!)
-const VibeCheck = dynamic(() => import('@/components/home/VibeCheck'), {
-  loading: () => null,
-  ssr: false,
-});
-
 // Import types for new features
 import type { HappeningNowEvent } from '@/components/home/HappeningNow';
 import type { SurpriseOption } from '@/components/home/SurpriseMe';
@@ -1070,11 +1058,6 @@ export default function HomePageClient({ initialMovies, initialStats, initialTod
         attractions={initialSurpriseData.attractions}
       />
 
-      {/* 🌙 AI NIGHT PLANNER - Plan your perfect evening (UNIQUE FEATURE!) */}
-      <NightPlanner />
-
-      {/* 📊 LIVE VIBE CHECK - Real-time crowd levels at venues (UNIQUE FEATURE!) */}
-      <VibeCheck />
     </div>
   );
 }
