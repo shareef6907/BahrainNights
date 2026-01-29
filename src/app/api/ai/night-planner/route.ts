@@ -8,7 +8,7 @@ interface Venue {
   slug: string;
   category: string;
   description: string | null;
-  cover_image: string | null;
+  cover_image_url: string | null;
   price_range: string | null;
   average_rating: number | null;
   address: string | null;
@@ -139,8 +139,9 @@ export async function POST(request: NextRequest) {
     // Fetch venues matching the mood categories
     const { data: venues, error } = await supabaseAdmin
       .from('venues')
-      .select('id, name, slug, category, description, cover_image, price_range, average_rating, address')
-      .eq('is_published', true)
+      .select('id, name, slug, category, description, cover_image_url, price_range, average_rating, address')
+      .eq('status', 'approved')
+      .eq('is_hidden', false)
       .limit(50);
 
     if (error) {
@@ -214,7 +215,7 @@ export async function POST(request: NextRequest) {
             slug: venue.slug,
             category: venue.category || 'Venue',
             description: venue.description || '',
-            image: venue.cover_image || undefined,
+            image: venue.cover_image_url || undefined,
             priceRange: venue.price_range || undefined,
             rating: venue.average_rating || undefined,
             address: venue.address || undefined,
