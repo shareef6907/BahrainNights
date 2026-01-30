@@ -68,8 +68,27 @@ async function getBlogArticles() {
 export default async function BlogPage() {
   const articles = await getBlogArticles();
 
-  // Featured articles (admin-selected)
-  const featured = articles.filter(a => a.is_featured).slice(0, 10);
+  // Featured articles (admin-selected) - exclude past events
+  // If article has event_date or event_end_date, only show if event hasn't passed
+  const now = new Date();
+  now.setHours(0, 0, 0, 0); // Compare dates only, not time
+  
+  const featured = articles.filter(a => {
+    if (!a.is_featured) return false;
+    
+    // If it's an event with dates, check if it's still upcoming/current
+    const eventEndDate = a.event_end_date ? new Date(a.event_end_date) : null;
+    const eventDate = a.event_date ? new Date(a.event_date) : null;
+    
+    // Use end date if available, otherwise use event date
+    const relevantDate = eventEndDate || eventDate;
+    
+    // If no event dates, it's a regular featured article - show it
+    if (!relevantDate) return true;
+    
+    // Only show if event hasn't passed yet
+    return relevantDate >= now;
+  }).slice(0, 10);
 
   // Get trending (most viewed)
   const trending = [...articles]
