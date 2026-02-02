@@ -15,7 +15,7 @@ export async function GET() {
 
     if (error) {
       console.error('Error fetching PWA stats:', error);
-      return NextResponse.json({ error: 'Failed to fetch stats' }, { status: 500 });
+      // Return empty stats instead of failing - table might not have data yet
     }
 
     // Calculate stats
