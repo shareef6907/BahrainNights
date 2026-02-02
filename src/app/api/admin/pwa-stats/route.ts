@@ -1,15 +1,8 @@
-import { NextRequest, NextResponse } from 'next/server';
+import { NextResponse } from 'next/server';
 import { getAdminClient } from '@/lib/supabase/server';
-import { verifyAdmin } from '@/lib/auth/verifyAdmin';
 import type { ActivityLog } from '@/types/database';
 
-export async function GET(request: NextRequest) {
-  // Verify admin access
-  const authResult = await verifyAdmin(request);
-  if (!authResult.isAdmin) {
-    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-  }
-
+export async function GET() {
   try {
     const supabase = getAdminClient();
 
