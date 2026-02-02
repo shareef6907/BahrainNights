@@ -5,6 +5,7 @@ import { AuthProvider } from "@/lib/auth-context";
 import { TranslationProvider } from "@/lib/i18n/TranslationContext";
 import { PublicAuthProvider } from "@/context/PublicAuthContext";
 import { PageTracker } from "@/components/analytics/PageTracker";
+import { GoogleAnalytics } from "@/components/analytics/GoogleAnalytics";
 import FloatingBackButton from "@/components/ui/FloatingBackButton";
 import SwipeBackHandler from "@/components/SwipeBackHandler";
 import { PWARegister } from "@/components/PWARegister";
@@ -195,6 +196,7 @@ export default function RootLayout({
         />
       </head>
       <body className={`${inter.variable} font-inter antialiased`}>
+        <GoogleAnalytics />
         <TranslationProvider>
           <PublicAuthProvider>
             <AuthProvider>

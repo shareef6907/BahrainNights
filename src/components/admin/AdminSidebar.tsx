@@ -26,6 +26,7 @@ import {
   Ticket,
   FileText,
   Mail,
+  Smartphone,
 } from 'lucide-react';
 import { useAuth } from '@/lib/auth-context';
 
@@ -105,6 +106,11 @@ const navItems = [
     name: 'Analytics',
     href: '/admin/analytics',
     icon: BarChart3,
+  },
+  {
+    name: 'PWA Installs',
+    href: '/admin/pwa',
+    icon: Smartphone,
   },
   {
     name: 'Newsletter',
