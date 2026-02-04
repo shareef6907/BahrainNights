@@ -48,11 +48,6 @@ const EventModal = dynamic(() => import('@/components/events/EventModal'), {
 });
 
 // NEW UNIQUE FEATURES - Lazy load for performance
-const MoodBasedDiscovery = dynamic(() => import('@/components/home/MoodBasedDiscovery'), {
-  loading: () => <div className="h-[300px] bg-slate-800/50 rounded-2xl animate-pulse" />,
-  ssr: false,
-});
-
 const HappeningNow = dynamic(() => import('@/components/home/HappeningNow'), {
   loading: () => null,
   ssr: false,
@@ -910,9 +905,6 @@ export default function HomePageClient({ initialMovies, initialStats, initialTod
           </motion.div>
         </div>
       </section>
-
-      {/* 🆕 WHAT'S YOUR VIBE? - Mood-based discovery (UNIQUE FEATURE!) */}
-      <MoodBasedDiscovery />
 
       {/* Categories Grid - Updated to match main menu */}
       <section className="px-4 mb-12 md:mb-24">
