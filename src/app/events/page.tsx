@@ -3,6 +3,7 @@ import { createClient } from '@supabase/supabase-js';
 import EventsPageClient, { Event, Attraction } from '@/components/events/EventsPageClient';
 import EventListSchema from '@/components/SEO/EventListSchema';
 import InternalLinks, { guideLinks, placeLinks } from '@/components/SEO/InternalLinks';
+import EventServicesPromo from '@/components/events/EventServicesPromo';
 
 // Force dynamic rendering to ensure fresh data on every request
 export const dynamic = 'force-dynamic';
@@ -288,6 +289,7 @@ export default async function EventsPage() {
       <Suspense fallback={null}>
         <EventsPageClient initialEvents={events} familyAttractions={attractions} />
       </Suspense>
+      <EventServicesPromo />
       <InternalLinks title="Explore Bahrain" links={[...guideLinks, ...placeLinks]} />
     </>
   );
