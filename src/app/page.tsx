@@ -276,6 +276,36 @@ async function getHappeningNowEvents() {
   return data || [];
 }
 
+// Fetch trending data for Trending This Week section
+async function getTrendingData() {
+  const today = new Date().toISOString().split('T')[0];
+  
+  const [venuesResult, eventsResult] = await Promise.all([
+    // Top 5 venues by view count
+    supabaseAdmin
+      .from('venues')
+      .select('id, name, slug, category, area, rating, image_url, view_count')
+      .eq('status', 'approved')
+      .order('view_count', { ascending: false })
+      .limit(5),
+    // Top 3 upcoming events by view count  
+    supabaseAdmin
+      .from('events')
+      .select('id, title, slug, venue_name, date, cover_url, view_count')
+      .eq('status', 'published')
+      .eq('is_hidden', false)
+      .eq('country', 'Bahrain')
+      .gte('date', today)
+      .order('view_count', { ascending: false })
+      .limit(3),
+  ]);
+
+  return {
+    venues: venuesResult.data || [],
+    events: eventsResult.data || [],
+  };
+}
+
 // Fetch surprise me data (random events, places, attractions)
 async function getSurpriseData() {
   const today = new Date().toISOString().split('T')[0];
@@ -341,13 +371,14 @@ async function getSurpriseData() {
 // Server Component - data is fetched BEFORE the page renders
 export default async function BahrainNightsHomepage() {
   // Fetch all data on the server - NO loading state needed!
-  const [movies, stats, todayEvents, internationalEvents, happeningNowEvents, surpriseData] = await Promise.all([
+  const [movies, stats, todayEvents, internationalEvents, happeningNowEvents, surpriseData, trendingData] = await Promise.all([
     getMovies(),
     getStats(),
     getTodayEvents(),
     getInternationalEvents(),
     getHappeningNowEvents(),
-    getSurpriseData()
+    getSurpriseData(),
+    getTrendingData()
   ]);
 
   return (
@@ -358,6 +389,7 @@ export default async function BahrainNightsHomepage() {
       initialInternationalEvents={internationalEvents}
       initialHappeningNowEvents={happeningNowEvents}
       initialSurpriseData={surpriseData}
+      initialTrendingData={trendingData}
     />
   );
 }

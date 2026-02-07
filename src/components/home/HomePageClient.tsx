@@ -58,6 +58,18 @@ const SurpriseMe = dynamic(() => import('@/components/home/SurpriseMe'), {
   ssr: false,
 });
 
+// Trending Section - lazy loaded
+const TrendingSection = dynamic(() => import('@/components/home/TrendingSection'), {
+  loading: () => <div className="h-[400px] bg-slate-800/50 rounded-2xl animate-pulse" />,
+  ssr: false,
+});
+
+// Newsletter Popup - lazy loaded
+const NewsletterPopup = dynamic(
+  () => import('@/components/newsletter/NewsletterPopup').then(mod => ({ default: mod.NewsletterPopup })),
+  { ssr: false }
+);
+
 // Import types for new features
 import type { HappeningNowEvent } from '@/components/home/HappeningNow';
 import type { SurpriseOption } from '@/components/home/SurpriseMe';
@@ -226,6 +238,28 @@ function convertToMovieFormat(movie: HomepageMovie): Movie {
   };
 }
 
+// Trending data types
+interface TrendingVenue {
+  id: string;
+  name: string;
+  slug: string;
+  category: string;
+  area: string;
+  rating: number;
+  image_url: string | null;
+  view_count: number;
+}
+
+interface TrendingEvent {
+  id: string;
+  title: string;
+  slug: string;
+  venue_name: string;
+  date: string;
+  cover_url: string | null;
+  view_count: number;
+}
+
 interface HomePageClientProps {
   initialMovies: HomepageMovie[];
   initialStats: { events: number; venues: number; cinema: number; offers: number; explore: number; attractions: number; blog: number };
@@ -233,9 +267,10 @@ interface HomePageClientProps {
   initialInternationalEvents: HomepageInternationalEvent[];
   initialHappeningNowEvents: HappeningNowEvent[];
   initialSurpriseData: { events: SurpriseOption[], places: SurpriseOption[], attractions: SurpriseOption[] };
+  initialTrendingData?: { venues: TrendingVenue[], events: TrendingEvent[] };
 }
 
-export default function HomePageClient({ initialMovies, initialStats, initialTodayEvents, initialInternationalEvents, initialHappeningNowEvents, initialSurpriseData }: HomePageClientProps) {
+export default function HomePageClient({ initialMovies, initialStats, initialTodayEvents, initialInternationalEvents, initialHappeningNowEvents, initialSurpriseData, initialTrendingData }: HomePageClientProps) {
   const { t } = useTranslation();
 
   // International dropdown - hardcoded to show UAE, Saudi Arabia, Qatar
@@ -947,7 +982,19 @@ export default function HomePageClient({ initialMovies, initialStats, initialTod
         </div>
       </section>
 
-      {/* International Events Section - After Explore by Category */}
+      {/* Trending This Week Section */}
+      {initialTrendingData && (initialTrendingData.venues.length > 0 || initialTrendingData.events.length > 0) && (
+        <section className="px-4 mb-12 md:mb-24">
+          <div className="max-w-7xl mx-auto">
+            <TrendingSection 
+              venues={initialTrendingData.venues} 
+              events={initialTrendingData.events} 
+            />
+          </div>
+        </section>
+      )}
+
+      {/* International Events Section - After Trending */}
       {initialInternationalEvents && initialInternationalEvents.length > 0 && (
         <InternationalEventsSection events={initialInternationalEvents} />
       )}
@@ -1049,6 +1096,9 @@ export default function HomePageClient({ initialMovies, initialStats, initialTod
         places={initialSurpriseData.places}
         attractions={initialSurpriseData.attractions}
       />
+
+      {/* Newsletter Popup - 30 sec delay OR 50% scroll */}
+      <NewsletterPopup delayMs={30000} scrollThreshold={50} />
 
     </div>
   );
