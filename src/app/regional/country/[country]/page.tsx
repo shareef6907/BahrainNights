@@ -41,6 +41,29 @@ export async function generateStaticParams() {
 
 export const revalidate = 3600;
 
+// Helper: Filter out past events from blog articles
+// Uses 'any' cast because event_date/event_end_date may not be in TypeScript types yet
+function filterPastEvents(articles: BlogArticle[]): BlogArticle[] {
+  const now = new Date();
+  now.setHours(0, 0, 0, 0);
+  
+  return articles.filter(a => {
+    // Cast to any to access event date fields that may not be in types yet
+    const article = a as any;
+    
+    // If it has event dates, check if it's still current/upcoming
+    const eventEndDate = article.event_end_date ? new Date(article.event_end_date) : null;
+    const eventDate = article.event_date ? new Date(article.event_date) : null;
+    const relevantDate = eventEndDate || eventDate;
+    
+    // If no event dates, it's a regular article - show it
+    if (!relevantDate) return true;
+    
+    // Only show if event hasn't passed yet
+    return relevantDate >= now;
+  });
+}
+
 async function getArticles(country: string, city?: string) {
   const supabase = getAdminClient();
 
@@ -56,9 +79,10 @@ async function getArticles(country: string, city?: string) {
     query = query.ilike('city', city);
   }
 
-  const { data: articles } = await query.limit(30) as { data: BlogArticle[] | null };
+  const { data: rawArticles } = await query.limit(50) as { data: BlogArticle[] | null };
 
-  return articles || [];
+  // CRITICAL: Filter out past events before returning
+  return filterPastEvents(rawArticles || []).slice(0, 30);
 }
 
 export default async function CountryBlogPage({ params, searchParams }: Props) {

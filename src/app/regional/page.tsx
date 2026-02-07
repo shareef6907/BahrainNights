@@ -68,66 +68,70 @@ async function getBlogArticles() {
 export default async function BlogPage() {
   const articles = await getBlogArticles();
 
-  // Featured articles (admin-selected) - exclude past events
+  // CRITICAL: Filter out past events from ALL listings
   // If article has event_date or event_end_date, only show if event hasn't passed
   const now = new Date();
   now.setHours(0, 0, 0, 0); // Compare dates only, not time
   
-  const featured = articles.filter(a => {
-    if (!a.is_featured) return false;
-    
-    // If it's an event with dates, check if it's still upcoming/current
+  // Helper function: returns true if article should be shown (not a past event)
+  const isNotPastEvent = (a: BlogArticle): boolean => {
     const eventEndDate = a.event_end_date ? new Date(a.event_end_date) : null;
     const eventDate = a.event_date ? new Date(a.event_date) : null;
     
     // Use end date if available, otherwise use event date
     const relevantDate = eventEndDate || eventDate;
     
-    // If no event dates, it's a regular featured article - show it
+    // If no event dates, it's a regular article - show it
     if (!relevantDate) return true;
     
-    // Only show if event hasn't passed yet
+    // Only show if event hasn't passed yet (today or future)
     return relevantDate >= now;
-  }).slice(0, 10);
+  };
 
-  // Get trending (most viewed)
-  const trending = [...articles]
+  // Pre-filter all articles to exclude past events
+  const activeArticles = articles.filter(isNotPastEvent);
+  
+  // Featured articles (admin-selected)
+  const featured = activeArticles.filter(a => a.is_featured).slice(0, 10);
+
+  // Get trending (most viewed) - from active articles only
+  const trending = [...activeArticles]
     .sort((a, b) => (b.view_count || 0) - (a.view_count || 0))
     .slice(0, 15);
 
-  // Get latest
-  const latest = articles.slice(0, 15);
+  // Get latest - from active articles only
+  const latest = activeArticles.slice(0, 15);
 
-  // City-based filtering
-  const bahrain = articles.filter(a =>
+  // City-based filtering - all from active articles only
+  const bahrain = activeArticles.filter(a =>
     a.country === 'bahrain' ||
     a.city?.toLowerCase().includes('manama') ||
     a.city?.toLowerCase().includes('bahrain')
   );
 
-  const dubai = articles.filter(a =>
+  const dubai = activeArticles.filter(a =>
     a.city?.toLowerCase().includes('dubai')
   );
 
-  const abuDhabi = articles.filter(a =>
+  const abuDhabi = activeArticles.filter(a =>
     a.city?.toLowerCase().includes('abu dhabi') ||
     a.city?.toLowerCase().includes('abu-dhabi')
   );
 
-  const riyadh = articles.filter(a =>
+  const riyadh = activeArticles.filter(a =>
     a.city?.toLowerCase().includes('riyadh')
   );
 
-  const jeddah = articles.filter(a =>
+  const jeddah = activeArticles.filter(a =>
     a.city?.toLowerCase().includes('jeddah')
   );
 
-  const doha = articles.filter(a =>
+  const doha = activeArticles.filter(a =>
     a.city?.toLowerCase().includes('doha') ||
     a.country === 'qatar'
   );
 
-  const london = articles.filter(a =>
+  const london = activeArticles.filter(a =>
     a.city?.toLowerCase().includes('london') ||
     a.country === 'uk'
   );

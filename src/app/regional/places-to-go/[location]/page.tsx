@@ -47,18 +47,44 @@ export async function generateStaticParams() {
 
 export const revalidate = 3600; // Revalidate every hour
 
+// Helper: Filter out past events from blog articles
+// Uses 'any' cast because event_date/event_end_date may not be in TypeScript types yet
+function filterPastEvents(articles: BlogArticle[]): BlogArticle[] {
+  const now = new Date();
+  now.setHours(0, 0, 0, 0);
+  
+  return articles.filter(a => {
+    // Cast to any to access event date fields that may not be in types yet
+    const article = a as any;
+    
+    // If it has event dates, check if it's still current/upcoming
+    const eventEndDate = article.event_end_date ? new Date(article.event_end_date) : null;
+    const eventDate = article.event_date ? new Date(article.event_date) : null;
+    const relevantDate = eventEndDate || eventDate;
+    
+    // If no event dates, it's a regular article - show it
+    if (!relevantDate) return true;
+    
+    // Only show if event hasn't passed yet
+    return relevantDate >= now;
+  });
+}
+
 async function getLocationData(location: string) {
   const supabase = getAdminClient();
 
   // Get all articles for this country
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const { data: articles } = await (supabase as any)
+  const { data: rawArticles } = await (supabase as any)
     .from('blog_articles')
     .select('*')
     .eq('status', 'published')
     .eq('country', location)
     .order('created_at', { ascending: false })
-    .limit(20) as { data: BlogArticle[] | null };
+    .limit(50) as { data: BlogArticle[] | null };
+
+  // CRITICAL: Filter out past events
+  const articles = filterPastEvents(rawArticles || []).slice(0, 20);
 
   // Get events count for this country (approximate from location field)
   const locationInfo = LOCATION_DATA[location];
@@ -70,18 +96,21 @@ async function getLocationData(location: string) {
 
   // Get featured articles
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const { data: featured } = await (supabase as any)
+  const { data: rawFeatured } = await (supabase as any)
     .from('blog_articles')
     .select('*')
     .eq('status', 'published')
     .eq('country', location)
     .eq('is_featured', true)
     .order('created_at', { ascending: false })
-    .limit(3) as { data: BlogArticle[] | null };
+    .limit(10) as { data: BlogArticle[] | null };
+
+  // CRITICAL: Filter out past events from featured too
+  const featured = filterPastEvents(rawFeatured || []).slice(0, 3);
 
   return {
-    articles: articles || [],
-    featured: featured || [],
+    articles,
+    featured,
     eventsCount: eventsCount || 0,
   };
 }
