@@ -13,13 +13,14 @@ interface BlogArticle {
   country: string;
   city: string | null;
   category: string;
-  read_time_minutes: number;
-  view_count: number;
-  published_at: string;
-  affiliate_url?: string | null;
-  event_date?: string | null;
-  event_end_date?: string | null;
-  event_venue?: string | null;
+  read_time_minutes?: number;
+  view_count?: number;
+  published_at?: string;
+  affiliate_url: string | null;
+  event_date: string | null;
+  event_end_date: string | null;
+  event_venue: string | null;
+  isEvent?: boolean;
 }
 
 interface BlogCardProps {
@@ -157,11 +158,24 @@ export function BlogCard({ article, onSelect, index = 0 }: BlogCardProps) {
 
           {/* Meta */}
           <div className="flex items-center gap-2 text-xs text-gray-400">
-            <span className="text-green-500 font-medium">New</span>
-            <span className="flex items-center gap-1">
-              <Clock size={10} />
-              {article.read_time_minutes} min
-            </span>
+            {article.isEvent ? (
+              <>
+                <span className="text-yellow-500 font-medium">🎟️ Event</span>
+                {article.event_date && (
+                  <span>{new Date(article.event_date).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}</span>
+                )}
+              </>
+            ) : (
+              <>
+                <span className="text-green-500 font-medium">New</span>
+                {article.read_time_minutes && (
+                  <span className="flex items-center gap-1">
+                    <Clock size={10} />
+                    {article.read_time_minutes} min
+                  </span>
+                )}
+              </>
+            )}
             {article.city && <span>{article.city}</span>}
           </div>
 

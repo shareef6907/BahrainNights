@@ -14,13 +14,14 @@ interface BlogArticle {
   country: string;
   city: string | null;
   category: string;
-  read_time_minutes: number;
-  view_count: number;
-  published_at: string;
-  affiliate_url?: string | null;
-  event_date?: string | null;
-  event_end_date?: string | null;
-  event_venue?: string | null;
+  read_time_minutes?: number;
+  view_count?: number;
+  published_at?: string;
+  affiliate_url: string | null;
+  event_date: string | null;
+  event_end_date: string | null;
+  event_venue: string | null;
+  isEvent?: boolean;
 }
 
 interface BlogRowProps {

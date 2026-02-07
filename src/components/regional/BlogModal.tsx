@@ -14,13 +14,14 @@ interface BlogArticle {
   country: string;
   city: string | null;
   category: string;
-  read_time_minutes: number;
-  view_count: number;
-  published_at: string;
-  event_date?: string | null;
-  event_end_date?: string | null;
-  event_venue?: string | null;
-  affiliate_url?: string | null;
+  read_time_minutes?: number;
+  view_count?: number;
+  published_at?: string;
+  event_date: string | null;
+  event_end_date: string | null;
+  event_venue: string | null;
+  affiliate_url: string | null;
+  isEvent?: boolean;
 }
 
 // Helper function to format event dates nicely

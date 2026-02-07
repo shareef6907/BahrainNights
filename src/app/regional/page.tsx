@@ -17,10 +17,11 @@ export const metadata: Metadata = {
   },
 };
 
-// Cache page for 5 minutes - HUGE performance boost
+// Cache page for 5 minutes
 export const revalidate = 300;
 
-interface BlogArticle {
+// Unified interface for both events and blog articles
+export interface RegionalItem {
   id: string;
   title: string;
   slug: string;
@@ -29,112 +30,201 @@ interface BlogArticle {
   country: string;
   city: string | null;
   category: string;
-  read_time_minutes: number;
-  view_count: number;
-  published_at: string;
+  event_date: string | null;
+  event_end_date: string | null;
+  event_venue: string | null;
+  affiliate_url: string | null;
+  // For display purposes
+  read_time_minutes?: number;
+  view_count?: number;
+  published_at?: string;
   is_featured?: boolean;
-  event_date?: string | null;
-  event_end_date?: string | null;
-  event_venue?: string | null;
-  affiliate_url?: string | null;
+  isEvent?: boolean; // To distinguish events from articles
 }
 
-async function getBlogArticles() {
+// Fetch upcoming events from events table
+async function getUpcomingEvents(): Promise<RegionalItem[]> {
   try {
     const supabase = getAdminClient();
+    const today = new Date().toISOString().split('T')[0];
 
-    // OPTIMIZED: Only fetch fields needed for listing (NO content field - it's heavy)
-    // Content is fetched on-demand when modal opens
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const { data: events, error } = await (supabase as any)
+      .from('events')
+      .select('id, title, slug, description, cover_url, featured_image, country, city, category, date, start_date, end_date, venue_name, affiliate_url, is_featured')
+      .eq('status', 'published')
+      .eq('is_active', true)
+      .or(`start_date.gte.${today},date.gte.${today},end_date.gte.${today}`)
+      .order('start_date', { ascending: true })
+      .limit(200);
+
+    if (error) {
+      console.error('Events fetch error:', error);
+      return [];
+    }
+
+    // Transform events to RegionalItem format
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    return (events || []).map((e: any) => ({
+      id: e.id,
+      title: e.title,
+      slug: e.slug,
+      excerpt: e.description?.substring(0, 200) || '',
+      featured_image: e.cover_url || e.featured_image,
+      country: e.country || 'Unknown',
+      city: e.city,
+      category: e.category || 'event',
+      event_date: e.start_date || e.date,
+      event_end_date: e.end_date,
+      event_venue: e.venue_name,
+      affiliate_url: e.affiliate_url,
+      is_featured: e.is_featured,
+      isEvent: true,
+    }));
+  } catch (err) {
+    console.error('Events exception:', err);
+    return [];
+  }
+}
+
+// Fetch blog articles (non-event content)
+async function getBlogArticles(): Promise<RegionalItem[]> {
+  try {
+    const supabase = getAdminClient();
+    const today = new Date().toISOString().split('T')[0];
+
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const { data: articles, error } = await (supabase as any)
       .from('blog_articles')
       .select('id, title, slug, excerpt, featured_image, country, city, category, read_time_minutes, view_count, published_at, is_featured, event_date, event_end_date, event_venue, affiliate_url')
       .eq('status', 'published')
       .order('published_at', { ascending: false })
-      .limit(100) as { data: BlogArticle[] | null; error: Error | null };
+      .limit(50);
 
     if (error) {
       console.error('Blog articles fetch error:', error);
       return [];
     }
 
-    return articles || [];
+    // Filter out past events from articles
+    const filtered = (articles || []).filter((a: any) => {
+      const eventEndDate = a.event_end_date ? new Date(a.event_end_date) : null;
+      const eventDate = a.event_date ? new Date(a.event_date) : null;
+      const relevantDate = eventEndDate || eventDate;
+      if (!relevantDate) return true;
+      return relevantDate >= new Date(today);
+    });
+
+    return filtered.map((a: any) => ({
+      id: a.id,
+      title: a.title,
+      slug: a.slug,
+      excerpt: a.excerpt || '',
+      featured_image: a.featured_image,
+      country: a.country || 'Unknown',
+      city: a.city,
+      category: a.category || 'article',
+      read_time_minutes: a.read_time_minutes,
+      view_count: a.view_count,
+      published_at: a.published_at,
+      is_featured: a.is_featured,
+      event_date: a.event_date || null,
+      event_end_date: a.event_end_date || null,
+      event_venue: a.event_venue || null,
+      affiliate_url: a.affiliate_url || null,
+      isEvent: false,
+    }));
   } catch (err) {
     console.error('Blog articles exception:', err);
     return [];
   }
 }
 
-export default async function BlogPage() {
-  const articles = await getBlogArticles();
+// Helper to filter items by city/country
+function filterByLocation(items: RegionalItem[], cities: string[], countries: string[] = []): RegionalItem[] {
+  return items.filter(item => {
+    const cityMatch = cities.some(c => 
+      item.city?.toLowerCase().includes(c.toLowerCase())
+    );
+    const countryMatch = countries.some(c => 
+      item.country?.toLowerCase() === c.toLowerCase()
+    );
+    return cityMatch || countryMatch;
+  });
+}
 
-  // CRITICAL: Filter out past events from ALL listings
-  // If article has event_date or event_end_date, only show if event hasn't passed
-  const now = new Date();
-  now.setHours(0, 0, 0, 0); // Compare dates only, not time
+export default async function RegionalPage() {
+  // Fetch both events and blog articles
+  const [events, articles] = await Promise.all([
+    getUpcomingEvents(),
+    getBlogArticles(),
+  ]);
+
+  // Combine all items
+  const allItems = [...events, ...articles];
+
+  // Featured items (prioritize events with is_featured)
+  const featured = allItems
+    .filter(item => item.is_featured)
+    .slice(0, 10);
+
+  // Group by location - EVENTS FIRST, then articles
+  // Bahrain
+  const bahrain = filterByLocation(allItems, ['manama', 'bahrain'], ['Bahrain']);
   
-  // Helper function: returns true if article should be shown (not a past event)
-  const isNotPastEvent = (a: BlogArticle): boolean => {
-    const eventEndDate = a.event_end_date ? new Date(a.event_end_date) : null;
-    const eventDate = a.event_date ? new Date(a.event_date) : null;
-    
-    // Use end date if available, otherwise use event date
-    const relevantDate = eventEndDate || eventDate;
-    
-    // If no event dates, it's a regular article - show it
-    if (!relevantDate) return true;
-    
-    // Only show if event hasn't passed yet (today or future)
-    return relevantDate >= now;
-  };
-
-  // Pre-filter all articles to exclude past events
-  const activeArticles = articles.filter(isNotPastEvent);
+  // Dubai
+  const dubai = filterByLocation(allItems, ['dubai'], []);
   
-  // Featured articles (admin-selected)
-  const featured = activeArticles.filter(a => a.is_featured).slice(0, 10);
+  // Abu Dhabi  
+  const abuDhabi = filterByLocation(allItems, ['abu dhabi', 'abu-dhabi', 'yas island'], []);
+  
+  // Saudi Arabia - Riyadh
+  const riyadh = filterByLocation(allItems, ['riyadh'], []);
+  
+  // Saudi Arabia - Jeddah
+  const jeddah = filterByLocation(allItems, ['jeddah'], []);
+  
+  // Saudi Arabia - AlUla & other cities
+  const saudiOther = filterByLocation(allItems, ['alula', 'al-ula', 'dammam', 'khobar'], ['Saudi Arabia'])
+    .filter(item => !riyadh.includes(item) && !jeddah.includes(item));
+  
+  // Qatar - Doha
+  const doha = filterByLocation(allItems, ['doha'], ['Qatar']);
+  
+  // Kuwait
+  const kuwait = filterByLocation(allItems, ['kuwait city', 'kuwait'], ['Kuwait']);
+  
+  // Oman
+  const oman = filterByLocation(allItems, ['muscat'], ['Oman']);
+  
+  // Egypt
+  const egypt = filterByLocation(allItems, ['cairo', 'giza', 'alexandria'], ['Egypt']);
+  
+  // UK - London
+  const london = filterByLocation(allItems, ['london'], ['UK', 'United Kingdom']);
 
-  // Get trending (most viewed) - from active articles only
-  const trending = [...activeArticles]
-    .sort((a, b) => (b.view_count || 0) - (a.view_count || 0))
+  // Trending (most viewed articles + featured events)
+  const trending = [...allItems]
+    .sort((a, b) => {
+      // Prioritize featured items
+      if (a.is_featured && !b.is_featured) return -1;
+      if (!a.is_featured && b.is_featured) return 1;
+      // Then by view count
+      return (b.view_count || 0) - (a.view_count || 0);
+    })
     .slice(0, 15);
 
-  // Get latest - from active articles only
-  const latest = activeArticles.slice(0, 15);
+  // Latest (most recent by date)
+  const latest = [...allItems]
+    .sort((a, b) => {
+      const dateA = a.event_date || a.published_at || '';
+      const dateB = b.event_date || b.published_at || '';
+      return dateB.localeCompare(dateA);
+    })
+    .slice(0, 15);
 
-  // City-based filtering - all from active articles only
-  const bahrain = activeArticles.filter(a =>
-    a.country === 'bahrain' ||
-    a.city?.toLowerCase().includes('manama') ||
-    a.city?.toLowerCase().includes('bahrain')
-  );
-
-  const dubai = activeArticles.filter(a =>
-    a.city?.toLowerCase().includes('dubai')
-  );
-
-  const abuDhabi = activeArticles.filter(a =>
-    a.city?.toLowerCase().includes('abu dhabi') ||
-    a.city?.toLowerCase().includes('abu-dhabi')
-  );
-
-  const riyadh = activeArticles.filter(a =>
-    a.city?.toLowerCase().includes('riyadh')
-  );
-
-  const jeddah = activeArticles.filter(a =>
-    a.city?.toLowerCase().includes('jeddah')
-  );
-
-  const doha = activeArticles.filter(a =>
-    a.city?.toLowerCase().includes('doha') ||
-    a.country === 'qatar'
-  );
-
-  const london = activeArticles.filter(a =>
-    a.city?.toLowerCase().includes('london') ||
-    a.country === 'uk'
-  );
+  // Check if we have content
+  const hasContent = allItems.length > 0;
 
   return (
     <RegionalPageClient
@@ -144,10 +234,16 @@ export default async function BlogPage() {
       abuDhabi={abuDhabi}
       riyadh={riyadh}
       jeddah={jeddah}
+      saudiOther={saudiOther}
       doha={doha}
+      kuwait={kuwait}
+      oman={oman}
+      egypt={egypt}
       london={london}
       trending={trending}
       latest={latest}
+      hasContent={hasContent}
+      totalEvents={events.length}
     />
   );
 }
