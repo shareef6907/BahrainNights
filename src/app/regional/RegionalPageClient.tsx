@@ -67,11 +67,21 @@ export function RegionalPageClient({
   const [isModalOpen, setIsModalOpen] = useState(false);
 
   const handleSelectArticle = (article: RegionalItem) => {
-    // For events, redirect to affiliate URL or event page
-    if (article.isEvent && article.affiliate_url) {
-      window.open(article.affiliate_url, '_blank');
+    // For events, redirect to event page or affiliate URL
+    if (article.isEvent) {
+      if (article.affiliate_url) {
+        // Has ticket link - open in new tab
+        window.open(article.affiliate_url, '_blank');
+      } else if (article.country === 'Bahrain') {
+        // Bahrain event - go to local events page
+        window.location.href = `/events/${article.slug}`;
+      } else {
+        // International event - go to international page
+        window.location.href = `/international`;
+      }
       return;
     }
+    // For blog articles, show the modal
     setSelectedArticle(article);
     setIsModalOpen(true);
   };
