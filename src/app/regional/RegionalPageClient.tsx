@@ -5,6 +5,7 @@ import Link from 'next/link';
 import { HeroTrailerPlayer } from '@/components/regional/HeroTrailerPlayer';
 import { BlogRow } from '@/components/regional/BlogRow';
 import { BlogModal } from '@/components/regional/BlogModal';
+import { EventModal } from '@/components/regional/EventModal';
 
 interface RegionalItem {
   id: string;
@@ -63,32 +64,34 @@ export function RegionalPageClient({
   hasContent,
   totalEvents,
 }: Props) {
+  // State for blog article modal
   const [selectedArticle, setSelectedArticle] = useState<RegionalItem | null>(null);
-  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isArticleModalOpen, setIsArticleModalOpen] = useState(false);
 
-  const handleSelectArticle = (article: RegionalItem) => {
-    // For events, redirect to event page or affiliate URL
-    if (article.isEvent) {
-      if (article.affiliate_url) {
-        // Has ticket link - open in new tab
-        window.open(article.affiliate_url, '_blank');
-      } else if (article.country === 'Bahrain') {
-        // Bahrain event - go to local events page
-        window.location.href = `/events/${article.slug}`;
-      } else {
-        // International event - go to international page
-        window.location.href = `/international`;
-      }
-      return;
+  // State for event modal
+  const [selectedEvent, setSelectedEvent] = useState<RegionalItem | null>(null);
+  const [isEventModalOpen, setIsEventModalOpen] = useState(false);
+
+  const handleSelectItem = (item: RegionalItem) => {
+    if (item.isEvent) {
+      // For events, open the event modal
+      setSelectedEvent(item);
+      setIsEventModalOpen(true);
+    } else {
+      // For blog articles, open the blog modal
+      setSelectedArticle(item);
+      setIsArticleModalOpen(true);
     }
-    // For blog articles, show the modal
-    setSelectedArticle(article);
-    setIsModalOpen(true);
   };
 
-  const handleCloseModal = () => {
-    setIsModalOpen(false);
+  const handleCloseArticleModal = () => {
+    setIsArticleModalOpen(false);
     setTimeout(() => setSelectedArticle(null), 300);
+  };
+
+  const handleCloseEventModal = () => {
+    setIsEventModalOpen(false);
+    setTimeout(() => setSelectedEvent(null), 300);
   };
 
   return (
@@ -138,7 +141,7 @@ export function RegionalPageClient({
                 title="Featured Events"
                 icon="⭐"
                 articles={featured}
-                onSelectArticle={handleSelectArticle}
+                onSelectArticle={handleSelectItem}
               />
             )}
 
@@ -148,7 +151,7 @@ export function RegionalPageClient({
                 title="Bahrain"
                 icon="🇧🇭"
                 articles={bahrain}
-                onSelectArticle={handleSelectArticle}
+                onSelectArticle={handleSelectItem}
                 seeAllLink="/events"
               />
             )}
@@ -159,7 +162,7 @@ export function RegionalPageClient({
                 title="Dubai"
                 icon="🇦🇪"
                 articles={dubai}
-                onSelectArticle={handleSelectArticle}
+                onSelectArticle={handleSelectItem}
                 seeAllLink="/international/uae"
               />
             )}
@@ -170,7 +173,7 @@ export function RegionalPageClient({
                 title="Abu Dhabi"
                 icon="🇦🇪"
                 articles={abuDhabi}
-                onSelectArticle={handleSelectArticle}
+                onSelectArticle={handleSelectItem}
                 seeAllLink="/international/uae"
               />
             )}
@@ -181,7 +184,7 @@ export function RegionalPageClient({
                 title="Riyadh"
                 icon="🇸🇦"
                 articles={riyadh}
-                onSelectArticle={handleSelectArticle}
+                onSelectArticle={handleSelectItem}
                 seeAllLink="/international/saudi-arabia"
               />
             )}
@@ -192,7 +195,7 @@ export function RegionalPageClient({
                 title="Jeddah"
                 icon="🇸🇦"
                 articles={jeddah}
-                onSelectArticle={handleSelectArticle}
+                onSelectArticle={handleSelectItem}
                 seeAllLink="/international/saudi-arabia"
               />
             )}
@@ -203,7 +206,7 @@ export function RegionalPageClient({
                 title="Saudi Arabia"
                 icon="🇸🇦"
                 articles={saudiOther}
-                onSelectArticle={handleSelectArticle}
+                onSelectArticle={handleSelectItem}
                 seeAllLink="/international/saudi-arabia"
               />
             )}
@@ -214,7 +217,7 @@ export function RegionalPageClient({
                 title="Qatar"
                 icon="🇶🇦"
                 articles={doha}
-                onSelectArticle={handleSelectArticle}
+                onSelectArticle={handleSelectItem}
                 seeAllLink="/international/qatar"
               />
             )}
@@ -225,7 +228,7 @@ export function RegionalPageClient({
                 title="Kuwait"
                 icon="🇰🇼"
                 articles={kuwait}
-                onSelectArticle={handleSelectArticle}
+                onSelectArticle={handleSelectItem}
                 seeAllLink="/international/kuwait"
               />
             )}
@@ -236,7 +239,7 @@ export function RegionalPageClient({
                 title="Oman"
                 icon="🇴🇲"
                 articles={oman}
-                onSelectArticle={handleSelectArticle}
+                onSelectArticle={handleSelectItem}
                 seeAllLink="/international/oman"
               />
             )}
@@ -247,7 +250,7 @@ export function RegionalPageClient({
                 title="Egypt"
                 icon="🇪🇬"
                 articles={egypt}
-                onSelectArticle={handleSelectArticle}
+                onSelectArticle={handleSelectItem}
                 seeAllLink="/international/egypt"
               />
             )}
@@ -258,7 +261,7 @@ export function RegionalPageClient({
                 title="London"
                 icon="🇬🇧"
                 articles={london}
-                onSelectArticle={handleSelectArticle}
+                onSelectArticle={handleSelectItem}
                 seeAllLink="/international/uk"
               />
             )}
@@ -269,7 +272,7 @@ export function RegionalPageClient({
                 title="Trending"
                 icon="🔥"
                 articles={trending}
-                onSelectArticle={handleSelectArticle}
+                onSelectArticle={handleSelectItem}
               />
             )}
 
@@ -279,7 +282,7 @@ export function RegionalPageClient({
                 title="Coming Soon"
                 icon="📅"
                 articles={latest}
-                onSelectArticle={handleSelectArticle}
+                onSelectArticle={handleSelectItem}
               />
             )}
           </>
@@ -304,11 +307,18 @@ export function RegionalPageClient({
         </div>
       </div>
 
-      {/* Modal for articles */}
+      {/* Modal for blog articles */}
       <BlogModal
         article={selectedArticle}
-        isOpen={isModalOpen}
-        onClose={handleCloseModal}
+        isOpen={isArticleModalOpen}
+        onClose={handleCloseArticleModal}
+      />
+
+      {/* Modal for events */}
+      <EventModal
+        event={selectedEvent}
+        isOpen={isEventModalOpen}
+        onClose={handleCloseEventModal}
       />
     </div>
   );
