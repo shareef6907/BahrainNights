@@ -36,6 +36,7 @@ const pageTitles: Record<string, string> = {
   '/admin/studio/reels': 'Reel Briefs',
   '/admin/studio/analytics': 'Studio Analytics',
   '/admin/studio/settings': 'Studio Settings',
+  '/admin/regional/trailers': 'Regional Page Trailers',
   '/admin/platinumlist-attractions': 'Platinumlist Attractions',
   '/admin/platinumlist-events': 'Platinumlist Events',
   '/admin/newsletter': 'Newsletter Management',

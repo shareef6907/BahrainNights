@@ -48,6 +48,12 @@ const navItems = [
     icon: FileText,
   },
   {
+    name: 'Regional Trailers',
+    href: '/admin/regional/trailers',
+    icon: Film,
+    highlight: true,
+  },
+  {
     name: 'Venues',
     href: '/admin/venues',
     icon: Building2,
