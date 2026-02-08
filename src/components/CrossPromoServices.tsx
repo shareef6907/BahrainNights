@@ -1,6 +1,6 @@
 'use client';
 
-import { Camera, Music, ArrowRight } from 'lucide-react';
+import { Camera, Music, Globe, ArrowRight } from 'lucide-react';
 import Link from 'next/link';
 
 interface CrossPromoServicesProps {
@@ -9,12 +9,24 @@ interface CrossPromoServicesProps {
 }
 
 /**
- * Cross-promotion banner for Events Bahrain (equipment rental)
- * and Film Production Bahrain (video/film production).
+ * Cross-promotion banner for Cinematic Group services.
  * Designed to be helpful and contextual, not spammy.
  */
 export default function CrossPromoServices({ context = 'general', compact = false }: CrossPromoServicesProps) {
   const services = [
+    {
+      name: 'Cinematic Web Works',
+      tagline: context === 'venue'
+        ? 'Need a website for your venue?'
+        : 'Premium Web Development',
+      description: 'Cinematic websites with video headers, custom-coded from scratch. No templates.',
+      href: 'https://www.cinematicwebworks.com',
+      icon: Globe,
+      color: 'from-amber-500/20 to-yellow-500/20',
+      borderColor: 'border-amber-500/20 hover:border-amber-500/40',
+      iconBg: 'bg-amber-500/20',
+      iconColor: 'text-amber-400',
+    },
     {
       name: 'Events Bahrain',
       tagline: context === 'event' 
@@ -75,14 +87,14 @@ export default function CrossPromoServices({ context = 'general', compact = fals
     <section className="py-12 px-4">
       <div className="max-w-6xl mx-auto">
         <div className="text-center mb-8">
-          <p className="text-xs text-gray-500 uppercase tracking-wider mb-2">Professional Services</p>
-          <h2 className="text-2xl font-bold text-white">Event Production & Film Services</h2>
+          <p className="text-xs text-gray-500 uppercase tracking-wider mb-2">Cinematic Group Services</p>
+          <h2 className="text-2xl font-bold text-white">Web, Film & Event Production</h2>
           <p className="text-gray-400 mt-2 max-w-xl mx-auto">
-            Planning an event or need professional video production? Our sister companies provide end-to-end services across Bahrain.
+            Need a website, video production, or event equipment? Our sister companies provide end-to-end services across Bahrain.
           </p>
         </div>
 
-        <div className="grid md:grid-cols-2 gap-6">
+        <div className="grid md:grid-cols-3 gap-6">
           {services.map((service) => (
             <a
               key={service.name}
