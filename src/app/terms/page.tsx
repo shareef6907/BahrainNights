@@ -5,6 +5,9 @@ import { ArrowLeft, Shield, Users, Camera, MapPin, AlertTriangle, Scale, Mail } 
 export const metadata: Metadata = {
   title: 'Terms of Service | BahrainNights',
   description: 'Terms of Service and Content Guidelines for BahrainNights - Bahrain\'s premier events and lifestyle platform.',
+  alternates: {
+    canonical: 'https://www.bahrainnights.com/terms',
+  },
 };
 
 export default function TermsPage() {

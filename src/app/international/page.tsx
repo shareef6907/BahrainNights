@@ -7,6 +7,9 @@ import EventListSchema from '@/components/SEO/EventListSchema';
 export const metadata: Metadata = {
   title: 'International Events | BahrainNights',
   description: 'Discover amazing events across UAE, Saudi Arabia, Qatar, Egypt, Türkiye, and UK. Book tickets to the best concerts, shows, and experiences worldwide.',
+  alternates: {
+    canonical: 'https://www.bahrainnights.com/international',
+  },
   openGraph: {
     title: 'International Events | BahrainNights',
     description: 'Discover amazing events across the Middle East and beyond',
