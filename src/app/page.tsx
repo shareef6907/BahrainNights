@@ -399,6 +399,9 @@ export const metadata = {
   title: 'BahrainNights | Events, Venues, Cinema & Nightlife in Bahrain',
   description: "Discover Bahrain's best events, venues, cinema, nightlife, and dining. Your curated guide to everything happening in the Kingdom. Go Out. Live More.",
   keywords: ['Bahrain Nights', 'events in Bahrain', 'nightlife in Bahrain', 'things to do in Bahrain', 'venues in Bahrain', 'cinema Bahrain'],
+  alternates: {
+    canonical: 'https://www.bahrainnights.com',
+  },
   openGraph: {
     title: 'BahrainNights | Events, Venues & Nightlife in Bahrain',
     description: "Your curated guide to Bahrain's best experiences",

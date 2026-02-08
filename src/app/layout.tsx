@@ -44,9 +44,8 @@ export const metadata: Metadata = {
   formatDetection: {
     telephone: true,
   },
-  alternates: {
-    canonical: "https://www.bahrainnights.com",
-  },
+  // Note: Don't set a static canonical here - it would apply to ALL pages
+  // Each page should have its own canonical, or let Next.js infer from metadataBase + path
   icons: {
     icon: [
       { url: "/favicon.ico", sizes: "any" },
