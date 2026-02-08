@@ -605,4 +605,32 @@ export default function EventsThisWeekPage() {
               <Link href="/bahrain-nightlife-guide" className="p-6 bg-gray-800/50 rounded-xl hover:bg-gray-800 transition text-center group">
                 <span className="text-3xl mb-3 block">🌙</span>
                 <h3 className="font-semibold text-white group-hover:text-purple-300">Nightlife</h3>
-                <p className="text-sm text-gray
+                <p className="text-sm text-gray-400 mt-2">Best bars & clubs</p>
+              </Link>
+              
+              <Link href="/best-restaurants-bahrain" className="p-6 bg-gray-800/50 rounded-xl hover:bg-gray-800 transition text-center group">
+                <span className="text-3xl mb-3 block">🍽️</span>
+                <h3 className="font-semibold text-white group-hover:text-purple-300">Restaurants</h3>
+                <p className="text-sm text-gray-400 mt-2">Where to eat</p>
+              </Link>
+            </div>
+          </div>
+        </section>
+
+        {/* Footer CTA */}
+        <section className="py-16 px-4 bg-gradient-to-r from-purple-900/30 to-pink-900/30">
+          <div className="max-w-4xl mx-auto text-center">
+            <h2 className="text-2xl font-bold text-white mb-4">Never Miss an Event</h2>
+            <p className="text-gray-300 mb-6">Check back every week for updated events in Bahrain</p>
+            <Link 
+              href="/events"
+              className="inline-flex items-center gap-2 px-8 py-4 bg-gradient-to-r from-purple-600 to-pink-600 rounded-full text-white font-semibold hover:opacity-90 transition"
+            >
+              View All Events
+            </Link>
+          </div>
+        </section>
+      </main>
+    </>
+  );
+}
