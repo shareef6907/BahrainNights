@@ -3,7 +3,7 @@ import Link from 'next/link';
 import { 
   Flag, Calendar, MapPin, Star,
   Sparkles, Music, Users, Camera,
-  PartyPopper, Heart, Building, Car
+  PartyPopper, Heart, Building, Car, Clock
 } from 'lucide-react';
 import BreadcrumbSchema from '@/components/SEO/BreadcrumbSchema';
 
@@ -152,12 +152,6 @@ const carParadeInfo = {
   hotspots: ['Seef area', 'Manama Corniche', 'Budaiya Highway', 'Riffa main streets'],
   tips: 'If driving, expect delays. If celebrating, make sure decorations don\'t obstruct view or lights.',
 };
-
-const Clock = ({ className }: { className?: string }) => (
-  <svg xmlns="http://www.w3.org/2000/svg" className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-    <circle cx="12" cy="12" r="10" /><polyline points="12,6 12,12 16,14" />
-  </svg>
-);
 
 export default function NationalDayBahrainPage() {
   const lastUpdated = new Date().toISOString().split('T')[0];
