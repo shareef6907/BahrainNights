@@ -7,12 +7,12 @@ import {
 import BreadcrumbSchema from '@/components/SEO/BreadcrumbSchema';
 
 export const metadata: Metadata = {
-  title: 'Best Chinese Restaurants in Bahrain 2026 | Top 12 Dim Sum & Cantonese',
-  description: 'Discover the 12 best Chinese restaurants in Bahrain for 2026. From authentic dim sum and Cantonese cuisine to Sichuan specialties, find the perfect Chinese restaurant in Manama, Seef & Juffair.',
-  keywords: 'best Chinese restaurants Bahrain 2026, Chinese food Bahrain, dim sum Bahrain, Cantonese food Manama, Sichuan Bahrain, Chinese takeaway Bahrain, authentic Chinese Bahrain',
+  title: 'Best Chinese Restaurants in Bahrain 2026 | Top 12 Dim Sum & Cantonese Dining',
+  description: 'Discover the 12 best Chinese restaurants in Bahrain for 2026. From authentic dim sum to Sichuan specialties, find the best Chinese food in Manama, Seef, and Juffair at Golden Dragon, Panda House, and more.',
+  keywords: 'best Chinese restaurants Bahrain 2026, Chinese food Bahrain, dim sum Bahrain, Cantonese Manama, Sichuan Bahrain, Golden Dragon, Panda House, authentic Chinese Bahrain',
   openGraph: {
-    title: 'Best Chinese Restaurants in Bahrain 2026 | Top 12 Dim Sum & Cantonese',
-    description: 'Complete guide to the best Chinese restaurants in Bahrain - from dim sum to Sichuan cuisine.',
+    title: 'Best Chinese Restaurants in Bahrain 2026 | Top 12 Dim Sum & Cantonese Dining',
+    description: 'Complete guide to the best Chinese restaurants in Bahrain - from authentic dim sum to elegant Cantonese fine dining.',
     type: 'article',
     locale: 'en_US',
     url: 'https://www.bahrainnights.com/guides/best-chinese-restaurants-bahrain',
@@ -30,266 +30,266 @@ export const metadata: Metadata = {
 
 const restaurants = [
   {
-    name: 'China Garden',
-    slug: 'china-garden-gulf-hotel',
+    name: 'Golden Dragon',
+    slug: 'golden-dragon-bahrain',
     location: 'Gulf Hotel, Adliya',
     type: 'Fine Dining',
     rating: 5,
-    price: 'BD 20-40 per person',
-    cuisine: 'Cantonese & Dim Sum',
-    description: 'Consistently ranked among Bahrain\'s finest Chinese restaurants, China Garden at the Gulf Hotel offers an authentic Cantonese experience helmed by skilled Hong Kong-trained chefs. The restaurant is particularly renowned for its dim sum, which features delicate handcrafted dumplings, fluffy bao buns, and traditional Cantonese classics. The elegant setting with traditional Chinese décor creates the perfect atmosphere for both business dinners and family celebrations.',
-    specialties: ['Dim sum lunch', 'Peking duck', 'Seafood', 'Cantonese roasts', 'Set menus'],
-    atmosphere: 'Elegant traditional Chinese décor with private dining rooms',
-    hours: 'Daily 12PM-3PM (dim sum), 7PM-11PM',
-    reservation: 'Essential for weekend dim sum',
-    bestFor: 'Dim sum lovers, business dinners, special occasions, authentic Cantonese',
-    mustTry: 'Dim sum selection, Peking duck, Wok-fried lobster, Char siu bao',
-  },
-  {
-    name: 'Royal China',
-    slug: 'royal-china-seef',
-    location: 'Seef District',
-    type: 'Fine Dining',
-    rating: 5,
     price: 'BD 18-35 per person',
-    cuisine: 'Cantonese',
-    description: 'Royal China brings sophisticated Cantonese dining to Bahrain with an menu that honors traditional techniques while incorporating premium ingredients. The restaurant\'s skilled chefs execute classics with precision, from perfectly crispy duck to silky congee. The contemporary Chinese décor creates an upscale yet welcoming atmosphere that appeals to both connoisseurs and newcomers to Cantonese cuisine.',
-    specialties: ['Cantonese classics', 'Live seafood', 'Roast meats', 'Noodles', 'Group banquets'],
-    atmosphere: 'Contemporary Chinese luxury with elegant furnishings',
-    hours: 'Daily 12PM-11PM',
-    reservation: 'Highly recommended',
-    bestFor: 'Celebrations, family gatherings, authentic Cantonese, business lunches',
-    mustTry: 'Crispy aromatic duck, Sweet and sour fish, Claypot rice, Egg tarts',
+    cuisine: 'Cantonese Fine Dining',
+    description: 'Located within the prestigious Gulf Hotel, Golden Dragon stands as Bahrain\'s premier Chinese fine dining destination. The restaurant offers an authentic Cantonese experience with expert chefs who have mastered traditional cooking techniques. The elegant setting features classic Chinese décor with private dining rooms for special occasions. The extensive menu spans dim sum, seafood, and signature Cantonese dishes prepared with imported premium ingredients.',
+    specialties: ['Dim Sum', 'Peking Duck', 'Live Seafood', 'Cantonese BBQ', 'Premium Abalone'],
+    atmosphere: 'Elegant fine dining with traditional Chinese décor and private rooms',
+    hours: 'Daily 12PM-3PM, 7PM-11PM',
+    reservation: 'Highly recommended, essential for weekends',
+    bestFor: 'Business entertaining, celebrations, authentic Cantonese, special occasions',
+    mustTry: 'Peking Duck, Dim Sum Selection, Steamed Garoupa, Crispy Aromatic Duck',
   },
   {
-    name: 'Golden Phoenix',
-    slug: 'golden-phoenix-manama',
-    location: 'Diplomatic Area',
+    name: 'Panda House',
+    slug: 'panda-house-bahrain',
+    location: 'Juffair',
+    type: 'Casual Dining',
+    rating: 5,
+    price: 'BD 6-14 per person',
+    cuisine: 'Authentic Chinese',
+    description: 'Panda House has become a Juffair institution, beloved for its authentic Chinese flavors and generous portions at reasonable prices. Run by a Chinese family, the kitchen maintains traditional recipes and proper techniques that appeal to Chinese residents and food enthusiasts alike. The extensive menu covers all major Chinese regional cuisines with particular strength in Sichuan and Cantonese dishes. The casual atmosphere makes it perfect for regular dining.',
+    specialties: ['Sichuan Dishes', 'Hand-pulled Noodles', 'Mapo Tofu', 'Kung Pao Chicken', 'Chinese BBQ'],
+    atmosphere: 'Casual and authentic with welcoming family atmosphere',
+    hours: 'Daily 11AM-11PM',
+    reservation: 'Recommended for groups',
+    bestFor: 'Authentic Chinese, families, regular visits, groups, late night',
+    mustTry: 'Mapo Tofu, Kung Pao Chicken, Hand-pulled noodles, Sweet and sour pork',
+  },
+  {
+    name: 'Shang Palace',
+    slug: 'shang-palace-bahrain',
+    location: 'Shangri-La Hotel, Seef',
     type: 'Fine Dining',
     rating: 5,
-    price: 'BD 15-30 per person',
-    cuisine: 'Szechuan & Cantonese',
-    description: 'Golden Phoenix offers a journey through China\'s diverse culinary landscape, with particular strength in fiery Szechuan dishes alongside Cantonese favorites. The restaurant is known for bold flavors, generous portions, and welcoming service that has built a loyal following over the years. The extensive menu caters to adventurous eaters seeking authentic spice as well as those preferring milder Cantonese preparations.',
-    specialties: ['Szechuan specialties', 'Mapo tofu', 'Kung Pao dishes', 'Hot pots', 'Peking duck'],
-    atmosphere: 'Traditional Chinese with red and gold accents',
-    hours: 'Daily 11:30AM-11PM',
-    reservation: 'Recommended for groups',
-    bestFor: 'Spice lovers, adventurous eaters, authentic flavors, groups',
-    mustTry: 'Mapo tofu, Kung Pao chicken, Dan dan noodles, Twice-cooked pork',
+    price: 'BD 20-45 per person',
+    cuisine: 'Premium Cantonese',
+    description: 'The Shang Palace brings the legendary Shangri-La hospitality to Chinese dining in Bahrain. This sophisticated restaurant offers refined Cantonese cuisine in an opulent setting befitting its five-star hotel home. Master chefs prepare traditional dishes with premium ingredients, while the elegant ambiance and impeccable service create an unforgettable dining experience. The weekend dim sum is particularly renowned among discerning diners.',
+    specialties: ['Weekend Dim Sum', 'Premium Seafood', 'Traditional Cantonese', 'Chef Specialties', 'Chinese Tea Service'],
+    atmosphere: 'Luxurious Shangri-La elegance with sophisticated Chinese décor',
+    hours: 'Daily 12PM-3PM, 7PM-11PM',
+    reservation: 'Essential, especially for weekend dim sum',
+    bestFor: 'Special occasions, business dining, dim sum lovers, hotel guests',
+    mustTry: 'Dim Sum Brunch, Wok-fried Lobster, Roast Duck, Steamed fish',
   },
   {
-    name: 'Dragon City',
-    slug: 'dragon-city-juffair',
+    name: 'China Garden',
+    slug: 'china-garden-diplomat',
+    location: 'Diplomat Radisson Blu',
+    type: 'Fine Dining',
+    rating: 4,
+    price: 'BD 15-30 per person',
+    cuisine: 'Traditional Chinese',
+    description: 'A long-standing favorite in Bahrain\'s Chinese dining scene, China Garden at the Diplomat Radisson Blu Hotel delivers consistent quality in an elegant hotel setting. The restaurant has built a loyal following over decades with its reliable execution of Chinese classics and attentive service. The menu offers a comprehensive journey through Chinese cuisine, from light dim sum to hearty mains.',
+    specialties: ['Classic Chinese Dishes', 'Business Lunches', 'Seafood', 'Traditional Décor', 'Private Dining'],
+    atmosphere: 'Classic hotel Chinese restaurant with refined décor',
+    hours: 'Daily 12PM-3PM, 7PM-11PM',
+    reservation: 'Recommended',
+    bestFor: 'Business lunches, hotel guests, reliable quality, traditional Chinese',
+    mustTry: 'Sweet and sour prawns, Beef in black bean sauce, Fried rice, Hot and sour soup',
+  },
+  {
+    name: 'Chopstix',
+    slug: 'chopstix-bahrain',
+    location: 'Seef Mall / Multiple Locations',
+    type: 'Casual Dining',
+    rating: 4,
+    price: 'BD 5-12 per person',
+    cuisine: 'Modern Chinese',
+    description: 'Chopstix brings accessible, well-prepared Chinese food to shopping destinations across Bahrain. This popular chain has perfected the art of delivering flavorful Chinese dishes in a casual, family-friendly setting. The menu caters to local tastes while maintaining the essence of Chinese cooking. Multiple convenient locations make it easy to satisfy Chinese food cravings wherever you are.',
+    specialties: ['Mall Convenience', 'Family Friendly', 'Quick Service', 'Value Combos', 'Noodles'],
+    atmosphere: 'Modern casual dining with efficient service',
+    hours: 'Mall hours (typically 10AM-10PM)',
+    reservation: 'Not required',
+    bestFor: 'Mall shoppers, families, quick meals, consistent quality',
+    mustTry: 'Kung Pao Chicken, Fried Noodles, Spring Rolls, Lemon Chicken',
+  },
+  {
+    name: 'Beijing Restaurant',
+    slug: 'beijing-restaurant-manama',
+    location: 'Manama',
+    type: 'Casual Dining',
+    rating: 4,
+    price: 'BD 5-12 per person',
+    cuisine: 'Northern Chinese',
+    description: 'Beijing Restaurant specializes in the hearty flavors of Northern China, featuring dishes that warm the soul. The restaurant is particularly known for its hand-made dumplings and noodles, prepared fresh daily by skilled Chinese cooks. The casual setting belies the authentic flavors emerging from the kitchen. For lovers of Northern Chinese cuisine, this is an essential Bahrain destination.',
+    specialties: ['Hand-made Dumplings', 'Northern Chinese', 'Fresh Noodles', 'Lamb Dishes', 'Hot Pot'],
+    atmosphere: 'Casual authentic Chinese eatery',
+    hours: 'Daily 11AM-11PM',
+    reservation: 'Walk-in friendly',
+    bestFor: 'Dumpling lovers, authentic Northern Chinese, budget dining, families',
+    mustTry: 'Pork Dumplings, Beijing Noodles, Lamb Skewers, Fried Dumplings',
+  },
+  {
+    name: 'Red Wok',
+    slug: 'red-wok-bahrain',
     location: 'Juffair',
     type: 'Casual Dining',
     rating: 4,
-    price: 'BD 8-18 per person',
-    cuisine: 'Chinese-Filipino Fusion',
-    description: 'Dragon City has become a beloved institution serving the diverse communities of Juffair with a menu that spans Chinese classics and Filipino favorites. The restaurant\'s Cantonese dishes are prepared with skill and consistency, while the fusion offerings provide unique flavor combinations not found elsewhere. The casual atmosphere and reasonable prices make it perfect for regular visits.',
-    specialties: ['Fusion dishes', 'Fried rice varieties', 'Noodle soups', 'Family portions', 'Takeaway'],
-    atmosphere: 'Casual and family-friendly with bright décor',
-    hours: 'Daily 10AM-11PM',
-    reservation: 'Usually walk-in friendly',
-    bestFor: 'Families, casual dining, fusion seekers, value meals',
-    mustTry: 'Special fried rice, Beef chow fun, Crispy pork belly, Hot and sour soup',
-  },
-  {
-    name: 'Furn Bistro',
-    slug: 'furn-bistro-manama',
-    location: 'Kempinski Hotel, Manama',
-    type: 'Fine Dining',
-    rating: 5,
-    price: 'BD 20-40 per person',
-    cuisine: 'Pan-Asian with Chinese Focus',
-    description: 'Furn Bistro at the Kempinski offers sophisticated Chinese dishes as part of its Pan-Asian culinary journey. The restaurant\'s Chinese menu features refined interpretations of classic dishes, with particular attention to presentation and premium ingredients. The sleek, modern setting provides a contemporary backdrop for exploring Chinese flavors elevated to hotel fine dining standards.',
-    specialties: ['Modern Chinese', 'Tasting menus', 'Premium ingredients', 'Wine pairings', 'Private dining'],
-    atmosphere: 'Sleek contemporary design with open kitchen elements',
-    hours: 'Daily 12PM-11PM',
-    reservation: 'Highly recommended',
-    bestFor: 'Special occasions, foodies, business entertaining, hotel guests',
-    mustTry: 'Chef\'s Chinese selection, Dim sum platter, Wok-fried specialties',
-  },
-  {
-    name: 'Mandarin Chinese',
-    slug: 'mandarin-chinese-bahrain',
-    location: 'Exhibition Road, Manama',
-    type: 'Casual Dining',
-    rating: 4,
-    price: 'BD 6-15 per person',
-    cuisine: 'Traditional Chinese',
-    description: 'A long-standing favorite among Bahrain\'s Chinese food enthusiasts, Mandarin Chinese delivers authentic flavors in a no-frills setting. The kitchen prepares time-tested recipes that have satisfied cravings for decades, from perfectly executed fried rice to comforting noodle soups. The consistent quality and reasonable prices have earned it generations of loyal customers.',
-    specialties: ['Classic dishes', 'Fried rice', 'Noodles', 'Sweet and sour', 'Family sets'],
-    atmosphere: 'Traditional Chinese restaurant with comfortable seating',
-    hours: 'Daily 11AM-11PM',
-    reservation: 'Usually not required',
-    bestFor: 'Authentic cravings, regular visits, families, takeaway',
-    mustTry: 'House special fried rice, Beef with black bean sauce, Spring rolls, Lemon chicken',
-  },
-  {
-    name: 'Chopsticks',
-    slug: 'chopsticks-bahrain',
-    location: 'Multiple Locations',
-    type: 'Fast Casual',
-    rating: 4,
     price: 'BD 4-10 per person',
-    cuisine: 'Chinese Fast Casual',
-    description: 'Chopsticks brings Chinese flavors to the fast-casual format, perfect for quick lunches and convenient dinners. The menu features crowd-pleasers like kung pao chicken, sweet and sour pork, and various fried rice options — all prepared fresh and served quickly. Multiple locations across Bahrain make it a reliable go-to for satisfying Chinese food cravings on the go.',
-    specialties: ['Quick service', 'Combo meals', 'Takeaway', 'Value pricing', 'Mall locations'],
-    atmosphere: 'Modern fast-casual with convenient counter service',
-    hours: 'Daily 10AM-10PM (mall hours)',
-    reservation: 'Not required',
-    bestFor: 'Quick meals, shoppers, lunch breaks, takeaway',
-    mustTry: 'Combo meals, Kung Pao chicken, Special fried rice, Crispy wontons',
+    cuisine: 'Indo-Chinese',
+    description: 'Red Wok serves the popular Indo-Chinese fusion that has captured hearts across Asia. This style blends Chinese cooking techniques with Indian spices and flavors, creating dishes that are bold, flavorful, and uniquely satisfying. The restaurant excels in quick wok-fried dishes with punchy flavors. For those who love spice with their Chinese, Red Wok delivers consistently.',
+    specialties: ['Indo-Chinese Fusion', 'Chilli Dishes', 'Manchurian', 'Hakka Noodles', 'Fried Rice'],
+    atmosphere: 'Casual and vibrant with quick service',
+    hours: 'Daily 11AM-12AM',
+    reservation: 'Not usually required',
+    bestFor: 'Spice lovers, Indo-Chinese fans, late night, budget dining',
+    mustTry: 'Chilli Chicken, Gobi Manchurian, Hakka Noodles, Dragon Chicken',
   },
   {
-    name: 'Wok Express',
-    slug: 'wok-express-bahrain',
-    location: 'City Centre Bahrain',
-    type: 'Fast Casual',
+    name: 'Dynasty',
+    slug: 'dynasty-chinese-bahrain',
+    location: 'ART Rotana, Amwaj',
+    type: 'Fine Dining',
+    rating: 4,
+    price: 'BD 18-32 per person',
+    cuisine: 'Cantonese',
+    description: 'Dynasty at the ART Rotana offers refined Cantonese dining in the beautiful Amwaj Islands setting. The restaurant combines authentic flavors with elegant presentation, making it ideal for special occasions or sophisticated business dining. The waterfront hotel location adds to the ambiance, while skilled chefs deliver consistent quality across the menu.',
+    specialties: ['Waterfront Dining', 'Hotel Cantonese', 'Dim Sum', 'Seafood Specialties', 'Private Events'],
+    atmosphere: 'Elegant hotel dining with Amwaj waterfront setting',
+    hours: 'Daily 12PM-3PM, 7PM-11PM',
+    reservation: 'Recommended',
+    bestFor: 'Amwaj residents, hotel guests, celebrations, scenic dining',
+    mustTry: 'Dim Sum Lunch, Crispy Duck, Wok-fried Prawns, Seafood Fried Rice',
+  },
+  {
+    name: 'Great Wall',
+    slug: 'great-wall-bahrain',
+    location: 'Gudaibiya',
+    type: 'Budget',
     rating: 4,
     price: 'BD 3-8 per person',
-    cuisine: 'Chinese Stir-Fry',
-    description: 'Wok Express offers the excitement of fresh wok cooking at mall-friendly prices. Watch as skilled wok chefs toss your custom order in flaming woks, creating fresh stir-fries and noodle dishes in minutes. The interactive concept and budget-friendly pricing make it popular with families and anyone seeking a quick, customizable Chinese meal.',
-    specialties: ['Custom wok dishes', 'Build your own', 'Fresh noodles', 'Quick cooking', 'Budget meals'],
-    atmosphere: 'Open wok station in food court setting',
-    hours: 'Daily 10AM-10PM',
+    cuisine: 'Authentic Chinese',
+    description: 'Great Wall proves that authentic Chinese food doesn\'t require a big budget. This unpretentious restaurant serves genuine Chinese flavors at remarkably affordable prices. Frequented by the Chinese community in Bahrain, the kitchen maintains proper techniques and authentic seasonings. The no-frills setting focuses attention where it belongs: on the delicious food.',
+    specialties: ['Budget Friendly', 'Authentic Flavors', 'Chinese Community Favorite', 'Large Portions', 'Home-style Cooking'],
+    atmosphere: 'Simple and authentic, no-frills dining',
+    hours: 'Daily 11AM-11PM',
     reservation: 'Not required',
-    bestFor: 'Mall shoppers, custom meals, families, budget dining',
-    mustTry: 'Build-your-own wok, Beef noodles, Chicken fried rice',
+    bestFor: 'Budget dining, authentic experience, locals, takeaway',
+    mustTry: 'Fried Rice, Sweet and Sour Pork, Beef with Broccoli, Spring Rolls',
   },
   {
-    name: 'Asian Village',
-    slug: 'asian-village-riffa',
+    name: 'Wok Station',
+    slug: 'wok-station-bahrain',
+    location: 'Seef District',
+    type: 'Fast Casual',
+    rating: 4,
+    price: 'BD 4-9 per person',
+    cuisine: 'Contemporary Asian',
+    description: 'Wok Station brings fresh, made-to-order wok cooking to the fast-casual dining scene. The interactive format allows diners to customize their bowls with choice of proteins, vegetables, and sauces. The theatrical open kitchen adds entertainment value while ensuring freshness. For quick, healthy, customizable Asian fare, Wok Station is a reliable choice.',
+    specialties: ['Build Your Bowl', 'Fresh Wok Cooking', 'Healthy Options', 'Quick Service', 'Customizable'],
+    atmosphere: 'Modern fast-casual with open wok kitchen',
+    hours: 'Daily 11AM-11PM',
+    reservation: 'Not required',
+    bestFor: 'Quick meals, customizable dishes, healthy eating, mall dining',
+    mustTry: 'Custom Wok Bowl, Signature Fried Rice, Teriyaki Options, Fresh Vegetables',
+  },
+  {
+    name: 'Golden China',
+    slug: 'golden-china-riffa',
     location: 'Riffa',
     type: 'Casual Dining',
     rating: 4,
-    price: 'BD 7-15 per person',
-    cuisine: 'Pan-Asian with Chinese',
-    description: 'Asian Village serves the Riffa community with a diverse Pan-Asian menu that includes well-executed Chinese dishes. The restaurant\'s Chinese offerings range from comforting classics to more adventurous regional specialties. The friendly service and family-oriented atmosphere have made it a neighborhood favorite for casual dining.',
-    specialties: ['Pan-Asian variety', 'Chinese classics', 'Family dining', 'Delivery', 'Group menus'],
-    atmosphere: 'Comfortable neighborhood restaurant',
+    price: 'BD 5-12 per person',
+    cuisine: 'Traditional Chinese',
+    description: 'Serving the Riffa community, Golden China offers reliable Chinese cuisine south of Manama. The restaurant has become a local favorite for its generous portions and consistent flavors. The menu covers all Chinese classics with quality ingredients and proper preparation. For Riffa residents seeking Chinese without the drive to Manama, Golden China delivers.',
+    specialties: ['Riffa Location', 'Family Portions', 'Classic Chinese', 'Delivery Available', 'Set Menus'],
+    atmosphere: 'Comfortable local Chinese restaurant',
     hours: 'Daily 11AM-11PM',
-    reservation: 'Recommended for groups',
-    bestFor: 'Riffa residents, families, mixed groups, casual dinners',
-    mustTry: 'Szechuan beef, Special chow mein, Honey chicken, Salt and pepper squid',
+    reservation: 'Walk-in friendly',
+    bestFor: 'Riffa residents, families, consistent quality, delivery',
+    mustTry: 'Special Fried Rice, Chicken in Garlic Sauce, Beef Chow Mein, Wonton Soup',
   },
   {
-    name: 'Panda Express',
-    slug: 'panda-express-bahrain',
-    location: 'Multiple Locations',
-    type: 'Fast Casual',
-    rating: 3,
-    price: 'BD 3-7 per person',
-    cuisine: 'American Chinese',
-    description: 'The globally recognized Panda Express brings its American-Chinese comfort food to Bahrain. While not authentically Chinese, the restaurant serves consistent, crowd-pleasing dishes like orange chicken and Beijing beef that satisfy cravings for familiar flavors. The quick service and predictable quality make it reliable for families and those seeking comfort food.',
-    specialties: ['Orange chicken', 'Beijing beef', 'Combo plates', 'Quick service', 'Consistent quality'],
-    atmosphere: 'Familiar fast-casual American Chinese setting',
-    hours: 'Daily 10AM-11PM',
-    reservation: 'Not required',
-    bestFor: 'Families with kids, comfort food, quick meals, consistent experience',
-    mustTry: 'Orange chicken, Beijing beef, Honey walnut shrimp',
-  },
-  {
-    name: 'Zen Restaurant',
-    slug: 'zen-restaurant-seef',
-    location: 'Seef',
-    type: 'Fine Dining',
+    name: 'Bamboo',
+    slug: 'bamboo-chinese-bahrain',
+    location: 'Zinj',
+    type: 'Casual Dining',
     rating: 4,
-    price: 'BD 15-30 per person',
-    cuisine: 'Chinese & Japanese',
-    description: 'Zen Restaurant offers a refined Asian dining experience with a strong Chinese menu alongside Japanese options. The Chinese dishes are prepared with attention to authentic techniques, from proper wok hei in stir-fries to carefully steamed dim sum. The minimalist décor creates a peaceful atmosphere that matches the restaurant\'s name.',
-    specialties: ['Dual cuisine', 'Dim sum', 'Seafood', 'Sushi and Chinese combos', 'Private rooms'],
-    atmosphere: 'Minimalist Asian elegance with tranquil ambiance',
-    hours: 'Daily 12PM-11PM',
-    reservation: 'Recommended',
-    bestFor: 'Mixed groups, business dinners, those wanting variety, special occasions',
-    mustTry: 'Dim sum selection, Crispy duck, Salt and pepper prawns, Chinese-style lobster',
-  },
-  {
-    name: 'Lanterns',
-    slug: 'lanterns-ritz-carlton',
-    location: 'Ritz-Carlton, Seef',
-    type: 'Fine Dining',
-    rating: 5,
-    price: 'BD 18-35 per person',
-    cuisine: 'Pan-Asian with Chinese',
-    description: 'Lanterns at the Ritz-Carlton features an excellent selection of Chinese dishes within its broader Pan-Asian offering. The Chinese menu showcases Cantonese classics prepared with premium ingredients and meticulous technique. The stunning terrace with Gulf views provides an unforgettable backdrop for enjoying expertly prepared dim sum or aromatic claypot dishes.',
-    specialties: ['Dim sum', 'Cantonese roasts', 'Terrace dining', 'Gulf views', 'Premium ingredients'],
-    atmosphere: 'Elegant hotel dining with spectacular outdoor terrace',
-    hours: 'Daily 12PM-11PM',
-    reservation: 'Highly recommended for terrace',
-    bestFor: 'Special occasions, romantic dinners, impressive entertaining, hotel guests',
-    mustTry: 'Weekend dim sum, Peking duck, Black pepper beef, Mango pudding',
+    price: 'BD 6-14 per person',
+    cuisine: 'Chinese & Asian',
+    description: 'Bamboo offers a diverse Asian menu with strong Chinese offerings in the Zinj neighborhood. The restaurant balances authenticity with local preferences, creating dishes that satisfy both purists and casual diners. The menu includes popular Chinese favorites alongside other Asian cuisines for groups with varied preferences. Friendly service and consistent quality have built a loyal following.',
+    specialties: ['Mixed Asian Menu', 'Sizzling Platters', 'Noodle Varieties', 'Vegetarian Options', 'Family Dining'],
+    atmosphere: 'Welcoming neighborhood Asian restaurant',
+    hours: 'Daily 11:30AM-11PM',
+    reservation: 'Recommended for groups',
+    bestFor: 'Mixed groups, families, neighborhood dining, vegetarians',
+    mustTry: 'Sizzling Beef, Kung Pao Prawns, Vegetable Fried Rice, Crispy Wontons',
   },
 ];
 
 const restaurantsByCategory = [
-  { category: 'Fine Dining', picks: ['China Garden', 'Royal China', 'Lanterns'] },
-  { category: 'Best Dim Sum', picks: ['China Garden', 'Lanterns', 'Zen Restaurant'] },
-  { category: 'Best Value', picks: ['Chopsticks', 'Wok Express', 'Mandarin Chinese'] },
-  { category: 'Authentic', picks: ['China Garden', 'Golden Phoenix', 'Royal China'] },
-  { category: 'Best for Groups', picks: ['Royal China', 'Dragon City', 'Golden Phoenix'] },
-  { category: 'Quick Meals', picks: ['Chopsticks', 'Wok Express', 'Panda Express'] },
+  { category: 'Fine Dining', picks: ['Golden Dragon', 'Shang Palace', 'Dynasty'] },
+  { category: 'Best Dim Sum', picks: ['Shang Palace', 'Golden Dragon', 'Dynasty'] },
+  { category: 'Best Value', picks: ['Great Wall', 'Panda House', 'Beijing Restaurant'] },
+  { category: 'Authentic Sichuan', picks: ['Panda House', 'Beijing Restaurant', 'Great Wall'] },
+  { category: 'Best for Groups', picks: ['Golden Dragon', 'Panda House', 'China Garden'] },
+  { category: 'Quick Meals', picks: ['Chopstix', 'Wok Station', 'Red Wok'] },
 ];
 
 const dishes = [
-  { dish: 'Dim Sum', description: 'Assorted steamed and fried dumplings, buns, and small bites', where: 'China Garden, Lanterns, Zen Restaurant' },
-  { dish: 'Peking Duck', description: 'Crispy-skinned roast duck served with pancakes and hoisin', where: 'China Garden, Royal China, Golden Phoenix' },
-  { dish: 'Kung Pao Chicken', description: 'Wok-fried chicken with peanuts, chilies, and Sichuan pepper', where: 'Golden Phoenix, Mandarin Chinese, Chopsticks' },
-  { dish: 'Sweet & Sour Pork', description: 'Crispy pork pieces in tangy fruit-based sauce', where: 'Mandarin Chinese, Dragon City, Royal China' },
-  { dish: 'Mapo Tofu', description: 'Silky tofu in spicy Sichuan bean paste with minced meat', where: 'Golden Phoenix, Furn Bistro, Zen Restaurant' },
-  { dish: 'Char Siu', description: 'Cantonese BBQ pork with honey glaze', where: 'China Garden, Royal China, Lanterns' },
-  { dish: 'Fried Rice', description: 'Wok-fried rice with eggs, vegetables, and choice of protein', where: 'Dragon City, Mandarin Chinese, Chopsticks' },
-  { dish: 'Chow Mein', description: 'Stir-fried noodles with vegetables and protein', where: 'Asian Village, Wok Express, Dragon City' },
+  { dish: 'Peking Duck', description: 'Roasted duck with crispy skin, pancakes, and hoisin sauce', where: 'Golden Dragon, Shang Palace, Dynasty' },
+  { dish: 'Dim Sum', description: 'Steamed and fried dumplings, buns, and small plates', where: 'Shang Palace, Golden Dragon, Dynasty' },
+  { dish: 'Kung Pao Chicken', description: 'Stir-fried chicken with peanuts and dried chilies', where: 'Panda House, Chopstix, China Garden' },
+  { dish: 'Sweet and Sour Pork', description: 'Crispy pork in tangy sweet and sour sauce', where: 'Golden Dragon, Panda House, Great Wall' },
+  { dish: 'Mapo Tofu', description: 'Silken tofu in spicy Sichuan chili bean sauce', where: 'Panda House, Beijing Restaurant, Great Wall' },
+  { dish: 'Fried Rice', description: 'Wok-fried rice with egg, vegetables, and choice of protein', where: 'Panda House, Chopstix, Golden China' },
+  { dish: 'Chow Mein', description: 'Stir-fried noodles with vegetables and protein', where: 'Panda House, Golden China, Red Wok' },
+  { dish: 'Spring Rolls', description: 'Crispy rolled pastry with savory vegetable or meat filling', where: 'Golden Dragon, Chopstix, China Garden' },
 ];
 
 const tips = [
   {
-    title: 'Dim Sum Timing',
-    content: 'Dim sum is traditionally a lunch affair. Arrive early (before 1 PM) at popular spots like China Garden for the freshest selection and to avoid waiting.',
+    title: 'Reserve for Dim Sum',
+    content: 'Weekend dim sum at hotel restaurants is extremely popular. Book in advance at Shang Palace or Golden Dragon to avoid disappointment.',
   },
   {
     title: 'Share Family Style',
-    content: 'Chinese meals are designed for sharing. Order several dishes for the table and share — this gives you variety and is the authentic way to dine.',
+    content: 'Chinese dining is designed for sharing. Order one dish per person plus rice and share everything. This way you can taste more variety.',
   },
   {
-    title: 'Rice is Essential',
-    content: 'For non-soup dishes, steamed jasmine rice is essential. It balances rich sauces and extends your dishes. Don\'t skip it.',
+    title: 'Ask for Authentic Spice',
+    content: 'If you enjoy Sichuan heat, ask for "Chinese spicy" rather than adjusted versions. Restaurants often tone down the chili for local palates.',
   },
   {
-    title: 'Spice Levels',
-    content: 'Sichuan dishes are genuinely spicy. The numbing sensation from Sichuan peppercorns is intentional. Ask for mild if you\'re not experienced with the heat.',
+    title: 'Try the Specials',
+    content: 'Many Chinese restaurants have off-menu specials or dishes prepared for Chinese customers. Ask your server what\'s special today.',
   },
   {
-    title: 'Reserve for Peking Duck',
-    content: 'Peking duck often requires advance ordering (sometimes 24 hours). Call ahead to avoid disappointment at fine dining restaurants.',
+    title: 'Lunch Sets Offer Value',
+    content: 'Hotel Chinese restaurants often have business lunch sets that offer fine dining quality at more accessible prices.',
   },
   {
-    title: 'Lunch Specials',
-    content: 'Many Chinese restaurants offer lunch sets that provide excellent value — often 30-40% cheaper than ordering the same items à la carte.',
+    title: 'Tea is Part of the Experience',
+    content: 'Chinese tea service is integral to the meal. Good Chinese restaurants will serve quality tea as part of the dining experience.',
   },
 ];
 
 const faqs = [
   {
-    q: 'What is the best Chinese restaurant in Bahrain for dim sum?',
-    a: 'China Garden at the Gulf Hotel is widely regarded as having the best dim sum in Bahrain, with skilled Hong Kong-trained chefs preparing authentic Cantonese dumplings and buns. Lanterns at the Ritz-Carlton also offers excellent weekend dim sum with the bonus of terrace views. For both, reservations are essential, especially on weekends.',
+    q: 'What is the best Chinese restaurant in Bahrain for fine dining?',
+    a: 'Golden Dragon at the Gulf Hotel is widely considered Bahrain\'s finest Chinese restaurant, offering premium Cantonese cuisine with exceptional dim sum and Peking duck. Shang Palace at Shangri-La Hotel is another excellent choice for luxurious Chinese dining, particularly renowned for its weekend dim sum brunch.',
   },
   {
-    q: 'Where can I find authentic Sichuan food in Bahrain?',
-    a: 'Golden Phoenix in the Diplomatic Area specializes in Sichuan cuisine alongside Cantonese dishes. Their Mapo tofu, Kung Pao chicken, and dan dan noodles deliver authentic Sichuan flavors with the characteristic numbing spice of Sichuan peppercorns. Ask for "authentic spicy" if you want the full experience.',
+    q: 'Where can I find the best dim sum in Bahrain?',
+    a: 'Shang Palace at Shangri-La Hotel serves the most acclaimed dim sum in Bahrain, especially during their weekend brunch. Golden Dragon at Gulf Hotel also offers excellent dim sum selections. Dynasty at ART Rotana provides quality dim sum in a scenic Amwaj setting. Book ahead as weekend dim sum is very popular.',
   },
   {
-    q: 'Which Chinese restaurants in Bahrain offer Peking duck?',
-    a: 'China Garden at the Gulf Hotel is famous for its Peking duck, carved tableside with traditional accompaniments. Royal China and Golden Phoenix also prepare excellent versions. It\'s advisable to order Peking duck in advance (at least a few hours, sometimes 24 hours) to ensure availability.',
+    q: 'Are there authentic Chinese restaurants in Bahrain?',
+    a: 'Yes, several restaurants offer authentic Chinese cuisine. Panda House in Juffair is run by a Chinese family and serves genuine flavors. Great Wall in Gudaibiya is popular with the Chinese community. Beijing Restaurant specializes in authentic Northern Chinese cuisine with hand-made dumplings and noodles.',
   },
   {
     q: 'What are the cheapest Chinese restaurants in Bahrain?',
-    a: 'Wok Express and Panda Express offer meals from BD 3-7 per person. Chopsticks provides good Chinese fast-casual options at multiple locations for BD 4-10. Mandarin Chinese offers authentic dishes at BD 6-15, representing excellent value for sit-down Chinese dining.',
+    a: 'Great Wall in Gudaibiya offers authentic Chinese from BD 3-8 per person. Red Wok provides Indo-Chinese from BD 4-10. Chopstix and Wok Station offer budget-friendly options in malls from BD 4-9. These restaurants prove quality Chinese food is available at every budget level.',
   },
   {
-    q: 'Are there Chinese restaurants in Bahrain suitable for large groups?',
-    a: 'Royal China and China Garden both offer private dining rooms ideal for large groups and celebrations. Dragon City in Juffair can accommodate big parties with family-style sharing menus. Golden Phoenix also welcomes groups and can arrange banquet-style dining for special occasions.',
+    q: 'Which Chinese restaurant in Bahrain has the best Peking Duck?',
+    a: 'Golden Dragon at Gulf Hotel is renowned for serving the best Peking Duck in Bahrain, prepared traditionally and carved tableside. Shang Palace at Shangri-La also offers excellent Peking Duck. Both require advance ordering for the full duck presentation. Expect to pay around BD 25-35 for a whole duck.',
   },
 ];
 
@@ -308,21 +308,21 @@ export default function BestChineseRestaurantsBahrainPage() {
 
       {/* Hero Section */}
       <section className="relative py-20 px-4 overflow-hidden">
-        <div className="absolute inset-0 bg-gradient-to-r from-red-500/10 to-amber-500/10" />
+        <div className="absolute inset-0 bg-gradient-to-r from-red-500/10 to-yellow-500/10" />
         <div className="max-w-6xl mx-auto relative">
           <div className="text-center mb-12">
             <span className="inline-block px-4 py-1 bg-red-500/20 text-red-400 rounded-full text-sm font-medium mb-4">
-              🥡 Ultimate Chinese Food Guide 2026
+              🥡 Ultimate Restaurant Guide 2026
             </span>
             <h1 className="text-4xl md:text-6xl font-black mb-6">
-              <span className="bg-gradient-to-r from-red-400 to-amber-500 bg-clip-text text-transparent">
+              <span className="bg-gradient-to-r from-red-400 to-yellow-500 bg-clip-text text-transparent">
                 Best Chinese Restaurants
               </span>
               {' '}in Bahrain 2026
             </h1>
             <p className="text-xl text-gray-300 max-w-3xl mx-auto">
-              From exquisite dim sum at China Garden to fiery Sichuan specialties — 
-              your complete guide to the best Chinese restaurants, Cantonese cuisine, and authentic Asian flavors in Bahrain.
+              From elegant Cantonese fine dining at Shang Palace to authentic street-style gems — 
+              your complete guide to the best Chinese restaurants, dim sum houses, and Sichuan spots in the Kingdom of Bahrain.
             </p>
             <p className="text-sm text-gray-500 mt-4">
               Last updated: {lastUpdated} | By <Link href="https://www.bahrainnights.com" className="text-red-400 hover:underline">BahrainNights.com</Link>
@@ -332,10 +332,10 @@ export default function BestChineseRestaurantsBahrainPage() {
           {/* Quick Stats */}
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mt-12">
             {[
-              { label: 'Restaurants Reviewed', value: '30+', icon: Utensils },
+              { label: 'Restaurants Reviewed', value: '35+', icon: Utensils },
               { label: 'Budget From', value: 'BD 3', icon: DollarSign },
-              { label: 'Dim Sum Spots', value: '5+', icon: Award },
-              { label: 'Regional Cuisines', value: '4+', icon: Flame },
+              { label: 'Fine Dining Options', value: '4+', icon: Award },
+              { label: 'Regional Styles', value: 'All China', icon: Flame },
             ].map((stat) => (
               <div key={stat.label} className="bg-white/5 backdrop-blur-sm rounded-xl p-4 text-center">
                 <stat.icon className="w-6 h-6 mx-auto mb-2 text-red-400" />
@@ -352,23 +352,21 @@ export default function BestChineseRestaurantsBahrainPage() {
         <div className="max-w-4xl mx-auto">
           <div className="prose prose-invert max-w-none">
             <p className="text-lg text-gray-300 leading-relaxed">
-              Chinese cuisine in Bahrain reflects the incredible diversity of China&apos;s culinary heritage, from the delicate 
-              refinement of Cantonese dim sum to the bold, numbing heat of Sichuan cooking. With a significant Chinese 
-              expat community and generations of established restaurants, Bahrain offers authentic Chinese dining 
-              experiences that rival those found in major Asian cities.
+              Chinese cuisine holds a special place in Bahrain&apos;s diverse culinary landscape, with restaurants 
+              ranging from opulent hotel fine dining establishments to humble neighborhood eateries cherished by 
+              the Chinese community. The kingdom offers an impressive array of regional Chinese cuisines, from 
+              delicate Cantonese dim sum and roast meats to fiery Sichuan dishes that challenge your spice tolerance. 
+              Whether you&apos;re celebrating a special occasion or seeking authentic comfort food, Bahrain&apos;s 
+              Chinese restaurant scene has evolved to satisfy every preference and budget.
             </p>
             <p className="text-lg text-gray-300 leading-relaxed mt-4">
-              Whether you&apos;re craving the theatrical presentation of Peking duck, the comfort of perfectly fried rice 
-              with proper wok hei, or the sophisticated artistry of handcrafted dim sum, this guide will help you 
-              navigate Bahrain&apos;s Chinese restaurant scene. From opulent hotel fine dining to humble neighborhood 
-              eateries treasured by locals, discover where to find the kingdom&apos;s best Chinese flavors.
-            </p>
-            <p className="text-lg text-gray-300 leading-relaxed mt-4">
-              Chinese cooking is one of the world&apos;s great culinary traditions, built on principles of balance, 
-              texture, and flavor harmony. The best Chinese restaurants in Bahrain honor these traditions with 
-              skilled chefs, quality ingredients, and cooking techniques honed over millennia. From the sizzle 
-              of a scorching wok to the gentle steam of bamboo baskets, every element contributes to dishes 
-              that are both nourishing and deeply satisfying.
+              The Chinese dining experience in Bahrain spans the full spectrum of what this ancient cuisine has to 
+              offer. Premium hotels like the Gulf Hotel, Shangri-La, and Diplomat Radisson Blu house refined 
+              restaurants where master chefs prepare traditional dishes with premium ingredients and tableside 
+              presentations. Meanwhile, casual eateries in Juffair, Gudaibiya, and beyond serve home-style cooking 
+              that transports you straight to the streets of Beijing or the teahouses of Guangzhou. This comprehensive 
+              guide will help you navigate Bahrain&apos;s Chinese restaurant scene, whether you&apos;re craving 
+              perfectly crispy Peking duck or a simple bowl of hand-pulled noodles.
             </p>
           </div>
         </div>
@@ -498,7 +496,7 @@ export default function BestChineseRestaurantsBahrainPage() {
       </section>
 
       {/* Events CTA */}
-      <section className="py-12 px-4 bg-gradient-to-r from-red-500/20 to-amber-500/20">
+      <section className="py-12 px-4 bg-gradient-to-r from-red-500/20 to-yellow-500/20">
         <div className="max-w-4xl mx-auto text-center">
           <h2 className="text-2xl font-bold mb-4">Looking for Food Events & Experiences?</h2>
           <p className="text-gray-300 mb-6">
@@ -531,12 +529,12 @@ export default function BestChineseRestaurantsBahrainPage() {
           <h2 className="text-2xl font-bold mb-8">Explore More Cuisine Guides</h2>
           <div className="grid md:grid-cols-4 gap-4">
             {[
-              { title: 'Indian', href: '/guides/best-indian-restaurants-bahrain', emoji: '🍛' },
+              { title: 'Indian Restaurants', href: '/guides/best-indian-restaurants-bahrain', emoji: '🍛' },
+              { title: 'Thai Restaurants', href: '/guides/best-thai-restaurants-bahrain', emoji: '🍜' },
               { title: 'Japanese & Sushi', href: '/guides/best-japanese-restaurants-bahrain', emoji: '🍣' },
-              { title: 'Thai', href: '/guides/best-thai-restaurants-bahrain', emoji: '🍜' },
-              { title: 'Seafood', href: '/guides/best-seafood-bahrain', emoji: '🦐' },
               { title: 'Arabic & Lebanese', href: '/guides/best-arabic-restaurants-bahrain', emoji: '🥙' },
               { title: 'Italian', href: '/guides/best-italian-restaurants-bahrain', emoji: '🍝' },
+              { title: 'Seafood', href: '/guides/best-seafood-bahrain', emoji: '🦐' },
               { title: 'All Restaurants', href: '/guides/restaurants', emoji: '🍽️' },
               { title: 'Best Buffets', href: '/guides/buffets', emoji: '🥘' },
             ].map((guide) => (
@@ -592,8 +590,8 @@ export default function BestChineseRestaurantsBahrainPage() {
           __html: JSON.stringify({
             '@context': 'https://schema.org',
             '@type': 'Article',
-            headline: 'Best Chinese Restaurants in Bahrain 2026 | Top 12 Dim Sum & Cantonese',
-            description: 'Complete guide to the best Chinese restaurants in Bahrain, from authentic dim sum to Sichuan cuisine and fast-casual options.',
+            headline: 'Best Chinese Restaurants in Bahrain 2026 | Top 12 Dim Sum & Cantonese Dining',
+            description: 'Complete guide to the best Chinese restaurants in Bahrain, from Cantonese fine dining to authentic budget-friendly options.',
             author: {
               '@type': 'Organization',
               name: 'BahrainNights',

@@ -7,12 +7,12 @@ import {
 import BreadcrumbSchema from '@/components/SEO/BreadcrumbSchema';
 
 export const metadata: Metadata = {
-  title: 'Best Thai Restaurants in Bahrain 2026 | Top 12 Thai Food & Street Eats',
-  description: 'Discover the 12 best Thai restaurants in Bahrain for 2026. From authentic Pad Thai and Tom Yum to fine dining Thai experiences, find the perfect Thai restaurant in Manama, Seef & Juffair.',
-  keywords: 'best Thai restaurants Bahrain 2026, Thai food Bahrain, Pad Thai Manama, Tom Yum soup Bahrain, Thai curry Bahrain, Thai street food Bahrain, authentic Thai Bahrain',
+  title: 'Best Thai Restaurants in Bahrain 2026 | Top 12 Authentic Thai Dining',
+  description: 'Discover the 12 best Thai restaurants in Bahrain for 2026. From authentic street food to elegant fine dining, find the best Pad Thai, Tom Yum, and Thai curries in Manama, Seef, and Juffair.',
+  keywords: 'best Thai restaurants Bahrain 2026, Thai food Bahrain, Pad Thai Bahrain, Tom Yum Manama, Thai curry Bahrain, Talay Thai, Thai Lounge, authentic Thai Bahrain',
   openGraph: {
-    title: 'Best Thai Restaurants in Bahrain 2026 | Top 12 Thai Food & Street Eats',
-    description: 'Complete guide to the best Thai restaurants in Bahrain - from authentic street food to elegant dining.',
+    title: 'Best Thai Restaurants in Bahrain 2026 | Top 12 Authentic Thai Dining',
+    description: 'Complete guide to the best Thai restaurants in Bahrain - from authentic street food to elegant fine dining experiences.',
     type: 'article',
     locale: 'en_US',
     url: 'https://www.bahrainnights.com/guides/best-thai-restaurants-bahrain',
@@ -30,266 +30,266 @@ export const metadata: Metadata = {
 
 const restaurants = [
   {
-    name: 'Trader Vic\'s Mai Tai Lounge',
-    slug: 'trader-vics-bahrain',
-    location: 'Ritz-Carlton, Seef',
+    name: 'Talay Thai',
+    slug: 'talay-thai-bahrain',
+    location: 'Adliya',
     type: 'Fine Dining',
     rating: 5,
-    price: 'BD 20-40 per person',
-    cuisine: 'Thai & Polynesian',
-    description: 'While known for its Polynesian flair, Trader Vic\'s serves exceptional Thai dishes in an exotic tropical setting. The restaurant\'s skilled Thai chefs create authentic dishes with premium ingredients, from fragrant green curries to perfectly balanced Pad Thai. The sophisticated atmosphere makes it ideal for special occasions, while the extensive cocktail menu featuring mai tais and tropical drinks complements the bold Thai flavors perfectly.',
-    specialties: ['Green curry', 'Pad Thai', 'Thai seafood', 'Cocktail pairings', 'Tropical ambiance'],
-    atmosphere: 'Exotic Polynesian décor with island vibes and romantic lighting',
-    hours: 'Daily 7PM-1AM',
+    price: 'BD 15-30 per person',
+    cuisine: 'Authentic Thai',
+    description: 'Widely regarded as Bahrain\'s premier Thai restaurant, Talay Thai delivers an exceptional culinary journey through the flavors of Thailand. The elegant setting in Adliya perfectly complements the refined yet authentic dishes crafted by skilled Thai chefs. Every dish reflects the careful balance of sweet, sour, salty, and spicy that defines Thai cuisine. The extensive menu spans all major regions of Thailand, from fiery Southern curries to delicate Northern specialties.',
+    specialties: ['Tom Yum Goong', 'Massaman Curry', 'Pad Thai', 'Mango Sticky Rice', 'Thai Seafood'],
+    atmosphere: 'Elegant dining with traditional Thai décor and intimate seating',
+    hours: 'Daily 12PM-3PM, 7PM-11PM',
     reservation: 'Recommended, especially weekends',
-    bestFor: 'Date nights, celebrations, cocktail lovers, special occasions',
-    mustTry: 'Green curry with prawns, Pad Thai, Mai Tai cocktails',
+    bestFor: 'Special occasions, authentic Thai experience, date nights',
+    mustTry: 'Tom Yum Goong, Massaman Lamb, Pad Thai with prawns, Thai ice tea',
   },
   {
-    name: 'Lanterns',
+    name: 'Thai Lounge',
+    slug: 'thai-lounge-bahrain',
+    location: 'Seef Mall / City Centre',
+    type: 'Casual Dining',
+    rating: 5,
+    price: 'BD 8-18 per person',
+    cuisine: 'Modern Thai',
+    description: 'Thai Lounge has built a devoted following across its multiple locations in Bahrain thanks to consistent quality and generous portions. The contemporary ambiance makes it perfect for casual dining, whether you\'re with family, friends, or solo. The menu covers all Thai favorites with a modern twist, and the kitchen caters well to various spice preferences. Their lunch specials offer excellent value for those seeking quality Thai food during the day.',
+    specialties: ['Green Curry', 'Pad See Ew', 'Spring Rolls', 'Tom Kha Gai', 'Thai Noodles'],
+    atmosphere: 'Modern casual with vibrant Thai-inspired décor',
+    hours: 'Daily 11AM-11PM',
+    reservation: 'Walk-in friendly',
+    bestFor: 'Families, mall dining, casual lunches, consistent quality',
+    mustTry: 'Green Curry with Chicken, Pad See Ew, Fresh spring rolls, Thai iced coffee',
+  },
+  {
+    name: 'Monsoon',
+    slug: 'monsoon-bahrain',
+    location: 'InterContinental Regency',
+    type: 'Fine Dining',
+    rating: 5,
+    price: 'BD 18-35 per person',
+    cuisine: 'Pan-Asian / Thai',
+    description: 'Set within the prestigious InterContinental Regency, Monsoon offers an upscale Pan-Asian experience with Thai cuisine taking center stage. The sophisticated ambiance combines modern elegance with subtle Asian touches, creating the perfect backdrop for a memorable dining experience. The kitchen team brings together authentic techniques with premium ingredients, resulting in Thai dishes that satisfy purists while appealing to broader palates.',
+    specialties: ['Signature Thai Curries', 'Wok-fried dishes', 'Seafood specials', 'Premium Pad Thai', 'Asian fusion desserts'],
+    atmosphere: 'Luxurious hotel dining with Asian-inspired modern design',
+    hours: 'Daily 12PM-3PM, 7PM-11PM',
+    reservation: 'Highly recommended',
+    bestFor: 'Business dinners, celebrations, hotel guests, refined Thai experience',
+    mustTry: 'Signature Red Curry, Prawns in tamarind sauce, Coconut soup, Black rice pudding',
+  },
+  {
+    name: 'Lanterns Thai',
     slug: 'lanterns-ritz-carlton',
     location: 'Ritz-Carlton, Seef',
     type: 'Fine Dining',
     rating: 5,
-    price: 'BD 18-35 per person',
-    cuisine: 'Thai & Pan-Asian',
-    description: 'Nestled within the luxurious Ritz-Carlton Bahrain, Lanterns offers an elegant Thai dining experience combined with stunning terrace views. The restaurant expertly prepares traditional Thai dishes using authentic spices and fresh ingredients. The open-air terrace overlooking the Arabian Gulf provides a magical setting for enjoying Tom Yum soup, aromatic curries, and classic Thai stir-fries while gentle sea breezes enhance the dining atmosphere.',
-    specialties: ['Tom Yum soup', 'Massaman curry', 'Thai basil dishes', 'Terrace dining', 'Seafood specialties'],
-    atmosphere: 'Elegant hotel dining with beautiful outdoor terrace and Gulf views',
+    price: 'BD 20-40 per person',
+    cuisine: 'Thai & Asian',
+    description: 'Located within the luxurious Ritz-Carlton Bahrain, Lanterns offers a stunning setting for Thai and Asian cuisine. The beautiful outdoor terrace with views of the lagoon creates an unforgettable dining atmosphere. The Thai menu features classic dishes prepared with premium ingredients and authentic techniques. Whether you choose the elegant indoor seating or the romantic terrace, Lanterns delivers a world-class Thai dining experience.',
+    specialties: ['Terrace dining', 'Premium Thai curries', 'Fresh seafood', 'Authentic noodles', 'Thai desserts'],
+    atmosphere: 'Elegant Ritz-Carlton setting with stunning terrace views',
     hours: 'Daily 12PM-11PM',
-    reservation: 'Highly recommended for terrace seating',
-    bestFor: 'Romantic dinners, business entertaining, hotel guests, sunset dining',
-    mustTry: 'Tom Yum Goong, Massaman lamb curry, Mango sticky rice',
+    reservation: 'Essential for terrace seating',
+    bestFor: 'Romantic dinners, special occasions, outdoor dining, hotel guests',
+    mustTry: 'Yellow Curry with Lobster, Tom Yum with fresh prawns, Mango sticky rice',
   },
   {
-    name: 'Monsoon',
-    slug: 'monsoon-seef',
-    location: 'Seef District',
-    type: 'Casual Fine Dining',
-    rating: 5,
-    price: 'BD 12-25 per person',
-    cuisine: 'Thai & Asian Fusion',
-    description: 'Monsoon has established itself as one of Bahrain\'s favorite destinations for authentic Thai cuisine. The restaurant strikes the perfect balance between traditional recipes and contemporary presentation, creating dishes that are both visually appealing and explosively flavorful. The stylish interior features Asian-inspired décor with warm wood tones and subtle lighting that creates an inviting atmosphere for both casual meals and celebrations.',
-    specialties: ['Red curry', 'Pad Thai', 'Thai fish cakes', 'Spring rolls', 'Coconut-based desserts'],
-    atmosphere: 'Contemporary Asian décor with sophisticated ambiance',
-    hours: 'Daily 12PM-11:30PM',
-    reservation: 'Recommended for dinner',
-    bestFor: 'Family dinners, groups, regular Thai cravings, celebrations',
-    mustTry: 'Red curry chicken, Tod Mun (fish cakes), Pad See Ew, Coconut ice cream',
-  },
-  {
-    name: 'Silk Thai Restaurant',
-    slug: 'silk-thai-juffair',
+    name: 'Krua Thai',
+    slug: 'krua-thai-juffair',
     location: 'Juffair',
     type: 'Casual Dining',
     rating: 4,
-    price: 'BD 8-18 per person',
+    price: 'BD 6-12 per person',
     cuisine: 'Authentic Thai',
-    description: 'Silk Thai delivers consistently authentic Thai flavors in a comfortable, unpretentious setting. Run by a Thai family with decades of culinary experience, the restaurant serves dishes that taste like they\'re straight from the streets of Bangkok. The generous portions and reasonable prices have made it a favorite among locals and expats seeking genuine Thai food without the hotel price tag.',
-    specialties: ['Authentic Thai curries', 'Som Tam (papaya salad)', 'Larb', 'Thai fried rice', 'Basil chicken'],
-    atmosphere: 'Casual and family-friendly with traditional Thai touches',
-    hours: 'Daily 11AM-11PM',
+    description: 'Krua Thai brings authentic home-style Thai cooking to Juffair at remarkably affordable prices. This no-frills gem has earned a loyal following among Thai food enthusiasts who value authenticity over ambiance. The owners source ingredients carefully to ensure genuine Thai flavors, and the kitchen doesn\'t shy away from proper spice levels. For those seeking the real taste of Thailand without hotel prices, Krua Thai delivers consistently.',
+    specialties: ['Street-style Pad Thai', 'Authentic curries', 'Papaya salad', 'Basil stir-fry', 'Thai soups'],
+    atmosphere: 'Simple and authentic neighborhood Thai restaurant',
+    hours: 'Daily 11AM-10:30PM',
     reservation: 'Usually walk-in friendly',
-    bestFor: 'Families, authentic flavors, regular visits, value dining',
-    mustTry: 'Som Tam, Pad Krapow (basil chicken), Green curry, Thai iced tea',
+    bestFor: 'Authentic Thai cravings, budget dining, spice lovers, takeaway',
+    mustTry: 'Som Tam (papaya salad), Pad Krapow, Boat noodles, Green curry',
   },
   {
-    name: 'Thai Lounge',
-    slug: 'thai-lounge-adliya',
-    location: 'Adliya',
-    type: 'Casual Dining',
-    rating: 4,
-    price: 'BD 10-20 per person',
-    cuisine: 'Modern Thai',
-    description: 'Located in the trendy Adliya district, Thai Lounge combines authentic Thai cooking with a modern lounge atmosphere. The restaurant caters to the area\'s vibrant nightlife crowd while maintaining serious culinary credentials. Whether you\'re looking for a pre-drinks dinner or a late-night Thai food fix, the kitchen delivers consistent quality and bold flavors.',
-    specialties: ['Late-night Thai', 'Thai street food', 'Cocktails', 'Sharing platters', 'Vegetarian options'],
-    atmosphere: 'Trendy lounge setting in the heart of Adliya nightlife',
-    hours: 'Daily 12PM-12AM',
-    reservation: 'Recommended on weekends',
-    bestFor: 'Night owls, Adliya visitors, pre-drinks dining, groups',
-    mustTry: 'Thai street food platter, Drunken noodles, Tom Kha Gai',
-  },
-  {
-    name: 'Noodle Box',
-    slug: 'noodle-box-bahrain',
-    location: 'Multiple Locations',
-    type: 'Fast Casual',
+    name: 'Bangkok Bites',
+    slug: 'bangkok-bites-bahrain',
+    location: 'Manama',
+    type: 'Street Food Style',
     rating: 4,
     price: 'BD 4-10 per person',
     cuisine: 'Thai Street Food',
-    description: 'For quick, affordable Thai food that doesn\'t compromise on taste, Noodle Box is a reliable go-to. The menu features Thai favorites like Pad Thai, green curry, and stir-fried noodles served in generous portions perfect for a quick lunch or casual dinner. Multiple locations across Bahrain make it convenient for satisfying sudden Thai cravings anywhere in the kingdom.',
-    specialties: ['Pad Thai', 'Noodle dishes', 'Quick service', 'Value meals', 'Takeaway-friendly'],
-    atmosphere: 'Casual quick-service with modern design',
+    description: 'Bangkok Bites captures the vibrant energy and bold flavors of Thailand\'s famous street food scene. The casual setting recreates the atmosphere of a Bangkok street stall, complete with quick service and authentic flavors. Dishes are prepared fresh to order, often with the wok-hei (breath of the wok) that defines great Thai street cooking. For an affordable taste of Thailand that doesn\'t compromise on authenticity, Bangkok Bites is a top choice.',
+    specialties: ['Street-style noodles', 'Satay skewers', 'Quick wok dishes', 'Thai snacks', 'Fresh juices'],
+    atmosphere: 'Casual street food vibes with quick service',
+    hours: 'Daily 10AM-11PM',
+    reservation: 'Not required',
+    bestFor: 'Quick Thai fix, budget meals, late-night cravings, takeaway',
+    mustTry: 'Chicken satay, Pad Thai, Thai boat noodles, Fried rice with basil',
+  },
+  {
+    name: 'Blue Thai',
+    slug: 'blue-thai-seef',
+    location: 'Seef District',
+    type: 'Casual Dining',
+    rating: 4,
+    price: 'BD 8-15 per person',
+    cuisine: 'Contemporary Thai',
+    description: 'Blue Thai offers a contemporary take on Thai cuisine in a stylish Seef location. The restaurant balances authenticity with modern presentation, appealing to both Thai food enthusiasts and newcomers alike. The menu features familiar favorites alongside creative specialties that showcase the kitchen\'s skill. The vibrant décor and welcoming atmosphere make it ideal for group gatherings and family dinners.',
+    specialties: ['Modern presentations', 'Classic curries', 'Fresh salads', 'Seafood dishes', 'Vegetarian Thai'],
+    atmosphere: 'Contemporary and vibrant with stylish touches',
+    hours: 'Daily 11:30AM-11PM',
+    reservation: 'Recommended for groups',
+    bestFor: 'Groups, family dining, modern Thai experience, Seef location',
+    mustTry: 'Panang Curry, Tom Kha, Crispy prawn cakes, Thai fish cakes',
+  },
+  {
+    name: 'Nara Thai',
+    slug: 'nara-thai-bahrain',
+    location: 'Riffa / Isa Town',
+    type: 'Casual Dining',
+    rating: 4,
+    price: 'BD 5-12 per person',
+    cuisine: 'Traditional Thai',
+    description: 'Serving the communities of Riffa and Isa Town, Nara Thai brings authentic Thai flavors to areas outside Manama. The restaurant has become a local favorite for its consistent quality and reasonable prices. The menu covers all the essential Thai dishes with particular strength in noodle dishes and curries. For residents in the southern governorates seeking quality Thai food, Nara Thai is the go-to destination.',
+    specialties: ['Noodle dishes', 'Regional curries', 'Fried rice varieties', 'Thai appetizers', 'Set meals'],
+    atmosphere: 'Welcoming local restaurant with comfortable seating',
     hours: 'Daily 11AM-11PM',
-    reservation: 'Not required',
-    bestFor: 'Quick meals, lunch breaks, takeaway, budget dining',
-    mustTry: 'Signature Pad Thai, Green curry noodles, Thai fried rice',
+    reservation: 'Usually walk-in friendly',
+    bestFor: 'Riffa residents, family meals, consistent Thai food, value',
+    mustTry: 'Drunken noodles, Massaman Beef, Thai fried rice, Red curry',
   },
   {
-    name: 'Bushido',
-    slug: 'bushido-gulf-hotel',
-    location: 'Gulf Hotel, Adliya',
-    type: 'Fine Dining',
-    rating: 5,
-    price: 'BD 25-50 per person',
-    cuisine: 'Japanese & Thai Fusion',
-    description: 'Bushido at the Gulf Hotel offers an upscale dining experience that artfully combines Thai and Japanese cuisines. The restaurant\'s Thai offerings are prepared with the same precision and premium ingredients as its Japanese dishes. The elegant setting features dramatic lighting and sophisticated décor that creates an atmosphere of modern Asian luxury.',
-    specialties: ['Fusion dishes', 'Premium ingredients', 'Thai curries', 'Sushi-Thai combinations', 'Tasting menus'],
-    atmosphere: 'Sleek, sophisticated Asian luxury dining',
-    hours: 'Daily 7PM-11:30PM',
-    reservation: 'Essential',
-    bestFor: 'Special occasions, foodies, fusion lovers, business dinners',
-    mustTry: 'Thai-Japanese fusion specials, Signature curry, Dessert selections',
-  },
-  {
-    name: 'Wok Station',
-    slug: 'wok-station-bahrain',
-    location: 'Seef Mall',
-    type: 'Fast Casual',
-    rating: 4,
-    price: 'BD 4-8 per person',
-    cuisine: 'Thai Wok Dishes',
-    description: 'Wok Station brings the excitement of Thai wok cooking to a casual mall setting. Watch as skilled chefs toss ingredients in flaming woks, creating fresh stir-fries and noodle dishes right before your eyes. The interactive experience and affordable prices make it particularly popular with families and shoppers looking for a satisfying meal break.',
-    specialties: ['Live wok cooking', 'Custom stir-fries', 'Noodle dishes', 'Family-friendly', 'Mall convenience'],
-    atmosphere: 'Open kitchen concept in bustling mall food court',
-    hours: 'Daily 10AM-10PM',
-    reservation: 'Not required',
-    bestFor: 'Shoppers, families, quick bites, interactive dining',
-    mustTry: 'Custom wok stir-fry, Pad Thai, Thai basil chicken rice',
-  },
-  {
-    name: 'Mezzaluna',
-    slug: 'mezzaluna-manama',
-    location: 'Diplomatic Area',
-    type: 'Fine Dining',
-    rating: 4,
-    price: 'BD 20-40 per person',
-    cuisine: 'Italian & Thai',
-    description: 'While primarily an Italian restaurant, Mezzaluna features an impressive selection of Thai dishes on its pan-Asian menu. The restaurant\'s Thai chef brings authentic flavors to classics like Tom Yum and Pad Thai, all served in an elegant setting with panoramic city views. Perfect for groups with mixed cuisine preferences.',
-    specialties: ['Thai-Italian combination', 'City views', 'Business lunch', 'Private dining', 'Wine selection'],
-    atmosphere: 'Elegant high-rise dining with stunning Manama views',
-    hours: 'Daily 12PM-3PM, 7PM-11PM',
-    reservation: 'Recommended',
-    bestFor: 'Business lunches, mixed groups, view seekers, special events',
-    mustTry: 'Tom Yum soup, Thai green curry, Combination dinner',
-  },
-  {
-    name: 'Royal Thai',
-    slug: 'royal-thai-bahrain',
+    name: 'Siam Kitchen',
+    slug: 'siam-kitchen-bahrain',
     location: 'Gudaibiya',
     type: 'Budget',
     rating: 4,
-    price: 'BD 4-9 per person',
-    cuisine: 'Authentic Thai Street Food',
-    description: 'Royal Thai is a hidden gem serving some of Bahrain\'s most authentic Thai street food at incredibly affordable prices. The small restaurant may lack fancy décor, but more than makes up for it with dishes that transport you straight to Bangkok\'s food markets. Thai expats and in-the-know locals flock here for genuine flavors that rival anything back home.',
-    specialties: ['Street food authenticity', 'Budget prices', 'Thai expat favorite', 'Som Tam', 'Isaan dishes'],
-    atmosphere: 'Simple no-frills setting focused purely on food',
+    price: 'BD 3-8 per person',
+    cuisine: 'Authentic Thai',
+    description: 'Siam Kitchen proves that excellent Thai food doesn\'t require a premium price tag. This small but mighty restaurant serves surprisingly authentic dishes at budget-friendly prices. Run by Thai nationals, the kitchen maintains genuine flavors and proper spice levels. The humble setting attracts those in the know who prioritize taste over ambiance. For the best value Thai food in Bahrain, Siam Kitchen is hard to beat.',
+    specialties: ['Affordable curries', 'Authentic spice levels', 'Fresh noodles', 'Traditional soups', 'Value meals'],
+    atmosphere: 'Simple, no-frills authentic Thai eatery',
     hours: 'Daily 10AM-10PM',
     reservation: 'Not required',
-    bestFor: 'Budget dining, authentic seekers, Thai expats, adventurous eaters',
-    mustTry: 'Som Tam Thai, Larb Moo, Khao Pad (fried rice), Thai soups',
+    bestFor: 'Budget dining, authentic experience, Thai community favorite, takeaway',
+    mustTry: 'Green curry, Pad Krapow, Tom Yum, Thai tea',
   },
   {
-    name: 'Benihana',
-    slug: 'benihana-bahrain',
-    location: 'Sheraton, Manama',
+    name: 'Saffron Thai',
+    slug: 'saffron-thai-diplomat',
+    location: 'Diplomat Radisson Blu',
     type: 'Fine Dining',
     rating: 4,
-    price: 'BD 18-35 per person',
-    cuisine: 'Japanese & Thai',
-    description: 'Famous for its theatrical teppanyaki cooking, Benihana also serves excellent Thai dishes for those seeking variety. The restaurant\'s Thai menu features well-executed classics prepared with the same attention to detail as their Japanese offerings. The fun, interactive atmosphere makes it perfect for celebrations and group dining.',
-    specialties: ['Teppanyaki show', 'Thai side menu', 'Group dining', 'Celebrations', 'Entertainment'],
-    atmosphere: 'Fun, theatrical dining with skilled chef performances',
+    price: 'BD 15-28 per person',
+    cuisine: 'Premium Thai',
+    description: 'Located in the Diplomat Radisson Blu Hotel, Saffron Thai offers refined Thai cuisine in an elegant hotel setting. The restaurant combines traditional Thai flavors with contemporary presentation, creating dishes that are both authentic and visually stunning. The sophisticated atmosphere makes it ideal for business dining or special celebrations. The extensive menu spans Thailand\'s diverse regional cuisines.',
+    specialties: ['Hotel Thai dining', 'Business lunches', 'Thai tasting menus', 'Premium ingredients', 'Extensive wine list'],
+    atmosphere: 'Elegant hotel restaurant with refined ambiance',
     hours: 'Daily 12PM-3PM, 7PM-11PM',
-    reservation: 'Highly recommended',
-    bestFor: 'Celebrations, families, group outings, entertainment dining',
-    mustTry: 'Thai curry alongside teppanyaki, Spring rolls, Pad Thai',
+    reservation: 'Recommended',
+    bestFor: 'Business entertaining, hotel guests, refined Thai experience',
+    mustTry: 'Tasting menu, Signature curries, Grilled seafood, Mango desserts',
   },
   {
-    name: 'Café Lilou',
-    slug: 'cafe-lilou-adliya',
-    location: 'Adliya',
-    type: 'Café',
+    name: 'Thai Express',
+    slug: 'thai-express-bahrain',
+    location: 'Multiple Locations',
+    type: 'Fast Casual',
+    rating: 3,
+    price: 'BD 4-9 per person',
+    cuisine: 'Quick Thai',
+    description: 'Part of the international chain, Thai Express offers convenient Thai food in shopping malls across Bahrain. While not as authentic as specialty restaurants, it provides a reliable option for quick Thai cravings during shopping trips. The menu covers familiar favorites in consistent quality across locations. For families with kids or those seeking a fast but flavorful meal, Thai Express delivers convenience and consistency.',
+    specialties: ['Quick service', 'Mall locations', 'Family-friendly', 'Consistent quality', 'Set meals'],
+    atmosphere: 'Fast casual mall dining with efficient service',
+    hours: 'Mall hours (typically 10AM-10PM)',
+    reservation: 'Not required',
+    bestFor: 'Mall shoppers, families, quick meals, convenient locations',
+    mustTry: 'Pad Thai, Green Curry Rice, Spring rolls, Thai iced tea',
+  },
+  {
+    name: 'Elephant Thai',
+    slug: 'elephant-thai-bahrain',
+    location: 'Zinj',
+    type: 'Casual Dining',
     rating: 4,
-    price: 'BD 8-15 per person',
-    cuisine: 'European & Thai',
-    description: 'The beloved Café Lilou surprises diners with an excellent selection of Thai dishes alongside its famous French pastries and European fare. The Thai offerings are authentic and well-prepared, providing a refreshing change from the usual café menu. The charming courtyard setting makes it a delightful spot for a Thai lunch.',
-    specialties: ['Unexpected Thai menu', 'Café ambiance', 'Outdoor seating', 'All-day dining', 'Desserts'],
-    atmosphere: 'Charming European café with courtyard seating',
-    hours: 'Daily 7AM-11PM',
-    reservation: 'Walk-in friendly',
-    bestFor: 'Café lovers, brunch, casual Thai lunch, mixed groups',
-    mustTry: 'Thai green curry, Pad Thai, followed by French pastries',
+    price: 'BD 6-14 per person',
+    cuisine: 'Traditional Thai',
+    description: 'Elephant Thai has carved out a reputation for authentic Thai flavors in the Zinj neighborhood. The restaurant focuses on traditional recipes prepared with care and attention to detail. The menu features dishes from across Thailand, with particular expertise in central Thai cuisine. The warm, welcoming atmosphere and attentive service add to the overall experience.',
+    specialties: ['Central Thai dishes', 'Fresh ingredients', 'Traditional recipes', 'Family portions', 'Vegetarian options'],
+    atmosphere: 'Cozy neighborhood Thai restaurant with warm hospitality',
+    hours: 'Daily 11:30AM-11PM',
+    reservation: 'Recommended for dinner',
+    bestFor: 'Neighborhood dining, authentic Thai, families, vegetarians',
+    mustTry: 'Yellow Curry, Pad Woon Sen, Thai basil chicken, Coconut soup',
   },
 ];
 
 const restaurantsByCategory = [
-  { category: 'Fine Dining', picks: ['Trader Vic\'s', 'Lanterns', 'Bushido'] },
-  { category: 'Best Value', picks: ['Royal Thai', 'Noodle Box', 'Wok Station'] },
-  { category: 'Best Pad Thai', picks: ['Monsoon', 'Silk Thai', 'Noodle Box'] },
-  { category: 'Authentic', picks: ['Royal Thai', 'Silk Thai', 'Monsoon'] },
-  { category: 'Best for Groups', picks: ['Benihana', 'Thai Lounge', 'Monsoon'] },
-  { category: 'Late Night', picks: ['Thai Lounge', 'Trader Vic\'s', 'Noodle Box'] },
+  { category: 'Fine Dining', picks: ['Talay Thai', 'Monsoon', 'Lanterns Thai'] },
+  { category: 'Best Value', picks: ['Siam Kitchen', 'Bangkok Bites', 'Krua Thai'] },
+  { category: 'Best Curries', picks: ['Talay Thai', 'Thai Lounge', 'Elephant Thai'] },
+  { category: 'Spice Lovers', picks: ['Krua Thai', 'Siam Kitchen', 'Bangkok Bites'] },
+  { category: 'Best for Groups', picks: ['Thai Lounge', 'Blue Thai', 'Nara Thai'] },
+  { category: 'Outdoor Dining', picks: ['Lanterns Thai', 'Monsoon', 'Talay Thai'] },
 ];
 
 const dishes = [
-  { dish: 'Pad Thai', description: 'Stir-fried rice noodles with tamarind, peanuts, and bean sprouts', where: 'Monsoon, Silk Thai, Noodle Box' },
-  { dish: 'Tom Yum Goong', description: 'Hot and sour soup with prawns, lemongrass, and galangal', where: 'Lanterns, Silk Thai, Royal Thai' },
-  { dish: 'Green Curry', description: 'Creamy coconut curry with Thai basil and green chilies', where: 'Trader Vic\'s, Monsoon, Lanterns' },
-  { dish: 'Som Tam', description: 'Spicy green papaya salad with lime and dried shrimp', where: 'Royal Thai, Silk Thai, Thai Lounge' },
-  { dish: 'Massaman Curry', description: 'Rich, mild curry with potatoes and roasted peanuts', where: 'Lanterns, Monsoon, Bushido' },
-  { dish: 'Pad Krapow', description: 'Stir-fried meat with holy basil and fried egg', where: 'Silk Thai, Royal Thai, Thai Lounge' },
-  { dish: 'Mango Sticky Rice', description: 'Sweet glutinous rice with fresh mango and coconut cream', where: 'Lanterns, Monsoon, Silk Thai' },
-  { dish: 'Tom Kha Gai', description: 'Creamy coconut chicken soup with galangal', where: 'Thai Lounge, Silk Thai, Lanterns' },
+  { dish: 'Pad Thai', description: 'Stir-fried rice noodles with tamarind, peanuts, and lime', where: 'Talay Thai, Thai Lounge, Krua Thai' },
+  { dish: 'Tom Yum Goong', description: 'Spicy and sour soup with prawns and aromatic herbs', where: 'Talay Thai, Monsoon, Lanterns' },
+  { dish: 'Green Curry', description: 'Creamy coconut curry with Thai basil and chilies', where: 'Thai Lounge, Blue Thai, Siam Kitchen' },
+  { dish: 'Massaman Curry', description: 'Rich curry with peanuts, potatoes, and warm spices', where: 'Talay Thai, Nara Thai, Elephant Thai' },
+  { dish: 'Som Tam', description: 'Spicy green papaya salad with lime and chilies', where: 'Krua Thai, Bangkok Bites, Siam Kitchen' },
+  { dish: 'Pad Krapow', description: 'Stir-fried meat with holy basil and chilies', where: 'Krua Thai, Siam Kitchen, Bangkok Bites' },
+  { dish: 'Tom Kha Gai', description: 'Creamy coconut soup with chicken and galangal', where: 'Thai Lounge, Blue Thai, Talay Thai' },
+  { dish: 'Mango Sticky Rice', description: 'Sweet glutinous rice with fresh mango and coconut cream', where: 'Talay Thai, Monsoon, Lanterns' },
 ];
 
 const tips = [
   {
-    title: 'Spice Levels',
-    content: 'Thai food can be intensely spicy. Order "Thai spicy" only if you\'re experienced. Most restaurants will adjust to your preference — don\'t be shy to ask for mild.',
+    title: 'Know Your Spice Level',
+    content: 'Thai restaurants often ask about spice preferences. "Thai spicy" is usually much hotter than "medium." When in doubt, start mild and add chili flakes.',
   },
   {
-    title: 'Fresh Herbs Matter',
-    content: 'Good Thai food depends on fresh herbs like Thai basil, lemongrass, and kaffir lime leaves. Restaurants using fresh ingredients will have notably better flavors.',
+    title: 'Balance Your Order',
+    content: 'A proper Thai meal includes soup, curry, stir-fry, and rice. Mix wet and dry dishes, and include something fresh like a salad.',
   },
   {
-    title: 'Rice Pairing',
-    content: 'Jasmine rice is essential with Thai curries — it absorbs the flavors perfectly. Some Isaan dishes pair better with sticky rice.',
+    title: 'Try Jasmine Rice',
+    content: 'Fragrant jasmine rice is the traditional accompaniment for Thai curries and stir-fries. Sticky rice pairs best with Northern and Isaan dishes.',
   },
   {
-    title: 'Balance is Key',
-    content: 'Thai cuisine balances sweet, sour, salty, and spicy. A good dish will hit all four notes. Adjust with the condiments provided.',
-  },
-  {
-    title: 'Fish Sauce is Essential',
-    content: 'Fish sauce is the backbone of Thai cooking. Don\'t be put off by the smell — it adds umami depth that makes Thai food special.',
+    title: 'Share Family Style',
+    content: 'Thai dining is communal. Order several dishes to share and eat with a spoon and fork (not chopsticks for Thai food).',
   },
   {
     title: 'Lunch Specials',
-    content: 'Many Thai restaurants offer lunch sets with better value. A lunch Pad Thai or curry set can save you BD 5-10 compared to dinner.',
+    content: 'Many Thai restaurants offer excellent lunch deals with curry and rice combos at reduced prices. Great for trying new dishes affordably.',
+  },
+  {
+    title: 'Fresh Herbs Matter',
+    content: 'The best Thai dishes feature fresh lemongrass, galangal, kaffir lime, and Thai basil. These aromatics define authentic Thai flavor.',
   },
 ];
 
 const faqs = [
   {
-    q: 'What is the best Thai restaurant in Bahrain for authentic flavors?',
-    a: 'For the most authentic Thai flavors, Royal Thai in Gudaibiya is highly recommended by Thai expats. Silk Thai in Juffair also delivers genuine Thai taste at reasonable prices. Both restaurants are run by Thai families and serve dishes true to traditional recipes. For upscale authentic Thai, Lanterns at Ritz-Carlton offers refined Thai cuisine.',
+    q: 'What is the best Thai restaurant in Bahrain for authentic cuisine?',
+    a: 'Talay Thai in Adliya is widely considered Bahrain\'s best Thai restaurant for authentic cuisine, with skilled Thai chefs preparing traditional dishes. For budget-friendly authenticity, Krua Thai in Juffair and Siam Kitchen in Gudaibiya offer genuine Thai flavors at affordable prices. These restaurants are favorites among the Thai community in Bahrain.',
   },
   {
     q: 'Where can I find the best Pad Thai in Bahrain?',
-    a: 'Monsoon in Seef District is famous for its perfectly balanced Pad Thai with the right blend of tamarind, peanuts, and fresh ingredients. Silk Thai and Noodle Box also serve excellent versions. For quick and affordable Pad Thai, Noodle Box locations throughout Bahrain offer consistent quality at budget-friendly prices.',
+    a: 'Talay Thai serves an exceptional Pad Thai with the perfect balance of sweet, sour, and savory. Thai Lounge across its multiple locations also delivers consistently good Pad Thai. For street-style authenticity, Krua Thai and Bangkok Bites prepare their Pad Thai in traditional wok style.',
   },
   {
-    q: 'Are there Thai restaurants in Bahrain suitable for fine dining?',
-    a: 'Yes, several excellent options exist. Lanterns at the Ritz-Carlton offers elegant Thai dining with terrace views. Trader Vic\'s combines Thai dishes with tropical elegance. Bushido at Gulf Hotel serves upscale Thai-Japanese fusion. These venues are perfect for special occasions and business entertaining.',
+    q: 'Are there affordable Thai restaurants in Bahrain?',
+    a: 'Yes, several excellent Thai restaurants offer authentic food at budget prices. Siam Kitchen in Gudaibiya offers meals from BD 3-8. Bangkok Bites provides street-food style Thai from BD 4-10. Krua Thai in Juffair offers quality Thai from BD 6-12. These prove great Thai food doesn\'t require fine dining prices.',
   },
   {
-    q: 'What are the cheapest Thai restaurants in Bahrain?',
-    a: 'Royal Thai in Gudaibiya offers authentic Thai street food from BD 4-9 per person. Noodle Box and Wok Station in various malls serve satisfying meals for BD 4-8. These budget-friendly options prove you don\'t need to spend much for delicious Thai food in Bahrain.',
+    q: 'Which Thai restaurant in Bahrain is best for a date night?',
+    a: 'Lanterns Thai at the Ritz-Carlton offers stunning terrace views and elegant ambiance perfect for romantic dining. Talay Thai in Adliya provides intimate fine dining with exceptional food. Monsoon at InterContinental Regency combines sophisticated atmosphere with premium Thai cuisine.',
   },
   {
-    q: 'Which Thai restaurants in Bahrain are open late?',
-    a: 'Thai Lounge in Adliya stays open until midnight, perfect for the nightlife district. Trader Vic\'s operates until 1 AM, making it ideal for late-night Thai cravings with cocktails. Monsoon and several Noodle Box locations also serve until 11-11:30 PM.',
+    q: 'Do Thai restaurants in Bahrain offer vegetarian options?',
+    a: 'Most Thai restaurants in Bahrain have vegetarian options, as Thai cuisine features many vegetable and tofu dishes. Thai Lounge, Blue Thai, and Elephant Thai have dedicated vegetarian menus. Tofu can substitute meat in most curries and stir-fries. Be sure to mention any dietary requirements as some dishes contain fish sauce.',
   },
 ];
 
@@ -297,7 +297,7 @@ export default function BestThaiRestaurantsBahrainPage() {
   const lastUpdated = new Date().toISOString().split('T')[0];
   
   return (
-    <div className="min-h-screen bg-gradient-to-b from-slate-950 via-green-950/10 to-slate-950 text-white">
+    <div className="min-h-screen bg-gradient-to-b from-slate-950 via-emerald-950/10 to-slate-950 text-white">
       <BreadcrumbSchema
         items={[
           { name: 'Home', url: 'https://www.bahrainnights.com' },
@@ -308,37 +308,37 @@ export default function BestThaiRestaurantsBahrainPage() {
 
       {/* Hero Section */}
       <section className="relative py-20 px-4 overflow-hidden">
-        <div className="absolute inset-0 bg-gradient-to-r from-green-500/10 to-yellow-500/10" />
+        <div className="absolute inset-0 bg-gradient-to-r from-emerald-500/10 to-yellow-500/10" />
         <div className="max-w-6xl mx-auto relative">
           <div className="text-center mb-12">
-            <span className="inline-block px-4 py-1 bg-green-500/20 text-green-400 rounded-full text-sm font-medium mb-4">
-              🍜 Ultimate Thai Food Guide 2026
+            <span className="inline-block px-4 py-1 bg-emerald-500/20 text-emerald-400 rounded-full text-sm font-medium mb-4">
+              🍜 Ultimate Restaurant Guide 2026
             </span>
             <h1 className="text-4xl md:text-6xl font-black mb-6">
-              <span className="bg-gradient-to-r from-green-400 to-yellow-500 bg-clip-text text-transparent">
+              <span className="bg-gradient-to-r from-emerald-400 to-yellow-500 bg-clip-text text-transparent">
                 Best Thai Restaurants
               </span>
               {' '}in Bahrain 2026
             </h1>
             <p className="text-xl text-gray-300 max-w-3xl mx-auto">
-              From authentic street food at Royal Thai to elegant dining at Lanterns — 
+              From elegant fine dining at Talay Thai to authentic street food gems — 
               your complete guide to the best Thai restaurants, Pad Thai spots, and curry houses in the Kingdom of Bahrain.
             </p>
             <p className="text-sm text-gray-500 mt-4">
-              Last updated: {lastUpdated} | By <Link href="https://www.bahrainnights.com" className="text-green-400 hover:underline">BahrainNights.com</Link>
+              Last updated: {lastUpdated} | By <Link href="https://www.bahrainnights.com" className="text-emerald-400 hover:underline">BahrainNights.com</Link>
             </p>
           </div>
 
           {/* Quick Stats */}
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mt-12">
             {[
-              { label: 'Restaurants Reviewed', value: '25+', icon: Utensils },
-              { label: 'Budget From', value: 'BD 4', icon: DollarSign },
+              { label: 'Restaurants Reviewed', value: '30+', icon: Utensils },
+              { label: 'Budget From', value: 'BD 3', icon: DollarSign },
               { label: 'Fine Dining Options', value: '4+', icon: Award },
-              { label: 'Spice Levels', value: 'All', icon: Flame },
+              { label: 'Regional Styles', value: 'All Thailand', icon: Flame },
             ].map((stat) => (
               <div key={stat.label} className="bg-white/5 backdrop-blur-sm rounded-xl p-4 text-center">
-                <stat.icon className="w-6 h-6 mx-auto mb-2 text-green-400" />
+                <stat.icon className="w-6 h-6 mx-auto mb-2 text-emerald-400" />
                 <div className="text-2xl font-bold">{stat.value}</div>
                 <div className="text-sm text-gray-400">{stat.label}</div>
               </div>
@@ -352,21 +352,18 @@ export default function BestThaiRestaurantsBahrainPage() {
         <div className="max-w-4xl mx-auto">
           <div className="prose prose-invert max-w-none">
             <p className="text-lg text-gray-300 leading-relaxed">
-              Thai cuisine has captured the hearts of food lovers worldwide with its explosive flavors, aromatic herbs, 
-              and perfect balance of sweet, sour, salty, and spicy elements. In Bahrain, the Thai food scene has 
-              flourished to offer everything from humble street food experiences to sophisticated fine dining.
+              Thai cuisine has captured the hearts and taste buds of food lovers worldwide, and Bahrain offers 
+              a remarkable selection of Thai restaurants ranging from luxurious hotel fine dining to humble 
+              neighborhood gems run by Thai nationals. The kingdom&apos;s diverse dining scene includes authentic 
+              establishments serving fiery curries and aromatic soups that transport you straight to Bangkok, 
+              as well as contemporary restaurants offering refined interpretations of Thai classics.
             </p>
             <p className="text-lg text-gray-300 leading-relaxed mt-4">
-              Whether you&apos;re craving the tangy kick of authentic Tom Yum soup, the comforting warmth of green curry 
-              with coconut milk, or the iconic Pad Thai that started a global food revolution, Bahrain&apos;s Thai 
-              restaurants deliver authentic flavors that rival those found on the streets of Bangkok. This comprehensive 
-              guide will help you navigate the kingdom&apos;s best Thai dining options for every occasion and budget.
-            </p>
-            <p className="text-lg text-gray-300 leading-relaxed mt-4">
-              Thai cooking is an art form built on fresh ingredients — lemongrass, galangal, kaffir lime leaves, 
-              Thai basil, and bird&apos;s eye chilies combine to create dishes that are at once complex and harmonious. 
-              The best Thai restaurants in Bahrain respect these traditions while adapting to local preferences, 
-              offering spice levels from mild to authentic Thai heat that will make your eyes water in the best possible way.
+              Whether you&apos;re craving the perfect Pad Thai with its harmonious blend of sweet, sour, and 
+              savory notes, a warming bowl of Tom Yum that clears your sinuses, or a creamy green curry 
+              fragrant with Thai basil, this comprehensive guide will help you navigate Bahrain&apos;s 
+              Thai restaurant scene. From Seef to Juffair, Adliya to Riffa, we&apos;ve covered every corner 
+              of the kingdom to bring you the definitive guide to Thai dining in Bahrain for 2026.
             </p>
           </div>
         </div>
@@ -379,7 +376,7 @@ export default function BestThaiRestaurantsBahrainPage() {
           <div className="grid md:grid-cols-3 lg:grid-cols-6 gap-4">
             {restaurantsByCategory.map((cat) => (
               <div key={cat.category} className="bg-white/5 rounded-xl p-4">
-                <h3 className="font-semibold text-green-400 mb-2 text-sm">{cat.category}</h3>
+                <h3 className="font-semibold text-emerald-400 mb-2 text-sm">{cat.category}</h3>
                 <ul className="text-sm text-gray-300 space-y-1">
                   {cat.picks.map((pick) => (
                     <li key={pick}>• {pick}</li>
@@ -409,10 +406,10 @@ export default function BestThaiRestaurantsBahrainPage() {
                   <div className="flex-1">
                     <div className="flex items-start justify-between mb-3">
                       <div>
-                        <Link href={`/restaurants/${restaurant.slug}`} className="hover:text-green-400 transition-colors">
+                        <Link href={`/restaurants/${restaurant.slug}`} className="hover:text-emerald-400 transition-colors">
                           <h3 className="text-xl font-bold">{restaurant.name}</h3>
                         </Link>
-                        <p className="text-green-400 text-sm flex items-center gap-1">
+                        <p className="text-emerald-400 text-sm flex items-center gap-1">
                           <MapPin className="w-4 h-4" />
                           {restaurant.location} • {restaurant.type}
                         </p>
@@ -420,27 +417,27 @@ export default function BestThaiRestaurantsBahrainPage() {
                       <div className="text-right">
                         <div className="flex">
                           {[...Array(restaurant.rating)].map((_, i) => (
-                            <Star key={i} className="w-4 h-4 text-green-400 fill-green-400" />
+                            <Star key={i} className="w-4 h-4 text-emerald-400 fill-emerald-400" />
                           ))}
                         </div>
                         <span className="text-sm font-bold text-white">{restaurant.price}</span>
                       </div>
                     </div>
                     
-                    <p className="text-sm text-green-300 mb-2">{restaurant.cuisine}</p>
+                    <p className="text-sm text-emerald-300 mb-2">{restaurant.cuisine}</p>
                     <p className="text-gray-300 mb-4">{restaurant.description}</p>
                     
                     <div className="flex flex-wrap gap-2 mb-4">
                       {restaurant.specialties.map((s) => (
-                        <span key={s} className="text-xs bg-green-500/20 text-green-300 px-2 py-1 rounded">
+                        <span key={s} className="text-xs bg-emerald-500/20 text-emerald-300 px-2 py-1 rounded">
                           {s}
                         </span>
                       ))}
                     </div>
 
-                    <div className="bg-green-500/10 rounded-lg p-3">
+                    <div className="bg-emerald-500/10 rounded-lg p-3">
                       <p className="text-sm">
-                        <strong className="text-green-400">Must Try: </strong>
+                        <strong className="text-emerald-400">Must Try: </strong>
                         {restaurant.mustTry}
                       </p>
                     </div>
@@ -450,7 +447,7 @@ export default function BestThaiRestaurantsBahrainPage() {
                     <p><strong className="text-gray-400">Atmosphere:</strong> {restaurant.atmosphere}</p>
                     <p><strong className="text-gray-400">Hours:</strong> {restaurant.hours}</p>
                     <p><strong className="text-gray-400">Reservations:</strong> {restaurant.reservation}</p>
-                    <p className="text-green-400 italic pt-2">Best for: {restaurant.bestFor}</p>
+                    <p className="text-emerald-400 italic pt-2">Best for: {restaurant.bestFor}</p>
                   </div>
                 </div>
               </div>
@@ -470,7 +467,7 @@ export default function BestThaiRestaurantsBahrainPage() {
           <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-4">
             {dishes.map((dish) => (
               <div key={dish.dish} className="bg-white/5 rounded-xl p-5">
-                <h3 className="font-bold text-green-400 mb-1">{dish.dish}</h3>
+                <h3 className="font-bold text-emerald-400 mb-1">{dish.dish}</h3>
                 <p className="text-sm text-gray-300 mb-2">{dish.description}</p>
                 <p className="text-xs text-gray-400">Best at: {dish.where}</p>
               </div>
@@ -487,7 +484,7 @@ export default function BestThaiRestaurantsBahrainPage() {
           <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-4">
             {tips.map((tip) => (
               <div key={tip.title} className="bg-white/5 rounded-xl p-5">
-                <h3 className="font-bold text-green-400 mb-2">{tip.title}</h3>
+                <h3 className="font-bold text-emerald-400 mb-2">{tip.title}</h3>
                 <p className="text-sm text-gray-300">{tip.content}</p>
               </div>
             ))}
@@ -496,7 +493,7 @@ export default function BestThaiRestaurantsBahrainPage() {
       </section>
 
       {/* Events CTA */}
-      <section className="py-12 px-4 bg-gradient-to-r from-green-500/20 to-yellow-500/20">
+      <section className="py-12 px-4 bg-gradient-to-r from-emerald-500/20 to-yellow-500/20">
         <div className="max-w-4xl mx-auto text-center">
           <h2 className="text-2xl font-bold mb-4">Looking for Food Events & Experiences?</h2>
           <p className="text-gray-300 mb-6">
@@ -507,7 +504,7 @@ export default function BestThaiRestaurantsBahrainPage() {
               href="https://bahrain.platinumlist.net/?affiliate=yjg3yzi"
               target="_blank"
               rel="noopener noreferrer"
-              className="px-6 py-3 bg-green-500 hover:bg-green-400 text-black font-bold rounded-lg transition-colors"
+              className="px-6 py-3 bg-emerald-500 hover:bg-emerald-400 text-black font-bold rounded-lg transition-colors"
             >
               Browse Events on Platinumlist
             </a>
@@ -529,12 +526,12 @@ export default function BestThaiRestaurantsBahrainPage() {
           <h2 className="text-2xl font-bold mb-8">Explore More Cuisine Guides</h2>
           <div className="grid md:grid-cols-4 gap-4">
             {[
-              { title: 'Indian', href: '/guides/best-indian-restaurants-bahrain', emoji: '🍛' },
+              { title: 'Indian Restaurants', href: '/guides/best-indian-restaurants-bahrain', emoji: '🍛' },
+              { title: 'Chinese Restaurants', href: '/guides/best-chinese-restaurants-bahrain', emoji: '🥡' },
               { title: 'Japanese & Sushi', href: '/guides/best-japanese-restaurants-bahrain', emoji: '🍣' },
-              { title: 'Chinese', href: '/guides/best-chinese-restaurants-bahrain', emoji: '🥡' },
-              { title: 'Seafood', href: '/guides/best-seafood-bahrain', emoji: '🦐' },
               { title: 'Arabic & Lebanese', href: '/guides/best-arabic-restaurants-bahrain', emoji: '🥙' },
               { title: 'Italian', href: '/guides/best-italian-restaurants-bahrain', emoji: '🍝' },
+              { title: 'Seafood', href: '/guides/best-seafood-bahrain', emoji: '🦐' },
               { title: 'All Restaurants', href: '/guides/restaurants', emoji: '🍽️' },
               { title: 'Best Buffets', href: '/guides/buffets', emoji: '🥘' },
             ].map((guide) => (
@@ -544,7 +541,7 @@ export default function BestThaiRestaurantsBahrainPage() {
                 className="bg-white/5 hover:bg-white/10 rounded-xl p-4 transition-colors group"
               >
                 <span className="text-2xl mb-2 block">{guide.emoji}</span>
-                <span className="font-medium group-hover:text-green-400 transition-colors">
+                <span className="font-medium group-hover:text-emerald-400 transition-colors">
                   {guide.title}
                 </span>
               </Link>
@@ -573,12 +570,12 @@ export default function BestThaiRestaurantsBahrainPage() {
       <section className="py-12 px-4 border-t border-white/10">
         <div className="max-w-6xl mx-auto text-center">
           <p className="text-gray-400 mb-4">
-            Powered by <Link href="https://www.bahrainnights.com" className="text-green-400 hover:underline">BahrainNights.com</Link> — 
+            Powered by <Link href="https://www.bahrainnights.com" className="text-emerald-400 hover:underline">BahrainNights.com</Link> — 
             Your ultimate guide to nightlife, dining, and entertainment in Bahrain.
           </p>
           <div className="flex justify-center gap-6 text-sm text-gray-500">
-            <a href="https://www.eventsbahrain.com" target="_blank" rel="noopener noreferrer" className="hover:text-green-400">EventsBahrain.com</a>
-            <a href="https://www.cinematicwebworks.com" target="_blank" rel="noopener noreferrer" className="hover:text-green-400">CinematicWebWorks.com</a>
+            <a href="https://www.eventsbahrain.com" target="_blank" rel="noopener noreferrer" className="hover:text-emerald-400">EventsBahrain.com</a>
+            <a href="https://www.cinematicwebworks.com" target="_blank" rel="noopener noreferrer" className="hover:text-emerald-400">CinematicWebWorks.com</a>
           </div>
         </div>
       </section>
@@ -590,8 +587,8 @@ export default function BestThaiRestaurantsBahrainPage() {
           __html: JSON.stringify({
             '@context': 'https://schema.org',
             '@type': 'Article',
-            headline: 'Best Thai Restaurants in Bahrain 2026 | Top 12 Thai Food & Street Eats',
-            description: 'Complete guide to the best Thai restaurants in Bahrain, from authentic street food to elegant fine dining options.',
+            headline: 'Best Thai Restaurants in Bahrain 2026 | Top 12 Authentic Thai Dining',
+            description: 'Complete guide to the best Thai restaurants in Bahrain, from fine dining to authentic budget-friendly options.',
             author: {
               '@type': 'Organization',
               name: 'BahrainNights',

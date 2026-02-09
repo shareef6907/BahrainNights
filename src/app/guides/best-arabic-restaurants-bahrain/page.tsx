@@ -2,7 +2,7 @@ import { Metadata } from 'next';
 import Link from 'next/link';
 import { 
   Utensils, MapPin, Star,
-  DollarSign, Award, Sparkles
+  DollarSign, Award, Sparkles, Clock, Users
 } from 'lucide-react';
 import BreadcrumbSchema from '@/components/SEO/BreadcrumbSchema';
 
@@ -30,255 +30,203 @@ export const metadata: Metadata = {
 
 const restaurants = [
   {
-    name: 'Haji\'s Café',
-    slug: 'hajis-cafe-bahrain',
+    name: "Haji's Café",
     location: 'Muharraq',
     type: 'Heritage',
     rating: 5,
-    price: 'BD 5-15 per person',
+    price: 'BD 5-15',
     cuisine: 'Traditional Bahraini',
-    description: 'Haji\'s Café is a Bahraini institution, serving authentic local cuisine in the historic heart of Muharraq. This heritage restaurant offers a genuine taste of traditional Bahraini cooking, from perfectly spiced machboos to fresh seafood dishes. The atmospheric old Bahraini house setting transports you back in time, making it essential for anyone wanting to experience true Bahraini gastronomy.',
-    specialties: ['Machboos', 'Bahraini breakfast', 'Traditional fish dishes', 'Gahwa coffee', 'Local desserts'],
-    atmosphere: 'Authentic heritage house with traditional Bahraini décor',
-    hours: 'Daily 7AM-11PM',
-    reservation: 'Recommended for groups',
-    bestFor: 'Authentic Bahraini food, cultural experience, tourists',
-    mustTry: 'Machboos laham, Balaleet, Traditional breakfast, Gahwa',
+    description: "Haji's Café is a Bahraini institution, serving authentic local cuisine in the historic heart of Muharraq. This heritage restaurant offers a genuine taste of traditional Bahraini cooking, from perfectly spiced machboos to fresh seafood dishes.",
+    specialties: ['Machboos', 'Bahraini breakfast', 'Traditional fish dishes', 'Gahwa coffee'],
+    bestFor: 'Authentic Bahraini food, cultural experience',
+    mustTry: 'Machboos laham, Balaleet',
   },
   {
     name: 'Al Abraaj',
-    slug: 'al-abraaj-bahrain',
     location: 'Seef District',
     type: 'Fine Dining',
     rating: 5,
-    price: 'BD 15-35 per person',
+    price: 'BD 15-35',
     cuisine: 'Lebanese Fine Dining',
-    description: 'Al Abraaj represents the pinnacle of Lebanese fine dining in Bahrain. The restaurant offers an extensive mezze selection, premium grilled meats, and sophisticated Lebanese dishes in an elegant setting. The attention to detail in both food and service makes it perfect for special occasions celebrating Arabic cuisine at its finest.',
-    specialties: ['Premium mezze', 'Mixed grill', 'Lamb dishes', 'Lebanese wines', 'Shisha terrace'],
-    atmosphere: 'Elegant and upscale with Arabic touches',
-    hours: 'Daily 12PM-12AM',
-    reservation: 'Recommended',
-    bestFor: 'Special occasions, business dinners, celebrations',
-    mustTry: 'Mixed mezze, Mixed grill, Lamb ouzi, Knafeh',
+    description: 'Al Abraaj represents the pinnacle of Lebanese fine dining in Bahrain. The restaurant offers an extensive mezze selection, premium grilled meats, and sophisticated Lebanese dishes in an elegant setting.',
+    specialties: ['Premium mezze', 'Mixed grill', 'Lamb dishes', 'Shisha terrace'],
+    bestFor: 'Special occasions, business dinners',
+    mustTry: 'Mixed mezze, Mixed grill, Lamb ouzi',
   },
   {
-    name: 'Khoury\'s',
-    slug: 'khourys-bahrain',
+    name: "Khoury's",
     location: 'Adliya',
     type: 'Lebanese',
     rating: 5,
-    price: 'BD 12-25 per person',
+    price: 'BD 12-25',
     cuisine: 'Lebanese',
-    description: 'Khoury\'s has been serving authentic Lebanese cuisine in Adliya for years, earning a loyal following for its consistent quality and generous portions. The restaurant excels in both hot and cold mezze, grilled meats, and traditional Lebanese specialties. The warm, welcoming atmosphere makes it feel like dining at a Lebanese family home.',
-    specialties: ['Mezze spread', 'Grilled meats', 'Fattoush', 'Hummus', 'Lebanese desserts'],
-    atmosphere: 'Warm and welcoming, traditional Lebanese',
-    hours: 'Daily 11AM-11PM',
-    reservation: 'Recommended for dinner',
-    bestFor: 'Family gatherings, Lebanese food lovers, groups',
-    mustTry: 'Mezze platter, Shish taouk, Grilled lamb chops, Baklava',
+    description: "Khoury's has been serving authentic Lebanese cuisine in Adliya for years, earning a loyal following for its consistent quality and generous portions. The warm atmosphere makes it feel like dining at a Lebanese family home.",
+    specialties: ['Mezze spread', 'Grilled meats', 'Fattoush', 'Hummus'],
+    bestFor: 'Family gatherings, Lebanese food lovers',
+    mustTry: 'Mezze platter, Shish taouk, Baklava',
   },
   {
     name: 'Fares',
-    slug: 'fares-bahrain',
     location: 'Multiple locations',
     type: 'Casual',
     rating: 4,
-    price: 'BD 6-15 per person',
+    price: 'BD 6-15',
     cuisine: 'Lebanese Seafood',
-    description: 'Fares is beloved for its fresh, simply prepared Lebanese-style seafood. The restaurant offers generous portions of grilled fish, fried calamari, and seafood mezze at reasonable prices. Multiple convenient locations make it a go-to for quick, satisfying Lebanese seafood meals.',
-    specialties: ['Fresh fish', 'Fried calamari', 'Seafood mezze', 'Fish sayadieh', 'Fattoush'],
-    atmosphere: 'Casual and family-friendly',
-    hours: 'Daily 11AM-11PM',
-    reservation: 'Not usually required',
-    bestFor: 'Seafood, families, value, quick meals',
-    mustTry: 'Grilled hammour, Fried calamari, Hummus, Tabbouleh',
+    description: 'Fares is beloved for its fresh, simply prepared Lebanese-style seafood. The restaurant offers generous portions of grilled fish, fried calamari, and seafood mezze at reasonable prices.',
+    specialties: ['Fresh fish', 'Fried calamari', 'Seafood mezze', 'Fish sayadieh'],
+    bestFor: 'Seafood, families, value',
+    mustTry: 'Grilled hammour, Fried calamari',
   },
   {
     name: 'Abd El Wahab',
-    slug: 'abd-el-wahab-bahrain',
     location: 'Bahrain Bay',
     type: 'Fine Dining',
     rating: 5,
-    price: 'BD 18-40 per person',
+    price: 'BD 18-40',
     cuisine: 'Lebanese',
-    description: 'Part of an acclaimed regional chain, Abd El Wahab brings sophisticated Lebanese cuisine to Bahrain Bay. The stunning waterfront location, impeccable service, and extensive menu make it one of Bahrain\'s premier Lebanese dining destinations. Perfect for those seeking elevated Lebanese cuisine in a glamorous setting.',
-    specialties: ['Signature mezze', 'Grilled specialties', 'Lebanese wines', 'Waterfront terrace', 'Shisha'],
-    atmosphere: 'Glamorous with stunning bay views',
-    hours: 'Daily 12PM-1AM',
-    reservation: 'Essential, especially for terrace',
-    bestFor: 'Special occasions, waterfront dining, evening gatherings',
-    mustTry: 'Signature mezze selection, Mixed grill, Lamb maklouba',
+    description: "Part of an acclaimed regional chain, Abd El Wahab brings sophisticated Lebanese cuisine to Bahrain Bay. The stunning waterfront location and impeccable service make it one of Bahrain's premier Lebanese dining destinations.",
+    specialties: ['Signature mezze', 'Grilled specialties', 'Lebanese wines', 'Waterfront terrace'],
+    bestFor: 'Special occasions, waterfront dining',
+    mustTry: 'Signature mezze selection, Mixed grill',
   },
   {
     name: 'Al Safir',
-    slug: 'al-safir-bahrain',
     location: 'Juffair',
     type: 'Casual',
     rating: 4,
-    price: 'BD 5-12 per person',
+    price: 'BD 5-12',
     cuisine: 'Syrian/Lebanese',
-    description: 'Al Safir offers authentic Syrian and Lebanese cuisine at excellent prices. The restaurant is particularly known for its shawarma, grilled meats, and fresh bread. A local favorite for quick, satisfying Arabic food without pretension.',
-    specialties: ['Shawarma', 'Grilled meats', 'Fresh bread', 'Mezze', 'Fatayer'],
-    atmosphere: 'Simple and authentic',
-    hours: 'Daily 10AM-12AM',
-    reservation: 'Not required',
+    description: 'Al Safir offers authentic Syrian and Lebanese cuisine at excellent prices. The restaurant is particularly known for its shawarma, grilled meats, and fresh bread.',
+    specialties: ['Shawarma', 'Grilled meats', 'Fresh bread', 'Fatayer'],
     bestFor: 'Quick meals, shawarma cravings, budget dining',
-    mustTry: 'Chicken shawarma, Mixed grill, Fatayer, Fresh juice',
+    mustTry: 'Chicken shawarma, Mixed grill',
   },
   {
     name: 'Saffron by Nic',
-    slug: 'saffron-by-nic',
     location: 'Amwaj Islands',
     type: 'Contemporary Arabic',
     rating: 4,
-    price: 'BD 12-25 per person',
+    price: 'BD 12-25',
     cuisine: 'Modern Arabic',
-    description: 'Saffron by Nic offers a contemporary take on Arabic cuisine in the beautiful Amwaj Islands setting. The restaurant blends traditional flavors with modern presentations, creating dishes that honor heritage while appealing to contemporary palates. The outdoor terrace with marina views adds to the experience.',
+    description: 'Saffron by Nic offers a contemporary take on Arabic cuisine in the beautiful Amwaj Islands setting. The restaurant blends traditional flavors with modern presentations.',
     specialties: ['Modern mezze', 'Fusion dishes', 'Marina views', 'Creative cocktails'],
-    atmosphere: 'Contemporary with marina terrace',
-    hours: 'Daily 12PM-11PM',
-    reservation: 'Recommended for terrace',
     bestFor: 'Modern Arabic, Amwaj dining, date nights',
-    mustTry: 'Contemporary mezze, Signature mains, Arabic-inspired cocktails',
+    mustTry: 'Contemporary mezze, Signature mains',
   },
   {
     name: 'Meirc',
-    slug: 'meirc-bahrain',
     location: 'Manama',
     type: 'Traditional',
     rating: 4,
-    price: 'BD 8-18 per person',
+    price: 'BD 8-18',
     cuisine: 'Iraqi',
-    description: 'Meirc specializes in Iraqi cuisine, offering a unique addition to Bahrain\'s Arabic dining scene. The restaurant serves traditional Iraqi dishes including tikka, kebabs, and the famous masgouf (grilled carp). Essential for those wanting to explore Iraqi flavors.',
-    specialties: ['Masgouf', 'Iraqi tikka', 'Kebabs', 'Dolma', 'Iraqi bread'],
-    atmosphere: 'Traditional Iraqi setting',
-    hours: 'Daily 11AM-11PM',
-    reservation: 'Recommended for masgouf',
+    description: 'Meirc specializes in Iraqi cuisine, offering a unique addition to Bahrain\'s Arabic dining scene. The restaurant serves traditional Iraqi dishes including tikka, kebabs, and the famous masgouf.',
+    specialties: ['Masgouf', 'Iraqi tikka', 'Kebabs', 'Dolma'],
     bestFor: 'Iraqi cuisine, unique experience, meat lovers',
-    mustTry: 'Masgouf, Iraqi tikka, Dolma, Iraqi chai',
+    mustTry: 'Masgouf, Iraqi tikka, Dolma',
   },
   {
     name: 'Yildizlar',
-    slug: 'yildizlar-bahrain',
     location: 'Adliya',
     type: 'Turkish',
     rating: 4,
-    price: 'BD 10-22 per person',
+    price: 'BD 10-22',
     cuisine: 'Turkish',
-    description: 'Yildizlar brings authentic Turkish cuisine to Bahrain, offering everything from traditional mezze to expertly grilled kebabs and Turkish breakfast. The restaurant is particularly loved for its Saturday Turkish breakfast spread, a feast of cheeses, olives, eggs, and fresh bread.',
-    specialties: ['Turkish breakfast', 'Kebabs', 'Pide', 'Baklava', 'Turkish coffee'],
-    atmosphere: 'Cozy Turkish ambiance',
-    hours: 'Daily 8AM-11PM',
-    reservation: 'Recommended for weekend breakfast',
+    description: 'Yildizlar brings authentic Turkish cuisine to Bahrain, offering everything from traditional mezze to expertly grilled kebabs. The Saturday Turkish breakfast spread is legendary.',
+    specialties: ['Turkish breakfast', 'Kebabs', 'Pide', 'Baklava'],
     bestFor: 'Turkish food, weekend breakfast, kebab lovers',
-    mustTry: 'Full Turkish breakfast, Adana kebab, Künefe, Turkish coffee',
+    mustTry: 'Full Turkish breakfast, Adana kebab, Künefe',
   },
   {
     name: 'Levant',
-    slug: 'levant-bahrain',
     location: 'Seef Mall',
     type: 'Casual',
     rating: 4,
-    price: 'BD 7-15 per person',
+    price: 'BD 7-15',
     cuisine: 'Lebanese',
-    description: 'Levant offers reliable Lebanese cuisine in a convenient mall location. The restaurant serves all the Lebanese classics at reasonable prices, making it perfect for shopping breaks or casual family meals. Consistent quality and quick service have earned it a loyal following.',
+    description: 'Levant offers reliable Lebanese cuisine in a convenient mall location. Perfect for shopping breaks or casual family meals with consistent quality.',
     specialties: ['Mezze', 'Grills', 'Shawarma', 'Lebanese desserts'],
-    atmosphere: 'Modern and convenient mall setting',
-    hours: 'Mall hours',
-    reservation: 'Not required',
     bestFor: 'Shopping breaks, families, quick Lebanese',
-    mustTry: 'Shawarma plate, Mezze combo, Mixed grill',
+    mustTry: 'Shawarma plate, Mezze combo',
   },
   {
     name: 'Bahrain Traditional Restaurant',
-    slug: 'bahrain-traditional',
     location: 'Manama Souq',
     type: 'Heritage',
     rating: 4,
-    price: 'BD 6-14 per person',
+    price: 'BD 6-14',
     cuisine: 'Traditional Bahraini',
-    description: 'Located in the historic Manama Souq area, this restaurant offers authentic Bahraini dishes in a traditional setting. The menu features local favorites like machboos, harees, and muhammar, providing visitors with a genuine taste of Bahraini culinary heritage.',
-    specialties: ['Machboos', 'Harees', 'Muhammar', 'Traditional fish', 'Arabic coffee'],
-    atmosphere: 'Traditional souq setting',
-    hours: 'Daily 7AM-10PM',
-    reservation: 'Not usually required',
-    bestFor: 'Authentic Bahraini, cultural experience, souq visits',
-    mustTry: 'Chicken machboos, Harees, Muhammar, Dates with coffee',
+    description: 'Located in the historic Manama Souq area, this restaurant offers authentic Bahraini dishes in a traditional setting with local favorites like machboos and harees.',
+    specialties: ['Machboos', 'Harees', 'Muhammar', 'Traditional fish'],
+    bestFor: 'Authentic Bahraini, cultural experience',
+    mustTry: 'Chicken machboos, Harees, Muhammar',
   },
   {
-    name: 'Masso Arabic Corner',
-    slug: 'masso-arabic',
+    name: 'Ritz-Carlton Arabic Corner',
     location: 'Ritz-Carlton',
     type: 'Fine Dining',
     rating: 5,
-    price: 'BD 20-40 per person',
+    price: 'BD 20-40',
     cuisine: 'Arabic Fine Dining',
-    description: 'The Arabic selections at the Ritz-Carlton deliver refined Arabic cuisine in a luxurious setting. Premium ingredients and sophisticated preparations elevate traditional dishes to fine dining standards. Perfect for experiencing Arabic cuisine at its most elegant.',
+    description: 'The Arabic selections at the Ritz-Carlton deliver refined Arabic cuisine in a luxurious setting with premium ingredients and sophisticated preparations.',
     specialties: ['Refined mezze', 'Premium lamb', 'Arabic desserts', 'Shisha garden'],
-    atmosphere: 'Luxurious hotel setting with garden views',
-    hours: 'Daily 7PM-11PM',
-    reservation: 'Essential',
-    bestFor: 'Special occasions, luxury Arabic, celebrations',
-    mustTry: 'Premium lamb dishes, Signature mezze, Arabic sweets platter',
+    bestFor: 'Special occasions, luxury Arabic',
+    mustTry: 'Premium lamb dishes, Signature mezze',
   },
 ];
 
 const mezzeGuide = [
-  { dish: 'Hummus', description: 'Creamy chickpea dip - the essential start to any Arabic meal', where: 'All restaurants' },
-  { dish: 'Fattoush', description: 'Fresh salad with crispy pita, sumac dressing', where: 'Khoury\'s, Abd El Wahab' },
+  { dish: 'Hummus', description: 'Creamy chickpea dip - essential start to any meal', where: 'All restaurants' },
+  { dish: 'Fattoush', description: 'Fresh salad with crispy pita, sumac dressing', where: "Khoury's, Abd El Wahab" },
   { dish: 'Tabbouleh', description: 'Parsley salad with bulgur, tomatoes, mint', where: 'All Lebanese restaurants' },
   { dish: 'Baba Ganoush', description: 'Smoky eggplant dip', where: 'Al Abraaj, Fares' },
-  { dish: 'Kibbeh', description: 'Bulgur shells with spiced lamb filling', where: 'Khoury\'s, Levant' },
-  { dish: 'Machboos', description: 'Bahraini spiced rice with meat - national dish', where: 'Haji\'s Café' },
+  { dish: 'Kibbeh', description: 'Bulgur shells with spiced lamb filling', where: "Khoury's, Levant" },
+  { dish: 'Machboos', description: 'Bahraini spiced rice with meat', where: "Haji's Café" },
 ];
 
 const tips = [
   {
-    title: 'Mezze is Meant for Sharing',
+    icon: Users,
+    title: 'Mezze is for Sharing',
     content: 'Order multiple mezze dishes for the table. Arabic dining is communal - sharing is part of the experience.',
   },
   {
+    icon: Utensils,
     title: 'Fresh Bread is Essential',
-    content: 'Arabic bread should be warm and fresh. Use it to scoop mezze and soak up sauces - never let it go to waste.',
+    content: 'Arabic bread should be warm and fresh. Use it to scoop mezze and soak up sauces.',
   },
   {
+    icon: Award,
     title: 'Try the National Dish',
-    content: 'Machboos (spiced rice with meat) is Bahrain\'s national dish. Every visitor should try it at least once.',
+    content: 'Machboos (spiced rice with meat) is Bahrain\'s national dish. Every visitor should try it.',
   },
   {
-    title: 'Shisha Culture',
-    content: 'Many Arabic restaurants offer shisha. It\'s a social activity - relax and enjoy after your meal.',
-  },
-  {
+    icon: Clock,
     title: 'Arabic Coffee Ritual',
-    content: 'Finish with Arabic coffee (gahwa) and dates. It\'s a symbol of hospitality and the traditional way to end a meal.',
-  },
-  {
-    title: 'Go Early for Fresh Fish',
-    content: 'Seafood restaurants get their freshest catches early. Visit for lunch for the best selection.',
+    content: 'Finish with Arabic coffee (gahwa) and dates - the traditional way to end a meal.',
   },
 ];
 
 const faqs = [
   {
     q: 'What is the best Arabic restaurant in Bahrain?',
-    a: 'For Lebanese fine dining, Al Abraaj and Abd El Wahab are exceptional. For authentic Bahraini food, Haji\'s Café in Muharraq is unmissable. Khoury\'s in Adliya offers excellent Lebanese cuisine in a warm atmosphere.',
+    a: "For Lebanese fine dining, Al Abraaj and Abd El Wahab are exceptional. For authentic Bahraini food, Haji's Café in Muharraq is unmissable. Khoury's in Adliya offers excellent Lebanese cuisine in a warm atmosphere.",
   },
   {
     q: 'Where can I try traditional Bahraini food?',
-    a: 'Haji\'s Café in Muharraq is the most famous spot for authentic Bahraini cuisine, including machboos and traditional breakfast. The Bahrain Traditional Restaurant in Manama Souq also offers genuine local dishes.',
+    a: "Haji's Café in Muharraq is the most famous spot for authentic Bahraini cuisine, including machboos and traditional breakfast. The Bahrain Traditional Restaurant in Manama Souq also offers genuine local dishes.",
   },
   {
     q: 'What is machboos and where is the best one?',
-    a: 'Machboos is Bahrain\'s national dish - fragrant rice cooked with meat (usually chicken or lamb), spices, and dried limes. Haji\'s Café is widely considered to serve the most authentic version.',
+    a: "Machboos is Bahrain's national dish - fragrant rice cooked with meat (usually chicken or lamb), spices, and dried limes. Haji's Café is widely considered to serve the most authentic version.",
   },
   {
     q: 'Are there good Lebanese restaurants in Bahrain?',
-    a: 'Bahrain has excellent Lebanese dining options. Khoury\'s and Al Abraaj are top choices for traditional Lebanese. Abd El Wahab offers upscale Lebanese with stunning bay views. Fares is great for Lebanese-style seafood.',
+    a: "Bahrain has excellent Lebanese dining options. Khoury's and Al Abraaj are top choices for traditional Lebanese. Abd El Wahab offers upscale Lebanese with stunning bay views. Fares is great for Lebanese-style seafood.",
   },
   {
     q: 'Where can I find the best shawarma in Bahrain?',
-    a: 'Al Safir in Juffair is renowned for authentic shawarma at great prices. Many roadside stands also serve excellent shawarma. For sit-down shawarma, Khoury\'s and Levant offer quality versions.',
+    a: "Al Safir in Juffair is renowned for authentic shawarma at great prices. Many roadside stands also serve excellent shawarma. For sit-down shawarma, Khoury's and Levant offer quality versions.",
   },
 ];
 
@@ -379,28 +327,146 @@ export default function BestArabicRestaurantsBahrainPage() {
             Comprehensive reviews covering Lebanese, Bahraini, Turkish, Iraqi, and Arabic cuisines for 2026.
           </p>
           
-          <div className="space-y-6">
+          <div className="grid md:grid-cols-2 gap-6">
             {restaurants.map((restaurant) => (
               <div 
                 key={restaurant.name}
                 className="bg-white/5 backdrop-blur-sm rounded-2xl p-6 hover:bg-white/10 transition-all"
               >
-                <div className="flex flex-col lg:flex-row gap-6">
-                  <div className="flex-1">
-                    <div className="flex items-start justify-between mb-3">
-                      <div>
-                        <Link href={`/restaurants/${restaurant.slug}`} className="hover:text-amber-400 transition-colors">
-                          <h3 className="text-xl font-bold">{restaurant.name}</h3>
-                        </Link>
-                        <p className="text-amber-400 text-sm flex items-center gap-1">
-                          <MapPin className="w-4 h-4" />
-                          {restaurant.location} • {restaurant.type}
-                        </p>
-                      </div>
-                      <div className="text-right">
-                        <div className="flex">
-                          {[...Array(restaurant.rating)].map((_, i) => (
-                            <Star key={i} className="w-4 h-4 text-amber-400 fill-amber-400" />
-                          ))}
-                        </div>
-                        <span className="text-sm font-
+                <div className="flex justify-between items-start mb-3">
+                  <div>
+                    <h3 className="text-xl font-bold">{restaurant.name}</h3>
+                    <p className="text-amber-400 text-sm flex items-center gap-1">
+                      <MapPin className="w-4 h-4" />
+                      {restaurant.location} • {restaurant.type}
+                    </p>
+                  </div>
+                  <div className="text-right">
+                    <div className="flex">
+                      {[...Array(restaurant.rating)].map((_, i) => (
+                        <Star key={i} className="w-4 h-4 text-amber-400 fill-amber-400" />
+                      ))}
+                    </div>
+                    <span className="text-sm font-bold text-white">{restaurant.price}</span>
+                  </div>
+                </div>
+                
+                <p className="text-gray-300 text-sm mb-4">{restaurant.description}</p>
+                
+                <div className="flex flex-wrap gap-2 mb-3">
+                  {restaurant.specialties.map((s) => (
+                    <span key={s} className="text-xs bg-amber-500/20 text-amber-300 px-2 py-1 rounded">{s}</span>
+                  ))}
+                </div>
+                
+                <div className="text-sm text-gray-400 space-y-1">
+                  <p><strong className="text-gray-300">Best for:</strong> {restaurant.bestFor}</p>
+                  <p><strong className="text-gray-300">Must try:</strong> {restaurant.mustTry}</p>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* Tips Section */}
+      <section className="py-16 px-4 bg-black/30">
+        <div className="max-w-6xl mx-auto">
+          <h2 className="text-3xl font-bold mb-12 text-center">Arabic Dining Tips</h2>
+          
+          <div className="grid md:grid-cols-2 gap-6">
+            {tips.map((tip) => (
+              <div key={tip.title} className="bg-white/5 rounded-xl p-6">
+                <div className="flex items-start gap-4">
+                  <div className="p-3 bg-amber-500/20 rounded-lg">
+                    <tip.icon className="w-6 h-6 text-amber-400" />
+                  </div>
+                  <div>
+                    <h3 className="font-bold mb-2">{tip.title}</h3>
+                    <p className="text-gray-400 text-sm">{tip.content}</p>
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* FAQ Section */}
+      <section className="py-16 px-4">
+        <div className="max-w-4xl mx-auto">
+          <h2 className="text-3xl font-bold mb-12 text-center">Frequently Asked Questions</h2>
+          
+          <div className="space-y-6">
+            {faqs.map((faq, idx) => (
+              <div key={idx} className="bg-white/5 rounded-xl p-6">
+                <h3 className="font-bold text-amber-400 mb-2">{faq.q}</h3>
+                <p className="text-gray-300">{faq.a}</p>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* CTA */}
+      <section className="py-16 px-4 bg-gradient-to-r from-amber-500/10 to-yellow-500/10">
+        <div className="max-w-4xl mx-auto text-center">
+          <h2 className="text-3xl font-bold mb-4">Hungry for Arabic Food?</h2>
+          <p className="text-gray-300 mb-8">
+            Browse all restaurants and find the perfect spot for your next meal.
+          </p>
+          <div className="flex flex-wrap justify-center gap-4">
+            <Link 
+              href="/places?category=restaurant"
+              className="px-8 py-3 bg-amber-500 hover:bg-amber-400 text-black font-bold rounded-lg transition-colors"
+            >
+              Browse Restaurants
+            </Link>
+            <Link 
+              href="/guides/brunches"
+              className="px-8 py-3 bg-white/10 hover:bg-white/20 text-white font-bold rounded-lg transition-colors"
+            >
+              Friday Brunch Guide
+            </Link>
+          </div>
+        </div>
+      </section>
+
+      {/* FAQ Schema */}
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{
+          __html: JSON.stringify({
+            '@context': 'https://schema.org',
+            '@type': 'FAQPage',
+            mainEntity: faqs.map(faq => ({
+              '@type': 'Question',
+              name: faq.q,
+              acceptedAnswer: {
+                '@type': 'Answer',
+                text: faq.a,
+              },
+            })),
+          }),
+        }}
+      />
+
+      {/* Article Schema */}
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{
+          __html: JSON.stringify({
+            '@context': 'https://schema.org',
+            '@type': 'Article',
+            headline: 'Best Arabic & Lebanese Restaurants in Bahrain 2026',
+            description: 'Complete guide to Arabic and Lebanese restaurants in Bahrain from budget to luxury.',
+            author: { '@type': 'Organization', name: 'BahrainNights' },
+            publisher: { '@type': 'Organization', name: 'BahrainNights' },
+            datePublished: '2026-01-25',
+            dateModified: lastUpdated,
+          }),
+        }}
+      />
+    </div>
+  );
+}

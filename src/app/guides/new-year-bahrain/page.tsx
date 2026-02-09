@@ -3,25 +3,25 @@ import Link from 'next/link';
 import { 
   PartyPopper, Clock, MapPin, Star,
   Calendar, Music, Users, Sparkles,
-  Wine, Utensils, Building, Camera
+  Wine, Utensils, Building, DollarSign
 } from 'lucide-react';
 import BreadcrumbSchema from '@/components/SEO/BreadcrumbSchema';
 
 export const metadata: Metadata = {
-  title: 'New Year\'s Eve in Bahrain — Best Parties & Events 2026 | Complete Guide',
-  description: 'Celebrate New Year\'s Eve 2026 in Bahrain! Discover the best NYE parties, fireworks, concerts, dinners, and countdown events at hotels, clubs, and venues across the kingdom.',
+  title: "New Year's Eve in Bahrain — Best Parties & Events 2026 | Complete Guide",
+  description: "Celebrate New Year's Eve 2026 in Bahrain! Discover the best NYE parties, fireworks, concerts, dinners, and countdown events at hotels, clubs, and venues across the kingdom.",
   keywords: 'New Year Bahrain, NYE Bahrain, New Year Eve Bahrain, countdown Bahrain, New Year party Bahrain, fireworks Bahrain New Year, best NYE parties Bahrain',
   openGraph: {
-    title: 'New Year\'s Eve in Bahrain — Best Parties & Events',
+    title: "New Year's Eve in Bahrain — Best Parties & Events",
     description: 'Your guide to celebrating NYE 2026 in Bahrain with parties, fireworks, and countdown events.',
     type: 'article',
     locale: 'en_US',
     url: 'https://www.bahrainnights.com/guides/new-year-bahrain',
-    images: [{ url: 'https://www.bahrainnights.com/images/new-year-bahrain-og.jpg', width: 1200, height: 630, alt: 'New Year\'s Eve in Bahrain' }],
+    images: [{ url: 'https://www.bahrainnights.com/images/new-year-bahrain-og.jpg', width: 1200, height: 630, alt: "New Year's Eve in Bahrain" }],
   },
   twitter: {
     card: 'summary_large_image',
-    title: 'New Year\'s Eve in Bahrain — Best Parties & Events',
+    title: "New Year's Eve in Bahrain — Best Parties & Events",
     description: 'Complete guide to NYE celebrations in Bahrain.',
   },
   alternates: {
@@ -35,9 +35,8 @@ const nyeParties = [
     location: 'Bahrain Bay',
     type: 'Luxury Gala',
     price: 'BD 150-250',
-    description: 'The most prestigious New Year\'s Eve celebration in Bahrain. The Four Seasons hosts an elegant black-tie gala featuring international live entertainment, gourmet dining, premium open bar, and midnight fireworks views over Bahrain Bay. Expect celebrity performances and Bahrain\'s elite crowd.',
+    description: "The most prestigious New Year's Eve celebration in Bahrain. The Four Seasons hosts an elegant black-tie gala featuring international live entertainment, gourmet dining, premium open bar, and midnight fireworks views over Bahrain Bay.",
     highlights: ['Black-tie gala', 'Live international acts', 'Gourmet dinner', 'Premium open bar', 'Fireworks view'],
-    link: '/venues/four-seasons-bahrain',
     dressCode: 'Black tie / Formal',
   },
   {
@@ -45,9 +44,8 @@ const nyeParties = [
     location: 'Seef',
     type: 'Premium Party',
     price: 'BD 120-180',
-    description: 'The Ritz-Carlton transforms for New Year\'s Eve with multiple party zones, live bands, DJs, and an elaborate buffet dinner. Their beachfront setting offers firework views and a sophisticated yet fun atmosphere perfect for couples and groups.',
+    description: "The Ritz-Carlton transforms for New Year's Eve with multiple party zones, live bands, DJs, and an elaborate buffet dinner. Their beachfront setting offers firework views and sophisticated atmosphere.",
     highlights: ['Multiple party areas', 'Live bands & DJs', 'Dinner buffet', 'Beach setting', 'Midnight countdown'],
-    link: '/venues/ritz-carlton-bahrain',
     dressCode: 'Smart elegant',
   },
   {
@@ -55,9 +53,8 @@ const nyeParties = [
     location: 'Adliya',
     type: 'Hotel Party',
     price: 'BD 80-120',
-    description: 'A long-standing NYE tradition in Bahrain, Gulf Hotel offers excellent value with quality entertainment, good food, and a central location. Multiple venue options within the hotel cater to different vibes from elegant to energetic.',
+    description: 'A long-standing NYE tradition in Bahrain, Gulf Hotel offers excellent value with quality entertainment, good food, and a central location. Multiple venue options cater to different vibes.',
     highlights: ['Multiple venues', 'Good value', 'Quality entertainment', 'Central location'],
-    link: '/venues/gulf-hotel',
     dressCode: 'Smart casual to elegant',
   },
   {
@@ -65,9 +62,8 @@ const nyeParties = [
     location: 'Amwaj Islands',
     type: 'Beach Party',
     price: 'BD 100-150',
-    description: 'Ring in the new year with your feet in the sand at ART Rotana\'s beach NYE party. A more relaxed vibe with live music, BBQ stations, beach bonfire, and fireworks over Amwaj waters. Perfect for those wanting a different NYE experience.',
+    description: "Ring in the new year with your feet in the sand at ART Rotana's beach NYE party. A more relaxed vibe with live music, BBQ stations, beach bonfire, and fireworks over Amwaj waters.",
     highlights: ['Beach party vibe', 'Live music', 'BBQ & bonfire', 'Fireworks', 'Relaxed atmosphere'],
-    link: '/areas/amwaj',
     dressCode: 'Beach elegant',
   },
   {
@@ -75,9 +71,8 @@ const nyeParties = [
     location: 'Budaiya',
     type: 'Beach Club Party',
     price: 'BD 80-120',
-    description: 'Bahrain\'s favorite beach club hosts a legendary NYE party with top DJs, beach dancing, flowing drinks, and midnight fireworks. The atmosphere is energetic and youthful — perfect for groups looking to party into the new year.',
+    description: "Bahrain's favorite beach club hosts a legendary NYE party with top DJs, beach dancing, flowing drinks, and midnight fireworks. The atmosphere is energetic and youthful.",
     highlights: ['Beach club setting', 'Top DJs', 'Party atmosphere', 'Fireworks', 'Late night dancing'],
-    link: '/venues/coral-bay',
     dressCode: 'Beach chic',
   },
 ];
@@ -88,7 +83,7 @@ const nyeDinners = [
     location: 'Four Seasons',
     cuisine: 'Steakhouse',
     price: 'BD 80-120',
-    description: 'World-class steaks and a special NYE menu in an elegant setting. Perfect for couples seeking a refined dining experience before heading to parties.',
+    description: 'World-class steaks and a special NYE menu in an elegant setting. Perfect for couples seeking refined dining before heading to parties.',
     features: ['Special NYE menu', 'Premium steaks', 'Elegant ambiance'],
   },
   {
@@ -128,8 +123,8 @@ const nyeNightlife = [
   {
     name: 'Block 338 Bars',
     area: 'Adliya',
-    description: 'The heart of Bahrain\'s bar scene comes alive on NYE. Multiple venues mean you can bar-hop through the countdown. Expect packed crowds and festive energy.',
-    venues: ['Calexico', 'JJ\'s Irish Pub', 'Various lounges'],
+    description: "The heart of Bahrain's bar scene comes alive on NYE. Multiple venues mean you can bar-hop through the countdown.",
+    venues: ['Calexico', "JJ's Irish Pub", 'Various lounges'],
     vibe: 'Bar-hopping, casual party',
   },
   {
@@ -142,19 +137,19 @@ const nyeNightlife = [
   {
     name: 'Hotel Bars',
     area: 'Various',
-    description: 'Hotel bars offer sophisticated NYE environments with quality drinks, live music, and often views of fireworks. Good for those wanting atmosphere without full gala commitment.',
+    description: 'Hotel bars offer sophisticated NYE environments with quality drinks, live music, and often views of fireworks.',
     venues: ['Lobby lounges', 'Rooftop bars'],
     vibe: 'Sophisticated, drinks-focused',
   },
 ];
 
 const nyeTips = [
-  { title: 'Book Early', content: 'NYE events sell out weeks in advance. Book hotel parties by mid-December; popular restaurants by early December. Last-minute options are limited and overpriced.', icon: Calendar },
-  { title: 'Transport Planning', content: 'Taxis are scarce and surge-priced on NYE. Book a return taxi in advance, use Careem/Uber (expect surcharges), or stay at your party venue. Don\'t drink and drive.', icon: MapPin },
-  { title: 'Dress Code', content: 'NYE is the time to dress up. Most hotel events require formal or smart elegant attire. Beach parties allow resort chic. Check specific event dress codes when booking.', icon: Users },
-  { title: 'Hotel Stay', content: 'Consider booking a room at your party venue. Many hotels offer NYE packages including accommodation. This solves transport issues and extends the celebration.', icon: Building },
-  { title: 'January 1st Plans', content: 'January 1 is a public holiday. Many hotels offer recovery brunches. Plan ahead if you want New Year\'s Day brunch reservations.', icon: Clock },
-  { title: 'Budget Wisely', content: 'NYE in Bahrain isn\'t cheap. Budget BD 100-300 per person for a quality celebration including dinner, drinks, and party. Upscale options cost more.', icon: Star },
+  { title: 'Book Early', content: 'NYE events sell out weeks in advance. Book hotel parties by mid-December; popular restaurants by early December.', icon: Calendar },
+  { title: 'Transport Planning', content: "Taxis are scarce and surge-priced on NYE. Book a return taxi in advance, use Careem/Uber (expect surcharges), or stay at your party venue.", icon: MapPin },
+  { title: 'Dress Code', content: 'NYE is the time to dress up. Most hotel events require formal or smart elegant attire. Beach parties allow resort chic.', icon: Users },
+  { title: 'Hotel Stay', content: 'Consider booking a room at your party venue. Many hotels offer NYE packages including accommodation.', icon: Building },
+  { title: 'January 1st Plans', content: 'January 1 is a public holiday. Many hotels offer recovery brunches. Plan ahead for New Year\'s Day brunch reservations.', icon: Clock },
+  { title: 'Budget Wisely', content: "NYE in Bahrain isn't cheap. Budget BD 100-300 per person for a quality celebration including dinner, drinks, and party.", icon: DollarSign },
 ];
 
 const countdownSpots = [
@@ -164,16 +159,16 @@ const countdownSpots = [
   { name: 'Restaurant Dinners', type: 'Reservation', price: 'BD 50-120', description: 'Elegant dinner then watch fireworks or head to a party.' },
 ];
 
+const faqs = [
+  { q: "Where are the best fireworks for New Year's Eve in Bahrain?", a: 'The main NYE fireworks display is at Bahrain Bay, launched at midnight. Best views are from the waterfront walkway, hotel rooftops (Four Seasons, Ritz-Carlton), or Bahrain Bay restaurants. Amwaj Islands also has a smaller display.' },
+  { q: "How much does New Year's Eve in Bahrain cost?", a: 'NYE celebrations range from free (public fireworks viewing) to BD 250+ (luxury hotel galas). Budget BD 80-120 for good beach club or mid-range hotel parties. Fine dining NYE dinners run BD 50-120.' },
+  { q: 'Is January 1st a public holiday in Bahrain?', a: "Yes, January 1st is an official public holiday in Bahrain. Most businesses are closed, but hotels, malls, and tourist areas operate normally. Many hotels offer New Year's Day recovery brunches." },
+  { q: "What should I wear to New Year's Eve parties in Bahrain?", a: 'Dress code varies by venue. Luxury hotel galas require formal/black-tie attire. Most hotel parties expect smart elegant dress. Beach club parties allow resort chic or beach elegant.' },
+  { q: "How do I get around on New Year's Eve in Bahrain?", a: "Transport is challenging on NYE. Book taxis in advance, use Careem/Uber (expect 2-3x surge pricing), or stay at your party venue. Never drink and drive — Bahrain has strict drunk driving laws." },
+];
+
 export default function NewYearBahrainPage() {
   const lastUpdated = new Date().toISOString().split('T')[0];
-  
-  const faqs = [
-    { q: 'Where are the best fireworks for New Year\'s Eve in Bahrain?', a: 'The main NYE fireworks display is at Bahrain Bay, launched at midnight. Best views are from the waterfront walkway, hotel rooftops (Four Seasons, Ritz-Carlton), or Bahrain Bay restaurants. Amwaj Islands also has a smaller display. For premium viewing, book a hotel party with bay views.' },
-    { q: 'How much does New Year\'s Eve in Bahrain cost?', a: 'NYE celebrations range from free (public fireworks viewing) to BD 250+ (luxury hotel galas). Budget BD 80-120 for good beach club or mid-range hotel parties. Fine dining NYE dinners run BD 50-120. Budget BD 100-300 per person for a complete evening with dinner, drinks, and party.' },
-    { q: 'Is January 1st a public holiday in Bahrain?', a: 'Yes, January 1st is an official public holiday in Bahrain. Most businesses are closed, but hotels, malls, and tourist areas operate normally. Many hotels offer New Year\'s Day recovery brunches — book in advance for popular venues.' },
-    { q: 'What should I wear to New Year\'s Eve parties in Bahrain?', a: 'Dress code varies by venue. Luxury hotel galas require formal/black-tie attire. Most hotel parties expect smart elegant dress. Beach club parties allow resort chic or beach elegant. Always check specific event requirements when booking. NYE is the night to dress up.' },
-    { q: 'How do I get around on New Year\'s Eve in Bahrain?', a: 'Transport is challenging on NYE. Book taxis in advance, use Careem/Uber (expect 2-3x surge pricing), or stay at your party venue. Many hotels offer NYE accommodation packages. Never drink and drive — Bahrain has strict drunk driving laws and checkpoints are common on NYE.' },
-  ];
   
   return (
     <div className="min-h-screen bg-gradient-to-b from-slate-950 via-amber-950/10 to-slate-950 text-white">
@@ -190,11 +185,11 @@ export default function NewYearBahrainPage() {
           <div className="text-center mb-12">
             <span className="inline-block px-4 py-1 bg-amber-500/20 text-amber-400 rounded-full text-sm font-medium mb-4">🎆 Celebration Guide</span>
             <h1 className="text-4xl md:text-6xl font-black mb-6">
-              <span className="bg-gradient-to-r from-amber-400 to-orange-500 bg-clip-text text-transparent">New Year's Eve in Bahrain</span>
+              <span className="bg-gradient-to-r from-amber-400 to-orange-500 bg-clip-text text-transparent">New Year&apos;s Eve in Bahrain</span>
               <span className="block text-2xl md:text-3xl mt-2 text-white">Best Parties & Events 2026</span>
             </h1>
             <p className="text-xl text-gray-300 max-w-3xl mx-auto">
-              Ring in 2027 in style! From glamorous hotel galas and beach club bashes to waterfront fireworks and legendary parties, discover the best ways to celebrate New Year's Eve in the Kingdom of Bahrain.
+              Ring in 2027 in style! From glamorous hotel galas and beach club bashes to waterfront fireworks and legendary parties, discover the best ways to celebrate New Year&apos;s Eve in the Kingdom of Bahrain.
             </p>
             <p className="text-sm text-gray-500 mt-4">Last updated: {lastUpdated}</p>
           </div>
@@ -220,10 +215,10 @@ export default function NewYearBahrainPage() {
       <section className="py-12 px-4">
         <div className="max-w-4xl mx-auto prose prose-invert">
           <p className="text-lg text-gray-300 leading-relaxed">
-            New Year's Eve in Bahrain is a night of glamour, celebration, and unforgettable moments. Unlike neighboring Saudi Arabia where NYE celebrations are more subdued, Bahrain embraces the occasion with open arms — fireworks light up the bay, champagne flows at luxury hotels, and the kingdom's best venues compete to throw the party of the year.
+            New Year&apos;s Eve in Bahrain is a night of glamour, celebration, and unforgettable moments. Unlike neighboring Saudi Arabia where NYE celebrations are more subdued, Bahrain embraces the occasion with open arms — fireworks light up the bay, champagne flows at luxury hotels, and the kingdom&apos;s best venues compete to throw the party of the year.
           </p>
           <p className="text-lg text-gray-300 leading-relaxed mt-4">
-            Whether you're looking for a sophisticated black-tie gala, a beach party under the stars, an intimate fine dining experience, or simply a great spot to watch the midnight fireworks, Bahrain delivers. This guide covers the best NYE options across all budgets and styles, plus essential tips for making your celebration smooth and memorable.
+            Whether you&apos;re looking for a sophisticated black-tie gala, a beach party under the stars, an intimate fine dining experience, or simply a great spot to watch the midnight fireworks, Bahrain delivers. This guide covers the best NYE options across all budgets and styles, plus essential tips for making your celebration smooth and memorable.
           </p>
         </div>
       </section>
@@ -231,7 +226,7 @@ export default function NewYearBahrainPage() {
       {/* Best NYE Parties */}
       <section className="py-16 px-4 bg-black/30">
         <div className="max-w-6xl mx-auto">
-          <h2 className="text-3xl font-bold mb-4 text-center">Best New Year's Eve Parties 2026</h2>
+          <h2 className="text-3xl font-bold mb-4 text-center">Best New Year&apos;s Eve Parties 2026</h2>
           <p className="text-gray-400 text-center mb-12 max-w-2xl mx-auto">The most sought-after NYE celebrations in Bahrain. Book early — these sell out fast.</p>
           
           <div className="space-y-6">
@@ -240,9 +235,7 @@ export default function NewYearBahrainPage() {
                 <div className="flex flex-col lg:flex-row gap-6">
                   <div className="flex-1">
                     <span className="inline-block px-3 py-1 bg-amber-500/20 text-amber-300 text-xs rounded-full mb-3">{party.type}</span>
-                    <Link href={party.link} className="hover:text-amber-400 transition-colors">
-                      <h3 className="text-xl font-bold">{party.name}</h3>
-                    </Link>
+                    <h3 className="text-xl font-bold">{party.name}</h3>
                     <p className="text-amber-400 text-sm flex items-center gap-1 mb-2">
                       <MapPin className="w-4 h-4" />{party.location}
                     </p>
@@ -255,14 +248,6 @@ export default function NewYearBahrainPage() {
                   <div className="lg:w-1/4 lg:text-right">
                     <span className="text-xl font-bold text-white">{party.price}</span>
                     <p className="text-sm text-gray-400">per person</p>
-                    <a 
-                      href={`https://platinumlist.net/aff/?ref=yjg3yzi&link=${encodeURIComponent('https://platinumlist.net/event-tickets/new-year-eve-bahrain')}`}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="inline-block mt-3 px-4 py-2 bg-amber-500 hover:bg-amber-400 text-black text-sm font-bold rounded-lg transition-colors"
-                    >
-                      Book on Platinumlist
-                    </a>
                   </div>
                 </div>
               </div>
@@ -274,7 +259,7 @@ export default function NewYearBahrainPage() {
       {/* NYE Dinners */}
       <section className="py-16 px-4">
         <div className="max-w-6xl mx-auto">
-          <h2 className="text-3xl font-bold mb-4 text-center">Fine Dining on New Year's Eve</h2>
+          <h2 className="text-3xl font-bold mb-4 text-center">Fine Dining on New Year&apos;s Eve</h2>
           <p className="text-gray-400 text-center mb-12 max-w-2xl mx-auto">Start your evening with a memorable meal before heading to parties or fireworks.</p>
           
           <div className="grid md:grid-cols-2 gap-6">
@@ -364,4 +349,101 @@ export default function NewYearBahrainPage() {
       <section className="py-16 px-4">
         <div className="max-w-6xl mx-auto">
           <h2 className="text-3xl font-bold mb-4 text-center">Essential NYE Tips</h2>
-          <p className="text-gray-400 text-center mb-12 max-w-2
+          <p className="text-gray-400 text-center mb-12 max-w-2xl mx-auto">Make your New Year&apos;s Eve celebration smooth and memorable.</p>
+          
+          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {nyeTips.map((tip) => (
+              <div key={tip.title} className="bg-white/5 rounded-xl p-6">
+                <div className="flex items-start gap-4">
+                  <div className="p-3 bg-amber-500/20 rounded-lg">
+                    <tip.icon className="w-6 h-6 text-amber-400" />
+                  </div>
+                  <div>
+                    <h3 className="font-bold mb-2">{tip.title}</h3>
+                    <p className="text-gray-400 text-sm">{tip.content}</p>
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* FAQ Section */}
+      <section className="py-16 px-4 bg-black/30">
+        <div className="max-w-4xl mx-auto">
+          <h2 className="text-3xl font-bold mb-12 text-center">Frequently Asked Questions</h2>
+          
+          <div className="space-y-6">
+            {faqs.map((faq, idx) => (
+              <div key={idx} className="bg-white/5 rounded-xl p-6">
+                <h3 className="font-bold text-amber-400 mb-2">{faq.q}</h3>
+                <p className="text-gray-300">{faq.a}</p>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* CTA */}
+      <section className="py-16 px-4 bg-gradient-to-r from-amber-500/10 to-orange-500/10">
+        <div className="max-w-4xl mx-auto text-center">
+          <h2 className="text-3xl font-bold mb-4">Ready to Celebrate?</h2>
+          <p className="text-gray-300 mb-8">
+            Start planning your perfect New Year&apos;s Eve in Bahrain now.
+          </p>
+          <div className="flex flex-wrap justify-center gap-4">
+            <Link 
+              href="/guides/nightlife"
+              className="px-8 py-3 bg-amber-500 hover:bg-amber-400 text-black font-bold rounded-lg transition-colors"
+            >
+              Explore Nightlife
+            </Link>
+            <Link 
+              href="/guides/restaurants"
+              className="px-8 py-3 bg-white/10 hover:bg-white/20 text-white font-bold rounded-lg transition-colors"
+            >
+              Best Restaurants
+            </Link>
+          </div>
+        </div>
+      </section>
+
+      {/* FAQ Schema */}
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{
+          __html: JSON.stringify({
+            '@context': 'https://schema.org',
+            '@type': 'FAQPage',
+            mainEntity: faqs.map(faq => ({
+              '@type': 'Question',
+              name: faq.q,
+              acceptedAnswer: {
+                '@type': 'Answer',
+                text: faq.a,
+              },
+            })),
+          }),
+        }}
+      />
+
+      {/* Article Schema */}
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{
+          __html: JSON.stringify({
+            '@context': 'https://schema.org',
+            '@type': 'Article',
+            headline: "New Year's Eve in Bahrain — Best Parties & Events 2026",
+            description: 'Complete guide to NYE celebrations in Bahrain including parties, fireworks, and dining.',
+            author: { '@type': 'Organization', name: 'BahrainNights' },
+            publisher: { '@type': 'Organization', name: 'BahrainNights' },
+            datePublished: '2026-01-25',
+            dateModified: lastUpdated,
+          }),
+        }}
+      />
+    </div>
+  );
+}
