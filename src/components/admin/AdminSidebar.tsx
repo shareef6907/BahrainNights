@@ -27,7 +27,6 @@ import {
   FileText,
   Mail,
   Smartphone,
-  Trees,
 } from 'lucide-react';
 import { useAuth } from '@/lib/auth-context';
 
@@ -98,12 +97,6 @@ const navItems = [
     name: 'Attractions',
     href: '/admin/attractions',
     icon: MapPin,
-  },
-  {
-    name: 'Parks & Gardens',
-    href: '/admin/parks',
-    icon: Trees,
-    highlight: true,
   },
   {
     name: 'Platinumlist',
