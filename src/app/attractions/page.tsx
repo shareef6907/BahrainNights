@@ -3,9 +3,8 @@ import { getAttractions as fetchAttractions, Attraction as DbAttraction } from '
 import AttractionsPageClient, { Attraction } from '@/components/attractions/AttractionsPageClient';
 import AttractionListSchema from '@/components/SEO/AttractionListSchema';
 
-// Disable caching temporarily to verify fix, then re-enable
-export const dynamic = 'force-dynamic';
-export const revalidate = 0;
+// Cache for 5 minutes, stale-while-revalidate
+export const revalidate = 300;
 
 // Convert database Attraction to client Attraction type
 function toClientAttraction(attr: DbAttraction): Attraction {

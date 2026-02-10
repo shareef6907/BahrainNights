@@ -53,5 +53,9 @@ export async function GET() {
     success: true,
     cinemas: BAHRAIN_CINEMAS,
     total: BAHRAIN_CINEMAS.length,
+  }, {
+    headers: {
+      'Cache-Control': 'public, max-age=86400, stale-while-revalidate=43200',
+    },
   });
 }
