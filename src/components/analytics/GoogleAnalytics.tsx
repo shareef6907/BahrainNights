@@ -1,13 +1,51 @@
 'use client';
 
 import Script from 'next/script';
+import { useEffect } from 'react';
 
-const GA_MEASUREMENT_ID = process.env.NEXT_PUBLIC_GA_MEASUREMENT_ID;
+// Hardcoded GA4 Measurement ID for BahrainNights.com
+const GA_MEASUREMENT_ID = 'G-92TXX50WSQ';
 
 export function GoogleAnalytics() {
-  if (!GA_MEASUREMENT_ID) {
-    return null;
-  }
+  // Set up conversion event tracking after component mounts
+  useEffect(() => {
+    if (typeof window === 'undefined' || !('gtag' in window)) return;
+
+    const gtag = (window as any).gtag;
+    const sisterDomains = ['bahrainnights.com', 'eventsbahrain.com', 'cinematicwebworks.com', 'filmproductionbahrain.com', 'studentphotos.com'];
+
+    // Track WhatsApp button clicks
+    document.querySelectorAll('a[href*="wa.me"]').forEach(link => {
+      link.addEventListener('click', () => {
+        gtag('event', 'whatsapp_click', { page: window.location.pathname });
+      });
+    });
+
+    // Track phone number clicks
+    document.querySelectorAll('a[href^="tel:"]').forEach(link => {
+      link.addEventListener('click', () => {
+        gtag('event', 'phone_click', { page: window.location.pathname });
+      });
+    });
+
+    // Track contact form submissions
+    document.querySelectorAll('form').forEach(form => {
+      form.addEventListener('submit', () => {
+        gtag('event', 'contact_form_submit', { page: window.location.pathname });
+      });
+    });
+
+    // Track cross-promotion clicks (links to sister sites)
+    document.querySelectorAll('a').forEach(link => {
+      sisterDomains.forEach(domain => {
+        if ((link as HTMLAnchorElement).href.includes(domain) && !window.location.hostname.includes(domain)) {
+          link.addEventListener('click', () => {
+            gtag('event', 'cross_promo_click', { destination: domain, page: window.location.pathname });
+          });
+        }
+      });
+    });
+  }, []);
 
   return (
     <>
