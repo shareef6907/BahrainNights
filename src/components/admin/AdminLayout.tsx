@@ -40,6 +40,7 @@ const pageTitles: Record<string, string> = {
   '/admin/platinumlist-attractions': 'Platinumlist Attractions',
   '/admin/platinumlist-events': 'Platinumlist Events',
   '/admin/newsletter': 'Newsletter Management',
+  '/admin/parks': 'Parks & Gardens',
 };
 
 export default function AdminLayout({ children }: AdminLayoutProps) {
