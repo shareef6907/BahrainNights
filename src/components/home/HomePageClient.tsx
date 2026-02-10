@@ -354,6 +354,7 @@ export default function HomePageClient({ initialMovies, initialStats, initialTod
         { name: t.nav.spasWellness, icon: '💆', href: '/explore/spas' },
         { name: t.nav.hotelsStaycations, icon: '🏨', href: '/explore/hotels' },
         { name: t.nav.kidsActivities || 'Kids Activities', icon: '👶', href: '/explore/kids' },
+        { name: t.categories?.parks || 'Parks & Gardens', icon: '🌳', href: '/parks' },
       ]
     },
     {
