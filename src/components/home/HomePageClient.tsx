@@ -262,7 +262,7 @@ interface TrendingEvent {
 
 interface HomePageClientProps {
   initialMovies: HomepageMovie[];
-  initialStats: { events: number; venues: number; cinema: number; offers: number; explore: number; attractions: number; blog: number };
+  initialStats: { events: number; venues: number; cinema: number; offers: number; explore: number; attractions: number; blog: number; parks?: number };
   initialTodayEvents: TodayEvent[];
   initialInternationalEvents: HomepageInternationalEvent[];
   initialHappeningNowEvents: HappeningNowEvent[];
@@ -453,11 +453,12 @@ export default function HomePageClient({ initialMovies, initialStats, initialTod
     { icon: "📝", name: t.categories.blog, description: t.categories.blogDesc, count: stats.blog, color: "from-rose-500 to-pink-500", href: "/regional", countLabel: t.categories.articles },
     { icon: "🍽️", name: t.categories.dining, description: t.categories.diningDesc, count: stats.venues, color: "from-orange-500 to-red-500", href: "/places", countLabel: t.categories.listings },
     { icon: "🎬", name: t.categories.cinema, description: t.categories.cinemaDesc, count: stats.cinema, color: "from-blue-500 to-cyan-500", href: "/cinema", countLabel: t.categories.listings },
+    { icon: "🌳", name: t.categories.parks, description: t.categories.parksDesc, count: stats.parks || 0, color: "from-green-500 to-teal-500", href: "/parks", countLabel: t.categories.listings, alwaysShow: true },
     { icon: "🏷️", name: t.categories.offers, description: t.categories.offersDesc, count: stats.offers, color: "from-green-500 to-emerald-500", href: "/offers", countLabel: t.categories.listings },
     { icon: "🧭", name: t.categories.explore, description: t.categories.exploreDesc, count: stats.explore, color: "from-indigo-500 to-purple-500", href: "/explore", countLabel: t.categories.listings }
   ];
-  // Filter out categories with 0 listings
-  const categories = allCategories.filter(category => category.count > 0);
+  // Filter out categories with 0 listings (except those marked alwaysShow)
+  const categories = allCategories.filter(category => category.count > 0 || category.alwaysShow);
 
 
 

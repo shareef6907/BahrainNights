@@ -459,6 +459,8 @@ export const en = {
     exploreDesc: 'Hotels, spas & more',
     attractions: 'Attractions',
     attractionsDesc: 'Tours, water sports & more',
+    parks: 'Parks & Gardens',
+    parksDesc: 'Green spaces & nature',
     blog: 'Blog',
     blogDesc: 'Articles & guides',
     listings: 'listings',
