@@ -22,18 +22,28 @@ import {
   ChevronDown,
   Clock,
   Check,
-  X,
   RefreshCw,
-  Sparkles,
-  Users,
-  Car,
-  Moon,
   Baby,
   Footprints,
-  Home
+  Car,
+  Moon,
+  Home,
+  Waves,
+  Camera,
+  Dumbbell
 } from 'lucide-react';
-import { BAHRAIN_GOVERNORATES, BAHRAIN_CENTER, MAP_ZOOM } from '@/lib/parks/constants';
-import { formatDistance, getDirectionsUrl, sortParks, Park } from '@/lib/parks/utils';
+import { 
+  BAHRAIN_PARKS, 
+  ParkData, 
+  calculateDistance, 
+  formatDistance, 
+  getGoogleMapsDirectionsUrl,
+  getGoogleMapsSearchUrl,
+  getParksByDistance,
+  getParksByGovernorate,
+  searchParks
+} from '@/lib/parks/data';
+import { BAHRAIN_GOVERNORATES, BAHRAIN_CENTER } from '@/lib/parks/constants';
 
 // Types
 interface UserLocation {
@@ -42,16 +52,19 @@ interface UserLocation {
 }
 
 type SortOption = 'distance' | 'rating' | 'reviews' | 'name';
-type ViewMode = 'grid' | 'list' | 'map';
+type ViewMode = 'grid' | 'list';
 
 // Feature icon mapping
 const FEATURE_ICONS: Record<string, React.ReactNode> = {
   'Playground': <Baby className="w-3 h-3" />,
   'Walking Track': <Footprints className="w-3 h-3" />,
+  'Walking Paths': <Footprints className="w-3 h-3" />,
   'Parking Available': <Car className="w-3 h-3" />,
   'Lit at Night': <Moon className="w-3 h-3" />,
   'Restrooms': <Home className="w-3 h-3" />,
-  'Pet Friendly': <Users className="w-3 h-3" />,
+  'Waterfront': <Waves className="w-3 h-3" />,
+  'Photography Spot': <Camera className="w-3 h-3" />,
+  'Exercise Equipment': <Dumbbell className="w-3 h-3" />,
 };
 
 // Animation variants
@@ -88,25 +101,25 @@ function ParkCardSkeleton() {
 function ParkCard({ 
   park, 
   userLocation, 
-  onViewOnMap, 
+  distance,
   isHighlighted,
   viewMode = 'grid'
 }: { 
-  park: Park; 
+  park: ParkData; 
   userLocation: UserLocation | null;
-  onViewOnMap: (park: Park) => void;
+  distance?: number;
   isHighlighted: boolean;
   viewMode: ViewMode;
 }) {
-  const distance = park.distance ?? (userLocation ? 
-    Math.sqrt(Math.pow(userLocation.lat - park.geometry.location.lat, 2) + Math.pow(userLocation.lng - park.geometry.location.lng, 2)) * 111 
-    : undefined);
-
-  const getPhotoUrl = (photoReference: string, maxWidth: number = 400) => {
-    return `/api/parks/photo?reference=${photoReference}&maxwidth=${maxWidth}`;
-  };
-
   const isListView = viewMode === 'list';
+
+  // Default park images based on features
+  const getDefaultImage = () => {
+    if (park.features.includes('Wildlife')) return '/images/parks/wildlife.jpg';
+    if (park.features.includes('Waterfront')) return '/images/parks/waterfront.jpg';
+    if (park.features.includes('Botanical Garden')) return '/images/parks/botanical.jpg';
+    return '/images/parks/default.jpg';
+  };
 
   return (
     <motion.article
@@ -120,18 +133,9 @@ function ParkCard({
     >
       {/* Park Image */}
       <div className={`relative bg-slate-800 ${isListView ? 'w-48 h-full min-h-[160px]' : 'h-48'}`}>
-        {park.photos && park.photos[0] ? (
-          <Image
-            src={getPhotoUrl(park.photos[0].photo_reference)}
-            alt={park.name}
-            fill
-            className="object-cover group-hover:scale-105 transition-transform duration-300"
-          />
-        ) : (
-          <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-green-500/20 to-teal-500/20">
-            <Trees className="w-16 h-16 text-green-400/50" />
-          </div>
-        )}
+        <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-green-500/20 to-teal-500/20">
+          <Trees className="w-16 h-16 text-green-400/50" />
+        </div>
         
         {/* Distance Badge */}
         {distance !== undefined && (
@@ -147,29 +151,21 @@ function ParkCard({
             Verified
           </div>
         )}
-
-        {/* Open Now Badge */}
-        {park.opening_hours?.open_now !== undefined && (
-          <div className={`absolute bottom-3 left-3 px-3 py-1 backdrop-blur-sm rounded-full text-xs font-medium ${
-            park.opening_hours.open_now 
-              ? 'bg-green-500/80 text-white' 
-              : 'bg-red-500/80 text-white'
-          }`}>
-            {park.opening_hours.open_now ? 'Open Now' : 'Closed'}
-          </div>
-        )}
       </div>
 
       {/* Park Info */}
       <div className={`p-5 ${isListView ? 'flex-1 flex flex-col justify-between' : ''}`}>
         <div>
-          <h3 className="text-lg font-bold text-white mb-2 group-hover:text-green-400 transition-colors line-clamp-1">
+          <h3 className="text-lg font-bold text-white mb-1 group-hover:text-green-400 transition-colors line-clamp-1">
             {park.name}
           </h3>
+          {park.nameAr && (
+            <p className="text-sm text-gray-500 mb-2" dir="rtl">{park.nameAr}</p>
+          )}
           
           <div className="flex items-center gap-2 text-gray-400 text-sm mb-3">
             <MapPin className="w-4 h-4 text-green-400 flex-shrink-0" />
-            <span className="line-clamp-1">{park.vicinity || park.formatted_address}</span>
+            <span className="line-clamp-1">{park.area}, Bahrain</span>
           </div>
 
           {/* Rating */}
@@ -179,11 +175,19 @@ function ParkCard({
                 <Star className="w-4 h-4 text-yellow-400 fill-yellow-400" />
                 <span className="text-yellow-400 font-medium">{park.rating}</span>
               </div>
-              {park.user_ratings_total && (
+              {park.reviewCount && (
                 <span className="text-gray-500 text-sm">
-                  ({park.user_ratings_total.toLocaleString()} reviews)
+                  ({park.reviewCount.toLocaleString()} reviews)
                 </span>
               )}
+            </div>
+          )}
+
+          {/* Opening Hours */}
+          {park.openingHours && (
+            <div className="flex items-center gap-2 text-gray-400 text-sm mb-3">
+              <Clock className="w-4 h-4 text-green-400" />
+              <span>{park.openingHours}</span>
             </div>
           )}
 
@@ -195,10 +199,15 @@ function ParkCard({
                   key={feature}
                   className="inline-flex items-center gap-1 px-2 py-1 bg-white/5 border border-white/10 rounded-lg text-xs text-gray-400"
                 >
-                  {FEATURE_ICONS[feature]}
+                  {FEATURE_ICONS[feature] || <Trees className="w-3 h-3" />}
                   {feature}
                 </span>
               ))}
+              {park.features.length > 4 && (
+                <span className="px-2 py-1 bg-white/5 border border-white/10 rounded-lg text-xs text-gray-400">
+                  +{park.features.length - 4} more
+                </span>
+              )}
             </div>
           )}
         </div>
@@ -206,20 +215,24 @@ function ParkCard({
         {/* Actions */}
         <div className={`flex gap-2 ${isListView ? '' : 'mt-3'}`}>
           <a
-            href={getDirectionsUrl(park, userLocation || undefined)}
+            href={getGoogleMapsDirectionsUrl(park, userLocation || undefined)}
             target="_blank"
             rel="noopener noreferrer"
             className="flex-1 flex items-center justify-center gap-2 px-4 py-3 bg-gradient-to-r from-green-500 to-teal-500 text-white font-bold rounded-xl hover:shadow-lg hover:shadow-green-500/25 transition-all text-sm"
           >
             <Navigation className="w-4 h-4" />
-            Directions
+            Get Directions
+            <ExternalLink className="w-3 h-3" />
           </a>
-          <button
-            onClick={() => onViewOnMap(park)}
+          <a
+            href={getGoogleMapsSearchUrl(park.name)}
+            target="_blank"
+            rel="noopener noreferrer"
             className="flex items-center justify-center gap-2 px-4 py-3 bg-white/5 border border-white/10 text-white rounded-xl hover:bg-white/10 transition-all text-sm"
+            title="View on Google Maps"
           >
             <MapIcon className="w-4 h-4" />
-          </button>
+          </a>
         </div>
       </div>
     </motion.article>
@@ -229,38 +242,26 @@ function ParkCard({
 export default function ParksPageClient() {
   // State
   const [userLocation, setUserLocation] = useState<UserLocation | null>(null);
-  const [nearbyParks, setNearbyParks] = useState<Park[]>([]);
-  const [allParks, setAllParks] = useState<{ verified: Park[]; unverified: Park[] }>({ verified: [], unverified: [] });
   const [loading, setLoading] = useState(false);
-  const [loadingDirectory, setLoadingDirectory] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [radius, setRadius] = useState(5000);
   const [viewMode, setViewMode] = useState<ViewMode>('grid');
-  const [sortBy, setSortBy] = useState<SortOption>('distance');
+  const [sortBy, setSortBy] = useState<SortOption>('rating');
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedGovernorate, setSelectedGovernorate] = useState<string>('all');
   const [highlightedParkId, setHighlightedParkId] = useState<string | null>(null);
   const [locationPermission, setLocationPermission] = useState<'prompt' | 'granted' | 'denied'>('prompt');
   const [showFilters, setShowFilters] = useState(false);
+  const [radius, setRadius] = useState(10); // km
   
   const mapRef = useRef<HTMLDivElement>(null);
-  const listRef = useRef<HTMLDivElement>(null);
 
   // Check for existing location permission
   useEffect(() => {
     if (navigator.permissions) {
       navigator.permissions.query({ name: 'geolocation' }).then((result) => {
         setLocationPermission(result.state as 'prompt' | 'granted' | 'denied');
-        result.onchange = () => {
-          setLocationPermission(result.state as 'prompt' | 'granted' | 'denied');
-        };
       });
     }
-  }, []);
-
-  // Fetch all parks directory on mount
-  useEffect(() => {
-    fetchParksDirectory();
   }, []);
 
   // Get user's location
@@ -276,13 +277,13 @@ export default function ParksPageClient() {
 
     navigator.geolocation.getCurrentPosition(
       (position) => {
-        const location = {
+        setUserLocation({
           lat: position.coords.latitude,
           lng: position.coords.longitude
-        };
-        setUserLocation(location);
+        });
         setLocationPermission('granted');
-        fetchNearbyParks(location, radius);
+        setSortBy('distance'); // Auto-switch to distance sort
+        setLoading(false);
       },
       (err) => {
         setLoading(false);
@@ -298,83 +299,34 @@ export default function ParksPageClient() {
             setError('Location request timed out. Please try again.');
             break;
           default:
-            setError('An unknown error occurred while getting your location.');
+            setError('An unknown error occurred.');
         }
       },
-      {
-        enableHighAccuracy: true,
-        timeout: 10000,
-        maximumAge: 300000
-      }
+      { enableHighAccuracy: true, timeout: 10000, maximumAge: 300000 }
     );
-  }, [radius]);
+  }, []);
 
-  // Fetch nearby parks
-  const fetchNearbyParks = async (location: UserLocation, searchRadius: number) => {
-    try {
-      const response = await fetch(
-        `/api/parks/nearby?lat=${location.lat}&lng=${location.lng}&radius=${searchRadius}`
-      );
-      
-      if (!response.ok) throw new Error('Failed to fetch parks');
+  // Calculate parks with distances
+  const parksWithDistance = useMemo(() => {
+    if (!userLocation) return BAHRAIN_PARKS.map(p => ({ ...p, distance: undefined }));
+    return getParksByDistance(userLocation.lat, userLocation.lng);
+  }, [userLocation]);
 
-      const data = await response.json();
-      setNearbyParks(data.results || []);
-      setLoading(false);
-    } catch (err) {
-      setError('Failed to fetch nearby parks. Please try again.');
-      setLoading(false);
-    }
-  };
+  // Nearby parks (within radius)
+  const nearbyParks = useMemo(() => {
+    if (!userLocation) return [];
+    return parksWithDistance.filter(p => p.distance !== undefined && p.distance <= radius);
+  }, [parksWithDistance, userLocation, radius]);
 
-  // Fetch parks directory
-  const fetchParksDirectory = async () => {
-    setLoadingDirectory(true);
-    try {
-      const response = await fetch('/api/parks/directory');
-      if (!response.ok) throw new Error('Failed to fetch directory');
-
-      const data = await response.json();
-      setAllParks({
-        verified: data.verifiedParks || [],
-        unverified: data.unverifiedParks || [],
-      });
-    } catch (err) {
-      console.error('Failed to fetch parks directory:', err);
-    } finally {
-      setLoadingDirectory(false);
-    }
-  };
-
-  // Handle radius change
-  const handleRadiusChange = (newRadius: number) => {
-    setRadius(newRadius);
-    if (userLocation) {
-      setLoading(true);
-      fetchNearbyParks(userLocation, newRadius);
-    }
-  };
-
-  // Handle view on map
-  const handleViewOnMap = (park: Park) => {
-    setHighlightedParkId(park.place_id);
-    mapRef.current?.scrollIntoView({ behavior: 'smooth', block: 'center' });
-    
-    // Clear highlight after 3 seconds
-    setTimeout(() => setHighlightedParkId(null), 3000);
-  };
-
-  // Filter and sort parks for directory
+  // Filter and sort all parks
   const filteredParks = useMemo(() => {
-    let parks = [...allParks.verified, ...allParks.unverified];
+    let parks = [...parksWithDistance];
     
     // Search filter
     if (searchQuery) {
-      const query = searchQuery.toLowerCase();
-      parks = parks.filter(p => 
-        p.name.toLowerCase().includes(query) ||
-        (p.vicinity || '').toLowerCase().includes(query)
-      );
+      const results = searchParks(searchQuery);
+      const resultIds = new Set(results.map(p => p.id));
+      parks = parks.filter(p => resultIds.has(p.id));
     }
     
     // Governorate filter
@@ -383,32 +335,54 @@ export default function ParksPageClient() {
     }
     
     // Sort
-    return sortParks(parks, sortBy, userLocation || undefined);
-  }, [allParks, searchQuery, selectedGovernorate, sortBy, userLocation]);
+    switch (sortBy) {
+      case 'distance':
+        if (userLocation) {
+          parks.sort((a, b) => (a.distance ?? 999) - (b.distance ?? 999));
+        }
+        break;
+      case 'rating':
+        parks.sort((a, b) => (b.rating ?? 0) - (a.rating ?? 0));
+        break;
+      case 'reviews':
+        parks.sort((a, b) => (b.reviewCount ?? 0) - (a.reviewCount ?? 0));
+        break;
+      case 'name':
+        parks.sort((a, b) => a.name.localeCompare(b.name));
+        break;
+    }
+    
+    return parks;
+  }, [parksWithDistance, searchQuery, selectedGovernorate, sortBy, userLocation]);
 
   const radiusOptions = [
-    { value: 5000, label: '5 km' },
-    { value: 10000, label: '10 km' },
-    { value: 25000, label: '25 km' },
-    { value: 50000, label: 'All of Bahrain' },
+    { value: 5, label: '5 km' },
+    { value: 10, label: '10 km' },
+    { value: 25, label: '25 km' },
+    { value: 100, label: 'All' },
   ];
 
-  const sortOptions: { value: SortOption; label: string }[] = [
-    { value: 'distance', label: 'Nearest' },
+  const sortOptions: { value: SortOption; label: string; requiresLocation?: boolean }[] = [
+    { value: 'distance', label: 'Nearest', requiresLocation: true },
     { value: 'rating', label: 'Highest Rated' },
     { value: 'reviews', label: 'Most Reviewed' },
     { value: 'name', label: 'Alphabetical' },
   ];
 
+  // Get Google Maps embed URL for showing all parks
+  const getMapEmbedUrl = () => {
+    if (userLocation) {
+      return `https://www.google.com/maps/embed?pb=!1m14!1m12!1m3!1d50000!2d${userLocation.lng}!3d${userLocation.lat}!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!5e0!3m2!1sen!2sbh`;
+    }
+    return `https://www.google.com/maps/embed?pb=!1m14!1m12!1m3!1d100000!2d${BAHRAIN_CENTER.lng}!3d${BAHRAIN_CENTER.lat}!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!5e0!3m2!1sen!2sbh`;
+  };
+
   return (
     <div className="min-h-screen bg-gradient-to-b from-slate-950 via-slate-900 to-slate-950 text-white">
-      {/* Back Navigation */}
+      {/* Navigation */}
       <nav className="fixed top-0 left-0 right-0 z-50 bg-slate-950/95 backdrop-blur-xl border-b border-white/10">
         <div className="max-w-7xl mx-auto px-4 py-4 flex items-center justify-between">
-          <Link 
-            href="/" 
-            className="flex items-center gap-2 text-gray-400 hover:text-white transition-colors"
-          >
+          <Link href="/" className="flex items-center gap-2 text-gray-400 hover:text-white transition-colors">
             <ChevronLeft className="w-5 h-5" />
             <span>Back</span>
           </Link>
@@ -416,17 +390,17 @@ export default function ParksPageClient() {
             <Trees className="w-5 h-5 text-green-400" />
             Parks & Gardens
           </h1>
-          <div className="w-20" /> {/* Spacer */}
+          <div className="w-20" />
         </div>
       </nav>
 
-      {/* Hero Section - Parks Near Me */}
+      {/* Hero Section */}
       <section className="pt-24 pb-12 px-4">
         <div className="max-w-4xl mx-auto text-center">
           <motion.div initial="hidden" animate="visible" variants={fadeIn}>
             <div className="inline-flex items-center gap-2 px-4 py-2 bg-green-500/10 border border-green-500/30 rounded-full text-green-400 text-sm font-medium mb-6">
               <Compass className="w-4 h-4" />
-              Location-based discovery
+              {BAHRAIN_PARKS.length} Parks in Bahrain
             </div>
             
             <h1 className="text-4xl md:text-6xl font-bold mb-4">
@@ -436,15 +410,15 @@ export default function ParksPageClient() {
             </h1>
             
             <p className="text-xl text-gray-400 mb-8 max-w-2xl mx-auto">
-              Discover parks and gardens in Bahrain. Get directions to green spaces near you.
+              Discover parks and gardens across Bahrain. Find green spaces near you with directions.
             </p>
 
-            {/* Main CTA Button */}
+            {/* Main CTA */}
             {!userLocation && (
               <motion.button
                 onClick={getUserLocation}
                 disabled={loading}
-                className="inline-flex items-center gap-3 px-8 py-4 bg-gradient-to-r from-green-500 to-teal-500 text-white font-bold text-lg rounded-2xl hover:shadow-lg hover:shadow-green-500/25 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+                className="inline-flex items-center gap-3 px-8 py-4 bg-gradient-to-r from-green-500 to-teal-500 text-white font-bold text-lg rounded-2xl hover:shadow-lg hover:shadow-green-500/25 transition-all disabled:opacity-50"
                 whileHover={{ scale: loading ? 1 : 1.05 }}
                 whileTap={{ scale: 0.98 }}
               >
@@ -466,9 +440,9 @@ export default function ParksPageClient() {
             {userLocation && (
               <div className="inline-flex items-center gap-2 px-4 py-2 bg-green-500/20 border border-green-500/30 rounded-full text-green-400 text-sm">
                 <Check className="w-4 h-4" />
-                Location enabled
+                Location enabled — showing {nearbyParks.length} parks within {radius} km
                 <button 
-                  onClick={() => fetchNearbyParks(userLocation, radius)}
+                  onClick={getUserLocation}
                   className="ml-2 p-1 hover:bg-white/10 rounded-full transition-colors"
                 >
                   <RefreshCw className={`w-4 h-4 ${loading ? 'animate-spin' : ''}`} />
@@ -476,19 +450,16 @@ export default function ParksPageClient() {
               </div>
             )}
 
-            {/* Error Display */}
+            {/* Error */}
             {error && (
               <motion.div 
                 className="mt-6 p-4 bg-red-500/10 border border-red-500/30 rounded-xl text-red-400 max-w-md mx-auto"
-                initial={{ opacity: 0, y: 10 }}
-                animate={{ opacity: 1, y: 0 }}
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
               >
                 <div className="flex items-start gap-3">
-                  <AlertCircle className="w-5 h-5 flex-shrink-0 mt-0.5" />
-                  <div className="text-left">
-                    <p className="font-medium">Location Access Required</p>
-                    <p className="text-sm mt-1 text-red-400/80">{error}</p>
-                  </div>
+                  <AlertCircle className="w-5 h-5 flex-shrink-0" />
+                  <p className="text-left text-sm">{error}</p>
                 </div>
               </motion.div>
             )}
@@ -497,42 +468,30 @@ export default function ParksPageClient() {
       </section>
 
       {/* Nearby Parks Section */}
-      {userLocation && (
+      {userLocation && nearbyParks.length > 0 && (
         <section className="px-4 pb-12">
           <div className="max-w-7xl mx-auto">
-            {/* Controls */}
-            <div className="flex flex-wrap items-center justify-between gap-4 mb-6 p-4 bg-white/5 backdrop-blur-sm border border-white/10 rounded-2xl">
-              {/* Radius Filter */}
-              <div className="flex items-center gap-3">
-                <span className="text-gray-400 text-sm">Radius:</span>
-                <div className="flex gap-2">
-                  {radiusOptions.map((option) => (
-                    <button
-                      key={option.value}
-                      onClick={() => handleRadiusChange(option.value)}
-                      className={`px-3 py-1.5 rounded-lg text-sm font-medium transition-all ${
-                        radius === option.value
-                          ? 'bg-green-500 text-white'
-                          : 'bg-white/5 text-gray-400 hover:bg-white/10'
-                      }`}
-                    >
-                      {option.label}
-                    </button>
-                  ))}
-                </div>
+            <div className="flex items-center justify-between mb-6">
+              <h2 className="text-2xl font-bold">Parks Near You</h2>
+              <div className="flex gap-2">
+                {radiusOptions.map((option) => (
+                  <button
+                    key={option.value}
+                    onClick={() => setRadius(option.value)}
+                    className={`px-3 py-1.5 rounded-lg text-sm font-medium transition-all ${
+                      radius === option.value
+                        ? 'bg-green-500 text-white'
+                        : 'bg-white/5 text-gray-400 hover:bg-white/10'
+                    }`}
+                  >
+                    {option.label}
+                  </button>
+                ))}
               </div>
-
-              {/* Results count */}
-              {!loading && (
-                <span className="text-gray-400 text-sm">
-                  Found <span className="text-green-400 font-bold">{nearbyParks.length}</span> parks
-                </span>
-              )}
             </div>
 
-            {/* Map Preview */}
-            <div ref={mapRef} className="mb-8 rounded-2xl overflow-hidden border border-white/10 h-[350px] bg-slate-800">
-              {/* Google Maps Embed with user location and parks */}
+            {/* Map */}
+            <div ref={mapRef} className="mb-8 rounded-2xl overflow-hidden border border-white/10 h-[300px]">
               <iframe
                 width="100%"
                 height="100%"
@@ -540,63 +499,39 @@ export default function ParksPageClient() {
                 loading="lazy"
                 allowFullScreen
                 referrerPolicy="no-referrer-when-downgrade"
-                src={`https://www.google.com/maps/embed/v1/search?key=${process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY || ''}&q=parks&center=${userLocation.lat},${userLocation.lng}&zoom=${MAP_ZOOM.nearby}`}
+                src={getMapEmbedUrl()}
               />
             </div>
 
-            {/* Loading */}
-            {loading && (
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                {[...Array(6)].map((_, i) => <ParkCardSkeleton key={i} />)}
-              </div>
-            )}
-
-            {/* Parks List */}
-            {!loading && nearbyParks.length > 0 && (
-              <motion.div 
-                className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"
-                variants={stagger}
-                initial="hidden"
-                animate="visible"
-              >
-                {nearbyParks.map((park) => (
-                  <ParkCard
-                    key={park.place_id}
-                    park={park}
-                    userLocation={userLocation}
-                    onViewOnMap={handleViewOnMap}
-                    isHighlighted={highlightedParkId === park.place_id}
-                    viewMode="grid"
-                  />
-                ))}
-              </motion.div>
-            )}
-
-            {/* No Results */}
-            {!loading && nearbyParks.length === 0 && (
-              <div className="text-center py-12 bg-white/5 rounded-2xl border border-white/10">
-                <Trees className="w-16 h-16 text-gray-600 mx-auto mb-4" />
-                <h3 className="text-xl font-bold text-white mb-2">No parks found within {radius / 1000} km</h3>
-                <p className="text-gray-400 mb-6">Try expanding your search radius</p>
-                <button
-                  onClick={() => handleRadiusChange(Math.min(radius * 2, 50000))}
-                  className="px-6 py-3 bg-green-500 text-white font-bold rounded-xl hover:bg-green-600 transition-colors"
-                >
-                  Search wider area
-                </button>
-              </div>
-            )}
+            {/* Nearby Parks Grid */}
+            <motion.div 
+              className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"
+              variants={stagger}
+              initial="hidden"
+              animate="visible"
+            >
+              {nearbyParks.slice(0, 6).map((park) => (
+                <ParkCard
+                  key={park.id}
+                  park={park}
+                  userLocation={userLocation}
+                  distance={park.distance}
+                  isHighlighted={highlightedParkId === park.id}
+                  viewMode="grid"
+                />
+              ))}
+            </motion.div>
           </div>
         </section>
       )}
 
-      {/* Full Parks Directory */}
+      {/* Full Directory */}
       <section className="px-4 pb-20">
         <div className="max-w-7xl mx-auto">
           <div className="flex items-center justify-between mb-8">
             <div>
               <h2 className="text-3xl font-bold text-white mb-2">All Parks in Bahrain</h2>
-              <p className="text-gray-400">Complete directory of public parks and gardens</p>
+              <p className="text-gray-400">Complete directory of {BAHRAIN_PARKS.length} public parks and gardens</p>
             </div>
           </div>
 
@@ -610,11 +545,11 @@ export default function ParksPageClient() {
                 placeholder="Search parks..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                className="w-full pl-12 pr-4 py-3 bg-white/5 border border-white/10 rounded-xl text-white placeholder-gray-500 focus:outline-none focus:border-green-400/50 transition-colors"
+                className="w-full pl-12 pr-4 py-3 bg-white/5 border border-white/10 rounded-xl text-white placeholder-gray-500 focus:outline-none focus:border-green-400/50"
               />
             </div>
 
-            {/* Filters Toggle (Mobile) */}
+            {/* Mobile Filters Toggle */}
             <button
               onClick={() => setShowFilters(!showFilters)}
               className="md:hidden flex items-center gap-2 px-4 py-3 bg-white/5 border border-white/10 rounded-xl text-gray-400"
@@ -624,13 +559,12 @@ export default function ParksPageClient() {
               <ChevronDown className={`w-4 h-4 transition-transform ${showFilters ? 'rotate-180' : ''}`} />
             </button>
 
-            {/* Filters (Desktop always visible, mobile toggle) */}
+            {/* Filters */}
             <div className={`flex flex-wrap gap-3 ${showFilters ? '' : 'hidden md:flex'}`}>
-              {/* Governorate */}
               <select
                 value={selectedGovernorate}
                 onChange={(e) => setSelectedGovernorate(e.target.value)}
-                className="px-4 py-3 bg-white/5 border border-white/10 rounded-xl text-white focus:outline-none focus:border-green-400/50 cursor-pointer"
+                className="px-4 py-3 bg-white/5 border border-white/10 rounded-xl text-white focus:outline-none cursor-pointer"
               >
                 <option value="all" className="bg-slate-900">All Areas</option>
                 {BAHRAIN_GOVERNORATES.map((gov) => (
@@ -638,30 +572,33 @@ export default function ParksPageClient() {
                 ))}
               </select>
 
-              {/* Sort */}
               <select
                 value={sortBy}
                 onChange={(e) => setSortBy(e.target.value as SortOption)}
-                className="px-4 py-3 bg-white/5 border border-white/10 rounded-xl text-white focus:outline-none focus:border-green-400/50 cursor-pointer"
+                className="px-4 py-3 bg-white/5 border border-white/10 rounded-xl text-white focus:outline-none cursor-pointer"
               >
                 {sortOptions.map((option) => (
-                  <option key={option.value} value={option.value} className="bg-slate-900">
-                    Sort: {option.label}
+                  <option 
+                    key={option.value} 
+                    value={option.value} 
+                    className="bg-slate-900"
+                    disabled={option.requiresLocation && !userLocation}
+                  >
+                    Sort: {option.label}{option.requiresLocation && !userLocation ? ' (needs location)' : ''}
                   </option>
                 ))}
               </select>
 
-              {/* View Toggle */}
               <div className="flex bg-white/5 border border-white/10 rounded-xl p-1">
                 <button
                   onClick={() => setViewMode('grid')}
-                  className={`p-2 rounded-lg transition-all ${viewMode === 'grid' ? 'bg-green-500 text-white' : 'text-gray-400 hover:text-white'}`}
+                  className={`p-2 rounded-lg transition-all ${viewMode === 'grid' ? 'bg-green-500 text-white' : 'text-gray-400'}`}
                 >
                   <Grid className="w-5 h-5" />
                 </button>
                 <button
                   onClick={() => setViewMode('list')}
-                  className={`p-2 rounded-lg transition-all ${viewMode === 'list' ? 'bg-green-500 text-white' : 'text-gray-400 hover:text-white'}`}
+                  className={`p-2 rounded-lg transition-all ${viewMode === 'list' ? 'bg-green-500 text-white' : 'text-gray-400'}`}
                 >
                   <List className="w-5 h-5" />
                 </button>
@@ -669,55 +606,43 @@ export default function ParksPageClient() {
             </div>
           </div>
 
-          {/* Loading Directory */}
-          {loadingDirectory && (
-            <div className={`grid gap-6 ${viewMode === 'list' ? 'grid-cols-1' : 'grid-cols-1 md:grid-cols-2 lg:grid-cols-3'}`}>
-              {[...Array(6)].map((_, i) => <ParkCardSkeleton key={i} />)}
+          {/* Results Count */}
+          <p className="text-gray-400 mb-6">
+            Showing <span className="text-green-400 font-bold">{filteredParks.length}</span> parks
+            {searchQuery && ` matching "${searchQuery}"`}
+          </p>
+
+          {/* Parks Grid */}
+          <motion.div 
+            className={`grid gap-6 ${viewMode === 'list' ? 'grid-cols-1' : 'grid-cols-1 md:grid-cols-2 lg:grid-cols-3'}`}
+            variants={stagger}
+            initial="hidden"
+            animate="visible"
+          >
+            {filteredParks.map((park) => (
+              <ParkCard
+                key={park.id}
+                park={park}
+                userLocation={userLocation}
+                distance={park.distance}
+                isHighlighted={highlightedParkId === park.id}
+                viewMode={viewMode}
+              />
+            ))}
+          </motion.div>
+
+          {/* No Results */}
+          {filteredParks.length === 0 && (
+            <div className="text-center py-12 bg-white/5 rounded-2xl border border-white/10">
+              <Search className="w-12 h-12 text-gray-600 mx-auto mb-4" />
+              <h3 className="text-xl font-bold text-white mb-2">No parks found</h3>
+              <p className="text-gray-400">Try adjusting your search or filters</p>
             </div>
-          )}
-
-          {/* Parks Directory */}
-          {!loadingDirectory && (
-            <>
-              {/* Results count */}
-              <p className="text-gray-400 mb-6">
-                Showing <span className="text-green-400 font-bold">{filteredParks.length}</span> parks
-                {searchQuery && ` matching "${searchQuery}"`}
-              </p>
-
-              <motion.div 
-                ref={listRef}
-                className={`grid gap-6 ${viewMode === 'list' ? 'grid-cols-1' : 'grid-cols-1 md:grid-cols-2 lg:grid-cols-3'}`}
-                variants={stagger}
-                initial="hidden"
-                animate="visible"
-              >
-                {filteredParks.map((park) => (
-                  <ParkCard
-                    key={park.place_id}
-                    park={park}
-                    userLocation={userLocation}
-                    onViewOnMap={handleViewOnMap}
-                    isHighlighted={highlightedParkId === park.place_id}
-                    viewMode={viewMode}
-                  />
-                ))}
-              </motion.div>
-
-              {/* No results */}
-              {filteredParks.length === 0 && (
-                <div className="text-center py-12 bg-white/5 rounded-2xl border border-white/10">
-                  <Search className="w-12 h-12 text-gray-600 mx-auto mb-4" />
-                  <h3 className="text-xl font-bold text-white mb-2">No parks found</h3>
-                  <p className="text-gray-400">Try adjusting your search or filters</p>
-                </div>
-              )}
-            </>
           )}
         </div>
       </section>
 
-      {/* JSON-LD Structured Data */}
+      {/* JSON-LD */}
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{
@@ -726,23 +651,24 @@ export default function ParksPageClient() {
             '@type': 'ItemList',
             name: 'Parks and Gardens in Bahrain',
             description: 'Complete directory of public parks and gardens in Bahrain',
-            numberOfItems: allParks.verified.length + allParks.unverified.length,
-            itemListElement: allParks.verified.slice(0, 10).map((park, index) => ({
+            numberOfItems: BAHRAIN_PARKS.length,
+            itemListElement: BAHRAIN_PARKS.slice(0, 10).map((park, index) => ({
               '@type': 'ListItem',
               position: index + 1,
               item: {
                 '@type': 'Park',
                 name: park.name,
-                address: park.vicinity || park.formatted_address,
+                description: park.description,
+                address: `${park.area}, Bahrain`,
                 geo: {
                   '@type': 'GeoCoordinates',
-                  latitude: park.geometry.location.lat,
-                  longitude: park.geometry.location.lng,
+                  latitude: park.coordinates.lat,
+                  longitude: park.coordinates.lng,
                 },
                 aggregateRating: park.rating ? {
                   '@type': 'AggregateRating',
                   ratingValue: park.rating,
-                  reviewCount: park.user_ratings_total,
+                  reviewCount: park.reviewCount,
                 } : undefined,
               },
             })),

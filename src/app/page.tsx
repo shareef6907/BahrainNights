@@ -227,7 +227,7 @@ async function getInternationalEvents() {
 
 // Fetch stats for the homepage
 async function getStats() {
-  const defaultStats = { events: 0, venues: 0, cinema: 0, offers: 0, explore: 0, attractions: 0, blog: 0 };
+  const defaultStats = { events: 0, venues: 0, cinema: 0, offers: 0, explore: 0, attractions: 0, blog: 0, parks: 25 };
 
   try {
     // Fetch counts in parallel (only Bahrain events for event count)
@@ -247,6 +247,7 @@ async function getStats() {
       explore: 0, // Will be added later
       attractions: attractionsResult.count || 0,
       blog: blogResult.count || 0,
+      parks: 25, // Hardcoded parks count
     };
   } catch (error) {
     console.error('Error fetching stats:', error);
