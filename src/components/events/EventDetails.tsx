@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import { motion } from 'framer-motion';
-import { Calendar, Clock, Users, Shirt, ChevronDown, ChevronUp, Tag } from 'lucide-react';
+import { Calendar, Clock, Shirt, ChevronDown, ChevronUp, Tag } from 'lucide-react';
 import Link from 'next/link';
 import { useTranslation } from '@/lib/i18n';
 
@@ -111,19 +111,6 @@ export default function EventDetails({
               <div>
                 <p className="text-sm text-gray-400">{t.eventDetail.duration}</p>
                 <p className="text-white font-medium">{duration}</p>
-              </div>
-            </div>
-          )}
-
-          {/* Age Restriction */}
-          {ageRestriction && (
-            <div className="flex items-start gap-4 p-4 bg-white/5 rounded-xl">
-              <div className="p-3 bg-yellow-400/10 rounded-lg">
-                <Users className="w-6 h-6 text-yellow-400" />
-              </div>
-              <div>
-                <p className="text-sm text-gray-400">{t.eventDetail.ageRestriction}</p>
-                <p className="text-white font-medium">{ageRestriction}</p>
               </div>
             </div>
           )}
