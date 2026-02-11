@@ -98,6 +98,31 @@ export default function PlatinumlistEventsAdmin() {
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
   const [bulkActionLoading, setBulkActionLoading] = useState(false);
   const [toast, setToast] = useState<{ message: string; type: 'success' | 'error' } | null>(null);
+  const [syncing, setSyncing] = useState(false);
+
+  // Sync from Platinumlist API
+  const handleSync = async () => {
+    setSyncing(true);
+    showToast('Syncing events from Platinumlist...', 'success');
+    try {
+      const response = await fetch('/api/admin/sync-platinumlist', {
+        method: 'POST',
+      });
+      const data = await response.json();
+      if (response.ok) {
+        showToast(data.message || 'Sync completed!', 'success');
+        // Refresh the events list
+        await fetchEvents();
+      } else {
+        showToast(data.error || 'Sync failed', 'error');
+      }
+    } catch (error) {
+      console.error('Sync error:', error);
+      showToast('Sync failed', 'error');
+    } finally {
+      setSyncing(false);
+    }
+  };
 
   // Edit modal state
   const [editModalOpen, setEditModalOpen] = useState(false);
@@ -588,6 +613,16 @@ export default function PlatinumlistEventsAdmin() {
           >
             <RefreshCw className={`w-5 h-5 ${loading ? 'animate-spin' : ''}`} />
             Refresh
+          </button>
+
+          {/* Sync from Platinumlist */}
+          <button
+            onClick={handleSync}
+            disabled={syncing}
+            className="px-4 py-2 bg-cyan-600 hover:bg-cyan-500 disabled:bg-cyan-800 rounded-lg flex items-center gap-2 transition font-medium"
+          >
+            <RefreshCw className={`w-5 h-5 ${syncing ? 'animate-spin' : ''}`} />
+            {syncing ? 'Syncing...' : 'Sync from Platinumlist'}
           </button>
         </div>
 
