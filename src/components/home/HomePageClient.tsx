@@ -413,10 +413,19 @@ export default function HomePageClient({ initialMovies, initialStats, initialTod
     setIsEventModalOpen(true);
   };
 
-  // Play video immediately when ready
+  // Lazy load video after initial render for better LCP
   useEffect(() => {
     const video = videoRef.current;
     if (!video) return;
+
+    // Delay video loading to improve LCP
+    const timer = setTimeout(() => {
+      const source = video.getAttribute('data-src');
+      if (source) {
+        video.src = source;
+        video.load();
+      }
+    }, 100);
 
     // Play as soon as we have any data
     const playVideo = () => {
@@ -431,6 +440,8 @@ export default function HomePageClient({ initialMovies, initialStats, initialTod
     // Listen for when video can start playing
     video.addEventListener('canplay', playVideo);
     video.addEventListener('loadeddata', playVideo);
+
+    return () => clearTimeout(timer);
 
     return () => {
       video.removeEventListener('canplay', playVideo);
@@ -709,15 +720,15 @@ export default function HomePageClient({ initialMovies, initialStats, initialTod
           {/* eslint-disable-next-line jsx-a11y/media-has-caption */}
           <video
             ref={videoRef}
-            autoPlay
             muted
             loop
             playsInline
-            preload="auto"
+            preload="none"
+            poster="/header-video-poster.jpg"
             disablePictureInPicture
             className="absolute inset-0 w-full h-full object-cover"
             style={{ objectPosition: 'center center' }}
-            src="/Header-Video1.mp4"
+            data-src="/Header-Video1.mp4"
           />
           {/* Dark overlay for better text readability */}
           <div className="absolute inset-0 bg-black/50" />
