@@ -185,6 +185,35 @@ export default function TonightPage() {
         </div>
       </section>
 
+      {/* More Tonight Ideas */}
+      <section className="py-12 px-4 bg-black/20">
+        <div className="max-w-6xl mx-auto">
+          <h2 className="text-xl font-bold mb-6">More Ideas for Tonight</h2>
+          <div className="grid md:grid-cols-4 gap-4">
+            <Link href="/guides/best-date-night-bahrain" className="bg-white/5 hover:bg-white/10 rounded-lg p-4 transition-colors">
+              <span className="text-2xl mb-2 block">💕</span>
+              <h3 className="font-bold">Date Night</h3>
+              <p className="text-xs text-gray-400">Romantic spots for couples</p>
+            </Link>
+            <Link href="/guides/shisha-lounges-bahrain" className="bg-white/5 hover:bg-white/10 rounded-lg p-4 transition-colors">
+              <span className="text-2xl mb-2 block">💨</span>
+              <h3 className="font-bold">Shisha</h3>
+              <p className="text-xs text-gray-400">Best hookah spots</p>
+            </Link>
+            <Link href="/guides/karaoke-bahrain" className="bg-white/5 hover:bg-white/10 rounded-lg p-4 transition-colors">
+              <span className="text-2xl mb-2 block">🎤</span>
+              <h3 className="font-bold">Karaoke</h3>
+              <p className="text-xs text-gray-400">Sing your heart out</p>
+            </Link>
+            <Link href="/guides/best-views-bahrain" className="bg-white/5 hover:bg-white/10 rounded-lg p-4 transition-colors">
+              <span className="text-2xl mb-2 block">🌃</span>
+              <h3 className="font-bold">Best Views</h3>
+              <p className="text-xs text-gray-400">Rooftops & skylines</p>
+            </Link>
+          </div>
+        </div>
+      </section>
+
       {/* SEO Content */}
       <section className="py-12 px-4 border-t border-white/10">
         <div className="max-w-4xl mx-auto">
@@ -192,16 +221,41 @@ export default function TonightPage() {
           <div className="text-gray-400 space-y-4 text-sm">
             <p>
               Looking for what to do in Bahrain tonight? Whether it&apos;s a {today.toLowerCase()}, 
-              Bahrain always has something happening. From happy hours starting in the late 
+              Bahrain always has something happening. From <Link href="/guides/happy-hour-bahrain" className="text-indigo-400 hover:underline">happy hours</Link> starting in the late 
               afternoon to clubs that keep going until the early hours, the kingdom&apos;s 
               nightlife scene caters to every mood.
             </p>
             <p>
-              Popular areas for tonight include Adliya (trendy bars and restaurants), 
-              Juffair (entertainment hub), and hotel venues across Seef and Bahrain Bay. 
+              Popular areas for tonight include <Link href="/guides/adliya" className="text-indigo-400 hover:underline">Adliya</Link> (trendy bars and restaurants), 
+              <Link href="/guides/juffair-restaurants-bars" className="text-indigo-400 hover:underline">Juffair</Link> (entertainment hub), and hotel venues across <Link href="/guides/seef" className="text-indigo-400 hover:underline">Seef</Link> and <Link href="/guides/bahrain-bay" className="text-indigo-400 hover:underline">Bahrain Bay</Link>. 
               Check our area guides for specific recommendations based on where you are 
               or where you want to go tonight.
             </p>
+            <p>
+              Planning ahead? Check out our <Link href="/this-weekend" className="text-indigo-400 hover:underline">This Weekend</Link> guide for 
+              <Link href="/guides/brunches" className="text-indigo-400 hover:underline">Friday brunch</Link> bookings and weekend activities.
+            </p>
+          </div>
+        </div>
+      </section>
+
+      {/* Related Guides */}
+      <section className="py-8 px-4">
+        <div className="max-w-6xl mx-auto">
+          <h3 className="text-lg font-bold mb-4">Related Guides</h3>
+          <div className="flex flex-wrap gap-2">
+            {[
+              { title: 'This Weekend', href: '/this-weekend' },
+              { title: 'Best Steakhouses', href: '/guides/best-steakhouses-bahrain' },
+              { title: 'Japanese Restaurants', href: '/guides/best-japanese-restaurants-bahrain' },
+              { title: 'Italian Restaurants', href: '/guides/best-italian-restaurants-bahrain' },
+              { title: 'Bowling', href: '/guides/bowling-bahrain' },
+              { title: 'Escape Rooms', href: '/guides/escape-rooms-bahrain' },
+            ].map((link) => (
+              <Link key={link.href} href={link.href} className="px-3 py-1 bg-white/5 hover:bg-white/10 rounded text-sm transition-colors">
+                {link.title}
+              </Link>
+            ))}
           </div>
         </div>
       </section>

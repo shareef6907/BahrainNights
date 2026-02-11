@@ -441,9 +441,8 @@ export default function HomePageClient({ initialMovies, initialStats, initialTod
     video.addEventListener('canplay', playVideo);
     video.addEventListener('loadeddata', playVideo);
 
-    return () => clearTimeout(timer);
-
     return () => {
+      clearTimeout(timer);
       video.removeEventListener('canplay', playVideo);
       video.removeEventListener('loadeddata', playVideo);
     };

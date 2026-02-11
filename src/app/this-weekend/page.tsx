@@ -258,6 +258,35 @@ export default function ThisWeekendPage() {
         </div>
       </section>
 
+      {/* More Weekend Ideas */}
+      <section className="py-12 px-4 bg-black/20">
+        <div className="max-w-6xl mx-auto">
+          <h2 className="text-xl font-bold mb-6">More Weekend Ideas</h2>
+          <div className="grid md:grid-cols-4 gap-4">
+            <Link href="/guides/spa-wellness-bahrain" className="bg-white/5 hover:bg-white/10 rounded-lg p-4 transition-colors">
+              <span className="text-2xl mb-2 block">💆</span>
+              <h3 className="font-bold">Spa Day</h3>
+              <p className="text-xs text-gray-400">Relax & rejuvenate</p>
+            </Link>
+            <Link href="/guides/golf-bahrain" className="bg-white/5 hover:bg-white/10 rounded-lg p-4 transition-colors">
+              <span className="text-2xl mb-2 block">⛳</span>
+              <h3 className="font-bold">Golf</h3>
+              <p className="text-xs text-gray-400">Hit the links</p>
+            </Link>
+            <Link href="/guides/diving-bahrain" className="bg-white/5 hover:bg-white/10 rounded-lg p-4 transition-colors">
+              <span className="text-2xl mb-2 block">🤿</span>
+              <h3 className="font-bold">Diving</h3>
+              <p className="text-xs text-gray-400">Explore underwater</p>
+            </Link>
+            <Link href="/guides/best-family-restaurants-bahrain" className="bg-white/5 hover:bg-white/10 rounded-lg p-4 transition-colors">
+              <span className="text-2xl mb-2 block">👨‍👩‍👧‍👦</span>
+              <h3 className="font-bold">Family Dining</h3>
+              <p className="text-xs text-gray-400">Kid-friendly spots</p>
+            </Link>
+          </div>
+        </div>
+      </section>
+
       {/* SEO Content */}
       <section className="py-12 px-4 border-t border-white/10">
         <div className="max-w-4xl mx-auto">
@@ -266,7 +295,7 @@ export default function ThisWeekendPage() {
             <p>
               The Bahrain weekend runs Thursday through Saturday (with Friday being the 
               main day off). This creates a unique rhythm — Thursday night kicks off 
-              the celebrations, Friday is for brunch and relaxation, and Saturday 
+              the celebrations with <Link href="/guides/nightlife" className="text-orange-400 hover:underline">Bahrain&apos;s best nightlife</Link>, Friday is for <Link href="/guides/brunches" className="text-orange-400 hover:underline">brunch</Link> and relaxation, and Saturday 
               offers a mix of activities before the work week returns on Sunday.
             </p>
             <p>
@@ -276,11 +305,35 @@ export default function ThisWeekendPage() {
               from 12:30 PM until 4 PM or later.
             </p>
             <p>
-              Whether you&apos;re looking for beach time in Zallaq, nightlife in Juffair 
-              and Adliya, family activities at malls and attractions, or cultural 
-              exploration in Manama and Muharraq, Bahrain packs plenty into its 
+              Whether you&apos;re looking for beach time in <Link href="/guides/zallaq-guide" className="text-orange-400 hover:underline">Zallaq</Link>, nightlife in <Link href="/guides/juffair-restaurants-bars" className="text-orange-400 hover:underline">Juffair</Link> 
+              and <Link href="/guides/adliya" className="text-orange-400 hover:underline">Adliya</Link>, <Link href="/guides/kids-activities-bahrain" className="text-orange-400 hover:underline">family activities</Link> at malls and attractions, or cultural 
+              exploration in <Link href="/guides/manama-city-guide" className="text-orange-400 hover:underline">Manama</Link> and <Link href="/guides/muharraq" className="text-orange-400 hover:underline">Muharraq</Link>, Bahrain packs plenty into its 
               three-day weekend.
             </p>
+            <p>
+              Need plans for tonight specifically? Check our <Link href="/tonight" className="text-orange-400 hover:underline">Tonight</Link> page for what&apos;s happening right now.
+            </p>
+          </div>
+        </div>
+      </section>
+
+      {/* Related Guides */}
+      <section className="py-8 px-4">
+        <div className="max-w-6xl mx-auto">
+          <h3 className="text-lg font-bold mb-4">Related Guides</h3>
+          <div className="flex flex-wrap gap-2">
+            {[
+              { title: 'Tonight', href: '/tonight' },
+              { title: 'Date Night', href: '/guides/best-date-night-bahrain' },
+              { title: 'Best Views', href: '/guides/best-views-bahrain' },
+              { title: 'Happy Hour', href: '/guides/happy-hour-bahrain' },
+              { title: 'Shisha Lounges', href: '/guides/shisha-lounges-bahrain' },
+              { title: 'Summer Activities', href: '/guides/summer-activities-bahrain' },
+            ].map((link) => (
+              <Link key={link.href} href={link.href} className="px-3 py-1 bg-white/5 hover:bg-white/10 rounded text-sm transition-colors">
+                {link.title}
+              </Link>
+            ))}
           </div>
         </div>
       </section>
