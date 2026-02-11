@@ -26,7 +26,7 @@ export const metadata: Metadata = {
 const mallInfo = {
   name: 'Bahrain Mall',
   tagline: 'Family Shopping & Entertainment',
-  address: 'Seef District, Manama, Kingdom of Bahrain (near Seef Mall)',
+  address: 'Sanabis, Manama, Kingdom of Bahrain',
   mapsLink: 'https://www.google.com/maps/place/Bahrain+Mall/@26.2298,50.5352,17z',
   hours: {
     regular: 'Sat-Wed: 9:00 AM - 10:00 PM',

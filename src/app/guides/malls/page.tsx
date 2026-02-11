@@ -61,7 +61,7 @@ const malls = [
     type: 'Luxury Mall',
     rating: 5,
     size: '200,000 sqm',
-    stores: '400+ stores',
+    stores: '150+ stores',
     description: 'Bahrain\'s premier beachfront luxury destination featuring high-end brands, the Kingdom\'s largest aquarium, diverse dining, and connected to 5-star hotels.',
     highlights: ['Marassi Aquarium', 'Beachfront location', 'Luxury brands', 'VOX Cinemas', 'Connected to Address Hotel'],
     brands: ['Al Fardan Jewellery', 'Aigner', 'ALDO', 'Ajmal Perfumes', 'AZADEA brands'],

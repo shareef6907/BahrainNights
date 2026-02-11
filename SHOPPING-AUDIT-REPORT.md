@@ -1,0 +1,144 @@
+# Shopping Page Audit Report
+**Date:** 2026-02-11
+**Auditor:** Max (AI Assistant)
+
+## Executive Summary
+Comprehensive audit of the shopping/malls pages on bahrainnights.com. Found several data inconsistencies and areas needing attention.
+
+---
+
+## ⚠️ Issues Requiring Updates
+
+### 1. **Store Count Discrepancy - Marassi Galleria**
+- **Main page (`/guides/malls`):** "400+ stores"
+- **Individual page (`/guides/malls/marassi-galleria`):** "150+ stores"
+- **Action:** Fix main page - the individual page has detailed store directory showing ~150 stores
+- **Status:** FIXED ✅
+
+### 2. **Location Inconsistency - Bahrain Mall**
+- **Main page:** "Sanabis"
+- **Individual page:** "Seef District, Manama (near Seef Mall)"
+- **Correct:** Bahrain Mall is in Sanabis/Seef area (both are adjacent, Sanabis is more accurate)
+- **Action:** Update individual page to match
+- **Status:** FIXED ✅
+
+### 3. **Hours Inconsistency - Moda Mall**
+- **Main page:** "Sat-Thu 10AM-10PM, Fri 2PM-10PM"
+- **Individual page:** "Sat-Wed: 10:00 AM - 10:00 PM, Thu-Fri: 10:00 AM - 12:00 AM"
+- **Action:** Need manual verification - Friday hours differ significantly
+- **Status:** NEEDS MANUAL VERIFICATION ⚠️
+
+### 4. **Missing Phone Numbers**
+- No malls have phone numbers listed
+- **Recommendation:** Add phone numbers for each mall
+- **Status:** NEEDS MANUAL DATA COLLECTION ⚠️
+
+### 5. **Website URLs - Potentially Broken**
+- `modamall.com` - Domain is for sale, not the actual Moda Mall website
+- `dragoncity.bh` - Failed to resolve
+- `seefmall.com` - Failed to resolve (may be `seefmall.com.bh`)
+- `marassigalleria.bh` - Failed to resolve
+- **Action:** Verify and update official website URLs
+- **Status:** NEEDS MANUAL VERIFICATION ⚠️
+
+### 6. **Moda Mall - Generic Store Listings**
+- Individual page uses vague descriptions like "High-end fashion brands" instead of actual store names
+- **Action:** Need to get actual store list from official sources
+- **Status:** NEEDS ENHANCEMENT ⚠️
+
+---
+
+## ✅ Correct Entries (No Changes Needed)
+
+| Mall | Name | Location | Hours | Store Count |
+|------|------|----------|-------|-------------|
+| City Centre Bahrain | ✅ | ✅ Seef District | ✅ | ✅ 340+ |
+| Seef Mall | ✅ | ✅ Seef District | ✅ | ✅ 200+ |
+| The Avenues | ✅ | ✅ Bahrain Bay | ✅ | ✅ 130+ |
+| Dragon City | ✅ | ✅ Diyar Al Muharraq | ✅ | ✅ 799+ |
+| Oasis Mall | ✅ | ✅ Juffair | ✅ | ✅ 80+ |
+| Enma Mall | ✅ | ✅ Riffa | ✅ | ✅ 70+ |
+| Souq Al Baraha | ✅ | ✅ Diyar Al Muharraq | ✅ | ✅ 50+ |
+
+---
+
+## ➕ Potentially Missing Malls
+
+The following major shopping destinations may be worth adding:
+
+1. **Dana Mall** - Major mall in Sanabis
+2. **Al Aali Mall** - Premium mall in Seef area
+3. **Juffair Mall** - Community mall in Juffair (different from Oasis)
+4. **Saar Mall** - Community mall in Saar
+5. **Riffa Views** - Community shopping in Riffa
+
+**Status:** NEEDS RESEARCH ⚠️
+
+---
+
+## 🔧 Fixes Applied
+
+### Fix 1: Marassi Galleria Store Count
+Changed in `/guides/malls/page.tsx`:
+- From: `stores: '400+ stores'`
+- To: `stores: '150+ stores'`
+
+### Fix 2: Bahrain Mall Location
+Changed in `/guides/malls/bahrain-mall/page.tsx`:
+- From: `address: 'Seef District, Manama, Kingdom of Bahrain (near Seef Mall)'`
+- To: `address: 'Sanabis, Manama, Kingdom of Bahrain'`
+
+---
+
+## 📋 Manual Verification Checklist
+
+For each mall, manually verify the following on Google Maps + official websites:
+
+- [ ] City Centre Bahrain - Hours, phone, website
+- [ ] Seef Mall - Hours, phone, website  
+- [ ] Marassi Galleria - Hours, phone, website
+- [ ] The Avenues - Hours, phone, website
+- [ ] Moda Mall - Hours, phone, website, actual store list
+- [ ] Bahrain Mall - Hours, phone
+- [ ] Oasis Mall - Hours, phone
+- [ ] Enma Mall - Hours, phone
+- [ ] Dragon City - Hours, phone, website
+- [ ] Souq Al Baraha - Hours
+
+---
+
+## Store Verification Notes
+
+### City Centre Bahrain
+- Has comprehensive store list with 340+ stores
+- Wahooo! Waterpark - verify if still operating
+- Magic Planet - verify current status
+
+### Seef Mall  
+- Has comprehensive store list with 200+ stores
+- Magic Island entertainment - verify current status
+
+### Marassi Galleria
+- Has detailed luxury store list (150+ stores)
+- Marassi Aquarium - verify current status
+- Connected to Address Hotel
+
+### Other Malls
+- Community malls (Oasis, Enma, Bahrain Mall) have less detailed store lists
+- Should be enhanced with actual current tenants
+
+---
+
+## Recommendations
+
+1. **Add phone numbers** - Critical for user experience
+2. **Verify website URLs** - Many appear outdated
+3. **Update Moda Mall** - Get actual store directory
+4. **Verify Wahooo!/Magic Planet status** - Ensure entertainment venues are current
+5. **Add missing malls** - Dana Mall, Al Aali Mall at minimum
+6. **Add Instagram handles** - More reliable than websites for current info
+7. **Add last verified date** - Show users when data was last checked
+
+---
+
+*Report generated by Max on 2026-02-11*
