@@ -312,6 +312,48 @@ export default function BestJapaneseRestaurantsPage() {
           </div>
         </div>
       </section>
+
+      {/* More Cuisine Guides */}
+      <section className="py-8 px-4 bg-black/20">
+        <div className="max-w-6xl mx-auto">
+          <h3 className="text-lg font-bold mb-4">Other Cuisine Guides</h3>
+          <div className="flex flex-wrap gap-2">
+            {[
+              { title: 'Korean', href: '/guides/best-korean-restaurants-bahrain' },
+              { title: 'Steakhouses', href: '/guides/best-steakhouses-bahrain' },
+              { title: 'Lebanese', href: '/guides/best-lebanese-restaurants-bahrain' },
+              { title: 'Seafood', href: '/guides/best-seafood-bahrain' },
+              { title: 'Turkish', href: '/guides/best-turkish-restaurants-bahrain' },
+              { title: 'Mexican', href: '/guides/best-mexican-restaurants-bahrain' },
+            ].map((link) => (
+              <Link key={link.href} href={link.href} className="px-3 py-1.5 bg-white/5 hover:bg-red-500/20 rounded text-sm transition-colors">
+                {link.title}
+              </Link>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* Related Guides */}
+      <section className="py-8 px-4">
+        <div className="max-w-6xl mx-auto">
+          <h3 className="text-lg font-bold mb-4">Related Guides</h3>
+          <div className="flex flex-wrap gap-2">
+            {[
+              { title: 'Date Night', href: '/guides/best-date-night-bahrain' },
+              { title: 'Best Views', href: '/guides/best-views-bahrain' },
+              { title: 'Business Lunch', href: '/guides/best-business-lunch-bahrain' },
+              { title: 'Tonight', href: '/tonight' },
+              { title: 'Bahrain Bay', href: '/guides/bahrain-bay' },
+              { title: 'Seef', href: '/guides/seef' },
+            ].map((link) => (
+              <Link key={link.href} href={link.href} className="px-3 py-1 bg-white/5 hover:bg-white/10 rounded text-sm transition-colors">
+                {link.title}
+              </Link>
+            ))}
+          </div>
+        </div>
+      </section>
     </div>
   );
 }

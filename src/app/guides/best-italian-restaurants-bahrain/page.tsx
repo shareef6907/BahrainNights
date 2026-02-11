@@ -315,6 +315,49 @@ export default function BestItalianRestaurantsPage() {
           </div>
         </div>
       </section>
+
+      {/* More Cuisine Guides */}
+      <section className="py-8 px-4 bg-black/20">
+        <div className="max-w-6xl mx-auto">
+          <h3 className="text-lg font-bold mb-4">Other Cuisine Guides</h3>
+          <div className="flex flex-wrap gap-2">
+            {[
+              { title: 'Japanese', href: '/guides/best-japanese-restaurants-bahrain' },
+              { title: 'Lebanese', href: '/guides/best-lebanese-restaurants-bahrain' },
+              { title: 'Indian', href: '/guides/best-indian-restaurants-bahrain' },
+              { title: 'Steakhouses', href: '/guides/best-steakhouses-bahrain' },
+              { title: 'Korean', href: '/guides/best-korean-restaurants-bahrain' },
+              { title: 'Turkish', href: '/guides/best-turkish-restaurants-bahrain' },
+              { title: 'Mexican', href: '/guides/best-mexican-restaurants-bahrain' },
+            ].map((link) => (
+              <Link key={link.href} href={link.href} className="px-3 py-1.5 bg-white/5 hover:bg-green-500/20 rounded text-sm transition-colors">
+                {link.title}
+              </Link>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* Related Guides */}
+      <section className="py-8 px-4">
+        <div className="max-w-6xl mx-auto">
+          <h3 className="text-lg font-bold mb-4">Related Guides</h3>
+          <div className="flex flex-wrap gap-2">
+            {[
+              { title: 'Date Night', href: '/guides/best-date-night-bahrain' },
+              { title: 'Best Views', href: '/guides/best-views-bahrain' },
+              { title: 'Business Lunch', href: '/guides/best-business-lunch-bahrain' },
+              { title: 'Tonight', href: '/tonight' },
+              { title: 'This Weekend', href: '/this-weekend' },
+              { title: 'Adliya', href: '/guides/adliya' },
+            ].map((link) => (
+              <Link key={link.href} href={link.href} className="px-3 py-1 bg-white/5 hover:bg-white/10 rounded text-sm transition-colors">
+                {link.title}
+              </Link>
+            ))}
+          </div>
+        </div>
+      </section>
     </div>
   );
 }
