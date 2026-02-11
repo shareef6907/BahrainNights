@@ -36,18 +36,28 @@ if (!supabaseUrl || !supabaseKey) {
 const supabase = createClient(supabaseUrl, supabaseKey);
 
 /**
- * Convert Unix timestamp to ISO date string
+ * Convert Unix timestamp to ISO date string in event's timezone
+ * Uses the event's timezone (defaults to Asia/Bahrain for Bahrain events)
  */
-function unixToDate(timestamp: number): string {
-  return new Date(timestamp * 1000).toISOString().split('T')[0];
+function unixToDate(timestamp: number, timezone: string = 'Asia/Bahrain'): string {
+  const date = new Date(timestamp * 1000);
+  // Format as YYYY-MM-DD in the event's timezone
+  return date.toLocaleDateString('en-CA', { timeZone: timezone });
 }
 
 /**
- * Convert Unix timestamp to time string (HH:MM)
+ * Convert Unix timestamp to time string (HH:MM) in event's timezone
+ * IMPORTANT: Must use event's timezone, not server timezone (Vercel runs in UTC)
  */
-function unixToTime(timestamp: number): string {
+function unixToTime(timestamp: number, timezone: string = 'Asia/Bahrain'): string {
   const date = new Date(timestamp * 1000);
-  return date.toTimeString().split(' ')[0].substring(0, 5);
+  // Format as HH:MM in the event's timezone
+  return date.toLocaleTimeString('en-GB', { 
+    timeZone: timezone,
+    hour: '2-digit',
+    minute: '2-digit',
+    hour12: false 
+  });
 }
 
 /**
@@ -110,8 +120,11 @@ function transformEvent(event: PlatinumlistEvent): DbEvent {
   const country = countryConfig?.name || 'Bahrain';
   const city = countryConfig ? extractCity(event.name, countryConfig) : null;
 
-  const startDate = unixToDate(event.start);
-  const startTime = unixToTime(event.start);
+  // Use event's timezone from API, fallback to country-based timezone
+  const timezone = event.timezone || countryConfig?.timezone || 'Asia/Bahrain';
+
+  const startDate = unixToDate(event.start, timezone);
+  const startTime = unixToTime(event.start, timezone);
 
   return {
     title: event.name,
@@ -124,9 +137,9 @@ function transformEvent(event: PlatinumlistEvent): DbEvent {
     date: startDate,  // Required NOT NULL column
     time: startTime,
     start_date: startDate,
-    end_date: unixToDate(event.end),
+    end_date: unixToDate(event.end, timezone),
     start_time: startTime,
-    end_time: unixToTime(event.end),
+    end_time: unixToTime(event.end, timezone),
     price: priceString,
     price_currency: currency,
     featured_image: event.image_full?.src || event.image_big?.src || null,
