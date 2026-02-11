@@ -10,6 +10,11 @@
       ],
       "destination": "https://www.bahrainnights.com/:path*",
       "permanent": true
+    },
+    {
+      "source": "/places/zahle",
+      "destination": "/places",
+      "permanent": true
     }
   ],
   "crons": [
