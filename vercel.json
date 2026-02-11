@@ -1,4 +1,17 @@
 {
+  "redirects": [
+    {
+      "source": "/:path*",
+      "has": [
+        {
+          "type": "host",
+          "value": "bahrainnights.com"
+        }
+      ],
+      "destination": "https://www.bahrainnights.com/:path*",
+      "permanent": true
+    }
+  ],
   "crons": [
     {
       "path": "/api/keep-alive",
