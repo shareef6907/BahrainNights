@@ -1,8 +1,8 @@
 import { supabaseAdmin } from '@/lib/supabase';
 import HomePageClient, { HomepageMovie, TodayEvent } from '@/components/home/HomePageClient';
 
-// Revalidate every 5 minutes for fresh data
-export const revalidate = 300;
+// Force dynamic rendering - page needs real-time data
+export const dynamic = 'force-dynamic';
 
 // Category mapping for display
 const categoryDisplay: Record<string, { label: string; icon: string }> = {

@@ -39,7 +39,15 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   };
 }
 
+// Allow dynamic rendering for locations not pre-generated
+export const dynamicParams = true;
+
+// Generate static params (gracefully handle missing env vars)
 export async function generateStaticParams() {
+  // Skip static generation if Supabase isn't configured (local dev without env vars)
+  if (!process.env.NEXT_PUBLIC_SUPABASE_URL || !process.env.SUPABASE_SERVICE_ROLE_KEY) {
+    return [];
+  }
   return Object.keys(LOCATION_DATA).map((location) => ({
     location,
   }));

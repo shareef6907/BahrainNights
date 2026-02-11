@@ -17,8 +17,8 @@ export const metadata: Metadata = {
   },
 };
 
-// Cache page for 5 minutes
-export const revalidate = 300;
+// Force dynamic rendering - page needs real-time data
+export const dynamic = 'force-dynamic';
 
 // Unified interface for both events and blog articles
 export interface RegionalItem {

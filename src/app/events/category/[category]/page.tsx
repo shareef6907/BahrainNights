@@ -35,8 +35,15 @@ interface PageProps {
   params: Promise<{ category: string }>;
 }
 
-// Generate static params for all categories
+// Allow dynamic rendering for categories not pre-generated
+export const dynamicParams = true;
+
+// Generate static params for all categories (gracefully handle missing env vars)
 export async function generateStaticParams() {
+  // Skip static generation if Supabase isn't configured (local dev without env vars)
+  if (!process.env.NEXT_PUBLIC_SUPABASE_URL || !process.env.SUPABASE_SERVICE_ROLE_KEY) {
+    return [];
+  }
   return validCategories.map((category) => ({
     category,
   }));
