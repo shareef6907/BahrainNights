@@ -148,19 +148,84 @@ export default function AdliyaGuidePage() {
         </div>
       </section>
 
+      {/* What to Do in Adliya */}
+      <section className="py-12 px-4">
+        <div className="max-w-6xl mx-auto">
+          <h2 className="text-xl font-bold mb-6">What to Do in Adliya</h2>
+          <div className="grid md:grid-cols-3 gap-4">
+            <Link href="/guides/shisha-lounges-bahrain" className="bg-white/5 hover:bg-white/10 rounded-lg p-4 transition-colors">
+              <span className="text-xl mb-2 block">💨</span>
+              <h3 className="font-bold text-sm">Shisha</h3>
+              <p className="text-xs text-gray-400">Hookah spots in Adliya</p>
+            </Link>
+            <Link href="/guides/happy-hour-bahrain" className="bg-white/5 hover:bg-white/10 rounded-lg p-4 transition-colors">
+              <span className="text-xl mb-2 block">🍺</span>
+              <h3 className="font-bold text-sm">Happy Hour</h3>
+              <p className="text-xs text-gray-400">Drink deals nearby</p>
+            </Link>
+            <Link href="/guides/best-date-night-bahrain" className="bg-white/5 hover:bg-white/10 rounded-lg p-4 transition-colors">
+              <span className="text-xl mb-2 block">💕</span>
+              <h3 className="font-bold text-sm">Date Night</h3>
+              <p className="text-xs text-gray-400">Romantic spots</p>
+            </Link>
+          </div>
+        </div>
+      </section>
+
+      {/* Cuisine in Adliya */}
+      <section className="py-8 px-4 bg-black/20">
+        <div className="max-w-6xl mx-auto">
+          <h2 className="text-lg font-bold mb-4">Cuisines Near Adliya</h2>
+          <div className="flex flex-wrap gap-2">
+            {[
+              { title: 'Italian', href: '/guides/best-italian-restaurants-bahrain' },
+              { title: 'Japanese', href: '/guides/best-japanese-restaurants-bahrain' },
+              { title: 'Lebanese', href: '/guides/best-lebanese-restaurants-bahrain' },
+              { title: 'Mexican', href: '/guides/best-mexican-restaurants-bahrain' },
+              { title: 'Steakhouses', href: '/guides/best-steakhouses-bahrain' },
+            ].map((link) => (
+              <Link key={link.href} href={link.href} className="px-3 py-1.5 bg-white/5 hover:bg-amber-500/20 rounded text-sm transition-colors">
+                {link.title}
+              </Link>
+            ))}
+          </div>
+        </div>
+      </section>
+
       <section className="py-12 px-4 border-t border-white/10">
         <div className="max-w-6xl mx-auto">
           <h2 className="text-xl font-bold mb-6">Explore More Areas</h2>
           <div className="grid md:grid-cols-4 gap-4">
             {[
-              { title: 'Juffair', href: '/guides/juffair-dining', emoji: '🌃' },
+              { title: 'Juffair', href: '/guides/juffair-restaurants-bars', emoji: '🌃' },
               { title: 'Seef', href: '/guides/seef', emoji: '🏙️' },
               { title: 'Amwaj', href: '/guides/amwaj', emoji: '🏝️' },
-              { title: 'Manama', href: '/guides/manama', emoji: '🕌' },
+              { title: 'Manama', href: '/guides/manama-city-guide', emoji: '🕌' },
             ].map((guide) => (
               <Link key={guide.href} href={guide.href} className="bg-white/5 hover:bg-white/10 rounded-xl p-4 transition-colors flex items-center gap-3">
                 <span className="text-2xl">{guide.emoji}</span>
                 <span className="font-medium">{guide.title}</span>
+              </Link>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* More Guides */}
+      <section className="py-8 px-4">
+        <div className="max-w-6xl mx-auto">
+          <h3 className="text-lg font-bold mb-4">Related Guides</h3>
+          <div className="flex flex-wrap gap-2">
+            {[
+              { title: 'Tonight', href: '/tonight' },
+              { title: 'This Weekend', href: '/this-weekend' },
+              { title: 'Nightlife', href: '/guides/nightlife' },
+              { title: 'Live Music', href: '/guides/live-music' },
+              { title: 'Best Views', href: '/guides/best-views-bahrain' },
+              { title: 'Late Night Food', href: '/guides/best-late-night-food-bahrain' },
+            ].map((link) => (
+              <Link key={link.href} href={link.href} className="px-3 py-1 bg-white/5 hover:bg-white/10 rounded text-sm transition-colors">
+                {link.title}
               </Link>
             ))}
           </div>

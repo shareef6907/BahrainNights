@@ -182,6 +182,31 @@ export default function BestViewsBahrainPage() {
         </div>
       </section>
 
+      {/* Views by Area */}
+      <section className="py-12 px-4 bg-black/20">
+        <div className="max-w-6xl mx-auto">
+          <h2 className="text-xl font-bold mb-6">Best View Locations</h2>
+          <div className="grid md:grid-cols-4 gap-4">
+            <Link href="/guides/bahrain-bay" className="bg-white/5 hover:bg-cyan-500/10 rounded-lg p-4 transition-colors">
+              <h3 className="font-bold">Bahrain Bay</h3>
+              <p className="text-xs text-gray-400">Skyline & water</p>
+            </Link>
+            <Link href="/guides/hotels-bahrain-bay" className="bg-white/5 hover:bg-cyan-500/10 rounded-lg p-4 transition-colors">
+              <h3 className="font-bold">Four Seasons</h3>
+              <p className="text-xs text-gray-400">Bay views</p>
+            </Link>
+            <Link href="/guides/zallaq-guide" className="bg-white/5 hover:bg-cyan-500/10 rounded-lg p-4 transition-colors">
+              <h3 className="font-bold">Zallaq</h3>
+              <p className="text-xs text-gray-400">Beach sunsets</p>
+            </Link>
+            <Link href="/guides/amwaj" className="bg-white/5 hover:bg-cyan-500/10 rounded-lg p-4 transition-colors">
+              <h3 className="font-bold">Amwaj</h3>
+              <p className="text-xs text-gray-400">Island views</p>
+            </Link>
+          </div>
+        </div>
+      </section>
+
       <section className="py-12 px-4 border-t border-white/10">
         <div className="max-w-6xl mx-auto">
           <h2 className="text-xl font-bold mb-6">More Guides</h2>
@@ -191,9 +216,30 @@ export default function BestViewsBahrainPage() {
               { title: 'Rooftop Bars', href: '/guides/nightlife' },
               { title: 'Beach Clubs', href: '/guides/beach-clubs' },
               { title: 'Happy Hour', href: '/guides/happy-hour-bahrain' },
+              { title: 'Shisha Lounges', href: '/guides/shisha-lounges-bahrain' },
+              { title: 'Italian Restaurants', href: '/guides/best-italian-restaurants-bahrain' },
             ].map((guide) => (
               <Link key={guide.href} href={guide.href} className="px-4 py-2 bg-white/5 hover:bg-white/10 rounded-lg text-sm transition-colors">
                 {guide.title}
+              </Link>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* Related Content */}
+      <section className="py-8 px-4">
+        <div className="max-w-6xl mx-auto">
+          <h3 className="text-lg font-bold mb-4">Plan Your Evening</h3>
+          <div className="flex flex-wrap gap-2">
+            {[
+              { title: 'Tonight', href: '/tonight' },
+              { title: 'This Weekend', href: '/this-weekend' },
+              { title: 'New Year\'s Eve', href: '/guides/new-years-eve-bahrain' },
+              { title: 'Valentine\'s Day', href: '/guides/valentines-day-bahrain' },
+            ].map((link) => (
+              <Link key={link.href} href={link.href} className="px-3 py-1 bg-white/5 hover:bg-white/10 rounded text-sm transition-colors">
+                {link.title}
               </Link>
             ))}
           </div>

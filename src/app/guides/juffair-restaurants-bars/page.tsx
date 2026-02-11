@@ -369,6 +369,77 @@ export default function JuffairGuidePage() {
         </div>
       </section>
 
+      {/* More in Juffair */}
+      <section className="py-12 px-4 border-t border-white/10">
+        <div className="max-w-6xl mx-auto">
+          <h2 className="text-xl font-bold mb-6">More in Juffair</h2>
+          <div className="grid md:grid-cols-4 gap-4">
+            <Link href="/guides/hotels-juffair-bahrain" className="bg-white/5 hover:bg-white/10 rounded-lg p-4 transition-colors">
+              <span className="text-xl mb-2 block">🏨</span>
+              <h3 className="font-bold text-sm">Hotels</h3>
+              <p className="text-xs text-gray-400">Where to stay</p>
+            </Link>
+            <Link href="/guides/best-late-night-food-bahrain" className="bg-white/5 hover:bg-white/10 rounded-lg p-4 transition-colors">
+              <span className="text-xl mb-2 block">🌙</span>
+              <h3 className="font-bold text-sm">Late Night Food</h3>
+              <p className="text-xs text-gray-400">After midnight eats</p>
+            </Link>
+            <Link href="/guides/karaoke-bahrain" className="bg-white/5 hover:bg-white/10 rounded-lg p-4 transition-colors">
+              <span className="text-xl mb-2 block">🎤</span>
+              <h3 className="font-bold text-sm">Karaoke</h3>
+              <p className="text-xs text-gray-400">Sing along spots</p>
+            </Link>
+            <Link href="/guides/happy-hour-bahrain" className="bg-white/5 hover:bg-white/10 rounded-lg p-4 transition-colors">
+              <span className="text-xl mb-2 block">🍻</span>
+              <h3 className="font-bold text-sm">Happy Hour</h3>
+              <p className="text-xs text-gray-400">Drink deals</p>
+            </Link>
+          </div>
+        </div>
+      </section>
+
+      {/* Explore Other Areas */}
+      <section className="py-8 px-4 bg-black/20">
+        <div className="max-w-6xl mx-auto">
+          <h2 className="text-lg font-bold mb-4">Explore Other Areas</h2>
+          <div className="flex flex-wrap gap-3">
+            {[
+              { title: 'Adliya', href: '/guides/adliya' },
+              { title: 'Seef', href: '/guides/seef' },
+              { title: 'Amwaj', href: '/guides/amwaj' },
+              { title: 'Bahrain Bay', href: '/guides/bahrain-bay' },
+              { title: 'Manama', href: '/guides/manama-city-guide' },
+              { title: 'Zallaq', href: '/guides/zallaq-guide' },
+            ].map((link) => (
+              <Link key={link.href} href={link.href} className="px-4 py-2 bg-white/5 hover:bg-blue-500/20 rounded-lg text-sm transition-colors">
+                {link.title}
+              </Link>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* Related Guides */}
+      <section className="py-8 px-4">
+        <div className="max-w-6xl mx-auto">
+          <h3 className="text-lg font-bold mb-4">Related Guides</h3>
+          <div className="flex flex-wrap gap-2">
+            {[
+              { title: 'Tonight', href: '/tonight' },
+              { title: 'This Weekend', href: '/this-weekend' },
+              { title: 'Best Date Night', href: '/guides/best-date-night-bahrain' },
+              { title: 'Shisha Lounges', href: '/guides/shisha-lounges-bahrain' },
+              { title: 'Best Views', href: '/guides/best-views-bahrain' },
+              { title: 'Nightlife', href: '/guides/nightlife' },
+            ].map((link) => (
+              <Link key={link.href} href={link.href} className="px-3 py-1 bg-white/5 hover:bg-white/10 rounded text-sm transition-colors">
+                {link.title}
+              </Link>
+            ))}
+          </div>
+        </div>
+      </section>
+
       {/* Footer */}
       <footer className="py-8 px-4 text-center text-gray-500 text-sm border-t border-white/5">
         <p>Powered by BahrainNights.com — Bahrain&apos;s #1 Events & Lifestyle Platform</p>
