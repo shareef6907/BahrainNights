@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useCallback } from 'react';
 import { X, Calendar, MapPin, Ticket, Share2, Clock, Globe, ExternalLink } from 'lucide-react';
+import { parseDate, formatDate, formatDateRange, getRelativeDateLabel } from '@/lib/utils/date';
 
 interface RegionalEvent {
   id: string;
@@ -19,39 +20,20 @@ interface RegionalEvent {
   isEvent?: boolean;
 }
 
-// Helper function to format event dates nicely
-function formatEventDate(startDate: string, endDate?: string | null): string {
-  const start = new Date(startDate);
-  const options: Intl.DateTimeFormatOptions = {
-    weekday: 'long',
-    month: 'long',
-    day: 'numeric',
-    year: 'numeric',
-  };
-
-  const startStr = start.toLocaleDateString('en-US', options);
-
-  if (endDate) {
-    const end = new Date(endDate);
-    // If same day, just show one date
-    if (start.toDateString() === end.toDateString()) {
-      return startStr;
-    }
-    // If same month, show range
-    if (start.getMonth() === end.getMonth() && start.getFullYear() === end.getFullYear()) {
-      return `${start.toLocaleDateString('en-US', { month: 'long', day: 'numeric' })} - ${end.getDate()}, ${end.getFullYear()}`;
-    }
-    // Different months
-    const endStr = end.toLocaleDateString('en-US', options);
-    return `${startStr} - ${endStr}`;
+// Helper function to format event dates nicely (uses timezone-safe utilities)
+function formatEventDateDisplay(startDate: string, endDate?: string | null): string {
+  if (endDate && endDate !== startDate) {
+    return formatDateRange(startDate, endDate) || startDate;
   }
-
-  return startStr;
+  return formatDate(startDate) || startDate;
 }
 
-// Format short date for badge
+// Format short date for badge (timezone-safe)
 function formatShortDate(dateStr: string): { day: string; month: string; year: string } {
-  const date = new Date(dateStr);
+  const date = parseDate(dateStr);
+  if (!date) {
+    return { day: '?', month: '???', year: '????' };
+  }
   return {
     day: date.getDate().toString(),
     month: date.toLocaleDateString('en-US', { month: 'short' }).toUpperCase(),
@@ -59,9 +41,11 @@ function formatShortDate(dateStr: string): { day: string; month: string; year: s
   };
 }
 
-// Get days until event
+// Get days until event (timezone-safe)
 function getDaysUntil(dateStr: string): string {
-  const eventDate = new Date(dateStr);
+  const eventDate = parseDate(dateStr);
+  if (!eventDate) return '';
+  
   const today = new Date();
   today.setHours(0, 0, 0, 0);
   eventDate.setHours(0, 0, 0, 0);
@@ -249,7 +233,7 @@ export function EventModal({ event, isOpen, onClose }: EventModalProps) {
                 <div className="flex items-center gap-3 text-gray-300">
                   <Calendar className="w-5 h-5 text-yellow-500 flex-shrink-0" />
                   <span className="font-medium">
-                    {formatEventDate(event.event_date, event.event_end_date)}
+                    {formatEventDateDisplay(event.event_date, event.event_end_date)}
                   </span>
                 </div>
               )}

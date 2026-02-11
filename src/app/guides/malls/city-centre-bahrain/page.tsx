@@ -9,12 +9,12 @@ import {
 import BreadcrumbSchema from '@/components/SEO/BreadcrumbSchema';
 
 export const metadata: Metadata = {
-  title: 'City Centre Bahrain - Complete Store Directory & Guide 2025',
-  description: 'Complete guide to City Centre Bahrain. 340+ stores including Zara, H&M, Cineco Cinema, Carrefour, Magic Planet, Time Out Market. Full store directory.',
-  keywords: 'City Centre Bahrain, City Center Bahrain, Bahrain mall, shopping Bahrain, Cineco Cinema Bahrain, Carrefour Bahrain, Time Out Market',
+  title: 'City Centre Bahrain - Complete Store Directory & Guide 2026',
+  description: 'Complete guide to City Centre Bahrain. 350+ stores including Zara, H&M, Saks Fifth Avenue, Carrefour, Wahooo! Waterpark, Magic Planet & 20-screen Cineco Cinema.',
+  keywords: 'City Centre Bahrain, City Center Bahrain, Bahrain mall, shopping Bahrain, Cineco Cinema Bahrain, Carrefour Bahrain, Wahooo Waterpark, Saks Fifth Avenue Bahrain',
   openGraph: {
-    title: 'City Centre Bahrain - Complete Store Directory & Guide 2025',
-    description: 'Bahrain\'s largest mall with 340+ stores, Cineco Cinema, Magic Planet & Time Out Market.',
+    title: 'City Centre Bahrain - Complete Store Directory & Guide 2026',
+    description: 'Bahrain\'s largest mall with 350+ stores, 20-screen Cineco, Wahooo! Waterpark & Magic Planet.',
     type: 'article',
     locale: 'en_US',
     url: 'https://www.bahrainnights.com/guides/malls/city-centre-bahrain',
@@ -26,7 +26,7 @@ export const metadata: Metadata = {
 
 const mallInfo = {
   name: 'City Centre Bahrain',
-  tagline: 'Bahrain\'s Premier Shopping & Entertainment Destination',
+  tagline: 'Bahrain\'s Largest Shopping & Entertainment Destination',
   address: 'Sheikh Khalifa Bin Salman Highway, Seef District, Manama, Kingdom of Bahrain',
   mapsLink: 'https://www.google.com/maps/place/City+Centre+Bahrain/@26.2168,50.5481,17z',
   hours: {
@@ -36,11 +36,11 @@ const mallInfo = {
     },
   },
   parking: {
-    spaces: '5,000+',
+    spaces: '7,000+',
     cost: 'Free',
     valet: 'Available',
   },
-  stores: '340+',
+  stores: '350+',
   yearOpened: '2008',
 };
 

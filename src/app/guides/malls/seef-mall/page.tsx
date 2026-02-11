@@ -9,12 +9,12 @@ import {
 import BreadcrumbSchema from '@/components/SEO/BreadcrumbSchema';
 
 export const metadata: Metadata = {
-  title: 'Seef Mall Bahrain - Complete Store Directory & Guide 2025',
-  description: 'Complete guide to Seef Mall Bahrain. 200+ stores including H&M, Marks & Spencer, Mango, Sephora, plus dining & Magic Island entertainment. Full store list.',
-  keywords: 'Seef Mall Bahrain, Seef mall shops, Seef district shopping, family mall Bahrain, shopping mall Manama, Seef Mall stores, Magic Island',
+  title: 'Seef Mall Bahrain - Complete Store Directory & Guide 2026',
+  description: 'Complete guide to Seef Mall Bahrain. Now with 3 locations: Seef District, Muharraq & Isa Town. 250+ stores including H&M, Marks & Spencer, Mango, Sephora, Magic Island & cinemas.',
+  keywords: 'Seef Mall Bahrain, Seef mall shops, Seef district shopping, Seef Mall Muharraq, Seef Mall Isa Town, family mall Bahrain, shopping mall Manama, Seef Mall stores, Magic Island',
   openGraph: {
-    title: 'Seef Mall Bahrain - Complete Store Directory & Guide 2025',
-    description: 'Complete guide to Seef Mall Bahrain with 200+ stores, Magic Island entertainment & dining.',
+    title: 'Seef Mall Bahrain - Complete Store Directory & Guide 2026',
+    description: 'Complete guide to Seef Mall Bahrain with 3 locations, 250+ stores, Magic Island entertainment & dining.',
     type: 'article',
     locale: 'en_US',
     url: 'https://www.bahrainnights.com/guides/malls/seef-mall',
@@ -26,8 +26,8 @@ export const metadata: Metadata = {
 
 const mallInfo = {
   name: 'Seef Mall',
-  tagline: 'Bahrain\'s Original Premier Shopping Destination',
-  address: 'Seef District, Manama, Bahrain',
+  tagline: 'Bahrain\'s Original Premier Shopping Destination — Now with 3 Locations',
+  address: 'Main: Seef District | Also: Muharraq & Isa Town',
   mapsLink: 'https://www.google.com/maps/place/Seef+Mall/@26.2325003,50.5364399,17z',
   hours: {
     shops: {
@@ -44,7 +44,7 @@ const mallInfo = {
     cost: 'Free',
     valet: 'Available',
   },
-  stores: '200+',
+  stores: '250+',
   yearOpened: '1997',
 };
 

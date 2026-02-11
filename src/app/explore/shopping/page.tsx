@@ -66,12 +66,12 @@ const brandCategories = [
 
 // Mall data
 const malls = [
-  { name: 'Marassi Galleria', slug: 'marassi-galleria', area: 'Diyar Al Muharraq', stores: '150+', emoji: '🏬' },
-  { name: 'City Centre Bahrain', slug: 'city-centre-bahrain', area: 'Seef', stores: '340+', emoji: '🛍️' },
-  { name: 'Seef Mall', slug: 'seef-mall', area: 'Seef', stores: '200+', emoji: '🏪' },
+  { name: 'City Centre Bahrain', slug: 'city-centre-bahrain', area: 'Seef District', stores: '350+', emoji: '🛍️' },
+  { name: 'Marassi Galleria', slug: 'marassi-galleria', area: 'Diyar Al Muharraq', stores: '400+', emoji: '🏬' },
+  { name: 'Seef Mall', slug: 'seef-mall', area: '3 Locations', stores: '250+', emoji: '🏪' },
   { name: 'The Avenues', slug: 'the-avenues', area: 'Bahrain Bay', stores: '130+', emoji: '✨' },
-  { name: 'Moda Mall', slug: 'moda-mall', area: 'Manama', stores: '80+', emoji: '💎' },
-  { name: 'Bahrain Mall', slug: 'bahrain-mall', area: 'Sanabis', stores: '120+', emoji: '🎁' },
+  { name: 'Moda Mall', slug: 'moda-mall', area: 'BWTC Manama', stores: '90+', emoji: '💎' },
+  { name: 'Dana Mall', slug: 'dana-mall', area: 'Seef/Sanabis', stores: '100+', emoji: '🛒' },
 ];
 
 export default function ShoppingPage() {

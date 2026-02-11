@@ -26,6 +26,7 @@ import {
   Clock,
   ExternalLink
 } from 'lucide-react';
+import { formatDateShort } from '@/lib/utils/date';
 
 interface Event {
   id: string;
@@ -532,18 +533,10 @@ export default function PlatinumlistEventsAdmin() {
     }
   };
 
-  // Format date for display
-  const formatDate = (dateStr: string | null) => {
+  // Format date for display (uses timezone-aware utility)
+  const formatEventDate = (dateStr: string | null) => {
     if (!dateStr) return '-';
-    try {
-      return new Date(dateStr).toLocaleDateString('en-US', {
-        month: 'short',
-        day: 'numeric',
-        year: 'numeric'
-      });
-    } catch {
-      return dateStr;
-    }
+    return formatDateShort(dateStr) || dateStr;
   };
 
   return (
@@ -784,7 +777,7 @@ export default function PlatinumlistEventsAdmin() {
                   <td className="p-4">
                     <div className="flex items-center gap-1 text-sm">
                       <Calendar className="w-4 h-4 text-gray-500" />
-                      <span>{formatDate(event.start_date)}</span>
+                      <span>{formatEventDate(event.start_date)}</span>
                     </div>
                     {event.start_time && (
                       <div className="flex items-center gap-1 text-xs text-gray-500 mt-1">

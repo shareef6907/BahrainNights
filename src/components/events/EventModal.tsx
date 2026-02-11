@@ -4,6 +4,7 @@ import { useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { X, MapPin, ExternalLink, Tag, Calendar, Clock, Ticket } from 'lucide-react';
 import Image from 'next/image';
+import { formatDate, formatTime, formatDateRange, getRelativeDateLabel } from '@/lib/utils/date';
 
 export interface EventData {
   id: string;
@@ -144,39 +145,8 @@ export default function EventModal({
     return style.label;
   };
 
-  // Format date display
-  const formatDate = (dateStr: string | null) => {
-    if (!dateStr) return null;
-    try {
-      const date = new Date(dateStr);
-      return date.toLocaleDateString('en-BH', {
-        weekday: 'long',
-        year: 'numeric',
-        month: 'long',
-        day: 'numeric',
-      });
-    } catch {
-      return dateStr;
-    }
-  };
-
-  // Format time display
-  const formatTime = (timeStr: string | null) => {
-    if (!timeStr) return null;
-    try {
-      // Handle various time formats
-      if (timeStr.includes(':')) {
-        const [hours, minutes] = timeStr.split(':');
-        const hour = parseInt(hours);
-        const ampm = hour >= 12 ? 'PM' : 'AM';
-        const displayHour = hour % 12 || 12;
-        return `${displayHour}:${minutes} ${ampm}`;
-      }
-      return timeStr;
-    } catch {
-      return timeStr;
-    }
-  };
+  // Get relative date label (Today, Tomorrow, etc.)
+  const relativeLabel = getRelativeDateLabel(event.start_date);
 
   // Use cover_url if available, fallback to image_url
   const coverImage = event.cover_url || event.image_url ||
@@ -332,17 +302,23 @@ export default function EventModal({
                       </h3>
                       <div className="flex flex-col gap-2 text-gray-300">
                         {event.start_date && (
-                          <div className="flex items-center gap-2">
-                            <Calendar className={`w-5 h-5 ${style.color}`} />
-                            <span>{formatDate(event.start_date)}</span>
-                            {event.end_date && event.end_date !== event.start_date && (
-                              <span> - {formatDate(event.end_date)}</span>
+                          <div className="flex items-center gap-2 flex-wrap">
+                            <Calendar className={`w-5 h-5 ${style.color} flex-shrink-0`} />
+                            {relativeLabel && (
+                              <span className={`px-2 py-0.5 ${style.color} bg-white/10 rounded-md text-sm font-medium`}>
+                                {relativeLabel}
+                              </span>
                             )}
+                            <span>
+                              {event.end_date && event.end_date !== event.start_date
+                                ? formatDateRange(event.start_date, event.end_date)
+                                : formatDate(event.start_date)}
+                            </span>
                           </div>
                         )}
                         {event.start_time && (
                           <div className="flex items-center gap-2">
-                            <Clock className={`w-5 h-5 ${style.color}`} />
+                            <Clock className={`w-5 h-5 ${style.color} flex-shrink-0`} />
                             <span>{formatTime(event.start_time)}</span>
                             {event.end_time && (
                               <span> - {formatTime(event.end_time)}</span>

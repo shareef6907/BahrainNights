@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { cookies } from 'next/headers';
 import { supabaseAdmin } from '@/lib/supabase';
 import { verifyToken } from '@/lib/auth';
+import { parseDate } from '@/lib/utils/date';
 
 export const dynamic = 'force-dynamic';
 
@@ -69,21 +70,25 @@ export async function GET(request: NextRequest) {
       );
     }
 
-    // Calculate counts
+    // Calculate counts with proper date parsing
     const now = new Date();
+    // Set to start of today for fair comparison (events today are not "past")
+    const todayStart = new Date(now.getFullYear(), now.getMonth(), now.getDate());
     const allEvents = events || [];
 
     const counts = {
       all: allEvents.length,
       pending: allEvents.filter(e => e.status === 'pending').length,
       published: allEvents.filter(e => {
-        const eventDate = e.date || e.start_date;
-        return e.status === 'published' && (!eventDate || new Date(eventDate) >= now);
+        const eventDateStr = e.date || e.start_date;
+        const eventDate = parseDate(eventDateStr);
+        return e.status === 'published' && (!eventDate || eventDate >= todayStart);
       }).length,
       draft: allEvents.filter(e => e.status === 'draft').length,
       past: allEvents.filter(e => {
-        const eventDate = e.date || e.start_date;
-        return eventDate && new Date(eventDate) < now;
+        const eventDateStr = e.date || e.start_date;
+        const eventDate = parseDate(eventDateStr);
+        return eventDate && eventDate < todayStart;
       }).length,
     };
 

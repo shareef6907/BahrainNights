@@ -7,6 +7,7 @@ import {
   ArrowRight, Music, PartyPopper, Film, Users
 } from 'lucide-react';
 import BreadcrumbSchema from '@/components/SEO/BreadcrumbSchema';
+import { parseDate, toISODateString, BAHRAIN_TIMEZONE } from '@/lib/utils/date';
 
 export const metadata: Metadata = {
   title: 'Events in Bahrain This Weekend | What\'s On Friday & Saturday',
@@ -28,7 +29,7 @@ export const metadata: Metadata = {
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!;
 const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY!;
 
-// Get weekend dates
+// Get weekend dates (Bahrain weekend is Friday-Saturday)
 function getWeekendDates() {
   const today = new Date();
   const dayOfWeek = today.getDay();
@@ -55,11 +56,11 @@ function getWeekendDates() {
   sunday.setDate(saturday.getDate() + 1);
   
   return {
-    friday: friday.toISOString().split('T')[0],
-    saturday: saturday.toISOString().split('T')[0],
-    endOfWeekend: sunday.toISOString().split('T')[0],
-    displayFriday: friday.toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric' }),
-    displaySaturday: saturday.toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric' }),
+    friday: toISODateString(friday),
+    saturday: toISODateString(saturday),
+    endOfWeekend: toISODateString(sunday),
+    displayFriday: friday.toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric', timeZone: BAHRAIN_TIMEZONE }),
+    displaySaturday: saturday.toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric', timeZone: BAHRAIN_TIMEZONE }),
   };
 }
 
@@ -94,8 +95,8 @@ async function getWeekendEvents() {
 
 // Event card component
 function EventCard({ event }: { event: { id: string; title: string; slug: string; date: string; time?: string; venue_name?: string; category?: string; image_url?: string; price?: string } }) {
-  const eventDate = new Date(event.date);
-  const dayName = eventDate.toLocaleDateString('en-US', { weekday: 'short' });
+  const eventDate = parseDate(event.date) || new Date();
+  const dayName = eventDate.toLocaleDateString('en-US', { weekday: 'short', timeZone: BAHRAIN_TIMEZONE });
   const dayNum = eventDate.getDate();
   
   const categoryColors: Record<string, string> = {

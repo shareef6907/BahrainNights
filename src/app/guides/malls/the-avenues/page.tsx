@@ -8,12 +8,12 @@ import {
 import BreadcrumbSchema from '@/components/SEO/BreadcrumbSchema';
 
 export const metadata: Metadata = {
-  title: 'The Avenues Bahrain - Complete Store Directory & Guide 2025',
-  description: 'Complete guide to The Avenues Bahrain Bay. 130+ stores expanding to 218+, VOX Cinemas, The Cheesecake Factory, Magic Planet, water taxi rides. Connected to Hilton Garden Inn.',
-  keywords: 'The Avenues Bahrain, Bahrain Bay mall, shopping Bahrain, VOX Cinemas, The Cheesecake Factory Bahrain, Hilton Garden Inn Bahrain',
+  title: 'The Avenues Bahrain - Complete Store Directory & Guide 2026',
+  description: 'Complete guide to The Avenues Bahrain Bay. 130+ stores, Below Zero ice rink, VOX Cinemas, The Cheesecake Factory, water taxi rides. 1.5km waterfront promenade.',
+  keywords: 'The Avenues Bahrain, Bahrain Bay mall, shopping Bahrain, Below Zero ice rink, VOX Cinemas, The Cheesecake Factory Bahrain, waterfront Bahrain',
   openGraph: {
-    title: 'The Avenues Bahrain - Shopping & Entertainment Guide 2025',
-    description: 'Premium mall on Bahrain Bay with 130+ stores, VOX Cinemas, dining & water taxi rides.',
+    title: 'The Avenues Bahrain - Waterfront Shopping & Dining Guide 2026',
+    description: 'Premium waterfront mall on Bahrain Bay with 130+ stores, Below Zero ice rink, VOX Cinemas & water taxi.',
     type: 'article',
     locale: 'en_US',
     url: 'https://www.bahrainnights.com/guides/malls/the-avenues',

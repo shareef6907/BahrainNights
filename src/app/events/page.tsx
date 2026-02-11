@@ -4,6 +4,7 @@ import EventsPageClient, { Event, Attraction } from '@/components/events/EventsP
 import EventListSchema from '@/components/SEO/EventListSchema';
 import InternalLinks, { guideLinks, placeLinks } from '@/components/SEO/InternalLinks';
 import EventServicesPromo from '@/components/events/EventServicesPromo';
+import { parseDate, toISODateString } from '@/lib/utils/date';
 
 // Force dynamic rendering to ensure fresh data on every request
 export const dynamic = 'force-dynamic';
@@ -30,42 +31,40 @@ function getCategoryColor(category: string): string {
   return colors[category?.toLowerCase()] || 'bg-purple-500';
 }
 
-// Helper: Normalize date to ISO format (YYYY-MM-DD)
+// Helper: Normalize date to ISO format (YYYY-MM-DD) - timezone-safe
 function normalizeToISODate(dateStr: string | null | undefined): string {
   if (!dateStr) return '';
 
   // If already in ISO format (YYYY-MM-DD), return as-is
-  if (/^\d{4}-\d{2}-\d{2}/.test(dateStr)) {
-    return dateStr.split('T')[0]; // Strip time if present
+  if (/^\d{4}-\d{2}-\d{2}$/.test(dateStr)) {
+    return dateStr;
+  }
+  
+  // Strip time component if present (e.g., "2025-02-15T00:00:00")
+  if (/^\d{4}-\d{2}-\d{2}T/.test(dateStr)) {
+    return dateStr.split('T')[0];
   }
 
-  // Try to parse various formats
-  try {
-    const date = new Date(dateStr);
-    if (!isNaN(date.getTime())) {
-      // If the year is missing/wrong (e.g., "Dec 29" parsed as 2001), use current/next year
-      const year = date.getFullYear();
-      const currentYear = new Date().getFullYear();
+  // Use timezone-safe parsing
+  const date = parseDate(dateStr);
+  if (!date) return '';
+  
+  // Check if year needs correction (for dates like "Dec 29" parsed with wrong year)
+  const year = date.getFullYear();
+  const currentYear = new Date().getFullYear();
 
-      if (year < currentYear - 1) {
-        // Date was parsed with wrong year, assume current or next year
-        const month = date.getMonth();
-        const day = date.getDate();
-        const currentMonth = new Date().getMonth();
+  if (year < currentYear - 1) {
+    // Date was parsed with wrong year, assume current or next year
+    const month = date.getMonth();
+    const day = date.getDate();
+    const currentMonth = new Date().getMonth();
 
-        // If the month is before current month, assume next year
-        const targetYear = month < currentMonth ? currentYear + 1 : currentYear;
-        const correctedDate = new Date(targetYear, month, day);
-        return correctedDate.toISOString().split('T')[0];
-      }
-
-      return date.toISOString().split('T')[0];
-    }
-  } catch {
-    // Fall through
+    // If the month is before current month, assume next year
+    const targetYear = month < currentMonth ? currentYear + 1 : currentYear;
+    return toISODateString(new Date(targetYear, month, day));
   }
 
-  return ''; // Return empty if we can't parse
+  return toISODateString(date);
 }
 
 // Fetch all published events on the server
