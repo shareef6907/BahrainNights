@@ -40,7 +40,7 @@ const supabase = createClient(supabaseUrl, supabaseKey);
  * Convert Unix timestamp to ISO date string in event's timezone
  * Uses the event's timezone to ensure correct date display
  */
-function unixToDate(timestamp: number, timezone: string = 'UTC'): string {
+function unixToDate(timestamp: number, timezone: string = 'Asia/Dubai'): string {
   const date = new Date(timestamp * 1000);
   // Format as YYYY-MM-DD in the event's timezone
   return date.toLocaleDateString('en-CA', { timeZone: timezone });
@@ -50,7 +50,7 @@ function unixToDate(timestamp: number, timezone: string = 'UTC'): string {
  * Convert Unix timestamp to time string (HH:MM) in event's timezone
  * IMPORTANT: Must use event's timezone, not server timezone (Vercel runs in UTC)
  */
-function unixToTime(timestamp: number, timezone: string = 'UTC'): string {
+function unixToTime(timestamp: number, timezone: string = 'Asia/Dubai'): string {
   const date = new Date(timestamp * 1000);
   // Format as HH:MM in the event's timezone
   return date.toLocaleTimeString('en-GB', { 
@@ -118,8 +118,8 @@ function transformEvent(event: PlatinumlistEvent): DbEvent {
   const countryConfig = detectCountry(event);
   const country = countryConfig?.name || 'UAE';
   const city = countryConfig ? extractCity(event.name, countryConfig) : null;
-
-  // Use event's timezone from API, fallback to country-based timezone
+  
+  // Use the event's timezone from API, fallback to country timezone, or default to Dubai
   const timezone = event.timezone || countryConfig?.timezone || 'Asia/Dubai';
 
   const startDate = unixToDate(event.start, timezone);
