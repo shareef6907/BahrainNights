@@ -19,6 +19,7 @@ export interface HappeningNowEvent {
 
 interface HappeningNowProps {
   events: HappeningNowEvent[];
+  onEventClick?: (event: HappeningNowEvent) => void;
 }
 
 function getTimeUntil(eventDate: string, eventTime: string | null): { label: string; urgency: 'live' | 'soon' | 'later' } {
@@ -49,7 +50,7 @@ function getTimeUntil(eventDate: string, eventTime: string | null): { label: str
   return { label: 'Today', urgency: 'later' };
 }
 
-export default function HappeningNow({ events }: HappeningNowProps) {
+export default function HappeningNow({ events, onEventClick }: HappeningNowProps) {
   const [timeLabels, setTimeLabels] = useState<Record<string, { label: string; urgency: string }>>({});
 
   // Update time labels every minute
@@ -131,6 +132,73 @@ export default function HappeningNow({ events }: HappeningNowProps) {
             const isLive = timeInfo.urgency === 'live';
             const isSoon = timeInfo.urgency === 'soon';
 
+            const cardClassName = `group flex gap-4 p-4 rounded-2xl border transition-all duration-300 hover:scale-[1.02] cursor-pointer text-left w-full ${
+              isLive
+                ? 'bg-gradient-to-r from-red-500/20 to-orange-500/20 border-red-500/50'
+                : isSoon
+                ? 'bg-gradient-to-r from-yellow-500/10 to-orange-500/10 border-yellow-500/30'
+                : 'bg-white/5 border-white/10 hover:border-white/30'
+            }`;
+
+            const cardContent = (
+              <>
+                {/* Thumbnail */}
+                <div className="relative w-24 h-24 flex-shrink-0 rounded-xl overflow-hidden">
+                  <img
+                    src={event.cover_url || 'https://images.unsplash.com/photo-1492684223066-81342ee5ff30?w=200&h=200&fit=crop'}
+                    alt={event.title}
+                    className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-300"
+                  />
+                  {isLive && (
+                    <div className="absolute inset-0 bg-red-500/30 flex items-center justify-center">
+                      <span className="bg-red-500 text-white text-[10px] font-bold px-2 py-0.5 rounded-full animate-pulse">
+                        LIVE
+                      </span>
+                    </div>
+                  )}
+                </div>
+
+                {/* Content */}
+                <div className="flex-1 min-w-0">
+                  {/* Time Badge */}
+                  <div
+                    className={`inline-flex items-center gap-1.5 text-xs font-bold px-2 py-1 rounded-full mb-2 ${
+                      isLive
+                        ? 'bg-red-500 text-white'
+                        : isSoon
+                        ? 'bg-yellow-500 text-black'
+                        : 'bg-white/10 text-gray-300'
+                    }`}
+                  >
+                    <Clock className="w-3 h-3" />
+                    {timeInfo.label}
+                  </div>
+
+                  <h3 className="font-bold text-lg line-clamp-1 group-hover:text-yellow-500 transition-colors">
+                    {event.title}
+                  </h3>
+
+                  <div className="flex items-center gap-4 mt-2 text-sm text-gray-400">
+                    <span className="flex items-center gap-1">
+                      <MapPin className="w-3.5 h-3.5" />
+                      <span className="truncate max-w-[120px]">{event.venue_name || 'TBA'}</span>
+                    </span>
+                    {event.time && (
+                      <span className="flex items-center gap-1">
+                        <Clock className="w-3.5 h-3.5" />
+                        {event.time}
+                      </span>
+                    )}
+                  </div>
+                </div>
+
+                {/* Arrow indicator */}
+                <div className="hidden md:flex items-center">
+                  <ChevronRight className="w-5 h-5 text-gray-400 group-hover:text-yellow-500 group-hover:translate-x-1 transition-all" />
+                </div>
+              </>
+            );
+
             return (
               <motion.div
                 key={event.id}
@@ -139,71 +207,22 @@ export default function HappeningNow({ events }: HappeningNowProps) {
                 viewport={{ once: true }}
                 transition={{ delay: index * 0.1 }}
               >
-                <Link
-                  href={`/events/${event.slug}`}
-                  className={`group flex gap-4 p-4 rounded-2xl border transition-all duration-300 hover:scale-[1.02] ${
-                    isLive
-                      ? 'bg-gradient-to-r from-red-500/20 to-orange-500/20 border-red-500/50'
-                      : isSoon
-                      ? 'bg-gradient-to-r from-yellow-500/10 to-orange-500/10 border-yellow-500/30'
-                      : 'bg-white/5 border-white/10 hover:border-white/30'
-                  }`}
-                >
-                  {/* Thumbnail */}
-                  <div className="relative w-24 h-24 flex-shrink-0 rounded-xl overflow-hidden">
-                    <img
-                      src={event.cover_url || 'https://images.unsplash.com/photo-1492684223066-81342ee5ff30?w=200&h=200&fit=crop'}
-                      alt={event.title}
-                      className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-300"
-                    />
-                    {isLive && (
-                      <div className="absolute inset-0 bg-red-500/30 flex items-center justify-center">
-                        <span className="bg-red-500 text-white text-[10px] font-bold px-2 py-0.5 rounded-full animate-pulse">
-                          LIVE
-                        </span>
-                      </div>
-                    )}
-                  </div>
-
-                  {/* Content */}
-                  <div className="flex-1 min-w-0">
-                    {/* Time Badge */}
-                    <div
-                      className={`inline-flex items-center gap-1.5 text-xs font-bold px-2 py-1 rounded-full mb-2 ${
-                        isLive
-                          ? 'bg-red-500 text-white'
-                          : isSoon
-                          ? 'bg-yellow-500 text-black'
-                          : 'bg-white/10 text-gray-300'
-                      }`}
-                    >
-                      <Clock className="w-3 h-3" />
-                      {timeInfo.label}
-                    </div>
-
-                    <h3 className="font-bold text-lg line-clamp-1 group-hover:text-yellow-500 transition-colors">
-                      {event.title}
-                    </h3>
-
-                    <div className="flex items-center gap-4 mt-2 text-sm text-gray-400">
-                      <span className="flex items-center gap-1">
-                        <MapPin className="w-3.5 h-3.5" />
-                        <span className="truncate max-w-[120px]">{event.venue_name || 'TBA'}</span>
-                      </span>
-                      {event.time && (
-                        <span className="flex items-center gap-1">
-                          <Clock className="w-3.5 h-3.5" />
-                          {event.time}
-                        </span>
-                      )}
-                    </div>
-                  </div>
-
-                  {/* Arrow indicator */}
-                  <div className="hidden md:flex items-center">
-                    <ChevronRight className="w-5 h-5 text-gray-400 group-hover:text-yellow-500 group-hover:translate-x-1 transition-all" />
-                  </div>
-                </Link>
+                {onEventClick ? (
+                  <button
+                    type="button"
+                    onClick={() => onEventClick(event)}
+                    className={cardClassName}
+                  >
+                    {cardContent}
+                  </button>
+                ) : (
+                  <Link
+                    href={`/events/${event.slug}`}
+                    className={cardClassName}
+                  >
+                    {cardContent}
+                  </Link>
+                )}
               </motion.div>
             );
           })}

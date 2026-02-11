@@ -174,6 +174,26 @@ function convertTodayEventToEventData(event: TodayEvent): EventData {
   };
 }
 
+// Helper to convert HappeningNowEvent to EventData format for modal
+function convertHappeningNowEventToEventData(event: HappeningNowEvent): EventData {
+  return {
+    id: event.id,
+    title: event.title,
+    description: null,
+    price: null,
+    price_currency: '',
+    image_url: event.cover_url,
+    cover_url: event.cover_url,
+    venue_name: event.venue_name,
+    location: event.venue_name,
+    category: event.category,
+    start_date: event.date,
+    start_time: event.time?.includes(':') ? event.time : null,
+    end_time: event.end_time?.includes(':') ? event.end_time : null,
+    affiliate_url: `/events/${event.slug}`,
+  };
+}
+
 // International event type for homepage section
 export interface HomepageInternationalEvent {
   id: string;
@@ -381,9 +401,17 @@ export default function HomePageClient({ initialMovies, initialStats, initialTod
   const [trailerMovie, setTrailerMovie] = useState<Movie | null>(null);
   const [isTrailerModalOpen, setIsTrailerModalOpen] = useState(false);
 
-  // Event modal states (for Happening Today)
+  // Event modal states (for Happening Today and Happening Now)
   const [selectedEvent, setSelectedEvent] = useState<TodayEvent | null>(null);
+  const [selectedHappeningNowEvent, setSelectedHappeningNowEvent] = useState<HappeningNowEvent | null>(null);
   const [isEventModalOpen, setIsEventModalOpen] = useState(false);
+
+  // Handler for Happening Now event clicks
+  const handleHappeningNowEventClick = (event: HappeningNowEvent) => {
+    setSelectedHappeningNowEvent(event);
+    setSelectedEvent(null); // Clear other event type
+    setIsEventModalOpen(true);
+  };
 
   // Play video immediately when ready
   useEffect(() => {
@@ -780,7 +808,10 @@ export default function HomePageClient({ initialMovies, initialStats, initialTod
 
       {/* 🆕 HAPPENING NOW - Real-time events with countdown (UNIQUE FEATURE!) */}
       {initialHappeningNowEvents && initialHappeningNowEvents.length > 0 && (
-        <HappeningNow events={initialHappeningNowEvents} />
+        <HappeningNow 
+          events={initialHappeningNowEvents} 
+          onEventClick={handleHappeningNowEventClick}
+        />
       )}
 
       {/* Cinema Section - NO LOADING STATE! Data pre-fetched on server */}
@@ -1086,6 +1117,18 @@ export default function HomePageClient({ initialMovies, initialStats, initialTod
           onClose={() => {
             setIsEventModalOpen(false);
             setSelectedEvent(null);
+          }}
+        />
+      )}
+
+      {/* Happening Now Event Modal */}
+      {selectedHappeningNowEvent && (
+        <EventModal
+          event={convertHappeningNowEventToEventData(selectedHappeningNowEvent)}
+          isOpen={isEventModalOpen}
+          onClose={() => {
+            setIsEventModalOpen(false);
+            setSelectedHappeningNowEvent(null);
           }}
         />
       )}
