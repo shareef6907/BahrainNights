@@ -45,7 +45,7 @@ export default function CrossPromoServices({ context = 'general', compact = fals
       tagline: context === 'venue'
         ? 'Showcase your venue with professional video'
         : 'Professional Video & Film Production',
-      description: 'Corporate videos, event coverage, commercials, drone filming & post-production in Bahrain.',
+      description: 'Corporate videos, event coverage, commercials & post-production in Bahrain.',
       href: 'https://www.filmproductionbahrain.com',
       icon: Camera,
       color: 'from-rose-500/20 to-orange-500/20',

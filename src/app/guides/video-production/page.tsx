@@ -9,8 +9,8 @@ import {
 
 export const metadata: Metadata = {
   title: 'Video Production Bahrain 2026 | Corporate Videos, Events & Films',
-  description: 'Professional video production services in Bahrain - corporate videos, event coverage, commercials, wedding films, drone filming & post-production. Award-winning cinematography.',
-  keywords: 'video production Bahrain, film production Bahrain, corporate video Bahrain, wedding videography Bahrain, drone filming Bahrain, commercial production Bahrain, event video Bahrain',
+  description: 'Professional video production services in Bahrain - corporate videos, event coverage, commercials, wedding films & post-production. Award-winning cinematography.',
+  keywords: 'video production Bahrain, film production Bahrain, corporate video Bahrain, wedding videography Bahrain, commercial production Bahrain, event video Bahrain',
   alternates: {
     canonical: 'https://www.bahrainnights.com/guides/video-production',
   },
@@ -29,15 +29,11 @@ const faqs = [
   },
   {
     q: 'What video production services are available in Bahrain?',
-    a: 'Professional services include corporate videos, TV commercials, event coverage, wedding cinematography, documentary production, drone filming, animation, live streaming, and full post-production including editing, color grading, and motion graphics.',
+    a: 'Professional services include corporate videos, TV commercials, event coverage, wedding cinematography, documentary production, animation, live streaming, and full post-production including editing, color grading, and motion graphics.',
   },
   {
     q: 'How long does it take to produce a corporate video in Bahrain?',
     a: 'A typical corporate video takes 2-4 weeks from concept to delivery. This includes pre-production (scripting, planning), 1-2 days of filming, and 1-2 weeks of post-production. Rush projects can be completed faster.',
-  },
-  {
-    q: 'Can I get drone filming for my event in Bahrain?',
-    a: 'Yes, licensed drone operators can provide aerial cinematography in Bahrain. Proper permits are required for certain locations. Film Production Bahrain handles all permits and provides professional drone filming services.',
   },
   {
     q: 'Do video production companies in Bahrain provide equipment rental?',
@@ -71,7 +67,7 @@ const services = [
     icon: Video,
     title: 'Wedding Cinematography',
     description: 'Cinematic wedding films that tell your love story',
-    features: ['Full day coverage', 'Highlight reels', 'Documentary style', 'Drone footage included'],
+    features: ['Full day coverage', 'Highlight reels', 'Documentary style', 'Same-day edits'],
     pricing: 'From BD 800',
   },
 ];
@@ -79,7 +75,7 @@ const services = [
 const capabilities = [
   '4K & 8K Cinema Cameras',
   'Professional Lighting',
-  'Licensed Drone Filming',
+  'Gimbal Stabilization',
   'Live Streaming',
   'Motion Graphics',
   'Color Grading',

@@ -167,7 +167,7 @@ export default function RootLayout({
                       '@type': 'Organization',
                       name: 'Film Production Bahrain',
                       url: 'https://www.filmproductionbahrain.com',
-                      description: 'Professional video and film production services in Bahrain. Corporate videos, event coverage, commercials & drone filming.'
+                      description: 'Professional video and film production services in Bahrain. Corporate videos, event coverage, commercials & post-production.'
                     }
                   ]
                 },

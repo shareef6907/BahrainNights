@@ -376,7 +376,7 @@ export default function BirthdayPartyGuidePage() {
                     </div>
                     <div className="flex items-center gap-2 text-gray-300">
                       <CheckCircle className="w-5 h-5 text-red-400" />
-                      <span>Drone Footage</span>
+                      <span>Multi-Angle Coverage</span>
                     </div>
                     <div className="flex items-center gap-2 text-gray-300">
                       <CheckCircle className="w-5 h-5 text-red-400" />

@@ -9,7 +9,7 @@ import {
 
 export const metadata: Metadata = {
   title: 'Wedding Videography Bahrain 2026 | Cinematic Wedding Films',
-  description: 'Professional wedding videography in Bahrain - cinematic films, same-day edits, drone footage & multicam coverage. Capture your special day beautifully.',
+  description: 'Professional wedding videography in Bahrain - cinematic films, same-day edits & multicam coverage. Capture your special day beautifully.',
   keywords: 'wedding videography Bahrain, wedding video Bahrain, wedding cinematography Bahrain, wedding film Bahrain, Bahrain wedding videographer, Arabic wedding video, destination wedding Bahrain',
   alternates: {
     canonical: 'https://www.bahrainnights.com/guides/wedding-videography',
@@ -25,11 +25,11 @@ export const metadata: Metadata = {
 const faqs = [
   {
     q: 'How much does wedding videography cost in Bahrain?',
-    a: 'Wedding videography in Bahrain typically ranges from BD 800-2500+ depending on coverage. Basic packages (6-8 hours, highlight reel) start around BD 800. Full-day cinematic coverage with multiple cameras, drone footage, and documentary-style editing ranges from BD 1500-2500.',
+    a: 'Wedding videography in Bahrain typically ranges from BD 800-2500+ depending on coverage. Basic packages (6-8 hours, highlight reel) start around BD 800. Full-day cinematic coverage with multiple cameras and documentary-style editing ranges from BD 1500-2500.',
   },
   {
     q: 'What should I look for in a Bahrain wedding videographer?',
-    a: 'Look for: 1) Portfolio showing weddings similar to yours (Arabic, Western, Indian style), 2) Experience with your venue, 3) Equipment quality (4K cameras, stabilizers, drones), 4) Editing style that matches your taste, 5) Reviews from previous couples, and 6) Clear contract terms.',
+    a: 'Look for: 1) Portfolio showing weddings similar to yours (Arabic, Western, Indian style), 2) Experience with your venue, 3) Equipment quality (4K cameras, stabilizers), 4) Editing style that matches your taste, 5) Reviews from previous couples, and 6) Clear contract terms.',
   },
   {
     q: 'How long does it take to receive the wedding video?',
@@ -73,7 +73,7 @@ const packages = [
       'Multi-camera coverage',
       '5-8 min cinematic film',
       'Full ceremony & speeches',
-      'Drone footage',
+      'Cinematic color grading',
       'USB in premium box',
     ],
     popular: true,
@@ -87,7 +87,7 @@ const packages = [
       '3+ camera angles',
       '10-15 min documentary film',
       'Same-day edit screening',
-      'Drone + gimbal coverage',
+      'Gimbal + crane shots',
       'Raw footage included',
     ],
     popular: false,
@@ -316,7 +316,7 @@ export default function WeddingVideographyPage() {
             <div>
               <h3 className="text-xl font-bold mb-4 text-pink-400">Special Shots</h3>
               <ul className="space-y-2 text-gray-300">
-                <li>• Drone aerial footage</li>
+                <li>• Wide-angle venue shots</li>
                 <li>• Sunset/golden hour portraits</li>
                 <li>• Slow-motion moments</li>
                 <li>• Candid guest interactions</li>
