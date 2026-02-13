@@ -1,5 +1,5 @@
-import { redirect } from 'next/navigation';
+import { permanentRedirect } from 'next/navigation';
 
 export async function GET() {
-  redirect('/things-to-do-in-bahrain');
+  permanentRedirect('/things-to-do-in-bahrain');
 }
