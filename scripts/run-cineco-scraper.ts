@@ -37,8 +37,6 @@ interface MovieRecord {
   slug: string;
   title: string;
   scraped_from: string[] | null;
-  cineco_url?: string;
-  cineco_booking_url?: string;
 }
 
 /**
@@ -71,7 +69,7 @@ async function updateDatabase(
       // Check if movie exists
       const { data: existing, error: fetchError } = await supabase
         .from('movies')
-        .select('id, slug, title, scraped_from, cineco_url, cineco_booking_url')
+        .select('id, slug, title, scraped_from')
         .eq('slug', slug)
         .single();
 
@@ -89,8 +87,6 @@ async function updateDatabase(
         const updateData: Record<string, unknown> = {
           is_now_showing: movie.isNowShowing || (existing as MovieRecord).scraped_from?.includes('vox'),
           is_coming_soon: movie.isComingSoon,
-          cineco_url: movie.cinecoUrl,
-          cineco_booking_url: movie.bookingUrl,
           updated_at: new Date().toISOString()
         };
 
@@ -158,8 +154,6 @@ async function updateDatabase(
           is_now_showing: movie.isNowShowing,
           is_coming_soon: movie.isComingSoon,
           scraped_from: ['cineco'],
-          cineco_url: movie.cinecoUrl,
-          cineco_booking_url: movie.bookingUrl,
           created_at: new Date().toISOString(),
           updated_at: new Date().toISOString()
         };
@@ -221,8 +215,6 @@ async function cleanupOldMovies(currentSlugs: string[]): Promise<void> {
 
         const updateData: Record<string, unknown> = {
           scraped_from: updatedSources,
-          cineco_url: null,
-          cineco_booking_url: null,
           updated_at: new Date().toISOString()
         };
 
