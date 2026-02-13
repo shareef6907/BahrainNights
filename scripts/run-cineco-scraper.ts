@@ -69,7 +69,7 @@ async function updateDatabase(
       // Check if movie exists
       const { data: existing, error: fetchError } = await supabase
         .from('movies')
-        .select('id, slug, title, scraped_from')
+        .select('id, slug, title, scraped_from, poster_url')
         .eq('slug', slug)
         .single();
 
@@ -92,6 +92,13 @@ async function updateDatabase(
 
         if (!hasCineco) {
           updateData.scraped_from = [...currentSources, 'cineco'];
+        }
+
+        // Update poster if existing doesn't have one and we have a Cineco poster
+        const existingPoster = (existing as MovieRecord & { poster_url?: string }).poster_url;
+        if ((!existingPoster || !existingPoster.startsWith('http')) && movie.posterUrl) {
+          updateData.poster_url = movie.posterUrl;
+          console.log(`  📸 Adding Cineco poster for: ${movie.title}`);
         }
 
         // Add trailer if we have one and existing doesn't
