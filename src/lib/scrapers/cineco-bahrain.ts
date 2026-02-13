@@ -160,15 +160,30 @@ function parseNowShowingFromHTML(html: string): ScrapedMovie[] {
         bookingUrl = $bookLink.attr('href');
       }
       
-      // Get poster URL (from img in container)
+      // Get poster URL - Cineco uses CSS background-image on .movie-poster divs
       let posterUrl: string | undefined;
-      // Look for poster in the movie card area
-      const $parentCard = $heading.closest('div').parent().parent();
-      const $posterImg = $parentCard.find('img').first();
-      if ($posterImg.length) {
-        posterUrl = $posterImg.attr('src') || $posterImg.attr('data-src');
-        if (posterUrl && !posterUrl.startsWith('http')) {
-          posterUrl = `https://bahrain.cineco.net${posterUrl}`;
+      // Find the movie card container and look for .movie-poster with background style
+      const $movieCard = $heading.closest('.customized-movie-poster, .col-sm-3');
+      const $posterDiv = $movieCard.find('.movie-poster');
+      if ($posterDiv.length) {
+        const style = $posterDiv.attr('style') || '';
+        // Extract URL from background:url(...) or background-image:url(...)
+        const bgMatch = style.match(/url\(['"]?([^'")\s]+)['"]?\)/);
+        if (bgMatch && bgMatch[1]) {
+          posterUrl = bgMatch[1];
+          if (!posterUrl.startsWith('http')) {
+            posterUrl = `https://bahrain.cineco.net${posterUrl}`;
+          }
+        }
+      }
+      // Fallback: try img tag
+      if (!posterUrl) {
+        const $posterImg = $movieCard.find('img').first();
+        if ($posterImg.length) {
+          posterUrl = $posterImg.attr('src') || $posterImg.attr('data-src');
+          if (posterUrl && !posterUrl.startsWith('http')) {
+            posterUrl = `https://bahrain.cineco.net${posterUrl}`;
+          }
         }
       }
       
