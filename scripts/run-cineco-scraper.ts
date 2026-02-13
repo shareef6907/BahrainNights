@@ -135,10 +135,19 @@ async function updateDatabase(
         const cinecoLanguage = movie.language ? 
           languageMap[movie.language.toLowerCase()] || movie.language : null;
 
+        // Poster fallback chain: TMDB → Cineco scraped poster
+        const finalPosterUrl = tmdbData?.poster_url || movie.posterUrl || null;
+        
+        // SKIP movies without any poster - every movie must have a poster
+        if (!finalPosterUrl) {
+          console.log(`  ⚠️ Skipping ${movie.title}: No poster available (TMDB or Cineco)`);
+          continue;
+        }
+
         const movieData = {
           title: tmdbData?.title || movie.title,
           slug: slug,
-          poster_url: tmdbData?.poster_url || movie.posterUrl || null,
+          poster_url: finalPosterUrl,
           backdrop_url: tmdbData?.backdrop_url || null,
           trailer_url: tmdbData?.trailer_url || movie.trailerUrl || null,
           trailer_key: tmdbData?.trailer_key || null,
