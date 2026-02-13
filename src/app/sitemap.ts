@@ -907,7 +907,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       priority: 0.8,
     },
     {
-      url: `${BASE_URL}/international/saudi`,
+      url: `${BASE_URL}/international/saudi-arabia`,
       lastModified: new Date(),
       changeFrequency: 'daily',
       priority: 0.8,
@@ -925,7 +925,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       priority: 0.7,
     },
     {
-      url: `${BASE_URL}/international/turkey`,
+      url: `${BASE_URL}/international/turkiye`,
       lastModified: new Date(),
       changeFrequency: 'daily',
       priority: 0.7,
