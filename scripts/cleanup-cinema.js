@@ -3,9 +3,9 @@
  *
  * Marks movies as inactive if:
  * 1. They haven't been updated in 7 days (no longer showing)
- * 2. They are not from VOX
+ * 2. They are not from supported cinemas (VOX or Cineco)
  *
- * Run daily after the VOX scraper
+ * Run after cinema scrapers (VOX + Cineco)
  */
 
 // Load .env.local for local development
@@ -85,6 +85,8 @@ async function cleanupCinema() {
     // (Keep movies but remove invalid cinema sources)
     console.log('\nCleaning up non-VOX cinema sources...');
 
+    // NOTE: We now support multiple cinemas (VOX and Cineco)
+    // Only clean up sources that are no longer valid (cinepolis, mukta, etc)
     const { data: allMovies, error: fetchError } = await supabase
       .from('movies')
       .select('id, title, scraped_from')
@@ -95,12 +97,12 @@ async function cleanupCinema() {
     } else {
       for (const movie of allMovies || []) {
         const currentSources = movie.scraped_from || [];
-        // Only keep 'vox' in scraped_from (remove cineco, cinepolis, mukta)
+        // Keep 'vox' and 'cineco' in scraped_from (remove cinepolis, mukta, etc)
         const validSources = currentSources.filter(s =>
-          s.toLowerCase() === 'vox'
+          s.toLowerCase() === 'vox' || s.toLowerCase() === 'cineco'
         );
 
-        // Only update if sources changed
+        // Only update if sources changed (removed invalid sources)
         if (validSources.length !== currentSources.length) {
           const updateData = {
             scraped_from: validSources.length > 0 ? validSources : null,
