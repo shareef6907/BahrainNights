@@ -96,22 +96,22 @@ function filterValidMovies(movies: DBMovie[]): DBMovie[] {
   });
 }
 
-// Fetch all movies on the server (VOX only + manual entries)
+// Fetch all movies on the server (VOX + Cineco + manual entries)
 async function getMovies() {
   const [nowShowingRes, comingSoonRes] = await Promise.all([
     supabaseAdmin
       .from('movies')
       .select('*')
       .eq('is_now_showing', true)
-      // Only show VOX movies or manual entries (no scraped_from)
-      .or('scraped_from.is.null,scraped_from.cs.{vox}')
+      // Show VOX, Cineco movies or manual entries (no scraped_from)
+      .or('scraped_from.is.null,scraped_from.cs.{vox},scraped_from.cs.{cineco}')
       .order('tmdb_rating', { ascending: false }),
     supabaseAdmin
       .from('movies')
       .select('*')
       .eq('is_coming_soon', true)
-      // Only show VOX movies or manual entries (no scraped_from)
-      .or('scraped_from.is.null,scraped_from.cs.{vox}')
+      // Show VOX, Cineco movies or manual entries (no scraped_from)
+      .or('scraped_from.is.null,scraped_from.cs.{vox},scraped_from.cs.{cineco}')
       .order('release_date', { ascending: true })
   ]);
 
@@ -191,12 +191,12 @@ export default async function CinemaPage() {
 
 // Metadata for SEO
 export const metadata = {
-  title: 'Cinema in Bahrain - Movies Now Showing & Coming Soon | VOX Cinemas',
-  description: 'Find movies now showing at VOX Cinemas Bahrain. Check what\'s playing at VOX City Centre and VOX The Avenues. Watch trailers, see showtimes, and book tickets online.',
-  keywords: ['cinema in Bahrain', 'movies in Bahrain', 'Bahrain cinema', 'now showing Bahrain', 'VOX Bahrain', 'VOX City Centre', 'VOX The Avenues', 'movie showtimes Bahrain'],
+  title: 'Cinema in Bahrain - Movies Now Showing & Coming Soon | VOX & Cineco',
+  description: 'Find movies now showing at VOX Cinemas and Cineco Bahrain. Check what\'s playing, watch trailers, and book tickets online at VOX City Centre, VOX The Avenues, Cineco Seef, and more.',
+  keywords: ['cinema in Bahrain', 'movies in Bahrain', 'Bahrain cinema', 'now showing Bahrain', 'VOX Bahrain', 'Cineco Bahrain', 'VOX City Centre', 'VOX The Avenues', 'Cineco Seef', 'movie showtimes Bahrain'],
   openGraph: {
-    title: 'Cinema in Bahrain - Movies Now Showing & Coming Soon | VOX Cinemas',
-    description: 'Find movies now showing at VOX Cinemas Bahrain. Check what\'s playing at VOX City Centre and VOX The Avenues.',
+    title: 'Cinema in Bahrain - Movies Now Showing & Coming Soon | VOX & Cineco',
+    description: 'Find movies now showing at VOX Cinemas and Cineco Bahrain. Watch trailers and book tickets online.',
     url: 'https://www.bahrainnights.com/cinema',
     type: 'website',
   },
@@ -206,6 +206,6 @@ export const metadata = {
   twitter: {
     card: 'summary_large_image',
     title: 'Cinema in Bahrain - Movies Now Showing & Coming Soon',
-    description: 'Find movies now showing at VOX Cinemas Bahrain. Check showtimes and book tickets online.',
+    description: 'Find movies now showing at VOX Cinemas and Cineco Bahrain. Book tickets online.',
   },
 };

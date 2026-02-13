@@ -1,19 +1,19 @@
-name: Cinema Sync - VOX Bahrain
+name: Cinema Sync - VOX & Cineco Bahrain
 
-# VOX Bahrain Cinema Scraper
-# Runs Monday, Thursday, Friday at 6 AM Bahrain time (3 AM UTC)
-# Scrapes VOX City Centre Bahrain and VOX The Avenues
-# Uses JSON-LD structured data - no browser needed!
+# Cinema Scraper for BahrainNights
+# Runs Saturday, Monday, Thursday at 6 AM Bahrain time (3 AM UTC)
+# Scrapes VOX and Cineco cinemas using Playwright browser automation
+# Deduplicates movies and updates the database
 
 on:
   schedule:
-    - cron: '0 3 * * 1,4,5'  # 3 AM UTC = 6 AM Bahrain | Mon, Thu, Fri
+    - cron: '0 3 * * 1,4,6'  # 3 AM UTC = 6 AM Bahrain | Mon, Thu, Sat
   workflow_dispatch:  # Allow manual runs
 
 jobs:
-  scrape-vox:
+  scrape-cinemas:
     runs-on: ubuntu-latest
-    timeout-minutes: 15
+    timeout-minutes: 30
     steps:
       - uses: actions/checkout@v4
 
@@ -25,13 +25,24 @@ jobs:
       - name: Install dependencies
         run: npm install --legacy-peer-deps
 
-      # Run VOX Bahrain scraper (TypeScript with JSON-LD parsing)
+      - name: Install Playwright browsers
+        run: npx playwright install chromium --with-deps
+
+      # Run VOX Bahrain scraper (Playwright browser automation)
       - name: Scrape VOX Bahrain
         env:
           SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
           SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
           TMDB_API_KEY: ${{ secrets.TMDB_API_KEY }}
         run: npx tsx scripts/run-vox-scraper.ts
+
+      # Run Cineco scraper
+      - name: Scrape Cineco Bahrain
+        env:
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
+          TMDB_API_KEY: ${{ secrets.TMDB_API_KEY }}
+        run: npx tsx scripts/run-cineco-scraper.ts
 
       # Run cleanup for old movies
       - name: Cleanup old movies

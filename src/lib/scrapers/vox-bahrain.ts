@@ -1,30 +1,11 @@
 /**
  * VOX Bahrain Cinema Scraper
  *
- * Uses cheerio for HTML parsing - no browser needed.
- * Scrapes from VOX Bahrain's showtimes and coming soon pages.
+ * Uses Puppeteer with stealth plugin for browser automation to scrape VOX Bahrain movies.
+ * Stealth plugin helps bypass anti-bot detection.
  */
 
 import * as cheerio from 'cheerio';
-
-// Comprehensive browser-like headers to avoid bot detection
-const BROWSER_HEADERS: Record<string, string> = {
-  'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
-  'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.7',
-  'Accept-Language': 'en-US,en;q=0.9,ar;q=0.8',
-  'Accept-Encoding': 'gzip, deflate, br',
-  'Cache-Control': 'no-cache',
-  'Pragma': 'no-cache',
-  'Sec-Ch-Ua': '"Not_A Brand";v="8", "Chromium";v="120", "Google Chrome";v="120"',
-  'Sec-Ch-Ua-Mobile': '?0',
-  'Sec-Ch-Ua-Platform': '"Windows"',
-  'Sec-Fetch-Dest': 'document',
-  'Sec-Fetch-Mode': 'navigate',
-  'Sec-Fetch-Site': 'none',
-  'Sec-Fetch-User': '?1',
-  'Upgrade-Insecure-Requests': '1',
-  'Connection': 'keep-alive',
-};
 
 // Types
 export interface ScrapedMovie {
@@ -61,66 +42,9 @@ export interface TMDBMovie {
 
 // VOX Bahrain URLs
 export const VOX_URLS = {
-  // Showtimes pages for Now Showing movies
-  showtimes: [
-    {
-      url: 'https://bhr.voxcinemas.com/showtimes?c=city-centre-bahrain',
-      location: 'VOX City Centre Bahrain'
-    },
-    {
-      url: 'https://bhr.voxcinemas.com/showtimes?c=vox-cinemas-the-avenues',
-      location: 'VOX The Avenues'
-    }
-  ],
-  // Coming Soon page
+  whatson: 'https://bhr.voxcinemas.com/movies/whatson',
   comingSoon: 'https://bhr.voxcinemas.com/movies/comingsoon'
 };
-
-/**
- * Fetch HTML content from a URL with retry logic and proper headers
- */
-async function fetchHTML(url: string, maxRetries = 3): Promise<string> {
-  let lastError: Error | null = null;
-
-  for (let attempt = 1; attempt <= maxRetries; attempt++) {
-    try {
-      console.log(`  Fetch attempt ${attempt}/${maxRetries} for ${url}`);
-
-      // Create abort controller for timeout
-      const controller = new AbortController();
-      const timeoutId = setTimeout(() => controller.abort(), 30000); // 30 second timeout
-
-      const response = await fetch(url, {
-        headers: BROWSER_HEADERS,
-        signal: controller.signal,
-        redirect: 'follow',
-      });
-
-      clearTimeout(timeoutId);
-
-      if (!response.ok) {
-        throw new Error(`HTTP ${response.status}: ${response.statusText}`);
-      }
-
-      const html = await response.text();
-      console.log(`  Success: received ${html.length} bytes`);
-      return html;
-
-    } catch (error) {
-      lastError = error instanceof Error ? error : new Error(String(error));
-      console.log(`  Attempt ${attempt} failed: ${lastError.message}`);
-
-      if (attempt < maxRetries) {
-        // Exponential backoff: 2s, 4s, 6s
-        const delay = attempt * 2000;
-        console.log(`  Waiting ${delay / 1000}s before retry...`);
-        await new Promise(resolve => setTimeout(resolve, delay));
-      }
-    }
-  }
-
-  throw lastError || new Error(`Failed to fetch ${url} after ${maxRetries} attempts`);
-}
 
 /**
  * Clean and normalize movie title
@@ -130,8 +54,10 @@ export function cleanTitle(title: string): string {
 
   return title
     .trim()
-    // Remove common tags and ratings
-    .replace(/\s*\(?\s*(pg|pg-?\d+|15\+?|18\+?|tbc|tc|arabic|english|hindi|dub(bed)?)\s*\)?$/gi, '')
+    // Remove common tags and ratings at the end
+    .replace(/\s*\(?\s*(pg|pg-?\d+|15\+?|18\+?|18tc|tbc|tc|arabic|english|hindi|dub(bed)?)\s*\)?$/gi, '')
+    // Remove rating prefixes (PG15, 18+, etc)
+    .replace(/^(PG\d*|18\+?|15\+?|18TC)\s+/i, '')
     // Remove duration info
     .replace(/\s*-?\s*\d+\s*(mins?|hours?|hr?s?)\s*$/gi, '')
     // Remove IMAX/3D/4DX tags
@@ -154,7 +80,8 @@ export function isValidTitle(title: string): boolean {
     'log in', 'login', 'register', 'sign in', 'home', 'movies', 'cinemas',
     'experiences', 'about', 'contact', 'privacy policy', 'terms', 'faq',
     'offers', 'whats on', "what's on", 'discover movies', 'food & drinks',
-    'see more', 'view all', 'load more', 'show more'
+    'see more', 'view all', 'load more', 'show more', 'showtimes', 'view movie',
+    'vox cinemas', 'select your cinema', 'select your movie', 'find times and book'
   ];
 
   const lowerTitle = title.toLowerCase();
@@ -162,7 +89,7 @@ export function isValidTitle(title: string): boolean {
 
   // Check for garbage patterns
   if (/^\d+\s*mins?$/i.test(title)) return false;
-  if (/^(pg|pg-?\d+|15\+?|18\+?)$/i.test(title)) return false;
+  if (/^(pg|pg-?\d+|15\+?|18\+?|18tc)$/i.test(title)) return false;
   if (/^[^a-zA-Z]*$/.test(title)) return false;
 
   return true;
@@ -180,224 +107,227 @@ export function createSlug(title: string): string {
 }
 
 /**
- * JSON-LD Movie data structure from VOX website
+ * Parse movies from HTML using Cheerio
  */
-interface VOXJsonLdMovie {
-  '@type': string;
-  name: string;
-  url?: string;
-  image?: string;
-  duration?: string; // Format: PT100M (ISO 8601)
-  inLanguage?: string;
-  contentRating?: string;
-  description?: string;
-}
-
-interface VOXJsonLdListItem {
-  '@type': string;
-  position: number;
-  item: VOXJsonLdMovie;
-}
-
-interface VOXJsonLdData {
-  '@context': string;
-  '@type': string;
-  itemListElement: VOXJsonLdListItem[];
-}
-
-/**
- * Extract JSON-LD structured data from page HTML
- */
-function extractJsonLd(html: string): VOXJsonLdData | null {
+function parseMoviesFromHTML(html: string, isComingSoon: boolean): ScrapedMovie[] {
   const $ = cheerio.load(html);
+  const movies: ScrapedMovie[] = [];
+  const seenTitles = new Set<string>();
 
-  let jsonLdData: VOXJsonLdData | null = null;
-
-  $('script[type="application/ld+json"]').each((_, script) => {
+  // Find all article elements (each contains a movie)
+  $('article').each((_, article) => {
     try {
-      const content = $(script).html();
-      if (content) {
-        const parsed = JSON.parse(content);
-        // Check if this is the movie list data
-        if (parsed['@type'] === 'itemList' && parsed.itemListElement) {
-          jsonLdData = parsed as VOXJsonLdData;
+      const $article = $(article);
+      
+      // Get movie link and extract URL
+      const movieLink = $article.find('a[href*="/movies/"]').first();
+      const href = movieLink.attr('href') || '';
+      
+      if (!href || href === '/movies/whatson' || href === '/movies/comingsoon') {
+        return;
+      }
+      
+      // Extract title from h3 heading
+      const $heading = $article.find('h3');
+      let title = '';
+      
+      // The title might be in a link inside h3
+      const $titleLink = $heading.find('a');
+      if ($titleLink.length > 0) {
+        title = $titleLink.text().trim();
+      } else {
+        title = $heading.text().trim();
+      }
+      
+      // Clean the title (remove rating prefixes like "PG15", "18+", etc.)
+      title = cleanTitle(title);
+      
+      if (!isValidTitle(title)) {
+        return;
+      }
+      
+      // Skip duplicates
+      const titleKey = title.toLowerCase();
+      if (seenTitles.has(titleKey)) {
+        return;
+      }
+      seenTitles.add(titleKey);
+      
+      // Get poster URL
+      const posterImg = $article.find('img').first();
+      let posterUrl = posterImg.attr('src') || '';
+      
+      // Make sure it's an absolute URL
+      if (posterUrl && !posterUrl.startsWith('http')) {
+        posterUrl = `https://bhr.voxcinemas.com${posterUrl}`;
+      }
+      
+      // Get language
+      let language = 'English';
+      const articleText = $article.text();
+      const languageMatch = articleText.match(/Language:\s*(\w+)/i);
+      if (languageMatch) {
+        language = languageMatch[1];
+      }
+      
+      // Get rating
+      let rating = '';
+      const ratingMatch = articleText.match(/(PG\d*|18\+?|15\+?|18TC)/i);
+      if (ratingMatch) {
+        rating = ratingMatch[1];
+      }
+      
+      // Get release date (for coming soon)
+      let releaseDate = '';
+      if (isComingSoon) {
+        const releaseDateMatch = articleText.match(/Release Date:\s*(\d+\s+\w+\s+\d{4})/i);
+        if (releaseDateMatch) {
+          releaseDate = releaseDateMatch[1];
         }
       }
-    } catch {
-      // Ignore parse errors, try next script
+      
+      // Get synopsis (for coming soon, it's in a paragraph)
+      let synopsis = '';
+      if (isComingSoon) {
+        const $paragraphs = $article.find('p');
+        $paragraphs.each((_, p) => {
+          const text = $(p).text().trim();
+          // Skip if it's metadata (contains Release Date, Language, etc.)
+          if (!text.includes('Release Date:') && !text.includes('Language:') && !text.includes('Starring:') && text.length > 50) {
+            synopsis = text;
+          }
+        });
+      }
+      
+      // Build VOX URL
+      let voxUrl = href;
+      if (voxUrl && !voxUrl.startsWith('http')) {
+        voxUrl = `https://bhr.voxcinemas.com${voxUrl}`;
+      }
+      
+      movies.push({
+        title,
+        slug: createSlug(title),
+        voxUrl,
+        posterUrl: posterUrl || undefined,
+        releaseDate: releaseDate || undefined,
+        isNowShowing: !isComingSoon,
+        isComingSoon,
+        cinemaLocations: ['VOX City Centre Bahrain', 'VOX The Avenues'],
+        language,
+        rating: rating || undefined,
+        synopsis: synopsis || undefined
+      });
+      
+    } catch (error) {
+      console.error('Error parsing article:', error);
     }
   });
 
-  return jsonLdData;
-}
-
-/**
- * Parse ISO 8601 duration (PT100M) to minutes
- */
-function parseDuration(isoDuration: string | undefined): number | undefined {
-  if (!isoDuration) return undefined;
-  const match = isoDuration.match(/PT(\d+)M/);
-  return match ? parseInt(match[1], 10) : undefined;
-}
-
-/**
- * Scrape Now Showing movies from showtimes page using JSON-LD
- */
-export async function scrapeNowShowing(url: string, location: string): Promise<ScrapedMovie[]> {
-  console.log(`Scraping Now Showing from: ${url}`);
-  const movies: ScrapedMovie[] = [];
-
-  try {
-    const html = await fetchHTML(url);
-
-    // Extract JSON-LD structured data
-    const jsonLdData = extractJsonLd(html);
-
-    if (jsonLdData && jsonLdData.itemListElement) {
-      console.log(`  Found ${jsonLdData.itemListElement.length} movies in JSON-LD data`);
-
-      for (const listItem of jsonLdData.itemListElement) {
-        const movie = listItem.item;
-
-        if (movie && movie['@type'] === 'Movie' && movie.name) {
-          const cleanedTitle = cleanTitle(movie.name);
-
-          if (isValidTitle(cleanedTitle)) {
-            // Construct full VOX URL
-            let voxUrl = movie.url;
-            if (voxUrl && !voxUrl.startsWith('http')) {
-              voxUrl = `https://bhr.voxcinemas.com${voxUrl}`;
-            }
-
-            movies.push({
-              title: cleanedTitle,
-              slug: createSlug(cleanedTitle),
-              voxUrl: voxUrl || undefined,
-              posterUrl: movie.image || undefined,
-              isNowShowing: true,
-              isComingSoon: false,
-              cinemaLocations: [location],
-              language: movie.inLanguage,
-              rating: movie.contentRating,
-              durationMinutes: parseDuration(movie.duration)
-            });
-          }
-        }
-      }
-    } else {
-      console.log(`  No JSON-LD data found, trying HTML fallback`);
-
-      // Fallback to HTML parsing
-      const $ = cheerio.load(html);
-      const foundTitles = new Set<string>();
-
-      // Try to find movie links
-      $('a[href*="/movies/"]').each((_, element) => {
-        const $el = $(element);
-        const href = $el.attr('href') || '';
-        const title = $el.text().trim() || $el.find('h1, h2, h3, h4, h5, h6').first().text().trim();
-        const cleanedTitle = cleanTitle(title);
-
-        if (isValidTitle(cleanedTitle) && !foundTitles.has(cleanedTitle.toLowerCase())) {
-          foundTitles.add(cleanedTitle.toLowerCase());
-          movies.push({
-            title: cleanedTitle,
-            slug: createSlug(cleanedTitle),
-            voxUrl: href.startsWith('http') ? href : `https://bhr.voxcinemas.com${href}`,
-            isNowShowing: true,
-            isComingSoon: false,
-            cinemaLocations: [location]
-          });
-        }
-      });
-    }
-
-    console.log(`  Found ${movies.length} Now Showing movies from ${location}`);
-  } catch (error) {
-    console.error(`  Error scraping ${url}:`, error instanceof Error ? error.message : error);
-  }
-
   return movies;
 }
 
 /**
- * Scrape Coming Soon movies using JSON-LD
+ * Launch browser with stealth settings
  */
-export async function scrapeComingSoon(url: string): Promise<ScrapedMovie[]> {
-  console.log(`Scraping Coming Soon from: ${url}`);
-  const movies: ScrapedMovie[] = [];
+async function launchBrowser() {
+  // Dynamic imports for puppeteer-extra
+  const puppeteerExtra = await import('puppeteer-extra');
+  const StealthPlugin = await import('puppeteer-extra-plugin-stealth');
+  
+  // Add stealth plugin
+  puppeteerExtra.default.use(StealthPlugin.default());
+  
+  const browser = await puppeteerExtra.default.launch({
+    headless: true,
+    args: [
+      '--no-sandbox',
+      '--disable-setuid-sandbox',
+      '--disable-dev-shm-usage',
+      '--disable-accelerated-2d-canvas',
+      '--disable-gpu',
+      '--window-size=1920,1080',
+      '--disable-blink-features=AutomationControlled'
+    ]
+  });
+  
+  return browser;
+}
 
+/**
+ * Scrape a page with Puppeteer
+ */
+async function scrapePage(url: string): Promise<string> {
+  const browser = await launchBrowser();
+  
   try {
-    const html = await fetchHTML(url);
+    const page = await browser.newPage();
+    
+    // Set viewport
+    await page.setViewport({ width: 1920, height: 1080 });
+    
+    // Set extra headers
+    await page.setExtraHTTPHeaders({
+      'Accept-Language': 'en-US,en;q=0.9'
+    });
+    
+    // Navigate to the page
+    await page.goto(url, { 
+      waitUntil: 'networkidle2',
+      timeout: 60000 
+    });
+    
+    // Wait a bit for any dynamic content
+    await new Promise(resolve => setTimeout(resolve, 3000));
+    
+    // Get page content
+    const html = await page.content();
+    
+    return html;
+    
+  } finally {
+    await browser.close();
+  }
+}
 
-    // Extract JSON-LD structured data
-    const jsonLdData = extractJsonLd(html);
+/**
+ * Scrape Now Showing movies
+ */
+export async function scrapeNowShowing(): Promise<ScrapedMovie[]> {
+  console.log(`\nScraping Now Showing from: ${VOX_URLS.whatson}`);
+  
+  try {
+    const html = await scrapePage(VOX_URLS.whatson);
+    const movies = parseMoviesFromHTML(html, false);
+    
+    console.log(`  Found ${movies.length} Now Showing movies`);
+    
+    return movies;
+    
+  } catch (error) {
+    console.error('Error scraping Now Showing:', error instanceof Error ? error.message : error);
+    return [];
+  }
+}
 
-    if (jsonLdData && jsonLdData.itemListElement) {
-      console.log(`  Found ${jsonLdData.itemListElement.length} movies in JSON-LD data`);
-
-      for (const listItem of jsonLdData.itemListElement) {
-        const movie = listItem.item;
-
-        if (movie && movie['@type'] === 'Movie' && movie.name) {
-          const cleanedTitle = cleanTitle(movie.name);
-
-          if (isValidTitle(cleanedTitle)) {
-            // Construct full VOX URL
-            let voxUrl = movie.url;
-            if (voxUrl && !voxUrl.startsWith('http')) {
-              voxUrl = `https://bhr.voxcinemas.com${voxUrl}`;
-            }
-
-            movies.push({
-              title: cleanedTitle,
-              slug: createSlug(cleanedTitle),
-              voxUrl: voxUrl || undefined,
-              posterUrl: movie.image || undefined,
-              synopsis: movie.description || undefined,
-              isNowShowing: false,
-              isComingSoon: true,
-              cinemaLocations: ['VOX City Centre Bahrain', 'VOX The Avenues'],
-              language: movie.inLanguage,
-              rating: movie.contentRating
-            });
-          }
-        }
-      }
-    } else {
-      console.log(`  No JSON-LD data found, trying HTML fallback`);
-
-      // Fallback to HTML parsing
-      const $ = cheerio.load(html);
-      const foundTitles = new Set<string>();
-
-      // Try to find movie links
-      $('a[href*="/movies/"]').each((_, element) => {
-        const $el = $(element);
-        const href = $el.attr('href') || '';
-        const title = $el.text().trim() || $el.find('h1, h2, h3, h4, h5, h6').first().text().trim();
-        const cleanedTitle = cleanTitle(title);
-
-        if (isValidTitle(cleanedTitle) && !foundTitles.has(cleanedTitle.toLowerCase())) {
-          foundTitles.add(cleanedTitle.toLowerCase());
-          movies.push({
-            title: cleanedTitle,
-            slug: createSlug(cleanedTitle),
-            voxUrl: href.startsWith('http') ? href : `https://bhr.voxcinemas.com${href}`,
-            isNowShowing: false,
-            isComingSoon: true,
-            cinemaLocations: ['VOX City Centre Bahrain', 'VOX The Avenues']
-          });
-        }
-      });
-    }
-
+/**
+ * Scrape Coming Soon movies
+ */
+export async function scrapeComingSoon(): Promise<ScrapedMovie[]> {
+  console.log(`\nScraping Coming Soon from: ${VOX_URLS.comingSoon}`);
+  
+  try {
+    const html = await scrapePage(VOX_URLS.comingSoon);
+    const movies = parseMoviesFromHTML(html, true);
+    
     console.log(`  Found ${movies.length} Coming Soon movies`);
+    
+    return movies;
+    
   } catch (error) {
-    console.error(`  Error scraping Coming Soon:`, error instanceof Error ? error.message : error);
+    console.error('Error scraping Coming Soon:', error instanceof Error ? error.message : error);
+    return [];
   }
-
-  return movies;
 }
 
 /**
@@ -495,51 +425,40 @@ export async function scrapeVOXBahrain(): Promise<{
   comingSoon: ScrapedMovie[];
 }> {
   console.log('='.repeat(60));
-  console.log('VOX BAHRAIN CINEMA SCRAPER (Cheerio)');
+  console.log('VOX BAHRAIN CINEMA SCRAPER (Puppeteer Stealth)');
   console.log('Started at:', new Date().toISOString());
   console.log('='.repeat(60));
 
-  const allNowShowing: ScrapedMovie[] = [];
-  const seenNowShowing = new Set<string>();
-
-  // Scrape Now Showing from all showtimes pages
-  for (const source of VOX_URLS.showtimes) {
-    const movies = await scrapeNowShowing(source.url, source.location);
-
-    for (const movie of movies) {
-      const key = movie.title.toLowerCase();
-      if (seenNowShowing.has(key)) {
-        // Movie already exists, add location
-        const existing = allNowShowing.find(m => m.title.toLowerCase() === key);
-        if (existing && !existing.cinemaLocations.includes(source.location)) {
-          existing.cinemaLocations.push(source.location);
-        }
-      } else {
-        seenNowShowing.add(key);
-        allNowShowing.push(movie);
-      }
-    }
-
-    // Small delay between requests
-    await new Promise(resolve => setTimeout(resolve, 1000));
-  }
-
+  // Scrape Now Showing
+  const nowShowing = await scrapeNowShowing();
+  
+  // Small delay between requests
+  await new Promise(resolve => setTimeout(resolve, 2000));
+  
   // Scrape Coming Soon
-  const comingSoon = await scrapeComingSoon(VOX_URLS.comingSoon);
+  const comingSoon = await scrapeComingSoon();
 
-  // Filter out movies that are already in Now Showing
+  // Filter out coming soon movies that are already in now showing
+  const nowShowingTitles = new Set(nowShowing.map(m => m.title.toLowerCase()));
   const filteredComingSoon = comingSoon.filter(
-    movie => !seenNowShowing.has(movie.title.toLowerCase())
+    movie => !nowShowingTitles.has(movie.title.toLowerCase())
   );
 
   console.log('\n' + '='.repeat(60));
   console.log('SCRAPE SUMMARY');
   console.log('='.repeat(60));
-  console.log(`Now Showing: ${allNowShowing.length} unique movies`);
+  console.log(`Now Showing: ${nowShowing.length} unique movies`);
   console.log(`Coming Soon: ${filteredComingSoon.length} unique movies`);
+  
+  // Log movie titles for debugging
+  console.log('\nNow Showing Movies:');
+  nowShowing.forEach((m, i) => console.log(`  ${i + 1}. ${m.title}`));
+  
+  console.log('\nComing Soon Movies:');
+  filteredComingSoon.forEach((m, i) => console.log(`  ${i + 1}. ${m.title}`));
 
   return {
-    nowShowing: allNowShowing,
+    nowShowing,
     comingSoon: filteredComingSoon
   };
 }
