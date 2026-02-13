@@ -76,14 +76,14 @@ function convertToMovieFormat(dbMovie: DBMovie): Movie {
 
 // Filter and deduplicate movies
 function filterValidMovies(movies: DBMovie[]): DBMovie[] {
-  // Filter movies with valid poster URLs
+  // Filter movies - allow those with valid posters OR from Cineco/VOX scrapers
   const validMovies = movies.filter(movie => {
     const poster = movie.poster_url || '';
-    // Must have valid poster URL (not placeholder, not null, starts with http)
-    if (!poster.startsWith('http') || poster.includes('placeholder') || poster.includes('null')) {
-      return false;
-    }
-    return true;
+    const hasValidPoster = poster.startsWith('http') && !poster.includes('placeholder') && !poster.includes('null');
+    const isFromScraper = movie.scraped_from && movie.scraped_from.length > 0;
+    
+    // Allow movies with valid posters OR movies from cinema scrapers (even without posters)
+    return hasValidPoster || isFromScraper;
   });
 
   // Remove duplicates by title (case-insensitive)
