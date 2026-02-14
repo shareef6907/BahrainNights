@@ -27,6 +27,7 @@ import {
   FileText,
   Mail,
   Smartphone,
+  Music,
 } from 'lucide-react';
 import { useAuth } from '@/lib/auth-context';
 
@@ -67,6 +68,12 @@ const navItems = [
     name: 'Events',
     href: '/admin/events',
     icon: Calendar,
+  },
+  {
+    name: 'Artists',
+    href: '/admin/artists',
+    icon: Music,
+    highlight: true,
   },
   {
     name: 'Cinema',
