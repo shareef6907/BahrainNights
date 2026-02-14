@@ -34,7 +34,6 @@ const CATEGORY_COLORS: Record<ArtistCategory, string> = {
 };
 
 export default function ArtistCard({ artist, onBook, delay = 0 }: Props) {
-  const [isHovered, setIsHovered] = useState(false);
   const [imageLoaded, setImageLoaded] = useState(false);
 
   // Get display category (subcategory takes precedence for instrumentalists)
@@ -44,15 +43,11 @@ export default function ArtistCard({ artist, onBook, delay = 0 }: Props) {
 
   return (
     <div
-      className="group relative rounded-xl overflow-hidden bg-[#1a1a1a] transition-transform duration-300 hover:scale-[1.02] hover:shadow-2xl hover:shadow-amber-500/10 touch-manipulation"
+      className="group relative rounded-xl overflow-hidden bg-[#1a1a1a] transition-transform duration-300 md:hover:scale-[1.02] md:hover:shadow-2xl md:hover:shadow-amber-500/10 touch-manipulation"
       style={{ 
         opacity: 0,
         animation: `fade-in 0.5s ease-out ${delay}ms forwards`
       }}
-      onMouseEnter={() => setIsHovered(true)}
-      onMouseLeave={() => setIsHovered(false)}
-      onTouchStart={() => setIsHovered(true)}
-      onTouchEnd={() => setTimeout(() => setIsHovered(false), 300)}
     >
       {/* Image Container */}
       <Link href={`/artists/${artist.slug}`} className="block aspect-[3/4] relative overflow-hidden touch-manipulation">
@@ -67,9 +62,7 @@ export default function ArtistCard({ artist, onBook, delay = 0 }: Props) {
             src={artist.profile_image}
             alt={artist.stage_name}
             fill
-            className={`object-cover transition-all duration-700 ${
-              isHovered ? 'scale-110' : 'scale-100'
-            } ${imageLoaded ? 'opacity-100' : 'opacity-0'}`}
+            className={`object-cover transition-transform duration-500 md:group-hover:scale-110 ${imageLoaded ? 'opacity-100' : 'opacity-0'}`}
             sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 25vw"
             onLoad={() => setImageLoaded(true)}
           />
@@ -109,15 +102,10 @@ export default function ArtistCard({ artist, onBook, delay = 0 }: Props) {
           </p>
         )}
 
-        {/* Action Button - Shows on Hover/Touch */}
-        <div className={`transition-all duration-200 ${isHovered ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-2 md:opacity-0 md:translate-y-2'}`}>
+        {/* Action Button - Always visible on mobile, hover on desktop */}
+        <div className="transition-all duration-200 opacity-100 translate-y-0 md:opacity-0 md:translate-y-2 md:group-hover:opacity-100 md:group-hover:translate-y-0">
           <button
             onClick={(e) => {
-              e.preventDefault();
-              e.stopPropagation();
-              onBook?.();
-            }}
-            onTouchEnd={(e) => {
               e.preventDefault();
               e.stopPropagation();
               onBook?.();
@@ -129,10 +117,8 @@ export default function ArtistCard({ artist, onBook, delay = 0 }: Props) {
         </div>
       </div>
 
-      {/* Hover Glow Effect */}
-      <div className={`absolute inset-0 rounded-xl transition-opacity duration-500 pointer-events-none ${
-        isHovered ? 'opacity-100' : 'opacity-0'
-      }`}>
+      {/* Hover Glow Effect - Desktop only */}
+      <div className="absolute inset-0 rounded-xl transition-opacity duration-500 pointer-events-none opacity-0 md:group-hover:opacity-100">
         <div className="absolute inset-0 rounded-xl border border-amber-500/30" />
       </div>
 
