@@ -427,8 +427,8 @@ export default function AdminVenueEditPage({ params }: { params: Promise<{ id: s
   };
 
   const handleAIRewrite = async () => {
-    if (!formData.description) {
-      setToast({ message: 'Please enter a description first', type: 'error' });
+    if (!formData.name) {
+      setToast({ message: 'Please enter a venue name first', type: 'error' });
       return;
     }
 
@@ -438,16 +438,17 @@ export default function AdminVenueEditPage({ params }: { params: Promise<{ id: s
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          type: 'venue',
-          name: formData.name,
-          category: formData.category,
-          area: formData.area,
-          currentDescription: formData.description,
+          contentType: 'venue',
+          venueName: formData.name,
+          venueCategory: formData.category,
+          location: formData.area,
+          existingDescription: formData.description || '',
         }),
       });
 
       if (!response.ok) {
-        throw new Error('Failed to generate description');
+        const errorData = await response.json().catch(() => ({}));
+        throw new Error(errorData.error || 'Failed to generate description');
       }
 
       const data = await response.json();
@@ -455,10 +456,10 @@ export default function AdminVenueEditPage({ params }: { params: Promise<{ id: s
         ...prev,
         description: data.description,
       }));
-      setToast({ message: 'Description rewritten with AI', type: 'success' });
+      setToast({ message: 'Description rewritten with AI ✨', type: 'success' });
     } catch (error) {
       console.error('Error rewriting description:', error);
-      setToast({ message: 'Failed to rewrite description', type: 'error' });
+      setToast({ message: error instanceof Error ? error.message : 'Failed to rewrite description', type: 'error' });
     } finally {
       setAiRewriting(false);
     }
@@ -1046,7 +1047,7 @@ export default function AdminVenueEditPage({ params }: { params: Promise<{ id: s
                 <label className="block text-sm text-gray-400">Description</label>
                 <button
                   onClick={handleAIRewrite}
-                  disabled={aiRewriting || !formData.description}
+                  disabled={aiRewriting || !formData.name}
                   className="flex items-center gap-1 text-xs text-purple-400 hover:text-purple-300 disabled:opacity-50"
                 >
                   {aiRewriting ? (
@@ -1054,7 +1055,7 @@ export default function AdminVenueEditPage({ params }: { params: Promise<{ id: s
                   ) : (
                     <Sparkles className="w-3 h-3" />
                   )}
-                  AI Rewrite
+                  {formData.description ? 'AI Rewrite' : 'AI Generate'}
                 </button>
               </div>
               <textarea
