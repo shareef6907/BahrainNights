@@ -204,7 +204,7 @@ export default function EntertainmentPageClient({ artists, categoryCounts }: Pro
       <section className="bg-[#111] border-t border-white/10 py-8">
         <div className="max-w-7xl mx-auto px-4 flex flex-col md:flex-row items-center justify-between gap-4">
           <p className="text-gray-400">
-            Are you an artist? <Link href="/artists/join" className="text-amber-500 hover:text-amber-400 font-medium">Join our roster →</Link>
+            Are you an artist? <Link href="/become-an-artist" className="text-amber-500 hover:text-amber-400 font-medium">Join our agency →</Link>
           </p>
           <p className="text-gray-500 text-sm">
             All bookings: <span className="text-white">bookings@bahrainnights.com</span>
