@@ -632,6 +632,8 @@ export default function HomePageClient({ initialMovies, initialStats, initialTod
               className="lg:hidden text-white p-2 hover:bg-white/5 rounded-lg transition-colors"
               data-testid="mobile-menu-button"
               onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+              aria-label={mobileMenuOpen ? 'Close menu' : 'Open menu'}
+              aria-expanded={mobileMenuOpen}
             >
               {mobileMenuOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
             </button>
