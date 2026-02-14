@@ -100,6 +100,37 @@ export default function ArtistsAdminPage() {
     }
   };
 
+  // Move artist up or down in order
+  const moveArtist = async (id: string, direction: 'up' | 'down') => {
+    const currentIndex = artists.findIndex(a => a.id === id);
+    if (currentIndex === -1) return;
+    
+    const swapIndex = direction === 'up' ? currentIndex - 1 : currentIndex + 1;
+    if (swapIndex < 0 || swapIndex >= artists.length) return;
+
+    const currentArtist = artists[currentIndex];
+    const swapArtist = artists[swapIndex];
+
+    try {
+      // Swap display_order values
+      await Promise.all([
+        fetch(`/api/admin/artists/${currentArtist.id}`, {
+          method: 'PATCH',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ display_order: swapArtist.display_order }),
+        }),
+        fetch(`/api/admin/artists/${swapArtist.id}`, {
+          method: 'PATCH',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ display_order: currentArtist.display_order }),
+        }),
+      ]);
+      fetchArtists();
+    } catch (error) {
+      console.error('Failed to reorder artists:', error);
+    }
+  };
+
   return (
     <div className="text-white">
       {/* Header */}
@@ -209,19 +240,40 @@ export default function ArtistsAdminPage() {
           <table className="w-full">
             <thead className="bg-gray-900">
               <tr>
+                <th className="px-4 py-3 text-left text-sm font-medium text-gray-400">Order</th>
                 <th className="px-4 py-3 text-left text-sm font-medium text-gray-400">Artist</th>
                 <th className="px-4 py-3 text-left text-sm font-medium text-gray-400">Category</th>
                 <th className="px-4 py-3 text-left text-sm font-medium text-gray-400">Tier</th>
                 <th className="px-4 py-3 text-left text-sm font-medium text-gray-400">Status</th>
                 <th className="px-4 py-3 text-left text-sm font-medium text-gray-400">Rate/Hr</th>
-                <th className="px-4 py-3 text-left text-sm font-medium text-gray-400">Rate/Event</th>
                 <th className="px-4 py-3 text-left text-sm font-medium text-gray-400">Featured</th>
                 <th className="px-4 py-3 text-left text-sm font-medium text-gray-400">Actions</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-gray-700">
-              {artists.map((artist) => (
+              {artists.map((artist, index) => (
                 <tr key={artist.id} className="hover:bg-gray-700/50">
+                  <td className="px-4 py-3">
+                    <div className="flex items-center gap-1">
+                      <button
+                        onClick={() => moveArtist(artist.id, 'up')}
+                        disabled={index === 0}
+                        className="p-1 text-gray-500 hover:text-white disabled:opacity-30 disabled:cursor-not-allowed"
+                        title="Move up"
+                      >
+                        ▲
+                      </button>
+                      <button
+                        onClick={() => moveArtist(artist.id, 'down')}
+                        disabled={index === artists.length - 1}
+                        className="p-1 text-gray-500 hover:text-white disabled:opacity-30 disabled:cursor-not-allowed"
+                        title="Move down"
+                      >
+                        ▼
+                      </button>
+                      <span className="text-xs text-gray-500 ml-1">{artist.display_order}</span>
+                    </div>
+                  </td>
                   <td className="px-4 py-3">
                     <div className="flex items-center gap-3">
                       <div className="w-10 h-10 rounded-lg overflow-hidden bg-gray-700 flex-shrink-0">
@@ -267,9 +319,6 @@ export default function ArtistsAdminPage() {
                   </td>
                   <td className="px-4 py-3 text-sm">
                     {artist.rate_per_hour ? `${artist.rate_per_hour} ${artist.currency}` : '-'}
-                  </td>
-                  <td className="px-4 py-3 text-sm">
-                    {artist.rate_per_event ? `${artist.rate_per_event} ${artist.currency}` : '-'}
                   </td>
                   <td className="px-4 py-3">
                     <button
