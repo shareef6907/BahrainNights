@@ -47,7 +47,17 @@ export default function ArtistsAdminPage() {
   const [selectedArtist, setSelectedArtist] = useState<Artist | null>(null);
   const [isEditing, setIsEditing] = useState(false);
   const [uploadingPhoto, setUploadingPhoto] = useState(false);
+  const [savingEdit, setSavingEdit] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
+  
+  // Edit form state
+  const [editForm, setEditForm] = useState({
+    stage_name: '',
+    short_description: '',
+    bio: '',
+    instagram_handle: '',
+    admin_notes: '',
+  });
 
   // Fetch artists
   const fetchArtists = async () => {
@@ -153,6 +163,42 @@ export default function ArtistsAdminPage() {
       handlePhotoUpload(selectedArtist.id, file);
     }
     e.target.value = '';
+  };
+
+  // Start editing an artist
+  const startEditing = (artist: Artist) => {
+    setEditForm({
+      stage_name: artist.stage_name || '',
+      short_description: artist.short_description || '',
+      bio: artist.bio || '',
+      instagram_handle: artist.instagram_handle || '',
+      admin_notes: artist.admin_notes || '',
+    });
+    setIsEditing(true);
+  };
+
+  // Save artist edits
+  const saveArtistEdits = async () => {
+    if (!selectedArtist) return;
+    setSavingEdit(true);
+    try {
+      const res = await fetch(`/api/admin/artists/${selectedArtist.id}`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(editForm),
+      });
+      if (!res.ok) throw new Error('Failed to save');
+      
+      // Update local state
+      setSelectedArtist({ ...selectedArtist, ...editForm });
+      setIsEditing(false);
+      fetchArtists();
+    } catch (error) {
+      console.error('Failed to save artist:', error);
+      alert('Failed to save changes');
+    } finally {
+      setSavingEdit(false);
+    }
   };
 
   // Toggle featured
@@ -458,8 +504,8 @@ export default function ArtistsAdminPage() {
                 )}
               </div>
               <button
-                onClick={() => setSelectedArtist(null)}
-                className="text-gray-400 hover:text-white"
+                onClick={() => { setSelectedArtist(null); setIsEditing(false); }}
+                className="text-gray-400 hover:text-white text-2xl"
               >
                 ✕
               </button>
@@ -513,72 +559,168 @@ export default function ArtistsAdminPage() {
                 </button>
               </div>
 
-              {/* Details Grid */}
-              <div className="grid grid-cols-2 gap-4">
-                <div>
-                  <label className="text-sm text-gray-400">Category</label>
-                  <p>{CATEGORY_LABELS[selectedArtist.category]}</p>
-                </div>
-                <div>
-                  <label className="text-sm text-gray-400">Subcategory</label>
-                  <p>{selectedArtist.subcategory || '-'}</p>
-                </div>
-                <div>
-                  <label className="text-sm text-gray-400">Status</label>
-                  <p className={STATUS_COLORS[selectedArtist.status].replace('bg-', 'text-').split(' ')[0]}>
-                    {selectedArtist.status}
-                  </p>
-                </div>
-                <div>
-                  <label className="text-sm text-gray-400">Tier</label>
-                  <p>{TIER_LABELS[selectedArtist.tier]}</p>
-                </div>
-                <div>
-                  <label className="text-sm text-gray-400">Rate per Hour</label>
-                  <p>{selectedArtist.rate_per_hour ? `${selectedArtist.rate_per_hour} ${selectedArtist.currency}` : 'Not set'}</p>
-                </div>
-                <div>
-                  <label className="text-sm text-gray-400">Rate per Event</label>
-                  <p>{selectedArtist.rate_per_event ? `${selectedArtist.rate_per_event} ${selectedArtist.currency}` : 'Not set'}</p>
-                </div>
-                <div className="col-span-2">
-                  <label className="text-sm text-gray-400">Rate Notes</label>
-                  <p>{selectedArtist.rate_notes || 'No notes'}</p>
-                </div>
+              {/* Edit Mode Toggle */}
+              <div className="flex justify-end">
+                {!isEditing ? (
+                  <button
+                    onClick={() => startEditing(selectedArtist)}
+                    className="px-4 py-2 bg-blue-600 hover:bg-blue-500 rounded-lg text-sm font-medium flex items-center gap-2"
+                  >
+                    ✏️ Edit Details
+                  </button>
+                ) : (
+                  <div className="flex gap-2">
+                    <button
+                      onClick={saveArtistEdits}
+                      disabled={savingEdit}
+                      className="px-4 py-2 bg-green-600 hover:bg-green-500 rounded-lg text-sm font-medium flex items-center gap-2 disabled:opacity-50"
+                    >
+                      {savingEdit ? '⏳ Saving...' : '✓ Save Changes'}
+                    </button>
+                    <button
+                      onClick={() => setIsEditing(false)}
+                      className="px-4 py-2 bg-gray-600 hover:bg-gray-500 rounded-lg text-sm font-medium"
+                    >
+                      Cancel
+                    </button>
+                  </div>
+                )}
               </div>
 
-              {/* Bio */}
-              {selectedArtist.bio && (
-                <div>
-                  <label className="text-sm text-gray-400">Bio</label>
-                  <p className="mt-1 whitespace-pre-wrap">{selectedArtist.bio}</p>
+              {/* Editable Fields */}
+              {isEditing ? (
+                <div className="space-y-4 bg-gray-900/50 rounded-lg p-4">
+                  <div>
+                    <label className="text-sm text-gray-400 block mb-1">Stage Name</label>
+                    <input
+                      type="text"
+                      value={editForm.stage_name}
+                      onChange={(e) => setEditForm({ ...editForm, stage_name: e.target.value })}
+                      className="w-full bg-gray-700 border border-gray-600 rounded-lg px-3 py-2 text-white"
+                    />
+                  </div>
+                  <div>
+                    <label className="text-sm text-gray-400 block mb-1">Short Description (tagline)</label>
+                    <input
+                      type="text"
+                      value={editForm.short_description}
+                      onChange={(e) => setEditForm({ ...editForm, short_description: e.target.value })}
+                      placeholder="e.g., Bahrain's #1 House DJ"
+                      className="w-full bg-gray-700 border border-gray-600 rounded-lg px-3 py-2 text-white"
+                    />
+                  </div>
+                  <div>
+                    <label className="text-sm text-gray-400 block mb-1">Full Bio</label>
+                    <textarea
+                      value={editForm.bio}
+                      onChange={(e) => setEditForm({ ...editForm, bio: e.target.value })}
+                      rows={5}
+                      placeholder="Full description of the artist..."
+                      className="w-full bg-gray-700 border border-gray-600 rounded-lg px-3 py-2 text-white resize-none"
+                    />
+                  </div>
+                  <div>
+                    <label className="text-sm text-gray-400 block mb-1">Instagram Handle</label>
+                    <input
+                      type="text"
+                      value={editForm.instagram_handle}
+                      onChange={(e) => setEditForm({ ...editForm, instagram_handle: e.target.value })}
+                      placeholder="@username"
+                      className="w-full bg-gray-700 border border-gray-600 rounded-lg px-3 py-2 text-white"
+                    />
+                  </div>
+                  <div>
+                    <label className="text-sm text-gray-400 block mb-1">Admin Notes (internal)</label>
+                    <textarea
+                      value={editForm.admin_notes}
+                      onChange={(e) => setEditForm({ ...editForm, admin_notes: e.target.value })}
+                      rows={2}
+                      placeholder="Internal notes..."
+                      className="w-full bg-gray-700 border border-gray-600 rounded-lg px-3 py-2 text-white resize-none"
+                    />
+                  </div>
                 </div>
-              )}
+              ) : (
+                <>
+                  {/* Details Grid - View Mode */}
+                  <div className="grid grid-cols-2 gap-4">
+                    <div>
+                      <label className="text-sm text-gray-400">Category</label>
+                      <p>{CATEGORY_LABELS[selectedArtist.category]}</p>
+                    </div>
+                    <div>
+                      <label className="text-sm text-gray-400">Subcategory</label>
+                      <p>{selectedArtist.subcategory || '-'}</p>
+                    </div>
+                    <div>
+                      <label className="text-sm text-gray-400">Status</label>
+                      <p className={STATUS_COLORS[selectedArtist.status].replace('bg-', 'text-').split(' ')[0]}>
+                        {selectedArtist.status}
+                      </p>
+                    </div>
+                    <div>
+                      <label className="text-sm text-gray-400">Tier</label>
+                      <p>{TIER_LABELS[selectedArtist.tier]}</p>
+                    </div>
+                    <div>
+                      <label className="text-sm text-gray-400">Rate per Hour</label>
+                      <p>{selectedArtist.rate_per_hour ? `${selectedArtist.rate_per_hour} ${selectedArtist.currency}` : 'Not set'}</p>
+                    </div>
+                    <div>
+                      <label className="text-sm text-gray-400">Rate per Event</label>
+                      <p>{selectedArtist.rate_per_event ? `${selectedArtist.rate_per_event} ${selectedArtist.currency}` : 'Not set'}</p>
+                    </div>
+                    <div className="col-span-2">
+                      <label className="text-sm text-gray-400">Rate Notes</label>
+                      <p>{selectedArtist.rate_notes || 'No notes'}</p>
+                    </div>
+                  </div>
 
-              {/* Instagram */}
-              {selectedArtist.instagram_handle && (
-                <div>
-                  <label className="text-sm text-gray-400">Instagram</label>
-                  <p className="text-pink-400">@{selectedArtist.instagram_handle.replace('@', '')}</p>
-                </div>
-              )}
+                  {/* Short Description */}
+                  <div>
+                    <label className="text-sm text-gray-400">Short Description</label>
+                    <p className="mt-1 text-amber-400">
+                      {selectedArtist.short_description || <span className="text-gray-500 italic">Not set - click Edit to add</span>}
+                    </p>
+                  </div>
 
-              {/* Contact (for signups) */}
-              {selectedArtist.submitted_email && (
-                <div className="border-t border-gray-700 pt-4">
-                  <h3 className="font-semibold mb-2">Contact Info (Tier 2 Signup)</h3>
-                  <p>Email: {selectedArtist.submitted_email}</p>
-                  {selectedArtist.submitted_phone && (
-                    <p>Phone: {selectedArtist.submitted_phone}</p>
+                  {/* Bio */}
+                  <div>
+                    <label className="text-sm text-gray-400">Full Bio</label>
+                    <p className="mt-1 whitespace-pre-wrap">
+                      {selectedArtist.bio || <span className="text-gray-500 italic">Not set - click Edit to add</span>}
+                    </p>
+                  </div>
+
+                  {/* Instagram */}
+                  <div>
+                    <label className="text-sm text-gray-400">Instagram</label>
+                    <p className="text-pink-400">
+                      {selectedArtist.instagram_handle 
+                        ? `@${selectedArtist.instagram_handle.replace('@', '')}`
+                        : <span className="text-gray-500 italic">Not set</span>
+                      }
+                    </p>
+                  </div>
+
+                  {/* Contact (for signups) */}
+                  {selectedArtist.submitted_email && (
+                    <div className="border-t border-gray-700 pt-4">
+                      <h3 className="font-semibold mb-2">Contact Info (Tier 2 Signup)</h3>
+                      <p>Email: {selectedArtist.submitted_email}</p>
+                      {selectedArtist.submitted_phone && (
+                        <p>Phone: {selectedArtist.submitted_phone}</p>
+                      )}
+                    </div>
                   )}
-                </div>
-              )}
 
-              {/* Admin Notes */}
-              <div>
-                <label className="text-sm text-gray-400">Admin Notes</label>
-                <p className="mt-1 text-gray-300">{selectedArtist.admin_notes || 'No admin notes'}</p>
-              </div>
+                  {/* Admin Notes */}
+                  <div>
+                    <label className="text-sm text-gray-400">Admin Notes</label>
+                    <p className="mt-1 text-gray-300">{selectedArtist.admin_notes || 'No admin notes'}</p>
+                  </div>
+                </>
+              )}
 
               {/* Actions */}
               <div className="flex gap-3 border-t border-gray-700 pt-6">
