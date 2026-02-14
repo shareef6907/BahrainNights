@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import Image from 'next/image';
 import { Artist, ArtistCategory, ArtistStatus, ArtistTier } from '@/types/database';
 
@@ -46,6 +46,8 @@ export default function ArtistsAdminPage() {
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedArtist, setSelectedArtist] = useState<Artist | null>(null);
   const [isEditing, setIsEditing] = useState(false);
+  const [uploadingPhoto, setUploadingPhoto] = useState(false);
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   // Fetch artists
   const fetchArtists = async () => {
@@ -84,6 +86,73 @@ export default function ArtistsAdminPage() {
     } catch (error) {
       console.error('Failed to update artist:', error);
     }
+  };
+
+  // Upload photo to S3
+  const handlePhotoUpload = async (artistId: string, file: File) => {
+    setUploadingPhoto(true);
+    try {
+      // Get presigned URL
+      const presignResponse = await fetch(`/api/admin/artists/${artistId}/upload-photo`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          fileType: file.type,
+          fileSize: file.size,
+          imageType: 'profile',
+        }),
+      });
+
+      if (!presignResponse.ok) {
+        const error = await presignResponse.json();
+        throw new Error(error.error || 'Failed to get upload URL');
+      }
+
+      const { presignedUrl, finalUrl } = await presignResponse.json();
+
+      // Upload directly to S3
+      const uploadResponse = await fetch(presignedUrl, {
+        method: 'PUT',
+        headers: { 'Content-Type': file.type },
+        body: file,
+      });
+
+      if (!uploadResponse.ok) {
+        throw new Error('Failed to upload to S3');
+      }
+
+      // Update artist with new image URL
+      const updateResponse = await fetch(`/api/admin/artists/${artistId}`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ profile_image: finalUrl }),
+      });
+
+      if (!updateResponse.ok) {
+        throw new Error('Failed to update artist');
+      }
+
+      // Refresh artists list
+      await fetchArtists();
+      
+      // Update selected artist if still viewing
+      if (selectedArtist && selectedArtist.id === artistId) {
+        setSelectedArtist({ ...selectedArtist, profile_image: finalUrl });
+      }
+    } catch (err) {
+      console.error('Upload error:', err);
+      alert(err instanceof Error ? err.message : 'Upload failed');
+    } finally {
+      setUploadingPhoto(false);
+    }
+  };
+
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file && selectedArtist) {
+      handlePhotoUpload(selectedArtist.id, file);
+    }
+    e.target.value = '';
   };
 
   // Toggle featured
@@ -133,6 +202,15 @@ export default function ArtistsAdminPage() {
 
   return (
     <div className="text-white">
+      {/* Hidden file input for photo upload */}
+      <input
+        type="file"
+        ref={fileInputRef}
+        onChange={handleFileChange}
+        accept="image/jpeg,image/png,image/webp,image/gif"
+        className="hidden"
+      />
+
       {/* Header */}
       <div className="mb-8">
         <h1 className="text-3xl font-bold mb-2">Artist Management</h1>
@@ -388,17 +466,52 @@ export default function ArtistsAdminPage() {
             </div>
 
             <div className="p-6 space-y-6">
-              {/* Profile Image */}
-              {selectedArtist.profile_image && (
-                <div className="w-full aspect-video relative rounded-lg overflow-hidden">
-                  <Image
-                    src={selectedArtist.profile_image}
-                    alt={selectedArtist.stage_name}
-                    fill
-                    className="object-cover"
-                  />
+              {/* Profile Image with Upload */}
+              <div className="relative">
+                <div className="w-full aspect-video relative rounded-lg overflow-hidden bg-gray-700 group">
+                  {selectedArtist.profile_image ? (
+                    <Image
+                      src={selectedArtist.profile_image}
+                      alt={selectedArtist.stage_name}
+                      fill
+                      className="object-cover"
+                    />
+                  ) : (
+                    <div className="w-full h-full flex items-center justify-center text-gray-500 text-6xl">
+                      🎭
+                    </div>
+                  )}
+                  
+                  {/* Upload overlay */}
+                  <div className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+                    <button
+                      onClick={() => fileInputRef.current?.click()}
+                      disabled={uploadingPhoto}
+                      className="px-6 py-3 bg-amber-500 hover:bg-amber-400 text-white rounded-lg font-medium flex items-center gap-2 transition-colors"
+                    >
+                      {uploadingPhoto ? (
+                        <>
+                          <span className="animate-spin">⏳</span>
+                          Uploading...
+                        </>
+                      ) : (
+                        <>
+                          📷 Change Photo
+                        </>
+                      )}
+                    </button>
+                  </div>
                 </div>
-              )}
+                
+                {/* Upload button below image on mobile */}
+                <button
+                  onClick={() => fileInputRef.current?.click()}
+                  disabled={uploadingPhoto}
+                  className="mt-3 w-full py-2 bg-gray-700 hover:bg-gray-600 rounded-lg text-sm flex items-center justify-center gap-2 md:hidden"
+                >
+                  {uploadingPhoto ? '⏳ Uploading...' : '📷 Change Photo'}
+                </button>
+              </div>
 
               {/* Details Grid */}
               <div className="grid grid-cols-2 gap-4">
