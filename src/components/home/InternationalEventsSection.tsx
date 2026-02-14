@@ -49,11 +49,12 @@ interface Country {
   dbName: string;
 }
 
-// Only show countries that are popular destinations for Bahrainis
-// Removed Egypt, Türkiye, Saudi Arabia, UK - focusing on UAE and Qatar with active events
+// Popular destinations for Bahrainis - regional GCC + UK
 const COUNTRIES: Country[] = [
   { code: 'uae', name: 'UAE', flag: '🇦🇪', dbName: 'UAE' },
   { code: 'qatar', name: 'Qatar', flag: '🇶🇦', dbName: 'Qatar' },
+  { code: 'saudi-arabia', name: 'Saudi Arabia', flag: '🇸🇦', dbName: 'Saudi Arabia' },
+  { code: 'uk', name: 'UK', flag: '🇬🇧', dbName: 'UK' },
 ];
 
 // Transform InternationalEvent to EventData for EventModal

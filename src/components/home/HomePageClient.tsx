@@ -293,12 +293,13 @@ interface HomePageClientProps {
 export default function HomePageClient({ initialMovies, initialStats, initialTodayEvents, initialInternationalEvents, initialHappeningNowEvents, initialSurpriseData, initialTrendingData }: HomePageClientProps) {
   const { t } = useTranslation();
 
-  // International dropdown - hardcoded to show UAE, Saudi Arabia, Qatar
-  // (removed Egypt, Türkiye, and UK as they have no upcoming events)
+  // International dropdown - GCC countries + UK
   const internationalDropdownItems = [
     { name: t.nav.allInternational || 'All International Events', icon: '🎭', href: '/international' },
     { name: 'UAE', icon: '🇦🇪', href: '/international/uae' },
     { name: 'Qatar', icon: '🇶🇦', href: '/international/qatar' },
+    { name: 'Saudi Arabia', icon: '🇸🇦', href: '/international/saudi-arabia' },
+    { name: 'UK', icon: '🇬🇧', href: '/international/uk' },
   ];
 
   // Navigation menu data with translations
