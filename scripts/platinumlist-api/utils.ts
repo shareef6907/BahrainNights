@@ -204,12 +204,52 @@ export const COUNTRY_CONFIGS: CountryConfig[] = [
     cities: ['Doha', 'Al Wakrah', 'Al Khor', 'Lusail', 'The Pearl']
   },
   {
+    name: 'Kuwait',
+    code: 'KW',
+    currency: 'KWD',
+    timezone: 'Asia/Kuwait',
+    urlPatterns: ['kuwait.platinumlist.net', 'kuwaitcity.platinumlist.net'],
+    cities: ['Kuwait City', 'Hawalli', 'Salmiya', 'Fahaheel', 'Jahra']
+  },
+  {
+    name: 'Oman',
+    code: 'OM',
+    currency: 'OMR',
+    timezone: 'Asia/Muscat',
+    urlPatterns: ['muscat.platinumlist.net', 'oman.platinumlist.net'],
+    cities: ['Muscat', 'Salalah', 'Sohar', 'Nizwa', 'Sur']
+  },
+  {
+    name: 'Jordan',
+    code: 'JO',
+    currency: 'JOD',
+    timezone: 'Asia/Amman',
+    urlPatterns: ['amman.platinumlist.net', 'jordan.platinumlist.net'],
+    cities: ['Amman', 'Aqaba', 'Petra', 'Irbid', 'Dead Sea']
+  },
+  {
+    name: 'Lebanon',
+    code: 'LB',
+    currency: 'LBP',
+    timezone: 'Asia/Beirut',
+    urlPatterns: ['beirut.platinumlist.net', 'lebanon.platinumlist.net'],
+    cities: ['Beirut', 'Byblos', 'Baalbek', 'Tripoli', 'Sidon']
+  },
+  {
     name: 'Egypt',
     code: 'EG',
     currency: 'EGP',
     timezone: 'Africa/Cairo',
     urlPatterns: ['cairo.platinumlist.net', 'egypt.platinumlist.net'],
     cities: ['Cairo', 'Alexandria', 'Giza', 'Sharm El Sheikh', 'Hurghada', 'Luxor', 'Aswan', 'El Gouna']
+  },
+  {
+    name: 'Morocco',
+    code: 'MA',
+    currency: 'MAD',
+    timezone: 'Africa/Casablanca',
+    urlPatterns: ['morocco.platinumlist.net', 'casablanca.platinumlist.net', 'marrakech.platinumlist.net'],
+    cities: ['Casablanca', 'Marrakech', 'Rabat', 'Fes', 'Tangier', 'Agadir']
   },
   {
     name: 'Türkiye',
@@ -226,6 +266,134 @@ export const COUNTRY_CONFIGS: CountryConfig[] = [
     timezone: 'Europe/London',
     urlPatterns: ['london.platinumlist.net', 'uk.platinumlist.net'],
     cities: ['London', 'Manchester', 'Birmingham', 'Liverpool', 'Edinburgh', 'Glasgow', 'Bristol']
+  },
+  {
+    name: 'India',
+    code: 'IN',
+    currency: 'INR',
+    timezone: 'Asia/Kolkata',
+    urlPatterns: ['india.platinumlist.net', 'mumbai.platinumlist.net', 'delhi.platinumlist.net'],
+    cities: ['Mumbai', 'Delhi', 'Bangalore', 'Chennai', 'Hyderabad', 'Kolkata', 'Pune', 'Goa']
+  },
+  {
+    name: 'Pakistan',
+    code: 'PK',
+    currency: 'PKR',
+    timezone: 'Asia/Karachi',
+    urlPatterns: ['pakistan.platinumlist.net', 'karachi.platinumlist.net', 'lahore.platinumlist.net'],
+    cities: ['Karachi', 'Lahore', 'Islamabad', 'Rawalpindi', 'Faisalabad']
+  },
+  {
+    name: 'Singapore',
+    code: 'SG',
+    currency: 'SGD',
+    timezone: 'Asia/Singapore',
+    urlPatterns: ['singapore.platinumlist.net'],
+    cities: ['Singapore', 'Marina Bay', 'Sentosa']
+  },
+  {
+    name: 'Malaysia',
+    code: 'MY',
+    currency: 'MYR',
+    timezone: 'Asia/Kuala_Lumpur',
+    urlPatterns: ['malaysia.platinumlist.net', 'kualalumpur.platinumlist.net'],
+    cities: ['Kuala Lumpur', 'Penang', 'Langkawi', 'Johor Bahru', 'Malacca']
+  },
+  {
+    name: 'Thailand',
+    code: 'TH',
+    currency: 'THB',
+    timezone: 'Asia/Bangkok',
+    urlPatterns: ['thailand.platinumlist.net', 'bangkok.platinumlist.net'],
+    cities: ['Bangkok', 'Pattaya', 'Phuket', 'Chiang Mai', 'Koh Samui']
+  },
+  {
+    name: 'Indonesia',
+    code: 'ID',
+    currency: 'IDR',
+    timezone: 'Asia/Jakarta',
+    urlPatterns: ['indonesia.platinumlist.net', 'jakarta.platinumlist.net', 'bali.platinumlist.net'],
+    cities: ['Jakarta', 'Bali', 'Surabaya', 'Bandung', 'Yogyakarta']
+  },
+  {
+    name: 'Philippines',
+    code: 'PH',
+    currency: 'PHP',
+    timezone: 'Asia/Manila',
+    urlPatterns: ['philippines.platinumlist.net', 'manila.platinumlist.net'],
+    cities: ['Manila', 'Cebu', 'Davao', 'Boracay', 'Palawan']
+  },
+  {
+    name: 'South Africa',
+    code: 'ZA',
+    currency: 'ZAR',
+    timezone: 'Africa/Johannesburg',
+    urlPatterns: ['southafrica.platinumlist.net', 'johannesburg.platinumlist.net', 'capetown.platinumlist.net'],
+    cities: ['Johannesburg', 'Cape Town', 'Durban', 'Pretoria', 'Port Elizabeth']
+  },
+  {
+    name: 'Nigeria',
+    code: 'NG',
+    currency: 'NGN',
+    timezone: 'Africa/Lagos',
+    urlPatterns: ['nigeria.platinumlist.net', 'lagos.platinumlist.net'],
+    cities: ['Lagos', 'Abuja', 'Port Harcourt', 'Ibadan', 'Kano']
+  },
+  {
+    name: 'Germany',
+    code: 'DE',
+    currency: 'EUR',
+    timezone: 'Europe/Berlin',
+    urlPatterns: ['germany.platinumlist.net', 'berlin.platinumlist.net'],
+    cities: ['Berlin', 'Munich', 'Frankfurt', 'Hamburg', 'Cologne', 'Düsseldorf']
+  },
+  {
+    name: 'France',
+    code: 'FR',
+    currency: 'EUR',
+    timezone: 'Europe/Paris',
+    urlPatterns: ['france.platinumlist.net', 'paris.platinumlist.net'],
+    cities: ['Paris', 'Nice', 'Lyon', 'Marseille', 'Cannes', 'Monaco']
+  },
+  {
+    name: 'Spain',
+    code: 'ES',
+    currency: 'EUR',
+    timezone: 'Europe/Madrid',
+    urlPatterns: ['spain.platinumlist.net', 'madrid.platinumlist.net', 'barcelona.platinumlist.net'],
+    cities: ['Madrid', 'Barcelona', 'Ibiza', 'Valencia', 'Seville', 'Marbella']
+  },
+  {
+    name: 'Italy',
+    code: 'IT',
+    currency: 'EUR',
+    timezone: 'Europe/Rome',
+    urlPatterns: ['italy.platinumlist.net', 'rome.platinumlist.net', 'milan.platinumlist.net'],
+    cities: ['Rome', 'Milan', 'Venice', 'Florence', 'Naples', 'Sardinia']
+  },
+  {
+    name: 'Greece',
+    code: 'GR',
+    currency: 'EUR',
+    timezone: 'Europe/Athens',
+    urlPatterns: ['greece.platinumlist.net', 'athens.platinumlist.net', 'mykonos.platinumlist.net'],
+    cities: ['Athens', 'Mykonos', 'Santorini', 'Thessaloniki', 'Rhodes', 'Crete']
+  },
+  {
+    name: 'Cyprus',
+    code: 'CY',
+    currency: 'EUR',
+    timezone: 'Asia/Nicosia',
+    urlPatterns: ['cyprus.platinumlist.net', 'nicosia.platinumlist.net', 'limassol.platinumlist.net'],
+    cities: ['Nicosia', 'Limassol', 'Larnaca', 'Paphos', 'Ayia Napa']
+  },
+  {
+    name: 'USA',
+    code: 'US',
+    currency: 'USD',
+    timezone: 'America/New_York',
+    urlPatterns: ['usa.platinumlist.net', 'newyork.platinumlist.net', 'miami.platinumlist.net', 'lasvegas.platinumlist.net'],
+    cities: ['New York', 'Los Angeles', 'Miami', 'Las Vegas', 'Chicago', 'Houston', 'San Francisco']
   }
 ];
 

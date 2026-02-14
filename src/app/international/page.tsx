@@ -5,14 +5,14 @@ import BreadcrumbSchema from '@/components/SEO/BreadcrumbSchema';
 import EventListSchema from '@/components/SEO/EventListSchema';
 
 export const metadata: Metadata = {
-  title: 'International Events | BahrainNights',
-  description: 'Discover amazing events across UAE, Saudi Arabia, Qatar, Egypt, Türkiye, and UK. Book tickets to the best concerts, shows, and experiences worldwide.',
+  title: 'International Events | Concerts, Shows & Experiences Worldwide | BahrainNights',
+  description: 'Discover amazing events across UAE, Saudi Arabia, Qatar, Kuwait, Oman, Egypt, Türkiye, UK, India, Morocco, Lebanon, and 20+ countries. Book tickets to concerts, shows, and experiences worldwide.',
   alternates: {
     canonical: 'https://www.bahrainnights.com/international',
   },
   openGraph: {
     title: 'International Events | BahrainNights',
-    description: 'Discover amazing events across the Middle East and beyond',
+    description: 'Discover concerts, shows & experiences across 25+ countries - Middle East, Europe, Asia & beyond',
     images: ['/images/og-international.jpg'],
   },
 };
@@ -38,23 +38,44 @@ interface InternationalEvent {
   city: string | null;
 }
 
-// Country configuration with flags
+// Country configuration with flags - comprehensive list of all Platinumlist countries
 const COUNTRY_CONFIG: Record<string, { flag: string; code: string }> = {
+  // Middle East & GCC
   'UAE': { flag: '🇦🇪', code: 'uae' },
   'United Arab Emirates': { flag: '🇦🇪', code: 'uae' },
   'Saudi Arabia': { flag: '🇸🇦', code: 'saudi-arabia' },
   'Qatar': { flag: '🇶🇦', code: 'qatar' },
-  'Egypt': { flag: '🇪🇬', code: 'egypt' },
-  'Türkiye': { flag: '🇹🇷', code: 'turkiye' },
-  'Turkey': { flag: '🇹🇷', code: 'turkiye' },
-  'UK': { flag: '🇬🇧', code: 'uk' },
-  'United Kingdom': { flag: '🇬🇧', code: 'uk' },
   'Kuwait': { flag: '🇰🇼', code: 'kuwait' },
   'Oman': { flag: '🇴🇲', code: 'oman' },
   'Jordan': { flag: '🇯🇴', code: 'jordan' },
   'Lebanon': { flag: '🇱🇧', code: 'lebanon' },
+  'Türkiye': { flag: '🇹🇷', code: 'turkiye' },
+  'Turkey': { flag: '🇹🇷', code: 'turkiye' },
+  'Cyprus': { flag: '🇨🇾', code: 'cyprus' },
+  // Africa
+  'Egypt': { flag: '🇪🇬', code: 'egypt' },
   'Morocco': { flag: '🇲🇦', code: 'morocco' },
+  'South Africa': { flag: '🇿🇦', code: 'south-africa' },
+  'Nigeria': { flag: '🇳🇬', code: 'nigeria' },
+  // Europe
+  'UK': { flag: '🇬🇧', code: 'uk' },
+  'United Kingdom': { flag: '🇬🇧', code: 'uk' },
+  'Germany': { flag: '🇩🇪', code: 'germany' },
+  'France': { flag: '🇫🇷', code: 'france' },
+  'Spain': { flag: '🇪🇸', code: 'spain' },
+  'Italy': { flag: '🇮🇹', code: 'italy' },
+  'Greece': { flag: '🇬🇷', code: 'greece' },
+  // Asia
   'India': { flag: '🇮🇳', code: 'india' },
+  'Pakistan': { flag: '🇵🇰', code: 'pakistan' },
+  'Singapore': { flag: '🇸🇬', code: 'singapore' },
+  'Malaysia': { flag: '🇲🇾', code: 'malaysia' },
+  'Thailand': { flag: '🇹🇭', code: 'thailand' },
+  'Indonesia': { flag: '🇮🇩', code: 'indonesia' },
+  'Philippines': { flag: '🇵🇭', code: 'philippines' },
+  // Americas
+  'USA': { flag: '🇺🇸', code: 'usa' },
+  'United States': { flag: '🇺🇸', code: 'usa' },
 };
 
 export default async function InternationalPage() {
