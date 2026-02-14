@@ -28,7 +28,7 @@ const areas = [
     vibe: 'Artsy, Casual, Hipster',
     bestFor: 'Cocktails, live music, date nights',
     spots: [
-      { name: 'Colony', type: 'Gastropub', highlight: 'Trendy food & drinks' },
+      { name: 'Colony', type: 'Restaurant & Lounge', highlight: 'Trendy food & drinks' },
       { name: 'Block 338', type: 'Bar Street', highlight: 'Multiple venues in one area' },
       { name: 'JJ\'s Irish Pub', type: 'Pub', highlight: 'Live music & sports' },
     ],
