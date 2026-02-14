@@ -7,3 +7,4 @@ export * from './ads';
 export * from './sponsors';
 export * from './analytics';
 export * from './search';
+export * from './artists';
