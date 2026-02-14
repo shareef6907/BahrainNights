@@ -185,7 +185,7 @@ export function RegionalPageClient({
                 icon="🇸🇦"
                 articles={riyadh}
                 onSelectArticle={handleSelectItem}
-                seeAllLink="/international/saudi-arabia"
+                seeAllLink="/international"
               />
             )}
 
@@ -196,7 +196,7 @@ export function RegionalPageClient({
                 icon="🇸🇦"
                 articles={jeddah}
                 onSelectArticle={handleSelectItem}
-                seeAllLink="/international/saudi-arabia"
+                seeAllLink="/international"
               />
             )}
 
@@ -207,7 +207,7 @@ export function RegionalPageClient({
                 icon="🇸🇦"
                 articles={saudiOther}
                 onSelectArticle={handleSelectItem}
-                seeAllLink="/international/saudi-arabia"
+                seeAllLink="/international"
               />
             )}
 

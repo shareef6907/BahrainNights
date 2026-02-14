@@ -899,15 +899,9 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       changeFrequency: 'daily',
       priority: 0.8,
     },
-    // International country pages
+    // International country pages (only pages that exist)
     {
       url: `${BASE_URL}/international/uae`,
-      lastModified: new Date(),
-      changeFrequency: 'daily',
-      priority: 0.8,
-    },
-    {
-      url: `${BASE_URL}/international/saudi-arabia`,
       lastModified: new Date(),
       changeFrequency: 'daily',
       priority: 0.8,
@@ -917,24 +911,6 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       lastModified: new Date(),
       changeFrequency: 'daily',
       priority: 0.8,
-    },
-    {
-      url: `${BASE_URL}/international/egypt`,
-      lastModified: new Date(),
-      changeFrequency: 'daily',
-      priority: 0.7,
-    },
-    {
-      url: `${BASE_URL}/international/turkiye`,
-      lastModified: new Date(),
-      changeFrequency: 'daily',
-      priority: 0.7,
-    },
-    {
-      url: `${BASE_URL}/international/uk`,
-      lastModified: new Date(),
-      changeFrequency: 'daily',
-      priority: 0.7,
     },
     {
       url: `${BASE_URL}/sponsors`,

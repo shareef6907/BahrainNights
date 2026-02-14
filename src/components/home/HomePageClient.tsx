@@ -298,7 +298,6 @@ export default function HomePageClient({ initialMovies, initialStats, initialTod
   const internationalDropdownItems = [
     { name: t.nav.allInternational || 'All International Events', icon: '🎭', href: '/international' },
     { name: 'UAE', icon: '🇦🇪', href: '/international/uae' },
-    { name: 'Saudi Arabia', icon: '🇸🇦', href: '/international/saudi-arabia' },
     { name: 'Qatar', icon: '🇶🇦', href: '/international/qatar' },
   ];
 
