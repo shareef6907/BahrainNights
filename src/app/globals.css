@@ -1,4 +1,4 @@
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700;800;900&family=IBM+Plex+Sans+Arabic:wght@400;500;700&display=swap');
+/* Fonts loaded via next/font/google in layout.tsx for optimal performance */
 @import "tailwindcss";
 
 @theme {
@@ -17,9 +17,9 @@
   --color-warm-gold: #C4A052;
   --color-cool-blue: #4A5FE8;
 
-  /* Fonts */
-  --font-inter: 'Inter', ui-sans-serif, system-ui, sans-serif;
-  --font-arabic: 'IBM Plex Sans Arabic', sans-serif;
+  /* Fonts - loaded via next/font/google for optimal performance */
+  --font-inter: var(--font-inter), ui-sans-serif, system-ui, sans-serif;
+  --font-arabic: var(--font-arabic), sans-serif;
 }
 
 :root {

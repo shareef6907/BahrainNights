@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { Inter } from "next/font/google";
+import { Inter, IBM_Plex_Sans_Arabic } from "next/font/google";
 import "./globals.css";
 import { AuthProvider } from "@/lib/auth-context";
 import { TranslationProvider } from "@/lib/i18n/TranslationContext";
@@ -14,6 +14,14 @@ import { PWAInstallPrompt } from "@/components/PWAInstallPrompt";
 const inter = Inter({
   variable: "--font-inter",
   subsets: ["latin"],
+  display: "swap",
+  preload: true,
+});
+
+const ibmPlexArabic = IBM_Plex_Sans_Arabic({
+  variable: "--font-arabic",
+  subsets: ["arabic"],
+  weight: ["400", "500", "700"],
   display: "swap",
   preload: true,
 });
@@ -194,7 +202,7 @@ export default function RootLayout({
           }}
         />
       </head>
-      <body className={`${inter.variable} font-inter antialiased`}>
+      <body className={`${inter.variable} ${ibmPlexArabic.variable} font-inter antialiased`}>
         <GoogleAnalytics />
         <TranslationProvider>
           <PublicAuthProvider>
