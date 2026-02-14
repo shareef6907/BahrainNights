@@ -51,8 +51,6 @@ export async function POST(request: Request) {
 
     // Format budget range for email
     const budgetLabels: Record<string, string> = {
-      'under_50': 'Under 50 BHD',
-      '50_100': '50 - 100 BHD',
       '100_250': '100 - 250 BHD',
       '250_500': '250 - 500 BHD',
       '500_plus': '500+ BHD',

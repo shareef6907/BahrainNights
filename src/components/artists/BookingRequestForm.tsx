@@ -19,8 +19,6 @@ const EVENT_TYPES = [
 ];
 
 const BUDGET_RANGES = [
-  { value: 'under_50', label: 'Under 50 BHD' },
-  { value: '50_100', label: '50 - 100 BHD' },
   { value: '100_250', label: '100 - 250 BHD' },
   { value: '250_500', label: '250 - 500 BHD' },
   { value: '500_plus', label: '500+ BHD' },
