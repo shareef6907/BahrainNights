@@ -97,13 +97,13 @@ export default function EntertainmentPageClient({ artists, categoryCounts }: Pro
             <div className="flex flex-wrap gap-4">
               <button
                 onClick={scrollToArtists}
-                className="px-8 py-4 bg-white text-black font-semibold rounded-lg hover:bg-gray-100 transition-all duration-300 shadow-lg hover:shadow-xl hover:scale-105"
+                className="px-8 py-4 bg-white text-black font-semibold rounded-lg hover:bg-gray-100 transition-colors duration-200 shadow-lg active:scale-95 touch-manipulation"
               >
                 Browse Artists
               </button>
               <button
                 onClick={() => openBookingForm()}
-                className="px-8 py-4 bg-amber-500/90 text-white font-semibold rounded-lg hover:bg-amber-500 transition-all duration-300 shadow-lg hover:shadow-amber-500/30 hover:scale-105 backdrop-blur-sm"
+                className="px-8 py-4 bg-amber-500/90 text-white font-semibold rounded-lg hover:bg-amber-500 transition-colors duration-200 shadow-lg active:scale-95 touch-manipulation backdrop-blur-sm"
               >
                 Request a Booking
               </button>
@@ -135,10 +135,14 @@ export default function EntertainmentPageClient({ artists, categoryCounts }: Pro
                 <button
                   key={category}
                   onClick={() => setSelectedCategory(category)}
-                  className={`px-6 py-2.5 rounded-full text-sm font-medium whitespace-nowrap transition-all duration-300 ${
+                  onTouchEnd={(e) => {
+                    e.preventDefault();
+                    setSelectedCategory(category);
+                  }}
+                  className={`px-6 py-2.5 rounded-full text-sm font-medium whitespace-nowrap transition-colors duration-200 touch-manipulation select-none active:scale-95 ${
                     selectedCategory === category
                       ? 'bg-amber-500 text-white shadow-lg shadow-amber-500/30'
-                      : 'bg-white/10 text-gray-300 hover:bg-white/20 hover:text-white'
+                      : 'bg-white/10 text-gray-300 hover:bg-white/20 hover:text-white active:bg-white/30'
                   }`}
                 >
                   {CATEGORY_LABELS[category]}
@@ -193,7 +197,7 @@ export default function EntertainmentPageClient({ artists, categoryCounts }: Pro
           </p>
           <button
             onClick={() => openBookingForm()}
-            className="px-10 py-4 bg-amber-500 text-white font-semibold rounded-lg hover:bg-amber-600 transition-all duration-300 shadow-lg hover:shadow-amber-500/30 text-lg"
+            className="px-10 py-4 bg-amber-500 text-white font-semibold rounded-lg hover:bg-amber-600 transition-colors duration-200 shadow-lg active:scale-95 touch-manipulation text-lg"
           >
             Request a Booking
           </button>
@@ -241,6 +245,11 @@ export default function EntertainmentPageClient({ artists, categoryCounts }: Pro
         .scrollbar-hide {
           -ms-overflow-style: none;
           scrollbar-width: none;
+        }
+        /* Eliminate 300ms tap delay on all interactive elements */
+        .touch-manipulation {
+          touch-action: manipulation;
+          -webkit-tap-highlight-color: transparent;
         }
       `}</style>
     </div>

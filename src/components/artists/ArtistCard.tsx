@@ -44,16 +44,18 @@ export default function ArtistCard({ artist, onBook, delay = 0 }: Props) {
 
   return (
     <div
-      className="group relative rounded-xl overflow-hidden bg-[#1a1a1a] transition-all duration-500 hover:scale-[1.02] hover:shadow-2xl hover:shadow-amber-500/10"
+      className="group relative rounded-xl overflow-hidden bg-[#1a1a1a] transition-transform duration-300 hover:scale-[1.02] hover:shadow-2xl hover:shadow-amber-500/10 touch-manipulation"
       style={{ 
         opacity: 0,
         animation: `fade-in 0.5s ease-out ${delay}ms forwards`
       }}
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
+      onTouchStart={() => setIsHovered(true)}
+      onTouchEnd={() => setTimeout(() => setIsHovered(false), 300)}
     >
       {/* Image Container */}
-      <Link href={`/artists/${artist.slug}`} className="block aspect-[3/4] relative overflow-hidden">
+      <Link href={`/artists/${artist.slug}`} className="block aspect-[3/4] relative overflow-hidden touch-manipulation">
         {/* Placeholder/Loading State */}
         {!imageLoaded && (
           <div className="absolute inset-0 bg-gradient-to-br from-gray-800 to-gray-900 animate-pulse" />
@@ -107,14 +109,20 @@ export default function ArtistCard({ artist, onBook, delay = 0 }: Props) {
           </p>
         )}
 
-        {/* Action Button - Shows on Hover */}
-        <div className={`transition-all duration-300 ${isHovered ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-2'}`}>
+        {/* Action Button - Shows on Hover/Touch */}
+        <div className={`transition-all duration-200 ${isHovered ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-2 md:opacity-0 md:translate-y-2'}`}>
           <button
             onClick={(e) => {
               e.preventDefault();
+              e.stopPropagation();
               onBook?.();
             }}
-            className="w-full py-2.5 bg-amber-500 hover:bg-amber-600 text-white text-sm font-semibold rounded-lg transition-colors"
+            onTouchEnd={(e) => {
+              e.preventDefault();
+              e.stopPropagation();
+              onBook?.();
+            }}
+            className="w-full py-2.5 bg-amber-500 hover:bg-amber-600 active:bg-amber-700 text-white text-sm font-semibold rounded-lg transition-colors touch-manipulation"
           >
             Request Booking
           </button>
@@ -138,6 +146,10 @@ export default function ArtistCard({ artist, onBook, delay = 0 }: Props) {
             opacity: 1;
             transform: translateY(0);
           }
+        }
+        .touch-manipulation {
+          touch-action: manipulation;
+          -webkit-tap-highlight-color: transparent;
         }
       `}</style>
     </div>
