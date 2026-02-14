@@ -1099,7 +1099,7 @@ export default function HomePageClient({ initialMovies, initialStats, initialTod
               { title: t.footer.forBusinesses, links: [{ name: t.footer.registerYourVenue, href: '/register-venue' }, { name: t.footer.venueLogin, href: '/venue-portal/login' }, { name: t.footer.listYourEvent, href: '/list-event' }, { name: t.footer.advertise, href: '/advertise' }, { name: t.footer.contact, href: '/contact' }] }
             ].map(section => (
               <div key={section.title}>
-                <h4 className="font-bold text-lg mb-4">{section.title}</h4>
+                <h3 className="font-bold text-lg mb-4">{section.title}</h3>
                 <ul className="space-y-3 text-gray-400">
                   {section.links.map(link => (
                     <li key={link.name} className="hover:text-white hover:translate-x-1 transition-all duration-200">
