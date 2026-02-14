@@ -15,6 +15,11 @@
       "source": "/places/zahle",
       "destination": "/places",
       "permanent": true
+    },
+    {
+      "source": "/entertainment",
+      "destination": "/artists",
+      "permanent": true
     }
   ],
   "crons": [

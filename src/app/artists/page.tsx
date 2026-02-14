@@ -13,7 +13,7 @@ export const metadata: Metadata = {
     title: 'Book World-Class Entertainment | BahrainNights',
     description: 'Bahrain\'s premier artist booking agency. DJs, live bands, vocalists, fire shows, and more.',
     type: 'website',
-    url: 'https://bahrainnights.com/entertainment',
+    url: 'https://bahrainnights.com/artists',
   },
 };
 

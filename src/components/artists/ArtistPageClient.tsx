@@ -66,7 +66,7 @@ export default function ArtistPageClient({ artist, relatedArtists }: Props) {
         <div className="relative z-10 max-w-7xl mx-auto px-4 pt-20 pb-12">
           {/* Back Link */}
           <Link 
-            href="/entertainment" 
+            href="/artists" 
             className="inline-flex items-center gap-2 text-gray-400 hover:text-white transition-colors mb-8"
           >
             <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">

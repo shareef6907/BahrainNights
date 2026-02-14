@@ -7,17 +7,19 @@ import { ArtistCategory } from '@/types/database';
 const CATEGORIES: { value: ArtistCategory; label: string }[] = [
   { value: 'dj', label: 'DJ' },
   { value: 'vocalist', label: 'Vocalist / Singer' },
-  { value: 'instrumentalist', label: 'Instrumentalist' },
-  { value: 'band', label: 'Band' },
-  { value: 'fire_show', label: 'Fire Show' },
-  { value: 'performer', label: 'Performer / Dancer' },
-  { value: 'kids_entertainment', label: 'Kids Entertainment' },
-  { value: 'magician', label: 'Magician' },
+  { value: 'instrumentalist', label: 'Musician / Instrumentalist' },
+  { value: 'band', label: 'Band / Ensemble' },
+  { value: 'fire_show', label: 'Fire Show / LED Show' },
+  { value: 'performer', label: 'Performer / Dancer / Entertainer' },
+  { value: 'kids_entertainment', label: 'Kids Entertainment / Character' },
+  { value: 'magician', label: 'Magician / Illusionist' },
 ];
 
 const SUBCATEGORIES: Record<string, string[]> = {
-  instrumentalist: ['Guitarist', 'Pianist', 'Violinist', 'Saxophonist', 'Drummer', 'Harpist', 'Oud Player', 'Kanun Player', 'Other'],
-  vocalist: ['Pop', 'Jazz', 'Arabic', 'Classical', 'Other'],
+  instrumentalist: ['Guitarist', 'Pianist', 'Violinist', 'Saxophonist', 'Drummer', 'Harpist', 'Oud Player', 'Kanun Player', 'Flutist', 'Cellist', 'Trumpeter', 'Percussionist', 'Other'],
+  vocalist: ['Pop', 'Jazz', 'Arabic', 'Classical', 'R&B/Soul', 'Opera', 'Bollywood', 'Other'],
+  performer: ['Dancer', 'Acrobat', 'Stilt Walker', 'Living Statue', 'Belly Dancer', 'Aerial Artist', 'Other'],
+  kids_entertainment: ['Clown', 'Face Painter', 'Balloon Artist', 'Character Performer', 'Puppeteer', 'Other'],
 };
 
 export default function ArtistRegistrationForm() {
@@ -114,7 +116,7 @@ export default function ArtistRegistrationForm() {
             Thank you for applying to join BahrainNights! Our team will review your application within 48 hours.
           </p>
           <Link
-            href="/entertainment"
+            href="/artists"
             className="inline-block px-8 py-3 bg-amber-500 text-white font-semibold rounded-lg hover:bg-amber-600 transition-colors"
           >
             Back to Entertainment
@@ -311,7 +313,6 @@ export default function ArtistRegistrationForm() {
                     value={formData.rate_per_hour}
                     onChange={e => updateField('rate_per_hour', e.target.value)}
                     className="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-lg text-white focus:border-amber-500 outline-none"
-                    placeholder="e.g. 50"
                   />
                 </div>
                 <div>
@@ -321,7 +322,6 @@ export default function ArtistRegistrationForm() {
                     value={formData.rate_per_event}
                     onChange={e => updateField('rate_per_event', e.target.value)}
                     className="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-lg text-white focus:border-amber-500 outline-none"
-                    placeholder="e.g. 200"
                   />
                 </div>
               </div>
@@ -345,7 +345,7 @@ export default function ArtistRegistrationForm() {
               <h2 className="text-xl font-semibold text-white mb-4">Terms & Conditions</h2>
               
               {[
-                { field: 'agree_instagram', text: 'I agree to list @bh.nights for bookings in my Instagram bio within 7 days of approval' },
+                { field: 'agree_instagram', text: 'I agree to list @bh.nights for bookings in my Instagram bio immediately upon approval' },
                 { field: 'agree_exclusive', text: 'I understand all bookings through BahrainNights.com are managed exclusively by BahrainNights' },
                 { field: 'agree_promo', text: 'I agree that my profile, photos, and videos may be used for promotional purposes' },
                 { field: 'agree_rates_private', text: 'I understand my rates are kept confidential and not displayed publicly' },
