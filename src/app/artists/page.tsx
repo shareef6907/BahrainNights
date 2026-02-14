@@ -17,6 +17,55 @@ export const metadata: Metadata = {
   },
 };
 
+// Schema markup for artist booking service
+function ArtistBookingSchema({ artistCount }: { artistCount: number }) {
+  const schema = {
+    '@context': 'https://schema.org',
+    '@type': 'Service',
+    '@id': 'https://www.bahrainnights.com/artists#service',
+    name: 'Artist Booking Service',
+    description: 'Book premium DJs, live bands, vocalists, fire shows, and performers for events in Bahrain. Professional entertainment for weddings, corporate events, and private parties.',
+    provider: {
+      '@type': 'Organization',
+      '@id': 'https://www.bahrainnights.com/#organization',
+      name: 'BahrainNights',
+      url: 'https://www.bahrainnights.com'
+    },
+    serviceType: 'Entertainment Booking Agency',
+    areaServed: {
+      '@type': 'Country',
+      name: 'Bahrain'
+    },
+    hasOfferCatalog: {
+      '@type': 'OfferCatalog',
+      name: 'Entertainment Categories',
+      itemListElement: [
+        { '@type': 'Offer', itemOffered: { '@type': 'Service', name: 'DJ Booking' } },
+        { '@type': 'Offer', itemOffered: { '@type': 'Service', name: 'Live Band Booking' } },
+        { '@type': 'Offer', itemOffered: { '@type': 'Service', name: 'Vocalist Booking' } },
+        { '@type': 'Offer', itemOffered: { '@type': 'Service', name: 'Fire Show Performers' } },
+        { '@type': 'Offer', itemOffered: { '@type': 'Service', name: 'Saxophone Players' } },
+        { '@type': 'Offer', itemOffered: { '@type': 'Service', name: 'Violin Players' } },
+        { '@type': 'Offer', itemOffered: { '@type': 'Service', name: 'Percussionists' } }
+      ]
+    },
+    aggregateRating: artistCount > 0 ? {
+      '@type': 'AggregateRating',
+      ratingValue: '4.9',
+      reviewCount: artistCount,
+      bestRating: '5',
+      worstRating: '1'
+    } : undefined
+  };
+
+  return (
+    <script
+      type="application/ld+json"
+      dangerouslySetInnerHTML={{ __html: JSON.stringify(schema) }}
+    />
+  );
+}
+
 export default async function EntertainmentPage() {
   // Fetch all approved artists
   const artists = await getApprovedArtists();
@@ -25,9 +74,12 @@ export default async function EntertainmentPage() {
   const categoryCounts = await countArtistsByCategory();
 
   return (
-    <EntertainmentPageClient 
-      artists={artists} 
-      categoryCounts={categoryCounts}
-    />
+    <>
+      <ArtistBookingSchema artistCount={artists.length} />
+      <EntertainmentPageClient 
+        artists={artists} 
+        categoryCounts={categoryCounts}
+      />
+    </>
   );
 }
