@@ -1,10 +1,11 @@
 'use client';
 
 import { motion } from 'framer-motion';
-import { Phone, Navigation, Calendar, Menu, Instagram, Globe } from 'lucide-react';
+import { Phone, Navigation, Calendar, Menu, Instagram, Globe, MessageCircle } from 'lucide-react';
 
 interface PlaceActionBarProps {
   phone?: string;
+  whatsapp?: string;
   latitude?: number;
   longitude?: number;
   googleMapsUrl?: string | null;
@@ -17,6 +18,7 @@ interface PlaceActionBarProps {
 
 export default function PlaceActionBar({
   phone,
+  whatsapp,
   latitude,
   longitude,
   googleMapsUrl,
@@ -29,6 +31,28 @@ export default function PlaceActionBar({
   const handleCall = () => {
     if (phone) {
       window.location.href = `tel:${phone}`;
+    }
+  };
+
+  const handleWhatsApp = () => {
+    if (whatsapp) {
+      // Clean the number - remove spaces, dashes, and ensure it starts with country code
+      let cleanNumber = whatsapp.replace(/[\s\-\(\)]/g, '');
+      // If it starts with 00, replace with +
+      if (cleanNumber.startsWith('00')) {
+        cleanNumber = '+' + cleanNumber.slice(2);
+      }
+      // If it doesn't start with +, assume it needs +973 (Bahrain)
+      if (!cleanNumber.startsWith('+')) {
+        // If it starts with 973, add +
+        if (cleanNumber.startsWith('973')) {
+          cleanNumber = '+' + cleanNumber;
+        } else {
+          cleanNumber = '+973' + cleanNumber;
+        }
+      }
+      const message = encodeURIComponent(`Hi! I found ${name} on BahrainNights and would like to inquire about...`);
+      window.open(`https://wa.me/${cleanNumber.replace('+', '')}?text=${message}`, '_blank');
     }
   };
 
@@ -80,6 +104,19 @@ export default function PlaceActionBar({
             >
               <Phone className="w-5 h-5" />
               <span>Call</span>
+            </motion.button>
+          )}
+
+          {/* WhatsApp Button */}
+          {whatsapp && (
+            <motion.button
+              onClick={handleWhatsApp}
+              className="flex items-center gap-2 px-5 py-3 bg-gradient-to-r from-[#25D366] to-[#128C7E] rounded-xl text-white font-semibold whitespace-nowrap hover:shadow-lg hover:shadow-green-500/25 transition-all"
+              whileHover={{ scale: 1.02 }}
+              whileTap={{ scale: 0.98 }}
+            >
+              <MessageCircle className="w-5 h-5" />
+              <span>WhatsApp</span>
             </motion.button>
           )}
 

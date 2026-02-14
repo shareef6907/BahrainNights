@@ -2,7 +2,7 @@
 
 import { useState, useMemo } from 'react';
 import { motion } from 'framer-motion';
-import { Phone, Navigation } from 'lucide-react';
+import { Phone, Navigation, MessageCircle } from 'lucide-react';
 import PlaceHero from './PlaceHero';
 import PlaceActionBar from './PlaceActionBar';
 import PlaceInfo from './PlaceInfo';
@@ -234,6 +234,7 @@ export default function PlaceDetailPageContent({ venue, similarVenues, events = 
         {/* Action Bar */}
         <PlaceActionBar
           phone={venue.phone || undefined}
+          whatsapp={venue.whatsapp || undefined}
           latitude={venue.latitude || undefined}
           longitude={venue.longitude || undefined}
           googleMapsUrl={venue.google_maps_url}
@@ -346,22 +347,46 @@ export default function PlaceDetailPageContent({ venue, similarVenues, events = 
 
         {/* Mobile Sticky Bottom Bar */}
         <div className="lg:hidden fixed bottom-0 left-0 right-0 z-50 bg-slate-950/95 backdrop-blur-xl border-t border-white/10 p-4">
-          <div className="flex items-center gap-3">
+          <div className="flex items-center gap-2">
             {venue.phone && (
               <motion.a
                 href={`tel:${venue.phone}`}
-                className="flex-1 flex items-center justify-center gap-2 px-4 py-3 bg-gradient-to-r from-green-500 to-emerald-600 rounded-xl text-white font-semibold"
+                className="flex-1 flex items-center justify-center gap-2 px-3 py-3 bg-gradient-to-r from-green-500 to-emerald-600 rounded-xl text-white font-semibold text-sm"
                 whileTap={{ scale: 0.98 }}
               >
-                <Phone className="w-5 h-5" />
+                <Phone className="w-4 h-4" />
                 Call
               </motion.a>
+            )}
+            {/* WhatsApp button */}
+            {venue.whatsapp && (
+              <motion.button
+                onClick={() => {
+                  let cleanNumber = venue.whatsapp!.replace(/[\s\-\(\)]/g, '');
+                  if (cleanNumber.startsWith('00')) {
+                    cleanNumber = '+' + cleanNumber.slice(2);
+                  }
+                  if (!cleanNumber.startsWith('+')) {
+                    if (cleanNumber.startsWith('973')) {
+                      cleanNumber = '+' + cleanNumber;
+                    } else {
+                      cleanNumber = '+973' + cleanNumber;
+                    }
+                  }
+                  const message = encodeURIComponent(`Hi! I found ${venue.name} on BahrainNights.`);
+                  window.open(`https://wa.me/${cleanNumber.replace('+', '')}?text=${message}`, '_blank');
+                }}
+                className="flex-1 flex items-center justify-center gap-2 px-3 py-3 bg-gradient-to-r from-[#25D366] to-[#128C7E] rounded-xl text-white font-semibold text-sm"
+                whileTap={{ scale: 0.98 }}
+              >
+                <MessageCircle className="w-4 h-4" />
+                WhatsApp
+              </motion.button>
             )}
             {/* Directions button - show if lat/lng OR googleMapsUrl available */}
             {(venue.google_maps_url || (venue.latitude && venue.longitude)) && (
               <motion.button
                 onClick={() => {
-                  // Use googleMapsUrl if provided, otherwise construct from lat/lng
                   if (venue.google_maps_url) {
                     window.open(venue.google_maps_url, '_blank');
                   } else if (venue.latitude && venue.longitude) {
@@ -369,10 +394,10 @@ export default function PlaceDetailPageContent({ venue, similarVenues, events = 
                     window.open(mapsUrl, '_blank');
                   }
                 }}
-                className="flex-1 flex items-center justify-center gap-2 px-4 py-3 bg-gradient-to-r from-blue-500 to-indigo-600 rounded-xl text-white font-semibold"
+                className="flex-1 flex items-center justify-center gap-2 px-3 py-3 bg-gradient-to-r from-blue-500 to-indigo-600 rounded-xl text-white font-semibold text-sm"
                 whileTap={{ scale: 0.98 }}
               >
-                <Navigation className="w-5 h-5" />
+                <Navigation className="w-4 h-4" />
                 Directions
               </motion.button>
             )}
