@@ -106,8 +106,8 @@ export default function BookingRequestForm({ artists, preselectedArtist, onClose
   }
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm overflow-y-auto">
-      <div className="bg-[#1a1a1a] rounded-2xl p-6 md:p-8 max-w-2xl w-full my-8 border border-white/10 relative">
+    <div className="fixed inset-0 z-50 flex items-start justify-center p-4 pt-8 bg-black/80 backdrop-blur-sm overflow-y-auto">
+      <div className="bg-[#1a1a1a] rounded-2xl p-5 md:p-6 max-w-xl w-full mb-8 border border-white/10 relative">
         {/* Close Button */}
         <button
           onClick={onClose}
@@ -118,19 +118,19 @@ export default function BookingRequestForm({ artists, preselectedArtist, onClose
           </svg>
         </button>
 
-        <h2 className="text-2xl font-bold text-white mb-6">Request a Booking</h2>
+        <h2 className="text-xl font-bold text-white mb-4">Request a Booking</h2>
 
         {error && (
-          <div className="mb-6 p-4 bg-red-500/10 border border-red-500/30 rounded-lg text-red-400">
+          <div className="mb-4 p-3 bg-red-500/10 border border-red-500/30 rounded-lg text-red-400 text-sm">
             {error}
           </div>
         )}
 
-        <form onSubmit={handleSubmit} className="space-y-6">
+        <form onSubmit={handleSubmit} className="space-y-4">
           {/* Event Details */}
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div className="grid grid-cols-2 gap-3">
             <div>
-              <label className="block text-sm font-medium text-gray-300 mb-2">
+              <label className="block text-xs font-medium text-gray-300 mb-1">
                 Event Date <span className="text-red-400">*</span>
               </label>
               <input
@@ -138,30 +138,30 @@ export default function BookingRequestForm({ artists, preselectedArtist, onClose
                 required
                 value={formData.event_date}
                 onChange={e => setFormData(prev => ({ ...prev, event_date: e.target.value }))}
-                className="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-lg text-white focus:border-amber-500 focus:ring-1 focus:ring-amber-500 outline-none transition-colors"
+                className="w-full px-3 py-2 bg-white/5 border border-white/10 rounded-lg text-white text-sm focus:border-amber-500 focus:ring-1 focus:ring-amber-500 outline-none transition-colors"
               />
             </div>
             <div>
-              <label className="block text-sm font-medium text-gray-300 mb-2">Event Time</label>
+              <label className="block text-xs font-medium text-gray-300 mb-1">Event Time</label>
               <input
                 type="time"
                 value={formData.event_time}
                 onChange={e => setFormData(prev => ({ ...prev, event_time: e.target.value }))}
-                className="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-lg text-white focus:border-amber-500 focus:ring-1 focus:ring-amber-500 outline-none transition-colors"
+                className="w-full px-3 py-2 bg-white/5 border border-white/10 rounded-lg text-white text-sm focus:border-amber-500 focus:ring-1 focus:ring-amber-500 outline-none transition-colors"
               />
             </div>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div className="grid grid-cols-2 gap-3">
             <div>
-              <label className="block text-sm font-medium text-gray-300 mb-2">
+              <label className="block text-xs font-medium text-gray-300 mb-1">
                 Event Type <span className="text-red-400">*</span>
               </label>
               <select
                 required
                 value={formData.event_type}
                 onChange={e => setFormData(prev => ({ ...prev, event_type: e.target.value }))}
-                className="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-lg text-white focus:border-amber-500 focus:ring-1 focus:ring-amber-500 outline-none transition-colors"
+                className="w-full px-3 py-2 bg-white/5 border border-white/10 rounded-lg text-white text-sm focus:border-amber-500 focus:ring-1 focus:ring-amber-500 outline-none transition-colors"
               >
                 <option value="">Select type...</option>
                 {EVENT_TYPES.map(type => (
@@ -170,39 +170,39 @@ export default function BookingRequestForm({ artists, preselectedArtist, onClose
               </select>
             </div>
             <div>
-              <label className="block text-sm font-medium text-gray-300 mb-2">Estimated Guests</label>
+              <label className="block text-xs font-medium text-gray-300 mb-1">Estimated Guests</label>
               <input
                 type="number"
                 min="1"
                 value={formData.guest_count}
                 onChange={e => setFormData(prev => ({ ...prev, guest_count: e.target.value }))}
                 placeholder="e.g. 100"
-                className="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-lg text-white placeholder-gray-500 focus:border-amber-500 focus:ring-1 focus:ring-amber-500 outline-none transition-colors"
+                className="w-full px-3 py-2 bg-white/5 border border-white/10 rounded-lg text-white text-sm placeholder-gray-500 focus:border-amber-500 focus:ring-1 focus:ring-amber-500 outline-none transition-colors"
               />
             </div>
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-gray-300 mb-2">Venue / Location Name</label>
+            <label className="block text-xs font-medium text-gray-300 mb-1">Venue / Location</label>
             <input
               type="text"
               value={formData.venue_name}
               onChange={e => setFormData(prev => ({ ...prev, venue_name: e.target.value }))}
-              placeholder="e.g. Four Seasons Hotel Bahrain Bay"
-              className="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-lg text-white placeholder-gray-500 focus:border-amber-500 focus:ring-1 focus:ring-amber-500 outline-none transition-colors"
+              placeholder="e.g. Four Seasons Hotel"
+              className="w-full px-3 py-2 bg-white/5 border border-white/10 rounded-lg text-white text-sm placeholder-gray-500 focus:border-amber-500 focus:ring-1 focus:ring-amber-500 outline-none transition-colors"
             />
           </div>
 
           {/* Preferred Artists */}
           <div>
-            <label className="block text-sm font-medium text-gray-300 mb-2">Preferred Artist(s)</label>
-            <div className="flex flex-wrap gap-2 max-h-32 overflow-y-auto p-3 bg-white/5 border border-white/10 rounded-lg">
+            <label className="block text-xs font-medium text-gray-300 mb-1">Preferred Artist(s)</label>
+            <div className="flex flex-wrap gap-1.5 max-h-24 overflow-y-auto p-2 bg-white/5 border border-white/10 rounded-lg">
               {artists.map(artist => (
                 <button
                   key={artist.id}
                   type="button"
                   onClick={() => handleArtistToggle(artist.stage_name)}
-                  className={`px-3 py-1.5 rounded-full text-sm transition-colors ${
+                  className={`px-2 py-1 rounded-full text-xs transition-colors ${
                     formData.preferred_artists.includes(artist.stage_name)
                       ? 'bg-amber-500 text-white'
                       : 'bg-white/10 text-gray-300 hover:bg-white/20'
@@ -212,75 +212,73 @@ export default function BookingRequestForm({ artists, preselectedArtist, onClose
                 </button>
               ))}
             </div>
-            <p className="text-xs text-gray-500 mt-1">Click to select/deselect artists</p>
           </div>
 
-          <div>
-            <label className="block text-sm font-medium text-gray-300 mb-2">Budget Range</label>
-            <select
-              value={formData.budget_range}
-              onChange={e => setFormData(prev => ({ ...prev, budget_range: e.target.value }))}
-              className="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-lg text-white focus:border-amber-500 focus:ring-1 focus:ring-amber-500 outline-none transition-colors"
-            >
-              <option value="">Select budget range...</option>
-              {BUDGET_RANGES.map(range => (
-                <option key={range.value} value={range.value}>{range.label}</option>
-              ))}
-            </select>
-          </div>
-
-          <div>
-            <label className="block text-sm font-medium text-gray-300 mb-2">Special Requirements</label>
-            <textarea
-              rows={3}
-              value={formData.special_requirements}
-              onChange={e => setFormData(prev => ({ ...prev, special_requirements: e.target.value }))}
-              placeholder="Any specific requirements, equipment needs, or preferences..."
-              className="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-lg text-white placeholder-gray-500 focus:border-amber-500 focus:ring-1 focus:ring-amber-500 outline-none transition-colors resize-none"
-            />
+          <div className="grid grid-cols-2 gap-3">
+            <div>
+              <label className="block text-xs font-medium text-gray-300 mb-1">Budget Range</label>
+              <select
+                value={formData.budget_range}
+                onChange={e => setFormData(prev => ({ ...prev, budget_range: e.target.value }))}
+                className="w-full px-3 py-2 bg-white/5 border border-white/10 rounded-lg text-white text-sm focus:border-amber-500 focus:ring-1 focus:ring-amber-500 outline-none transition-colors"
+              >
+                <option value="">Select...</option>
+                {BUDGET_RANGES.map(range => (
+                  <option key={range.value} value={range.value}>{range.label}</option>
+                ))}
+              </select>
+            </div>
+            <div>
+              <label className="block text-xs font-medium text-gray-300 mb-1">Special Requirements</label>
+              <input
+                type="text"
+                value={formData.special_requirements}
+                onChange={e => setFormData(prev => ({ ...prev, special_requirements: e.target.value }))}
+                placeholder="Equipment, preferences..."
+                className="w-full px-3 py-2 bg-white/5 border border-white/10 rounded-lg text-white text-sm placeholder-gray-500 focus:border-amber-500 focus:ring-1 focus:ring-amber-500 outline-none transition-colors"
+              />
+            </div>
           </div>
 
           {/* Contact Info */}
-          <div className="pt-4 border-t border-white/10">
-            <h3 className="text-lg font-semibold text-white mb-4">Your Contact Details</h3>
+          <div className="pt-3 border-t border-white/10">
+            <h3 className="text-sm font-semibold text-white mb-3">Your Contact Details</h3>
             
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div className="grid grid-cols-2 gap-3">
               <div>
-                <label className="block text-sm font-medium text-gray-300 mb-2">
-                  Your Name <span className="text-red-400">*</span>
+                <label className="block text-xs font-medium text-gray-300 mb-1">
+                  Name <span className="text-red-400">*</span>
                 </label>
                 <input
                   type="text"
                   required
                   value={formData.client_name}
                   onChange={e => setFormData(prev => ({ ...prev, client_name: e.target.value }))}
-                  className="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-lg text-white focus:border-amber-500 focus:ring-1 focus:ring-amber-500 outline-none transition-colors"
+                  className="w-full px-3 py-2 bg-white/5 border border-white/10 rounded-lg text-white text-sm focus:border-amber-500 focus:ring-1 focus:ring-amber-500 outline-none transition-colors"
                 />
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-300 mb-2">
-                  Phone Number
-                </label>
+                <label className="block text-xs font-medium text-gray-300 mb-1">Phone</label>
                 <input
                   type="tel"
                   value={formData.client_phone}
                   onChange={e => setFormData(prev => ({ ...prev, client_phone: e.target.value }))}
                   placeholder="+973"
-                  className="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-lg text-white placeholder-gray-500 focus:border-amber-500 focus:ring-1 focus:ring-amber-500 outline-none transition-colors"
+                  className="w-full px-3 py-2 bg-white/5 border border-white/10 rounded-lg text-white text-sm placeholder-gray-500 focus:border-amber-500 focus:ring-1 focus:ring-amber-500 outline-none transition-colors"
                 />
               </div>
             </div>
 
-            <div className="mt-4">
-              <label className="block text-sm font-medium text-gray-300 mb-2">
-                Email Address <span className="text-red-400">*</span>
+            <div className="mt-3">
+              <label className="block text-xs font-medium text-gray-300 mb-1">
+                Email <span className="text-red-400">*</span>
               </label>
               <input
                 type="email"
                 required
                 value={formData.client_email}
                 onChange={e => setFormData(prev => ({ ...prev, client_email: e.target.value }))}
-                className="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-lg text-white focus:border-amber-500 focus:ring-1 focus:ring-amber-500 outline-none transition-colors"
+                className="w-full px-3 py-2 bg-white/5 border border-white/10 rounded-lg text-white text-sm focus:border-amber-500 focus:ring-1 focus:ring-amber-500 outline-none transition-colors"
               />
             </div>
           </div>
@@ -289,7 +287,7 @@ export default function BookingRequestForm({ artists, preselectedArtist, onClose
           <button
             type="submit"
             disabled={isSubmitting}
-            className="w-full py-4 bg-amber-500 hover:bg-amber-600 disabled:bg-amber-500/50 text-white font-semibold rounded-lg transition-colors flex items-center justify-center gap-2"
+            className="w-full py-3 bg-amber-500 hover:bg-amber-600 disabled:bg-amber-500/50 text-white font-semibold rounded-lg transition-colors flex items-center justify-center gap-2"
           >
             {isSubmitting ? (
               <>
