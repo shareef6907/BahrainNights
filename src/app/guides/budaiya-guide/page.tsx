@@ -1,5 +1,6 @@
 import BreadcrumbSchema from '@/components/SEO/BreadcrumbSchema';
 import FAQSchema from '@/components/SEO/FAQSchema';
+import InternalLinks from '@/components/SEO/InternalLinks';
 import { Metadata } from 'next';
 import Link from 'next/link';
 import { 
@@ -323,6 +324,17 @@ export default function BudaiyaGuidePage() {
             dateModified: '2026-02-11',
           }),
         }}
+      />
+
+      <InternalLinks 
+        title="Explore Bahrain" 
+        links={[
+          { title: 'Beach Clubs in Bahrain', href: '/guides/beach-clubs' },
+          { title: 'Riffa Guide', href: '/guides/riffa-guide' },
+          { title: 'Zallaq Guide', href: '/guides/zallaq-guide' },
+          { title: 'Outdoor Activities', href: '/guides/outdoor-activities-bahrain' },
+          { title: 'Things to Do', href: '/guides/things-to-do' },
+        ]} 
       />
     </div>
   );

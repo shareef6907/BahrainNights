@@ -1,5 +1,6 @@
 import BreadcrumbSchema from '@/components/SEO/BreadcrumbSchema';
 import FAQSchema from '@/components/SEO/FAQSchema';
+import InternalLinks from '@/components/SEO/InternalLinks';
 import { Metadata } from 'next';
 import Link from 'next/link';
 import { MapPin, Star, Users, Baby, Utensils } from 'lucide-react';
@@ -200,6 +201,17 @@ export default function BestFamilyRestaurantsBahrainPage() {
         author: { '@type': 'Organization', name: 'BahrainNights' },
         datePublished: '2026-02-11', dateModified: '2026-02-11',
       })}} />
+
+      <InternalLinks 
+        title="Family Activities in Bahrain" 
+        links={[
+          { title: 'Things to Do with Kids', href: '/guides/things-to-do-with-kids' },
+          { title: 'Family Activities Guide', href: '/guides/family-activities' },
+          { title: 'Best Brunches for Families', href: '/guides/brunches' },
+          { title: 'Shopping Malls with Play Areas', href: '/guides/malls' },
+          { title: 'Water Parks & Beach Clubs', href: '/guides/beach-clubs' },
+        ]} 
+      />
     </div>
   );
 }

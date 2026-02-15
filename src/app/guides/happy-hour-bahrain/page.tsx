@@ -1,5 +1,6 @@
 import BreadcrumbSchema from '@/components/SEO/BreadcrumbSchema';
 import FAQSchema from '@/components/SEO/FAQSchema';
+import InternalLinks from '@/components/SEO/InternalLinks';
 import { Metadata } from 'next';
 import Link from 'next/link';
 import { MapPin, Star, Clock, Wine, Beer } from 'lucide-react';
@@ -180,6 +181,17 @@ export default function HappyHourBahrainPage() {
         author: { '@type': 'Organization', name: 'BahrainNights' },
         datePublished: '2026-02-11', dateModified: '2026-02-11',
       })}} />
+
+      <InternalLinks 
+        title="Bahrain Nightlife & Drinks" 
+        links={[
+          { title: 'Bahrain Nightlife Guide', href: '/guides/nightlife' },
+          { title: 'Ladies Night Deals', href: '/guides/ladies-nights' },
+          { title: 'Juffair Bars & Nightlife', href: '/guides/nightlife-juffair' },
+          { title: 'Adliya Bars & Restaurants', href: '/guides/adliya-restaurants-bars' },
+          { title: 'Best Parties This Weekend', href: '/guides/parties' },
+        ]} 
+      />
     </div>
   );
 }

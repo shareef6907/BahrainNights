@@ -5,6 +5,7 @@ import {
   Car, Building, GraduationCap, Stethoscope
 } from 'lucide-react';
 import BreadcrumbSchema from '@/components/SEO/BreadcrumbSchema';
+import InternalLinks from '@/components/SEO/InternalLinks';
 
 export const metadata: Metadata = {
   title: 'Expat Guide to Bahrain 2026 | Living, Working & Settling In',
@@ -271,6 +272,17 @@ export default function ExpatPage() {
           { '@type': 'Question', name: 'Do I need to speak Arabic in Bahrain?', acceptedAnswer: { '@type': 'Answer', text: 'No, English is widely spoken in business and daily life. Arabic useful but not essential for most expats.' } },
         ]
       })}} />
+
+      <InternalLinks 
+        title="Expat Life in Bahrain" 
+        links={[
+          { title: 'Best Restaurants', href: '/guides/restaurants' },
+          { title: 'Nightlife Guide', href: '/guides/nightlife' },
+          { title: 'Beach Clubs & Pools', href: '/guides/beach-clubs' },
+          { title: 'Things to Do', href: '/guides/things-to-do' },
+          { title: 'Brunches in Bahrain', href: '/guides/brunches' },
+        ]} 
+      />
     </div>
   );
 }

@@ -5,6 +5,7 @@ import {
   ArrowRight, Laptop, Cake, Leaf, Sparkles
 } from 'lucide-react';
 import BreadcrumbSchema from '@/components/SEO/BreadcrumbSchema';
+import InternalLinks from '@/components/SEO/InternalLinks';
 
 export const metadata: Metadata = {
   title: 'Best Cafes in Bahrain 2026 | Coffee Shops & Specialty Coffee',
@@ -513,6 +514,17 @@ export default function CafesGuidePage() {
             ],
           }),
         }}
+      />
+
+      <InternalLinks 
+        title="Explore Dining in Bahrain" 
+        links={[
+          { title: 'Best Breakfast Spots', href: '/guides/best-breakfast-bahrain' },
+          { title: 'Dessert Cafes & Sweets', href: '/guides/desserts-cafes-bahrain' },
+          { title: 'Adliya Cafe Scene', href: '/guides/adliya-restaurants-bars' },
+          { title: 'Shisha Lounges', href: '/guides/shisha-lounges-bahrain' },
+          { title: 'Best Restaurants', href: '/guides/restaurants' },
+        ]} 
       />
     </div>
   );

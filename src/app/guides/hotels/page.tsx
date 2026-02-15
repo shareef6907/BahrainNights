@@ -5,6 +5,7 @@ import {
   ArrowRight, Utensils, Sparkles, Coffee, Users
 } from 'lucide-react';
 import BreadcrumbSchema from '@/components/SEO/BreadcrumbSchema';
+import InternalLinks from '@/components/SEO/InternalLinks';
 
 export const metadata: Metadata = {
   title: 'Best Hotels in Bahrain 2026 | Luxury, Beach & Budget Options',
@@ -556,6 +557,17 @@ export default function HotelsGuidePage() {
             ],
           }),
         }}
+      />
+
+      <InternalLinks 
+        title="Plan Your Bahrain Stay" 
+        links={[
+          { title: 'Beach Clubs & Pool Day Passes', href: '/guides/beach-clubs' },
+          { title: 'Best Brunches in Bahrain', href: '/guides/brunches' },
+          { title: 'Things to Do in Bahrain', href: '/guides/things-to-do' },
+          { title: 'Spa & Wellness Guide', href: '/guides/spa-wellness-bahrain' },
+          { title: 'Airport & Transport Guide', href: '/guides/first-time' },
+        ]} 
       />
     </div>
   );

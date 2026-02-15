@@ -1,5 +1,6 @@
 import BreadcrumbSchema from '@/components/SEO/BreadcrumbSchema';
 import FAQSchema from '@/components/SEO/FAQSchema';
+import InternalLinks from '@/components/SEO/InternalLinks';
 import { Metadata } from 'next';
 import Link from 'next/link';
 import { MapPin, Star, Eye, Sun, Moon, Camera } from 'lucide-react';
@@ -252,6 +253,17 @@ export default function BestViewsBahrainPage() {
         author: { '@type': 'Organization', name: 'BahrainNights' },
         datePublished: '2026-02-11', dateModified: '2026-02-11',
       })}} />
+
+      <InternalLinks 
+        title="Scenic Dining in Bahrain" 
+        links={[
+          { title: 'Romantic Date Night Spots', href: '/guides/best-date-night-bahrain' },
+          { title: 'Best Rooftop Bars', href: '/guides/nightlife' },
+          { title: 'Bahrain Bay Guide', href: '/guides/bahrain-bay' },
+          { title: 'Best Seafood Restaurants', href: '/guides/best-seafood-bahrain' },
+          { title: 'Beach Clubs', href: '/guides/beach-clubs' },
+        ]} 
+      />
     </div>
   );
 }

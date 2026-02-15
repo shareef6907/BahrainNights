@@ -5,6 +5,7 @@ import {
   Sun, DollarSign, Users, Calendar
 } from 'lucide-react';
 import BreadcrumbSchema from '@/components/SEO/BreadcrumbSchema';
+import InternalLinks from '@/components/SEO/InternalLinks';
 
 export const metadata: Metadata = {
   title: 'Golf Courses in Bahrain 2026 | Royal Golf Club & Driving Ranges',
@@ -458,6 +459,17 @@ export default function GolfPage() {
             ],
           }),
         }}
+      />
+
+      <InternalLinks 
+        title="Sports & Recreation in Bahrain" 
+        links={[
+          { title: 'Outdoor Activities', href: '/guides/outdoor-activities-bahrain' },
+          { title: 'Riffa Area Guide', href: '/guides/riffa-guide' },
+          { title: 'Beach Clubs', href: '/guides/beach-clubs' },
+          { title: 'Best Hotels', href: '/guides/hotels' },
+          { title: 'Things to Do', href: '/guides/things-to-do' },
+        ]} 
       />
     </div>
   );

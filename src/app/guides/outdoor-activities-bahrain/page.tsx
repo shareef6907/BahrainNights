@@ -5,6 +5,7 @@ import {
   Camera, Compass, Wind, TreePine
 } from 'lucide-react';
 import BreadcrumbSchema from '@/components/SEO/BreadcrumbSchema';
+import InternalLinks from '@/components/SEO/InternalLinks';
 
 export const metadata: Metadata = {
   title: 'Outdoor Activities in Bahrain 2026 | Adventures & Nature Guide',
@@ -393,6 +394,17 @@ export default function OutdoorActivitiesBahrainPage() {
           acceptedAnswer: { '@type': 'Answer', text: faq.a }
         }))
       })}} />
+
+      <InternalLinks 
+        title="Adventure in Bahrain" 
+        links={[
+          { title: 'Beach Clubs & Water Sports', href: '/guides/beach-clubs' },
+          { title: 'Golf Courses in Bahrain', href: '/guides/golf' },
+          { title: 'Diving in Bahrain', href: '/guides/diving-bahrain' },
+          { title: 'Free Things to Do', href: '/guides/free-things-to-do' },
+          { title: 'Family Activities', href: '/guides/family-activities' },
+        ]} 
+      />
     </div>
   );
 }

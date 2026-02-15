@@ -1,5 +1,6 @@
 import BreadcrumbSchema from '@/components/SEO/BreadcrumbSchema';
 import FAQSchema from '@/components/SEO/FAQSchema';
+import InternalLinks from '@/components/SEO/InternalLinks';
 import { Metadata } from 'next';
 import Link from 'next/link';
 import { MapPin, Star, PartyPopper, Sparkles, Clock, Music } from 'lucide-react';
@@ -156,6 +157,17 @@ export default function NewYearsEveBahrainPage() {
         author: { '@type': 'Organization', name: 'BahrainNights' },
         datePublished: '2026-02-11', dateModified: '2026-02-11',
       })}} />
+
+      <InternalLinks 
+        title="Celebrations in Bahrain" 
+        links={[
+          { title: 'Best Parties in Bahrain', href: '/guides/parties' },
+          { title: 'Nightlife Guide', href: '/guides/nightlife' },
+          { title: 'National Day Events', href: '/guides/national-day-bahrain' },
+          { title: 'Best Hotels for NYE', href: '/guides/hotels' },
+          { title: 'Best Restaurants', href: '/guides/restaurants' },
+        ]} 
+      />
     </div>
   );
 }

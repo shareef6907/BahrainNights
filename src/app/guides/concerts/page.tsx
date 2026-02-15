@@ -5,6 +5,7 @@ import {
   ArrowRight, Users, Sparkles, Volume2, Radio
 } from 'lucide-react';
 import BreadcrumbSchema from '@/components/SEO/BreadcrumbSchema';
+import InternalLinks from '@/components/SEO/InternalLinks';
 
 export const metadata: Metadata = {
   title: 'Concerts in Bahrain 2026 | Live Music Events & Shows',
@@ -521,6 +522,17 @@ export default function ConcertsGuidePage() {
             ],
           }),
         }}
+      />
+
+      <InternalLinks 
+        title="Entertainment in Bahrain" 
+        links={[
+          { title: 'Live Music Venues', href: '/guides/live-music-bahrain' },
+          { title: 'Dubai Concerts', href: '/guides/dubai-concerts' },
+          { title: 'Saudi Concerts', href: '/guides/saudi-concerts' },
+          { title: 'Nightlife Guide', href: '/guides/nightlife' },
+          { title: 'Events This Weekend', href: '/this-weekend' },
+        ]} 
       />
     </div>
   );

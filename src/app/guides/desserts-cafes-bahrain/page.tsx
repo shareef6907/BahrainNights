@@ -3,6 +3,7 @@ import Link from 'next/link';
 import { Cake, MapPin, Star, Coffee, IceCream, Cookie, Heart } from 'lucide-react';
 import BreadcrumbSchema from '@/components/SEO/BreadcrumbSchema';
 import FAQSchema from '@/components/SEO/FAQSchema';
+import InternalLinks from '@/components/SEO/InternalLinks';
 
 export const metadata: Metadata = {
   title: 'Best Desserts & Cafés in Bahrain 2026 | Top Sweet Spots',
@@ -339,6 +340,17 @@ export default function DessertsCafesBahrainPage() {
             dateModified: '2026-02-11',
           }),
         }}
+      />
+
+      <InternalLinks 
+        title="Sweet Spots in Bahrain" 
+        links={[
+          { title: 'Best Cafes in Bahrain', href: '/guides/cafes' },
+          { title: 'Best Breakfast Spots', href: '/guides/best-breakfast-bahrain' },
+          { title: 'Adliya Restaurants & Cafes', href: '/guides/adliya-restaurants-bars' },
+          { title: 'Shopping Malls', href: '/guides/malls' },
+          { title: 'Family-Friendly Spots', href: '/guides/best-family-restaurants-bahrain' },
+        ]} 
       />
     </div>
   );

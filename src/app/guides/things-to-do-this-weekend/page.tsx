@@ -5,6 +5,7 @@ import {
   ArrowRight, Music, Utensils, Waves, Moon, PartyPopper
 } from 'lucide-react';
 import BreadcrumbSchema from '@/components/SEO/BreadcrumbSchema';
+import InternalLinks from '@/components/SEO/InternalLinks';
 
 export const metadata: Metadata = {
   title: 'Things to Do in Bahrain This Weekend 2026 | Weekend Events Guide',
@@ -532,6 +533,17 @@ export default function ThisWeekendGuidePage() {
             ],
           }),
         }}
+      />
+
+      <InternalLinks 
+        title="Plan Your Weekend" 
+        links={[
+          { title: 'Events This Weekend', href: '/this-weekend' },
+          { title: 'Best Brunches', href: '/guides/brunches' },
+          { title: 'Beach Clubs', href: '/guides/beach-clubs' },
+          { title: 'Best Parties', href: '/guides/parties' },
+          { title: 'Family Activities', href: '/guides/family-activities' },
+        ]} 
       />
     </div>
   );

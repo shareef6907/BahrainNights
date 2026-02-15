@@ -3,6 +3,7 @@ import Link from 'next/link';
 import { Coffee, MapPin, Star, Sun, Croissant, Clock, Heart } from 'lucide-react';
 import BreadcrumbSchema from '@/components/SEO/BreadcrumbSchema';
 import FAQSchema from '@/components/SEO/FAQSchema';
+import InternalLinks from '@/components/SEO/InternalLinks';
 
 export const metadata: Metadata = {
   title: 'Best Breakfast in Bahrain 2026 | Top Brunch Spots & Morning Cafés',
@@ -351,6 +352,17 @@ export default function BreakfastBahrainPage() {
             dateModified: '2026-02-11',
           }),
         }}
+      />
+
+      <InternalLinks 
+        title="Morning Dining in Bahrain" 
+        links={[
+          { title: 'Best Brunches in Bahrain', href: '/guides/brunches' },
+          { title: 'Best Cafes for Coffee', href: '/guides/cafes' },
+          { title: 'Hotels with Great Breakfast', href: '/guides/hotels' },
+          { title: 'Adliya Cafes & Restaurants', href: '/guides/adliya-restaurants-bars' },
+          { title: 'Family-Friendly Restaurants', href: '/guides/best-family-restaurants-bahrain' },
+        ]} 
       />
     </div>
   );

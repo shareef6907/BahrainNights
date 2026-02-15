@@ -5,6 +5,7 @@ import {
   ArrowRight, Palette, Coffee
 } from 'lucide-react';
 import BreadcrumbSchema from '@/components/SEO/BreadcrumbSchema';
+import InternalLinks from '@/components/SEO/InternalLinks';
 
 export const metadata: Metadata = {
   title: 'Adliya Nightlife Guide 2026 | Best Bars & Cafes in Adliya Bahrain',
@@ -296,6 +297,17 @@ export default function AdliyaNightlifePage() {
           { '@type': 'Question', name: 'Is Adliya good for nightlife?', acceptedAnswer: { '@type': 'Answer', text: 'Yes! Adliya offers a more casual, artsy nightlife scene with live music and lounges.' }},
         ],
       })}} />
+
+      <InternalLinks 
+        title="Bahrain Nightlife Guide" 
+        links={[
+          { title: 'Adliya Restaurants & Bars', href: '/guides/adliya-restaurants-bars' },
+          { title: 'Juffair Nightlife', href: '/guides/nightlife-juffair' },
+          { title: 'Ladies Night Deals', href: '/guides/ladies-nights' },
+          { title: 'Best Parties in Bahrain', href: '/guides/parties' },
+          { title: 'Happy Hour Guide', href: '/guides/happy-hour-bahrain' },
+        ]} 
+      />
     </div>
   );
 }

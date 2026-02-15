@@ -1,5 +1,6 @@
 import BreadcrumbSchema from '@/components/SEO/BreadcrumbSchema';
 import FAQSchema from '@/components/SEO/FAQSchema';
+import InternalLinks from '@/components/SEO/InternalLinks';
 import { Metadata } from 'next';
 import Link from 'next/link';
 import { MapPin, Star, Sun, Waves, DollarSign } from 'lucide-react';
@@ -267,6 +268,17 @@ export default function PoolDayPassesBahrainPage() {
           </div>
         </div>
       </section>
+
+      <InternalLinks 
+        title="Beach & Pool Life in Bahrain" 
+        links={[
+          { title: 'Beach Clubs Guide', href: '/guides/beach-clubs' },
+          { title: 'Best Hotels with Pools', href: '/guides/hotels' },
+          { title: 'Amwaj Islands', href: '/guides/amwaj' },
+          { title: 'Summer Activities', href: '/guides/summer-activities-bahrain' },
+          { title: 'Best Brunches', href: '/guides/brunches' },
+        ]} 
+      />
     </div>
   );
 }

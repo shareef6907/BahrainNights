@@ -5,6 +5,7 @@ import {
   Info, CheckCircle, AlertTriangle, Globe
 } from 'lucide-react';
 import BreadcrumbSchema from '@/components/SEO/BreadcrumbSchema';
+import InternalLinks from '@/components/SEO/InternalLinks';
 
 export const metadata: Metadata = {
   title: 'First Time in Bahrain 2026 | Essential Visitor Guide',
@@ -300,6 +301,17 @@ export default function FirstTimePage() {
           { '@type': 'Question', name: 'What\'s the best time to visit Bahrain?', acceptedAnswer: { '@type': 'Answer', text: 'November to February offers perfect weather (15-25°C). Avoid May-September heat.' } },
         ]
       })}} />
+
+      <InternalLinks 
+        title="Plan Your Bahrain Trip" 
+        links={[
+          { title: 'Things to Do in Bahrain', href: '/guides/things-to-do' },
+          { title: 'Best Hotels', href: '/guides/hotels' },
+          { title: 'Tourist Attractions', href: '/guides/tourist-attractions' },
+          { title: 'Best Restaurants', href: '/guides/restaurants' },
+          { title: 'Shopping Malls', href: '/guides/malls' },
+        ]} 
+      />
     </div>
   );
 }

@@ -1,5 +1,6 @@
 import BreadcrumbSchema from '@/components/SEO/BreadcrumbSchema';
 import FAQSchema from '@/components/SEO/FAQSchema';
+import InternalLinks from '@/components/SEO/InternalLinks';
 import { Metadata } from 'next';
 import Link from 'next/link';
 import { 
@@ -477,6 +478,17 @@ export default function RiffaGuidePage() {
             dateModified: '2026-02-05',
           }),
         }}
+      />
+
+      <InternalLinks 
+        title="Explore Bahrain Areas" 
+        links={[
+          { title: 'Golf in Bahrain', href: '/guides/golf' },
+          { title: 'Budaiya Guide', href: '/guides/budaiya-guide' },
+          { title: 'Manama City Guide', href: '/guides/manama' },
+          { title: 'Amwaj Islands', href: '/guides/amwaj' },
+          { title: 'Best Restaurants', href: '/guides/restaurants' },
+        ]} 
       />
     </div>
   );

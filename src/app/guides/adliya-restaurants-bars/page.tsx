@@ -1,5 +1,6 @@
 import BreadcrumbSchema from '@/components/SEO/BreadcrumbSchema';
 import FAQSchema from '@/components/SEO/FAQSchema';
+import InternalLinks from '@/components/SEO/InternalLinks';
 import { Metadata } from 'next';
 import Link from 'next/link';
 import { 
@@ -399,6 +400,17 @@ export default function AdliyaGuidePage() {
             dateModified: '2026-02-05',
           }),
         }}
+      />
+
+      <InternalLinks 
+        title="Explore Adliya & Bahrain Dining" 
+        links={[
+          { title: 'Nightlife in Adliya', href: '/guides/nightlife-adliya' },
+          { title: 'Best Italian Restaurants', href: '/guides/best-italian-restaurants-bahrain' },
+          { title: 'Best Cafes in Bahrain', href: '/guides/cafes' },
+          { title: 'Juffair Dining Guide', href: '/guides/juffair-restaurants-bars' },
+          { title: 'Happy Hour Deals', href: '/guides/happy-hour-bahrain' },
+        ]} 
       />
     </div>
   );
