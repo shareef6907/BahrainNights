@@ -459,10 +459,10 @@ export default function EventsPageClient({ initialEvents, familyAttractions = []
           {/* Sidebar Filters - Hidden on Mobile */}
           <div className="hidden lg:block lg:w-64 flex-shrink-0">
             <div className="sticky top-24 bg-white/5 backdrop-blur-sm border border-white/10 rounded-2xl p-4">
-              <h3 className="text-lg font-semibold text-white mb-4 flex items-center gap-2">
+              <h2 className="text-lg font-semibold text-white mb-4 flex items-center gap-2">
                 <Filter className="w-5 h-5" />
                 {t.events.sidebar.categories}
-              </h3>
+              </h2>
               <div className="space-y-2">
                 {categories.map((category) => (
                   <button
