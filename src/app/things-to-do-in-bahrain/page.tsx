@@ -138,7 +138,7 @@ function generateSchema() {
             url: 'https://www.bahrainnights.com/logo.png'
           }
         },
-        datePublished: '2024-01-15',
+        datePublished: '2026-01-15',
         dateModified: new Date().toISOString().split('T')[0],
         mainEntityOfPage: 'https://www.bahrainnights.com/things-to-do-in-bahrain'
       },
