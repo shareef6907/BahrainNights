@@ -344,7 +344,7 @@ export default function EventsPageClient({ initialEvents, familyAttractions = []
         dangerouslySetInnerHTML={{ __html: JSON.stringify(eventsJsonLd) }}
       />
 
-      <div className="min-h-screen bg-slate-950">
+      <main className="min-h-screen bg-slate-950">
       {/* Hero Section */}
       <section className="relative pt-24 pb-12 overflow-hidden">
         <div className="absolute inset-0">
@@ -743,12 +743,12 @@ export default function EventsPageClient({ initialEvents, familyAttractions = []
           </div>
         </div>
       </section>
-    </div>
 
       {/* Event Production Services */}
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pb-16">
         <CrossPromoServices context="event" />
       </div>
+    </main>
 
       {/* Event Modal */}
       <EventModal

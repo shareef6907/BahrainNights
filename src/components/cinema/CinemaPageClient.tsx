@@ -251,7 +251,7 @@ export default function CinemaPageClient({
         dangerouslySetInnerHTML={{ __html: JSON.stringify(moviesJsonLd) }}
       />
 
-      <div className="bg-gradient-to-b from-slate-950 via-slate-900 to-slate-950 text-white min-h-screen">
+      <main className="bg-gradient-to-b from-slate-950 via-slate-900 to-slate-950 text-white min-h-screen">
         {/* Hero Section */}
         <section className="pt-24 pb-8 px-4">
           <div className="max-w-7xl mx-auto">
@@ -427,7 +427,7 @@ export default function CinemaPageClient({
           title={trailerMovie?.title || ''}
           trailerUrl={trailerMovie?.trailerUrl || ''}
         />
-      </div>
+      </main>
     </>
   );
 }
