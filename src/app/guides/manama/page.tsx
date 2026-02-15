@@ -332,6 +332,20 @@ export default function ManamaGuidePage() {
           }),
         }}
       />
+
+      <InternalLinks
+        title="Explore More of Bahrain"
+        links={[
+          { title: 'Muharraq Guide', href: '/guides/muharraq' },
+          { title: 'Seef Guide', href: '/guides/seef' },
+          { title: 'Amwaj Islands', href: '/guides/amwaj' },
+          { title: 'Tourist Attractions', href: '/guides/tourist-attractions' },
+          { title: 'Best Restaurants', href: '/guides/restaurants' },
+          { title: 'Nightlife Guide', href: '/guides/nightlife' },
+          { title: 'Shopping Malls', href: '/guides/malls' },
+          { title: 'Things to Do', href: '/guides/things-to-do' },
+        ]}
+      />
     </div>
   );
 }

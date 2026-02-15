@@ -500,6 +500,20 @@ export default function ArabicRestaurantsPage() {
           }),
         }}
       />
+
+      <InternalLinks
+        title="More Dining in Bahrain"
+        links={[
+          { title: 'All Restaurants', href: '/guides/restaurants' },
+          { title: 'Indian Restaurants', href: '/guides/indian-restaurants' },
+          { title: 'Seafood Restaurants', href: '/guides/seafood-restaurants-bahrain' },
+          { title: 'Best Brunches', href: '/guides/brunches' },
+          { title: 'Best Buffets', href: '/guides/buffets' },
+          { title: 'Things to Do', href: '/guides/things-to-do' },
+          { title: 'Muharraq Guide', href: '/guides/muharraq' },
+          { title: 'Manama Guide', href: '/guides/manama' },
+        ]}
+      />
     </div>
   );
 }

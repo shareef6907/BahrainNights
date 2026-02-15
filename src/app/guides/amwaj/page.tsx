@@ -332,6 +332,20 @@ export default function AmwajGuidePage() {
           }),
         }}
       />
+
+      <InternalLinks
+        title="Explore More Areas"
+        links={[
+          { title: 'Beach Clubs', href: '/guides/beach-clubs' },
+          { title: 'Muharraq Guide', href: '/guides/muharraq' },
+          { title: 'Manama Guide', href: '/guides/manama' },
+          { title: 'Seef Guide', href: '/guides/seef' },
+          { title: 'Best Restaurants', href: '/guides/restaurants' },
+          { title: 'Things to Do', href: '/guides/things-to-do' },
+          { title: 'Family Activities', href: '/guides/family-activities' },
+          { title: 'Free Things to Do', href: '/guides/free-things-to-do' },
+        ]}
+      />
     </div>
   );
 }

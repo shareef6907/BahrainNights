@@ -355,6 +355,20 @@ export default function NightlifeGuidePage() {
           }),
         }}
       />
+
+      <InternalLinks
+        title="Plan Your Night Out"
+        links={[
+          { title: 'Ladies Nights', href: '/guides/ladies-nights' },
+          { title: 'Rooftop Bars', href: '/guides/rooftop-bars' },
+          { title: 'Sports Bars', href: '/guides/sports-bars' },
+          { title: 'Best Restaurants', href: '/guides/restaurants' },
+          { title: 'Best Brunches', href: '/guides/brunches' },
+          { title: 'Beach Clubs', href: '/guides/beach-clubs' },
+          { title: 'Events Today', href: '/events/today' },
+          { title: 'This Weekend', href: '/events/this-weekend' },
+        ]}
+      />
     </div>
   );
 }

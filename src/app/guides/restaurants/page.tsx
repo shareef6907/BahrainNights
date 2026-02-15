@@ -542,6 +542,20 @@ export default function RestaurantsGuidePage() {
           }),
         }}
       />
+
+      <InternalLinks
+        title="Discover More Dining Options"
+        links={[
+          { title: 'Best Brunches', href: '/guides/brunches' },
+          { title: 'Arabic Restaurants', href: '/guides/arabic-restaurants' },
+          { title: 'Indian Restaurants', href: '/guides/indian-restaurants' },
+          { title: 'Seafood Restaurants', href: '/guides/seafood-restaurants-bahrain' },
+          { title: 'Buffets in Bahrain', href: '/guides/buffets' },
+          { title: 'Nightlife Guide', href: '/guides/nightlife' },
+          { title: 'Beach Clubs', href: '/guides/beach-clubs' },
+          { title: 'Things to Do', href: '/guides/things-to-do' },
+        ]}
+      />
     </div>
   );
 }

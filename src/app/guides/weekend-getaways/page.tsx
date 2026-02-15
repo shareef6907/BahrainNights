@@ -290,6 +290,20 @@ export default function WeekendGetawaysPage() {
           { '@type': 'Question', name: 'Best destination for a quick weekend?', acceptedAnswer: { '@type': 'Answer', text: 'Doha (30min flight) or Al Khobar (drive) for shortest trips. Dubai for most to do.' } },
         ]
       })}} />
+
+      <InternalLinks
+        title="Explore Bahrain First"
+        links={[
+          { title: 'Staycations', href: '/guides/staycations' },
+          { title: 'Beach Clubs', href: '/guides/beach-clubs' },
+          { title: 'Things to Do', href: '/guides/things-to-do' },
+          { title: 'Best Restaurants', href: '/guides/restaurants' },
+          { title: 'Family Activities', href: '/guides/family-activities' },
+          { title: 'Nightlife Guide', href: '/guides/nightlife' },
+          { title: 'Tourist Attractions', href: '/guides/tourist-attractions' },
+          { title: 'Expat Guide', href: '/guides/expat' },
+        ]}
+      />
     </div>
   );
 }

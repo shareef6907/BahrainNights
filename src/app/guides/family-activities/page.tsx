@@ -483,6 +483,20 @@ export default function FamilyActivitiesPage() {
           }),
         }}
       />
+
+      <InternalLinks
+        title="More Family Fun in Bahrain"
+        links={[
+          { title: 'Things to Do with Kids', href: '/guides/things-to-do-with-kids' },
+          { title: 'Free Things to Do', href: '/guides/free-things-to-do' },
+          { title: 'Beach Clubs', href: '/guides/beach-clubs' },
+          { title: 'Best Restaurants', href: '/guides/restaurants' },
+          { title: 'Shopping Malls', href: '/guides/malls' },
+          { title: 'Tourist Attractions', href: '/guides/tourist-attractions' },
+          { title: 'Amwaj Islands', href: '/guides/amwaj' },
+          { title: 'Weekend Getaways', href: '/guides/weekend-getaways' },
+        ]}
+      />
     </div>
   );
 }

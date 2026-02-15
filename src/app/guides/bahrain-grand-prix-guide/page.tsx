@@ -555,6 +555,20 @@ export default function BahrainGrandPrixGuidePage() {
           acceptedAnswer: { '@type': 'Answer', text: faq.a }
         }))
       })}} />
+
+      <InternalLinks
+        title="More Things to Do in Bahrain"
+        links={[
+          { title: 'Nightlife Guide', href: '/guides/nightlife' },
+          { title: 'Sports Bars', href: '/guides/sports-bars' },
+          { title: 'Best Restaurants', href: '/guides/restaurants' },
+          { title: 'Best Brunches', href: '/guides/brunches' },
+          { title: 'Beach Clubs', href: '/guides/beach-clubs' },
+          { title: 'Things to Do', href: '/guides/things-to-do' },
+          { title: 'Events This Weekend', href: '/events/this-weekend' },
+          { title: 'All Events', href: '/events' },
+        ]}
+      />
     </div>
   );
 }
