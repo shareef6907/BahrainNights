@@ -9,14 +9,14 @@ import {
 } from 'lucide-react';
 
 export const metadata: Metadata = {
-  title: 'Budaiya Guide — Restaurants, Beaches & Things to Do | Bahrain 2026',
+  title: 'Budaiya Guide — Restaurants, Beaches & Things to Do',
   description: 'Complete guide to Budaiya, Bahrain. Discover the best restaurants, beach spots, family activities, and things to do in Bahrain\'s scenic northern coast.',
   keywords: 'Budaiya Bahrain, Budaiya restaurants, Budaiya beach, things to do Budaiya, Budaiya guide, Al Budaiya Bahrain, Northern Bahrain',
   alternates: {
     canonical: 'https://www.bahrainnights.com/guides/budaiya-guide',
   },
   openGraph: {
-    title: 'Budaiya Guide — Restaurants, Beaches & Things to Do',
+    title: 'Budaiya — Restaurants, Beaches & Things to Do',
     description: 'Discover Budaiya: Bahrain\'s scenic northern coast with beaches, restaurants, and family activities.',
     type: 'article',
     locale: 'en_US',

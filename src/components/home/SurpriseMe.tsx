@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import Link from 'next/link';
+import Image from 'next/image';
 import { Shuffle, Sparkles, MapPin, Clock, X, RefreshCw } from 'lucide-react';
 
 export interface SurpriseOption {
@@ -192,12 +193,13 @@ export default function SurpriseMe({ events, places, attractions }: SurpriseMePr
                         onClick={() => setIsOpen(false)}
                         className="block group"
                       >
-                        <div className="relative rounded-2xl overflow-hidden">
-                          <img
+                        <div className="relative rounded-2xl overflow-hidden h-48">
+                          <Image
                             src={result.image}
                             alt={result.title}
-                            loading="lazy"
-                            className="w-full h-48 object-cover group-hover:scale-105 transition-transform duration-300"
+                            fill
+                            sizes="(max-width: 448px) 100vw, 400px"
+                            className="object-cover group-hover:scale-105 transition-transform duration-300"
                           />
                           <div className="absolute inset-0 bg-gradient-to-t from-black via-black/50 to-transparent" />
                           <div className="absolute top-3 right-3 px-3 py-1 bg-yellow-500 text-black text-xs font-bold rounded-full uppercase">

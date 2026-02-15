@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import Link from 'next/link';
+import Image from 'next/image';
 import { Clock, MapPin, ChevronRight, Zap } from 'lucide-react';
 
 export interface HappeningNowEvent {
@@ -144,12 +145,12 @@ export default function HappeningNow({ events, onEventClick }: HappeningNowProps
               <>
                 {/* Thumbnail */}
                 <div className="relative w-24 h-24 flex-shrink-0 rounded-xl overflow-hidden">
-                  <img
+                  <Image
                     src={event.cover_url || 'https://images.unsplash.com/photo-1492684223066-81342ee5ff30?w=200&h=200&fit=crop'}
                     alt={event.title}
-                    loading="lazy"
                     width={96}
                     height={96}
+                    sizes="96px"
                     className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-300"
                   />
                   {isLive && (

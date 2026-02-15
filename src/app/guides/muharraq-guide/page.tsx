@@ -8,14 +8,14 @@ import {
 } from 'lucide-react';
 
 export const metadata: Metadata = {
-  title: 'Muharraq Bahrain — Heritage, Restaurants & Hidden Gems 2026',
+  title: 'Muharraq Guide — Heritage, Restaurants & Hidden Gems',
   description: 'Discover Muharraq, Bahrain\'s cultural heart and UNESCO World Heritage site. Explore traditional restaurants, pearling history, ancient mosques, and hidden gems in this historic island.',
   keywords: 'Muharraq Bahrain, Muharraq restaurants, Muharraq heritage, Pearling Path Bahrain, Bahrain UNESCO, Muharraq Souq, traditional Bahrain, Siyadi House',
   alternates: {
     canonical: 'https://www.bahrainnights.com/guides/muharraq-guide',
   },
   openGraph: {
-    title: 'Muharraq Bahrain — Heritage, Restaurants & Hidden Gems 2026',
+    title: 'Muharraq Guide — Heritage, Restaurants & Hidden Gems',
     description: 'Your complete guide to Muharraq\'s UNESCO heritage, traditional dining, and authentic Bahraini culture.',
     type: 'article',
     locale: 'en_US',

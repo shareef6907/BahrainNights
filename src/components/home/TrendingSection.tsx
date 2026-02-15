@@ -2,8 +2,9 @@
 
 import { useState } from 'react';
 import Link from 'next/link';
+import Image from 'next/image';
 import { motion } from 'framer-motion';
-import { TrendingUp, MapPin, Calendar, Star, Clock, Users, ArrowRight, Flame } from 'lucide-react';
+import { TrendingUp, MapPin, Calendar, Star, ArrowRight, Flame } from 'lucide-react';
 
 interface TrendingVenue {
   id: string;
@@ -119,11 +120,12 @@ export default function TrendingSection({ venues, events }: TrendingSectionProps
                 {/* Image */}
                 <div className="aspect-square relative">
                   {venue.image_url ? (
-                    <img
+                    <Image
                       src={venue.image_url}
                       alt={venue.name}
-                      loading="lazy"
-                      className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                      fill
+                      sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 20vw"
+                      className="object-cover group-hover:scale-105 transition-transform duration-300"
                     />
                   ) : (
                     <div className="w-full h-full bg-gradient-to-br from-slate-700 to-slate-800 flex items-center justify-center">
@@ -180,11 +182,12 @@ export default function TrendingSection({ venues, events }: TrendingSectionProps
                 {/* Image */}
                 <div className="aspect-video relative">
                   {event.cover_url ? (
-                    <img
+                    <Image
                       src={event.cover_url}
                       alt={event.title}
-                      loading="lazy"
-                      className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                      fill
+                      sizes="(max-width: 768px) 100vw, 33vw"
+                      className="object-cover group-hover:scale-105 transition-transform duration-300"
                     />
                   ) : (
                     <div className="w-full h-full bg-gradient-to-br from-orange-900/50 to-red-900/50 flex items-center justify-center">

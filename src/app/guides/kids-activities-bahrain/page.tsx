@@ -1,4 +1,5 @@
 import BreadcrumbSchema from '@/components/SEO/BreadcrumbSchema';
+import InternalLinks from '@/components/SEO/InternalLinks';
 import { Metadata } from 'next';
 import Link from 'next/link';
 import { MapPin, Star, Baby, Gamepad2, Waves, TreePine, Clock, Ticket, Sun, Building2, Palette, Music } from 'lucide-react';
@@ -428,6 +429,17 @@ export default function KidsActivitiesBahrainPage() {
           acceptedAnswer: { '@type': 'Answer', text: faq.a }
         }))
       })}} />
+
+      <InternalLinks 
+        title="Family Fun in Bahrain" 
+        links={[
+          { title: 'Family Activities Guide', href: '/guides/family-activities' },
+          { title: 'Family-Friendly Restaurants', href: '/guides/best-family-restaurants-bahrain' },
+          { title: 'Beach Clubs & Water Parks', href: '/guides/beach-clubs' },
+          { title: 'Shopping Malls', href: '/guides/malls' },
+          { title: 'Free Things to Do', href: '/guides/free-things-to-do' },
+        ]} 
+      />
     </div>
   );
 }

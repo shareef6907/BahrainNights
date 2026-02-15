@@ -3,6 +3,7 @@
 import { useState, useEffect, useRef } from 'react';
 import dynamic from 'next/dynamic';
 import Link from 'next/link';
+import Image from 'next/image';
 import { motion, AnimatePresence } from 'framer-motion';
 import { MapPin, Clock, Star, ChevronRight, ChevronDown, Menu, X, Play, Building2, LogIn } from 'lucide-react';
 import GlobalSearch from '@/components/search/GlobalSearch';
@@ -875,10 +876,13 @@ export default function HomePageClient({ initialMovies, initialStats, initialTod
                   variants={fadeIn}
                   whileHover={cardHover}
                 >
-                  <img
+                  <Image
                     src={movie.poster_url?.startsWith('http') ? movie.poster_url : movie.poster_url ? `https://image.tmdb.org/t/p/w500${movie.poster_url}` : 'https://images.unsplash.com/photo-1489599849927-2ee91cede3ba?w=300&h=450&fit=crop'}
                     alt={movie.title}
+                    width={300}
+                    height={450}
                     className="w-full h-[280px] md:h-[450px] object-cover group-hover:scale-105 transition-transform duration-300"
+                    sizes="(max-width: 768px) 50vw, 25vw"
                   />
                   {/* Mobile-friendly play trailer button - always visible on mobile */}
                   {movie.trailer_url && (
@@ -969,7 +973,7 @@ export default function HomePageClient({ initialMovies, initialStats, initialTod
                   whileHover={cardHover}
                 >
                   <div className="relative h-72 overflow-hidden">
-                    <img src={event.image} alt={event.title} loading="lazy" className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" />
+                    <Image src={event.image} alt={event.title} fill sizes="(max-width: 768px) 100vw, (max-width: 1024px) 50vw, 25vw" className="object-cover group-hover:scale-105 transition-transform duration-300" />
                     <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/30 to-transparent" />
                     <div className="absolute top-4 right-4 px-4 py-1.5 bg-yellow-500 text-black text-xs font-bold rounded-full">
                       {event.category}
