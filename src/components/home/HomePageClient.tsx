@@ -741,7 +741,7 @@ export default function HomePageClient({ initialMovies, initialStats, initialTod
             loop
             playsInline
             preload="none"
-            poster="/header-video-poster.jpg"
+            poster="/header-video-poster.webp"
             disablePictureInPicture
             className="absolute inset-0 w-full h-full object-cover"
             style={{ objectPosition: 'center center' }}

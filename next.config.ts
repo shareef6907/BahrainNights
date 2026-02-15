@@ -74,6 +74,18 @@ const nextConfig: NextConfig = {
         port: '',
         pathname: '/**',
       },
+      {
+        protocol: 'https',
+        hostname: 'assets.voxcinemas.com',
+        port: '',
+        pathname: '/**',
+      },
+      {
+        protocol: 'https',
+        hostname: 'bahrain.cineco.net',
+        port: '',
+        pathname: '/**',
+      },
     ],
     // Enable modern image formats for better compression
     formats: ['image/avif', 'image/webp'],
