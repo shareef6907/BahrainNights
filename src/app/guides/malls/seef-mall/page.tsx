@@ -8,6 +8,26 @@ import {
 } from 'lucide-react';
 import BreadcrumbSchema from '@/components/SEO/BreadcrumbSchema';
 
+// Brand page links mapping
+const brandLinks: Record<string, string> = {
+  'Zara': '/guides/brands/zara',
+  'H&M': '/guides/brands/hm',
+  'Nike': '/guides/brands/nike',
+  'Adidas': '/guides/brands/adidas',
+  'Sephora': '/guides/brands/sephora',
+  'Apple': '/guides/brands/apple',
+  'Bath & Body Works': '/guides/brands/bath-body-works',
+  'Starbucks': '/guides/brands/starbucks',
+  'Starbucks Coffee': '/guides/brands/starbucks',
+  'Costa': '/guides/brands/costa-coffee',
+  'Costa Coffee': '/guides/brands/costa-coffee',
+  'Shake Shack': '/guides/brands/shake-shack',
+  'Five Guys': '/guides/brands/five-guys',
+  'Crocs': '/guides/brands/crocs',
+  'Crocs Shoes': '/guides/brands/crocs',
+  'Uniqlo': '/guides/brands/uniqlo',
+};
+
 export const metadata: Metadata = {
   title: 'Seef Mall Bahrain - Complete Store Directory & Guide 2026',
   description: 'Complete guide to Seef Mall Bahrain. Now with 3 locations: Seef District, Muharraq & Isa Town. 250+ stores including H&M, Marks & Spencer, Mango, Sephora, Magic Island & cinemas.',

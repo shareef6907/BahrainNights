@@ -42,6 +42,14 @@
     {
       "path": "/api/cron/international-events",
       "schedule": "0 5 * * *"
+    },
+    {
+      "path": "/api/cron/bulk-index",
+      "schedule": "0 2 * * *"
+    },
+    {
+      "path": "/api/request-indexing",
+      "schedule": "30 2 * * *"
     }
   ]
 }

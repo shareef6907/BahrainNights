@@ -1,6 +1,6 @@
 import { Metadata } from 'next';
 import Link from 'next/link';
-import { ArrowRight, BookOpen, Calendar, MapPin, Globe } from 'lucide-react';
+import { ArrowRight, BookOpen, Calendar, MapPin, Globe, ShoppingBag } from 'lucide-react';
 import InternalLinks, { eventLinks, placeLinks, exploreLinks } from '@/components/SEO/InternalLinks';
 
 export const metadata: Metadata = {
@@ -305,6 +305,34 @@ const areaGuides = [
   },
 ];
 
+const shoppingGuides = [
+  { title: 'Best Malls in Bahrain', href: '/guides/malls', emoji: '🏬', description: 'Complete guide to all malls in Bahrain' },
+  { title: 'Traditional Souks', href: '/guides/souks', emoji: '🛍️', description: 'Explore Bahrain\'s historic markets' },
+];
+
+const brandGuides = [
+  { name: 'Zara', href: '/guides/brands/zara', emoji: '👗' },
+  { name: 'H&M', href: '/guides/brands/hm', emoji: '👔' },
+  { name: 'Nike', href: '/guides/brands/nike', emoji: '👟' },
+  { name: 'Adidas', href: '/guides/brands/adidas', emoji: '⚽' },
+  { name: 'Sephora', href: '/guides/brands/sephora', emoji: '💄' },
+  { name: 'Apple', href: '/guides/brands/apple', emoji: '🍎' },
+  { name: 'Louis Vuitton', href: '/guides/brands/louis-vuitton', emoji: '👜' },
+  { name: 'Gucci', href: '/guides/brands/gucci', emoji: '🐍' },
+  { name: 'Dior', href: '/guides/brands/dior', emoji: '💎' },
+  { name: 'Chanel', href: '/guides/brands/chanel', emoji: '🖤' },
+  { name: 'Hermès', href: '/guides/brands/hermes', emoji: '🧣' },
+  { name: 'Uniqlo', href: '/guides/brands/uniqlo', emoji: '🧥' },
+  { name: 'Starbucks', href: '/guides/brands/starbucks', emoji: '☕' },
+  { name: 'Costa Coffee', href: '/guides/brands/costa-coffee', emoji: '☕' },
+  { name: 'IKEA', href: '/guides/brands/ikea', emoji: '🏠' },
+  { name: 'Bath & Body Works', href: '/guides/brands/bath-body-works', emoji: '🛁' },
+  { name: 'Crocs', href: '/guides/brands/crocs', emoji: '🐊' },
+  { name: 'Five Guys', href: '/guides/brands/five-guys', emoji: '🍔' },
+  { name: 'Shake Shack', href: '/guides/brands/shake-shack', emoji: '🍔' },
+  { name: 'Cheesecake Factory', href: '/guides/brands/cheesecake-factory', emoji: '🍰' },
+];
+
 const categoryColors: Record<string, string> = {
   Essential: 'bg-yellow-500/20 text-yellow-400',
   Sightseeing: 'bg-emerald-500/20 text-emerald-400',
@@ -318,6 +346,7 @@ const categoryColors: Record<string, string> = {
   Budget: 'bg-green-500/20 text-green-400',
   Couples: 'bg-rose-500/20 text-rose-400',
   Area: 'bg-teal-500/20 text-teal-400',
+  Shopping: 'bg-pink-500/20 text-pink-400',
   Dubai: 'bg-pink-500/20 text-pink-400',
   'Abu Dhabi': 'bg-blue-500/20 text-blue-400',
   Qatar: 'bg-rose-500/20 text-rose-400',
@@ -423,8 +452,67 @@ export default function GuidesPage() {
         </div>
       </section>
 
-      {/* Regional Guides */}
+      {/* Shopping Guides */}
       <section className="py-12 px-4">
+        <div className="max-w-6xl mx-auto">
+          <h2 className="text-2xl font-bold mb-8 flex items-center gap-2">
+            <ShoppingBag className="w-7 h-7 text-pink-400" />
+            Shopping Guides
+          </h2>
+          <p className="text-gray-400 mb-8">
+            Find the best malls, souks, and your favorite brands in Bahrain.
+          </p>
+          
+          {/* Malls and Souks */}
+          <div className="grid md:grid-cols-2 gap-6 mb-8">
+            {shoppingGuides.map((guide) => (
+              <Link
+                key={guide.href}
+                href={guide.href}
+                className="group relative bg-white/5 rounded-2xl p-6 hover:bg-white/10 transition-all"
+              >
+                <div className="flex items-center gap-4">
+                  <span className="text-4xl">{guide.emoji}</span>
+                  <div className="flex-1">
+                    <h3 className="text-lg font-bold group-hover:text-pink-400 transition-colors">
+                      {guide.title}
+                    </h3>
+                    <p className="text-gray-400 text-sm">{guide.description}</p>
+                  </div>
+                  <ArrowRight className="w-5 h-5 text-pink-400 group-hover:translate-x-1 transition-transform" />
+                </div>
+              </Link>
+            ))}
+          </div>
+          
+          {/* Brand Guides */}
+          <div className="bg-white/5 rounded-2xl p-6">
+            <div className="flex items-center justify-between mb-4">
+              <h3 className="text-lg font-bold">Brand Guides</h3>
+              <Link href="/guides/brands" className="text-sm text-pink-400 hover:underline flex items-center gap-1">
+                View All <ArrowRight className="w-4 h-4" />
+              </Link>
+            </div>
+            <div className="grid grid-cols-4 md:grid-cols-5 lg:grid-cols-10 gap-3">
+              {brandGuides.map((brand) => (
+                <Link
+                  key={brand.href}
+                  href={brand.href}
+                  className="flex flex-col items-center gap-1 p-2 rounded-lg hover:bg-white/10 transition-colors group"
+                >
+                  <span className="text-2xl">{brand.emoji}</span>
+                  <span className="text-xs text-gray-400 group-hover:text-pink-400 transition-colors text-center">
+                    {brand.name}
+                  </span>
+                </Link>
+              ))}
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* Regional Guides */}
+      <section className="py-12 px-4 bg-black/30">
         <div className="max-w-6xl mx-auto">
           <h2 className="text-2xl font-bold mb-8 flex items-center gap-2">
             <Globe className="w-7 h-7 text-yellow-400" />

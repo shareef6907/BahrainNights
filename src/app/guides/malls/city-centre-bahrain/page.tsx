@@ -8,6 +8,24 @@ import {
 } from 'lucide-react';
 import BreadcrumbSchema from '@/components/SEO/BreadcrumbSchema';
 
+// Brand page links mapping
+const brandLinks: Record<string, string> = {
+  'Zara': '/guides/brands/zara',
+  'H&M': '/guides/brands/hm',
+  'Nike': '/guides/brands/nike',
+  'Adidas': '/guides/brands/adidas',
+  'Sephora': '/guides/brands/sephora',
+  'Apple': '/guides/brands/apple',
+  'Bath & Body Works': '/guides/brands/bath-body-works',
+  'Starbucks': '/guides/brands/starbucks',
+  'Costa': '/guides/brands/costa-coffee',
+  'Costa Coffee': '/guides/brands/costa-coffee',
+  'Shake Shack': '/guides/brands/shake-shack',
+  'Five Guys': '/guides/brands/five-guys',
+  'Crocs': '/guides/brands/crocs',
+  'Uniqlo': '/guides/brands/uniqlo',
+};
+
 export const metadata: Metadata = {
   title: 'City Centre Bahrain - Complete Store Directory & Guide 2026',
   description: 'Complete guide to City Centre Bahrain. 350+ stores including Zara, H&M, Saks Fifth Avenue, Carrefour, Wahooo! Waterpark, Magic Planet & 20-screen Cineco Cinema.',
@@ -442,9 +460,15 @@ export default function CityCentrePage() {
                 </h3>
                 <div className="space-y-1 max-h-64 overflow-y-auto">
                   {category.stores.map((store) => (
-                    <span key={store} className="block text-gray-400 text-sm">
-                      {store}
-                    </span>
+                    brandLinks[store] ? (
+                      <Link key={store} href={brandLinks[store]} className="block text-purple-400 hover:text-purple-300 text-sm hover:underline">
+                        {store}
+                      </Link>
+                    ) : (
+                      <span key={store} className="block text-gray-400 text-sm">
+                        {store}
+                      </span>
+                    )
                   ))}
                 </div>
               </div>
@@ -470,9 +494,15 @@ export default function CityCentrePage() {
                 </h3>
                 <div className="space-y-1">
                   {option.restaurants.map((restaurant) => (
-                    <span key={restaurant} className="block text-gray-400 text-sm">
-                      {restaurant}
-                    </span>
+                    brandLinks[restaurant] ? (
+                      <Link key={restaurant} href={brandLinks[restaurant]} className="block text-purple-400 hover:text-purple-300 text-sm hover:underline">
+                        {restaurant}
+                      </Link>
+                    ) : (
+                      <span key={restaurant} className="block text-gray-400 text-sm">
+                        {restaurant}
+                      </span>
+                    )
                   ))}
                 </div>
               </div>
