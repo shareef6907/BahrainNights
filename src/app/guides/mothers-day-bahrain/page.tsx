@@ -1,5 +1,6 @@
 import BreadcrumbSchema from '@/components/SEO/BreadcrumbSchema';
 import FAQSchema from '@/components/SEO/FAQSchema';
+import InternalLinks from '@/components/SEO/InternalLinks';
 import { Metadata } from 'next';
 import Link from 'next/link';
 import { MapPin, Star, Heart, Gift, Sparkles, Flower } from 'lucide-react';
@@ -170,6 +171,17 @@ export default function MothersDayBahrainPage() {
         author: { '@type': 'Organization', name: 'BahrainNights' },
         datePublished: '2026-02-11', dateModified: '2026-02-11',
       })}} />
+
+      <InternalLinks 
+        title="Special Occasions in Bahrain" 
+        links={[
+          { title: 'Best Brunches', href: '/guides/brunches' },
+          { title: 'Valentine\'s Day Guide', href: '/guides/valentines-day-bahrain' },
+          { title: 'Romantic Restaurants', href: '/guides/best-date-night-bahrain' },
+          { title: 'Spa & Wellness', href: '/guides/spa-wellness-bahrain' },
+          { title: 'Best Restaurants', href: '/guides/restaurants' },
+        ]} 
+      />
     </div>
   );
 }

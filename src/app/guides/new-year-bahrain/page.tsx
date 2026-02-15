@@ -6,6 +6,7 @@ import {
   Wine, Utensils, Building, DollarSign
 } from 'lucide-react';
 import BreadcrumbSchema from '@/components/SEO/BreadcrumbSchema';
+import InternalLinks from '@/components/SEO/InternalLinks';
 
 export const metadata: Metadata = {
   title: "New Year's Eve in Bahrain — Best Parties & Events 2026 | Complete Guide",
@@ -443,6 +444,17 @@ export default function NewYearBahrainPage() {
             dateModified: lastUpdated,
           }),
         }}
+      />
+
+      <InternalLinks 
+        title="Celebrate in Bahrain" 
+        links={[
+          { title: 'New Year\'s Eve Guide', href: '/guides/new-years-eve-bahrain' },
+          { title: 'Best Parties', href: '/guides/parties' },
+          { title: 'Nightlife Guide', href: '/guides/nightlife' },
+          { title: 'Best Hotels', href: '/guides/hotels' },
+          { title: 'Best Restaurants', href: '/guides/restaurants' },
+        ]} 
       />
     </div>
   );

@@ -5,6 +5,7 @@ import {
   ArrowRight, Users, Sparkles, Volume2, Plane, Info
 } from 'lucide-react';
 import BreadcrumbSchema from '@/components/SEO/BreadcrumbSchema';
+import InternalLinks from '@/components/SEO/InternalLinks';
 
 export const metadata: Metadata = {
   title: 'Concerts in Saudi Arabia 2026 | Riyadh, Jeddah & AlUla Events',
@@ -467,6 +468,17 @@ export default function SaudiConcertsPage() {
             ],
           }),
         }}
+      />
+
+      <InternalLinks 
+        title="Regional Entertainment" 
+        links={[
+          { title: 'Dubai Concerts', href: '/guides/dubai-concerts' },
+          { title: 'Concerts in Bahrain', href: '/guides/concerts' },
+          { title: 'Dubai Parties', href: '/guides/dubai-parties' },
+          { title: 'F1 Bahrain Grand Prix', href: '/guides/bahrain-grand-prix-guide' },
+          { title: 'Weekend Getaways', href: '/guides/weekend-getaways' },
+        ]} 
       />
     </div>
   );

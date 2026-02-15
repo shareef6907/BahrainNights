@@ -1,5 +1,6 @@
 import BreadcrumbSchema from '@/components/SEO/BreadcrumbSchema';
 import FAQSchema from '@/components/SEO/FAQSchema';
+import InternalLinks from '@/components/SEO/InternalLinks';
 import { Metadata } from 'next';
 import Link from 'next/link';
 import { 
@@ -474,6 +475,17 @@ export default function SeefGuidePage() {
             dateModified: '2026-02-05',
           }),
         }}
+      />
+
+      <InternalLinks 
+        title="Explore Seef & Bahrain" 
+        links={[
+          { title: 'Shopping Malls Guide', href: '/guides/malls' },
+          { title: 'Best Restaurants', href: '/guides/restaurants' },
+          { title: 'Beach Clubs', href: '/guides/beach-clubs' },
+          { title: 'Manama Guide', href: '/guides/manama' },
+          { title: 'Hotels in Seef', href: '/guides/hotels-seef-bahrain' },
+        ]} 
       />
     </div>
   );

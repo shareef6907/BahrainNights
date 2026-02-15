@@ -5,6 +5,7 @@ import {
   ArrowRight, Users, Wine, Zap, Calendar, Plane
 } from 'lucide-react';
 import BreadcrumbSchema from '@/components/SEO/BreadcrumbSchema';
+import InternalLinks from '@/components/SEO/InternalLinks';
 
 export const metadata: Metadata = {
   title: 'Best Parties in Dubai 2026 | Nightclubs, Events & Party Guide',
@@ -451,6 +452,17 @@ export default function DubaiPartiesPage() {
             ],
           }),
         }}
+      />
+
+      <InternalLinks 
+        title="Gulf Region Nightlife" 
+        links={[
+          { title: 'Dubai Concerts', href: '/guides/dubai-concerts' },
+          { title: 'Abu Dhabi Parties', href: '/guides/abu-dhabi-parties' },
+          { title: 'Bahrain Nightlife', href: '/guides/nightlife' },
+          { title: 'Saudi Concerts', href: '/guides/saudi-concerts' },
+          { title: 'Weekend Getaways', href: '/guides/weekend-getaways' },
+        ]} 
       />
     </div>
   );

@@ -5,6 +5,7 @@ import {
   ArrowRight, Waves, Gamepad2, TreePalm, Palette, Sparkles
 } from 'lucide-react';
 import BreadcrumbSchema from '@/components/SEO/BreadcrumbSchema';
+import InternalLinks from '@/components/SEO/InternalLinks';
 
 export const metadata: Metadata = {
   title: 'Things to Do in Bahrain with Kids 2026 | Kid-Friendly Activities',
@@ -535,6 +536,17 @@ export default function ThingsToDoWithKidsPage() {
             ],
           }),
         }}
+      />
+
+      <InternalLinks 
+        title="Family Fun in Bahrain" 
+        links={[
+          { title: 'Kids Activities', href: '/guides/kids-activities-bahrain' },
+          { title: 'Family Restaurants', href: '/guides/best-family-restaurants-bahrain' },
+          { title: 'Beach Clubs & Water Parks', href: '/guides/beach-clubs' },
+          { title: 'Shopping Malls', href: '/guides/malls' },
+          { title: 'Free Things to Do', href: '/guides/free-things-to-do' },
+        ]} 
       />
     </div>
   );

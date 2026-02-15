@@ -5,6 +5,7 @@ import {
   ArrowRight, Users, Wine, Zap, Calendar, Plane, Info
 } from 'lucide-react';
 import BreadcrumbSchema from '@/components/SEO/BreadcrumbSchema';
+import InternalLinks from '@/components/SEO/InternalLinks';
 
 export const metadata: Metadata = {
   title: 'Parties in Qatar 2026 | Doha Nightlife, Events & Entertainment Guide',
@@ -483,6 +484,17 @@ export default function QatarPartiesPage() {
             ],
           }),
         }}
+      />
+
+      <InternalLinks 
+        title="Gulf Nightlife" 
+        links={[
+          { title: 'Bahrain Nightlife', href: '/guides/nightlife' },
+          { title: 'Dubai Parties', href: '/guides/dubai-parties' },
+          { title: 'Abu Dhabi Parties', href: '/guides/abu-dhabi-parties' },
+          { title: 'Weekend Getaways', href: '/guides/weekend-getaways' },
+          { title: 'Best Parties in Bahrain', href: '/guides/parties' },
+        ]} 
       />
     </div>
   );

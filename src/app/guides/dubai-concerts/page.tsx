@@ -5,6 +5,7 @@ import {
   ArrowRight, Users, Sparkles, Volume2, Plane
 } from 'lucide-react';
 import BreadcrumbSchema from '@/components/SEO/BreadcrumbSchema';
+import InternalLinks from '@/components/SEO/InternalLinks';
 
 export const metadata: Metadata = {
   title: 'Concerts in Dubai 2026 | Live Music Events, Shows & Festivals',
@@ -429,6 +430,17 @@ export default function DubaiConcertsPage() {
             ],
           }),
         }}
+      />
+
+      <InternalLinks 
+        title="Music & Events in the Gulf" 
+        links={[
+          { title: 'Concerts in Bahrain', href: '/guides/concerts' },
+          { title: 'Saudi Concerts', href: '/guides/saudi-concerts' },
+          { title: 'Dubai Parties', href: '/guides/dubai-parties' },
+          { title: 'Dubai Events', href: '/guides/dubai-events' },
+          { title: 'Weekend Getaways', href: '/guides/weekend-getaways' },
+        ]} 
       />
     </div>
   );
