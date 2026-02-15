@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import Image from 'next/image';
 import { X, Download } from 'lucide-react';
 import { trackPWAInstall, trackPWAPromptShown, trackPWAPromptDismissed } from '@/components/analytics/GoogleAnalytics';
 
@@ -143,9 +144,11 @@ export function PWAInstallPrompt() {
         <div className="flex items-start gap-4">
           {/* App Icon */}
           <div className="w-14 h-14 rounded-xl flex-shrink-0 overflow-hidden bg-[#0f172a] border-2 border-yellow-500 p-1">
-            <img
+            <Image
               src="/android-chrome-192x192.png"
               alt="BahrainNights"
+              width={48}
+              height={48}
               className="w-full h-full object-contain rounded-lg"
             />
           </div>

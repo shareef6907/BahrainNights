@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect, useCallback } from 'react';
+import Image from 'next/image';
 import { X, Calendar, MapPin, Ticket, Share2, Clock, Globe, ExternalLink } from 'lucide-react';
 import { parseDate, formatDate, formatDateRange, getRelativeDateLabel } from '@/lib/utils/date';
 
@@ -181,10 +182,13 @@ export function EventModal({ event, isOpen, onClose }: EventModalProps) {
           {/* Hero Image */}
           <div className="relative aspect-[16/9]">
             {event.featured_image ? (
-              <img
+              <Image
                 src={event.featured_image}
                 alt={event.title}
-                className="w-full h-full object-cover"
+                fill
+                sizes="(max-width: 768px) 100vw, 800px"
+                className="object-cover"
+                priority
               />
             ) : (
               <div className={`w-full h-full bg-gradient-to-br ${categoryGradient}`} />

@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect, useRef, useCallback } from 'react';
+import Image from 'next/image';
 import { Volume2, VolumeX, Info, ChevronLeft, ChevronRight, Play } from 'lucide-react';
 import Link from 'next/link';
 
@@ -255,11 +256,16 @@ export function HeroTrailerPlayer() {
       {/* SINGLE Video Background - Only current trailer loads */}
       <div className="absolute inset-0">
         {/* Always show backdrop image as fallback (visible when video fails/unavailable/standalone) */}
-        <img
-          src={currentMovie?.backdrop_url || currentMovie?.poster_url || ''}
-          alt={currentMovie?.title}
-          className="w-full h-full object-cover"
-        />
+        {(currentMovie?.backdrop_url || currentMovie?.poster_url) && (
+          <Image
+            src={currentMovie?.backdrop_url || currentMovie?.poster_url || ''}
+            alt={currentMovie?.title || 'Movie backdrop'}
+            fill
+            sizes="100vw"
+            className="object-cover"
+            priority
+          />
+        )}
         {/* YouTube iframe overlays the backdrop - wait for device detection to ensure correct mute state for autoplay */}
         {iframeUrl && !videoError && isDeviceReady && (
           <iframe

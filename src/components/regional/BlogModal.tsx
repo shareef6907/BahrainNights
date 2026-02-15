@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect, useCallback } from 'react';
+import Image from 'next/image';
 import { X, Clock, Eye, Play, Share2, ArrowRight, MapPin, Ticket } from 'lucide-react';
 import Link from 'next/link';
 
@@ -182,10 +183,13 @@ export function BlogModal({ article, isOpen, onClose }: BlogModalProps) {
           {/* Hero Image */}
           <div className="relative aspect-video">
             {article.featured_image ? (
-              <img
+              <Image
                 src={article.featured_image}
                 alt={article.title}
-                className="w-full h-full object-cover"
+                fill
+                sizes="(max-width: 768px) 100vw, 800px"
+                className="object-cover"
+                priority
               />
             ) : (
               <div className="w-full h-full bg-gradient-to-br from-yellow-500/20 to-pink-500/20" />

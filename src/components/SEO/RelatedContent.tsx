@@ -1,6 +1,7 @@
 'use client';
 
 import Link from 'next/link';
+import Image from 'next/image';
 import { ArrowRight, MapPin, Calendar, Star } from 'lucide-react';
 
 interface RelatedItem {
@@ -79,11 +80,13 @@ export function RelatedContent({
                 className="group bg-white/5 hover:bg-white/10 rounded-xl p-4 transition-all"
               >
                 {item.image && (
-                  <div className="aspect-video rounded-lg overflow-hidden mb-3 bg-gray-800">
-                    <img 
+                  <div className="aspect-video rounded-lg overflow-hidden mb-3 bg-gray-800 relative">
+                    <Image 
                       src={item.image} 
                       alt={item.title}
-                      className="w-full h-full object-cover group-hover:scale-105 transition-transform"
+                      fill
+                      sizes="(max-width: 768px) 50vw, 25vw"
+                      className="object-cover group-hover:scale-105 transition-transform"
                     />
                   </div>
                 )}
