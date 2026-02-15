@@ -1,5 +1,6 @@
 import { Metadata } from 'next';
 import Link from 'next/link';
+import Image from 'next/image';
 import { createClient } from '@supabase/supabase-js';
 import { 
   MapPin, Star, Clock, Music, Wine, Moon, Sparkles,
@@ -499,11 +500,13 @@ export default async function NightlifePage() {
                     className="group bg-gray-800 rounded-xl overflow-hidden hover:ring-2 hover:ring-purple-500 transition"
                   >
                     {event.cover_url && (
-                      <div className="aspect-video bg-gray-700">
-                        <img 
+                      <div className="aspect-video bg-gray-700 relative overflow-hidden">
+                        <Image 
                           src={event.cover_url} 
                           alt={event.title}
-                          className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                          fill
+                          sizes="(max-width: 768px) 100vw, 25vw"
+                          className="object-cover group-hover:scale-105 transition-transform duration-300"
                         />
                       </div>
                     )}
