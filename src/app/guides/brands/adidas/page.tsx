@@ -6,6 +6,18 @@ import {
 } from 'lucide-react';
 import BreadcrumbSchema from '@/components/SEO/BreadcrumbSchema';
 
+// Mall page links mapping
+const mallLinks: Record<string, string> = {
+  'City Centre Bahrain': '/guides/malls/city-centre-bahrain',
+  'City Centre': '/guides/malls/city-centre-bahrain',
+  'Seef Mall': '/guides/malls/seef-mall',
+  'The Avenues': '/guides/malls/the-avenues',
+  'The Avenues Bahrain': '/guides/malls/the-avenues',
+  'Marassi Galleria': '/guides/malls/marassi-galleria',
+  'Moda Mall': '/guides/malls/moda-mall',
+  'Bahrain Mall': '/guides/malls/bahrain-mall',
+};
+
 export const metadata: Metadata = {
   title: 'Adidas Bahrain - All Store Locations & Shopping Guide 2026',
   description: 'Find Adidas stores in Bahrain. Complete guide to Adidas locations at City Centre, Seef Mall, The Avenues & more. Store hours, directions & shopping tips.',
@@ -199,7 +211,13 @@ export default function AdidasBahrainPage() {
                     <div className="space-y-2 text-sm mb-4">
                       <p className="flex items-center gap-2 text-gray-300">
                         <MapPin className="w-4 h-4 text-gray-500" />
-                        {store.address}
+                        {mallLinks[store.mall] ? (
+                          <Link href={mallLinks[store.mall]} className="text-white hover:underline">
+                            {store.mall}
+                          </Link>
+                        ) : (
+                          store.address
+                        )}
                       </p>
                       <p className="flex items-center gap-2 text-gray-300">
                         <Info className="w-4 h-4 text-gray-500" />

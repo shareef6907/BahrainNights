@@ -57,3 +57,8 @@ scripts/scrapers/**/node_modules/
 
 # Supabase temp files
 supabase/.temp/
+
+# Google Indexing API credentials - NEVER COMMIT
+/config/
+config/
+*.json.key

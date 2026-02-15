@@ -6,6 +6,18 @@ import {
 } from 'lucide-react';
 import BreadcrumbSchema from '@/components/SEO/BreadcrumbSchema';
 
+// Mall page links mapping
+const mallLinks: Record<string, string> = {
+  'City Centre Bahrain': '/guides/malls/city-centre-bahrain',
+  'City Centre': '/guides/malls/city-centre-bahrain',
+  'Seef Mall': '/guides/malls/seef-mall',
+  'The Avenues': '/guides/malls/the-avenues',
+  'The Avenues Bahrain': '/guides/malls/the-avenues',
+  'Marassi Galleria': '/guides/malls/marassi-galleria',
+  'Moda Mall': '/guides/malls/moda-mall',
+  'Bahrain Mall': '/guides/malls/bahrain-mall',
+};
+
 export const metadata: Metadata = {
   title: 'IKEA Bahrain - Store Location & Shopping Guide 2026',
   description: 'Visit IKEA Bahrain for affordable furniture, home decor & Swedish food. Complete guide with directions, hours, tips & what to expect at IKEA Sitra.',

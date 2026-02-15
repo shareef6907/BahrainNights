@@ -6,6 +6,18 @@ import {
 } from 'lucide-react';
 import BreadcrumbSchema from '@/components/SEO/BreadcrumbSchema';
 
+// Mall page links mapping
+const mallLinks: Record<string, string> = {
+  'City Centre Bahrain': '/guides/malls/city-centre-bahrain',
+  'City Centre': '/guides/malls/city-centre-bahrain',
+  'Seef Mall': '/guides/malls/seef-mall',
+  'The Avenues': '/guides/malls/the-avenues',
+  'The Avenues Bahrain': '/guides/malls/the-avenues',
+  'Marassi Galleria': '/guides/malls/marassi-galleria',
+  'Moda Mall': '/guides/malls/moda-mall',
+  'Bahrain Mall': '/guides/malls/bahrain-mall',
+};
+
 export const metadata: Metadata = {
   title: 'Cheesecake Factory Bahrain - Location & Menu Guide 2026',
   description: 'Find The Cheesecake Factory in Bahrain at The Avenues Mall. Complete guide with menu highlights, famous cheesecakes, hours, reservations & tips.',

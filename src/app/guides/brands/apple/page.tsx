@@ -6,6 +6,18 @@ import {
 } from 'lucide-react';
 import BreadcrumbSchema from '@/components/SEO/BreadcrumbSchema';
 
+// Mall page links mapping
+const mallLinks: Record<string, string> = {
+  'City Centre Bahrain': '/guides/malls/city-centre-bahrain',
+  'City Centre': '/guides/malls/city-centre-bahrain',
+  'Seef Mall': '/guides/malls/seef-mall',
+  'The Avenues': '/guides/malls/the-avenues',
+  'The Avenues Bahrain': '/guides/malls/the-avenues',
+  'Marassi Galleria': '/guides/malls/marassi-galleria',
+  'Moda Mall': '/guides/malls/moda-mall',
+  'Bahrain Mall': '/guides/malls/bahrain-mall',
+};
+
 export const metadata: Metadata = {
   title: 'Apple Store Bahrain - Authorized Resellers & Shopping Guide 2026',
   description: 'Find Apple products in Bahrain. Complete guide to Apple authorized resellers including iMachines, iWorld, Virgin Megastore & Lulu. iMacBook, iPad locations.',
@@ -210,7 +222,15 @@ export default function AppleBahrainPage() {
                     <div className="flex items-start justify-between mb-4">
                       <div>
                         <h3 className="text-xl font-bold text-white">{store.name}</h3>
-                        <p className="text-gray-400">{store.mall}</p>
+                        <p className="text-gray-400">
+                          {mallLinks[store.mall] ? (
+                            <Link href={mallLinks[store.mall]} className="hover:underline hover:text-white">
+                              {store.mall}
+                            </Link>
+                          ) : (
+                            store.mall
+                          )}
+                        </p>
                         <span className="inline-block mt-2 px-3 py-1 bg-gray-500/20 text-gray-300 text-xs rounded-full">
                           {store.type}
                         </span>
