@@ -122,6 +122,7 @@ export default function TrendingSection({ venues, events }: TrendingSectionProps
                     <img
                       src={venue.image_url}
                       alt={venue.name}
+                      loading="lazy"
                       className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
                     />
                   ) : (
@@ -182,6 +183,7 @@ export default function TrendingSection({ venues, events }: TrendingSectionProps
                     <img
                       src={event.cover_url}
                       alt={event.title}
+                      loading="lazy"
                       className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
                     />
                   ) : (

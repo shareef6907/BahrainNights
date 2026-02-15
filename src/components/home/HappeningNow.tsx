@@ -147,6 +147,9 @@ export default function HappeningNow({ events, onEventClick }: HappeningNowProps
                   <img
                     src={event.cover_url || 'https://images.unsplash.com/photo-1492684223066-81342ee5ff30?w=200&h=200&fit=crop'}
                     alt={event.title}
+                    loading="lazy"
+                    width={96}
+                    height={96}
                     className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-300"
                   />
                   {isLive && (

@@ -196,6 +196,7 @@ export default function SurpriseMe({ events, places, attractions }: SurpriseMePr
                           <img
                             src={result.image}
                             alt={result.title}
+                            loading="lazy"
                             className="w-full h-48 object-cover group-hover:scale-105 transition-transform duration-300"
                           />
                           <div className="absolute inset-0 bg-gradient-to-t from-black via-black/50 to-transparent" />
