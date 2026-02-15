@@ -7,6 +7,7 @@ import {
   PartyPopper, Beer
 } from 'lucide-react';
 import BreadcrumbSchema from '@/components/SEO/BreadcrumbSchema';
+import InternalLinks from '@/components/SEO/InternalLinks';
 
 export const metadata: Metadata = {
   title: 'Bahrain Grand Prix 2025 — Where to Watch, Eat & Party | F1 Guide',

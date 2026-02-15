@@ -5,6 +5,7 @@ import {
   ArrowRight, Hotel, Coffee, Sun, Sailboat
 } from 'lucide-react';
 import BreadcrumbSchema from '@/components/SEO/BreadcrumbSchema';
+import InternalLinks from '@/components/SEO/InternalLinks';
 
 export const metadata: Metadata = {
   title: 'Amwaj Islands Guide 2026 | Things to Do in Amwaj Bahrain',

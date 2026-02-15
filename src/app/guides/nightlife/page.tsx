@@ -1,4 +1,5 @@
 import BreadcrumbSchema from '@/components/SEO/BreadcrumbSchema';
+import InternalLinks from '@/components/SEO/InternalLinks';
 import { Metadata } from 'next';
 import Link from 'next/link';
 import { 

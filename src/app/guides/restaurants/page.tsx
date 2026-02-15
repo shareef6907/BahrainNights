@@ -5,6 +5,7 @@ import {
   ArrowRight, Wine, Flame, Leaf, Fish, ChefHat
 } from 'lucide-react';
 import BreadcrumbSchema from '@/components/SEO/BreadcrumbSchema';
+import InternalLinks from '@/components/SEO/InternalLinks';
 
 export const metadata: Metadata = {
   title: 'Best Restaurants in Bahrain 2026 | Top Dining Guide',

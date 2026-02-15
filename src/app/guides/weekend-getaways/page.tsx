@@ -5,6 +5,7 @@ import {
   Car, Globe, DollarSign, Calendar
 } from 'lucide-react';
 import BreadcrumbSchema from '@/components/SEO/BreadcrumbSchema';
+import InternalLinks from '@/components/SEO/InternalLinks';
 
 export const metadata: Metadata = {
   title: 'Weekend Getaways from Bahrain 2026 | Dubai, Qatar, Saudi & Beyond',

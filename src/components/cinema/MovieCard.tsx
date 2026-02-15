@@ -60,11 +60,11 @@ function MovieCard({ movie, index = 0, onMovieClick, onTrailerClick }: MovieCard
         {/* Now Showing / Coming Soon Badge */}
         <div className="absolute top-3 left-3">
           {movie.isNowShowing ? (
-            <span className="px-2 py-1 bg-green-500 text-white text-xs font-bold rounded-lg">
+            <span className="px-2 py-1 bg-green-700 text-white text-xs font-bold rounded-lg">
               Now Showing
             </span>
           ) : (
-            <span className="px-2 py-1 bg-orange-500 text-white text-xs font-bold rounded-lg">
+            <span className="px-2 py-1 bg-orange-700 text-white text-xs font-bold rounded-lg">
               {movie.releaseDate}
             </span>
           )}
@@ -96,6 +96,7 @@ function MovieCard({ movie, index = 0, onMovieClick, onTrailerClick }: MovieCard
                 e.stopPropagation();
                 onTrailerClick(movie);
               }}
+              aria-label={`Play trailer for ${movie.title}`}
             >
               <Play className="w-6 h-6 fill-current" />
             </motion.button>

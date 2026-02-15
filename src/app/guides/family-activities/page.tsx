@@ -5,6 +5,7 @@ import {
   ArrowRight, Waves, Ticket, TreePalm, Palette, Building2
 } from 'lucide-react';
 import BreadcrumbSchema from '@/components/SEO/BreadcrumbSchema';
+import InternalLinks from '@/components/SEO/InternalLinks';
 
 export const metadata: Metadata = {
   title: 'Family Activities in Bahrain 2026 | Best Things to Do with Family',

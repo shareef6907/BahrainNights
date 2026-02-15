@@ -97,7 +97,7 @@ export default function FeaturedMovie({ movies, onTrailerClick, onMovieClick }: 
               >
                 {/* Badge */}
                 <div className="flex items-center gap-3 mb-4">
-                  <span className="px-3 py-1 bg-red-500 text-white text-xs font-bold rounded-full">
+                  <span className="px-3 py-1 bg-red-700 text-white text-xs font-bold rounded-full">
                     NEW AT VOX
                   </span>
                   {movie.releaseDate && (

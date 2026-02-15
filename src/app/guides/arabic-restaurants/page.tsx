@@ -5,6 +5,7 @@ import {
   DollarSign, Users, Flame, Coffee
 } from 'lucide-react';
 import BreadcrumbSchema from '@/components/SEO/BreadcrumbSchema';
+import InternalLinks from '@/components/SEO/InternalLinks';
 
 export const metadata: Metadata = {
   title: 'Best Arabic Restaurants in Bahrain 2026 | Lebanese, Khaleeji & Middle Eastern',

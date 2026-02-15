@@ -5,6 +5,7 @@ import {
   ArrowRight, Hotel, Landmark, Moon, Coffee
 } from 'lucide-react';
 import BreadcrumbSchema from '@/components/SEO/BreadcrumbSchema';
+import InternalLinks from '@/components/SEO/InternalLinks';
 
 export const metadata: Metadata = {
   title: 'Things to Do in Manama 2026 | Manama City Guide Bahrain',
