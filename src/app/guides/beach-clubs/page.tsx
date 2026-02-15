@@ -5,6 +5,7 @@ import {
   ArrowRight, Users, Wine, Music, DollarSign, Calendar
 } from 'lucide-react';
 import BreadcrumbSchema from '@/components/SEO/BreadcrumbSchema';
+import InternalLinks from '@/components/SEO/InternalLinks';
 
 export const metadata: Metadata = {
   title: 'Beach Clubs in Bahrain 2026 | Best Pools, Day Passes & Parties',
@@ -525,6 +526,18 @@ export default function BeachClubsPage() {
             ],
           }),
         }}
+      />
+
+      <InternalLinks 
+        title="Explore More"
+        links={[
+          { title: 'All Guides', href: '/guides' },
+          { title: 'Discover Places', href: '/places' },
+          { title: 'Upcoming Events', href: '/events' },
+          { title: 'Best Brunches', href: '/guides/brunches' },
+          { title: 'Pool Parties', href: '/guides/parties' },
+          { title: 'Amwaj Islands', href: '/guides/amwaj' },
+        ]}
       />
     </div>
   );

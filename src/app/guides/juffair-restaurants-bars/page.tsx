@@ -1,5 +1,6 @@
 import BreadcrumbSchema from '@/components/SEO/BreadcrumbSchema';
 import FAQSchema from '@/components/SEO/FAQSchema';
+import InternalLinks from '@/components/SEO/InternalLinks';
 import { Metadata } from 'next';
 import Link from 'next/link';
 import { 
@@ -444,6 +445,18 @@ export default function JuffairGuidePage() {
       <footer className="py-8 px-4 text-center text-gray-500 text-sm border-t border-white/5">
         <p>Powered by BahrainNights.com — Bahrain&apos;s #1 Events & Lifestyle Platform</p>
       </footer>
+
+      <InternalLinks 
+        title="Explore More"
+        links={[
+          { title: 'All Guides', href: '/guides' },
+          { title: 'Discover Places', href: '/places' },
+          { title: 'Upcoming Events', href: '/events' },
+          { title: 'Nightlife Guide', href: '/guides/nightlife' },
+          { title: 'Best Steakhouses', href: '/guides/best-steakhouses-bahrain' },
+          { title: 'Adliya Area Guide', href: '/guides/adliya' },
+        ]}
+      />
 
       {/* Structured Data */}
       <script

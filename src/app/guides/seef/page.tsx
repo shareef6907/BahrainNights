@@ -5,6 +5,7 @@ import {
   ArrowRight, Hotel, Coffee, PartyPopper, Moon
 } from 'lucide-react';
 import BreadcrumbSchema from '@/components/SEO/BreadcrumbSchema';
+import InternalLinks from '@/components/SEO/InternalLinks';
 
 export const metadata: Metadata = {
   title: 'Things to Do in Seef Bahrain 2026 | Seef Guide',
@@ -326,6 +327,18 @@ export default function SeefGuidePage() {
             ],
           }),
         }}
+      />
+
+      <InternalLinks 
+        title="Explore More"
+        links={[
+          { title: 'All Guides', href: '/guides' },
+          { title: 'Discover Places', href: '/places' },
+          { title: 'Upcoming Events', href: '/events' },
+          { title: 'Beach Clubs', href: '/guides/beach-clubs' },
+          { title: 'Shopping Malls', href: '/guides/malls' },
+          { title: 'Family Activities', href: '/guides/family-activities' },
+        ]}
       />
     </div>
   );

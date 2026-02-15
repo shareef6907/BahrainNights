@@ -1,5 +1,6 @@
 import BreadcrumbSchema from '@/components/SEO/BreadcrumbSchema';
 import FAQSchema from '@/components/SEO/FAQSchema';
+import InternalLinks from '@/components/SEO/InternalLinks';
 import { Metadata } from 'next';
 import Link from 'next/link';
 import { MapPin, Star, Clock, DollarSign, Utensils, Phone } from 'lucide-react';
@@ -310,6 +311,18 @@ export default function BestIndianRestaurantsPage() {
           </div>
         </div>
       </section>
+
+      <InternalLinks 
+        title="Explore More"
+        links={[
+          { title: 'All Guides', href: '/guides' },
+          { title: 'Discover Places', href: '/places' },
+          { title: 'Upcoming Events', href: '/events' },
+          { title: 'Best Restaurants', href: '/guides/restaurants' },
+          { title: 'Arabic Restaurants', href: '/guides/best-arabic-restaurants-bahrain' },
+          { title: 'Budget Dining', href: '/guides/budget' },
+        ]}
+      />
     </div>
   );
 }

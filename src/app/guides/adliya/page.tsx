@@ -1,5 +1,6 @@
 import BreadcrumbSchema from '@/components/SEO/BreadcrumbSchema';
 import FAQSchema from '@/components/SEO/FAQSchema';
+import InternalLinks from '@/components/SEO/InternalLinks';
 import { Metadata } from 'next';
 import Link from 'next/link';
 import { MapPin, Utensils, Wine, Music, Coffee, Palette, Clock, Star } from 'lucide-react';
@@ -231,6 +232,18 @@ export default function AdliyaGuidePage() {
           </div>
         </div>
       </section>
+
+      <InternalLinks 
+        title="Explore More"
+        links={[
+          { title: 'All Guides', href: '/guides' },
+          { title: 'Discover Places', href: '/places' },
+          { title: 'Upcoming Events', href: '/events' },
+          { title: 'Nightlife Guide', href: '/guides/nightlife' },
+          { title: 'Best Restaurants', href: '/guides/restaurants' },
+          { title: 'Juffair Area Guide', href: '/guides/juffair-restaurants-bars' },
+        ]}
+      />
 
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify({
         '@context': 'https://schema.org', '@type': 'Article',
