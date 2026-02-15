@@ -1,5 +1,6 @@
 import BreadcrumbSchema from '@/components/SEO/BreadcrumbSchema';
 import FAQSchema from '@/components/SEO/FAQSchema';
+import InternalLinks from '@/components/SEO/InternalLinks';
 import { Metadata } from 'next';
 import Link from 'next/link';
 import { MapPin, Star, Flame } from 'lucide-react';
@@ -253,6 +254,17 @@ export default function BestSteakhousesBahrainPage() {
         author: { '@type': 'Organization', name: 'BahrainNights' },
         datePublished: '2026-02-11', dateModified: '2026-02-11',
       })}} />
+
+      <InternalLinks 
+        title="Explore Premium Dining" 
+        links={[
+          { title: 'Best Restaurants in Bahrain', href: '/guides/restaurants' },
+          { title: 'Fine Dining Date Night', href: '/guides/best-date-night-bahrain' },
+          { title: 'Business Lunch Spots', href: '/guides/best-business-lunch-bahrain' },
+          { title: 'Best Seafood Restaurants', href: '/guides/best-seafood-bahrain' },
+          { title: 'Hotels with Great Dining', href: '/guides/hotels' },
+        ]} 
+      />
     </div>
   );
 }

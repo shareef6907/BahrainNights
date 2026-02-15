@@ -8,7 +8,7 @@ import {
 import BreadcrumbSchema from '@/components/SEO/BreadcrumbSchema';
 
 export const metadata: Metadata = {
-  title: 'Eid Celebrations in Bahrain — Events & Dining | Complete 2026 Guide',
+  title: 'Eid Celebrations in Bahrain 2026 — Events & Guide',
   description: 'Discover how to celebrate Eid Al-Fitr and Eid Al-Adha in Bahrain. Best brunches, family activities, events, fireworks, and dining options for the festive holidays.',
   keywords: 'Eid Bahrain, Eid Al Fitr Bahrain, Eid Al Adha Bahrain, Eid celebrations Bahrain, Eid brunch Bahrain, Eid events, Bahrain Eid 2026, Eid dining Bahrain',
   openGraph: {

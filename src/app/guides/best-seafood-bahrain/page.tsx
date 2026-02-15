@@ -1,5 +1,6 @@
 import BreadcrumbSchema from '@/components/SEO/BreadcrumbSchema';
 import FAQSchema from '@/components/SEO/FAQSchema';
+import InternalLinks from '@/components/SEO/InternalLinks';
 import { Metadata } from 'next';
 import Link from 'next/link';
 import { MapPin, Star, DollarSign, Utensils, Fish } from 'lucide-react';
@@ -369,6 +370,17 @@ export default function BestSeafoodBahrainPage() {
           </div>
         </div>
       </section>
+
+      <InternalLinks 
+        title="More Dining Guides" 
+        links={[
+          { title: 'Best Waterfront Restaurants', href: '/guides/best-views-bahrain' },
+          { title: 'Amwaj Islands Dining', href: '/guides/amwaj' },
+          { title: 'Best Steakhouses in Bahrain', href: '/guides/best-steakhouses-bahrain' },
+          { title: 'Date Night Restaurants', href: '/guides/best-date-night-bahrain' },
+          { title: 'Beach Clubs with Dining', href: '/guides/beach-clubs' },
+        ]} 
+      />
     </div>
   );
 }

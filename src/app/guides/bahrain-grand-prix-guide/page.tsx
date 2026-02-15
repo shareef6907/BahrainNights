@@ -10,9 +10,9 @@ import BreadcrumbSchema from '@/components/SEO/BreadcrumbSchema';
 import InternalLinks from '@/components/SEO/InternalLinks';
 
 export const metadata: Metadata = {
-  title: 'Bahrain Grand Prix 2025 — Where to Watch, Eat & Party | F1 Guide',
+  title: 'Bahrain Grand Prix 2026 — Where to Watch & Party',
   description: 'Your ultimate guide to the Bahrain Grand Prix. Discover the best bars and hotels to watch F1, official race parties, dining near BIC circuit, and accommodation tips for race weekend.',
-  keywords: 'Bahrain Grand Prix, F1 Bahrain, where to watch F1 Bahrain, Bahrain F1 parties, Bahrain International Circuit, F1 bars Bahrain, Grand Prix hotels Bahrain, Formula 1 Bahrain 2025',
+  keywords: 'Bahrain Grand Prix, F1 Bahrain, where to watch F1 Bahrain, Bahrain F1 parties, Bahrain International Circuit, F1 bars Bahrain, Grand Prix hotels Bahrain, Formula 1 Bahrain 2026',
   openGraph: {
     title: 'Bahrain Grand Prix — Where to Watch, Eat & Party',
     description: 'Your complete guide to experiencing the F1 Bahrain Grand Prix — best viewing spots, parties, dining, and accommodation.',
@@ -196,7 +196,7 @@ export default function BahrainGrandPrixGuidePage() {
   const lastUpdated = new Date().toISOString().split('T')[0];
   
   const faqs = [
-    { q: 'When is the Bahrain Grand Prix 2025?', a: 'The Bahrain Grand Prix typically takes place in early March, often as the season-opening race. The 2025 race is scheduled for the first weekend of March. Practice sessions run Friday, qualifying on Saturday, and the main race on Sunday evening under the famous Bahrain floodlights.' },
+    { q: 'When is the Bahrain Grand Prix 2026?', a: 'The Bahrain Grand Prix typically takes place in early March, often as the season-opening race. The 2026 race is expected in the first weekend of March. Practice sessions run Friday, qualifying on Saturday, and the main race on Sunday evening under the famous Bahrain floodlights.' },
     { q: 'How do I get tickets for the Bahrain Grand Prix?', a: 'Tickets are available through the official Bahrain International Circuit website and authorized resellers like Platinumlist. Options range from General Admission (from BD 35) to premium Grandstand seats (BD 100-300) and luxury hospitality packages (BD 500+). Book early — popular grandstands sell out months in advance.' },
     { q: 'What is the best grandstand at Bahrain Grand Prix?', a: 'The Main Grandstand offers the best views of the start/finish straight, pit lane, and podium celebrations. Turn 1 Grandstand captures dramatic first-corner action. The Batelco Grandstand at Turn 11 provides excellent overtaking opportunities. Each has pros and cons — consider what you most want to see.' },
     { q: 'Can I bring food and drinks into the Bahrain Grand Prix?', a: 'Small snacks and sealed water bottles are generally permitted. Large coolers, alcohol, and glass containers are prohibited. BIC has significantly improved its food and beverage options in recent years, and hospitality packages include full catering. Check the official BIC website for current policies.' },
@@ -274,7 +274,7 @@ export default function BahrainGrandPrixGuidePage() {
           </div>
           <div className="mt-8 text-center">
             <a 
-              href="https://platinumlist.net/aff/?ref=yjg3yzi&link=https://platinumlist.net/event-tickets/bahrain-grand-prix-2025"
+              href="https://platinumlist.net/aff/?ref=yjg3yzi&link=https://platinumlist.net/event-tickets/bahrain-grand-prix-2026"
               target="_blank"
               rel="noopener noreferrer"
               className="inline-block px-8 py-3 bg-red-500 hover:bg-red-400 text-white font-bold rounded-lg transition-colors"
@@ -481,7 +481,7 @@ export default function BahrainGrandPrixGuidePage() {
           <p className="text-gray-300 mb-8">Book your tickets, secure your accommodation, and get ready for the most exciting weekend of the year in Bahrain.</p>
           <div className="flex flex-wrap justify-center gap-4">
             <a 
-              href="https://platinumlist.net/aff/?ref=yjg3yzi&link=https://platinumlist.net/event-tickets/bahrain-grand-prix-2025"
+              href="https://platinumlist.net/aff/?ref=yjg3yzi&link=https://platinumlist.net/event-tickets/bahrain-grand-prix-2026"
               target="_blank"
               rel="noopener noreferrer"
               className="px-8 py-3 bg-red-500 hover:bg-red-400 text-white font-bold rounded-lg transition-colors"

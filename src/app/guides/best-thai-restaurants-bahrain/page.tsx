@@ -5,6 +5,7 @@ import {
   DollarSign, Flame, Award
 } from 'lucide-react';
 import BreadcrumbSchema from '@/components/SEO/BreadcrumbSchema';
+import InternalLinks from '@/components/SEO/InternalLinks';
 
 export const metadata: Metadata = {
   title: 'Best Thai Restaurants in Bahrain 2026 | Top 12 Authentic Thai Dining',
@@ -629,6 +630,17 @@ export default function BestThaiRestaurantsBahrainPage() {
             })),
           }),
         }}
+      />
+
+      <InternalLinks 
+        title="Discover Asian Cuisine in Bahrain" 
+        links={[
+          { title: 'Best Japanese Restaurants in Bahrain', href: '/guides/best-japanese-restaurants-bahrain' },
+          { title: 'Best Korean Restaurants', href: '/guides/best-korean-restaurants-bahrain' },
+          { title: 'Best Chinese Restaurants', href: '/guides/best-chinese-restaurants-bahrain' },
+          { title: 'Best Indian Restaurants', href: '/guides/best-indian-restaurants-bahrain' },
+          { title: 'All Restaurant Guides', href: '/guides/restaurants' },
+        ]} 
       />
     </div>
   );

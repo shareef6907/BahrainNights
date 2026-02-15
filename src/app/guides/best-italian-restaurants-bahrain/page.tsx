@@ -1,5 +1,6 @@
 import BreadcrumbSchema from '@/components/SEO/BreadcrumbSchema';
 import FAQSchema from '@/components/SEO/FAQSchema';
+import InternalLinks from '@/components/SEO/InternalLinks';
 import { Metadata } from 'next';
 import Link from 'next/link';
 import { MapPin, Star, DollarSign, Utensils } from 'lucide-react';
@@ -358,6 +359,17 @@ export default function BestItalianRestaurantsPage() {
           </div>
         </div>
       </section>
+
+      <InternalLinks 
+        title="Explore Italian Dining in Bahrain" 
+        links={[
+          { title: 'Best Restaurants in Bahrain', href: '/guides/restaurants' },
+          { title: 'Fine Dining in Adliya', href: '/guides/adliya-restaurants-bars' },
+          { title: 'Romantic Date Night Restaurants', href: '/guides/best-date-night-bahrain' },
+          { title: 'Best Seafood Restaurants', href: '/guides/best-seafood-bahrain' },
+          { title: 'Family-Friendly Restaurants', href: '/guides/best-family-restaurants-bahrain' },
+        ]} 
+      />
     </div>
   );
 }
