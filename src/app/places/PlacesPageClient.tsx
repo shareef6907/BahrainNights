@@ -294,7 +294,7 @@ function PlacesPageContent() {
         />
       </head>
 
-      <div className="min-h-screen bg-gradient-to-b from-slate-950 via-slate-900 to-slate-950">
+      <main className="min-h-screen bg-gradient-to-b from-slate-950 via-slate-900 to-slate-950">
         {/* Hero Section */}
         <div className="relative overflow-hidden">
           <div className="absolute inset-0 bg-gradient-to-r from-purple-500/10 via-pink-500/5 to-orange-500/10" />
@@ -334,6 +334,7 @@ function PlacesPageContent() {
                 {searchQuery && (
                   <button
                     onClick={() => setSearchQuery('')}
+                    aria-label="Clear search"
                     className="absolute right-4 top-1/2 -translate-y-1/2 p-1 hover:bg-white/10 rounded-full transition-colors"
                   >
                     <X className="w-4 h-4 text-gray-400" />
@@ -367,6 +368,8 @@ function PlacesPageContent() {
             <div className="flex items-center gap-2 bg-white/5 rounded-xl p-1">
               <button
                 onClick={() => setViewMode('grid')}
+                aria-label="Grid view"
+                aria-pressed={viewMode === 'grid'}
                 className={`flex items-center gap-2 px-4 py-2 rounded-lg font-medium transition-colors ${
                   viewMode === 'grid'
                     ? 'bg-yellow-400 text-black'
@@ -378,6 +381,8 @@ function PlacesPageContent() {
               </button>
               <button
                 onClick={() => setViewMode('map')}
+                aria-label="Map view"
+                aria-pressed={viewMode === 'map'}
                 className={`flex items-center gap-2 px-4 py-2 rounded-lg font-medium transition-colors ${
                   viewMode === 'map'
                     ? 'bg-yellow-400 text-black'
@@ -514,7 +519,7 @@ function PlacesPageContent() {
             }}
           />
         )}
-      </div>
+      </main>
     </>
   );
 }
