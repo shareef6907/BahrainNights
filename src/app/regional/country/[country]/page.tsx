@@ -1,5 +1,6 @@
 import { Metadata } from 'next';
 import Link from 'next/link';
+import Image from 'next/image';
 import { notFound } from 'next/navigation';
 import { getAdminClient } from '@/lib/supabase/server';
 import { LOCATION_DATA } from '@/types/blog';
@@ -167,12 +168,15 @@ export default async function CountryBlogPage({ params, searchParams }: Props) {
                   className="group block bg-white/5 border border-white/10 rounded-xl overflow-hidden hover:border-yellow-400/50 transition-all"
                 >
                   {article.featured_image ? (
-                    <img
-                      src={article.featured_image}
-                      alt={article.title}
-                      className="w-full aspect-video object-cover group-hover:scale-105 transition-transform duration-300"
-                      loading="lazy"
-                    />
+                    <div className="relative aspect-video overflow-hidden">
+                      <Image
+                        src={article.featured_image}
+                        alt={article.title}
+                        fill
+                        sizes="(max-width: 768px) 100vw, 33vw"
+                        className="object-cover group-hover:scale-105 transition-transform duration-300"
+                      />
+                    </div>
                   ) : (
                     <div className="aspect-video bg-gradient-to-br from-purple-600/20 to-pink-600/20 flex items-center justify-center">
                       <span className="text-4xl">📰</span>

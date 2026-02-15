@@ -1,5 +1,6 @@
 import { Metadata } from 'next';
 import Link from 'next/link';
+import Image from 'next/image';
 import { notFound } from 'next/navigation';
 import { getAdminClient } from '@/lib/supabase/server';
 import { LOCATION_DATA } from '@/types/blog';
@@ -335,11 +336,12 @@ function ArticleCard({ article, featured }: ArticleCardProps) {
       <article className={`bg-white/5 border border-white/10 rounded-xl overflow-hidden hover:border-yellow-400/50 transition-all duration-300 ${featured ? 'ring-2 ring-yellow-400/20' : ''}`}>
         {article.featured_image ? (
           <div className="aspect-video relative overflow-hidden">
-            <img
+            <Image
               src={article.featured_image}
               alt={article.title}
-              className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
-              loading="lazy"
+              fill
+              sizes="(max-width: 768px) 100vw, (max-width: 1024px) 50vw, 33vw"
+              className="object-cover group-hover:scale-105 transition-transform duration-300"
             />
             {featured && (
               <div className="absolute top-3 left-3 px-3 py-1 bg-yellow-400 text-black text-xs font-bold rounded-full">
