@@ -7,6 +7,18 @@ import {
 } from 'lucide-react';
 import BreadcrumbSchema from '@/components/SEO/BreadcrumbSchema';
 
+// Brand page links mapping
+const brandLinks: Record<string, string> = {
+  'Zara': '/guides/brands/zara',
+  'H&M': '/guides/brands/hm',
+  'Nike': '/guides/brands/nike',
+  'Adidas': '/guides/brands/adidas',
+  'Sephora': '/guides/brands/sephora',
+  'Bath & Body Works': '/guides/brands/bath-body-works',
+  'Starbucks': '/guides/brands/starbucks',
+  'Costa': '/guides/brands/costa-coffee',
+};
+
 export const metadata: Metadata = {
   title: 'Oasis Mall Juffair - Shopping & Entertainment Guide 2026',
   description: 'Complete guide to Oasis Mall Juffair, a convenient neighborhood mall in Bahrain. 80+ stores, cinema, fitness center, dining options. Hours, stores & visitor tips.',

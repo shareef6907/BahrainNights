@@ -7,6 +7,12 @@ import {
 } from 'lucide-react';
 import BreadcrumbSchema from '@/components/SEO/BreadcrumbSchema';
 
+// Brand page links mapping
+const brandLinks: Record<string, string> = {
+  'Starbucks': '/guides/brands/starbucks',
+  'Costa': '/guides/brands/costa-coffee',
+};
+
 export const metadata: Metadata = {
   title: 'Souq Al Baraha Bahrain - Waterfront Shopping & Dining Guide 2026',
   description: 'Complete guide to Souq Al Baraha in Diyar Al Muharraq. Traditional waterfront souq with restaurants, cafes, boutiques & stunning views. Opening hours, directions & tips.',

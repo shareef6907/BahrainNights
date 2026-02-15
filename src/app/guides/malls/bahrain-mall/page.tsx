@@ -7,6 +7,20 @@ import {
 } from 'lucide-react';
 import BreadcrumbSchema from '@/components/SEO/BreadcrumbSchema';
 
+// Brand page links mapping
+const brandLinks: Record<string, string> = {
+  'Zara': '/guides/brands/zara',
+  'H&M': '/guides/brands/hm',
+  'Nike': '/guides/brands/nike',
+  'Adidas': '/guides/brands/adidas',
+  'Sephora': '/guides/brands/sephora',
+  'Apple': '/guides/brands/apple',
+  'Bath & Body Works': '/guides/brands/bath-body-works',
+  'Starbucks': '/guides/brands/starbucks',
+  'Costa': '/guides/brands/costa-coffee',
+  'Costa Coffee': '/guides/brands/costa-coffee',
+};
+
 export const metadata: Metadata = {
   title: 'Bahrain Mall - Complete Guide with LuLu Hypermarket 2025',
   description: 'Complete guide to Bahrain Mall in Seef District. Home to LuLu Hypermarket, 1,400 seat food court, amusement arcade with rides and games.',
@@ -242,9 +256,15 @@ export default function BahrainMallPage() {
                 </h3>
                 <div className="space-y-1">
                   {category.stores.map((store) => (
-                    <span key={store} className="block text-gray-400 text-sm">
-                      {store}
-                    </span>
+                    brandLinks[store] ? (
+                      <Link key={store} href={brandLinks[store]} className="block text-green-400 hover:text-green-300 text-sm hover:underline">
+                        {store}
+                      </Link>
+                    ) : (
+                      <span key={store} className="block text-gray-400 text-sm">
+                        {store}
+                      </span>
+                    )
                   ))}
                 </div>
               </div>

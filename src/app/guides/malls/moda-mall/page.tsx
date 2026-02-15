@@ -7,6 +7,30 @@ import {
 } from 'lucide-react';
 import BreadcrumbSchema from '@/components/SEO/BreadcrumbSchema';
 
+// Brand page links mapping
+const brandLinks: Record<string, string> = {
+  'Zara': '/guides/brands/zara',
+  'H&M': '/guides/brands/hm',
+  'Nike': '/guides/brands/nike',
+  'Adidas': '/guides/brands/adidas',
+  'Sephora': '/guides/brands/sephora',
+  'Apple': '/guides/brands/apple',
+  'Bath & Body Works': '/guides/brands/bath-body-works',
+  'Starbucks': '/guides/brands/starbucks',
+  'Costa': '/guides/brands/costa-coffee',
+  'Costa Coffee': '/guides/brands/costa-coffee',
+  'Shake Shack': '/guides/brands/shake-shack',
+  'Five Guys': '/guides/brands/five-guys',
+  'Crocs': '/guides/brands/crocs',
+  'Uniqlo': '/guides/brands/uniqlo',
+  'The Cheesecake Factory': '/guides/brands/cheesecake-factory',
+  'Louis Vuitton': '/guides/brands/louis-vuitton',
+  'Gucci': '/guides/brands/gucci',
+  'Dior': '/guides/brands/dior',
+  'Chanel': '/guides/brands/chanel',
+  'Hermès': '/guides/brands/hermes',
+};
+
 export const metadata: Metadata = {
   title: 'Moda Mall Bahrain - Luxury Shopping at World Trade Center 2025',
   description: 'Complete guide to Moda Mall at Bahrain World Trade Center. Luxury brands, designer fashion, premium dining in the iconic twin towers of Manama.',
@@ -229,9 +253,15 @@ export default function ModaMallPage() {
                 </h3>
                 <div className="space-y-1">
                   {category.stores.map((store) => (
-                    <span key={store} className="block text-gray-400 text-sm">
-                      {store}
-                    </span>
+                    brandLinks[store] ? (
+                      <Link key={store} href={brandLinks[store]} className="block text-rose-400 hover:text-rose-300 text-sm hover:underline">
+                        {store}
+                      </Link>
+                    ) : (
+                      <span key={store} className="block text-gray-400 text-sm">
+                        {store}
+                      </span>
+                    )
                   ))}
                 </div>
                 {category.note && (
@@ -257,9 +287,15 @@ export default function ModaMallPage() {
                 <h3 className="font-bold text-rose-400 mb-3">{option.category}</h3>
                 <div className="space-y-1">
                   {option.restaurants.map((restaurant) => (
-                    <span key={restaurant} className="block text-gray-400 text-sm">
-                      {restaurant}
-                    </span>
+                    brandLinks[restaurant] ? (
+                      <Link key={restaurant} href={brandLinks[restaurant]} className="block text-rose-400 hover:text-rose-300 text-sm hover:underline">
+                        {restaurant}
+                      </Link>
+                    ) : (
+                      <span key={restaurant} className="block text-gray-400 text-sm">
+                        {restaurant}
+                      </span>
+                    )
                   ))}
                 </div>
               </div>

@@ -8,6 +8,31 @@ import {
 } from 'lucide-react';
 import BreadcrumbSchema from '@/components/SEO/BreadcrumbSchema';
 
+// Brand page links mapping
+const brandLinks: Record<string, string> = {
+  'Zara': '/guides/brands/zara',
+  'Zara Home': '/guides/brands/zara',
+  'H&M': '/guides/brands/hm',
+  'Nike': '/guides/brands/nike',
+  'Adidas': '/guides/brands/adidas',
+  'Sephora': '/guides/brands/sephora',
+  'Apple': '/guides/brands/apple',
+  'Bath & Body Works': '/guides/brands/bath-body-works',
+  'Starbucks': '/guides/brands/starbucks',
+  'Costa': '/guides/brands/costa-coffee',
+  'Costa Coffee': '/guides/brands/costa-coffee',
+  'Shake Shack': '/guides/brands/shake-shack',
+  'Five Guys': '/guides/brands/five-guys',
+  'Crocs': '/guides/brands/crocs',
+  'Uniqlo': '/guides/brands/uniqlo',
+  'The Cheesecake Factory': '/guides/brands/cheesecake-factory',
+  'Louis Vuitton': '/guides/brands/louis-vuitton',
+  'Gucci': '/guides/brands/gucci',
+  'Dior': '/guides/brands/dior',
+  'Chanel': '/guides/brands/chanel',
+  'Hermès': '/guides/brands/hermes',
+};
+
 export const metadata: Metadata = {
   title: 'Marassi Galleria Bahrain - Complete Store Directory & Guide 2026',
   description: 'Complete guide to Marassi Galleria in Diyar Al Muharraq. 150+ stores including Louis Vuitton, Dior, Chanel, Gucci, Prada, plus 30+ restaurants, Reel Cinemas & Marassi Aquarium.',
@@ -401,9 +426,15 @@ export default function MarassiGalleriaPage() {
           
           <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 gap-3">
             {storeCategories[0].stores.map((brand) => (
-              <div key={brand} className="bg-gradient-to-br from-amber-500/10 to-yellow-500/5 rounded-lg p-3 text-center border border-amber-500/20">
-                <span className="text-sm font-medium text-amber-200">{brand}</span>
-              </div>
+              brandLinks[brand] ? (
+                <Link key={brand} href={brandLinks[brand]} className="bg-gradient-to-br from-amber-500/10 to-yellow-500/5 rounded-lg p-3 text-center border border-amber-500/20 hover:border-amber-400/50 transition-colors">
+                  <span className="text-sm font-medium text-amber-200 hover:text-amber-100">{brand}</span>
+                </Link>
+              ) : (
+                <div key={brand} className="bg-gradient-to-br from-amber-500/10 to-yellow-500/5 rounded-lg p-3 text-center border border-amber-500/20">
+                  <span className="text-sm font-medium text-amber-200">{brand}</span>
+                </div>
+              )
             ))}
           </div>
         </div>
@@ -463,9 +494,15 @@ export default function MarassiGalleriaPage() {
                 </h3>
                 <div className="space-y-1 max-h-64 overflow-y-auto">
                   {category.stores.map((store) => (
-                    <span key={store} className="block text-gray-400 text-sm">
-                      {store}
-                    </span>
+                    brandLinks[store] ? (
+                      <Link key={store} href={brandLinks[store]} className="block text-amber-400 hover:text-amber-300 text-sm hover:underline">
+                        {store}
+                      </Link>
+                    ) : (
+                      <span key={store} className="block text-gray-400 text-sm">
+                        {store}
+                      </span>
+                    )
                   ))}
                 </div>
               </div>
@@ -499,9 +536,15 @@ export default function MarassiGalleriaPage() {
                 </h3>
                 <div className="space-y-1">
                   {option.restaurants.map((restaurant) => (
-                    <span key={restaurant} className="block text-gray-400 text-sm">
-                      {restaurant}
-                    </span>
+                    brandLinks[restaurant] ? (
+                      <Link key={restaurant} href={brandLinks[restaurant]} className="block text-amber-400 hover:text-amber-300 text-sm hover:underline">
+                        {restaurant}
+                      </Link>
+                    ) : (
+                      <span key={restaurant} className="block text-gray-400 text-sm">
+                        {restaurant}
+                      </span>
+                    )
                   ))}
                 </div>
               </div>

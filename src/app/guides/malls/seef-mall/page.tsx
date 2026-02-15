@@ -427,9 +427,15 @@ export default function SeefMallPage() {
                 </h3>
                 <div className="space-y-1 max-h-64 overflow-y-auto">
                   {category.stores.map((store) => (
-                    <span key={store} className="block text-gray-400 text-sm">
-                      {store}
-                    </span>
+                    brandLinks[store] ? (
+                      <Link key={store} href={brandLinks[store]} className="block text-blue-400 hover:text-blue-300 text-sm hover:underline">
+                        {store}
+                      </Link>
+                    ) : (
+                      <span key={store} className="block text-gray-400 text-sm">
+                        {store}
+                      </span>
+                    )
                   ))}
                 </div>
               </div>
@@ -474,9 +480,15 @@ export default function SeefMallPage() {
                 </h3>
                 <div className="space-y-1">
                   {option.restaurants.map((restaurant) => (
-                    <span key={restaurant} className="block text-gray-400 text-sm">
-                      {restaurant}
-                    </span>
+                    brandLinks[restaurant] ? (
+                      <Link key={restaurant} href={brandLinks[restaurant]} className="block text-blue-400 hover:text-blue-300 text-sm hover:underline">
+                        {restaurant}
+                      </Link>
+                    ) : (
+                      <span key={restaurant} className="block text-gray-400 text-sm">
+                        {restaurant}
+                      </span>
+                    )
                   ))}
                 </div>
               </div>
