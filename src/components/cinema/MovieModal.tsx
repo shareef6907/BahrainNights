@@ -117,10 +117,10 @@ export default function MovieModal({
                 transition={{ duration: 0.3 }}
                 onClick={(e) => e.stopPropagation()}
               >
-                {/* Header with Backdrop */}
+                {/* Header with Backdrop - fallback to poster if no backdrop */}
                 <div className="relative h-[250px] md:h-[300px]">
                   <Image
-                    src={movie.backdrop}
+                    src={movie.backdrop && !movie.backdrop.includes('placeholder') ? movie.backdrop : movie.poster}
                     alt={movie.title}
                     fill
                     className="object-cover"
