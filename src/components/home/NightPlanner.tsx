@@ -482,7 +482,7 @@ export default function NightPlanner() {
                           )}
 
                           {/* Timeline dot */}
-                          <div className="absolute left-0 top-1 w-6 h-6 rounded-full bg-purple-500 flex items-center justify-center text-xs font-bold">
+                          <div className="absolute left-0 top-1 w-6 h-6 rounded-full bg-purple-600 flex items-center justify-center text-xs font-bold">
                             {index + 1}
                           </div>
 

@@ -23,7 +23,7 @@ const CATEGORY_LABELS: Record<ArtistCategory, string> = {
 };
 
 const CATEGORY_COLORS: Record<ArtistCategory, string> = {
-  dj: 'bg-purple-500',
+  dj: 'bg-purple-600',
   vocalist: 'bg-pink-500',
   instrumentalist: 'bg-blue-500',
   band: 'bg-indigo-500',

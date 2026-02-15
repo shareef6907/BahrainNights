@@ -175,7 +175,7 @@ export default function AttractionDetailContent({
                 {attraction.category || 'Attraction'}
               </span>
               {attraction.is_featured && (
-                <span className="px-3 py-1 bg-purple-500 text-white text-sm font-semibold rounded-full">
+                <span className="px-3 py-1 bg-purple-600 text-white text-sm font-semibold rounded-full">
                   Featured
                 </span>
               )}

@@ -420,7 +420,7 @@ export default function EventsPageClient({ initialEvents, familyAttractions = []
               onClick={() => setSelectedCategory(category.id)}
               className={`flex items-center gap-1.5 px-3 py-2 rounded-full whitespace-nowrap text-sm transition-all ${
                 selectedCategory === category.id
-                  ? 'bg-purple-500 text-white'
+                  ? 'bg-purple-600 text-white'
                   : 'bg-white/10 text-gray-300 hover:bg-white/15'
               }`}
             >

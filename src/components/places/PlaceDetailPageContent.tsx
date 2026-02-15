@@ -49,7 +49,7 @@ interface PlaceDetailPageContentProps {
 const categoryColors: Record<string, string> = {
   restaurant: 'bg-orange-500',
   cafe: 'bg-amber-600',
-  lounge: 'bg-purple-500',
+  lounge: 'bg-purple-600',
   bar: 'bg-blue-500',
   nightclub: 'bg-pink-500',
   'beach-club': 'bg-cyan-500',
@@ -277,7 +277,7 @@ export default function PlaceDetailPageContent({ venue, similarVenues, events = 
               <PlaceEvents
                 events={events.map(e => ({
                   ...e,
-                  categoryColor: categoryColors[e.category] || 'bg-purple-500',
+                  categoryColor: categoryColors[e.category] || 'bg-purple-600',
                 }))}
                 venueName={venue.name}
                 venueSlug={venue.slug}

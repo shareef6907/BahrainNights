@@ -14,7 +14,7 @@ interface PlaceMapViewProps {
 const categoryColors: Record<string, string> = {
   restaurant: 'bg-orange-500',
   cafe: 'bg-amber-600',
-  lounge: 'bg-purple-500',
+  lounge: 'bg-purple-600',
   bar: 'bg-blue-500',
   nightclub: 'bg-pink-500',
   'beach-club': 'bg-cyan-500',
