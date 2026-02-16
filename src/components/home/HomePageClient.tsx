@@ -1088,46 +1088,8 @@ export default function HomePageClient({ initialMovies, initialStats, initialTod
         </div>
       </section>
 
-      {/* Categories Grid - Updated to match main menu */}
-      <section className="px-4 mb-12 md:mb-24">
-        <div className="max-w-7xl mx-auto">
-          <motion.h2
-            className="text-3xl md:text-5xl font-bold mb-10"
-            initial="hidden"
-            whileInView="visible"
-            viewport={{ once: true, margin: "-100px" }}
-            variants={fadeIn}
-          >
-            {t.home.sections.exploreByCategory}
-          </motion.h2>
-
-          <motion.div
-            className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-6"
-            variants={stagger}
-            initial="hidden"
-            whileInView="visible"
-            viewport={{ once: true, margin: "-100px" }}
-          >
-            {categories.map(category => (
-              <Link
-                key={category.name}
-                href={category.href}
-                className="group relative block w-full h-full bg-white/5 backdrop-blur-sm border border-white/10 rounded-2xl p-6 cursor-pointer overflow-hidden hover:border-orange-400/50 hover:bg-white/10 transition-all duration-300 touch-manipulation active:scale-[0.98]"
-              >
-                <div className={`absolute inset-0 bg-gradient-to-br ${category.color} opacity-0 group-hover:opacity-20 transition-opacity duration-300 pointer-events-none`} />
-                <div className="relative text-center pointer-events-none">
-                  <div className="text-5xl mb-4 group-hover:scale-110 transition-transform duration-200">{category.icon}</div>
-                  <h3 className="text-xl font-bold mb-1 group-hover:text-orange-400 transition-colors">{category.name}</h3>
-                  <p className="text-sm text-gray-400 mb-2">{category.description}</p>
-                  <p className="text-yellow-500 font-semibold">
-                    {`${category.count} ${category.countLabel}`}
-                  </p>
-                </div>
-              </Link>
-            ))}
-          </motion.div>
-        </div>
-      </section>
+      {/* 🆕 CATEGORY SHOWCASE - Beautiful animated category cards with 3D effects */}
+      <CategoryShowcase stats={stats} />
 
       {/* Trending This Week Section */}
       {initialTrendingData && (initialTrendingData.venues.length > 0 || initialTrendingData.events.length > 0) && (
