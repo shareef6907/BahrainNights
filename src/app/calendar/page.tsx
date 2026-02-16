@@ -3,6 +3,7 @@ import { Suspense } from 'react';
 import { supabaseAdmin } from '@/lib/supabase';
 import CalendarPageClient from './CalendarPageClient';
 import { CalendarEvent } from '@/components/calendar/CalendarDay';
+import { EventCategory } from '@/components/calendar/CalendarFilters';
 
 export const metadata: Metadata = {
   title: 'Events Calendar Bahrain | All Upcoming Events',
@@ -47,10 +48,13 @@ const categoryMapping: Record<string, string> = {
   film: 'cinema',
 };
 
-function normalizeCategory(category: string | null): string {
+function normalizeCategory(category: string | null): EventCategory {
   if (!category) return 'concerts';
   const lower = category.toLowerCase();
-  return categoryMapping[lower] || 'concerts';
+  const mapped = categoryMapping[lower];
+  // Ensure the result is a valid EventCategory
+  const validCategories: EventCategory[] = ['concerts', 'family', 'cultural', 'nightlife', 'dining', 'sports', 'cinema'];
+  return (validCategories.includes(mapped as EventCategory) ? mapped : 'concerts') as EventCategory;
 }
 
 // Fetch real events from the database
