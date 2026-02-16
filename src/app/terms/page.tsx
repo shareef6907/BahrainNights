@@ -1,4 +1,7 @@
 import { Metadata } from 'next';
+
+// Static page with ISR - revalidate daily
+export const revalidate = 86400;
 import Link from 'next/link';
 import { ArrowLeft, Shield, Users, Camera, MapPin, AlertTriangle, Scale, Mail } from 'lucide-react';
 

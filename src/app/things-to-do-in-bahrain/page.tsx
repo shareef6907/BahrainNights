@@ -51,7 +51,6 @@ export const metadata: Metadata = {
 };
 
 // Force dynamic for fresh data
-export const dynamic = 'force-dynamic';
 export const revalidate = 3600; // Revalidate every hour
 
 // Supabase setup

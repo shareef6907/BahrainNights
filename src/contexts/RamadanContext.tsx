@@ -1,6 +1,6 @@
 'use client';
 
-import React, { createContext, useContext, useState, useEffect, useMemo, ReactNode } from 'react';
+import React, { createContext, useContext, useState, useEffect, useMemo, useCallback, ReactNode } from 'react';
 
 // Ramadan 2026 dates for Bahrain (approx Feb 28 - Mar 29, 2026)
 // Using conservative estimates - actual dates depend on moon sighting
@@ -172,12 +172,13 @@ export function RamadanProvider({ children }: { children: ReactNode }) {
     return () => clearInterval(interval);
   }, [ramadanStatus.isRamadan, iftarTime]);
 
-  const dismissBanner = () => {
+  const dismissBanner = useCallback(() => {
     setIsBannerDismissed(true);
     localStorage.setItem('ramadan-banner-dismissed', new Date().toISOString());
-  };
+  }, []);
 
-  const colors = {
+  // Memoize static colors object to prevent unnecessary re-renders
+  const colors = useMemo(() => ({
     primaryBg: '#1a1a2e',
     secondaryBg: '#16213e',
     gold: '#d4af37',
@@ -185,9 +186,10 @@ export function RamadanProvider({ children }: { children: ReactNode }) {
     lanternGlow: '#ff9f43',
     lanternWarm: '#ee5a24',
     cream: '#fef6e4',
-  };
+  }), []);
 
-  const value: RamadanContextType = {
+  // Memoize the context value to prevent unnecessary re-renders
+  const value = useMemo<RamadanContextType>(() => ({
     isRamadan: ramadanStatus.isRamadan,
     isRamadanBannerDismissed: isBannerDismissed,
     dismissBanner,
@@ -198,7 +200,7 @@ export function RamadanProvider({ children }: { children: ReactNode }) {
     ramadanYear: ramadanStatus.year,
     daysUntilRamadan: ramadanStatus.daysUntil,
     colors,
-  };
+  }), [ramadanStatus, isBannerDismissed, dismissBanner, iftarTime, suhoorTime, countdown, colors]);
 
   return (
     <RamadanContext.Provider value={value}>

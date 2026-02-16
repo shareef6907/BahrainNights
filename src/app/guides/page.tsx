@@ -1,4 +1,7 @@
 import { Metadata } from 'next';
+
+// Static page with ISR - revalidate every hour
+export const revalidate = 3600;
 import Link from 'next/link';
 import { ArrowRight, BookOpen, Calendar, MapPin, Globe, ShoppingBag } from 'lucide-react';
 import InternalLinks, { eventLinks, placeLinks, exploreLinks } from '@/components/SEO/InternalLinks';

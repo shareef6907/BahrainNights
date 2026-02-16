@@ -7,6 +7,9 @@ import {
 import BreadcrumbSchema from '@/components/SEO/BreadcrumbSchema';
 import InternalLinks from '@/components/SEO/InternalLinks';
 
+// Static page with ISR - revalidate every hour
+export const revalidate = 3600;
+
 export const metadata: Metadata = {
   title: 'Best Iftar in Bahrain 2026 | Top Iftar Buffets & Ramadan Tents',
   description: 'Discover the best iftar spots in Bahrain for Ramadan 2026. From luxury hotel buffets to traditional Ramadan tents, find the perfect place to break your fast.',
