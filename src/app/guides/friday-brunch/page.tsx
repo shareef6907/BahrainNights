@@ -174,11 +174,11 @@ const fridayBrunches = [
   {
     name: 'Coral Bay Brunch',
     venue: 'Coral Bay Resort',
-    area: 'Diyar Al Muharraq',
+    area: 'Manama (Coastal)',
     rating: 4,
     price: { soft: 'BD 22', house: 'BD 28', premium: 'BD 35' },
     timing: '1:00 PM - 5:00 PM',
-    phone: '+973 1600 0000',
+    phone: '+973 1731 2700',
     highlights: [
       'Beach resort atmosphere',
       'Outdoor BBQ grills',
