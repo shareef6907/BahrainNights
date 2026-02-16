@@ -1,18 +1,46 @@
 import { Metadata } from 'next';
 import Link from 'next/link';
 import { Calendar, Clock, MapPin, Music, Utensils, PartyPopper, Star, ArrowRight } from 'lucide-react';
+import BreadcrumbSchema from '@/components/SEO/BreadcrumbSchema';
+import FAQSchema from '@/components/SEO/FAQSchema';
 
 export const metadata: Metadata = {
-  title: 'Things to Do in Bahrain Tonight | What\'s On Tonight',
-  description: 'Find what\'s happening in Bahrain tonight. Live events, happy hours, ladies nights, live music, restaurant deals, and nightlife - updated daily.',
-  keywords: 'things to do Bahrain tonight, whats on Bahrain tonight, Bahrain tonight, events tonight Bahrain, nightlife Bahrain today',
+  title: 'Things to Do in Bahrain Tonight | What\'s On Tonight Bahrain 2026',
+  description: 'Find what\'s happening in Bahrain tonight. Live events, happy hours, ladies nights, live music, restaurant deals, and nightlife - updated daily for 2026.',
+  keywords: 'things to do in Bahrain tonight, whats on tonight Bahrain, Bahrain tonight, events tonight Bahrain, nightlife Bahrain today, what to do tonight Bahrain',
   alternates: { canonical: 'https://www.bahrainnights.com/tonight' },
   openGraph: {
-    title: 'Things to Do in Bahrain Tonight',
-    description: 'Your guide to tonight\'s events, deals, and entertainment in Bahrain.',
+    title: 'Things to Do in Bahrain Tonight | What\'s On Tonight',
+    description: 'Your guide to tonight\'s events, deals, and entertainment in Bahrain. Updated daily.',
     type: 'website',
+    url: 'https://www.bahrainnights.com/tonight',
+    locale: 'en_US',
+  },
+  twitter: {
+    card: 'summary_large_image',
+    title: 'Things to Do in Bahrain Tonight',
+    description: 'Find what\'s happening in Bahrain tonight - events, deals, nightlife.',
   },
 };
+
+const faqs = [
+  {
+    q: 'What is there to do in Bahrain tonight?',
+    a: 'Bahrain offers plenty of evening entertainment including happy hours at hotel bars (typically 4-8 PM), ladies nights with free drinks, live music at venues across Adliya and Juffair, late-night dining options, shisha lounges, and nightclubs that stay open until the early hours.',
+  },
+  {
+    q: 'What time does nightlife start in Bahrain?',
+    a: 'Happy hours typically run from 4-8 PM. Most bars and restaurants get busy around 8-9 PM. Nightclubs start filling up after 11 PM and stay open until 2-3 AM on weekdays and later on weekends (Thursday-Saturday).',
+  },
+  {
+    q: 'Where is the best area for nightlife in Bahrain tonight?',
+    a: 'Adliya (Block 338) is the most popular area with numerous bars and restaurants within walking distance. Juffair is great for hotel bars and lounges. Seef and Bahrain Bay offer upscale hotel venues with premium experiences.',
+  },
+  {
+    q: 'Is there a ladies night in Bahrain tonight?',
+    a: 'Yes! Ladies nights happen every night of the week in Bahrain, with Thursday being the biggest night. Most hotel bars offer 2-4 free drinks for ladies. Check our ladies night guide for tonight\'s specific venues and deals.',
+  },
+];
 
 // Get current day for dynamic content hints
 const getDayName = () => {
@@ -81,6 +109,14 @@ export default function TonightPage() {
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-slate-950 via-indigo-950/20 to-slate-950 text-white">
+      <BreadcrumbSchema
+        items={[
+          { name: 'Home', url: 'https://www.bahrainnights.com' },
+          { name: 'Tonight', url: 'https://www.bahrainnights.com/tonight' },
+        ]}
+      />
+      <FAQSchema faqs={faqs} />
+      
       {/* Hero */}
       <section className="relative py-20 px-4 overflow-hidden">
         <div className="absolute inset-0 bg-gradient-to-r from-indigo-500/10 to-purple-500/10" />
@@ -239,6 +275,21 @@ export default function TonightPage() {
         </div>
       </section>
 
+      {/* FAQ Section */}
+      <section className="py-16 px-4 bg-black/30">
+        <div className="max-w-4xl mx-auto">
+          <h2 className="text-2xl font-bold mb-8 text-center">Frequently Asked Questions</h2>
+          <div className="space-y-4">
+            {faqs.map((faq, i) => (
+              <div key={i} className="bg-white/5 rounded-xl p-6">
+                <h3 className="font-bold mb-2">{faq.q}</h3>
+                <p className="text-gray-400">{faq.a}</p>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
       {/* Related Guides */}
       <section className="py-8 px-4">
         <div className="max-w-6xl mx-auto">
@@ -246,11 +297,11 @@ export default function TonightPage() {
           <div className="flex flex-wrap gap-2">
             {[
               { title: 'This Weekend', href: '/this-weekend' },
+              { title: 'Ladies Night', href: '/guides/ladies-night' },
+              { title: 'Happy Hour', href: '/guides/happy-hour-bahrain' },
+              { title: 'Live Music', href: '/guides/live-music-bahrain' },
               { title: 'Best Steakhouses', href: '/guides/best-steakhouses-bahrain' },
-              { title: 'Japanese Restaurants', href: '/guides/best-japanese-restaurants-bahrain' },
-              { title: 'Italian Restaurants', href: '/guides/best-italian-restaurants-bahrain' },
-              { title: 'Bowling', href: '/guides/bowling-bahrain' },
-              { title: 'Escape Rooms', href: '/guides/escape-rooms-bahrain' },
+              { title: 'Nightlife Guide', href: '/guides/nightlife' },
             ].map((link) => (
               <Link key={link.href} href={link.href} className="px-3 py-1 bg-white/5 hover:bg-white/10 rounded text-sm transition-colors">
                 {link.title}

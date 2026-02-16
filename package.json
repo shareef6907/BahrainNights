@@ -60,6 +60,7 @@
     "dotenv": "^17.2.3",
     "eslint": "^9",
     "eslint-config-next": "16.1.1",
+    "googleapis": "^171.4.0",
     "pg": "^8.17.1",
     "playwright": "^1.57.0",
     "png-to-ico": "^3.0.1",

@@ -7,15 +7,20 @@ import {
 import BreadcrumbSchema from '@/components/SEO/BreadcrumbSchema';
 
 export const metadata: Metadata = {
-  title: 'Ladies Night Bahrain 2026 — Best Deals, Free Drinks & Where to Go',
-  description: 'Complete guide to ladies night in Bahrain. Find the best deals with free drinks, discounts & specials every night of the week. Thursday is the biggest night!',
-  keywords: 'ladies night bahrain, ladies night deals bahrain, free drinks bahrain, ladies night thursday bahrain, best ladies night manama, ladies night juffair, ladies night adliya',
+  title: 'Ladies Night Bahrain Today 2026 — Best Deals, Free Drinks & Where to Go',
+  description: 'Find ladies night in Bahrain today! Complete guide to the best deals with free drinks, discounts & specials every night of the week. Thursday is the biggest night!',
+  keywords: 'ladies night bahrain today, ladies night deals bahrain, free drinks bahrain, ladies night thursday bahrain, best ladies night manama, ladies night juffair, ladies night adliya, ladies night bahrain 2026',
   openGraph: {
-    title: 'Ladies Night Bahrain 2026 — Best Deals & Free Drinks Guide',
-    description: 'Find the best ladies night deals in Bahrain with free drinks, discounts, and specials every night.',
+    title: 'Ladies Night Bahrain Today — Best Deals & Free Drinks Guide',
+    description: 'Find the best ladies night deals in Bahrain today with free drinks, discounts, and specials every night.',
     type: 'article',
     locale: 'en_US',
     url: 'https://www.bahrainnights.com/guides/ladies-night',
+  },
+  twitter: {
+    card: 'summary_large_image',
+    title: 'Ladies Night Bahrain Today — Free Drinks & Deals',
+    description: 'Your guide to ladies night deals in Bahrain. Free drinks every night of the week!',
   },
   alternates: {
     canonical: 'https://www.bahrainnights.com/guides/ladies-night',

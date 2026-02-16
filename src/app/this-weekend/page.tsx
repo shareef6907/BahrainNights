@@ -1,18 +1,46 @@
 import { Metadata } from 'next';
 import Link from 'next/link';
 import { Calendar, Sun, Moon, Utensils, Music, Waves, Users, ArrowRight, MapPin } from 'lucide-react';
+import BreadcrumbSchema from '@/components/SEO/BreadcrumbSchema';
+import FAQSchema from '@/components/SEO/FAQSchema';
 
 export const metadata: Metadata = {
-  title: 'Bahrain This Weekend | Things to Do This Weekend in Bahrain',
-  description: 'Plan your weekend in Bahrain. Friday brunch, beach clubs, nightlife, family activities, and events happening this weekend across the kingdom.',
-  keywords: 'Bahrain this weekend, things to do weekend Bahrain, Friday brunch Bahrain, weekend events Bahrain, weekend activities Bahrain',
+  title: 'Things to Do in Bahrain This Weekend 2026 | Weekend Activities',
+  description: 'Plan your weekend in Bahrain. Friday brunch, beach clubs, nightlife, family activities, and events happening this weekend across the kingdom. Updated weekly.',
+  keywords: 'things to do in Bahrain this weekend, weekend activities Bahrain, Friday brunch Bahrain, weekend events Bahrain, where to go in Bahrain this weekend, weekend plans Bahrain',
   alternates: { canonical: 'https://www.bahrainnights.com/this-weekend' },
   openGraph: {
-    title: 'Bahrain This Weekend - Things to Do',
+    title: 'Things to Do in Bahrain This Weekend',
     description: 'Your complete guide to weekend activities, brunches, and events in Bahrain.',
     type: 'website',
+    url: 'https://www.bahrainnights.com/this-weekend',
+    locale: 'en_US',
+  },
+  twitter: {
+    card: 'summary_large_image',
+    title: 'Things to Do in Bahrain This Weekend',
+    description: 'Friday brunch, beach clubs, nightlife, and more weekend activities in Bahrain.',
   },
 };
+
+const faqs = [
+  {
+    q: 'What are the best things to do in Bahrain this weekend?',
+    a: 'Top weekend activities include Friday brunch at luxury hotels (starting 12:30 PM), beach clubs and pool day passes, shopping at malls like City Centre and The Avenues, nightlife in Adliya and Juffair, and family attractions. The Gulf weekend runs Thursday through Saturday.',
+  },
+  {
+    q: 'When does the weekend start in Bahrain?',
+    a: 'The Bahrain weekend runs Thursday through Saturday, with Friday being the main day off. Thursday night marks the start of weekend celebrations with peak nightlife activity.',
+  },
+  {
+    q: 'What is Friday brunch in Bahrain?',
+    a: 'Friday brunch is a beloved Bahrain tradition where hotels offer lavish buffets with international cuisines and beverages from around 12:30 PM to 4 PM. It\'s as much a social event as a meal, often including live entertainment and pool access. Prices range from BD 25-60.',
+  },
+  {
+    q: 'Where should I go in Bahrain this weekend?',
+    a: 'For beach vibes, head to Zallaq or Amwaj Islands. For nightlife, try Adliya (Block 338) or Juffair. For shopping, visit Seef or The Avenues. For culture, explore Manama\'s museums and Muharraq\'s heritage sites. Bahrain Bay offers upscale dining with waterfront views.',
+  },
+];
 
 const weekendHighlights = [
   {
@@ -111,6 +139,14 @@ const topBrunches = [
 export default function ThisWeekendPage() {
   return (
     <div className="min-h-screen bg-gradient-to-b from-slate-950 via-orange-950/10 to-slate-950 text-white">
+      <BreadcrumbSchema
+        items={[
+          { name: 'Home', url: 'https://www.bahrainnights.com' },
+          { name: 'This Weekend', url: 'https://www.bahrainnights.com/this-weekend' },
+        ]}
+      />
+      <FAQSchema faqs={faqs} />
+      
       {/* Hero */}
       <section className="relative py-20 px-4 overflow-hidden">
         <div className="absolute inset-0 bg-gradient-to-r from-orange-500/10 to-amber-500/10" />
@@ -317,6 +353,21 @@ export default function ThisWeekendPage() {
         </div>
       </section>
 
+      {/* FAQ Section */}
+      <section className="py-16 px-4 bg-black/30">
+        <div className="max-w-4xl mx-auto">
+          <h2 className="text-2xl font-bold mb-8 text-center">Frequently Asked Questions</h2>
+          <div className="space-y-4">
+            {faqs.map((faq, i) => (
+              <div key={i} className="bg-white/5 rounded-xl p-6">
+                <h3 className="font-bold mb-2">{faq.q}</h3>
+                <p className="text-gray-400">{faq.a}</p>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
       {/* Related Guides */}
       <section className="py-8 px-4">
         <div className="max-w-6xl mx-auto">
@@ -324,11 +375,11 @@ export default function ThisWeekendPage() {
           <div className="flex flex-wrap gap-2">
             {[
               { title: 'Tonight', href: '/tonight' },
-              { title: 'Date Night', href: '/guides/best-date-night-bahrain' },
-              { title: 'Best Views', href: '/guides/best-views-bahrain' },
-              { title: 'Happy Hour', href: '/guides/happy-hour-bahrain' },
-              { title: 'Shisha Lounges', href: '/guides/shisha-lounges-bahrain' },
-              { title: 'Summer Activities', href: '/guides/summer-activities-bahrain' },
+              { title: 'Friday Brunch', href: '/guides/friday-brunch' },
+              { title: 'Beach Clubs', href: '/guides/beach-clubs' },
+              { title: 'Ladies Night', href: '/guides/ladies-night' },
+              { title: 'Family Activities', href: '/guides/family-activities' },
+              { title: 'Weekend Getaways', href: '/guides/weekend-getaways' },
             ].map((link) => (
               <Link key={link.href} href={link.href} className="px-3 py-1 bg-white/5 hover:bg-white/10 rounded text-sm transition-colors">
                 {link.title}

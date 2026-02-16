@@ -8,15 +8,20 @@ import BreadcrumbSchema from '@/components/SEO/BreadcrumbSchema';
 import InternalLinks from '@/components/SEO/InternalLinks';
 
 export const metadata: Metadata = {
-  title: 'Weekend Getaways from Bahrain 2026 | Dubai, Qatar, Saudi & Beyond',
-  description: 'Best weekend getaways from Bahrain! Quick escapes to Dubai, Doha, Al Khobar, and beyond. Flight times, visa info, and trip ideas for short breaks.',
-  keywords: 'weekend getaway Bahrain, trips from Bahrain, Dubai from Bahrain, Doha from Bahrain, Saudi from Bahrain, short trips Bahrain',
+  title: 'Weekend Getaway from Bahrain 2026 | Where to Go This Weekend',
+  description: 'Best weekend getaway from Bahrain! Quick escapes to Dubai, Doha, Al Khobar, and beyond. Where to go in Bahrain this weekend plus trip ideas for short breaks.',
+  keywords: 'where to go in Bahrain this weekend, weekend getaway Bahrain, weekend plans Bahrain, trips from Bahrain, Dubai from Bahrain, Doha from Bahrain, weekend getaways Bahrain',
   openGraph: {
-    title: 'Weekend Getaways from Bahrain 2026 | Dubai, Qatar, Saudi',
-    description: 'Your guide to weekend escapes from Bahrain.',
+    title: 'Weekend Getaway from Bahrain 2026 | Where to Go This Weekend',
+    description: 'Your guide to weekend escapes and where to go in Bahrain this weekend.',
     type: 'article',
     locale: 'en_US',
     url: 'https://www.bahrainnights.com/guides/weekend-getaways',
+  },
+  twitter: {
+    card: 'summary_large_image',
+    title: 'Weekend Getaway from Bahrain',
+    description: 'Quick escapes to Dubai, Doha, Saudi Arabia, and weekend plans in Bahrain.',
   },
   alternates: {
     canonical: 'https://www.bahrainnights.com/guides/weekend-getaways',
