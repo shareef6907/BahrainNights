@@ -5,7 +5,7 @@ import BreadcrumbSchema from '@/components/SEO/BreadcrumbSchema';
 import FAQSchema from '@/components/SEO/FAQSchema';
 
 export const metadata: Metadata = {
-  title: 'Things to Do in Bahrain This Weekend 2026 | Weekend Activities',
+  title: 'Things to Do in Bahrain This Weekend | Weekend Activities Bahrain',
   description: 'Plan your weekend in Bahrain. Friday brunch, beach clubs, nightlife, family activities, and events happening this weekend across the kingdom. Updated weekly.',
   keywords: 'things to do in Bahrain this weekend, weekend activities Bahrain, Friday brunch Bahrain, weekend events Bahrain, where to go in Bahrain this weekend, weekend plans Bahrain',
   alternates: { canonical: 'https://www.bahrainnights.com/this-weekend' },

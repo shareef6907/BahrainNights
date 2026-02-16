@@ -74,13 +74,13 @@ const twentyFourHourRestaurants = [
     hours: '24 hours',
   },
   {
-    name: 'Jasmis',
-    location: 'Seef',
+    name: 'Saravana Bhavan',
+    location: 'Dana Mall, Sanabis',
     price: 'BD 4-10',
     rating: 4.4,
-    description: 'South Indian vegetarian restaurant popular for late-night dining. Dosas, idlis, and authentic South Indian breakfast items perfect for suhoor.',
+    description: 'Authentic South Indian vegetarian restaurant with excellent late-night options. Dosas, idlis, and traditional breakfast items perfect for suhoor.',
     highlights: ['Vegetarian', 'Authentic South Indian', 'Quick service', 'Affordable'],
-    hours: '24 hours',
+    hours: 'Extended hours during Ramadan',
   },
   {
     name: 'Reem Al Bawadi',

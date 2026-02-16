@@ -60,7 +60,7 @@ const iftarVenues = [
   },
   {
     name: 'Reef Resort',
-    location: 'Bahrain Bay',
+    location: 'Reef Island, Manama',
     type: 'Waterfront',
     price: 'BD 20-30 per person',
     description: 'Waterfront iftar setting with fresh seafood options and pleasant evening breeze.',

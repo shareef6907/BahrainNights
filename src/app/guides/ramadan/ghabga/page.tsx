@@ -83,7 +83,7 @@ const traditionalVenues = [
   },
   {
     name: 'Reef Resort Ramadan Tent',
-    location: 'Bahrain Bay',
+    location: 'Reef Island, Manama',
     price: 'BD 22-32',
     rating: 4.5,
     description: 'Beachfront ghabga experience with fresh seafood focus. Enjoy the sea breeze while gathering with friends and family for late-night Ramadan celebrations.',

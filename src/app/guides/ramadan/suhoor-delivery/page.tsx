@@ -69,9 +69,9 @@ const twentyFourHourRestaurants = [
     note: 'Filling American comfort food. Great for a satisfying suhoor.',
   },
   {
-    name: 'Jasmis',
+    name: 'Saravana Bhavan',
     cuisine: 'South Indian Vegetarian',
-    locations: 'Seef',
+    locations: 'Dana Mall, Sanabis',
     bestFor: 'Vegetarian, South Indian breakfast',
     suhoorPicks: ['Masala Dosa', 'Idli Sambar', 'Pongal', 'Filter Coffee'],
     delivery: 'Available via Talabat',

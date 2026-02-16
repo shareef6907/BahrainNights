@@ -72,10 +72,10 @@ const traditionalTents = [
   },
   {
     name: 'Reef Resort Tent',
-    location: 'Bahrain Bay',
+    location: 'Reef Island, Manama',
     price: 'BD 22-30',
     rating: 4.6,
-    description: 'Waterfront iftar with a fresh seafood focus. The tent overlooks the bay, offering a refreshing setting for breaking your fast. Fresh catches of the day are always featured.',
+    description: 'Waterfront iftar with a fresh seafood focus. The tent overlooks the sea, offering a refreshing setting for breaking your fast. Fresh catches of the day are always featured.',
     highlights: ['Waterfront location', 'Fresh seafood', 'Outdoor seating', 'Sunset views', 'Free parking'],
     phone: '+973 1311 3333',
     bookingTip: 'Request waterfront seating when booking.',
@@ -100,12 +100,12 @@ const hiddenGems = [
     highlights: ['Persian cuisine', 'Saffron rice', 'Kebab variety', 'Traditional decor'],
   },
   {
-    name: 'Mezzaluna',
-    location: 'Seef',
-    price: 'BD 22-32',
-    rating: 4.4,
-    description: 'Italian-influenced iftar for those wanting something different. Fresh pasta stations and wood-fired pizzas alongside Arabic essentials.',
-    highlights: ['Italian fusion', 'Fresh pasta', 'Wood-fired pizza', 'Unique option'],
+    name: 'La Vinoteca Barcelona',
+    location: 'Adliya',
+    price: 'BD 20-30',
+    rating: 4.5,
+    description: 'Spanish-influenced iftar for those wanting something different. Tapas-style dishes and Mediterranean flavors in an elegant Adliya setting.',
+    highlights: ['Spanish cuisine', 'Tapas style', 'Mediterranean flavors', 'Unique option'],
   },
 ];
 

@@ -66,12 +66,12 @@ const tentVenues = [
   },
   {
     name: 'Reef Resort Ramadan Tent',
-    location: 'Bahrain Bay',
+    location: 'Reef Island, Manama',
     tier: 'Mid-Range',
-    description: 'Reef Resort offers a unique waterfront tent experience. The bayfront location provides refreshing breezes and pleasant views. Known for their seafood options alongside traditional Arabic fare.',
+    description: 'Reef Resort offers a unique waterfront tent experience. The beachfront location provides refreshing breezes and pleasant views. Known for their seafood options alongside traditional Arabic fare.',
     experience: [
       'Waterfront location',
-      'Bay views',
+      'Sea views',
       'Fresh seafood focus',
       'Outdoor seating options',
       'Traditional tent setting',

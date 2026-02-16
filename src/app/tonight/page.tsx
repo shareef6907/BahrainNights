@@ -5,8 +5,8 @@ import BreadcrumbSchema from '@/components/SEO/BreadcrumbSchema';
 import FAQSchema from '@/components/SEO/FAQSchema';
 
 export const metadata: Metadata = {
-  title: 'Things to Do in Bahrain Tonight | What\'s On Tonight Bahrain 2026',
-  description: 'Find what\'s happening in Bahrain tonight. Live events, happy hours, ladies nights, live music, restaurant deals, and nightlife - updated daily for 2026.',
+  title: 'Things to Do in Bahrain Tonight | What\'s On Tonight Bahrain',
+  description: 'Find what\'s happening in Bahrain tonight. Live events, happy hours, ladies nights, live music, restaurant deals, and nightlife - updated daily.',
   keywords: 'things to do in Bahrain tonight, whats on tonight Bahrain, Bahrain tonight, events tonight Bahrain, nightlife Bahrain today, what to do tonight Bahrain',
   alternates: { canonical: 'https://www.bahrainnights.com/tonight' },
   openGraph: {

@@ -97,7 +97,7 @@ const familyActivities = [
   },
   {
     title: 'Lost Paradise of Dilmun',
-    location: 'A\'ali',
+    location: 'Zallaq',
     description: 'Bahrain\'s largest waterpark with themed areas and rides. A full day of entertainment for families.',
   },
   {
