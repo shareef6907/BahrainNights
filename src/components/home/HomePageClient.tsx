@@ -71,9 +71,28 @@ const NewsletterPopup = dynamic(
   { ssr: false }
 );
 
+// Ramadan components - lazy loaded for performance
+const RamadanSection = dynamic(() => import('@/components/Ramadan/RamadanSection'), {
+  loading: () => null,
+  ssr: false,
+});
+
+const RamadanHeroDecoration = dynamic(() => import('@/components/Ramadan/RamadanHeroDecoration'), {
+  loading: () => null,
+  ssr: false,
+});
+
+const IftarWidget = dynamic(() => import('@/components/Ramadan/IftarWidget'), {
+  loading: () => null,
+  ssr: false,
+});
+
 // Import types for new features
 import type { HappeningNowEvent } from '@/components/home/HappeningNow';
 import type { SurpriseOption } from '@/components/home/SurpriseMe';
+
+// Import Ramadan context hook for conditional rendering
+import { useRamadan } from '@/contexts/RamadanContext';
 
 // Animation variants - optimized for speed
 const fadeIn = {
@@ -293,6 +312,7 @@ interface HomePageClientProps {
 
 export default function HomePageClient({ initialMovies, initialStats, initialTodayEvents, initialInternationalEvents, initialHappeningNowEvents, initialSurpriseData, initialTrendingData }: HomePageClientProps) {
   const { t } = useTranslation();
+  const { isRamadan } = useRamadan();
 
   // International dropdown - GCC countries + UK
   const internationalDropdownItems = [
@@ -611,6 +631,8 @@ export default function HomePageClient({ initialMovies, initialStats, initialTod
 
             {/* Right Side Actions */}
             <div className="hidden lg:flex items-center space-x-2">
+              {/* Ramadan Iftar Widget - compact version in navbar */}
+              {isRamadan && <IftarWidget variant="compact" className="mr-2" />}
               <GlobalSearch variant="navbar" />
               <Link
                 href="/register-venue"
@@ -733,6 +755,9 @@ export default function HomePageClient({ initialMovies, initialStats, initialTod
 
       {/* Hero Section with Video Background */}
       <section className="relative pt-32 pb-32 px-4 min-h-[600px] md:min-h-[700px]">
+        {/* Ramadan Hero Decoration - crescent moon & lanterns */}
+        {isRamadan && <RamadanHeroDecoration />}
+        
         {/* Video Background - full size, no cropping from top */}
         <div className="absolute inset-0 w-full h-full">
           {/* eslint-disable-next-line jsx-a11y/media-has-caption */}
@@ -834,6 +859,9 @@ export default function HomePageClient({ initialMovies, initialStats, initialTod
           />
         </div>
       </section>
+
+      {/* 🆕 RAMADAN SECTION - Featured during Holy Month (shows above other content) */}
+      {isRamadan && <RamadanSection />}
 
       {/* 🆕 HAPPENING NOW - Real-time events with countdown (UNIQUE FEATURE!) */}
       {initialHappeningNowEvents && initialHappeningNowEvents.length > 0 && (

@@ -4,12 +4,14 @@ import "./globals.css";
 import { AuthProvider } from "@/lib/auth-context";
 import { TranslationProvider } from "@/lib/i18n/TranslationContext";
 import { PublicAuthProvider } from "@/context/PublicAuthContext";
+import { RamadanProvider } from "@/contexts/RamadanContext";
 import { PageTracker } from "@/components/analytics/PageTracker";
 import { GoogleAnalytics } from "@/components/analytics/GoogleAnalytics";
 import FloatingBackButton from "@/components/ui/FloatingBackButton";
 import SwipeBackHandler from "@/components/SwipeBackHandler";
 import { PWARegister } from "@/components/PWARegister";
 import { PWAInstallPrompt } from "@/components/PWAInstallPrompt";
+import { RamadanBanner } from "@/components/Ramadan";
 
 const inter = Inter({
   variable: "--font-inter",
@@ -207,10 +209,13 @@ export default function RootLayout({
         <TranslationProvider>
           <PublicAuthProvider>
             <AuthProvider>
-              <PageTracker />
-              <SwipeBackHandler threshold={50} edgeWidth={50} />
-              {children}
-              <FloatingBackButton />
+              <RamadanProvider>
+                <PageTracker />
+                <RamadanBanner />
+                <SwipeBackHandler threshold={50} edgeWidth={50} />
+                {children}
+                <FloatingBackButton />
+              </RamadanProvider>
             </AuthProvider>
           </PublicAuthProvider>
         </TranslationProvider>
