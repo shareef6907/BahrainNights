@@ -61,6 +61,7 @@ export default function MobileBottomNav() {
   }, [pathname]);
 
   const isActive = (item: NavItem) => {
+    if (!pathname) return false;
     if (item.activePattern) {
       return item.activePattern.test(pathname);
     }

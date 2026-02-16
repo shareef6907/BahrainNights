@@ -87,6 +87,34 @@ const IftarWidget = dynamic(() => import('@/components/Ramadan/IftarWidget'), {
   ssr: false,
 });
 
+// NEW FEATURE COMPONENTS - Feb 2025
+const WeatherWidget = dynamic(() => import('@/components/home/WeatherWidget'), {
+  loading: () => null,
+  ssr: false,
+});
+
+const MoodFilters = dynamic(() => import('@/components/home/MoodFilters'), {
+  loading: () => null,
+  ssr: false,
+});
+
+// Tonight Quick View - Shows what's happening tonight with filters
+const TonightQuickView = dynamic(() => import('@/components/home/TonightQuickView'), {
+  loading: () => <div className="h-[300px] bg-slate-800/50 rounded-2xl animate-pulse" />,
+  ssr: false,
+});
+
+// Category Showcase - Beautiful animated category cards
+const CategoryShowcase = dynamic(() => import('@/components/home/CategoryShowcase'), {
+  loading: () => <div className="h-[400px] bg-slate-800/50 rounded-2xl animate-pulse" />,
+  ssr: false,
+});
+
+const FavoritesBar = dynamic(() => import('@/components/home/FavoritesBar'), {
+  loading: () => null,
+  ssr: false,
+});
+
 // Import types for new features
 import type { HappeningNowEvent } from '@/components/home/HappeningNow';
 import type { SurpriseOption } from '@/components/home/SurpriseMe';
@@ -871,6 +899,34 @@ export default function HomePageClient({ initialMovies, initialStats, initialTod
         />
       )}
 
+      {/* 🆕 TONIGHT QUICK VIEW - Expandable section with what's on tonight */}
+      {initialHappeningNowEvents && initialHappeningNowEvents.length > 0 && (
+        <TonightQuickView 
+          events={initialHappeningNowEvents.map(e => ({
+            id: e.id,
+            title: e.title,
+            slug: e.slug,
+            venue_name: e.venue_name,
+            time: e.time,
+            cover_url: e.cover_url,
+            category: e.category,
+            affiliate_url: `/events/${e.slug}`
+          }))} 
+          onEventClick={(event) => {
+            const happeningEvent = initialHappeningNowEvents.find(e => e.id === event.id);
+            if (happeningEvent) {
+              handleHappeningNowEventClick(happeningEvent);
+            }
+          }}
+        />
+      )}
+
+      {/* 🆕 WEATHER-BASED SUGGESTIONS - Smart recommendations based on Bahrain weather */}
+      <WeatherWidget />
+
+      {/* 🆕 MOOD FILTERS - "Show me something for..." Date Night, Family Day, etc */}
+      <MoodFilters />
+
       {/* Cinema Section - NO LOADING STATE! Data pre-fetched on server */}
       <section className="px-4 mb-12 md:mb-24">
         <div className="max-w-7xl mx-auto">
@@ -1084,6 +1140,9 @@ export default function HomePageClient({ initialMovies, initialStats, initialTod
           </div>
         </section>
       )}
+
+      {/* 🆕 YOUR FAVORITES - Shows saved items from localStorage */}
+      <FavoritesBar />
 
       {/* International Events Section - After Trending */}
       {initialInternationalEvents && initialInternationalEvents.length > 0 && (

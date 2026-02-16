@@ -29,6 +29,12 @@ const RamadanBanner = dynamic(() => import("@/components/Ramadan/RamadanBanner")
   loading: () => null 
 });
 
+// Mobile Bottom Navigation - sticky nav for mobile users
+const MobileBottomNav = dynamic(() => import("@/components/ui/MobileBottomNav"), { 
+  ssr: false,
+  loading: () => null 
+});
+
 interface ClientComponentsProps {
   children: React.ReactNode;
 }
@@ -44,6 +50,7 @@ export function ClientComponents({ children }: ClientComponentsProps) {
       <SwipeBackHandler threshold={50} edgeWidth={50} />
       {children}
       <FloatingBackButton />
+      <MobileBottomNav />
       <PWARegister />
       <PWAInstallPrompt />
     </>

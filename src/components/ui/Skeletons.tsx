@@ -1,27 +1,28 @@
 'use client';
 
-import { motion } from 'framer-motion';
+import { motion, Variants } from 'framer-motion';
 
 // Shimmer animation for skeleton loading
-const shimmer = {
+const shimmer: Variants = {
   initial: { backgroundPosition: '-200% 0' },
   animate: {
     backgroundPosition: '200% 0',
     transition: {
       repeat: Infinity,
       duration: 1.5,
-      ease: 'linear',
+      ease: 'linear' as const,
     },
   },
 };
 
 // Base skeleton component with shimmer effect
-function SkeletonBase({ className }: { className?: string }) {
+function SkeletonBase({ className, style }: { className?: string; style?: React.CSSProperties }) {
   return (
     <motion.div
       variants={shimmer}
       initial="initial"
       animate="animate"
+      style={style}
       className={`bg-gradient-to-r from-slate-800 via-slate-700 to-slate-800 bg-[length:200%_100%] rounded-lg ${className}`}
     />
   );
