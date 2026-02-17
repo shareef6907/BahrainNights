@@ -1,6 +1,7 @@
 'use client';
 
 import dynamic from 'next/dynamic';
+import RamadanBanner from '@/components/Ramadan/RamadanBanner'; // Direct import for LCP
 
 // Dynamic imports for non-critical components (improves initial load)
 // Using ssr: false since these are purely client-side interactive components
@@ -23,11 +24,6 @@ const PWAInstallPrompt = dynamic(
   () => import("@/components/PWAInstallPrompt").then(mod => ({ default: mod.PWAInstallPrompt })), 
   { ssr: false, loading: () => null }
 );
-
-const RamadanBanner = dynamic(() => import("@/components/Ramadan/RamadanBanner"), { 
-  ssr: false,
-  loading: () => null 
-});
 
 // Mobile Bottom Navigation - sticky nav for mobile users
 const MobileBottomNav = dynamic(() => import("@/components/ui/MobileBottomNav"), { 
