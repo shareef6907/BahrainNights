@@ -68,15 +68,27 @@ const RamadanContext = createContext<RamadanContextType | undefined>(undefined);
 
 function getRamadanStatus(): { isRamadan: boolean; dayOfRamadan: number; year: number | null; daysUntil: number | null } {
   const now = new Date();
-  const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+  // Get today's date components in local timezone
+  const todayYear = now.getFullYear();
+  const todayMonth = now.getMonth();
+  const todayDate = now.getDate();
 
   // Check each configured year
   for (const [year, dates] of Object.entries(RAMADAN_CONFIG)) {
-    const start = new Date(dates.start);
-    const end = new Date(dates.end);
+    // Parse config dates and extract year/month/day to avoid timezone issues
+    const startDate = new Date(dates.start);
+    const endDate = new Date(dates.end);
+    
+    // Create comparable date numbers (YYYYMMDD format)
+    const todayNum = todayYear * 10000 + (todayMonth + 1) * 100 + todayDate;
+    const startNum = startDate.getUTCFullYear() * 10000 + (startDate.getUTCMonth() + 1) * 100 + startDate.getUTCDate();
+    const endNum = endDate.getUTCFullYear() * 10000 + (endDate.getUTCMonth() + 1) * 100 + endDate.getUTCDate();
 
-    if (today >= start && today <= end) {
-      const dayDiff = Math.floor((today.getTime() - start.getTime()) / (1000 * 60 * 60 * 24)) + 1;
+    if (todayNum >= startNum && todayNum <= endNum) {
+      // Calculate day of Ramadan
+      const startLocal = new Date(startDate.getUTCFullYear(), startDate.getUTCMonth(), startDate.getUTCDate());
+      const todayLocal = new Date(todayYear, todayMonth, todayDate);
+      const dayDiff = Math.floor((todayLocal.getTime() - startLocal.getTime()) / (1000 * 60 * 60 * 24)) + 1;
       return {
         isRamadan: true,
         dayOfRamadan: Math.min(dayDiff, 30),
@@ -86,8 +98,11 @@ function getRamadanStatus(): { isRamadan: boolean; dayOfRamadan: number; year: n
     }
 
     // Check if Ramadan is upcoming this year
-    if (today < start) {
-      const daysUntil = Math.ceil((start.getTime() - today.getTime()) / (1000 * 60 * 60 * 24));
+    if (todayNum < startNum) {
+      // Calculate days until using local dates
+      const startLocal = new Date(startDate.getUTCFullYear(), startDate.getUTCMonth(), startDate.getUTCDate());
+      const todayLocal = new Date(todayYear, todayMonth, todayDate);
+      const daysUntil = Math.round((startLocal.getTime() - todayLocal.getTime()) / (1000 * 60 * 60 * 24));
       if (daysUntil <= 30) {
         return {
           isRamadan: false,
