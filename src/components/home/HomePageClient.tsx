@@ -474,14 +474,14 @@ export default function HomePageClient({ initialMovies, initialStats, initialTod
     const video = videoRef.current;
     if (!video) return;
 
-    // Delay video loading to improve LCP
+    // Delay video loading significantly to improve LCP (load after main content)
     const timer = setTimeout(() => {
       const source = video.getAttribute('data-src');
       if (source) {
         video.src = source;
         video.load();
       }
-    }, 100);
+    }, 2500);
 
     // Play as soon as we have any data
     const playVideo = () => {
