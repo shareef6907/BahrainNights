@@ -265,7 +265,7 @@ export default function OutdoorActivitiesBahrainPage() {
             ))}
           </div>
           <p className="text-center mt-8 text-gray-400">
-            Book tickets for outdoor attractions on <a href="https://bahrain.platinumlist.net?affiliate=yjg3yzi" target="_blank" rel="noopener noreferrer" className="text-emerald-400 hover:underline">Platinumlist</a>
+            Book tickets for outdoor attractions on <a href="https://platinumlist.net/aff/?ref=yjg3yzi&link=https://bahrain.platinumlist.net" target="_blank" rel="noopener noreferrer" className="text-emerald-400 hover:underline">Platinumlist</a>
           </p>
         </div>
       </section>

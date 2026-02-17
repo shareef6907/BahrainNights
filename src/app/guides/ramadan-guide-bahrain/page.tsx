@@ -178,9 +178,9 @@ const visitorTips = [
 ];
 
 const platinumlistEvents = [
-  { name: 'Ramadan Tent Experience', url: 'https://platinumlist.net/event-tickets/ramadan-bahrain' },
-  { name: 'Ghabga Night Events', url: 'https://platinumlist.net/event-tickets/ghabga-bahrain' },
-  { name: 'Eid Celebrations', url: 'https://platinumlist.net/event-tickets/eid-bahrain' },
+  { name: 'Ramadan Tent Experience', url: 'https://platinumlist.net/aff/?ref=yjg3yzi&link=https://platinumlist.net/event-tickets/ramadan-bahrain' },
+  { name: 'Ghabga Night Events', url: 'https://platinumlist.net/aff/?ref=yjg3yzi&link=https://platinumlist.net/event-tickets/ghabga-bahrain' },
+  { name: 'Eid Celebrations', url: 'https://platinumlist.net/aff/?ref=yjg3yzi&link=https://platinumlist.net/event-tickets/eid-bahrain' },
 ];
 
 export default function RamadanGuideBahrainPage() {

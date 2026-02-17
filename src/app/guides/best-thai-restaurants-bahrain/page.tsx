@@ -502,7 +502,7 @@ export default function BestThaiRestaurantsBahrainPage() {
           </p>
           <div className="flex flex-wrap justify-center gap-4">
             <a 
-              href="https://bahrain.platinumlist.net/?affiliate=yjg3yzi"
+              href="https://platinumlist.net/aff/?ref=yjg3yzi&link=https://bahrain.platinumlist.net"
               target="_blank"
               rel="noopener noreferrer"
               className="px-6 py-3 bg-emerald-500 hover:bg-emerald-400 text-black font-bold rounded-lg transition-colors"

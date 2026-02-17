@@ -154,7 +154,7 @@ const weeklyHighlights = [
         type: 'Comedy',
         price: 'From 20 BHD',
         description: 'Weekly stand-up comedy featuring regional and international comedians. The longest-running comedy night in Bahrain delivers laughs every Thursday.',
-        ticketLink: 'https://bahrain.platinumlist.net',
+        ticketLink: 'https://platinumlist.net/aff/?ref=yjg3yzi&link=https://bahrain.platinumlist.net',
         featured: true
       },
       {
@@ -263,7 +263,7 @@ const upcomingHighlights = [
     venue: 'Multiple Venues',
     type: 'Various',
     description: 'Major concerts and special events are announced regularly. Platinumlist is Bahrain\'s official ticketing platform for entertainment events.',
-    ticketLink: 'https://bahrain.platinumlist.net'
+    ticketLink: 'https://platinumlist.net/aff/?ref=yjg3yzi&link=https://bahrain.platinumlist.net'
   }
 ];
 
@@ -456,7 +456,7 @@ export default function EventsThisWeekPage() {
               upcoming events before they sell out.
             </p>
             <a 
-              href="https://bahrain.platinumlist.net" 
+              href="https://platinumlist.net/aff/?ref=yjg3yzi&link=https://bahrain.platinumlist.net" 
               target="_blank" 
               rel="noopener noreferrer"
               className="inline-flex items-center gap-2 px-8 py-4 bg-gradient-to-r from-purple-600 to-pink-600 rounded-full text-white font-semibold hover:opacity-90 transition"

@@ -280,7 +280,7 @@ export default function ShoppingBahrainPage() {
             <Link href="/guides/restaurants" className="px-8 py-3 bg-white/10 hover:bg-white/20 text-white font-bold rounded-lg transition-colors">Restaurants</Link>
           </div>
           <p className="text-sm text-gray-400 mt-8">
-            Book experiences and events on <a href="https://bahrain.platinumlist.net?affiliate=yjg3yzi" target="_blank" rel="noopener noreferrer" className="text-amber-400 hover:underline">Platinumlist</a>
+            Book experiences and events on <a href="https://platinumlist.net/aff/?ref=yjg3yzi&link=https://bahrain.platinumlist.net" target="_blank" rel="noopener noreferrer" className="text-amber-400 hover:underline">Platinumlist</a>
           </p>
         </div>
       </section>
