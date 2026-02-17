@@ -132,9 +132,9 @@ export default function RamadanGuidePage() {
             
             <div className="mt-8 inline-flex items-center gap-3 bg-white/10 px-6 py-3 rounded-full">
               <Calendar className="w-5 h-5 text-emerald-400" />
-              <span className="font-bold">Expected: February 28 - March 29, 2026</span>
+              <span className="font-bold">February 18 - March 19, 2026</span>
             </div>
-            <p className="text-sm text-gray-500 mt-2">*Dates depend on moon sighting</p>
+            <p className="text-sm text-gray-500 mt-2">*Moon sighting confirmed Feb 17, 2026</p>
           </div>
         </div>
       </section>

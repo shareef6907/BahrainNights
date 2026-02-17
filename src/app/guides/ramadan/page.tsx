@@ -262,7 +262,7 @@ export default function RamadanPage() {
           <div className="space-y-4">
             {[
               { q: 'Can non-Muslims eat during Ramadan in Bahrain?', a: 'Yes, but not in public. Hotels serve meals discreetly in designated areas. Eating, drinking, and smoking in public during daylight hours is prohibited.' },
-              { q: 'When is Ramadan 2026?', a: 'Ramadan 2026 is expected to begin around February 28 - March 1, depending on moon sighting. Dates are confirmed closer to the time.' },
+              { q: 'When is Ramadan 2026?', a: 'Ramadan 2026 began February 18, 2026 following moon sighting confirmation. It ends around March 19, 2026.' },
               { q: 'Can tourists visit Bahrain during Ramadan?', a: 'Absolutely! It\'s a unique cultural experience. Just be respectful of local customs and fasting hours.' },
             ].map((faq, i) => (
               <div key={i} className="bg-white/5 rounded-xl p-6">
@@ -286,7 +286,7 @@ export default function RamadanPage() {
         '@type': 'FAQPage',
         mainEntity: [
           { '@type': 'Question', name: 'Can non-Muslims eat during Ramadan in Bahrain?', acceptedAnswer: { '@type': 'Answer', text: 'Yes, but not in public. Hotels serve meals discreetly in designated areas. Eating, drinking, and smoking in public during daylight hours is prohibited.' } },
-          { '@type': 'Question', name: 'When is Ramadan 2026?', acceptedAnswer: { '@type': 'Answer', text: 'Ramadan 2026 is expected to begin around February 28 - March 1, depending on moon sighting. Dates are confirmed closer to the time.' } },
+          { '@type': 'Question', name: 'When is Ramadan 2026?', acceptedAnswer: { '@type': 'Answer', text: 'Ramadan 2026 began February 18, 2026 following moon sighting confirmation. It ends around March 19, 2026.' } },
           { '@type': 'Question', name: 'Can tourists visit Bahrain during Ramadan?', acceptedAnswer: { '@type': 'Answer', text: 'Absolutely! It\'s a unique cultural experience. Just be respectful of local customs and fasting hours.' } },
         ]
       })}} />

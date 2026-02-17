@@ -187,7 +187,7 @@ export default function RamadanGuideBahrainPage() {
   const lastUpdated = new Date().toISOString().split('T')[0];
   
   const faqs = [
-    { q: 'When is Ramadan 2026 in Bahrain?', a: 'Ramadan 2026 is expected to begin around February 28 or March 1, 2026, depending on the moon sighting. The exact date is confirmed by religious authorities a day before. Ramadan lasts 29-30 days, ending with Eid Al-Fitr celebrations.' },
+    { q: 'When is Ramadan 2026 in Bahrain?', a: 'Ramadan 2026 began February 18, 2026 following moon sighting confirmation on February 17. Ramadan lasts 29-30 days, ending with Eid Al-Fitr celebrations.' },
     { q: 'Can tourists eat during Ramadan in Bahrain?', a: 'Yes, but not in public. Hotels serve meals discreetly in designated areas for non-fasting guests. Eating, drinking, and smoking in public during daylight hours is prohibited and can result in fines. Room service is always available.' },
     { q: 'What is the difference between iftar and ghabga?', a: 'Iftar is the meal that breaks the fast at sunset and is observed across the Muslim world. Ghabga is a Gulf-specific tradition — a second gathering held after Taraweeh prayers (around 9-10 PM) where families and friends share food, conversation, and entertainment late into the night.' },
     { q: 'Are restaurants open during Ramadan in Bahrain?', a: 'Most restaurants are closed during daylight hours but open after iftar (sunset). Many operate until 2-4 AM for suhoor service. Hotel restaurants may serve non-fasting guests discreetly during the day.' },
