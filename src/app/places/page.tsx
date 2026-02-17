@@ -1,5 +1,6 @@
 import { Metadata } from 'next';
 import PlacesPageClient from './PlacesPageClient';
+import BreadcrumbSchema from '@/components/SEO/BreadcrumbSchema';
 
 export const metadata: Metadata = {
   title: 'Best Restaurants, Bars, Cafes & Nightlife in Bahrain | BahrainNights',
@@ -23,5 +24,13 @@ export const metadata: Metadata = {
 };
 
 export default function PlacesPage() {
-  return <PlacesPageClient />;
+  return (
+    <>
+      <BreadcrumbSchema items={[
+        { name: 'Home', url: 'https://www.bahrainnights.com' },
+        { name: 'Places', url: 'https://www.bahrainnights.com/places' }
+      ]} />
+      <PlacesPageClient />
+    </>
+  );
 }
