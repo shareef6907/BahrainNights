@@ -803,23 +803,18 @@ export default function HomePageClient({ initialMovies, initialStats, initialTod
         </div>
 
         <div className="relative z-10 max-w-7xl mx-auto text-center">
-          <motion.div
-            className="inline-block mb-6 px-6 py-3 bg-white/5 backdrop-blur-sm rounded-full border border-white/10 hover:border-orange-400/50 transition-colors"
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.3 }}
+          {/* Hero content - CSS animations instead of framer-motion for faster load */}
+          <div
+            className="inline-block mb-6 px-6 py-3 bg-white/5 backdrop-blur-sm rounded-full border border-white/10 hover:border-orange-400/50 transition-colors animate-fade-in-up"
           >
             <span className="text-sm text-gray-300 flex items-center gap-2">
               <span className="text-xl">🇧🇭</span>
               {t.home.hero.tagline}
             </span>
-          </motion.div>
+          </div>
 
-          <motion.h1
-            className="text-4xl md:text-6xl lg:text-7xl font-black mb-6 leading-tight drop-shadow-2xl"
-            initial={{ opacity: 0, y: 30 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.4 }}
+          <h1
+            className="text-4xl md:text-6xl lg:text-7xl font-black mb-6 leading-tight drop-shadow-2xl animate-fade-in-up animation-delay-100"
           >
             <span
               className="bg-gradient-to-r from-yellow-500 via-amber-400 to-yellow-600 bg-clip-text text-transparent"
@@ -829,26 +824,20 @@ export default function HomePageClient({ initialMovies, initialStats, initialTod
             >
               {t.home.hero.title}
             </span>
-          </motion.h1>
+          </h1>
 
-          <motion.p
-            className="text-xl md:text-2xl text-gray-200 mb-10 max-w-2xl mx-auto drop-shadow-lg"
+          <p
+            className="text-xl md:text-2xl text-gray-200 mb-10 max-w-2xl mx-auto drop-shadow-lg animate-fade-in animation-delay-200"
             style={{ textShadow: '0 2px 8px rgba(0, 0, 0, 0.8)' }}
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            transition={{ duration: 0.3, delay: 0.1 }}
           >
             {t.home.hero.subtitle} •
             <span className="text-white font-semibold"> {stats.events > 0 ? stats.events.toLocaleString() : '1,247'} {t.nav.events.toLowerCase()}</span> •
             <span className="text-white font-semibold"> {stats.venues > 0 ? stats.venues.toLocaleString() : '847'} {t.nav.venues.toLowerCase()}</span>
-          </motion.p>
+          </p>
 
           {/* Search Bar */}
-          <motion.div
-            className="max-w-2xl mx-auto"
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.3, delay: 0.15 }}
+          <div
+            className="max-w-2xl mx-auto animate-fade-in-up animation-delay-300"
           >
             <GlobalSearch
               variant="hero"
@@ -856,7 +845,7 @@ export default function HomePageClient({ initialMovies, initialStats, initialTod
             />
 
             {/* Quick Filters - Neon Glow Category Buttons */}
-            <motion.div className="flex flex-wrap justify-center gap-3 mt-8" variants={stagger} initial="hidden" animate="visible">
+            <div className="flex flex-wrap justify-center gap-3 mt-8">
               {quickFilters.map(filter => (
                 <Link
                   key={filter.label}
@@ -866,8 +855,8 @@ export default function HomePageClient({ initialMovies, initialStats, initialTod
                   {filter.label}
                 </Link>
               ))}
-            </motion.div>
-          </motion.div>
+            </div>
+          </div>
         </div>
       </section>
 
