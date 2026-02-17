@@ -177,7 +177,7 @@ export default function MothersDayBahrainPage() {
         links={[
           { title: 'Best Brunches', href: '/guides/brunches' },
           { title: 'Valentine\'s Day Guide', href: '/guides/valentines-day-bahrain' },
-          { title: 'Romantic Restaurants', href: '/guides/best-date-night-bahrain' },
+          { title: 'Romantic Restaurants', href: '/guides/romantic' },
           { title: 'Spa & Wellness', href: '/guides/spa-wellness-bahrain' },
           { title: 'Best Restaurants', href: '/guides/restaurants' },
         ]} 

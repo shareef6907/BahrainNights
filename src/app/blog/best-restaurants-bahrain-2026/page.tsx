@@ -414,10 +414,10 @@ export default function BestRestaurants2026Page() {
             
             <div className="text-center mt-8">
               <Link 
-                href="/guides/best-date-night-bahrain"
+                href="/guides/romantic"
                 className="inline-flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-pink-600 to-rose-600 rounded-full text-white font-semibold hover:opacity-90 transition"
               >
-                Full Date Night Guide <ChevronRight className="w-4 h-4" />
+                Full Romantic Dining Guide <ChevronRight className="w-4 h-4" />
               </Link>
             </div>
           </div>

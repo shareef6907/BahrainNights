@@ -487,7 +487,7 @@ export default function DessertsCafesBahrainPage() {
               { title: 'Best Breakfast', href: '/guides/best-breakfast-bahrain', emoji: '☀️' },
               { title: 'Cafés Guide', href: '/guides/cafes', emoji: '☕' },
               { title: 'Brunch Spots', href: '/guides/brunch', emoji: '🥂' },
-              { title: 'Date Night', href: '/guides/best-date-night-bahrain', emoji: '💑' },
+              { title: 'Romantic Spots', href: '/guides/romantic', emoji: '💑' },
             ].map((guide) => (
               <Link 
                 key={guide.href}

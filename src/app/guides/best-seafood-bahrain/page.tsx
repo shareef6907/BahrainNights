@@ -377,7 +377,7 @@ export default function BestSeafoodBahrainPage() {
           { title: 'Best Waterfront Restaurants', href: '/guides/best-views-bahrain' },
           { title: 'Amwaj Islands Dining', href: '/guides/amwaj' },
           { title: 'Best Steakhouses in Bahrain', href: '/guides/best-steakhouses-bahrain' },
-          { title: 'Date Night Restaurants', href: '/guides/best-date-night-bahrain' },
+          { title: 'Romantic Restaurants', href: '/guides/romantic' },
           { title: 'Beach Clubs with Dining', href: '/guides/beach-clubs' },
         ]} 
       />

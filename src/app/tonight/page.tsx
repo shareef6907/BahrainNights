@@ -226,9 +226,9 @@ export default function TonightPage() {
         <div className="max-w-6xl mx-auto">
           <h2 className="text-xl font-bold mb-6">More Ideas for Tonight</h2>
           <div className="grid md:grid-cols-4 gap-4">
-            <Link href="/guides/best-date-night-bahrain" className="bg-white/5 hover:bg-white/10 rounded-lg p-4 transition-colors">
+            <Link href="/guides/romantic" className="bg-white/5 hover:bg-white/10 rounded-lg p-4 transition-colors">
               <span className="text-2xl mb-2 block">💕</span>
-              <h3 className="font-bold">Date Night</h3>
+              <h3 className="font-bold">Romantic</h3>
               <p className="text-xs text-gray-400">Romantic spots for couples</p>
             </Link>
             <Link href="/guides/shisha-lounges-bahrain" className="bg-white/5 hover:bg-white/10 rounded-lg p-4 transition-colors">

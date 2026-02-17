@@ -213,7 +213,7 @@ export default function BestViewsBahrainPage() {
           <h2 className="text-xl font-bold mb-6">More Guides</h2>
           <div className="flex flex-wrap gap-3">
             {[
-              { title: 'Date Night', href: '/guides/best-date-night-bahrain' },
+              { title: 'Romantic Dining', href: '/guides/romantic' },
               { title: 'Rooftop Bars', href: '/guides/nightlife' },
               { title: 'Beach Clubs', href: '/guides/beach-clubs' },
               { title: 'Happy Hour', href: '/guides/happy-hour-bahrain' },
@@ -257,7 +257,7 @@ export default function BestViewsBahrainPage() {
       <InternalLinks 
         title="Scenic Dining in Bahrain" 
         links={[
-          { title: 'Romantic Date Night Spots', href: '/guides/best-date-night-bahrain' },
+          { title: 'Romantic Spots', href: '/guides/romantic' },
           { title: 'Best Rooftop Bars', href: '/guides/nightlife' },
           { title: 'Bahrain Bay Guide', href: '/guides/bahrain-bay' },
           { title: 'Best Seafood Restaurants', href: '/guides/best-seafood-bahrain' },
