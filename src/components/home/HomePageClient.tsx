@@ -88,10 +88,7 @@ const IftarWidget = dynamic(() => import('@/components/Ramadan/IftarWidget'), {
 });
 
 // NEW FEATURE COMPONENTS - Feb 2025
-const WeatherWidget = dynamic(() => import('@/components/home/WeatherWidget'), {
-  loading: () => null,
-  ssr: false,
-});
+// WeatherWidget removed for performance - nobody comes to BahrainNights for weather
 
 // Tonight Quick View - Shows what's happening tonight with filters
 const TonightQuickView = dynamic(() => import('@/components/home/TonightQuickView'), {
@@ -446,6 +443,7 @@ export default function HomePageClient({ initialMovies, initialStats, initialTod
   const [activeDropdown, setActiveDropdown] = useState<string | null>(null);
   const [mobileAccordion, setMobileAccordion] = useState<string | null>(null);
   const [isScrolled, setIsScrolled] = useState(false);
+  const [showAds, setShowAds] = useState(false); // Defer ads for performance
   const videoRef = useRef<HTMLVideoElement>(null);
 
   // Data from server - no loading needed!
@@ -538,6 +536,12 @@ export default function HomePageClient({ initialMovies, initialStats, initialTod
     const handleClickOutside = () => setActiveDropdown(null);
     document.addEventListener('click', handleClickOutside);
     return () => document.removeEventListener('click', handleClickOutside);
+  }, []);
+
+  // Defer ads loading for better initial page performance
+  useEffect(() => {
+    const timer = setTimeout(() => setShowAds(true), 1500);
+    return () => clearTimeout(timer);
   }, []);
 
   // Data - ads are now fetched via AdBanner component
@@ -860,17 +864,19 @@ export default function HomePageClient({ initialMovies, initialStats, initialTod
         </div>
       </section>
 
-      {/* Premium Ad Slider - Fetches ads from database */}
-      <section className="relative z-10 px-4 mt-6 mb-10 md:mb-20">
-        <div className="max-w-7xl mx-auto">
-          <AdBanner
-            targetPage="homepage"
-            placement="slider"
-            limit={5}
-            className="h-[280px] md:h-[500px]"
-          />
-        </div>
-      </section>
+      {/* Premium Ad Slider - Deferred loading for performance */}
+      {showAds && (
+        <section className="relative z-10 px-4 mt-6 mb-10 md:mb-20">
+          <div className="max-w-7xl mx-auto">
+            <AdBanner
+              targetPage="homepage"
+              placement="slider"
+              limit={5}
+              className="h-[280px] md:h-[500px]"
+            />
+          </div>
+        </section>
+      )}
 
       {/* 🆕 RAMADAN SECTION - Featured during Holy Month (shows above other content) */}
       {isRamadan && <RamadanSection />}
@@ -905,41 +911,24 @@ export default function HomePageClient({ initialMovies, initialStats, initialTod
         />
       )}
 
-      {/* 🆕 WEATHER-BASED SUGGESTIONS - Smart recommendations based on Bahrain weather */}
-      <WeatherWidget />
-
       {/* Cinema Section - NO LOADING STATE! Data pre-fetched on server */}
       <section className="px-4 mb-12 md:mb-24">
         <div className="max-w-7xl mx-auto">
-          <motion.div
-            className="flex items-center justify-between mb-10"
-            initial="hidden"
-            whileInView="visible"
-            viewport={{ once: true, margin: "-100px" }}
-            variants={fadeIn}
-          >
+          <div className="flex items-center justify-between mb-10">
             <h2 className="text-3xl md:text-5xl font-bold">🎬 {t.home.sections.nowShowing}</h2>
             <Link href="/cinema" className="text-yellow-500 hover:text-yellow-400 flex items-center space-x-2 transition-colors group">
               <span className="font-medium">{t.home.sections.viewAll}</span>
               <ChevronRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
             </Link>
-          </motion.div>
+          </div>
 
-          <motion.div
-            className="grid grid-cols-2 md:grid-cols-4 gap-6"
-            variants={stagger}
-            initial="hidden"
-            whileInView="visible"
-            viewport={{ once: true, margin: "-100px" }}
-          >
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
             {movies.length > 0 ? (
               movies.map((movie, index) => (
-                <motion.div
+                <div
                   key={movie.id}
                   onClick={() => handleMovieClick(movie)}
-                  className="group relative rounded-2xl overflow-hidden cursor-pointer block"
-                  variants={fadeIn}
-                  whileHover={cardHover}
+                  className="group relative rounded-2xl overflow-hidden cursor-pointer block hover:scale-[1.02] transition-transform duration-200"
                 >
                   <Image
                     src={movie.poster_url?.startsWith('http') ? movie.poster_url : movie.poster_url ? `https://image.tmdb.org/t/p/w500${movie.poster_url}` : 'https://images.unsplash.com/photo-1489599849927-2ee91cede3ba?w=300&h=450&fit=crop'}
@@ -988,7 +977,7 @@ export default function HomePageClient({ initialMovies, initialStats, initialTod
                       )}
                     </div>
                   </div>
-                </motion.div>
+                </div>
               ))
             ) : (
               // No movies fallback
@@ -997,20 +986,14 @@ export default function HomePageClient({ initialMovies, initialStats, initialTod
                 <Link href="/cinema" className="text-yellow-500 hover:text-yellow-400 mt-2 inline-block">Browse all movies →</Link>
               </div>
             )}
-          </motion.div>
+          </div>
         </div>
       </section>
 
       {/* Upcoming Events */}
       <section className="px-4 mb-12 md:mb-24">
         <div className="max-w-7xl mx-auto">
-          <motion.div
-            className="flex items-center justify-between mb-10"
-            initial="hidden"
-            whileInView="visible"
-            viewport={{ once: true, margin: "-100px" }}
-            variants={fadeIn}
-          >
+          <div className="flex items-center justify-between mb-10">
             <h2 className="text-3xl md:text-5xl font-bold flex items-center gap-3">
               🔥 {t.home.sections.upcomingEvents || 'Upcoming Events'}
             </h2>
@@ -1018,26 +1001,18 @@ export default function HomePageClient({ initialMovies, initialStats, initialTod
               <span className="font-medium">{t.home.sections.viewAll}</span>
               <ChevronRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
             </Link>
-          </motion.div>
+          </div>
 
-          <motion.div
-            className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6"
-            variants={stagger}
-            initial="hidden"
-            whileInView="visible"
-            viewport={{ once: true, margin: "-100px" }}
-          >
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
             {todayEvents.length > 0 ? (
               todayEvents.map(event => (
-                <motion.div
+                <div
                   key={event.id}
                   onClick={() => {
                     setSelectedEvent(event);
                     setIsEventModalOpen(true);
                   }}
-                  className="group relative bg-white/5 backdrop-blur-sm border border-white/10 rounded-2xl overflow-hidden cursor-pointer hover:border-orange-400/50 transition-colors block"
-                  variants={fadeIn}
-                  whileHover={cardHover}
+                  className="group relative bg-white/5 backdrop-blur-sm border border-white/10 rounded-2xl overflow-hidden cursor-pointer hover:border-orange-400/50 hover:scale-[1.02] transition-all duration-200 block"
                 >
                   <div className="relative h-72 overflow-hidden">
                     <Image src={event.image} alt={event.title} fill sizes="(max-width: 768px) 100vw, (max-width: 1024px) 50vw, 25vw" className="object-cover group-hover:scale-105 transition-transform duration-300" loading="lazy" />
@@ -1059,7 +1034,7 @@ export default function HomePageClient({ initialMovies, initialStats, initialTod
                       </div>
                     </div>
                   </div>
-                </motion.div>
+                </div>
               ))
             ) : (
               <div className="col-span-4 text-center py-12">
@@ -1067,7 +1042,7 @@ export default function HomePageClient({ initialMovies, initialStats, initialTod
                 <Link href="/events" className="text-yellow-500 hover:text-yellow-400 mt-2 inline-block">Browse all events →</Link>
               </div>
             )}
-          </motion.div>
+          </div>
         </div>
       </section>
 
