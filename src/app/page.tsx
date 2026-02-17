@@ -25,7 +25,7 @@ async function getTodayEvents(): Promise<TodayEvent[]> {
   // Fetch upcoming events (today and future) - not just today
   const { data: upcomingEvents, error } = await supabaseAdmin
     .from('events')
-    .select('id, title, slug, venue_name, time, cover_url, category, date, is_featured, view_count')
+    .select('id, title, slug, venue_name, time, cover_url, category, date, is_featured, view_count, affiliate_url, booking_url, source_url')
     .eq('status', 'published')
     .eq('is_hidden', false)
     .eq('country', 'Bahrain')
@@ -61,6 +61,9 @@ async function getTodayEvents(): Promise<TodayEvent[]> {
         image: event.cover_url || 'https://images.unsplash.com/photo-1492684223066-81342ee5ff30?w=400&h=500&fit=crop',
         category: catInfo.label,
         date: event.date,
+        affiliate_url: event.affiliate_url,
+        booking_url: event.booking_url,
+        source_url: event.source_url,
       });
     }
   }
@@ -81,6 +84,9 @@ async function getTodayEvents(): Promise<TodayEvent[]> {
           image: event.cover_url || 'https://images.unsplash.com/photo-1492684223066-81342ee5ff30?w=400&h=500&fit=crop',
           category: catInfo.label,
           date: event.date,
+          affiliate_url: event.affiliate_url,
+          booking_url: event.booking_url,
+          source_url: event.source_url,
         });
       }
     }
@@ -261,7 +267,7 @@ async function getHappeningNowEvents() {
   
   const { data, error } = await supabaseAdmin
     .from('events')
-    .select('id, title, slug, venue_name, cover_url, category, date, time, end_time')
+    .select('id, title, slug, venue_name, cover_url, category, date, time, end_time, affiliate_url, booking_url, source_url')
     .eq('status', 'published')
     .eq('is_hidden', false)
     .eq('country', 'Bahrain')

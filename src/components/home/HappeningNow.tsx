@@ -16,6 +16,9 @@ export interface HappeningNowEvent {
   date: string;
   time: string | null;
   end_time?: string | null;
+  affiliate_url?: string | null;
+  booking_url?: string | null;
+  source_url?: string | null;
 }
 
 interface HappeningNowProps {

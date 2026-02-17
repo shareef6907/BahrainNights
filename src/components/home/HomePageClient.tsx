@@ -147,6 +147,9 @@ export interface TodayEvent {
   image: string;
   category: string;
   date: string;
+  affiliate_url?: string | null;
+  booking_url?: string | null;
+  source_url?: string | null;
 }
 
 // Import EventData type for modal
@@ -154,6 +157,8 @@ import type { EventData } from '@/components/events/EventModal';
 
 // Helper to convert TodayEvent to EventData format for modal
 function convertTodayEventToEventData(event: TodayEvent): EventData {
+  // Use affiliate_url if available, fallback to booking_url, then source_url, then event page
+  const affiliateUrl = event.affiliate_url || event.booking_url || event.source_url || `/events/${event.slug}`;
   return {
     id: event.id,
     title: event.title,
@@ -167,12 +172,14 @@ function convertTodayEventToEventData(event: TodayEvent): EventData {
     category: event.category,
     start_date: event.date,
     start_time: event.time?.includes(':') ? event.time : null,
-    affiliate_url: `/events/${event.slug}`,
+    affiliate_url: affiliateUrl,
   };
 }
 
 // Helper to convert HappeningNowEvent to EventData format for modal
 function convertHappeningNowEventToEventData(event: HappeningNowEvent): EventData {
+  // Use affiliate_url if available, fallback to booking_url, then source_url, then event page
+  const affiliateUrl = event.affiliate_url || event.booking_url || event.source_url || `/events/${event.slug}`;
   return {
     id: event.id,
     title: event.title,
@@ -187,7 +194,7 @@ function convertHappeningNowEventToEventData(event: HappeningNowEvent): EventDat
     start_date: event.date,
     start_time: event.time?.includes(':') ? event.time : null,
     end_time: event.end_time?.includes(':') ? event.end_time : null,
-    affiliate_url: `/events/${event.slug}`,
+    affiliate_url: affiliateUrl,
   };
 }
 
