@@ -10,7 +10,9 @@ const RAMADAN_CONFIG = {
     end: new Date('2025-03-30'), // End includes Eid day
   },
   2026: {
-    start: new Date('2026-02-17'),
+    // Confirmed via moon sighting on Feb 17, 2026
+    // Fasting begins Feb 18, ends approx Mar 19 (30 days)
+    start: new Date('2026-02-18'),
     end: new Date('2026-03-19'),
   },
   2027: {
