@@ -944,7 +944,7 @@ export default function HomePageClient({ initialMovies, initialStats, initialTod
             viewport={{ once: true, margin: "-100px" }}
           >
             {movies.length > 0 ? (
-              movies.map((movie) => (
+              movies.map((movie, index) => (
                 <motion.div
                   key={movie.id}
                   onClick={() => handleMovieClick(movie)}
@@ -959,6 +959,8 @@ export default function HomePageClient({ initialMovies, initialStats, initialTod
                     height={450}
                     className="w-full h-[280px] md:h-[450px] object-cover group-hover:scale-105 transition-transform duration-300"
                     sizes="(max-width: 768px) 50vw, 25vw"
+                    priority={index < 2}
+                    loading={index < 2 ? 'eager' : 'lazy'}
                   />
                   {/* Mobile-friendly play trailer button - always visible on mobile */}
                   {movie.trailer_url && (
@@ -1049,7 +1051,7 @@ export default function HomePageClient({ initialMovies, initialStats, initialTod
                   whileHover={cardHover}
                 >
                   <div className="relative h-72 overflow-hidden">
-                    <Image src={event.image} alt={event.title} fill sizes="(max-width: 768px) 100vw, (max-width: 1024px) 50vw, 25vw" className="object-cover group-hover:scale-105 transition-transform duration-300" />
+                    <Image src={event.image} alt={event.title} fill sizes="(max-width: 768px) 100vw, (max-width: 1024px) 50vw, 25vw" className="object-cover group-hover:scale-105 transition-transform duration-300" loading="lazy" />
                     <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/30 to-transparent" />
                     <div className="absolute top-4 right-4 px-4 py-1.5 bg-yellow-500 text-black text-xs font-bold rounded-full">
                       {event.category}

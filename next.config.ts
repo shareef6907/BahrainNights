@@ -179,6 +179,16 @@ const nextConfig: NextConfig = {
           },
         ],
       },
+      // Homepage - cache with stale-while-revalidate for instant loads
+      {
+        source: '/',
+        headers: [
+          {
+            key: 'Cache-Control',
+            value: 'public, s-maxage=120, stale-while-revalidate=300',
+          },
+        ],
+      },
     ];
   },
 

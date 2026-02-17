@@ -1,8 +1,9 @@
 import { supabaseAdmin } from '@/lib/supabase';
 import HomePageClient, { HomepageMovie, TodayEvent } from '@/components/home/HomePageClient';
 
-// Force dynamic rendering - page needs real-time data
-export const dynamic = 'force-dynamic';
+// ISR: Regenerate page every 2 minutes for fresh data without hitting DB on every request
+// This is the KEY performance optimization - cached HTML served instantly
+export const revalidate = 120;
 
 // Category mapping for display
 const categoryDisplay: Record<string, { label: string; icon: string }> = {
