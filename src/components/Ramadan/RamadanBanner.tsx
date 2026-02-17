@@ -4,18 +4,14 @@ import { X, Moon, Sparkles } from 'lucide-react';
 import { useRamadan } from '@/contexts/RamadanContext';
 
 export default function RamadanBanner() {
-  const { isRamadan, isRamadanBannerDismissed, dismissBanner, dayOfRamadan, daysUntilRamadan } = useRamadan();
+  const { isRamadan, isRamadanBannerDismissed, dismissBanner, daysUntilRamadan } = useRamadan();
 
   // Show banner during Ramadan or up to 7 days before
   const shouldShow = isRamadan || (daysUntilRamadan !== null && daysUntilRamadan <= 7);
 
   if (!shouldShow || isRamadanBannerDismissed) return null;
 
-  const bannerText = isRamadan
-    ? `Ramadan Kareem 🌙 Day ${dayOfRamadan} of the Holy Month`
-    : daysUntilRamadan === 1
-    ? 'Ramadan Mubarak begins tomorrow! 🌙'
-    : `${daysUntilRamadan} days until Ramadan 🌙`;
+  const bannerText = 'Ramadan Mubarak 🌙';
 
   return (
     <div
