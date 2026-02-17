@@ -164,11 +164,6 @@ export default function AdliyaGuidePage() {
               <h3 className="font-bold text-sm">Happy Hour</h3>
               <p className="text-xs text-gray-400">Drink deals nearby</p>
             </Link>
-            <Link href="/guides/best-date-night-bahrain" className="bg-white/5 hover:bg-white/10 rounded-lg p-4 transition-colors">
-              <span className="text-xl mb-2 block">💕</span>
-              <h3 className="font-bold text-sm">Date Night</h3>
-              <p className="text-xs text-gray-400">Romantic spots</p>
-            </Link>
           </div>
         </div>
       </section>
