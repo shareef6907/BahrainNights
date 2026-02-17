@@ -3,6 +3,7 @@ import { supabaseAdmin } from '@/lib/supabase';
 import CinemaPageClient from '@/components/cinema/CinemaPageClient';
 import { Movie } from '@/components/cinema/MovieCard';
 import MovieListSchema from '@/components/SEO/MovieListSchema';
+import BreadcrumbSchema from '@/components/SEO/BreadcrumbSchema';
 
 // Revalidate every 5 minutes for fresh data
 export const revalidate = 300;
@@ -171,6 +172,10 @@ export default async function CinemaPage() {
 
   return (
     <>
+      <BreadcrumbSchema items={[
+        { name: 'Home', url: 'https://www.bahrainnights.com' },
+        { name: 'Cinema', url: 'https://www.bahrainnights.com/cinema' }
+      ]} />
       <MovieListSchema
         movies={nowShowing}
         pageTitle="Movies Now Showing in Bahrain - VOX Cinemas"

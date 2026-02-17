@@ -2,6 +2,7 @@ import { Suspense } from 'react';
 import { getAttractions as fetchAttractions, Attraction as DbAttraction } from '@/lib/db/attractions';
 import AttractionsPageClient, { Attraction } from '@/components/attractions/AttractionsPageClient';
 import AttractionListSchema from '@/components/SEO/AttractionListSchema';
+import BreadcrumbSchema from '@/components/SEO/BreadcrumbSchema';
 
 // Cache for 5 minutes, stale-while-revalidate
 export const revalidate = 300;
@@ -60,6 +61,10 @@ export default async function AttractionsPage() {
 
   return (
     <>
+      <BreadcrumbSchema items={[
+        { name: 'Home', url: 'https://www.bahrainnights.com' },
+        { name: 'Attractions', url: 'https://www.bahrainnights.com/attractions' }
+      ]} />
       <AttractionListSchema
         attractions={attractions}
         pageTitle="Attractions & Experiences in Bahrain"

@@ -2,6 +2,7 @@ import { Suspense } from 'react';
 import { createClient } from '@supabase/supabase-js';
 import EventsPageClient, { Event, Attraction } from '@/components/events/EventsPageClient';
 import EventListSchema from '@/components/SEO/EventListSchema';
+import BreadcrumbSchema from '@/components/SEO/BreadcrumbSchema';
 import InternalLinks, { guideLinks, placeLinks } from '@/components/SEO/InternalLinks';
 import EventServicesPromo from '@/components/events/EventServicesPromo';
 import { parseDate, toISODateString } from '@/lib/utils/date';
@@ -279,6 +280,10 @@ export default async function EventsPage() {
 
   return (
     <>
+      <BreadcrumbSchema items={[
+        { name: 'Home', url: 'https://www.bahrainnights.com' },
+        { name: 'Events', url: 'https://www.bahrainnights.com/events' }
+      ]} />
       <EventListSchema
         events={schemaEvents}
         pageTitle="Events in Bahrain"
