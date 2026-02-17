@@ -93,11 +93,6 @@ const WeatherWidget = dynamic(() => import('@/components/home/WeatherWidget'), {
   ssr: false,
 });
 
-const MoodFilters = dynamic(() => import('@/components/home/MoodFilters'), {
-  loading: () => null,
-  ssr: false,
-});
-
 // Tonight Quick View - Shows what's happening tonight with filters
 const TonightQuickView = dynamic(() => import('@/components/home/TonightQuickView'), {
   loading: () => <div className="h-[300px] bg-slate-800/50 rounded-2xl animate-pulse" />,
@@ -923,9 +918,6 @@ export default function HomePageClient({ initialMovies, initialStats, initialTod
 
       {/* 🆕 WEATHER-BASED SUGGESTIONS - Smart recommendations based on Bahrain weather */}
       <WeatherWidget />
-
-      {/* 🆕 MOOD FILTERS - "Show me something for..." Date Night, Family Day, etc */}
-      <MoodFilters />
 
       {/* Cinema Section - NO LOADING STATE! Data pre-fetched on server */}
       <section className="px-4 mb-12 md:mb-24">
