@@ -4,7 +4,7 @@ import { useState, useEffect, useRef } from 'react';
 import dynamic from 'next/dynamic';
 import Link from 'next/link';
 import Image from 'next/image';
-import { motion, AnimatePresence } from 'framer-motion';
+// framer-motion removed for performance - using CSS animations instead
 import { MapPin, Clock, Star, ChevronRight, ChevronDown, Menu, X, Play, Building2, LogIn } from 'lucide-react';
 import GlobalSearch from '@/components/search/GlobalSearch';
 import { useTranslation } from '@/lib/i18n/TranslationContext';
@@ -114,50 +114,7 @@ import type { SurpriseOption } from '@/components/home/SurpriseMe';
 // Import Ramadan context hook for conditional rendering
 import { useRamadan } from '@/contexts/RamadanContext';
 
-// Animation variants - optimized for speed
-const fadeIn = {
-  hidden: { opacity: 0, y: 20 },
-  visible: { opacity: 1, y: 0, transition: { duration: 0.3 } }
-};
-
-const stagger = {
-  visible: { transition: { staggerChildren: 0.05 } }
-};
-
-const cardHover = {
-  y: -6,
-  transition: { duration: 0.2 }
-};
-
-const dropdownVariants = {
-  hidden: { opacity: 0, y: -10, scale: 0.95 },
-  visible: {
-    opacity: 1,
-    y: 0,
-    scale: 1,
-    transition: { duration: 0.2, ease: "easeOut" as const }
-  },
-  exit: {
-    opacity: 0,
-    y: -10,
-    scale: 0.95,
-    transition: { duration: 0.15 }
-  }
-};
-
-const accordionVariants = {
-  hidden: { height: 0, opacity: 0 },
-  visible: {
-    height: "auto",
-    opacity: 1,
-    transition: { duration: 0.3, ease: "easeOut" as const }
-  },
-  exit: {
-    height: 0,
-    opacity: 0,
-    transition: { duration: 0.2 }
-  }
-};
+// Animation variants removed - using CSS animations for performance
 
 // Navigation menu data - moved to component to use translations
 
@@ -617,41 +574,35 @@ export default function HomePageClient({ initialMovies, initialStats, initialTod
                     <ChevronDown className={`w-4 h-4 transition-transform duration-200 ${activeDropdown === item.name ? 'rotate-180' : ''}`} />
                   </button>
 
-                  {/* Desktop Dropdown */}
-                  <AnimatePresence>
-                    {activeDropdown === item.name && (
-                      <motion.div
-                        className="absolute top-full left-0 mt-2 w-64 bg-slate-900/98 backdrop-blur-xl border border-white/10 rounded-2xl shadow-2xl shadow-black/50 overflow-hidden"
-                        variants={dropdownVariants}
-                        initial="hidden"
-                        animate="visible"
-                        exit="exit"
-                      >
-                        <div className="py-2">
-                          {item.dropdown.map((subItem, index) => (
-                            <Link
-                              key={subItem.name}
-                              href={subItem.href}
-                              className="flex items-center space-x-3 px-4 py-3 hover:bg-white/5 transition-colors group"
-                              style={{ animationDelay: `${index * 30}ms` }}
-                            >
-                              <span className="text-xl group-hover:scale-110 transition-transform duration-200">{subItem.icon}</span>
-                              <span className="text-gray-300 group-hover:text-white transition-colors">{subItem.name}</span>
-                            </Link>
-                          ))}
-                        </div>
-                        <div className="border-t border-white/10 p-3">
+                  {/* Desktop Dropdown - CSS animations instead of framer-motion */}
+                  {activeDropdown === item.name && (
+                    <div
+                      className="absolute top-full left-0 mt-2 w-64 bg-slate-900/98 backdrop-blur-xl border border-white/10 rounded-2xl shadow-2xl shadow-black/50 overflow-hidden animate-dropdown-in"
+                    >
+                      <div className="py-2">
+                        {item.dropdown.map((subItem, index) => (
                           <Link
-                            href={item.href}
-                            className="flex items-center justify-center space-x-2 py-2 text-yellow-500 hover:text-yellow-400 font-medium transition-colors"
+                            key={subItem.name}
+                            href={subItem.href}
+                            className="flex items-center space-x-3 px-4 py-3 hover:bg-white/5 transition-colors group"
+                            style={{ animationDelay: `${index * 30}ms` }}
                           >
-                            <span>{t.nav.viewAll} {item.name}</span>
-                            <ChevronRight className="w-4 h-4" />
+                            <span className="text-xl group-hover:scale-110 transition-transform duration-200">{subItem.icon}</span>
+                            <span className="text-gray-300 group-hover:text-white transition-colors">{subItem.name}</span>
                           </Link>
-                        </div>
-                      </motion.div>
-                    )}
-                  </AnimatePresence>
+                        ))}
+                      </div>
+                      <div className="border-t border-white/10 p-3">
+                        <Link
+                          href={item.href}
+                          className="flex items-center justify-center space-x-2 py-2 text-yellow-500 hover:text-yellow-400 font-medium transition-colors"
+                        >
+                          <span>{t.nav.viewAll} {item.name}</span>
+                          <ChevronRight className="w-4 h-4" />
+                        </Link>
+                      </div>
+                    </div>
+                  )}
                 </div>
               ))}
             </div>
@@ -690,17 +641,12 @@ export default function HomePageClient({ initialMovies, initialStats, initialTod
           </div>
         </div>
 
-        {/* Mobile Menu */}
-        <AnimatePresence>
-          {mobileMenuOpen && (
-            <motion.div
-              className="lg:hidden bg-slate-900/98 backdrop-blur-xl border-t border-white/10 max-h-[calc(100vh-5rem)] overflow-y-auto"
-              data-testid="mobile-menu"
-              initial={{ opacity: 0, height: 0 }}
-              animate={{ opacity: 1, height: "auto" }}
-              exit={{ opacity: 0, height: 0 }}
-              transition={{ duration: 0.3 }}
-            >
+        {/* Mobile Menu - CSS animation */}
+        {mobileMenuOpen && (
+          <div
+            className="lg:hidden bg-slate-900/98 backdrop-blur-xl border-t border-white/10 max-h-[calc(100vh-5rem)] overflow-y-auto animate-slide-down"
+            data-testid="mobile-menu"
+          >
               <div className="px-4 py-4 space-y-1">
                 {menuItems.map((item) => (
                   <div key={item.name} className="border-b border-white/5 last:border-0">
@@ -718,40 +664,32 @@ export default function HomePageClient({ initialMovies, initialStats, initialTod
                       />
                     </button>
 
-                    {/* Accordion Content */}
-                    <AnimatePresence>
-                      {mobileAccordion === item.name && (
-                        <motion.div
-                          variants={accordionVariants}
-                          initial="hidden"
-                          animate="visible"
-                          exit="exit"
-                          className="overflow-hidden"
-                        >
-                          <div className="pb-4 pl-4 space-y-1">
-                            {item.dropdown.map((subItem) => (
-                              <Link
-                                key={subItem.name}
-                                href={subItem.href}
-                                className="flex items-center space-x-3 py-3 px-4 rounded-xl hover:bg-white/5 transition-colors"
-                                onClick={() => setMobileMenuOpen(false)}
-                              >
-                                <span className="text-xl">{subItem.icon}</span>
-                                <span className="text-gray-300">{subItem.name}</span>
-                              </Link>
-                            ))}
+                    {/* Accordion Content - CSS animation */}
+                    {mobileAccordion === item.name && (
+                      <div className="overflow-hidden animate-accordion-open">
+                        <div className="pb-4 pl-4 space-y-1">
+                          {item.dropdown.map((subItem) => (
                             <Link
-                              href={item.href}
-                              className="flex items-center space-x-2 py-3 px-4 text-yellow-500 font-medium"
+                              key={subItem.name}
+                              href={subItem.href}
+                              className="flex items-center space-x-3 py-3 px-4 rounded-xl hover:bg-white/5 transition-colors"
                               onClick={() => setMobileMenuOpen(false)}
                             >
-                              <span>{t.nav.viewAll}</span>
-                              <ChevronRight className="w-4 h-4" />
+                              <span className="text-xl">{subItem.icon}</span>
+                              <span className="text-gray-300">{subItem.name}</span>
                             </Link>
-                          </div>
-                        </motion.div>
-                      )}
-                    </AnimatePresence>
+                          ))}
+                          <Link
+                            href={item.href}
+                            className="flex items-center space-x-2 py-3 px-4 text-yellow-500 font-medium"
+                            onClick={() => setMobileMenuOpen(false)}
+                          >
+                            <span>{t.nav.viewAll}</span>
+                            <ChevronRight className="w-4 h-4" />
+                          </Link>
+                        </div>
+                      </div>
+                    )}
                   </div>
                 ))}
 
@@ -775,9 +713,8 @@ export default function HomePageClient({ initialMovies, initialStats, initialTod
                   </Link>
                 </div>
               </div>
-            </motion.div>
+            </div>
           )}
-        </AnimatePresence>
       </nav>
 
       {/* Hero Section with Video Background */}
