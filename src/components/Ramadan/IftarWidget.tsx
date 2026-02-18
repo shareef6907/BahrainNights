@@ -109,7 +109,7 @@ export default function IftarWidget({ variant = 'sidebar', className = '' }: Ift
 
       {/* Footer note */}
       <p className="text-xs text-ramadan-cream/40 text-center mt-4">
-        Times are approximate for Bahrain
+        Prayer times for Manama, Bahrain
       </p>
     </motion.div>
   );
