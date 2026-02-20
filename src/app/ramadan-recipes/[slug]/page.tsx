@@ -13,8 +13,9 @@ export async function generateStaticParams() {
 }
 
 // Generate metadata for each recipe
-export async function generateMetadata({ params }: { params: { slug: string } }): Promise<Metadata> {
-  const recipe = ramadanRecipes.find(r => r.id === params.slug);
+export async function generateMetadata({ params }: { params: Promise<{ slug: string }> }): Promise<Metadata> {
+  const { slug } = await params;
+  const recipe = ramadanRecipes.find(r => r.id === slug);
   
   if (!recipe) {
     return {
@@ -100,8 +101,9 @@ function RecipeSchema({ recipe }: { recipe: RamadanRecipe }) {
   );
 }
 
-export default function RecipePage({ params }: { params: { slug: string } }) {
-  const recipe = ramadanRecipes.find(r => r.id === params.slug);
+export default async function RecipePage({ params }: { params: Promise<{ slug: string }> }) {
+  const { slug } = await params;
+  const recipe = ramadanRecipes.find(r => r.id === slug);
   
   if (!recipe) {
     notFound();
