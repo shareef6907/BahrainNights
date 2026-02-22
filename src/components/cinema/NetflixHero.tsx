@@ -130,7 +130,10 @@ export default function NetflixHero({ movies, onMovieClick, onBookClick }: Netfl
 
   if (!movies || movies.length === 0) {
     return (
-      <div className="relative w-screen h-[80vh] bg-gradient-to-b from-gray-900 to-black flex items-center justify-center -ml-[calc((100vw-100%)/2)]">
+      <div 
+        className="relative flex items-center justify-center bg-gradient-to-b from-gray-900 to-black"
+        style={{ width: '100vw', height: '80vh', marginLeft: 'calc(-50vw + 50%)' }}
+      >
         <div className="text-center">
           <Play className="w-16 h-16 text-gray-600 mx-auto mb-4" />
           <h2 className="text-2xl font-bold text-white mb-2">Coming Soon</h2>
@@ -165,7 +168,8 @@ export default function NetflixHero({ movies, onMovieClick, onBookClick }: Netfl
 
   return (
     <div 
-      className="relative w-screen h-[80vh] min-h-[600px] overflow-hidden bg-black -ml-[calc((100vw-100%)/2)]"
+      className="relative overflow-hidden bg-black"
+      style={{ width: '100vw', height: '80vh', minHeight: '600px', marginLeft: 'calc(-50vw + 50%)' }}
       onMouseEnter={() => setShowControls(true)}
       onMouseLeave={() => setShowControls(false)}
     >
@@ -190,9 +194,9 @@ export default function NetflixHero({ movies, onMovieClick, onBookClick }: Netfl
                   top: '50%',
                   left: '50%',
                   width: '100vw',
-                  height: '56.25vw', // 16:9 aspect ratio
+                  height: '56.25vw',
                   minHeight: '100%',
-                  minWidth: '177.78vh', // 16:9 aspect ratio (100 / 0.5625)
+                  minWidth: '177.78vh',
                   transform: 'translate(-50%, -50%)',
                 }}
                 allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
