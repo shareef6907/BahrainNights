@@ -63,7 +63,7 @@ const weekendHighlights = [
     title: 'Nightlife',
     icon: Moon,
     time: 'Thu-Sat Nights',
-    description: 'Thursday kicks off the weekend with packed clubs and bars through Saturday.',
+    description: 'Thursday kicks off the weekend with packed clubs and lounges through Saturday.',
     link: '/guides/nightlife',
     color: 'purple',
   },
@@ -99,7 +99,7 @@ const weekendByDay = [
     subtitle: 'Weekend Kickoff',
     highlights: [
       'Gulf weekend officially begins',
-      'Peak nightlife - clubs and bars at full capacity',
+      'Peak nightlife - clubs and lounges at full capacity',
       'Ladies nights at many venues',
       'Live music and entertainment',
       'Book restaurants in advance',

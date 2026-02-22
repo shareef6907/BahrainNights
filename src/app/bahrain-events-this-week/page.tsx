@@ -163,7 +163,7 @@ const weeklyHighlights = [
         time: '8:00 PM onwards',
         type: 'Nightlife',
         price: 'Free entry + drinks deals',
-        description: 'Thursday is the biggest ladies night in Bahrain. Most hotel bars offer free drinks and special packages for ladies.',
+        description: 'Thursday is the biggest ladies night in Bahrain. Most hotel lounges offer free drinks and special packages for ladies.',
         ticketLink: null,
         featured: false
       }
@@ -608,7 +608,7 @@ export default function EventsThisWeekPage() {
               <Link href="/bahrain-nightlife-guide" className="p-6 bg-gray-800/50 rounded-xl hover:bg-gray-800 transition text-center group">
                 <span className="text-3xl mb-3 block">🌙</span>
                 <h3 className="font-semibold text-white group-hover:text-purple-300">Nightlife</h3>
-                <p className="text-sm text-gray-400 mt-2">Best bars & clubs</p>
+                <p className="text-sm text-gray-400 mt-2">Best lounges & clubs</p>
               </Link>
               
               <Link href="/best-restaurants-bahrain" className="p-6 bg-gray-800/50 rounded-xl hover:bg-gray-800 transition text-center group">
