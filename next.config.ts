@@ -192,6 +192,17 @@ const nextConfig: NextConfig = {
     ];
   },
 
+  // Redirects for SEO and renamed pages
+  async redirects() {
+    return [
+      {
+        source: '/best-bars-bahrain',
+        destination: '/best-lounges-bahrain',
+        permanent: true,
+      },
+    ];
+  },
+
   // Webpack optimizations
   webpack: (config, { isServer }) => {
     // Don't include node modules in client bundle

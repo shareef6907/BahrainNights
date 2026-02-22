@@ -108,12 +108,6 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       priority: 0.95,
     },
     {
-      url: `${BASE_URL}/best-bars-bahrain`,
-      lastModified: new Date(),
-      changeFrequency: 'weekly',
-      priority: 0.95,
-    },
-    {
       url: `${BASE_URL}/best-lounges-bahrain`,
       lastModified: new Date(),
       changeFrequency: 'weekly',
