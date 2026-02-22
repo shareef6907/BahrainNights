@@ -7,11 +7,11 @@ import {
 } from 'lucide-react';
 
 export const metadata: Metadata = {
-  title: 'The Ultimate Bahrain Nightlife Guide 2026 — Clubs, Bars & Lounges | BahrainNights',
-  description: 'Your complete guide to Bahrain nightlife in 2026. Discover the best nightclubs, rooftop bars, live music venues, and ladies nights across Juffair, Adliya, and Seef.',
+  title: 'The Ultimate Bahrain Nightlife Guide 2026 — Clubs & Lounges | BahrainNights',
+  description: 'Your complete guide to Bahrain nightlife in 2026. Discover the best nightclubs, rooftop lounges, live music venues, and ladies nights across Juffair, Adliya, and Seef.',
   keywords: [
-    'Bahrain nightlife 2026', 'best bars Bahrain', 'nightclubs Bahrain', 'Juffair nightlife',
-    'Adliya bars', 'ladies night Bahrain', 'rooftop bars Bahrain', 'live music Bahrain',
+    'Bahrain nightlife 2026', 'best lounges Bahrain', 'nightclubs Bahrain', 'Juffair nightlife',
+    'Adliya lounges', 'ladies night Bahrain', 'rooftop lounges Bahrain', 'live music Bahrain',
     'Bahrain clubs', 'best lounges Bahrain', 'night out Bahrain', 'Bahrain party scene'
   ].join(', '),
   alternates: {
@@ -19,7 +19,7 @@ export const metadata: Metadata = {
   },
   openGraph: {
     title: 'The Ultimate Bahrain Nightlife Guide 2026',
-    description: 'Your complete guide to Bahrain\'s best clubs, bars, and lounges in 2026.',
+    description: 'Your complete guide to Bahrain\'s best clubs and lounges in 2026.',
     url: 'https://www.bahrainnights.com/blog/bahrain-nightlife-guide-2026',
     siteName: 'BahrainNights',
     images: [

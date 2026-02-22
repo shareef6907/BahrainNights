@@ -6,29 +6,37 @@ import {
 
 // SEO Optimized Metadata
 export const metadata: Metadata = {
-  title: 'Best Lounges in Bahrain 2026 | Rooftop Bars & Skyline Views | BahrainNights',
-  description: 'Discover the best lounges in Bahrain 2026. Stunning rooftop bars, skyline views, luxury hotel lounges, and sophisticated spots for cocktails and special occasions.',
+  title: 'Best Lounges in Bahrain 2026 | Rooftop Views | BahrainNights',
+  description: 'Discover the best lounges in Bahrain 2026. Stunning rooftop lounges, skyline views, luxury hotel lounges, and sophisticated spots for cocktails and special occasions.',
   keywords: [
     'best lounges Bahrain', 'rooftop lounge Bahrain', 'Bahrain lounges',
-    'rooftop bars Manama', 'skyline bar Bahrain', 'luxury lounge Bahrain',
-    'cocktail lounge Bahrain', 'hotel lounge Bahrain', 'romantic bars Bahrain',
-    'best rooftop Manama 2026', 'upscale bars Bahrain', 'sunset lounge Bahrain'
+    'rooftop lounges Manama', 'skyline lounge Bahrain', 'luxury lounge Bahrain',
+    'cocktail lounge Bahrain', 'hotel lounge Bahrain', 'romantic lounges Bahrain',
+    'best rooftop Manama 2026', 'upscale lounges Bahrain', 'sunset lounge Bahrain'
   ].join(', '),
   alternates: {
     canonical: 'https://www.bahrainnights.com/best-lounges-bahrain',
   },
   openGraph: {
-    title: 'Best Lounges in Bahrain 2026 | Rooftop Bars & Skyline Views',
-    description: 'Your guide to the most stunning lounges in Bahrain. Rooftop bars, hotel lounges, and sophisticated spots.',
+    title: 'Best Lounges in Bahrain 2026 | Rooftop Views',
+    description: 'Your guide to the most stunning lounges in Bahrain. Rooftop lounges, hotel lounges, and sophisticated spots.',
     url: 'https://www.bahrainnights.com/best-lounges-bahrain',
     siteName: 'BahrainNights',
+    images: [
+      {
+        url: 'https://bahrainnights-production.s3.me-south-1.amazonaws.com/branding/og-lounges.jpg',
+        width: 1200,
+        height: 630,
+        alt: 'Best Lounges in Bahrain',
+      },
+    ],
     type: 'article',
     locale: 'en_BH',
   },
   twitter: {
     card: 'summary_large_image',
     title: 'Best Lounges in Bahrain 2026',
-    description: 'Rooftop bars, skyline views & sophisticated cocktail spots!',
+    description: 'Rooftop lounges, skyline views & sophisticated cocktail spots!',
   },
   robots: {
     index: true,
@@ -284,7 +292,7 @@ export default function BestLoungesBahrain() {
             "@context": "https://schema.org",
             "@type": "Article",
             "headline": "Best Lounges in Bahrain 2026 | Rooftop Bars & Skyline Views",
-            "description": "Complete guide to the best lounges in Bahrain including rooftop bars, hotel lounges, and sophisticated cocktail spots.",
+            "description": "Complete guide to the best lounges in Bahrain including rooftop lounges, hotel lounges, and sophisticated cocktail spots.",
             "author": {
               "@type": "Organization",
               "name": "BahrainNights"

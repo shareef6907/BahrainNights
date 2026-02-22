@@ -1,0 +1,458 @@
+{
+  "date": "2026-02-22T17:37:27.712Z",
+  "totalUrls": 54,
+  "submitted": 45,
+  "errors": 9,
+  "results": [
+    {
+      "url": "https://www.bahrainnights.com",
+      "status": "success",
+      "response": {
+        "urlNotificationMetadata": {
+          "url": "https://www.bahrainnights.com"
+        }
+      }
+    },
+    {
+      "url": "https://www.bahrainnights.com/events",
+      "status": "success",
+      "response": {
+        "urlNotificationMetadata": {
+          "url": "https://www.bahrainnights.com/events"
+        }
+      }
+    },
+    {
+      "url": "https://www.bahrainnights.com/places",
+      "status": "success",
+      "response": {
+        "urlNotificationMetadata": {
+          "url": "https://www.bahrainnights.com/places"
+        }
+      }
+    },
+    {
+      "url": "https://www.bahrainnights.com/cinema",
+      "status": "success",
+      "response": {
+        "urlNotificationMetadata": {
+          "url": "https://www.bahrainnights.com/cinema"
+        }
+      }
+    },
+    {
+      "url": "https://www.bahrainnights.com/guides",
+      "status": "success",
+      "response": {
+        "urlNotificationMetadata": {
+          "url": "https://www.bahrainnights.com/guides"
+        }
+      }
+    },
+    {
+      "url": "https://www.bahrainnights.com/things-to-do-in-bahrain",
+      "status": "success",
+      "response": {
+        "urlNotificationMetadata": {
+          "url": "https://www.bahrainnights.com/things-to-do-in-bahrain"
+        }
+      }
+    },
+    {
+      "url": "https://www.bahrainnights.com/best-restaurants-bahrain",
+      "status": "success",
+      "response": {
+        "urlNotificationMetadata": {
+          "url": "https://www.bahrainnights.com/best-restaurants-bahrain"
+        }
+      }
+    },
+    {
+      "url": "https://www.bahrainnights.com/bahrain-nightlife-guide",
+      "status": "success",
+      "response": {
+        "urlNotificationMetadata": {
+          "url": "https://www.bahrainnights.com/bahrain-nightlife-guide"
+        }
+      }
+    },
+    {
+      "url": "https://www.bahrainnights.com/weekend-in-bahrain",
+      "status": "success",
+      "response": {
+        "urlNotificationMetadata": {
+          "url": "https://www.bahrainnights.com/weekend-in-bahrain"
+        }
+      }
+    },
+    {
+      "url": "https://www.bahrainnights.com/tonight",
+      "status": "success",
+      "response": {
+        "urlNotificationMetadata": {
+          "url": "https://www.bahrainnights.com/tonight"
+        }
+      }
+    },
+    {
+      "url": "https://www.bahrainnights.com/this-weekend",
+      "status": "success",
+      "response": {
+        "urlNotificationMetadata": {
+          "url": "https://www.bahrainnights.com/this-weekend"
+        }
+      }
+    },
+    {
+      "url": "https://www.bahrainnights.com/best-hotels-bahrain",
+      "status": "success",
+      "response": {
+        "urlNotificationMetadata": {
+          "url": "https://www.bahrainnights.com/best-hotels-bahrain"
+        }
+      }
+    },
+    {
+      "url": "https://www.bahrainnights.com/best-brunches-bahrain",
+      "status": "success",
+      "response": {
+        "urlNotificationMetadata": {
+          "url": "https://www.bahrainnights.com/best-brunches-bahrain"
+        }
+      }
+    },
+    {
+      "url": "https://www.bahrainnights.com/best-cafes-bahrain",
+      "status": "success",
+      "response": {
+        "urlNotificationMetadata": {
+          "url": "https://www.bahrainnights.com/best-cafes-bahrain"
+        }
+      }
+    },
+    {
+      "url": "https://www.bahrainnights.com/ladies-night-bahrain",
+      "status": "success",
+      "response": {
+        "urlNotificationMetadata": {
+          "url": "https://www.bahrainnights.com/ladies-night-bahrain"
+        }
+      }
+    },
+    {
+      "url": "https://www.bahrainnights.com/nightlife-bahrain",
+      "status": "success",
+      "response": {
+        "urlNotificationMetadata": {
+          "url": "https://www.bahrainnights.com/nightlife-bahrain"
+        }
+      }
+    },
+    {
+      "url": "https://www.bahrainnights.com/best-lounges-bahrain",
+      "status": "success",
+      "response": {
+        "urlNotificationMetadata": {
+          "url": "https://www.bahrainnights.com/best-lounges-bahrain"
+        }
+      }
+    },
+    {
+      "url": "https://www.bahrainnights.com/attractions",
+      "status": "success",
+      "response": {
+        "urlNotificationMetadata": {
+          "url": "https://www.bahrainnights.com/attractions"
+        }
+      }
+    },
+    {
+      "url": "https://www.bahrainnights.com/family-kids",
+      "status": "success",
+      "response": {
+        "urlNotificationMetadata": {
+          "url": "https://www.bahrainnights.com/family-kids"
+        }
+      }
+    },
+    {
+      "url": "https://www.bahrainnights.com/artists",
+      "status": "success",
+      "response": {
+        "urlNotificationMetadata": {
+          "url": "https://www.bahrainnights.com/artists"
+        }
+      }
+    },
+    {
+      "url": "https://www.eventsbahrain.com",
+      "status": "success",
+      "response": {
+        "urlNotificationMetadata": {
+          "url": "https://www.eventsbahrain.com"
+        }
+      }
+    },
+    {
+      "url": "https://www.eventsbahrain.com/exhibition-booths",
+      "status": "success",
+      "response": {
+        "urlNotificationMetadata": {
+          "url": "https://www.eventsbahrain.com/exhibition-booths"
+        }
+      }
+    },
+    {
+      "url": "https://www.eventsbahrain.com/led-screens",
+      "status": "success",
+      "response": {
+        "urlNotificationMetadata": {
+          "url": "https://www.eventsbahrain.com/led-screens"
+        }
+      }
+    },
+    {
+      "url": "https://www.eventsbahrain.com/led-video-wall-rental",
+      "status": "success",
+      "response": {
+        "urlNotificationMetadata": {
+          "url": "https://www.eventsbahrain.com/led-video-wall-rental"
+        }
+      }
+    },
+    {
+      "url": "https://www.eventsbahrain.com/sound-lights",
+      "status": "success",
+      "response": {
+        "urlNotificationMetadata": {
+          "url": "https://www.eventsbahrain.com/sound-lights"
+        }
+      }
+    },
+    {
+      "url": "https://www.eventsbahrain.com/sound-and-lighting",
+      "status": "success",
+      "response": {
+        "urlNotificationMetadata": {
+          "url": "https://www.eventsbahrain.com/sound-and-lighting"
+        }
+      }
+    },
+    {
+      "url": "https://www.eventsbahrain.com/event-setup",
+      "status": "success",
+      "response": {
+        "urlNotificationMetadata": {
+          "url": "https://www.eventsbahrain.com/event-setup"
+        }
+      }
+    },
+    {
+      "url": "https://www.eventsbahrain.com/video-production",
+      "status": "success",
+      "response": {
+        "urlNotificationMetadata": {
+          "url": "https://www.eventsbahrain.com/video-production"
+        }
+      }
+    },
+    {
+      "url": "https://www.eventsbahrain.com/contact",
+      "status": "success",
+      "response": {
+        "urlNotificationMetadata": {
+          "url": "https://www.eventsbahrain.com/contact"
+        }
+      }
+    },
+    {
+      "url": "https://www.eventsbahrain.com/wedding-planning",
+      "status": "success",
+      "response": {
+        "urlNotificationMetadata": {
+          "url": "https://www.eventsbahrain.com/wedding-planning"
+        }
+      }
+    },
+    {
+      "url": "https://www.eventsbahrain.com/wedding-decoration-bahrain",
+      "status": "success",
+      "response": {
+        "urlNotificationMetadata": {
+          "url": "https://www.eventsbahrain.com/wedding-decoration-bahrain"
+        }
+      }
+    },
+    {
+      "url": "https://www.eventsbahrain.com/corporate-events",
+      "status": "success",
+      "response": {
+        "urlNotificationMetadata": {
+          "url": "https://www.eventsbahrain.com/corporate-events"
+        }
+      }
+    },
+    {
+      "url": "https://www.eventsbahrain.com/birthday-party-setup-bahrain",
+      "status": "success",
+      "response": {
+        "urlNotificationMetadata": {
+          "url": "https://www.eventsbahrain.com/birthday-party-setup-bahrain"
+        }
+      }
+    },
+    {
+      "url": "https://cinematicwebworks.com/",
+      "status": "success",
+      "response": {
+        "urlNotificationMetadata": {
+          "url": "https://cinematicwebworks.com/"
+        }
+      }
+    },
+    {
+      "url": "https://cinematicwebworks.com/blog.html",
+      "status": "success",
+      "response": {
+        "urlNotificationMetadata": {
+          "url": "https://cinematicwebworks.com/blog.html"
+        }
+      }
+    },
+    {
+      "url": "https://cinematicwebworks.com/web-design-bahrain.html",
+      "status": "success",
+      "response": {
+        "urlNotificationMetadata": {
+          "url": "https://cinematicwebworks.com/web-design-bahrain.html"
+        }
+      }
+    },
+    {
+      "url": "https://cinematicwebworks.com/web-development-bahrain.html",
+      "status": "success",
+      "response": {
+        "urlNotificationMetadata": {
+          "url": "https://cinematicwebworks.com/web-development-bahrain.html"
+        }
+      }
+    },
+    {
+      "url": "https://cinematicwebworks.com/cinematic-websites.html",
+      "status": "success",
+      "response": {
+        "urlNotificationMetadata": {
+          "url": "https://cinematicwebworks.com/cinematic-websites.html"
+        }
+      }
+    },
+    {
+      "url": "https://cinematicwebworks.com/about.html",
+      "status": "success",
+      "response": {
+        "urlNotificationMetadata": {
+          "url": "https://cinematicwebworks.com/about.html"
+        }
+      }
+    },
+    {
+      "url": "https://cinematicwebworks.com/seo-services-bahrain.html",
+      "status": "success",
+      "response": {
+        "urlNotificationMetadata": {
+          "url": "https://cinematicwebworks.com/seo-services-bahrain.html"
+        }
+      }
+    },
+    {
+      "url": "https://cinematicwebworks.com/mobile-app-development-bahrain.html",
+      "status": "success",
+      "response": {
+        "urlNotificationMetadata": {
+          "url": "https://cinematicwebworks.com/mobile-app-development-bahrain.html"
+        }
+      }
+    },
+    {
+      "url": "https://cinematicwebworks.com/nextjs-developer-bahrain.html",
+      "status": "success",
+      "response": {
+        "urlNotificationMetadata": {
+          "url": "https://cinematicwebworks.com/nextjs-developer-bahrain.html"
+        }
+      }
+    },
+    {
+      "url": "https://cinematicwebworks.com/react-developer-bahrain.html",
+      "status": "success",
+      "response": {
+        "urlNotificationMetadata": {
+          "url": "https://cinematicwebworks.com/react-developer-bahrain.html"
+        }
+      }
+    },
+    {
+      "url": "https://cinematicwebworks.com/web-development-dubai.html",
+      "status": "success",
+      "response": {
+        "urlNotificationMetadata": {
+          "url": "https://cinematicwebworks.com/web-development-dubai.html"
+        }
+      }
+    },
+    {
+      "url": "https://cinematicwebworks.com/web-development-saudi-arabia.html",
+      "status": "success",
+      "response": {
+        "urlNotificationMetadata": {
+          "url": "https://cinematicwebworks.com/web-development-saudi-arabia.html"
+        }
+      }
+    },
+    {
+      "url": "https://www.filmproductionbahrain.com",
+      "status": "error",
+      "error": "Permission denied. Failed to verify the URL ownership."
+    },
+    {
+      "url": "https://www.filmproductionbahrain.com/corporate-video-production",
+      "status": "error",
+      "error": "Permission denied. Failed to verify the URL ownership."
+    },
+    {
+      "url": "https://www.filmproductionbahrain.com/commercial-production",
+      "status": "error",
+      "error": "Permission denied. Failed to verify the URL ownership."
+    },
+    {
+      "url": "https://www.filmproductionbahrain.com/event-videography",
+      "status": "error",
+      "error": "Permission denied. Failed to verify the URL ownership."
+    },
+    {
+      "url": "https://www.filmproductionbahrain.com/music-video-production",
+      "status": "error",
+      "error": "Permission denied. Failed to verify the URL ownership."
+    },
+    {
+      "url": "https://www.filmproductionbahrain.com/real-estate-video-tours",
+      "status": "error",
+      "error": "Permission denied. Failed to verify the URL ownership."
+    },
+    {
+      "url": "https://www.filmproductionbahrain.com/food-and-restaurant-video",
+      "status": "error",
+      "error": "Permission denied. Failed to verify the URL ownership."
+    },
+    {
+      "url": "https://www.filmproductionbahrain.com/wedding-videography",
+      "status": "error",
+      "error": "Permission denied. Failed to verify the URL ownership."
+    },
+    {
+      "url": "https://www.filmproductionbahrain.com/blog",
+      "status": "error",
+      "error": "Permission denied. Failed to verify the URL ownership."
+    }
+  ]
+}

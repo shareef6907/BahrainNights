@@ -5,7 +5,7 @@ import { Clock, Users, ChefHat, Star, ArrowRight } from 'lucide-react';
 import { ramadanRecipes, recipeCategories, getCountryFlag, getRamadanDay } from '@/data/ramadan-recipes';
 
 export const metadata: Metadata = {
-  title: 'Ramadan Recipes 2026 — Traditional Iftar & Suhoor Dishes from Around the World | BahrainNights',
+  title: 'Ramadan Recipes 2026 — Iftar & Suhoor Dishes | BahrainNights',
   description: 'Discover 20+ authentic Ramadan recipes from across the Muslim world. Traditional iftar and suhoor dishes including harees, harira, biryani, luqaimat, kunafa, and more. Easy-to-follow recipes for a blessed Ramadan.',
   keywords: [
     'Ramadan recipes',
