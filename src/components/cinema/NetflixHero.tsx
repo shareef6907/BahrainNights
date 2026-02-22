@@ -36,15 +36,13 @@ function getYouTubeId(url: string | undefined): string | null {
 export default function NetflixHero({ movies, onMovieClick, onBookClick }: NetflixHeroProps) {
   const [currentIndex, setCurrentIndex] = useState(0);
   const [isMuted, setIsMuted] = useState(true); // Start muted for autoplay
-  const [isPlaying, setIsPlaying] = useState(true);
   const [userInteracted, setUserInteracted] = useState(false);
   const [isMobile, setIsMobile] = useState(false);
   const [showControls, setShowControls] = useState(false);
   const autoAdvanceRef = useRef<NodeJS.Timeout | null>(null);
   const isMutedRef = useRef(isMuted);
-  const playerRef = useRef<HTMLIFrameElement | null>(null);
 
-  // Keep muted ref in sync
+  // Keep muted ref in sync - this persists across slide changes
   useEffect(() => {
     isMutedRef.current = isMuted;
   }, [isMuted]);
@@ -62,7 +60,6 @@ export default function NetflixHero({ movies, onMovieClick, onBookClick }: Netfl
   // Auto-unmute on desktop after first load
   useEffect(() => {
     if (!isMobile && !userInteracted) {
-      // Give a small delay for the page to load, then unmute
       const timer = setTimeout(() => {
         setIsMuted(false);
         setUserInteracted(true);
@@ -80,7 +77,6 @@ export default function NetflixHero({ movies, onMovieClick, onBookClick }: Netfl
       setUserInteracted(true);
     };
 
-    // Listen for touch or click
     document.addEventListener('touchstart', handleInteraction, { once: true });
     document.addEventListener('click', handleInteraction, { once: true });
 
@@ -97,6 +93,7 @@ export default function NetflixHero({ movies, onMovieClick, onBookClick }: Netfl
     }
     autoAdvanceRef.current = setInterval(() => {
       setCurrentIndex((prev) => (prev + 1) % movies.length);
+      // DO NOT reset isMuted - preserve user's mute preference
     }, 25000);
   }, [movies.length]);
 
@@ -114,7 +111,7 @@ export default function NetflixHero({ movies, onMovieClick, onBookClick }: Netfl
   // Navigate to specific slide - PRESERVE mute state
   const goToSlide = useCallback((index: number) => {
     setCurrentIndex(index);
-    startAutoAdvance(); // Reset timer on manual navigation
+    startAutoAdvance();
     // DO NOT change isMuted here - preserve user's choice
   }, [startAutoAdvance]);
 
@@ -126,7 +123,6 @@ export default function NetflixHero({ movies, onMovieClick, onBookClick }: Netfl
     goToSlide((currentIndex + 1) % movies.length);
   }, [currentIndex, movies.length, goToSlide]);
 
-  // Toggle mute
   const toggleMute = useCallback(() => {
     setIsMuted((prev) => !prev);
     setUserInteracted(true);
@@ -134,7 +130,7 @@ export default function NetflixHero({ movies, onMovieClick, onBookClick }: Netfl
 
   if (!movies || movies.length === 0) {
     return (
-      <div className="relative h-[80vh] bg-gradient-to-b from-gray-900 to-black flex items-center justify-center">
+      <div className="relative w-screen h-[80vh] bg-gradient-to-b from-gray-900 to-black flex items-center justify-center -ml-[calc((100vw-100%)/2)]">
         <div className="text-center">
           <Play className="w-16 h-16 text-gray-600 mx-auto mb-4" />
           <h2 className="text-2xl font-bold text-white mb-2">Coming Soon</h2>
@@ -147,7 +143,7 @@ export default function NetflixHero({ movies, onMovieClick, onBookClick }: Netfl
   const currentMovie = movies[currentIndex];
   const videoId = getYouTubeId(currentMovie?.trailerUrl);
 
-  // Build YouTube embed URL with proper parameters
+  // Build YouTube embed URL
   const getEmbedUrl = (id: string) => {
     const params = new URLSearchParams({
       autoplay: '1',
@@ -169,30 +165,35 @@ export default function NetflixHero({ movies, onMovieClick, onBookClick }: Netfl
 
   return (
     <div 
-      className="relative h-[80vh] min-h-[600px] w-full overflow-hidden bg-black"
+      className="relative w-screen h-[80vh] min-h-[600px] overflow-hidden bg-black -ml-[calc((100vw-100%)/2)]"
       onMouseEnter={() => setShowControls(true)}
       onMouseLeave={() => setShowControls(false)}
     >
-      {/* YouTube Video Background - Only render ONE iframe for current trailer */}
+      {/* YouTube Video Background - FULL COVER */}
       <AnimatePresence mode="wait">
         {videoId && (
           <motion.div
-            key={`video-${currentIndex}`}
+            key={`video-${currentIndex}-${isMuted}`}
             className="absolute inset-0 w-full h-full"
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             transition={{ duration: 0.5 }}
           >
+            {/* Video container with cover behavior */}
             <div className="absolute inset-0 w-full h-full overflow-hidden">
-              {/* Scale up the iframe to hide YouTube UI */}
               <iframe
-                ref={playerRef}
                 src={getEmbedUrl(videoId)}
-                className="absolute top-1/2 left-1/2 w-[300%] h-[300%] -translate-x-1/2 -translate-y-1/2 pointer-events-none"
-                style={{ 
+                className="absolute pointer-events-none"
+                style={{
                   border: 'none',
-                  transform: 'translate(-50%, -50%) scale(1.5)',
+                  top: '50%',
+                  left: '50%',
+                  width: '100vw',
+                  height: '56.25vw', // 16:9 aspect ratio
+                  minHeight: '100%',
+                  minWidth: '177.78vh', // 16:9 aspect ratio (100 / 0.5625)
+                  transform: 'translate(-50%, -50%)',
                 }}
                 allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
                 allowFullScreen
@@ -207,7 +208,7 @@ export default function NetflixHero({ movies, onMovieClick, onBookClick }: Netfl
       {!videoId && currentMovie?.backdrop && (
         <motion.div
           key={`backdrop-${currentIndex}`}
-          className="absolute inset-0 bg-cover bg-center"
+          className="absolute inset-0 w-full h-full bg-cover bg-center"
           style={{ backgroundImage: `url(${currentMovie.backdrop})` }}
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
@@ -215,14 +216,14 @@ export default function NetflixHero({ movies, onMovieClick, onBookClick }: Netfl
         />
       )}
 
-      {/* Gradient overlays */}
-      <div className="absolute inset-0 bg-gradient-to-r from-black/90 via-black/50 to-transparent" />
-      <div className="absolute inset-0 bg-gradient-to-t from-[#0a0a0a] via-transparent to-black/30" />
-      <div className="absolute bottom-0 left-0 right-0 h-32 bg-gradient-to-t from-[#0a0a0a] to-transparent" />
+      {/* Gradient overlays for cinematic feel */}
+      <div className="absolute inset-0 bg-gradient-to-r from-black/90 via-black/40 to-transparent" />
+      <div className="absolute inset-0 bg-gradient-to-t from-[#0a0a0a] via-transparent to-black/20" />
+      <div className="absolute bottom-0 left-0 right-0 h-40 bg-gradient-to-t from-[#0a0a0a] to-transparent" />
 
       {/* Content Overlay */}
       <div className="absolute inset-0 flex items-end pb-24 md:pb-32">
-        <div className="max-w-7xl mx-auto px-6 w-full">
+        <div className="w-full max-w-7xl mx-auto px-6">
           <AnimatePresence mode="wait">
             <motion.div
               key={currentIndex}
@@ -253,7 +254,7 @@ export default function NetflixHero({ movies, onMovieClick, onBookClick }: Netfl
                 )}
               </div>
 
-              {/* Synopsis - Truncated */}
+              {/* Synopsis */}
               {currentMovie?.synopsis && (
                 <p className="text-gray-300 text-sm md:text-base line-clamp-2 md:line-clamp-3 mb-6 max-w-xl">
                   {currentMovie.synopsis}
@@ -303,14 +304,10 @@ export default function NetflixHero({ movies, onMovieClick, onBookClick }: Netfl
         className="absolute bottom-28 md:bottom-32 right-6 p-3 bg-gray-800/50 hover:bg-gray-700/70 rounded-full border border-gray-600 text-white transition-all z-20"
         aria-label={isMuted ? 'Unmute' : 'Mute'}
       >
-        {isMuted ? (
-          <VolumeX className="w-5 h-5" />
-        ) : (
-          <Volume2 className="w-5 h-5" />
-        )}
+        {isMuted ? <VolumeX className="w-5 h-5" /> : <Volume2 className="w-5 h-5" />}
       </button>
 
-      {/* Navigation Arrows - Show on hover (desktop) */}
+      {/* Navigation Arrows */}
       {movies.length > 1 && (
         <>
           <motion.button
@@ -355,7 +352,7 @@ export default function NetflixHero({ movies, onMovieClick, onBookClick }: Netfl
       {/* Mobile tap indicator */}
       {isMobile && !userInteracted && (
         <motion.div 
-          className="absolute bottom-40 left-1/2 -translate-x-1/2 text-white/70 text-sm flex items-center gap-2 bg-black/50 px-4 py-2 rounded-full"
+          className="absolute bottom-40 left-1/2 -translate-x-1/2 text-white/70 text-sm flex items-center gap-2 bg-black/50 px-4 py-2 rounded-full z-20"
           initial={{ opacity: 0, y: 10 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 2 }}
