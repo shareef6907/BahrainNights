@@ -18,13 +18,11 @@ import {
   Shield,
   Crown,
   Inbox,
-  Sparkles,
   Heart,
   ClipboardCheck,
   Star,
   MapPin,
   Ticket,
-  FileText,
   Mail,
   Smartphone,
   Music,
@@ -36,17 +34,6 @@ const navItems = [
     name: 'Dashboard',
     href: '/admin',
     icon: LayoutDashboard,
-  },
-  {
-    name: 'Content Studio',
-    href: '/admin/studio',
-    icon: Sparkles,
-    highlight: true,
-  },
-  {
-    name: 'Blog Articles',
-    href: '/admin/blog',
-    icon: FileText,
   },
   {
     name: 'Regional Trailers',
@@ -165,10 +152,6 @@ export default function AdminSidebar({ collapsed, onToggle }: AdminSidebarProps)
       return pathname === '/admin/sponsors' ||
              (pathname.startsWith('/admin/sponsors/') &&
               !pathname.includes('/inquiries'));
-    }
-    // Handle studio routes
-    if (href === '/admin/studio') {
-      return pathname === '/admin/studio' || pathname.startsWith('/admin/studio/');
     }
     return pathname.startsWith(href);
   };
