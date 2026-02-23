@@ -123,18 +123,20 @@ export default function NetflixHero({ movies, onMovieClick, onBookClick }: Netfl
   const videoId = getYouTubeId(currentMovie?.trailerUrl);
 
   // Build YouTube embed URL
-  const getEmbedUrl = (id: string, muted: boolean) => {
+  // Mobile: always muted for autoplay, show controls for user interaction
+  // Desktop: can unmute via reload, hide controls for clean look
+  const getEmbedUrl = (id: string, muted: boolean, mobile: boolean) => {
     const params = new URLSearchParams({
       autoplay: '1',
-      mute: muted ? '1' : '0',
-      controls: '0',
+      mute: mobile ? '1' : (muted ? '1' : '0'), // Mobile always muted for autoplay
+      controls: mobile ? '1' : '0', // Show controls on mobile for user to unmute
       loop: '1',
       playlist: id,
       modestbranding: '1',
       rel: '0',
       showinfo: '0',
       iv_load_policy: '3',
-      disablekb: '1',
+      disablekb: mobile ? '0' : '1',
       playsinline: '1',
       origin: typeof window !== 'undefined' ? window.location.origin : '',
     });
@@ -157,7 +159,7 @@ export default function NetflixHero({ movies, onMovieClick, onBookClick }: Netfl
       <AnimatePresence mode="wait">
         {videoId && (
           <motion.div
-            key={`video-${currentIndex}-${isMuted}`}
+            key={`video-${currentIndex}${isMobile ? '' : `-${isMuted}`}`}
             className="absolute inset-0 w-full h-full"
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
@@ -167,8 +169,8 @@ export default function NetflixHero({ movies, onMovieClick, onBookClick }: Netfl
             {/* Video container - contain on mobile, cover on desktop */}
             <div className="absolute inset-0 w-full h-full overflow-hidden flex items-center justify-center">
               <iframe
-                src={getEmbedUrl(videoId, isMuted)}
-                className="pointer-events-none"
+                src={getEmbedUrl(videoId, isMuted, isMobile)}
+                className={isMobile ? '' : 'pointer-events-none'}
                 style={isMobile ? {
                   // Mobile: contain behavior - show full video
                   border: 'none',
@@ -289,14 +291,16 @@ export default function NetflixHero({ movies, onMovieClick, onBookClick }: Netfl
         </div>
       </div>
 
-      {/* Mute/Unmute Button */}
-      <button
-        onClick={toggleMute}
-        className="absolute bottom-20 md:bottom-32 right-4 md:right-6 p-2 md:p-3 bg-gray-800/70 hover:bg-gray-700/90 rounded-full border border-gray-600 text-white transition-all z-20"
-        aria-label={isMuted ? 'Unmute' : 'Mute'}
-      >
-        {isMuted ? <VolumeX className="w-4 h-4 md:w-5 md:h-5" /> : <Volume2 className="w-4 h-4 md:w-5 md:h-5" />}
-      </button>
+      {/* Mute/Unmute Button - Desktop only (mobile uses YouTube controls) */}
+      {!isMobile && (
+        <button
+          onClick={toggleMute}
+          className="absolute bottom-32 right-6 p-3 bg-gray-800/70 hover:bg-gray-700/90 rounded-full border border-gray-600 text-white transition-all z-20"
+          aria-label={isMuted ? 'Unmute' : 'Mute'}
+        >
+          {isMuted ? <VolumeX className="w-5 h-5" /> : <Volume2 className="w-5 h-5" />}
+        </button>
+      )}
 
       {/* Navigation Arrows */}
       {movies.length > 1 && (
