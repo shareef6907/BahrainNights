@@ -40,12 +40,7 @@ export default function NetflixHero({ movies, onMovieClick, onBookClick }: Netfl
   const [isMobile, setIsMobile] = useState(false);
   const [showControls, setShowControls] = useState(false);
   const autoAdvanceRef = useRef<NodeJS.Timeout | null>(null);
-  const isMutedRef = useRef(isMuted);
-
-  // Keep muted ref in sync - this persists across slide changes
-  useEffect(() => {
-    isMutedRef.current = isMuted;
-  }, [isMuted]);
+  const iframeRef = useRef<HTMLIFrameElement | null>(null);
 
   // Detect mobile
   useEffect(() => {
@@ -57,33 +52,35 @@ export default function NetflixHero({ movies, onMovieClick, onBookClick }: Netfl
     return () => window.removeEventListener('resize', checkMobile);
   }, []);
 
+  // Send mute/unmute command to YouTube player via postMessage
+  const sendPlayerCommand = useCallback((command: string, args?: unknown) => {
+    if (iframeRef.current?.contentWindow) {
+      iframeRef.current.contentWindow.postMessage(JSON.stringify({
+        event: 'command',
+        func: command,
+        args: args ? [args] : []
+      }), '*');
+    }
+  }, []);
+
+  // Handle mute state changes via YouTube API (no iframe reload)
+  useEffect(() => {
+    if (isMuted) {
+      sendPlayerCommand('mute');
+    } else {
+      sendPlayerCommand('unMute');
+    }
+  }, [isMuted, sendPlayerCommand]);
+
   // Auto-unmute on desktop after first load
   useEffect(() => {
     if (!isMobile && !userInteracted) {
       const timer = setTimeout(() => {
         setIsMuted(false);
         setUserInteracted(true);
-      }, 1000);
+      }, 1500);
       return () => clearTimeout(timer);
     }
-  }, [isMobile, userInteracted]);
-
-  // Handle first interaction on mobile to unmute
-  useEffect(() => {
-    if (!isMobile || userInteracted) return;
-
-    const handleInteraction = () => {
-      setIsMuted(false);
-      setUserInteracted(true);
-    };
-
-    document.addEventListener('touchstart', handleInteraction, { once: true });
-    document.addEventListener('click', handleInteraction, { once: true });
-
-    return () => {
-      document.removeEventListener('touchstart', handleInteraction);
-      document.removeEventListener('click', handleInteraction);
-    };
   }, [isMobile, userInteracted]);
 
   // Auto-advance slides every 25 seconds
@@ -146,11 +143,11 @@ export default function NetflixHero({ movies, onMovieClick, onBookClick }: Netfl
   const currentMovie = movies[currentIndex];
   const videoId = getYouTubeId(currentMovie?.trailerUrl);
 
-  // Build YouTube embed URL
+  // Build YouTube embed URL - always muted for autoplay, control via postMessage
   const getEmbedUrl = (id: string) => {
     const params = new URLSearchParams({
       autoplay: '1',
-      mute: isMuted ? '1' : '0',
+      mute: '1', // Always start muted for mobile autoplay compatibility
       controls: '0',
       loop: '1',
       playlist: id,
@@ -159,7 +156,7 @@ export default function NetflixHero({ movies, onMovieClick, onBookClick }: Netfl
       showinfo: '0',
       iv_load_policy: '3',
       disablekb: '1',
-      enablejsapi: '1',
+      enablejsapi: '1', // Required for postMessage API
       playsinline: '1',
       origin: typeof window !== 'undefined' ? window.location.origin : '',
     });
@@ -177,7 +174,7 @@ export default function NetflixHero({ movies, onMovieClick, onBookClick }: Netfl
       <AnimatePresence mode="wait">
         {videoId && (
           <motion.div
-            key={`video-${currentIndex}-${isMuted}`}
+            key={`video-${currentIndex}`}
             className="absolute inset-0 w-full h-full"
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
@@ -187,6 +184,7 @@ export default function NetflixHero({ movies, onMovieClick, onBookClick }: Netfl
             {/* Video container with cover behavior */}
             <div className="absolute inset-0 w-full h-full overflow-hidden">
               <iframe
+                ref={iframeRef}
                 src={getEmbedUrl(videoId)}
                 className="absolute pointer-events-none"
                 style={{
@@ -353,16 +351,27 @@ export default function NetflixHero({ movies, onMovieClick, onBookClick }: Netfl
         </div>
       )}
 
-      {/* Mobile tap indicator */}
+      {/* Mobile tap-to-unmute overlay */}
       {isMobile && !userInteracted && (
         <motion.div 
-          className="absolute bottom-40 left-1/2 -translate-x-1/2 text-white/70 text-sm flex items-center gap-2 bg-black/50 px-4 py-2 rounded-full z-20"
-          initial={{ opacity: 0, y: 10 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 2 }}
+          className="absolute inset-0 z-10 cursor-pointer"
+          onClick={() => {
+            setIsMuted(false);
+            setUserInteracted(true);
+          }}
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
         >
-          <VolumeX className="w-4 h-4" />
-          Tap anywhere to unmute
+          {/* Tap indicator */}
+          <motion.div 
+            className="absolute bottom-40 left-1/2 -translate-x-1/2 text-white/80 text-sm flex items-center gap-2 bg-black/60 px-4 py-2 rounded-full"
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 1.5 }}
+          >
+            <VolumeX className="w-4 h-4" />
+            Tap to unmute
+          </motion.div>
         </motion.div>
       )}
     </div>
