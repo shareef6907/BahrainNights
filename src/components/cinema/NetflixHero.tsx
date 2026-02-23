@@ -40,7 +40,6 @@ export default function NetflixHero({ movies, onMovieClick, onBookClick }: Netfl
   const [isMobile, setIsMobile] = useState(false);
   const [showControls, setShowControls] = useState(false);
   const autoAdvanceRef = useRef<NodeJS.Timeout | null>(null);
-  const iframeRef = useRef<HTMLIFrameElement | null>(null);
 
   // Detect mobile
   useEffect(() => {
@@ -51,26 +50,6 @@ export default function NetflixHero({ movies, onMovieClick, onBookClick }: Netfl
     window.addEventListener('resize', checkMobile);
     return () => window.removeEventListener('resize', checkMobile);
   }, []);
-
-  // Send mute/unmute command to YouTube player via postMessage
-  const sendPlayerCommand = useCallback((command: string, args?: unknown) => {
-    if (iframeRef.current?.contentWindow) {
-      iframeRef.current.contentWindow.postMessage(JSON.stringify({
-        event: 'command',
-        func: command,
-        args: args ? [args] : []
-      }), '*');
-    }
-  }, []);
-
-  // Handle mute state changes via YouTube API (no iframe reload)
-  useEffect(() => {
-    if (isMuted) {
-      sendPlayerCommand('mute');
-    } else {
-      sendPlayerCommand('unMute');
-    }
-  }, [isMuted, sendPlayerCommand]);
 
   // Auto-unmute on desktop after first load
   useEffect(() => {
@@ -143,11 +122,11 @@ export default function NetflixHero({ movies, onMovieClick, onBookClick }: Netfl
   const currentMovie = movies[currentIndex];
   const videoId = getYouTubeId(currentMovie?.trailerUrl);
 
-  // Build YouTube embed URL - always muted for autoplay, control via postMessage
-  const getEmbedUrl = (id: string) => {
+  // Build YouTube embed URL
+  const getEmbedUrl = (id: string, muted: boolean) => {
     const params = new URLSearchParams({
       autoplay: '1',
-      mute: '1', // Always start muted for mobile autoplay compatibility
+      mute: muted ? '1' : '0',
       controls: '0',
       loop: '1',
       playlist: id,
@@ -156,7 +135,6 @@ export default function NetflixHero({ movies, onMovieClick, onBookClick }: Netfl
       showinfo: '0',
       iv_load_policy: '3',
       disablekb: '1',
-      enablejsapi: '1', // Required for postMessage API
       playsinline: '1',
       origin: typeof window !== 'undefined' ? window.location.origin : '',
     });
@@ -166,29 +144,40 @@ export default function NetflixHero({ movies, onMovieClick, onBookClick }: Netfl
   return (
     <div 
       className="relative overflow-hidden bg-black"
-      style={{ width: '100vw', height: '80vh', minHeight: '600px', marginLeft: 'calc(-50vw + 50%)' }}
+      style={{ 
+        width: '100vw', 
+        height: isMobile ? '50vh' : '80vh', 
+        minHeight: isMobile ? '300px' : '600px', 
+        marginLeft: 'calc(-50vw + 50%)' 
+      }}
       onMouseEnter={() => setShowControls(true)}
       onMouseLeave={() => setShowControls(false)}
     >
-      {/* YouTube Video Background - FULL COVER */}
+      {/* YouTube Video Background */}
       <AnimatePresence mode="wait">
         {videoId && (
           <motion.div
-            key={`video-${currentIndex}`}
+            key={`video-${currentIndex}-${isMuted}`}
             className="absolute inset-0 w-full h-full"
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            transition={{ duration: 0.5 }}
+            transition={{ duration: 0.3 }}
           >
-            {/* Video container with cover behavior */}
-            <div className="absolute inset-0 w-full h-full overflow-hidden">
+            {/* Video container - contain on mobile, cover on desktop */}
+            <div className="absolute inset-0 w-full h-full overflow-hidden flex items-center justify-center">
               <iframe
-                ref={iframeRef}
-                src={getEmbedUrl(videoId)}
-                className="absolute pointer-events-none"
-                style={{
+                src={getEmbedUrl(videoId, isMuted)}
+                className="pointer-events-none"
+                style={isMobile ? {
+                  // Mobile: contain behavior - show full video
                   border: 'none',
+                  width: '100%',
+                  height: '100%',
+                } : {
+                  // Desktop: cover behavior - fill container
+                  border: 'none',
+                  position: 'absolute',
                   top: '50%',
                   left: '50%',
                   width: '100vw',
@@ -224,8 +213,8 @@ export default function NetflixHero({ movies, onMovieClick, onBookClick }: Netfl
       <div className="absolute bottom-0 left-0 right-0 h-40 bg-gradient-to-t from-[#0a0a0a] to-transparent" />
 
       {/* Content Overlay */}
-      <div className="absolute inset-0 flex items-end pb-24 md:pb-32">
-        <div className="w-full max-w-7xl mx-auto px-6">
+      <div className="absolute inset-0 flex items-end pb-16 md:pb-32">
+        <div className="w-full max-w-7xl mx-auto px-4 md:px-6">
           <AnimatePresence mode="wait">
             <motion.div
               key={currentIndex}
@@ -236,63 +225,63 @@ export default function NetflixHero({ movies, onMovieClick, onBookClick }: Netfl
               transition={{ duration: 0.5 }}
             >
               {/* Movie Title */}
-              <h1 className="text-4xl md:text-6xl lg:text-7xl font-black text-white mb-4 drop-shadow-2xl">
+              <h1 className="text-2xl md:text-6xl lg:text-7xl font-black text-white mb-2 md:mb-4 drop-shadow-2xl">
                 {currentMovie?.title}
               </h1>
 
-              {/* Meta Info */}
-              <div className="flex flex-wrap items-center gap-3 mb-4 text-gray-300">
-                {currentMovie?.genres?.slice(0, 3).map((genre, i) => (
+              {/* Meta Info - simplified on mobile */}
+              <div className="flex flex-wrap items-center gap-2 md:gap-3 mb-2 md:mb-4 text-gray-300 text-xs md:text-base">
+                {currentMovie?.genres?.slice(0, isMobile ? 2 : 3).map((genre, i) => (
                   <span key={genre} className="flex items-center">
-                    {i > 0 && <span className="mx-2 text-gray-500">•</span>}
+                    {i > 0 && <span className="mx-1 md:mx-2 text-gray-500">•</span>}
                     {genre}
                   </span>
                 ))}
                 {currentMovie?.duration && (
                   <>
-                    <span className="mx-2 text-gray-500">•</span>
+                    <span className="mx-1 md:mx-2 text-gray-500">•</span>
                     <span>{currentMovie.duration}</span>
                   </>
                 )}
               </div>
 
-              {/* Synopsis */}
+              {/* Synopsis - hidden on mobile */}
               {currentMovie?.synopsis && (
-                <p className="text-gray-300 text-sm md:text-base line-clamp-2 md:line-clamp-3 mb-6 max-w-xl">
+                <p className="hidden md:block text-gray-300 text-sm md:text-base line-clamp-2 md:line-clamp-3 mb-6 max-w-xl">
                   {currentMovie.synopsis}
                 </p>
               )}
 
               {/* Action Buttons */}
-              <div className="flex flex-wrap gap-3">
+              <div className="flex flex-wrap gap-2 md:gap-3 mt-3 md:mt-0">
                 {videoId && (
                   <motion.button
                     onClick={() => onMovieClick(currentMovie)}
-                    className="flex items-center gap-2 px-6 py-3 bg-white text-black font-bold rounded-lg hover:bg-gray-200 transition-colors"
+                    className="flex items-center gap-1.5 md:gap-2 px-3 md:px-6 py-2 md:py-3 bg-white text-black text-sm md:text-base font-bold rounded-lg hover:bg-gray-200 transition-colors"
                     whileHover={{ scale: 1.05 }}
                     whileTap={{ scale: 0.95 }}
                   >
-                    <Play className="w-5 h-5 fill-current" />
-                    Watch Trailer
+                    <Play className="w-4 h-4 md:w-5 md:h-5 fill-current" />
+                    Trailer
                   </motion.button>
                 )}
                 <motion.button
                   onClick={() => onBookClick(currentMovie)}
-                  className="flex items-center gap-2 px-6 py-3 bg-red-600 text-white font-bold rounded-lg hover:bg-red-700 transition-colors"
+                  className="flex items-center gap-1.5 md:gap-2 px-3 md:px-6 py-2 md:py-3 bg-red-600 text-white text-sm md:text-base font-bold rounded-lg hover:bg-red-700 transition-colors"
                   whileHover={{ scale: 1.05 }}
                   whileTap={{ scale: 0.95 }}
                 >
-                  <Ticket className="w-5 h-5" />
-                  Book Tickets
+                  <Ticket className="w-4 h-4 md:w-5 md:h-5" />
+                  Book
                 </motion.button>
                 <motion.button
                   onClick={() => onMovieClick(currentMovie)}
-                  className="flex items-center gap-2 px-6 py-3 bg-gray-800/80 text-white font-medium rounded-lg hover:bg-gray-700 transition-colors border border-gray-600"
+                  className="flex items-center gap-1.5 md:gap-2 px-3 md:px-6 py-2 md:py-3 bg-gray-800/80 text-white text-sm md:text-base font-medium rounded-lg hover:bg-gray-700 transition-colors border border-gray-600"
                   whileHover={{ scale: 1.05 }}
                   whileTap={{ scale: 0.95 }}
                 >
-                  <Info className="w-5 h-5" />
-                  More Info
+                  <Info className="w-4 h-4 md:w-5 md:h-5" />
+                  Info
                 </motion.button>
               </div>
             </motion.div>
@@ -303,10 +292,10 @@ export default function NetflixHero({ movies, onMovieClick, onBookClick }: Netfl
       {/* Mute/Unmute Button */}
       <button
         onClick={toggleMute}
-        className="absolute bottom-28 md:bottom-32 right-6 p-3 bg-gray-800/50 hover:bg-gray-700/70 rounded-full border border-gray-600 text-white transition-all z-20"
+        className="absolute bottom-20 md:bottom-32 right-4 md:right-6 p-2 md:p-3 bg-gray-800/70 hover:bg-gray-700/90 rounded-full border border-gray-600 text-white transition-all z-20"
         aria-label={isMuted ? 'Unmute' : 'Mute'}
       >
-        {isMuted ? <VolumeX className="w-5 h-5" /> : <Volume2 className="w-5 h-5" />}
+        {isMuted ? <VolumeX className="w-4 h-4 md:w-5 md:h-5" /> : <Volume2 className="w-4 h-4 md:w-5 md:h-5" />}
       </button>
 
       {/* Navigation Arrows */}
@@ -335,7 +324,7 @@ export default function NetflixHero({ movies, onMovieClick, onBookClick }: Netfl
 
       {/* Dot Indicators */}
       {movies.length > 1 && (
-        <div className="absolute bottom-8 left-1/2 -translate-x-1/2 flex gap-2 z-20">
+        <div className="absolute bottom-4 md:bottom-8 left-1/2 -translate-x-1/2 flex gap-2 z-20">
           {movies.map((_, index) => (
             <button
               key={index}
@@ -351,29 +340,6 @@ export default function NetflixHero({ movies, onMovieClick, onBookClick }: Netfl
         </div>
       )}
 
-      {/* Mobile tap-to-unmute overlay */}
-      {isMobile && !userInteracted && (
-        <motion.div 
-          className="absolute inset-0 z-10 cursor-pointer"
-          onClick={() => {
-            setIsMuted(false);
-            setUserInteracted(true);
-          }}
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-        >
-          {/* Tap indicator */}
-          <motion.div 
-            className="absolute bottom-40 left-1/2 -translate-x-1/2 text-white/80 text-sm flex items-center gap-2 bg-black/60 px-4 py-2 rounded-full"
-            initial={{ opacity: 0, y: 10 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 1.5 }}
-          >
-            <VolumeX className="w-4 h-4" />
-            Tap to unmute
-          </motion.div>
-        </motion.div>
-      )}
     </div>
   );
 }
