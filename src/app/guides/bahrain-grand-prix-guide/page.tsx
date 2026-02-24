@@ -322,7 +322,7 @@ export default function BahrainGrandPrixGuidePage() {
           </div>
           
           <p className="text-center mt-8 text-gray-400">
-            Looking for more options? Check our <Link href="/guides/sports-bars" className="text-red-400 hover:underline">Sports Bars Guide</Link> and <Link href="/guides/rooftop-bars" className="text-red-400 hover:underline">Rooftop Bars</Link>.
+            Looking for more options? Check our <Link href="/guides/rooftop-bars-bahrain" className="text-red-400 hover:underline">Rooftop Bars</Link> and <Link href="/guides/nightlife" className="text-red-400 hover:underline">Nightlife Guide</Link>.
           </p>
         </div>
       </section>
