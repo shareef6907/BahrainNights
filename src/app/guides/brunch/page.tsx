@@ -37,15 +37,15 @@ const topBrunches = [
     reservation: 'Essential - book 1-2 weeks ahead',
   },
   {
-    name: 'La Mer Brunch',
+    name: 'La Med Brunch',
     hotel: 'The Ritz-Carlton',
     price: { soft: 'BD 48', house: 'BD 62', premium: 'BD 85' },
     time: '1:00 PM - 4:30 PM',
     day: 'Friday',
     rating: 4.9,
-    cuisine: 'International, seafood focus',
-    description: 'Legendary five-star brunch with lavish seafood displays, live cooking stations, and impeccable Ritz service.',
-    highlights: ['Seafood tower', 'Extensive buffet', 'Pool views', 'Live entertainment'],
+    cuisine: 'International',
+    description: 'Lavish five-star brunch with extensive buffet, live cooking stations, and impeccable Ritz service.',
+    highlights: ['Extensive buffet', 'Live cooking stations', 'Pool views', 'Live entertainment'],
     dressCode: 'Smart casual',
     reservation: 'Essential',
   },
@@ -383,7 +383,7 @@ export default function BrunchGuidePage() {
             {[
               {
                 q: 'What is the best brunch in Bahrain?',
-                a: 'The Ritz-Carlton\'s La Mer brunch and CUT at Four Seasons are considered the best luxury options. For great value, Sherlock Holmes at Gulf Hotel and Sofitel\'s brunch are excellent choices.',
+                a: 'The Ritz-Carlton\'s La Med brunch and CUT at Four Seasons are considered the best luxury options. For great value, Sherlock Holmes at Gulf Hotel and Sofitel\'s brunch are excellent choices.',
               },
               {
                 q: 'How much does brunch cost in Bahrain?',
@@ -472,7 +472,7 @@ export default function BrunchGuidePage() {
                 name: 'What is the best brunch in Bahrain?',
                 acceptedAnswer: {
                   '@type': 'Answer',
-                  text: 'The Ritz-Carlton\'s La Mer brunch and CUT at Four Seasons are considered the best luxury options. For great value, Sherlock Holmes at Gulf Hotel and Sofitel\'s brunch are excellent.',
+                  text: 'The Ritz-Carlton\'s La Med brunch and CUT at Four Seasons are considered the best luxury options. For great value, Sherlock Holmes at Gulf Hotel and Sofitel\'s brunch are excellent.',
                 },
               },
               {

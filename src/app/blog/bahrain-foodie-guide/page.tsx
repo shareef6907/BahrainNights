@@ -113,14 +113,14 @@ const internationalHighlights = [
 const seafoodSpecials = [
   { num: 31, name: 'Hammour', desc: 'The Gulf\'s most prized fish. Mild, flaky, and best grilled with simple spices.', where: 'Fish Market, Lanterns, seaside restaurants', price: '$$' },
   { num: 32, name: 'King Fish Tikka', desc: 'Marinated king fish grilled in the tandoor. Smoky, spicy, and absolutely addictive.', where: 'Indian restaurants, Zafran', price: '$$' },
-  { num: 33, name: 'Lobster Thermidor', desc: 'Classic French preparation with a creamy sauce. Bahrain\'s five-star hotels excel at this.', where: 'La Mer, Gulf Hotel', price: '$$$$' },
+  { num: 33, name: 'Lobster Thermidor', desc: 'Classic French preparation with a creamy sauce. Bahrain\'s five-star hotels excel at this.', where: 'Plums, CUT, fine dining restaurants', price: '$$$$' },
   { num: 34, name: 'Jumbo Prawns', desc: 'Giant Gulf prawns grilled, fried, or in curry. A seafood lover\'s dream.', where: 'Fish Market, seafood restaurants', price: '$$$' },
-  { num: 35, name: 'Fresh Oysters', desc: 'Imported oysters on the half shell. Several fine dining spots offer excellent selections.', where: 'La Mer, CUT, fine dining restaurants', price: '$$$$' },
+  { num: 35, name: 'Fresh Oysters', desc: 'Imported oysters on the half shell. Several fine dining spots offer excellent selections.', where: 'CUT, Plums, fine dining restaurants', price: '$$$$' },
   { num: 36, name: 'Seafood Machboos', desc: 'The rice dish made with fresh Gulf fish instead of meat. A coastal Bahraini specialty.', where: 'Traditional restaurants, Budaiya area', price: '$$' },
   { num: 37, name: 'Crab Curry', desc: 'Fresh crab in rich, spicy gravy. The best ones use local mud crabs.', where: 'Indian seafood restaurants', price: '$$' },
   { num: 38, name: 'Grilled Zubaidi', desc: 'Silver pomfret, a Gulf delicacy, grilled whole with lemon and herbs.', where: 'Lanterns, traditional restaurants', price: '$$' },
   { num: 39, name: 'Sashimi Platter', desc: 'Pristine raw fish from Tokyo\'s markets, sliced to perfection.', where: 'Bushido, Sushi Shin, Mirai', price: '$$$' },
-  { num: 40, name: 'Seafood Tower', desc: 'An impressive display of oysters, prawns, crab, and lobster on ice.', where: 'La Mer, fine dining restaurants', price: '$$$$' },
+  { num: 40, name: 'Seafood Tower', desc: 'An impressive display of oysters, prawns, crab, and lobster on ice.', where: 'CUT, Plums, fine dining restaurants', price: '$$$$' },
 ];
 
 const sweetTreats = [

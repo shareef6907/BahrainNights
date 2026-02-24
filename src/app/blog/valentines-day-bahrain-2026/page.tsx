@@ -83,14 +83,14 @@ const romanticRestaurants = [
     features: ['Bay views', 'Live jazz', 'Private tables']
   },
   {
-    name: 'La Mer',
+    name: 'La Plage',
     location: 'Ritz-Carlton Bahrain',
-    cuisine: 'French Seafood',
-    vibe: 'Elegant & romantic',
-    valentineOffer: 'Seafood tower + champagne dinner',
-    price: 'BHD 120/couple',
-    rating: 4.8,
-    features: ['Waterfront', 'Candle-lit', 'Oyster bar']
+    cuisine: 'Mediterranean',
+    vibe: 'Romantic beachfront',
+    valentineOffer: 'Mediterranean dinner under the stars',
+    price: 'BHD 100/couple',
+    rating: 4.7,
+    features: ['Beachfront', 'Al fresco', 'Gulf views']
   },
   {
     name: 'Masso',
@@ -252,7 +252,7 @@ const uniqueExperiences = [
 const giftIdeas = [
   { item: 'Bahraini Pearls', where: 'Manama Souq', price: 'From BHD 50', tip: 'Authentic Gulf pearls are a timeless gift' },
   { item: 'Spa Voucher', where: 'Five-star hotels', price: 'From BHD 80', tip: 'Can be used together as a couple experience' },
-  { item: 'Fine Dining Gift Card', where: 'CUT, La Mer, Masso', price: 'From BHD 100', tip: 'Let them choose their own special dinner' },
+  { item: 'Fine Dining Gift Card', where: 'CUT, Plums, Masso', price: 'From BHD 100', tip: 'Let them choose their own special dinner' },
   { item: 'Perfume', where: 'Arabian Oud, Amouage', price: 'From BHD 40', tip: 'Arabian fragrances are unique and luxurious' },
   { item: 'Designer Flowers', where: 'The Posy, Maison des Fleurs', price: 'From BHD 35', tip: 'Order early - they sell out!' },
   { item: 'Chocolate Box', where: 'Patchi, Godiva', price: 'From BHD 25', tip: 'Customize with a personal message' },

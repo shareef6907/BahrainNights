@@ -39,23 +39,23 @@ const restaurants = [
     signature: 'Seafood tower, Maine lobster',
   },
   {
-    name: 'La Mer',
+    name: 'La Plage',
     location: 'Ritz-Carlton Bahrain',
     type: 'Fine Dining',
     rating: 5,
-    price: 'BD 30-60 per person',
-    cuisine: 'French Seafood',
-    description: 'Elegant French seafood restaurant with Mediterranean influences. Fresh catches prepared with classic techniques.',
-    specialties: ['Fresh fish', 'Bouillabaisse', 'Lobster', 'Oysters', 'French preparations'],
-    atmosphere: 'Elegant, refined, beachfront setting',
-    hours: 'Tue-Sat 7PM-11PM',
-    reservation: 'Required',
-    bestFor: 'Romantic dinners, special occasions',
-    signature: 'Bouillabaisse, Grilled lobster',
+    price: 'BD 25-45 per person',
+    cuisine: 'Mediterranean Seafood',
+    description: 'Al fresco beachfront restaurant serving Arabian-Mediterranean fusion cuisine just off the beach. Perfect for those seeking vibrant outdoor scenery of the Arabian Gulf.',
+    specialties: ['Grilled seafood', 'Mediterranean mezze', 'Fresh fish', 'Arabic-Mediterranean fusion'],
+    atmosphere: 'Casual elegance, beachfront al fresco',
+    hours: 'Daily 10AM-11PM',
+    reservation: 'Recommended',
+    bestFor: 'Beachside dining, casual fine dining',
+    signature: 'Grilled seafood platter, Mediterranean mezze',
   },
   {
     name: 'Masso',
-    location: 'Ritz-Carlton Bahrain',
+    location: 'Palmyard Hotel, Bahrain Bay',
     type: 'Fine Dining',
     rating: 5,
     price: 'BD 25-50 per person',
@@ -395,7 +395,7 @@ export default function SeafoodPage() {
           <div className="space-y-4">
             {[
               { q: 'What is the best fish to try in Bahrain?', a: 'Hammour (Gulf grouper) is the local favorite — firm white flesh, excellent grilled. Safi and sheiri are also delicious local options.' },
-              { q: 'Where is the best seafood in Bahrain?', a: 'For fine dining, CUT and La Mer at luxury hotels. For casual fresh fish, Fares Seafood. For authentic experience, Manama fish market.' },
+              { q: 'Where is the best seafood in Bahrain?', a: 'For fine dining, CUT at Four Seasons and La Plage at Ritz-Carlton. For casual fresh fish, Fares Seafood. For authentic experience, Manama fish market.' },
               { q: 'Is seafood expensive in Bahrain?', a: 'Ranges widely. Fish market meals from BD 3-10, casual restaurants BD 8-20, fine dining BD 30-80 per person.' },
             ].map((faq, i) => (
               <div key={i} className="bg-white/5 rounded-xl p-6">
@@ -420,7 +420,7 @@ export default function SeafoodPage() {
         '@type': 'FAQPage',
         mainEntity: [
           { '@type': 'Question', name: 'What is the best fish to try in Bahrain?', acceptedAnswer: { '@type': 'Answer', text: 'Hammour (Gulf grouper) is the local favorite — firm white flesh, excellent grilled. Safi and sheiri are also delicious local options.' } },
-          { '@type': 'Question', name: 'Where is the best seafood in Bahrain?', acceptedAnswer: { '@type': 'Answer', text: 'For fine dining, CUT and La Mer at luxury hotels. For casual fresh fish, Fares Seafood. For authentic experience, Manama fish market.' } },
+          { '@type': 'Question', name: 'Where is the best seafood in Bahrain?', acceptedAnswer: { '@type': 'Answer', text: 'For fine dining, CUT at Four Seasons and La Plage at Ritz-Carlton. For casual fresh fish, Fares Seafood. For authentic experience, Manama fish market.' } },
           { '@type': 'Question', name: 'Is seafood expensive in Bahrain?', acceptedAnswer: { '@type': 'Answer', text: 'Ranges widely. Fish market meals from BD 3-10, casual restaurants BD 8-20, fine dining BD 30-80 per person.' } },
         ]
       })}} />

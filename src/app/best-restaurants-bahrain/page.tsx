@@ -113,7 +113,7 @@ function generateSchema() {
         numberOfItems: 30,
         itemListElement: [
           { '@type': 'ListItem', position: 1, name: 'CUT by Wolfgang Puck', description: 'Premium steakhouse at Four Seasons' },
-          { '@type': 'ListItem', position: 2, name: 'La Mer', description: 'Upscale seafood at Ritz-Carlton' },
+          { '@type': 'ListItem', position: 2, name: 'Plums', description: 'Premium steakhouse & seafood at Ritz-Carlton' },
           { '@type': 'ListItem', position: 3, name: 'Bushido', description: 'Japanese fine dining' },
           { '@type': 'ListItem', position: 4, name: 'Masso', description: 'Italian excellence at Four Seasons' },
           { '@type': 'ListItem', position: 5, name: 'Takht Jamsheed', description: 'Persian fine dining' },
@@ -134,7 +134,7 @@ function generateSchema() {
             name: 'What are the best fine dining restaurants in Bahrain?',
             acceptedAnswer: {
               '@type': 'Answer',
-              text: 'The best fine dining restaurants in Bahrain include CUT by Wolfgang Puck at Four Seasons, La Mer at Ritz-Carlton, Bushido for Japanese cuisine, Masso for Italian, and Plums at Gulf Hotel. Expect to pay 30-60 BHD per person.'
+              text: 'The best fine dining restaurants in Bahrain include CUT by Wolfgang Puck at Four Seasons, Plums at Ritz-Carlton, Bushido for Japanese cuisine, Masso for Italian, and Fusions at Gulf Hotel. Expect to pay 30-60 BHD per person.'
             }
           },
           {
@@ -159,10 +159,10 @@ const restaurantCategories = [
     description: 'Exceptional cuisine, impeccable service, and memorable atmospheres',
     restaurants: [
       { name: 'CUT by Wolfgang Puck', cuisine: 'American Steakhouse', location: 'Four Seasons', price: '$$$$', rating: 4.8, desc: 'Celebrity chef steakhouse with dry-aged cuts, stunning views, and impeccable service. The wagyu and USDA prime steaks are legendary.', specialties: ['Dry-aged Ribeye', 'Bone-in Filet', 'Truffle Mac & Cheese'], link: '/restaurants' },
-      { name: 'La Mer', cuisine: 'French Seafood', location: 'Ritz-Carlton', price: '$$$$', rating: 4.7, desc: 'Elegant waterfront restaurant serving the finest Mediterranean seafood. The oyster bar and whole fish preparations are outstanding.', specialties: ['Lobster Thermidor', 'Dover Sole', 'Seafood Tower'], link: '/restaurants' },
+      { name: 'Plums', cuisine: 'Steakhouse & Seafood', location: 'Ritz-Carlton', price: '$$$$', rating: 4.7, desc: 'Modern steakhouse with premium cuts and fresh seafood. The décor is as rich as the dishes.', specialties: ['Premium Steaks', 'Fresh Seafood', 'Fine Dining'], link: '/restaurants' },
       { name: 'Bushido', cuisine: 'Japanese', location: 'Ritz-Carlton', price: '$$$$', rating: 4.7, desc: 'Sophisticated Japanese restaurant with sushi bar, teppanyaki, and robata grill. Stunning ambiance and sake selection.', specialties: ['Omakase', 'Wagyu Tataki', 'Black Cod Miso'], link: '/restaurants' },
       { name: 'Masso', cuisine: 'Italian', location: 'Four Seasons', price: '$$$$', rating: 4.6, desc: 'Modern Italian cuisine with homemade pastas and wood-fired specialties. Beautiful terrace overlooking Bahrain Bay.', specialties: ['Truffle Pasta', 'Grilled Octopus', 'Tiramisu'], link: '/restaurants' },
-      { name: 'Plums', cuisine: 'Continental', location: 'Gulf Hotel', price: '$$$$', rating: 4.5, desc: 'Award-winning restaurant known for its Sunday roast and sophisticated Continental cuisine.', specialties: ['Beef Wellington', 'Rack of Lamb', 'Crème Brûlée'], link: '/restaurants' },
+      { name: 'Fusions', cuisine: 'International', location: 'Gulf Hotel', price: '$$$$', rating: 4.5, desc: 'Award-winning restaurant known for its creative fusion of Bahraini and international cuisines with seasonal menus.', specialties: ['Bahraini Lamb Shank', 'Seared Scallops', 'Chef Specials'], link: '/restaurants' },
       { name: 'Takht Jamsheed', cuisine: 'Persian', location: 'Gulf Hotel', price: '$$$', rating: 4.6, desc: 'Elegant Persian fine dining with live music. Traditional recipes prepared with premium ingredients.', specialties: ['Lamb Shank', 'Zereshk Polo', 'Koobideh'], link: '/restaurants' },
     ]
   },
@@ -447,8 +447,8 @@ export default async function RestaurantsPage() {
               <div className="bg-gray-800/50 rounded-xl p-6">
                 <h3 className="text-xl font-semibold text-white mb-3">What are the best fine dining restaurants in Bahrain?</h3>
                 <p className="text-gray-300">
-                  The best fine dining restaurants include CUT by Wolfgang Puck at Four Seasons, La Mer at Ritz-Carlton, 
-                  Bushido for Japanese, Masso for Italian, and Plums at Gulf Hotel. Expect to pay 30-60 BHD per person.
+                  The best fine dining restaurants include CUT by Wolfgang Puck at Four Seasons, Plums at Ritz-Carlton, 
+                  Bushido for Japanese, Masso for Italian, and Fusions at Gulf Hotel. Expect to pay 30-60 BHD per person.
                 </p>
               </div>
               

@@ -272,7 +272,7 @@ const day1 = {
         'Many restaurants have live music on Fridays',
         'Budaiya Road has great local seafood options'
       ],
-      recommended: ['La Mer', 'Lanterns', 'Bahraini Heritage', 'Fish Market'],
+      recommended: ['La Plage', 'Fish Market', 'Bahraini Heritage', 'Fares Seafood'],
       link: '/restaurants'
     },
     {
@@ -386,7 +386,7 @@ const day2 = {
         'Seafood by the water is always special',
         'Book a restaurant with a view'
       ],
-      recommended: ['Bahraini Heritage', 'La Mer', 'Lanterns', 'Al Abraaj'],
+      recommended: ['Bahraini Heritage', 'La Plage', 'Fish Market', 'Al Abraaj'],
       link: '/best-restaurants-bahrain'
     },
     {

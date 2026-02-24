@@ -19,22 +19,22 @@ export const metadata: Metadata = {
 };
 
 const faqs = [
-  { q: 'What is the best seafood restaurant in Bahrain?', a: 'For fine dining, Cut by Wolfgang Puck (Four Seasons) and La Mer (Ritz-Carlton) offer premium seafood. For traditional, Dar Al Shawarb and Al Bandar Resort are excellent. For fresh catches, head to Muharraq fish market.' },
+  { q: 'What is the best seafood restaurant in Bahrain?', a: 'For fine dining, Cut by Wolfgang Puck (Four Seasons) and La Plage (Ritz-Carlton) offer premium seafood. For traditional, Dar Al Shawarb and Al Bandar Resort are excellent. For fresh catches, head to Muharraq fish market.' },
   { q: 'Where can I find fresh fish in Bahrain?', a: 'The Muharraq Fish Market (near Arad) is the best place for fresh catches. Many restaurants source from here daily. Bahrain Fisherman\'s Association market and various co-ops also sell fresh fish.' },
   { q: 'What local fish should I try in Bahrain?', a: 'Try hammour (grouper) — Bahrain\'s most popular fish. Also excellent: safi (rabbitfish), chanad (kingfish), and shrimp/prawns from local waters. Ask for catch of the day at restaurants.' },
-  { q: 'Are there waterfront seafood restaurants in Bahrain?', a: 'Yes! Al Bandar Resort in Sitra, La Mer at Ritz-Carlton, and restaurants along Bahrain Bay have waterfront seating. Amwaj Islands also has several seafood spots with marina views.' },
+  { q: 'Are there waterfront seafood restaurants in Bahrain?', a: 'Yes! Al Bandar Resort in Sitra, La Plage at Ritz-Carlton, and restaurants along Bahrain Bay have waterfront seating. Amwaj Islands also has several seafood spots with marina views.' },
   { q: 'How much does seafood cost in Bahrain?', a: 'Fish market prices vary by catch (BD 3-15/kg). Casual seafood restaurants cost BD 8-15 per person. Mid-range like Dar Al Shawarb runs BD 15-25. Fine dining seafood starts at BD 30+ per person.' },
 ];
 
 const restaurants = [
   { 
-    name: 'La Mer', 
+    name: 'La Plage', 
     location: 'The Ritz-Carlton, Seef',
-    cuisine: 'Mediterranean Seafood Fine Dining',
-    priceRange: 'BD 35-60',
-    highlight: 'Stunning sea views, premium imported seafood',
-    mustTry: 'Lobster, Fresh Oysters, Grilled Fish, Bouillabaisse',
-    rating: 4.8,
+    cuisine: 'Mediterranean Seafood & Cuisine',
+    priceRange: 'BD 30-50',
+    highlight: 'Al fresco beachfront dining with Arabian Gulf views',
+    mustTry: 'Grilled Seafood, Mediterranean Mezze, Fresh Fish',
+    rating: 4.7,
   },
   { 
     name: 'Cut by Wolfgang Puck', 
@@ -253,7 +253,7 @@ export default function BestSeafoodBahrainPage() {
                 your meal watching the sunset over the Gulf.
               </p>
               <p className="text-gray-400 text-sm">
-                <strong>Best for:</strong> La Mer, Bahri Bar, Al Bandar Resort
+                <strong>Best for:</strong> La Plage, Bahri Bar, Al Bandar Resort
               </p>
             </div>
             

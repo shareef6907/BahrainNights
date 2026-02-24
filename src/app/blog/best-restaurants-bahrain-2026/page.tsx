@@ -157,7 +157,7 @@ const bestByCuisine = [
     cuisine: 'Seafood',
     icon: '🦞',
     restaurants: [
-      { name: 'La Mer', location: 'Ritz-Carlton', desc: 'Premium seafood with French techniques. The seafood tower is legendary.' },
+      { name: 'La Plage', location: 'Ritz-Carlton', desc: 'Al fresco Mediterranean dining with Arabian Gulf views. Perfect beachside atmosphere.' },
       { name: 'Fish Market', location: 'Multiple', desc: 'Pick your fish, pick your style. Fresh Gulf seafood at its best.' },
       { name: 'Lanterns', location: 'Adliya', desc: 'Creative seafood dishes alongside Indian favorites.' },
       { name: 'Budaiya Seaside', location: 'Budaiya', desc: 'Casual seaside dining with the freshest catch of the day.' },
