@@ -7,19 +7,18 @@ import {
 } from 'lucide-react';
 
 export const metadata: Metadata = {
-  title: 'Best Restaurants in Bahrain 2026 — Top 50 Dining Experiences | BahrainNights',
+  title: 'Best Restaurants in Bahrain 2026 — Top Dining Experiences | BahrainNights',
   description: 'Discover the best restaurants in Bahrain for 2026. From fine dining to hidden gems, our comprehensive guide covers top restaurants across all cuisines and price points.',
   keywords: [
     'best restaurants Bahrain 2026', 'top restaurants Bahrain', 'fine dining Bahrain',
     'Bahrain restaurant guide', 'where to eat Bahrain', 'Manama restaurants',
-    'Bahrain food scene', 'new restaurants Bahrain', 'romantic restaurants Bahrain',
-    'best seafood Bahrain', 'Bahrain steakhouse', 'Bahrain dining'
+    'Bahrain food scene', 'romantic restaurants Bahrain', 'best seafood Bahrain'
   ].join(', '),
   alternates: {
     canonical: 'https://www.bahrainnights.com/blog/best-restaurants-bahrain-2026',
   },
   openGraph: {
-    title: 'Best Restaurants in Bahrain 2026 — Top 50 Dining Experiences',
+    title: 'Best Restaurants in Bahrain 2026 — Top Dining Experiences',
     description: 'Your definitive guide to the best restaurants in Bahrain for 2026.',
     url: 'https://www.bahrainnights.com/blog/best-restaurants-bahrain-2026',
     siteName: 'BahrainNights',
@@ -37,7 +36,7 @@ export const metadata: Metadata = {
   twitter: {
     card: 'summary_large_image',
     title: 'Best Restaurants in Bahrain 2026',
-    description: 'Top 50 restaurants you need to try in Bahrain!',
+    description: 'Top restaurants you need to try in Bahrain!',
   },
   authors: [{ name: 'BahrainNights Team' }],
   robots: {
@@ -52,7 +51,7 @@ function generateSchema() {
     '@graph': [
       {
         '@type': 'Article',
-        headline: 'Best Restaurants in Bahrain 2026 — Top 50 Dining Experiences',
+        headline: 'Best Restaurants in Bahrain 2026 — Top Dining Experiences',
         description: 'Your definitive guide to the best restaurants in Bahrain for 2026.',
         image: 'https://www.bahrainnights.com/og-restaurants-2026.jpg',
         author: {
@@ -69,20 +68,12 @@ function generateSchema() {
           }
         },
         datePublished: '2026-01-01',
-        dateModified: '2026-02-15',
+        dateModified: '2026-02-24',
         mainEntityOfPage: 'https://www.bahrainnights.com/blog/best-restaurants-bahrain-2026'
       },
       {
         '@type': 'FAQPage',
         mainEntity: [
-          {
-            '@type': 'Question',
-            name: 'What is the most expensive restaurant in Bahrain?',
-            acceptedAnswer: {
-              '@type': 'Answer',
-              text: 'CUT by Wolfgang Puck at Four Seasons and Nusr-Et (Salt Bae\'s restaurant) are among the most expensive, with steaks exceeding BHD 100. Fine dining Japanese omakase can also reach BHD 150+ per person.'
-            }
-          },
           {
             '@type': 'Question',
             name: 'Do I need reservations for restaurants in Bahrain?',
@@ -105,106 +96,40 @@ function generateSchema() {
   };
 }
 
-const fineDining = [
-  { name: 'CUT by Wolfgang Puck', cuisine: 'Steakhouse', location: 'Four Seasons, Bahrain Bay', price: '$$$$', desc: 'World-class steaks with stunning bay views. The truffle fries and tomahawk are legendary. Perfect for special occasions.' },
-  { name: 'La Mer', cuisine: 'French/Mediterranean', location: 'Ritz-Carlton', price: '$$$$', desc: 'Elegant French cuisine with impeccable service. The seafood tower and lobster thermidor are exceptional.' },
-  { name: 'Bushido', cuisine: 'Japanese', location: 'Gulf Hotel', price: '$$$', desc: 'Theatrical Japanese dining with live performances. The omakase experience is worth every dinar.' },
-  { name: 'Plums', cuisine: 'International Fine Dining', location: 'Gulf Hotel', price: '$$$$', desc: 'Bahrain\'s most awarded restaurant. Seasonal menus showcasing global techniques with local ingredients.' },
-  { name: 'Nusr-Et', cuisine: 'Steakhouse', location: 'Four Seasons', price: '$$$$', desc: 'Salt Bae\'s famous steakhouse. The experience is as much about the showmanship as the meat.' },
-  { name: 'Mirai', cuisine: 'Japanese Omakase', location: 'Bahrain Bay', price: '$$$$', desc: 'Intimate omakase counter with fish flown in from Tokyo\'s Tsukiji Market. Book weeks in advance.' },
-  { name: 're/Asian Cuisine', cuisine: 'Pan-Asian', location: 'Four Seasons', price: '$$$', desc: 'Modern Asian dishes in a sleek setting. The dim sum and Peking duck are standouts.' },
-  { name: 'Masso', cuisine: 'Italian', location: 'Bahrain Bay', price: '$$$', desc: 'Authentic Italian with house-made pasta and wood-fired pizzas. The tiramisu is divine.' },
+// Verified restaurants at Gulf Hotel
+const gulfHotelRestaurants = [
+  { name: 'Takht Jamsheed', cuisine: 'Persian', desc: 'Taking inspiration from Persia\'s royal palace, this elegant restaurant offers fine dining fit for royalty with traditional Iranian cuisine.' },
+  { name: 'Bushido', cuisine: 'Japanese', desc: 'Theatrical Japanese dining with teppanyaki, sushi, and live performances. A complete dining experience.' },
+  { name: 'Plums', cuisine: 'International Fine Dining', desc: 'Bahrain\'s most awarded restaurant with seasonal menus showcasing global techniques.' },
+  { name: 'Saffron', cuisine: 'Indian', desc: 'Five-star Indian dining with exquisite Lucknowi and Hyderabadi dishes.' },
 ];
 
-const bestByCuisine = [
-  {
-    cuisine: 'Arabic & Lebanese',
-    icon: '🥙',
-    restaurants: [
-      { name: 'Al Abraaj', location: 'Seef', desc: 'Outstanding Lebanese mezze and grills in an elegant tent-style setting.' },
-      { name: 'Bahraini Heritage', location: 'Budaiya', desc: 'Authentic Bahraini dishes in a traditional house. The machboos is perfect.' },
-      { name: 'Haji\'s Café', location: 'Muharraq', desc: 'Institution for traditional breakfast. Balaleet and chai haleeb are must-tries.' },
-      { name: 'Aroos Damascus', location: 'Multiple', desc: 'Legendary shawarma and falafel. The late-night queues speak for themselves.' },
-    ]
-  },
-  {
-    cuisine: 'Indian',
-    icon: '🍛',
-    restaurants: [
-      { name: 'Zafran', location: 'Adliya', desc: 'North Indian fine dining with live music. The butter chicken and naan are sublime.' },
-      { name: 'Copper Chimney', location: 'Seef', desc: 'Authentic tandoori and curries from a legendary Indian chain.' },
-      { name: 'Saffron', location: 'Gulf Hotel', desc: 'Five-star Indian dining with exquisite Lucknowi and Hyderabadi dishes.' },
-      { name: 'Lanterns', location: 'Adliya', desc: 'Creative Indian fusion in a gorgeous setting. Great for groups.' },
-    ]
-  },
-  {
-    cuisine: 'Japanese',
-    icon: '🍣',
-    restaurants: [
-      { name: 'Bushido', location: 'Gulf Hotel', desc: 'The complete Japanese experience with teppanyaki, sushi, and performances.' },
-      { name: 'Mirai', location: 'Bahrain Bay', desc: 'Authentic omakase with seasonal fish from Japan.' },
-      { name: 'Sushi Shin', location: 'Adliya', desc: 'Neighborhood sushi bar with exceptional quality and fair prices.' },
-      { name: 'Meisei', location: 'Seef', desc: 'Casual Japanese with excellent ramen and robatayaki.' },
-    ]
-  },
-  {
-    cuisine: 'Italian',
-    icon: '🍝',
-    restaurants: [
-      { name: 'Masso', location: 'Bahrain Bay', desc: 'Wood-fired pizzas and hand-made pasta in a lively atmosphere.' },
-      { name: 'Segafredo', location: 'Adliya', desc: 'Authentic Italian with great coffee culture. Perfect for casual dining.' },
-      { name: 'Il Terrazzo', location: 'Crowne Plaza', desc: 'Classic Italian with an extensive wine list and romantic ambiance.' },
-      { name: 'Caffe Milano', location: 'Four Seasons', desc: 'Upscale Italian with bay views and impeccable pasta dishes.' },
-    ]
-  },
-  {
-    cuisine: 'Seafood',
-    icon: '🦞',
-    restaurants: [
-      { name: 'La Mer', location: 'Ritz-Carlton', desc: 'Premium seafood with French techniques. The seafood tower is legendary.' },
-      { name: 'Fish Market', location: 'Multiple', desc: 'Pick your fish, pick your style. Fresh Gulf seafood at its best.' },
-      { name: 'Lanterns', location: 'Adliya', desc: 'Creative seafood dishes alongside Indian favorites.' },
-      { name: 'Budaiya Seaside', location: 'Budaiya', desc: 'Casual seaside dining with the freshest catch of the day.' },
-    ]
-  },
+// Verified restaurants at Ritz-Carlton
+const ritzCarltonRestaurants = [
+  { name: 'La Med', cuisine: 'Mediterranean', desc: 'Elegant Mediterranean cuisine with stunning marina views. Famous for their Friday brunch.' },
+  { name: 'Trader Vic\'s', cuisine: 'Polynesian', desc: 'Tiki-themed waterfront dining with creative cocktails and Pacific Island-inspired cuisine.' },
+  { name: 'Primavera', cuisine: 'Italian', desc: 'Authentic Italian dining with Gulf views and fresh pasta dishes.' },
 ];
 
-const hiddenGems = [
-  { name: 'Coco\'s', location: 'Adliya', cuisine: 'Café', desc: 'Charming café with the best croissants outside Paris. Breakfast here is a must.', price: '$$' },
-  { name: 'Takht Jamsheed', location: 'Seef', cuisine: 'Persian', desc: 'Authentic Iranian cuisine in an unassuming location. The kebabs are perfection.', price: '$$' },
-  { name: 'Café Lilou', location: 'Adliya', cuisine: 'French Café', desc: 'Parisian vibes with excellent pastries and light fare. Perfect for afternoon tea.', price: '$$' },
-  { name: 'Maki Bahrain', location: 'Manama', cuisine: 'Japanese', desc: 'No-frills sushi spot with incredibly fresh fish and wallet-friendly prices.', price: '$' },
-  { name: 'Thai Corner', location: 'Juffair', cuisine: 'Thai', desc: 'Tiny restaurant serving some of the most authentic Thai food in Bahrain.', price: '$' },
-  { name: 'My Café', location: 'Muharraq', cuisine: 'Bahraini', desc: 'Local favorite for traditional dishes. Ask the owner for daily specials.', price: '$' },
+// Verified restaurants - Adliya
+const adliyaRestaurants = [
+  { name: 'Café Lilou', cuisine: 'French Café', desc: 'Parisian vibes with excellent pastries, breakfast, and light fare. Perfect for afternoon tea.' },
+  { name: 'Zafran', cuisine: 'Indian', desc: 'North Indian fine dining with live music. The butter chicken and naan are sublime.' },
+  { name: 'Lanterns', cuisine: 'Indian Fusion', desc: 'Creative Indian fusion in a gorgeous setting. Great for groups and special occasions.' },
+  { name: 'Segafredo', cuisine: 'Italian', desc: 'Authentic Italian with great coffee culture. Perfect for casual dining.' },
 ];
 
-const romanticRestaurants = [
-  { name: 'La Mer', location: 'Ritz-Carlton', why: 'Elegant ambiance, impeccable service, stunning views' },
-  { name: 'CUT', location: 'Four Seasons', why: 'Sophisticated dining with bay views and world-class steaks' },
-  { name: 'Iris', location: 'Bahrain Bay', why: 'Sunset cocktails followed by beachside dinner' },
-  { name: 'Café Lilou', location: 'Adliya', why: 'Intimate French café perfect for anniversary celebrations' },
-  { name: 'Trader Vic\'s', location: 'Ritz-Carlton', why: 'Romantic waterfront setting with tiki cocktails' },
-];
-
-const bestForBusiness = [
-  { name: 'Plums', desc: 'Professional atmosphere, private dining rooms, Michelin-worthy food' },
-  { name: 'CUT', desc: 'Impressive setting for closing deals, excellent wine selection' },
-  { name: 'The Orangery', desc: 'Elegant brunch venue, great for daytime meetings' },
-  { name: 'Gulf Hotel Restaurants', desc: 'Multiple options under one roof, convenient for hotel guests' },
-];
-
-const newOpenings2026 = [
-  { name: 'Nobu Bahrain', opening: 'Q1 2026', cuisine: 'Japanese-Peruvian', desc: 'The legendary Nobu finally arrives in Bahrain. Expect black cod miso and yellowtail jalapeno.' },
-  { name: 'Zuma', opening: 'Q2 2026', cuisine: 'Japanese', desc: 'London\'s iconic izakaya comes to Bahrain Bay with its signature robata grill.' },
-  { name: 'Cipriani', opening: 'Q3 2026', cuisine: 'Italian', desc: 'Venice\'s legendary restaurant expands to the Gulf with classic Venetian dishes.' },
-  { name: 'Hakkasan', opening: 'Late 2026', cuisine: 'Chinese', desc: 'Michelin-starred Cantonese cuisine in a stunning architectural setting.' },
+// Verified traditional Bahraini
+const traditionalBahraini = [
+  { name: 'Haji\'s Café', location: 'Muharraq', desc: 'Institution for traditional breakfast. Balaleet and chai haleeb are must-tries.' },
+  { name: 'Sitra Fish', location: 'Sitra', desc: 'Fresh Gulf seafood in a no-frills setting. Locals queue for the catch of the day.' },
 ];
 
 const priceGuide = [
-  { symbol: '$', range: 'Under BHD 10', desc: 'Casual eateries, street food, quick service' },
-  { symbol: '$$', range: 'BHD 10-25', desc: 'Mid-range restaurants, good value dining' },
+  { symbol: '$', range: 'Under BHD 10', desc: 'Casual eateries, street food' },
+  { symbol: '$$', range: 'BHD 10-25', desc: 'Mid-range restaurants' },
   { symbol: '$$$', range: 'BHD 25-50', desc: 'Upscale casual to fine dining' },
-  { symbol: '$$$$', range: 'BHD 50+', desc: 'Premium fine dining, special occasions' },
+  { symbol: '$$$$', range: 'BHD 50+', desc: 'Premium fine dining' },
 ];
 
 export default function BestRestaurants2026Page() {
@@ -223,7 +148,6 @@ export default function BestRestaurants2026Page() {
           <div className="absolute bottom-20 right-10 w-96 h-96 bg-orange-500/20 rounded-full blur-3xl" />
           
           <div className="max-w-4xl mx-auto relative z-10">
-            {/* Breadcrumb */}
             <nav className="mb-8">
               <ol className="flex items-center gap-2 text-sm text-gray-400">
                 <li><Link href="/" className="hover:text-white transition">Home</Link></li>
@@ -242,13 +166,13 @@ export default function BestRestaurants2026Page() {
                 Best Restaurants in Bahrain 2026
               </h1>
               <p className="text-xl text-gray-300 max-w-3xl mx-auto leading-relaxed">
-                From Michelin-worthy fine dining to beloved local haunts, our comprehensive guide 
-                to the 50 best restaurants in Bahrain has something for every palate and occasion.
+                From five-star hotel dining to beloved local haunts, our guide to the best 
+                verified restaurants in Bahrain has something for every palate and occasion.
               </p>
               
               <div className="flex items-center justify-center gap-4 mt-6 text-sm text-gray-400">
                 <span className="flex items-center gap-1">
-                  <Clock className="w-4 h-4" /> 15 min read
+                  <Clock className="w-4 h-4" /> 10 min read
                 </span>
                 <span>•</span>
                 <span>Updated February 2026</span>
@@ -261,21 +185,14 @@ export default function BestRestaurants2026Page() {
         <section className="py-12 px-4">
           <div className="max-w-4xl mx-auto prose prose-invert prose-lg">
             <p className="text-gray-300 leading-relaxed text-lg">
-              Bahrain's dining scene has never been more exciting. As the Kingdom continues to attract world-class 
-              chefs and innovative concepts, 2026 promises to be a landmark year for food lovers. Whether you're 
-              seeking a romantic dinner with bay views, an authentic Bahraini feast, or the latest culinary trend, 
-              our curated guide will point you in the right direction.
+              Bahrain's dining scene offers incredible diversity. In a single evening, you could enjoy 
+              traditional machboos in Muharraq, fine dining at a five-star hotel, and French pastries 
+              in Adliya. The island's position as a regional hub means you'll find authentic cuisines 
+              from across the globe.
             </p>
             <p className="text-gray-300 leading-relaxed text-lg">
-              What makes Bahrain unique is its diversity. In a single evening, you could enjoy traditional machboos 
-              in Muharraq, sip cocktails at a rooftop bar in Bahrain Bay, and finish with French pastries in Adliya. 
-              The island's position as a regional hub means you'll find authentic cuisines from across the globe, 
-              often prepared by expats who bring recipes from home.
-            </p>
-            <p className="text-gray-300 leading-relaxed text-lg">
-              We've eaten our way through Bahrain to bring you this comprehensive guide. From the splurge-worthy 
-              steakhouses where deals are closed to the hole-in-the-wall gems where locals queue for lunch, these 
-              are the restaurants that define Bahrain's culinary landscape in 2026.
+              This guide features verified restaurants we can confidently recommend. We're continuously 
+              updating this list as we visit and verify more establishments across the Kingdom.
             </p>
           </div>
         </section>
@@ -300,7 +217,7 @@ export default function BestRestaurants2026Page() {
           </div>
         </section>
 
-        {/* Fine Dining Section */}
+        {/* Gulf Hotel Restaurants */}
         <section className="py-16 px-4 bg-gray-800/30">
           <div className="max-w-6xl mx-auto">
             <div className="flex items-center gap-4 mb-8">
@@ -308,24 +225,21 @@ export default function BestRestaurants2026Page() {
                 <Award className="w-6 h-6 text-white" />
               </div>
               <div>
-                <h2 className="text-3xl font-bold text-white">Fine Dining Excellence</h2>
-                <p className="text-gray-400">Bahrain's most prestigious restaurants</p>
+                <h2 className="text-3xl font-bold text-white">Gulf Hotel Restaurants</h2>
+                <p className="text-gray-400">World-class dining under one roof</p>
               </div>
             </div>
             
+            <p className="text-gray-300 mb-8 max-w-3xl">
+              The Gulf Hotel Bahrain is home to over 10 restaurants and lounges, making it a dining 
+              destination in itself. Here are the standout options:
+            </p>
+            
             <div className="grid md:grid-cols-2 gap-4">
-              {fineDining.map((restaurant) => (
+              {gulfHotelRestaurants.map((restaurant) => (
                 <div key={restaurant.name} className="p-6 bg-gray-800/50 rounded-xl border border-gray-700 hover:border-amber-500/50 transition">
-                  <div className="flex items-start justify-between mb-2">
-                    <div>
-                      <h3 className="text-lg font-semibold text-white">{restaurant.name}</h3>
-                      <p className="text-amber-400 text-sm">{restaurant.cuisine}</p>
-                    </div>
-                    <span className="text-amber-400 font-bold">{restaurant.price}</span>
-                  </div>
-                  <p className="text-gray-500 text-sm flex items-center gap-1 mb-2">
-                    <MapPin className="w-3 h-3" /> {restaurant.location}
-                  </p>
+                  <h3 className="text-lg font-semibold text-white mb-1">{restaurant.name}</h3>
+                  <p className="text-amber-400 text-sm mb-2">{restaurant.cuisine}</p>
                   <p className="text-gray-400 text-sm">{restaurant.desc}</p>
                 </div>
               ))}
@@ -333,130 +247,95 @@ export default function BestRestaurants2026Page() {
           </div>
         </section>
 
-        {/* Best by Cuisine */}
-        {bestByCuisine.map((category, idx) => (
-          <section key={category.cuisine} className={`py-16 px-4 ${idx % 2 === 0 ? '' : 'bg-gray-800/30'}`}>
-            <div className="max-w-6xl mx-auto">
-              <div className="flex items-center gap-4 mb-8">
-                <span className="text-4xl">{category.icon}</span>
-                <h2 className="text-3xl font-bold text-white">Best {category.cuisine}</h2>
-              </div>
-              
-              <div className="grid md:grid-cols-2 gap-4">
-                {category.restaurants.map((restaurant) => (
-                  <div key={restaurant.name} className="p-5 bg-gray-800/50 rounded-xl border border-gray-700 hover:border-amber-500/30 transition">
-                    <div className="flex items-start justify-between mb-2">
-                      <h3 className="text-lg font-semibold text-white">{restaurant.name}</h3>
-                      <Star className="w-4 h-4 text-amber-400" />
-                    </div>
-                    <p className="text-amber-400/70 text-sm flex items-center gap-1 mb-2">
-                      <MapPin className="w-3 h-3" /> {restaurant.location}
-                    </p>
-                    <p className="text-gray-400 text-sm">{restaurant.desc}</p>
-                  </div>
-                ))}
-              </div>
-            </div>
-          </section>
-        ))}
-
-        {/* Hidden Gems */}
-        <section className="py-16 px-4 bg-gradient-to-r from-green-900/20 to-emerald-900/20">
-          <div className="max-w-6xl mx-auto">
-            <div className="flex items-center gap-4 mb-8">
-              <div className="p-3 rounded-xl bg-gradient-to-r from-green-500 to-emerald-600">
-                <Sparkles className="w-6 h-6 text-white" />
-              </div>
-              <div>
-                <h2 className="text-3xl font-bold text-white">Hidden Gems</h2>
-                <p className="text-gray-400">Under-the-radar spots the locals love</p>
-              </div>
-            </div>
-            
-            <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-4">
-              {hiddenGems.map((gem) => (
-                <div key={gem.name} className="p-5 bg-gray-800/50 rounded-xl border border-green-500/30">
-                  <div className="flex items-start justify-between mb-2">
-                    <h3 className="text-lg font-semibold text-white">{gem.name}</h3>
-                    <span className="text-green-400 text-sm">{gem.price}</span>
-                  </div>
-                  <p className="text-green-400/70 text-xs mb-1">{gem.cuisine} • {gem.location}</p>
-                  <p className="text-gray-400 text-sm">{gem.desc}</p>
-                </div>
-              ))}
-            </div>
-          </div>
-        </section>
-
-        {/* Romantic Restaurants */}
+        {/* Ritz-Carlton Restaurants */}
         <section className="py-16 px-4">
           <div className="max-w-6xl mx-auto">
             <div className="flex items-center gap-4 mb-8">
-              <div className="p-3 rounded-xl bg-gradient-to-r from-pink-500 to-rose-600">
-                <Heart className="w-6 h-6 text-white" />
+              <div className="p-3 rounded-xl bg-gradient-to-r from-blue-500 to-cyan-600">
+                <Star className="w-6 h-6 text-white" />
               </div>
               <div>
-                <h2 className="text-3xl font-bold text-white">Most Romantic Restaurants</h2>
-                <p className="text-gray-400">Perfect for date nights and special occasions</p>
+                <h2 className="text-3xl font-bold text-white">Ritz-Carlton Bahrain</h2>
+                <p className="text-gray-400">Luxury dining on the waterfront</p>
               </div>
             </div>
             
-            <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-4">
-              {romanticRestaurants.map((restaurant, idx) => (
-                <div key={restaurant.name} className={`p-5 rounded-xl border ${idx === 0 ? 'bg-gradient-to-br from-pink-600/20 to-rose-600/20 border-pink-500/50' : 'bg-gray-800/50 border-gray-700'}`}>
-                  {idx === 0 && <span className="text-xs text-pink-300 mb-2 block">Editor's Pick</span>}
+            <div className="grid md:grid-cols-3 gap-4">
+              {ritzCarltonRestaurants.map((restaurant) => (
+                <div key={restaurant.name} className="p-6 bg-gray-800/50 rounded-xl border border-gray-700 hover:border-blue-500/50 transition">
                   <h3 className="text-lg font-semibold text-white mb-1">{restaurant.name}</h3>
-                  <p className="text-pink-400/70 text-sm mb-2">{restaurant.location}</p>
-                  <p className="text-gray-400 text-sm">{restaurant.why}</p>
+                  <p className="text-blue-400 text-sm mb-2">{restaurant.cuisine}</p>
+                  <p className="text-gray-400 text-sm">{restaurant.desc}</p>
                 </div>
               ))}
-            </div>
-            
-            <div className="text-center mt-8">
-              <Link 
-                href="/guides/romantic"
-                className="inline-flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-pink-600 to-rose-600 rounded-full text-white font-semibold hover:opacity-90 transition"
-              >
-                Full Romantic Dining Guide <ChevronRight className="w-4 h-4" />
-              </Link>
             </div>
           </div>
         </section>
 
-        {/* New Openings 2026 */}
+        {/* Adliya Dining */}
         <section className="py-16 px-4 bg-gray-800/30">
           <div className="max-w-6xl mx-auto">
             <div className="flex items-center gap-4 mb-8">
-              <div className="p-3 rounded-xl bg-gradient-to-r from-cyan-500 to-blue-600">
-                <Calendar className="w-6 h-6 text-white" />
+              <div className="p-3 rounded-xl bg-gradient-to-r from-purple-500 to-pink-600">
+                <Utensils className="w-6 h-6 text-white" />
               </div>
               <div>
-                <h2 className="text-3xl font-bold text-white">Most Anticipated Openings 2026</h2>
-                <p className="text-gray-400">Coming soon to Bahrain</p>
+                <h2 className="text-3xl font-bold text-white">Adliya — Bahrain's Dining Hub</h2>
+                <p className="text-gray-400">Trendy restaurants and cafes</p>
               </div>
             </div>
             
-            <div className="grid md:grid-cols-2 gap-6">
-              {newOpenings2026.map((restaurant) => (
-                <div key={restaurant.name} className="p-6 bg-gray-800/50 rounded-xl border border-cyan-500/30">
-                  <span className="inline-block px-3 py-1 bg-cyan-500/20 text-cyan-300 text-xs rounded-full mb-3">
-                    Opening {restaurant.opening}
-                  </span>
-                  <h3 className="text-xl font-semibold text-white mb-1">{restaurant.name}</h3>
-                  <p className="text-cyan-400 text-sm mb-2">{restaurant.cuisine}</p>
-                  <p className="text-gray-400">{restaurant.desc}</p>
+            <p className="text-gray-300 mb-8 max-w-3xl">
+              Adliya is Bahrain's trendiest dining district, home to art galleries, boutiques, and 
+              an eclectic mix of restaurants and cafes.
+            </p>
+            
+            <div className="grid md:grid-cols-2 gap-4">
+              {adliyaRestaurants.map((restaurant) => (
+                <div key={restaurant.name} className="p-6 bg-gray-800/50 rounded-xl border border-gray-700 hover:border-purple-500/50 transition">
+                  <h3 className="text-lg font-semibold text-white mb-1">{restaurant.name}</h3>
+                  <p className="text-purple-400 text-sm mb-2">{restaurant.cuisine}</p>
+                  <p className="text-gray-400 text-sm">{restaurant.desc}</p>
                 </div>
               ))}
             </div>
-            
-            <div className="text-center mt-8">
-              <Link 
-                href="/blog/new-restaurants-bahrain-2026"
-                className="inline-flex items-center gap-2 text-cyan-400 hover:text-cyan-300 transition"
-              >
-                See all new restaurants <ArrowRight className="w-4 h-4" />
-              </Link>
+          </div>
+        </section>
+
+        {/* Traditional Bahraini */}
+        <section className="py-16 px-4">
+          <div className="max-w-6xl mx-auto">
+            <div className="flex items-center gap-4 mb-8">
+              <div className="p-3 rounded-xl bg-gradient-to-r from-orange-500 to-red-600">
+                <Heart className="w-6 h-6 text-white" />
+              </div>
+              <div>
+                <h2 className="text-3xl font-bold text-white">Traditional Bahraini</h2>
+                <p className="text-gray-400">Authentic local flavors</p>
+              </div>
             </div>
+            
+            <div className="grid md:grid-cols-2 gap-4">
+              {traditionalBahraini.map((restaurant) => (
+                <div key={restaurant.name} className="p-6 bg-gray-800/50 rounded-xl border border-gray-700 hover:border-orange-500/50 transition">
+                  <h3 className="text-lg font-semibold text-white mb-1">{restaurant.name}</h3>
+                  <p className="text-orange-400 text-sm mb-2">{restaurant.location}</p>
+                  <p className="text-gray-400 text-sm">{restaurant.desc}</p>
+                </div>
+              ))}
+            </div>
+          </div>
+        </section>
+
+        {/* More Coming Soon */}
+        <section className="py-16 px-4 bg-gray-800/30">
+          <div className="max-w-4xl mx-auto text-center">
+            <ChefHat className="w-16 h-16 text-amber-400 mx-auto mb-4" />
+            <h2 className="text-2xl font-bold text-white mb-4">More Restaurants Coming Soon</h2>
+            <p className="text-gray-300 mb-6 max-w-2xl mx-auto">
+              We're actively verifying more restaurants across Bahrain to add to this guide. 
+              Check back regularly for updates, or follow us on social media for the latest additions.
+            </p>
           </div>
         </section>
 
@@ -466,11 +345,6 @@ export default function BestRestaurants2026Page() {
             <h2 className="text-3xl font-bold text-white mb-8">Frequently Asked Questions</h2>
             
             <div className="space-y-4">
-              <div className="p-6 bg-gray-800/50 rounded-xl border border-gray-700">
-                <h3 className="text-lg font-semibold text-white mb-2">What is the most expensive restaurant in Bahrain?</h3>
-                <p className="text-gray-400">CUT by Wolfgang Puck at Four Seasons and Nusr-Et (Salt Bae's restaurant) are among the most expensive, with steaks exceeding BHD 100. Fine dining Japanese omakase can also reach BHD 150+ per person.</p>
-              </div>
-              
               <div className="p-6 bg-gray-800/50 rounded-xl border border-gray-700">
                 <h3 className="text-lg font-semibold text-white mb-2">Do I need reservations for restaurants in Bahrain?</h3>
                 <p className="text-gray-400">For fine dining and popular restaurants, especially on weekends (Thursday-Saturday), reservations are highly recommended. Many restaurants accept bookings via phone, Instagram DM, or platforms like OpenTable.</p>
@@ -494,7 +368,7 @@ export default function BestRestaurants2026Page() {
           <div className="max-w-4xl mx-auto text-center">
             <h2 className="text-3xl font-bold text-white mb-6">Hungry Yet?</h2>
             <p className="text-gray-300 text-lg mb-8">
-              Browse our complete restaurant directory with reviews, menus, and booking information.
+              Browse our restaurant directory or check out our other dining guides.
             </p>
             <div className="flex flex-wrap justify-center gap-4">
               <Link 
@@ -504,10 +378,10 @@ export default function BestRestaurants2026Page() {
                 Browse All Restaurants
               </Link>
               <Link 
-                href="/best-restaurants-bahrain"
+                href="/blog/best-brunches-bahrain-2026"
                 className="px-8 py-4 bg-gray-800 rounded-full text-white font-semibold hover:bg-gray-700 transition"
               >
-                Restaurant Rankings
+                Friday Brunch Guide
               </Link>
             </div>
           </div>
@@ -520,18 +394,18 @@ export default function BestRestaurants2026Page() {
             <div className="grid md:grid-cols-3 gap-6">
               <Link href="/blog/bahrain-foodie-guide" className="p-6 bg-gray-800/50 rounded-xl hover:bg-gray-800 transition group">
                 <Utensils className="w-8 h-8 text-orange-400 mb-3" />
-                <h3 className="font-semibold text-white group-hover:text-orange-300 transition">50 Must-Try Dishes</h3>
-                <p className="text-sm text-gray-400 mt-2">Your Bahrain food bucket list</p>
+                <h3 className="font-semibold text-white group-hover:text-orange-300 transition">Bahrain Foodie Guide</h3>
+                <p className="text-sm text-gray-400 mt-2">Must-try dishes in Bahrain</p>
               </Link>
               <Link href="/blog/best-brunches-bahrain-2026" className="p-6 bg-gray-800/50 rounded-xl hover:bg-gray-800 transition group">
                 <Wine className="w-8 h-8 text-amber-400 mb-3" />
                 <h3 className="font-semibold text-white group-hover:text-amber-300 transition">Best Brunches 2026</h3>
                 <p className="text-sm text-gray-400 mt-2">Friday brunch guide</p>
               </Link>
-              <Link href="/guides/best-seafood-bahrain" className="p-6 bg-gray-800/50 rounded-xl hover:bg-gray-800 transition group">
-                <Globe className="w-8 h-8 text-cyan-400 mb-3" />
-                <h3 className="font-semibold text-white group-hover:text-cyan-300 transition">Seafood Guide</h3>
-                <p className="text-sm text-gray-400 mt-2">Fresh from the Gulf</p>
+              <Link href="/blog/new-restaurants-bahrain-2026" className="p-6 bg-gray-800/50 rounded-xl hover:bg-gray-800 transition group">
+                <Sparkles className="w-8 h-8 text-cyan-400 mb-3" />
+                <h3 className="font-semibold text-white group-hover:text-cyan-300 transition">New Restaurants</h3>
+                <p className="text-sm text-gray-400 mt-2">Latest openings</p>
               </Link>
             </div>
           </div>
