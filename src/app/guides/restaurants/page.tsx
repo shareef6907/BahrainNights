@@ -151,7 +151,7 @@ const diningAreas = [
     vibe: 'Artsy, trendy, diverse',
     description: 'The hip dining district with cafes, restaurants, and art galleries. Best for casual dining and nightlife.',
     bestFor: 'Casual dinner, coffee, bar hopping',
-    topSpots: ['Block 338', 'Coco\'s', 'Mirai', 'Saffron'],
+    topSpots: ['Block 338', 'Coco\'s', 'Mirai', 'Zafran'],
   },
   {
     area: 'Seef Mall Area',

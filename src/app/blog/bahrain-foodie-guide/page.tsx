@@ -99,7 +99,7 @@ const middleEasternFavorites = [
 
 const internationalHighlights = [
   { num: 21, name: 'Butter Chicken', desc: 'Creamy tomato-based curry that\'s become a Bahrain staple. The Indian community has perfected it here.', where: 'Zafran, Copper Chimney, Lanterns', price: '$$' },
-  { num: 22, name: 'Biryani', desc: 'Fragrant rice layered with spiced meat. Hyderabadi and Lucknowi styles are both popular in Bahrain.', where: 'Zafran, Saffron, Indian restaurants', price: '$$' },
+  { num: 22, name: 'Biryani', desc: 'Fragrant rice layered with spiced meat. Hyderabadi and Lucknowi styles are both popular in Bahrain.', where: 'Zafran, Lanterns, Copper Chimney', price: '$$' },
   { num: 23, name: 'Fish and Chips', desc: 'British classic done right at Bahrain\'s British-style pubs and restaurants.', where: 'JJ\'s Irish Pub, British Club', price: '$$' },
   { num: 24, name: 'Sushi Omakase', desc: 'Chef\'s choice sushi experience with premium imported fish. Bahrain\'s Japanese scene is booming.', where: 'Sushi Shin, Bushido, Mirai', price: '$$$$' },
   { num: 25, name: 'Neapolitan Pizza', desc: 'Wood-fired pizza with San Marzano tomatoes and buffalo mozzarella. Authenticity is key.', where: 'Masso, Segafredo, Italian restaurants', price: '$$' },

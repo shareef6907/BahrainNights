@@ -133,7 +133,7 @@ const bestByCuisine = [
     restaurants: [
       { name: 'Zafran', location: 'Adliya', desc: 'North Indian fine dining with live music. The butter chicken and naan are sublime.' },
       { name: 'Copper Chimney', location: 'Seef', desc: 'Authentic tandoori and curries from a legendary Indian chain.' },
-      { name: 'Saffron', location: 'Gulf Hotel', desc: 'Five-star Indian dining with exquisite Lucknowi and Hyderabadi dishes.' },
+      { name: 'Rasoi by Vineet', location: 'Gulf Hotel', desc: 'Michelin-starred chef Vineet Bhatia\'s contemporary Indian fine dining experience.' },
       { name: 'Lanterns', location: 'Adliya', desc: 'Creative Indian fusion in a gorgeous setting. Great for groups.' },
     ]
   },

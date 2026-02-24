@@ -21,9 +21,9 @@ export const metadata: Metadata = {
 const faqs = [
   { q: 'What is the best Indian restaurant in Bahrain?', a: 'Rasoi by Vineet at Gulf Hotel is widely considered the best for fine dining Indian cuisine. For authentic home-style cooking, Lanterns and Copper Chimney are top choices. For South Indian, Saravana Bhavan is legendary.' },
   { q: 'Where can I find authentic South Indian food in Bahrain?', a: 'Saravana Bhavan in Manama is the go-to for authentic South Indian vegetarian food — dosas, idlis, and thalis. Anjappar and Chettinad restaurants also serve excellent South Indian non-vegetarian dishes.' },
-  { q: 'What is the average cost of Indian food in Bahrain?', a: 'Budget Indian restaurants cost BD 2-4 per person. Mid-range places like Copper Chimney or Lanterns run BD 6-12. Fine dining at Rasoi by Vineet or Saffron starts at BD 20-35 per person.' },
+  { q: 'What is the average cost of Indian food in Bahrain?', a: 'Budget Indian restaurants cost BD 2-4 per person. Mid-range places like Copper Chimney or Lanterns run BD 6-12. Fine dining at Rasoi by Vineet or Nirvana starts at BD 20-35 per person.' },
   { q: 'Which areas have the best Indian restaurants?', a: 'Gudaibiya and Manama Souq have the most authentic budget options. Adliya and Seef offer mid-range choices. Juffair and hotel restaurants have upscale Indian dining.' },
-  { q: 'Do Indian restaurants in Bahrain serve alcohol?', a: 'Most standalone Indian restaurants do not serve alcohol as many are vegetarian or family-oriented. Hotel restaurants like Rasoi by Vineet, Saffron (Ritz-Carlton), and India (Gulf Hotel) serve alcohol.' },
+  { q: 'Do Indian restaurants in Bahrain serve alcohol?', a: 'Most standalone Indian restaurants do not serve alcohol as many are vegetarian or family-oriented. Hotel restaurants like Rasoi by Vineet, Nirvana (Ritz-Carlton), and India (Gulf Hotel) serve alcohol.' },
 ];
 
 const restaurants = [
@@ -37,12 +37,12 @@ const restaurants = [
     rating: 4.8,
   },
   { 
-    name: 'Saffron', 
+    name: 'Nirvana', 
     location: 'The Ritz-Carlton, Seef',
     cuisine: 'North Indian Fine Dining',
     priceRange: 'BD 20-35',
-    highlight: 'Elegant setting with live Indian classical music',
-    mustTry: 'Tandoori Platter, Dal Makhani',
+    highlight: 'Elegant palace-style décor with live santoor music',
+    mustTry: 'Grilled Kebabs, Seafood Platters, The Great Indian Thali',
     rating: 4.7,
   },
   { 
@@ -197,7 +197,7 @@ export default function BestIndianRestaurantsPage() {
                 Bahrain&apos;s Indian dining scene. Look for butter chicken, dal makhani, paneer dishes, and naan bread.
               </p>
               <p className="text-gray-400 text-sm">
-                <strong>Best for:</strong> Copper Chimney, Charcoal Grill, Saffron, Rasoi by Vineet
+                <strong>Best for:</strong> Copper Chimney, Charcoal Grill, Nirvana, Rasoi by Vineet
               </p>
             </div>
             
