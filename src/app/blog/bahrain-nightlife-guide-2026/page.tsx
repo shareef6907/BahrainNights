@@ -160,40 +160,38 @@ const venueTypes = [
     type: 'Nightclubs',
     icon: Music,
     venues: [
-      { name: 'Coral Bay', location: 'Coral Bay Resort, Juffair', desc: 'Multi-floor complex with different music zones. The go-to spot for serious party-goers with international DJs every weekend.' },
       { name: 'Block 338', location: 'Adliya', desc: 'Trendy club with rotating themes and events. Known for its house music nights and fashion-forward crowd.' },
-      { name: 'Coda Jazz Lounge', location: 'Gulf Hotel', desc: 'Elegant venue blending live jazz with late-night dancing. Perfect for those who appreciate musical sophistication.' },
       { name: 'The One Club', location: 'Diplomat Hotel', desc: 'Bahrain institution with multiple dance floors and a loyal following. Arabic nights on Wednesdays are legendary.' },
+      { name: 'Bushido by Buddha-Bar', location: 'Ritz-Carlton, Seef', desc: 'Chic lounge and nightclub inspired by Japanese mysticism. Perfect blend of dining and late-night entertainment.' },
     ]
   },
   {
-    type: 'Rooftop Bars',
+    type: 'Rooftop Bars & Lounges',
     icon: Moon,
     venues: [
-      { name: 'CUT by Wolfgang Puck', location: 'Four Seasons, Bahrain Bay', desc: 'Premium steakhouse with a spectacular rooftop lounge. Stunning views of the bay and city skyline.' },
-      { name: 'Iris Lounge', location: 'Bahrain Bay', desc: 'Beachside rooftop experience with infinity pools and DJs. The sunset sessions are not to be missed.' },
-      { name: 'La Fontaine', location: 'Amwaj Islands', desc: 'Mediterranean-style rooftop with sea views and live music. Perfect for al fresco evenings.' },
-      { name: 'Trader Vic\'s', location: 'Ritz-Carlton, Seef', desc: 'Tiki-themed rooftop with creative cocktails and waterfront dining overlooking the marina.' },
+      { name: 'CUT by Wolfgang Puck', location: 'Four Seasons, Bahrain Bay', desc: 'Premium steakhouse with a spectacular lounge area. Stunning views of the bay and city skyline.' },
+      { name: 'Sky Lounge', location: 'Four Seasons, Bahrain Bay', desc: 'Sophisticated rooftop bar with panoramic bay views and expertly crafted cocktails.' },
+      { name: 'La Fontaine', location: 'Amwaj Islands', desc: 'Mediterranean-style venue with sea views and live music. Perfect for al fresco evenings.' },
+      { name: 'Trader Vic\'s', location: 'Ritz-Carlton, Seef', desc: 'Legendary Polynesian bar on the ground floor by the lagoon. Famous for Mai Tais and pupu platters in a tiki-themed setting.' },
     ]
   },
   {
     type: 'Live Music Venues',
     icon: Volume2,
     venues: [
-      { name: 'JJ\'s Irish Pub', location: 'Various locations', desc: 'Live bands most nights playing rock, pop, and crowd favorites. Great atmosphere and friendly vibe.' },
-      { name: 'Bushido', location: 'Gulf Hotel', desc: 'Live entertainment with dinner shows. Japanese fusion meets evening entertainment.' },
-      { name: 'Coda Jazz Lounge', location: 'Gulf Hotel', desc: 'Regular jazz performances in an intimate setting. The house band is excellent.' },
-      { name: 'Sherlock Holmes Pub', location: 'Crowne Plaza', desc: 'British pub atmosphere with live music weekends and quiz nights.' },
+      { name: 'JJ\'s Irish Pub', location: 'Juffair & Adliya', desc: 'Live bands most nights playing rock, pop, and crowd favorites. Great atmosphere and friendly vibe.' },
+      { name: 'Sherlock Holmes Pub', location: 'Gulf Hotel', desc: 'British pub atmosphere with live music weekends and quiz nights. A Bahrain institution.' },
+      { name: 'Thai Lounge', location: 'Ritz-Carlton, Seef', desc: 'Evening DJ entertainment with Asian-inspired cocktails and small plates.' },
     ]
   },
   {
     type: 'Cocktail Lounges',
     icon: Martini,
     venues: [
-      { name: 'Polo\'s Bar', location: 'Ritz-Carlton', desc: 'Sophisticated cocktail bar with expert mixologists and an extensive whiskey collection.' },
-      { name: 'Sho Cho', location: 'Novotel Al Dana', desc: 'Asian-fusion lounge with creative cocktails and sleek decor. Great for group gatherings.' },
-      { name: 'Zoe\'s', location: 'Downtown Rotana', desc: 'Intimate cocktail bar known for its signature creations and jazz-inspired atmosphere.' },
-      { name: 'Reef Lounge', location: 'Reef Resort, Juffair', desc: 'Beachfront cocktails with fire pits and ocean sounds. Relaxed yet stylish.' },
+      { name: 'Burlington Club', location: 'Ritz-Carlton, Seef', desc: 'Sophisticated gentleman\'s club atmosphere with premium cigars and fine cognacs.' },
+      { name: 'The Lobby Lounge', location: 'Ritz-Carlton, Seef', desc: 'Elegant lounge with classical trio and world-famous afternoon tea service.' },
+      { name: 're/Asian Cuisine', location: 'Four Seasons, Bahrain Bay', desc: 'Chic Asian-fusion lounge with creative cocktails and stunning bay views.' },
+      { name: 'Bahri Bar', location: 'Four Seasons, Bahrain Bay', desc: 'Sophisticated waterfront bar with Gulf views and expertly crafted cocktails.' },
     ]
   }
 ];
