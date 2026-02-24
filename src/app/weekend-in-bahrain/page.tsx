@@ -200,7 +200,7 @@ const day1 = {
       time: '11:00 PM',
       title: 'Thursday Night Out',
       icon: Moon,
-      description: 'Experience Bahrain\'s legendary Thursday nightlife. The party peaks between midnight and 3am.',
+      description: 'Experience Bahrain\'s legendary Thursday nightlife. The party peaks between midnight and 2am.',
       tips: [
         'Juffair for clubs, Adliya for lounges',
         'Ladies get free drinks at many venues',

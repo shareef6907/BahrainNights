@@ -128,7 +128,7 @@ const rooftopBars = [
     description: 'Spectacular aerial dance performances, live DJ, and al fresco dining. Unique entertainment concept.',
     vibe: 'Entertainment, vibrant',
     bestFor: 'Friday brunch, performances',
-    hours: 'Daily 7pm-3am, Fri brunch 2-6pm',
+    hours: 'Daily 7pm-2am, Fri brunch 2-6pm',
     tip: 'The Friday brunch with performances is legendary.',
     featured: false,
   },
