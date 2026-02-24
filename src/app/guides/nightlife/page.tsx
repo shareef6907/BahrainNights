@@ -360,7 +360,7 @@ export default function NightlifeGuidePage() {
         title="Plan Your Night Out"
         links={[
           { title: 'Ladies Nights', href: '/guides/ladies-nights' },
-          { title: 'Rooftop Bars', href: '/guides/rooftop-bars' },
+          { title: 'Rooftop Bars', href: '/guides/rooftop-bars-bahrain' },
           { title: 'Sports Bars', href: '/guides/sports-bars' },
           { title: 'Best Restaurants', href: '/guides/restaurants' },
           { title: 'Best Brunches', href: '/guides/brunches' },

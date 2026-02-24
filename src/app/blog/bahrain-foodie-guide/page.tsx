@@ -128,7 +128,7 @@ const sweetTreats = [
   { num: 42, name: 'Ras Al Abed', desc: 'Chocolate-coated marshmallow treats. A nostalgic favorite across the Gulf.', where: 'Supermarkets, sweet shops', price: '$' },
   { num: 43, name: 'Arabic Ice Cream', desc: 'Stretchy mastic ice cream with pistachios. Unlike any ice cream you\'ve had before.', where: 'Bachir, Arabic ice cream shops', price: '$' },
   { num: 44, name: 'Baklava', desc: 'Layers of phyllo, nuts, and honey syrup. Turkish and Lebanese varieties are both excellent.', where: 'Wooden Bakery, sweet shops', price: '$' },
-  { num: 45, name: 'Cheesecake', desc: 'New York style or Japanese fluffy — Bahrain\'s café scene has perfected both.', where: 'Café Lilou, 198 Café', price: '$$' },
+  { num: 45, name: 'Cheesecake', desc: 'New York style or Japanese fluffy — Bahrain\'s café scene has perfected both.', where: 'Café Lilou, hotel patisseries', price: '$$' },
   { num: 46, name: 'Crème Brûlée', desc: 'Classic French dessert with crackling caramelized sugar top.', where: 'Fine dining restaurants', price: '$$' },
   { num: 47, name: 'Mahalabia', desc: 'Rosewater-scented milk pudding with pistachios. Light, fragrant, and refreshing.', where: 'Arabic restaurants, hotel buffets', price: '$' },
   { num: 48, name: 'Date Cake', desc: 'Moist cake made with Bahraini dates. Sweet, sticky, and utterly irresistible.', where: 'Local bakeries, hotel restaurants', price: '$' },

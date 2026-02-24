@@ -190,7 +190,7 @@ const day1 = {
       description: 'Start your weekend with dinner at one of Bahrain\'s excellent restaurants. Thursday night is the main party night, so book ahead at popular spots.',
       tips: [
         'Make reservations in advance for popular restaurants',
-        'Adliya has great restaurant options within walking distance of bars',
+        'Adliya has great restaurant options within walking distance of lounges',
         'Consider a rooftop dinner for stunning views'
       ],
       recommended: ['CUT by Wolfgang Puck', 'Bushido', 'Block 338', 'Masso'],
@@ -200,9 +200,9 @@ const day1 = {
       time: '11:00 PM',
       title: 'Thursday Night Out',
       icon: Moon,
-      description: 'Experience Bahrain\'s legendary Thursday nightlife. The party peaks between midnight and 3am.',
+      description: 'Experience Bahrain\'s legendary Thursday nightlife. The party peaks between midnight and 2am.',
       tips: [
-        'Juffair for clubs, Adliya for bars',
+        'Juffair for clubs, Adliya for lounges',
         'Ladies get free drinks at many venues',
         'Dress smart casual — no shorts or flip-flops'
       ],
@@ -253,10 +253,10 @@ const day1 = {
       time: '7:00 PM',
       title: 'Sunset Drinks',
       icon: Sunset,
-      description: 'Watch the sunset over Bahrain Bay with a cocktail in hand. Several rooftop bars offer spectacular views.',
+      description: 'Watch the sunset over Bahrain Bay with a cocktail in hand. Several rooftop lounges offer spectacular views.',
       tips: [
         'Four Seasons rooftop has the best views',
-        'Many hotel bars have sunset happy hours',
+        'Many hotel lounges have sunset happy hours',
         'Bahrain Bay waterfront is perfect for a sunset walk'
       ],
       recommended: ['CUT Lounge', 'Hazel Rooftop', 'Sky Lounge', 'Trader Vic\'s'],
@@ -436,7 +436,7 @@ const practicalTips = [
   { title: 'Best Time to Visit', desc: 'October to April for pleasant weather. Avoid June-August unless you love heat (40°C+). Ramadan timing varies — check dates.' },
   { title: 'Getting Around', desc: 'Taxis and ride-hailing (Uber-like apps) work well. Renting a car gives more freedom. No public transport to speak of.' },
   { title: 'Budget', desc: 'Mid-range weekend: 200-300 BHD. Luxury weekend: 500+ BHD. This covers hotel, dining, activities, and nightlife.' },
-  { title: 'What to Pack', desc: 'Smart casual clothes for restaurants/bars. Swimwear for beaches. Light layers for AC. Comfortable walking shoes.' },
+  { title: 'What to Pack', desc: 'Smart casual clothes for restaurants/lounges. Swimwear for beaches. Light layers for AC. Comfortable walking shoes.' },
   { title: 'Alcohol', desc: 'Available at licensed venues (hotels and select restaurants). No public drinking. 21+ age limit.' },
   { title: 'Dress Code', desc: 'Liberal compared to neighbors, but still respectful. Covered shoulders in malls/public. Smart dress for upscale venues.' },
 ];

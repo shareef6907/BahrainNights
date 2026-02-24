@@ -1,16 +1,11 @@
 'use client';
 
 import { useState, useMemo, useEffect } from 'react';
-import { useSearchParams } from 'next/navigation';
 import dynamic from 'next/dynamic';
-import { motion } from 'framer-motion';
-import { Search, Film, Clock } from 'lucide-react';
-import FeaturedMovie from '@/components/cinema/FeaturedMovie';
-import MovieFilters from '@/components/cinema/MovieFilters';
-import MovieGrid from '@/components/cinema/MovieGrid';
+import { Film } from 'lucide-react';
+import NetflixHero from '@/components/cinema/NetflixHero';
+import GenreRow from '@/components/cinema/GenreRow';
 import { Movie } from '@/components/cinema/MovieCard';
-import AdBanner from '@/components/ads/AdBanner';
-import { useTranslation } from '@/lib/i18n';
 
 // Lazy load modals - only loaded when user clicks a movie
 const MovieModal = dynamic(() => import('@/components/cinema/MovieModal'), {
@@ -23,171 +18,114 @@ const TrailerModal = dynamic(() => import('@/components/cinema/TrailerModal'), {
   ssr: false,
 });
 
-// Default cinemas (will be overridden with translated label)
-const defaultCinemas = [
-  { value: 'all', label: 'All Cinemas' },
-];
-
 interface CinemaPageClientProps {
   initialNowShowing: Movie[];
   initialComingSoon: Movie[];
   initialCinemas?: { value: string; label: string }[];
   lastUpdated?: string | null;
+  featuredTrailers?: Movie[];
 }
 
-// Format the last updated timestamp
-function formatLastUpdated(timestamp: string | null | undefined, t: { cinema: { minuteAgo: string; minutesAgo: string; hourAgo: string; hoursAgo: string } }): string {
-  if (!timestamp) return 'Unknown';
-  const date = new Date(timestamp);
-  const now = new Date();
-  const diffMs = now.getTime() - date.getTime();
-  const diffHours = Math.floor(diffMs / (1000 * 60 * 60));
-  const diffMins = Math.floor(diffMs / (1000 * 60));
-
-  if (diffMins < 60) {
-    return `${diffMins} ${diffMins === 1 ? t.cinema.minuteAgo : t.cinema.minutesAgo}`;
-  } else if (diffHours < 24) {
-    return `${diffHours} ${diffHours === 1 ? t.cinema.hourAgo : t.cinema.hoursAgo}`;
-  } else {
-    return date.toLocaleDateString('en-US', {
-      month: 'short',
-      day: 'numeric',
-      hour: 'numeric',
-      minute: '2-digit',
-    });
-  }
-}
+// Genre display order (most popular first)
+const GENRE_ORDER = [
+  'Action',
+  'Comedy', 
+  'Horror',
+  'Drama',
+  'Family',
+  'Thriller',
+  'Animation',
+  'Romance',
+  'Sci-Fi',
+  'Science Fiction',
+  'Adventure',
+  'Fantasy',
+  'Mystery',
+  'Crime',
+];
 
 export default function CinemaPageClient({
   initialNowShowing,
   initialComingSoon,
-  initialCinemas = defaultCinemas,
-  lastUpdated
+  featuredTrailers,
 }: CinemaPageClientProps) {
-  const { t } = useTranslation();
-  const searchParams = useSearchParams();
-  const filterParam = searchParams?.get('filter') ?? null;
-
-  // Translated filter options
-  const genres = [
-    { value: 'all', label: t.cinema.genres.all },
-    { value: 'action', label: t.cinema.genres.action },
-    { value: 'comedy', label: t.cinema.genres.comedy },
-    { value: 'drama', label: t.cinema.genres.drama },
-    { value: 'horror', label: t.cinema.genres.horror },
-    { value: 'animation', label: t.cinema.genres.animation },
-    { value: 'sci-fi', label: t.cinema.genres.sciFi },
-    { value: 'science fiction', label: t.cinema.genres.sciFi },
-    { value: 'family', label: t.cinema.genres.family },
-    { value: 'adventure', label: t.cinema.genres.adventure },
-    { value: 'thriller', label: t.cinema.genres.thriller },
-    { value: 'romance', label: t.cinema.genres.romance },
-    { value: 'fantasy', label: t.cinema.genres.fantasy },
-  ];
-
-  const languages = [
-    { value: 'all', label: t.cinema.languages.all },
-    { value: 'english', label: t.cinema.languages.english },
-    { value: 'arabic', label: t.cinema.languages.arabic },
-    { value: 'hindi', label: t.cinema.languages.hindi },
-  ];
-
-  // Set initial tab based on URL parameter
-  const initialTab = filterParam === 'coming-soon' ? 'coming-soon' : 'now-showing';
-
-  const [activeTab, setActiveTab] = useState<'now-showing' | 'coming-soon'>(initialTab);
-  const [searchQuery, setSearchQuery] = useState('');
-  const [selectedCinema, setSelectedCinema] = useState('all');
-  const [selectedGenre, setSelectedGenre] = useState('all');
-  const [selectedLanguage, setSelectedLanguage] = useState('all');
-  const [sortBy, setSortBy] = useState('popular');
-
   const [selectedMovie, setSelectedMovie] = useState<Movie | null>(null);
   const [isMovieModalOpen, setIsMovieModalOpen] = useState(false);
   const [trailerMovie, setTrailerMovie] = useState<Movie | null>(null);
   const [isTrailerModalOpen, setIsTrailerModalOpen] = useState(false);
 
-  // Data from server - no loading needed!
-  const [nowShowingMovies] = useState<Movie[]>(initialNowShowing);
-  const [comingSoonMovies] = useState<Movie[]>(initialComingSoon);
-  // Override cinema labels with translations
-  const translatedCinemas = initialCinemas.map(cinema => ({
-    ...cinema,
-    label: cinema.value === 'all' ? t.cinema.filters.allCinemas : cinema.label
-  }));
-  const [cinemas] = useState(translatedCinemas);
+  // All movies for the page (now showing + coming soon, deduplicated)
+  const allMovies = useMemo(() => {
+    const seen = new Set<string>();
+    return [...initialNowShowing, ...initialComingSoon].filter(movie => {
+      if (seen.has(movie.id)) return false;
+      seen.add(movie.id);
+      return true;
+    });
+  }, [initialNowShowing, initialComingSoon]);
 
-  // Update tab when URL parameter changes
-  useEffect(() => {
-    if (filterParam === 'coming-soon') {
-      setActiveTab('coming-soon');
-    } else if (filterParam === 'now-showing') {
-      setActiveTab('now-showing');
+  // Featured movies for the hero - prefer featuredTrailers, fallback to recent with trailers
+  const heroMovies = useMemo(() => {
+    if (featuredTrailers && featuredTrailers.length > 0) {
+      return featuredTrailers;
     }
-  }, [filterParam]);
-
-  // Filter and sort movies
-  const filteredMovies = useMemo(() => {
-    const movies = activeTab === 'now-showing' ? nowShowingMovies : comingSoonMovies;
-
-    return movies
-      .filter((movie) => {
-        // Search filter
-        if (searchQuery && !movie.title.toLowerCase().includes(searchQuery.toLowerCase())) {
-          return false;
-        }
-
-        // Genre filter
-        if (selectedGenre !== 'all' && !movie.genres.some(g => g.toLowerCase() === selectedGenre.toLowerCase())) {
-          return false;
-        }
-
-        // Language filter
-        if (selectedLanguage !== 'all' && !movie.language.toLowerCase().includes(selectedLanguage.toLowerCase())) {
-          return false;
-        }
-
-        return true;
-      })
+    // Fallback: now showing movies with trailers, sorted by release date
+    return initialNowShowing
+      .filter(m => m.trailerUrl && m.backdrop)
       .sort((a, b) => {
-        switch (sortBy) {
-          case 'rating':
-            return b.rating - a.rating;
-          case 'newest':
-            return 0; // Would need actual dates
-          default:
-            return b.rating - a.rating; // Default sort by rating
+        const dateA = a.releaseDate ? new Date(a.releaseDate).getTime() : 0;
+        const dateB = b.releaseDate ? new Date(b.releaseDate).getTime() : 0;
+        return dateB - dateA;
+      })
+      .slice(0, 8);
+  }, [featuredTrailers, initialNowShowing]);
+
+  // Group movies by genre
+  const genreGroups = useMemo(() => {
+    const groups: Record<string, Movie[]> = {};
+    
+    allMovies.forEach(movie => {
+      const genres = movie.genres || [];
+      genres.forEach(genre => {
+        const normalizedGenre = genre.trim();
+        if (!groups[normalizedGenre]) {
+          groups[normalizedGenre] = [];
+        }
+        // Avoid duplicates within a genre
+        if (!groups[normalizedGenre].find(m => m.id === movie.id)) {
+          groups[normalizedGenre].push(movie);
         }
       });
-  }, [activeTab, nowShowingMovies, comingSoonMovies, searchQuery, selectedGenre, selectedLanguage, sortBy]);
+    });
 
-  // Filter for VOX Cinema movies with valid images for the featured slider
-  // Sort by release date (newest first) to highlight new releases
-  const featuredMovies = nowShowingMovies
-    .filter((movie) => {
-      // Must be available at VOX Cinema
-      const isInVox = movie.scrapedFrom?.some(cinema =>
-        cinema.toLowerCase().includes('vox')
-      );
-      // Must have a real poster URL (not placeholder)
-      const hasValidPoster = movie.poster &&
-        !movie.poster.includes('placeholder') &&
-        !movie.poster.includes('null') &&
-        movie.poster.startsWith('http');
-      // Must have a real backdrop URL (not placeholder)
-      const hasValidBackdrop = movie.backdrop &&
-        !movie.backdrop.includes('placeholder') &&
-        !movie.backdrop.includes('null') &&
-        movie.backdrop.startsWith('http');
-      return isInVox && hasValidPoster && hasValidBackdrop;
-    })
-    .sort((a, b) => {
-      // Sort by release date (newest first)
-      const dateA = a.releaseDate ? new Date(a.releaseDate).getTime() : 0;
-      const dateB = b.releaseDate ? new Date(b.releaseDate).getTime() : 0;
-      return dateB - dateA;
-    })
-    .slice(0, 7);
+    // Sort genres by preferred order, then alphabetically
+    const sortedGenres = Object.keys(groups).sort((a, b) => {
+      const indexA = GENRE_ORDER.findIndex(g => g.toLowerCase() === a.toLowerCase());
+      const indexB = GENRE_ORDER.findIndex(g => g.toLowerCase() === b.toLowerCase());
+      
+      if (indexA !== -1 && indexB !== -1) return indexA - indexB;
+      if (indexA !== -1) return -1;
+      if (indexB !== -1) return 1;
+      return a.localeCompare(b);
+    });
+
+    // Filter out genres with less than 2 movies and dedupe similar genres
+    const seenGenres = new Set<string>();
+    return sortedGenres
+      .filter(genre => {
+        const normalized = genre.toLowerCase().replace(/[- ]/g, '');
+        if (seenGenres.has(normalized)) return false;
+        seenGenres.add(normalized);
+        // Combine Sci-Fi and Science Fiction
+        if (normalized === 'sciencefiction' && seenGenres.has('scifi')) return false;
+        if (normalized === 'scifi') seenGenres.add('sciencefiction');
+        return groups[genre].length >= 1;
+      })
+      .map(genre => ({
+        name: genre,
+        movies: groups[genre].sort((a, b) => b.rating - a.rating),
+      }));
+  }, [allMovies]);
 
   const handleMovieClick = (movie: Movie) => {
     setSelectedMovie(movie);
@@ -199,14 +137,12 @@ export default function CinemaPageClient({
     setIsTrailerModalOpen(true);
   };
 
-  const handleClearFilters = () => {
-    setSelectedCinema('all');
-    setSelectedGenre('all');
-    setSelectedLanguage('all');
-    setSearchQuery('');
+  const handleBookClick = (movie: Movie) => {
+    setSelectedMovie(movie);
+    setIsMovieModalOpen(true);
   };
 
-  // Generate JSON-LD for movies (limited to first 10 for performance)
+  // Generate JSON-LD for movies
   const moviesJsonLd = {
     '@context': 'https://schema.org',
     '@graph': [
@@ -219,7 +155,7 @@ export default function CinemaPageClient({
       {
         '@type': 'ItemList',
         name: 'Movies Now Showing in Bahrain',
-        itemListElement: nowShowingMovies.slice(0, 10).map((movie, index) => ({
+        itemListElement: initialNowShowing.slice(0, 10).map((movie, index) => ({
           '@type': 'ListItem',
           position: index + 1,
           item: {
@@ -251,167 +187,42 @@ export default function CinemaPageClient({
         dangerouslySetInnerHTML={{ __html: JSON.stringify(moviesJsonLd) }}
       />
 
-      <main className="bg-gradient-to-b from-slate-950 via-slate-900 to-slate-950 text-white min-h-screen">
-        {/* Hero Section */}
-        <section className="pt-24 pb-8 px-4">
-          <div className="max-w-7xl mx-auto">
-            <motion.div
-              className="text-center mb-8"
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-            >
-              <div className="flex items-center justify-center gap-2 mb-4">
-                <Film className="w-8 h-8 text-yellow-400" />
-                <h1 className="text-4xl md:text-5xl font-black">
-                  <span className="bg-gradient-to-r from-yellow-400 via-orange-500 to-pink-500 bg-clip-text text-transparent">
-                    {t.cinema.hero.title}
-                  </span>{' '}
-                  {t.cinema.hero.titleSuffix}
-                </h1>
-              </div>
-              <p className="text-xl text-gray-400">
-                {t.cinema.hero.subtitle}
+      <main className="min-h-screen bg-[#0a0a0a] text-white">
+        {/* Netflix-Style Hero with Autoplay Trailers */}
+        <NetflixHero
+          movies={heroMovies}
+          onMovieClick={handleMovieClick}
+          onBookClick={handleBookClick}
+        />
+
+        {/* Genre Rows */}
+        <div className="relative z-10 -mt-16 pb-12">
+          {genreGroups.length > 0 ? (
+            genreGroups.map((group) => (
+              <GenreRow
+                key={group.name}
+                genre={group.name}
+                movies={group.movies}
+                onMovieClick={handleMovieClick}
+                onTrailerClick={handleTrailerClick}
+              />
+            ))
+          ) : (
+            <div className="text-center py-20 px-6">
+              <Film className="w-16 h-16 text-gray-600 mx-auto mb-4" />
+              <h3 className="text-xl font-semibold text-white mb-2">No Movies Available</h3>
+              <p className="text-gray-400">
+                Check back soon for the latest movies showing in Bahrain cinemas.
               </p>
-
-              {/* Last Updated & Report Link */}
-              <div className="flex items-center justify-center gap-4 mt-3 text-sm">
-                <div className="flex items-center gap-1.5 text-gray-500">
-                  <Clock className="w-4 h-4" />
-                  <span>{t.cinema.updated} {formatLastUpdated(lastUpdated, t)}</span>
-                </div>
-              </div>
-            </motion.div>
-
-            {/* Search Bar */}
-            <motion.div
-              className="max-w-xl mx-auto mb-8"
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.1 }}
-            >
-              <div className="relative">
-                <Search className="absolute left-5 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
-                <input
-                  type="text"
-                  placeholder={t.cinema.search.placeholder}
-                  value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
-                  className="w-full pl-14 pr-5 py-4 bg-white/5 border border-white/10 rounded-2xl text-white placeholder-gray-400 focus:outline-none focus:border-yellow-400/50 transition-colors"
-                />
-              </div>
-            </motion.div>
-
-            {/* Tab Toggle */}
-            <motion.div
-              className="flex justify-center mb-8"
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              transition={{ delay: 0.2 }}
-            >
-              <div className="inline-flex bg-white/5 border border-white/10 rounded-xl p-1">
-                <button
-                  onClick={() => setActiveTab('now-showing')}
-                  className={`px-6 py-2.5 rounded-lg font-medium transition-all ${
-                    activeTab === 'now-showing'
-                      ? 'bg-yellow-400 text-black'
-                      : 'text-gray-400 hover:text-white'
-                  }`}
-                >
-                  {t.cinema.tabs.nowShowing} ({nowShowingMovies.length})
-                </button>
-                <button
-                  onClick={() => setActiveTab('coming-soon')}
-                  className={`px-6 py-2.5 rounded-lg font-medium transition-all ${
-                    activeTab === 'coming-soon'
-                      ? 'bg-yellow-400 text-black'
-                      : 'text-gray-400 hover:text-white'
-                  }`}
-                >
-                  {t.cinema.tabs.comingSoon} ({comingSoonMovies.length})
-                </button>
-              </div>
-            </motion.div>
-          </div>
-        </section>
-
-        {/* Featured Movie Banner - Only for Now Showing */}
-        {activeTab === 'now-showing' && featuredMovies.length > 0 && (
-          <section className="px-4 mb-8 md:mb-12">
-            <div className="max-w-7xl mx-auto">
-              <FeaturedMovie
-                movies={featuredMovies}
-                onTrailerClick={handleTrailerClick}
-                onMovieClick={handleMovieClick}
-              />
             </div>
-          </section>
-        )}
-
-        {/* Filters */}
-        <section className="px-4 mb-8">
-          <div className="max-w-7xl mx-auto">
-            <MovieFilters
-              cinemas={cinemas}
-              genres={genres}
-              languages={languages}
-              selectedCinema={selectedCinema}
-              selectedGenre={selectedGenre}
-              selectedLanguage={selectedLanguage}
-              sortBy={sortBy}
-              onCinemaChange={setSelectedCinema}
-              onGenreChange={setSelectedGenre}
-              onLanguageChange={setSelectedLanguage}
-              onSortChange={setSortBy}
-              onClearFilters={handleClearFilters}
-            />
-          </div>
-        </section>
-
-        {/* Ad Banner */}
-        <section className="px-4 mb-8">
-          <div className="max-w-7xl mx-auto">
-            <AdBanner targetPage="cinema" placement="banner" limit={5} />
-          </div>
-        </section>
-
-        {/* Movies Grid */}
-        <section className="px-4 pb-12 md:pb-20">
-          <div className="max-w-7xl mx-auto">
-            {filteredMovies.length === 0 ? (
-              <div className="text-center py-20">
-                <Film className="w-16 h-16 text-gray-600 mx-auto mb-4" />
-                <h3 className="text-xl font-semibold text-white mb-2">{t.cinema.emptyState.title}</h3>
-                <p className="text-gray-400 mb-4">
-                  {nowShowingMovies.length === 0 && comingSoonMovies.length === 0
-                    ? t.cinema.emptyState.willBeAvailable
-                    : t.cinema.emptyState.tryAdjusting}
-                </p>
-                {searchQuery || selectedGenre !== 'all' || selectedLanguage !== 'all' ? (
-                  <button
-                    onClick={handleClearFilters}
-                    className="px-4 py-2 bg-yellow-400 text-black rounded-lg hover:bg-yellow-500 transition-colors"
-                  >
-                    {t.cinema.emptyState.clearFilters}
-                  </button>
-                ) : null}
-              </div>
-            ) : (
-              <MovieGrid
-                movies={filteredMovies}
-                onMovieClick={handleMovieClick}
-                onTrailerClick={handleTrailerClick}
-              />
-            )}
-          </div>
-        </section>
+          )}
+        </div>
 
         {/* Movie Detail Modal */}
         <MovieModal
           movie={selectedMovie}
           isOpen={isMovieModalOpen}
-          onClose={() => {
-            setIsMovieModalOpen(false);
-          }}
+          onClose={() => setIsMovieModalOpen(false)}
           onTrailerClick={() => {
             if (selectedMovie) {
               setTrailerMovie(selectedMovie);

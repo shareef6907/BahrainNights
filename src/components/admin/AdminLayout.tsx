@@ -28,14 +28,6 @@ const pageTitles: Record<string, string> = {
   '/admin/pwa': 'PWA Install Analytics',
   '/admin/members': 'Members',
   '/admin/users': 'Manage Users',
-  '/admin/blog': 'Blog Articles',
-  '/admin/studio': 'Content Studio',
-  '/admin/studio/blog': 'Blog Posts',
-  '/admin/studio/feed': 'Feed Posts',
-  '/admin/studio/stories': 'Stories',
-  '/admin/studio/reels': 'Reel Briefs',
-  '/admin/studio/analytics': 'Studio Analytics',
-  '/admin/studio/settings': 'Studio Settings',
   '/admin/regional/trailers': 'Regional Page Trailers',
   '/admin/platinumlist-attractions': 'Platinumlist Attractions',
   '/admin/platinumlist-events': 'Platinumlist Events',
@@ -77,11 +69,6 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
     // Check for ad edit page
     if (pathname.match(/^\/admin\/ads\/[^/]+\/edit$/)) {
       return 'Edit Ad';
-    }
-
-    // Check for blog article edit page
-    if (pathname.match(/^\/admin\/blog\/[^/]+$/)) {
-      return 'Edit Article';
     }
 
     return 'Admin';

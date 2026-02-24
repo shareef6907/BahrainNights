@@ -506,7 +506,7 @@ export const en = {
     privacy: 'Privacy Policy',
     terms: 'Terms of Service',
     contact: 'Contact Us',
-    copyright: '© 2025 BahrainNights.com • Powered by AI • Made with ❤️ in Bahrain',
+    copyright: '© 2026 BahrainNights.com • Powered by AI • Made with ❤️ in Bahrain',
     events: 'Events',
     todaysEvents: 'Today\'s Events',
     thisWeekend: 'This Weekend',

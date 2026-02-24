@@ -7,20 +7,20 @@ import {
 
 // SEO Optimized Metadata
 export const metadata: Metadata = {
-  title: 'Nightlife in Bahrain — Best Bars, Clubs & Lounges 2026 | BahrainNights',
-  description: 'Complete guide to Bahrain nightlife 2026. Discover the best bars, nightclubs, and lounges in Adliya, Juffair, and Seef. Ladies nights, dress codes, and insider tips.',
+  title: 'Nightlife in Bahrain 2026 | Clubs & Lounges | BahrainNights',
+  description: 'Complete guide to Bahrain nightlife 2026. Discover the best nightclubs and lounges in Adliya, Juffair, and Seef. Ladies nights, dress codes, and insider tips.',
   keywords: [
-    'Bahrain nightlife', 'bars in Bahrain', 'clubs in Bahrain', 'nightclubs Bahrain',
-    'Adliya nightlife', 'Juffair bars', 'Seef nightlife', 'lounges Bahrain',
-    'ladies night Bahrain', 'best bars Manama', 'Bahrain clubs 2026',
-    'where to party Bahrain', 'rooftop bars Bahrain', 'live music Bahrain'
+    'Bahrain nightlife', 'lounges in Bahrain', 'clubs in Bahrain', 'nightclubs Bahrain',
+    'Adliya nightlife', 'Juffair lounges', 'Seef nightlife', 'lounges Bahrain',
+    'ladies night Bahrain', 'best lounges Manama', 'Bahrain clubs 2026',
+    'where to party Bahrain', 'rooftop lounges Bahrain', 'live music Bahrain'
   ].join(', '),
   alternates: {
     canonical: 'https://www.bahrainnights.com/nightlife-bahrain',
   },
   openGraph: {
-    title: 'Nightlife in Bahrain — Best Bars, Clubs & Lounges 2026',
-    description: 'Your ultimate guide to Bahrain\'s nightlife scene. Best bars, clubs, and lounges in every area.',
+    title: 'Nightlife in Bahrain 2026 | Clubs & Lounges',
+    description: 'Your ultimate guide to Bahrain\'s nightlife scene. Best clubs and lounges in every area.',
     url: 'https://www.bahrainnights.com/nightlife-bahrain',
     siteName: 'BahrainNights',
     images: [

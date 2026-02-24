@@ -52,6 +52,14 @@ function convertToMovieFormat(dbMovie: DBMovie): Movie {
   const mins = durationMins % 60;
   const durationStr = hours > 0 ? `${hours}h ${mins}min` : `${mins}min`;
 
+  // Prefer trailer_key (YouTube ID) over trailer_url
+  let trailerUrl = '';
+  if (dbMovie.trailer_key) {
+    trailerUrl = dbMovie.trailer_key; // Just the YouTube ID
+  } else if (dbMovie.trailer_url) {
+    trailerUrl = dbMovie.trailer_url;
+  }
+
   return {
     id: dbMovie.id,
     title: dbMovie.title,
@@ -69,7 +77,7 @@ function convertToMovieFormat(dbMovie: DBMovie): Movie {
     }) : undefined,
     isNowShowing: dbMovie.is_now_showing,
     synopsis: dbMovie.synopsis || '',
-    trailerUrl: dbMovie.trailer_url || '',
+    trailerUrl,
     cast: dbMovie.movie_cast || [],
     scrapedFrom: dbMovie.scraped_from || [],
   };
@@ -80,8 +88,8 @@ function filterValidMovies(movies: DBMovie[]): DBMovie[] {
   // Filter movies with valid poster URLs
   const validMovies = movies.filter(movie => {
     const poster = movie.poster_url || '';
-    // Must have valid poster URL (not placeholder, not null, starts with http)
-    if (!poster.startsWith('http') || poster.includes('placeholder') || poster.includes('null')) {
+    // Must have valid poster URL (not placeholder, not null, starts with http or is TMDB path)
+    if (!poster || poster.includes('placeholder') || poster.includes('null')) {
       return false;
     }
     return true;
@@ -126,6 +134,57 @@ async function getMovies() {
   return { nowShowing, comingSoon };
 }
 
+// Fetch featured trailers from admin selection
+async function getFeaturedTrailers(): Promise<Movie[]> {
+  try {
+    // First try to get admin-selected featured trailers
+    const { data: featured, error: featuredError } = await supabaseAdmin
+      .from('cinema_featured_trailers')
+      .select('movie_id, display_order, is_active')
+      .eq('is_active', true)
+      .order('display_order', { ascending: true });
+
+    if (!featuredError && featured && featured.length > 0) {
+      // Fetch the actual movie data for featured trailers
+      const movieIds = featured.map(f => f.movie_id);
+      const { data: movies } = await supabaseAdmin
+        .from('movies')
+        .select('*')
+        .in('id', movieIds);
+
+      if (movies && movies.length > 0) {
+        // Sort movies by display_order from featured_trailers
+        const movieMap = new Map(movies.map(m => [m.id, m]));
+        const orderedMovies = featured
+          .map(f => movieMap.get(f.movie_id))
+          .filter((m): m is DBMovie => m !== undefined && !!m.trailer_key)
+          .map(m => convertToMovieFormat(m));
+        
+        if (orderedMovies.length > 0) {
+          return orderedMovies;
+        }
+      }
+    }
+
+    // Fallback: Get recent movies with trailers
+    const { data: fallbackMovies } = await supabaseAdmin
+      .from('movies')
+      .select('*')
+      .eq('is_now_showing', true)
+      .not('trailer_key', 'is', null)
+      .or('scraped_from.is.null,scraped_from.cs.{vox},scraped_from.cs.{cineco}')
+      .order('release_date', { ascending: false })
+      .limit(8);
+
+    return filterValidMovies(fallbackMovies || [])
+      .filter(m => m.trailer_key)
+      .map(m => convertToMovieFormat(m));
+  } catch (err) {
+    console.error('Error fetching featured trailers:', err);
+    return [];
+  }
+}
+
 // Fetch cinemas for filter dropdown
 async function getCinemas() {
   const { data } = await supabaseAdmin
@@ -164,10 +223,11 @@ async function getLastUpdated() {
 // Server Component - data is fetched BEFORE the page renders
 export default async function CinemaPage() {
   // Fetch all data on the server - NO loading state needed!
-  const [{ nowShowing, comingSoon }, cinemas, lastUpdated] = await Promise.all([
+  const [{ nowShowing, comingSoon }, cinemas, lastUpdated, featuredTrailers] = await Promise.all([
     getMovies(),
     getCinemas(),
-    getLastUpdated()
+    getLastUpdated(),
+    getFeaturedTrailers(),
   ]);
 
   return (
@@ -188,6 +248,7 @@ export default async function CinemaPage() {
           initialComingSoon={comingSoon}
           initialCinemas={cinemas}
           lastUpdated={lastUpdated}
+          featuredTrailers={featuredTrailers}
         />
       </Suspense>
     </>

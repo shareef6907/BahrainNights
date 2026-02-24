@@ -58,7 +58,7 @@ export const ramadanRecipes: RamadanRecipe[] = [
       "Serve hot, garnished with fresh parsley, a drizzle of olive oil, lemon wedges on the side, and warm pita bread."
     ],
     tips: "Red lentils cook faster and blend smoother than green or brown lentils. For extra richness, add a tablespoon of butter before serving. This soup freezes beautifully for up to 3 months.",
-    image: "https://images.unsplash.com/photo-1547592166-23ac45744acd?w=800&h=600&fit=crop"
+    image: "https://images.unsplash.com/photo-1476718406336-bb5a9690ee2a?w=800&h=600&fit=crop"
   },
   {
     id: "harira",
@@ -104,7 +104,7 @@ export const ramadanRecipes: RamadanRecipe[] = [
       "Season with salt to taste. Serve immediately in deep bowls, traditionally accompanied by dates and honey-dipped chebakia pastries."
     ],
     tips: "The tedouira (flour-water mixture) is what makes harira uniquely velvety — don't skip it. For a quicker version, use canned chickpeas and skip the lamb for a vegetarian version. Harira thickens as it sits, so add water when reheating.",
-    image: "https://images.unsplash.com/photo-1603105037880-880cd4edfb0d?w=800&h=600&fit=crop"
+    image: "https://images.unsplash.com/photo-1547592166-23ac45744acd?w=800&h=600&fit=crop"
   },
   {
     id: "samboosa",
@@ -144,7 +144,7 @@ export const ramadanRecipes: RamadanRecipe[] = [
       "Remove with a slotted spoon and drain on paper towels. Serve hot with tamarind sauce or green chutney."
     ],
     tips: "For a cheese version, fill with a mix of feta, mozzarella, and fresh mint. You can prepare and freeze samboosas before frying — fry straight from frozen, adding 1-2 extra minutes. The key to crispy samboosa is making sure the oil is hot enough before frying.",
-    image: "https://images.unsplash.com/photo-1601050690597-df0568f70950?w=800&h=600&fit=crop"
+    image: "https://images.unsplash.com/photo-1567188040759-fb8a883dc6d8?w=800&h=600&fit=crop"
   },
   {
     id: "fattoush",
@@ -185,7 +185,7 @@ export const ramadanRecipes: RamadanRecipe[] = [
       "Serve immediately — fattoush is best eaten right away while the pita is still crunchy."
     ],
     tips: "Sumac is the star of fattoush — its tart, lemony flavor is what makes this salad unique. Don't add the pita until serving or it will get soggy. For extra color, add a handful of pomegranate seeds on top.",
-    image: "https://images.unsplash.com/photo-1512621776951-a57141f2eefd?w=800&h=600&fit=crop"
+    image: "https://images.unsplash.com/photo-1540420773420-3366772f4999?w=800&h=600&fit=crop"
   },
   {
     id: "harees",
@@ -222,7 +222,7 @@ export const ramadanRecipes: RamadanRecipe[] = [
       "Serve hot, traditionally eaten with a spoon and accompanied by sugar on the side for those who prefer it sweet."
     ],
     tips: "The secret to great harees is patience — the longer you cook it and the more you beat it, the smoother and silkier it becomes. In Bahrain, harees is often prepared in large batches and shared among neighbors during Ramadan.",
-    image: "https://images.unsplash.com/photo-1585937421612-70a008356fbe?w=800&h=600&fit=crop"
+    image: "https://images.unsplash.com/photo-1517673132405-a56a62b18caf?w=800&h=600&fit=crop"
   },
   {
     id: "machboos",
@@ -361,7 +361,7 @@ export const ramadanRecipes: RamadanRecipe[] = [
       "Mound the rice on a large serving platter, arrange the chicken on top. Garnish with toasted almonds, raisins, and parsley."
     ],
     tips: "Kabsa spice mix typically includes cumin, coriander, black pepper, cinnamon, cardamom, cloves, nutmeg, and dried lime powder. Toasting the almonds in ghee makes them extra special. In Saudi homes, kabsa is traditionally eaten communal-style from one large platter.",
-    image: "https://images.unsplash.com/photo-1642821373181-696a54913e93?w=800&h=600&fit=crop"
+    image: "https://images.unsplash.com/photo-1631515243349-e0cb75fb8d3a?w=800&h=600&fit=crop"
   },
   {
     id: "thareed",
@@ -404,7 +404,7 @@ export const ramadanRecipes: RamadanRecipe[] = [
       "Ladle the stew over the bread, making sure the bread is well-soaked with the broth. Arrange the meat and vegetables on top. Serve immediately while the bread is soft and soaked through."
     ],
     tips: "Regag bread is a paper-thin Emirati bread — if you can't find it, use lavash or thin flatbread. The key is that the bread absorbs the flavorful broth and becomes soft and almost pasta-like. Thareed is even better the next day when the flavors have deepened.",
-    image: "https://images.unsplash.com/photo-1574484284002-952d92456975?w=800&h=600&fit=crop"
+    image: "https://images.unsplash.com/photo-1565557623262-b51c2513a641?w=800&h=600&fit=crop"
   },
   {
     id: "jollof-rice",
@@ -445,7 +445,7 @@ export const ramadanRecipes: RamadanRecipe[] = [
       "After 30 minutes, add butter and gently fluff with a fork. If the rice needs more time, cover and cook for 5 more minutes. Serve with fried plantains and grilled chicken."
     ],
     tips: "The secret to great jollof is the 'party jollof' smoky bottom — some people let the bottom slightly toast for extra flavor. Reducing the tomato base properly is crucial; raw tomato taste will ruin the dish. Use parboiled rice (not basmati) for authentic texture.",
-    image: "https://images.unsplash.com/photo-1604329760661-e71dc83f8f26?w=800&h=600&fit=crop"
+    image: "https://images.unsplash.com/photo-1596797038530-2c107229654b?w=800&h=600&fit=crop"
   },
   {
     id: "nasi-lemak",
@@ -481,7 +481,7 @@ export const ramadanRecipes: RamadanRecipe[] = [
       "Serve the coconut rice on plates, with sambal, fried anchovies, roasted peanuts, sliced cucumber, and halved boiled eggs arranged alongside."
     ],
     tips: "Pandan leaves are key to authentic nasi lemak aroma — find them at Asian grocery stores. The sambal can be made in advance and stored in the fridge for a week. For a more elaborate version, add rendang beef or fried chicken.",
-    image: "https://images.unsplash.com/photo-1562565652-a0d8f0c59eb4?w=800&h=600&fit=crop"
+    image: "https://images.unsplash.com/photo-1455619452474-d2be8b1e70cd?w=800&h=600&fit=crop"
   },
   {
     id: "jallab",
@@ -544,7 +544,7 @@ export const ramadanRecipes: RamadanRecipe[] = [
       "Serve very cold over crushed ice, garnished with chopped pistachios."
     ],
     tips: "Qamar al-Din sheets are widely available during Ramadan at Middle Eastern grocery stores. You can also make it thicker as a dessert pudding by using less water. Soaking overnight gives the smoothest result.",
-    image: "https://images.unsplash.com/photo-1621263764928-df1444c5e859?w=800&h=600&fit=crop"
+    image: "https://images.unsplash.com/photo-1622597467836-f3285f2131b8?w=800&h=600&fit=crop"
   },
   {
     id: "tamarind-juice",
@@ -576,7 +576,7 @@ export const ramadanRecipes: RamadanRecipe[] = [
       "Serve over crushed ice, garnished with fresh mint leaves."
     ],
     tips: "Start with less sugar and add more to taste — the tartness is what makes this drink so refreshing after fasting. In Bahrain, tamarind juice is served at practically every iftar gathering. Store in the fridge for up to 5 days.",
-    image: "https://images.unsplash.com/photo-1499638673689-79a0b5115d87?w=800&h=600&fit=crop"
+    image: "https://images.unsplash.com/photo-1541658016709-82535e94bc69?w=800&h=600&fit=crop"
   },
   {
     id: "vimto-rose-milk",
@@ -607,7 +607,7 @@ export const ramadanRecipes: RamadanRecipe[] = [
       "Garnish with rose petals if desired. Serve immediately."
     ],
     tips: "Vimto is a British drink that became a massive Ramadan tradition in the Gulf. The classic way is just Vimto and water, but the rose milk version is a popular modern twist. Some families also make Vimto mojito with fresh mint and lime.",
-    image: "https://images.unsplash.com/photo-1546173159-315724a31696?w=800&h=600&fit=crop"
+    image: "https://images.unsplash.com/photo-1568901839119-631418a3910d?w=800&h=600&fit=crop"
   },
   {
     id: "luqaimat",
@@ -646,7 +646,7 @@ export const ramadanRecipes: RamadanRecipe[] = [
       "Serve warm immediately — luqaimat are best eaten fresh."
     ],
     tips: "The batter should be sticky — that's what creates the crispy exterior and fluffy interior. Wet your hands and tools with oil or water to handle the batter easily. In Bahrain, luqaimat stalls pop up everywhere during Ramadan and the smell of frying dough fills the streets.",
-    image: "https://images.unsplash.com/photo-1579954115545-a95591f28bfc?w=800&h=600&fit=crop"
+    image: "https://images.unsplash.com/photo-1604467794349-0b74285de7e7?w=800&h=600&fit=crop"
   },
   {
     id: "kunafa",
@@ -721,7 +721,7 @@ export const ramadanRecipes: RamadanRecipe[] = [
       "Serve immediately while crispy and warm."
     ],
     tips: "Only cook qatayef on one side — the bubbly, uncooked side is what allows the edges to seal when pinched. These are traditionally only made and sold during Ramadan in the Arab world. For a lighter version, bake instead of frying at 200°C for 15 minutes.",
-    image: "https://images.unsplash.com/photo-1590080874088-eec64895b423?w=800&h=600&fit=crop"
+    image: "https://images.unsplash.com/photo-1606914469633-bd39206ea739?w=800&h=600&fit=crop"
   },
   {
     id: "umm-ali",
@@ -758,7 +758,7 @@ export const ramadanRecipes: RamadanRecipe[] = [
       "Serve hot in individual bowls, dusted with cinnamon."
     ],
     tips: "Umm Ali is like a Middle Eastern bread pudding crossed with crème brûlée. Using puff pastry gives the best flaky texture, but croissants work in a pinch. The dessert should be creamy, not dry — use plenty of milk. It's best served immediately from the oven.",
-    image: "https://images.unsplash.com/photo-1571115177098-24ec42ed204d?w=800&h=600&fit=crop"
+    image: "https://images.unsplash.com/photo-1488477181946-6428a0291777?w=800&h=600&fit=crop"
   },
   {
     id: "basbousa",
@@ -795,7 +795,7 @@ export const ramadanRecipes: RamadanRecipe[] = [
       "Serve at room temperature. Each piece should be moist and soaked through."
     ],
     tips: "The golden rule of syrup-soaked desserts: hot dessert + cold syrup (or cold dessert + hot syrup). This ensures maximum absorption. Don't skip the resting time before baking — it makes the texture much better. Basbousa keeps well at room temperature for 3-4 days.",
-    image: "https://images.unsplash.com/photo-1598110750624-207050c4f28c?w=800&h=600&fit=crop"
+    image: "https://images.unsplash.com/photo-1578985545062-69928b1d9587?w=800&h=600&fit=crop"
   }
 ];
 

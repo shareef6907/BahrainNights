@@ -2,7 +2,7 @@ import { Metadata } from 'next';
 
 export const metadata: Metadata = {
   title: 'Submit Your Venue | BahrainNights',
-  description: 'Submit your venue to be listed on BahrainNights. Get discovered by thousands of people looking for restaurants, bars, and entertainment in Bahrain.',
+  description: 'Submit your venue to be listed on BahrainNights. Get discovered by thousands of people looking for restaurants, lounges, and entertainment in Bahrain.',
   alternates: {
     canonical: 'https://www.bahrainnights.com/submit-venue',
   },

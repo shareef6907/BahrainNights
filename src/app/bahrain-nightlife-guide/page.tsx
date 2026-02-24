@@ -164,10 +164,10 @@ const neighborhoods = [
     vibe: 'Energetic, diverse, loud, fun',
     bestFor: 'Clubbing, bar hopping, late nights',
     venues: [
-      { name: 'Club Downtown', type: 'Nightclub', desc: 'Premier nightclub with international DJs, VIP sections, and huge dance floor. Thursday and Friday nights are legendary.', hours: '10pm-3am', link: '/nightclubs' },
+      { name: 'Club Downtown', type: 'Nightclub', desc: 'Premier nightclub with international DJs, VIP sections, and huge dance floor. Thursday and Friday nights are legendary.', hours: '10pm-2am', link: '/nightclubs' },
       { name: 'Wrangler\'s', type: 'Country Bar', desc: 'Unique country-western themed bar with live music, dancing, and American comfort food.', hours: '8pm-2am', link: '/lounges-bars' },
       { name: 'Diggers', type: 'Sports Bar', desc: 'Popular expat hangout with multiple screens, pool tables, and great pub atmosphere.', hours: '12pm-2am', link: '/lounges-bars' },
-      { name: 'Club Paparazzi', type: 'Nightclub', desc: 'Bollywood nights, hip-hop, and mixed music. Popular with diverse crowds.', hours: '10pm-3am', link: '/nightclubs' },
+      { name: 'Club Paparazzi', type: 'Nightclub', desc: 'Bollywood nights, hip-hop, and mixed music. Popular with diverse crowds.', hours: '10pm-2am', link: '/nightclubs' },
       { name: 'Typhoon', type: 'Lounge Bar', desc: 'Asian-inspired lounge with creative cocktails and late-night dining.', hours: '6pm-2am', link: '/lounges-bars' },
       { name: 'JJ\'s Irish Pub', type: 'Pub', desc: 'Classic Irish pub with live music, quiz nights, and friendly atmosphere.', hours: '12pm-2am', link: '/lounges-bars' },
     ]
@@ -201,7 +201,7 @@ const neighborhoods = [
       { name: 'Bushido Lounge', type: 'Cocktail Bar', desc: 'Japanese-inspired cocktail bar at Ritz-Carlton. Exceptional drinks and ambiance.', hours: '6pm-1am', link: '/lounges-bars' },
       { name: 'Trader Vic\'s', type: 'Tiki Bar', desc: 'Legendary Polynesian bar at Ritz-Carlton. Famous for Mai Tais and pupu platters.', hours: '12pm-1am', link: '/lounges-bars' },
       { name: 'Sherlock Holmes', type: 'English Pub', desc: 'Gulf Hotel\'s British pub with real ales, pub quiz, and cozy atmosphere.', hours: '12pm-2am', link: '/lounges-bars' },
-      { name: 'Zenj', type: 'Nightclub', desc: 'Gulf Hotel\'s iconic nightclub with live DJs and resident bands.', hours: '10pm-3am', link: '/nightclubs' },
+      { name: 'Zenj', type: 'Nightclub', desc: 'Gulf Hotel\'s iconic nightclub with live DJs and resident bands.', hours: '10pm-2am', link: '/nightclubs' },
       { name: 'Vox', type: 'Lounge', desc: 'InterContinental\'s stylish lounge with live music and dancing.', hours: '8pm-2am', link: '/lounges-bars' },
     ]
   },
@@ -241,7 +241,7 @@ const liveMusic = [
 
 const tips = [
   { title: 'Dress Code', desc: 'Smart casual is standard. No shorts, flip-flops, or sportswear at upscale venues. Clubs require stylish attire — when in doubt, overdress.' },
-  { title: 'Timing', desc: 'Bahrainis eat late. Bars fill up around 10-11pm. Clubs don\'t get busy until midnight. The party peaks between 1-3am on weekends.' },
+  { title: 'Timing', desc: 'Bahrainis eat late. Bars fill up around 10-11pm. Clubs don\'t get busy until midnight. The party peaks between midnight and 2am on weekends.' },
   { title: 'ID Required', desc: 'Always carry ID (passport or CPR). 21+ for bars and clubs. Hotels may be stricter about dress and age policies.' },
   { title: 'Transportation', desc: 'Use taxis or ride-hailing apps. Never drink and drive — Bahrain has zero tolerance. Parking is available but limited in busy areas.' },
   { title: 'Prices', desc: 'Drinks cost 4-8 BHD at bars, 8-15 BHD at upscale lounges. Happy hours offer 50% off. Ladies nights offer free drinks (limited).' },
@@ -576,7 +576,7 @@ export default async function NightlifePage() {
               <div className="bg-gray-800/50 rounded-xl p-6">
                 <h3 className="text-xl font-semibold text-white mb-3">What time do clubs close in Bahrain?</h3>
                 <p className="text-gray-300">
-                  Bars typically close around 1-2am. Nightclubs stay open until 3am on weekends (Thursday/Friday). 
+                  Bars typically close around 1-2am. Nightclubs stay open until 2am on weekends (Thursday/Friday). 
                   Some venues have after-hours on special occasions. The party peaks between midnight and 2am.
                 </p>
               </div>
