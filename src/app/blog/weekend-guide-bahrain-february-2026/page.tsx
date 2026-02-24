@@ -7,12 +7,12 @@ import {
 } from 'lucide-react';
 
 export const metadata: Metadata = {
-  title: 'Weekend Guide: What\'s Happening in Bahrain This Weekend (Feb 2026) | BahrainNights',
-  description: 'Your complete guide to the best events, brunches, and activities in Bahrain this weekend. Discover live music, Friday brunches, family fun, and nightlife for February 2026.',
+  title: 'Ramadan Weekend Guide: Iftar, Suhoor & Activities in Bahrain 2026 | BahrainNights',
+  description: 'Your complete Ramadan guide to Bahrain. Discover the best Iftar buffets, Ghabga experiences, family activities, and spiritual events during the holy month.',
   keywords: [
-    'Bahrain weekend guide', 'what to do in Bahrain this weekend', 'Bahrain events February 2026',
-    'Bahrain Friday brunch', 'Bahrain nightlife', 'things to do in Bahrain weekend',
-    'Bahrain activities', 'Bahrain entertainment', 'weekend in Bahrain'
+    'Bahrain Ramadan guide', 'Iftar Bahrain 2026', 'Suhoor Bahrain',
+    'Ghabga Bahrain', 'Ramadan activities Bahrain', 'things to do Ramadan Bahrain',
+    'Ramadan tent Bahrain', 'best Iftar Bahrain', 'Ramadan events Bahrain'
   ].join(', '),
   alternates: {
     canonical: 'https://www.bahrainnights.com/blog/weekend-guide-bahrain-february-2026',
@@ -71,18 +71,20 @@ function generateSchema() {
   };
 }
 
-const fridayBrunches = [
-  { name: 'Al Waha - Gulf Hotel', desc: 'Bahrain\'s most legendary brunch with 15+ live cooking stations, unlimited seafood, and world-class desserts', price: 'From BHD 35', time: '12:30 PM - 4:00 PM', rating: 4.8 },
-  { name: 'Primavera - Ritz-Carlton', desc: 'Authentic Italian brunch with stunning Arabian Gulf views, fresh pasta, and premium wines', price: 'From BHD 45', time: '12:30 PM - 4:00 PM', rating: 4.7 },
-  { name: 'Bahrain Bay Kitchen - Four Seasons', desc: 'Elegant international brunch featuring champagne, sushi bar, and live carving stations', price: 'From BHD 48', time: '12:30 PM - 4:00 PM', rating: 4.7 },
-  { name: 'Choices - InterContinental', desc: 'Great value brunch with themed stations covering Asian, BBQ, and Mediterranean cuisines', price: 'From BHD 32', time: '12:30 PM - 4:00 PM', rating: 4.5 },
+// Note: During Ramadan, traditional Friday brunches are not available
+// Instead, hotels offer Iftar and Suhoor experiences
+const ramadanDining = [
+  { name: 'Al Waha Iftar - Gulf Hotel', desc: 'Bahrain\'s most legendary Iftar buffet with traditional Arabic dishes and live cooking stations', price: 'From BHD 28', time: 'Sunset - 9:00 PM', rating: 4.8 },
+  { name: 'Ramadan Tent - Ritz-Carlton', desc: 'Elegant Iftar experience with Gulf and Levantine cuisine in a beautifully decorated tent', price: 'From BHD 35', time: 'Sunset - 10:00 PM', rating: 4.7 },
+  { name: 'Four Seasons Iftar', desc: 'Premium Iftar featuring international and Arabic cuisines with stunning Bahrain Bay views', price: 'From BHD 38', time: 'Sunset - 9:30 PM', rating: 4.7 },
+  { name: 'InterContinental Iftar', desc: 'Family-friendly Iftar with generous buffet and traditional Ramadan atmosphere', price: 'From BHD 25', time: 'Sunset - 9:00 PM', rating: 4.5 },
 ];
 
 const weekendEvents = [
-  { name: 'Live Jazz at The Merchant', type: 'Music', location: 'Adliya', day: 'Friday & Saturday', time: '9 PM onwards', desc: 'Bahrain\'s premier live music venue featuring local and international jazz acts' },
-  { name: 'Beach Day at Coral Bay', type: 'Leisure', location: 'Diyar Al Muharraq', day: 'Saturday', time: 'All day', desc: 'Family-friendly beach club with pools, water slides, and beachside dining' },
-  { name: 'Night Market at Block 338', type: 'Shopping', location: 'Adliya', day: 'Friday', time: '6 PM - 11 PM', desc: 'Artisanal goods, street food, and live entertainment in Bahrain\'s trendiest neighborhood' },
-  { name: 'Sunset Dhow Cruise', type: 'Experience', location: 'Bahrain Bay', day: 'Saturday', time: '4 PM - 7 PM', desc: 'Traditional wooden boat cruise with dinner and stunning skyline views' },
+  { name: 'Ramadan Nights at Souq Waqif', type: 'Cultural', location: 'Muharraq', day: 'Daily', time: 'After Iftar', desc: 'Traditional markets come alive after Iftar with shopping, street food, and live entertainment' },
+  { name: 'Ghabga at Gulf Hotel', type: 'Dining', location: 'Gulf Hotel', day: 'Daily', time: 'After 10 PM', desc: 'Late-night Ramadan gathering with traditional sweets, Arabic coffee, and shisha' },
+  { name: 'Ritz-Carlton Beach Walk', type: 'Leisure', location: 'Ritz-Carlton, Seef', day: 'Saturday', time: 'Late afternoon', desc: 'Enjoy a peaceful pre-Iftar walk along the pristine private beach' },
+  { name: 'Quran Recitation at Grand Mosque', type: 'Spiritual', location: 'Al Fateh Grand Mosque', day: 'Daily', time: 'Evening', desc: 'Beautiful Quran recitations during Ramadan at Bahrain\'s iconic mosque' },
 ];
 
 const familyActivities = [
@@ -92,11 +94,12 @@ const familyActivities = [
   { name: 'Gravity Indoor Skydiving', desc: 'Experience freefall in a safe indoor environment', location: 'Bahrain Bay', suitable: 'Ages 4+' },
 ];
 
-const nightlifeSpots = [
-  { name: 'Amber Lounge', location: 'The Domain Hotel', type: 'Upscale Lounge', vibe: 'Chic cocktails and stunning city views' },
-  { name: 'Coda Jazz Club', location: 'Ritz-Carlton', type: 'Jazz Bar', vibe: 'Sophisticated live jazz performances' },
-  { name: 'The Shed', location: 'Juffair', type: 'Sports Bar', vibe: 'Casual drinks and big-screen sports' },
-  { name: 'Buffalo Wings & Rings', location: 'Juffair', type: 'Bar & Grill', vibe: 'American vibes with great food' },
+// Note: During Ramadan, nightlife is limited. Many venues operate with reduced hours after Iftar.
+const eveningSpots = [
+  { name: 'Saffron by Jena', location: 'Muharraq', type: 'Traditional Café', vibe: 'Authentic Bahraini atmosphere with Arabic coffee and sweets' },
+  { name: 'Haji\'s Café', location: 'Muharraq', type: 'Traditional Café', vibe: 'Historic café with the best traditional chai and breakfast' },
+  { name: 'The Lobby Lounge', location: 'Ritz-Carlton', type: 'Elegant Lounge', vibe: 'Refined atmosphere for post-Iftar gatherings' },
+  { name: 'Café Lilou', location: 'Adliya', type: 'French Café', vibe: 'Charming café for late-night Suhoor gatherings' },
 ];
 
 const restaurantPicks = [
@@ -190,13 +193,13 @@ export default function WeekendGuidePage() {
             </div>
             
             <p className="text-gray-300 mb-8 max-w-3xl">
-              No weekend in Bahrain is complete without experiencing the legendary Friday brunch. These aren't your 
-              ordinary meals — they're elaborate feasts featuring live cooking stations, free-flowing beverages, and 
-              some of the best hospitality in the region. Here are our top picks for this weekend:
+              During Ramadan, the traditional Friday brunch is replaced by Iftar — the evening meal to break 
+              the fast. Bahrain's hotels offer some of the finest Iftar experiences in the region, featuring 
+              traditional Arabic dishes, live cooking stations, and warm hospitality. Here are our top picks:
             </p>
             
             <div className="grid md:grid-cols-2 gap-6">
-              {fridayBrunches.map((brunch) => (
+              {ramadanDining.map((brunch) => (
                 <div key={brunch.name} className="p-6 bg-gray-800/50 rounded-2xl border border-gray-700 hover:border-gray-600 transition">
                   <div className="flex justify-between items-start mb-3">
                     <h3 className="text-xl font-semibold text-white">{brunch.name}</h3>
@@ -331,13 +334,13 @@ export default function WeekendGuidePage() {
             </div>
             
             <p className="text-gray-300 mb-8 max-w-3xl">
-              Bahrain's nightlife scene is legendary in the Gulf region. From sophisticated rooftop lounges to energetic 
-              nightclubs, the Kingdom offers entertainment options that rival any major city. Whether you're looking for 
-              craft cocktails, live music, or dancing until dawn, here's where to head this weekend:
+              During Ramadan, Bahrain's evening scene shifts to a more relaxed pace. Traditional cafés, hotel lounges, 
+              and cultural spaces become the gathering spots after Iftar. Here are the best places for post-Iftar 
+              gatherings and late-night Suhoor:
             </p>
             
             <div className="grid md:grid-cols-2 gap-6">
-              {nightlifeSpots.map((spot) => (
+              {eveningSpots.map((spot) => (
                 <div key={spot.name} className="p-6 bg-gray-800/50 rounded-2xl border border-gray-700 hover:border-gray-600 transition">
                   <div className="flex items-center gap-2 mb-3">
                     <span className="px-3 py-1 bg-violet-500/20 rounded-full text-violet-300 text-xs font-medium">

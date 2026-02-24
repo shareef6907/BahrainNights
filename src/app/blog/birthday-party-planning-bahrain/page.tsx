@@ -81,7 +81,7 @@ const kidsVenues = [
 ];
 
 const adultVenues = [
-  { name: 'Beach Clubs', examples: 'Coral Bay, Jumeirah', capacity: '30-150', price: 'From BHD 500', features: ['Pool access', 'Beach', 'Catering available'], vibe: 'Relaxed & fun' },
+  { name: 'Beach Clubs', examples: 'Ritz-Carlton Beach Club, Jumeirah Royal Saray', capacity: '30-150', price: 'From BHD 500', features: ['Pool access', 'Beach', 'Catering available'], vibe: 'Relaxed & luxurious' },
   { name: 'Rooftop Lounges', examples: 'Hazel, Azure', capacity: '20-80', price: 'From BHD 800', features: ['City views', 'Bar service', 'DJ available'], vibe: 'Chic & sophisticated' },
   { name: 'Private Dining Rooms', examples: 'Gulf Hotel, Ritz-Carlton', capacity: '10-40', price: 'From BHD 600', features: ['Fine dining', 'Customized menus', 'Privacy'], vibe: 'Elegant & intimate' },
   { name: 'Garden Venues', examples: 'The Orangery, Block 338', capacity: '40-120', price: 'From BHD 400', features: ['Outdoor setting', 'Fairy lights', 'Instagram-worthy'], vibe: 'Casual & pretty' },
