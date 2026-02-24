@@ -123,20 +123,20 @@ export default function NetflixHero({ movies, onMovieClick, onBookClick }: Netfl
   const videoId = getYouTubeId(currentMovie?.trailerUrl);
 
   // Build YouTube embed URL
-  // Mobile: always muted for autoplay, show controls for user interaction
-  // Desktop: can unmute via reload, hide controls for clean look
-  const getEmbedUrl = (id: string, muted: boolean, mobile: boolean) => {
+  // Both mobile and desktop: hide YouTube controls for Netflix-like feel
+  // Sound control handled via our custom button + iframe reload
+  const getEmbedUrl = (id: string, muted: boolean) => {
     const params = new URLSearchParams({
       autoplay: '1',
-      mute: mobile ? '1' : (muted ? '1' : '0'), // Mobile always muted for autoplay
-      controls: mobile ? '1' : '0', // Show controls on mobile for user to unmute
+      mute: muted ? '1' : '0',
+      controls: '0', // Always hide YouTube controls for clean look
       loop: '1',
       playlist: id,
       modestbranding: '1',
       rel: '0',
       showinfo: '0',
       iv_load_policy: '3',
-      disablekb: mobile ? '0' : '1',
+      disablekb: '1',
       playsinline: '1',
       origin: typeof window !== 'undefined' ? window.location.origin : '',
     });
@@ -159,25 +159,20 @@ export default function NetflixHero({ movies, onMovieClick, onBookClick }: Netfl
       <AnimatePresence mode="wait">
         {videoId && (
           <motion.div
-            key={`video-${currentIndex}${isMobile ? '' : `-${isMuted}`}`}
+            key={`video-${currentIndex}-${isMuted}`}
             className="absolute inset-0 w-full h-full"
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             transition={{ duration: 0.3 }}
           >
-            {/* Video container - contain on mobile, cover on desktop */}
+            {/* Video container - cover behavior on all devices for Netflix feel */}
             <div className="absolute inset-0 w-full h-full overflow-hidden flex items-center justify-center">
               <iframe
-                src={getEmbedUrl(videoId, isMuted, isMobile)}
-                className={isMobile ? '' : 'pointer-events-none'}
-                style={isMobile ? {
-                  // Mobile: contain behavior - show full video
-                  border: 'none',
-                  width: '100%',
-                  height: '100%',
-                } : {
-                  // Desktop: cover behavior - fill container
+                src={getEmbedUrl(videoId, isMuted)}
+                className="pointer-events-none"
+                style={{
+                  // Cover behavior - fill container cinematically
                   border: 'none',
                   position: 'absolute',
                   top: '50%',
@@ -291,15 +286,25 @@ export default function NetflixHero({ movies, onMovieClick, onBookClick }: Netfl
         </div>
       </div>
 
-      {/* Mute/Unmute Button - Desktop only (mobile uses YouTube controls) */}
-      {!isMobile && (
-        <button
-          onClick={toggleMute}
-          className="absolute bottom-32 right-6 p-3 bg-gray-800/70 hover:bg-gray-700/90 rounded-full border border-gray-600 text-white transition-all z-20"
-          aria-label={isMuted ? 'Unmute' : 'Mute'}
+      {/* Mute/Unmute Button - shown on all devices */}
+      <button
+        onClick={toggleMute}
+        className={`absolute ${isMobile ? 'bottom-20 right-4' : 'bottom-32 right-6'} p-2.5 md:p-3 bg-gray-800/70 hover:bg-gray-700/90 active:bg-gray-600/90 rounded-full border border-gray-600 text-white transition-all z-20`}
+        aria-label={isMuted ? 'Unmute' : 'Mute'}
+      >
+        {isMuted ? <VolumeX className="w-4 h-4 md:w-5 md:h-5" /> : <Volume2 className="w-4 h-4 md:w-5 md:h-5" />}
+      </button>
+
+      {/* Tap to unmute hint - mobile only, when muted */}
+      {isMobile && isMuted && !userInteracted && (
+        <motion.div 
+          className="absolute bottom-20 right-16 bg-black/80 text-white text-xs px-3 py-1.5 rounded-full z-20"
+          initial={{ opacity: 0, x: 10 }}
+          animate={{ opacity: 1, x: 0 }}
+          transition={{ delay: 1, duration: 0.3 }}
         >
-          {isMuted ? <VolumeX className="w-5 h-5" /> : <Volume2 className="w-5 h-5" />}
-        </button>
+          Tap for sound
+        </motion.div>
       )}
 
       {/* Navigation Arrows */}
