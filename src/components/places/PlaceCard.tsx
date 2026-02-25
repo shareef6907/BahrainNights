@@ -4,7 +4,7 @@ import React, { useCallback } from 'react';
 import { motion } from 'framer-motion';
 import Image from 'next/image';
 import Link from 'next/link';
-import { MapPin, Phone, Navigation, Instagram, Star } from 'lucide-react';
+import { MapPin, Phone, Navigation, Instagram, Star, Crown } from 'lucide-react';
 import { LikeButton } from '@/components/ui/LikeButton';
 import { CATEGORY_COLORS, CATEGORY_LABELS } from '@/lib/constants/categoryColors';
 import { isOpenNow } from '@/lib/utils/openingHours';
@@ -36,6 +36,7 @@ export interface Place {
   upcomingEventsCount: number;
   likeCount?: number; // For sorting by popularity
   is_featured?: boolean; // Featured venues appear at top with badge
+  membership_tier?: 'free' | 'premium' | 'gold' | 'founding_partner'; // Membership tier for badges
 }
 
 interface PlaceCardProps {
@@ -95,8 +96,26 @@ function PlaceCard({ place, index }: PlaceCardProps) {
               </span>
             </div>
 
-            {/* Featured Badge */}
-            {place.is_featured && (
+            {/* Membership Tier Badge - shown in top-right corner */}
+            {place.membership_tier === 'gold' && (
+              <div className="absolute top-3 right-3 px-3 py-1 bg-gradient-to-r from-amber-400 to-yellow-500 rounded-full flex items-center gap-1 shadow-lg">
+                <Crown className="w-3 h-3 text-black fill-black" />
+                <span className="text-xs font-bold text-black">Gold Partner</span>
+              </div>
+            )}
+            {place.membership_tier === 'premium' && (
+              <div className="absolute top-3 right-3 px-3 py-1 bg-gradient-to-r from-blue-400 to-cyan-500 rounded-full flex items-center gap-1 shadow-lg">
+                <Star className="w-3 h-3 text-white fill-white" />
+                <span className="text-xs font-bold text-white">Premium</span>
+              </div>
+            )}
+            {place.membership_tier === 'founding_partner' && (
+              <div className="absolute top-3 right-3 px-3 py-1 bg-gradient-to-r from-emerald-400 to-green-500 rounded-full flex items-center gap-1 shadow-lg">
+                <span className="text-xs font-bold text-white">Founding Partner</span>
+              </div>
+            )}
+            {/* Featured Badge - only show if no membership badge */}
+            {place.is_featured && (!place.membership_tier || place.membership_tier === 'free') && (
               <div className="absolute top-3 right-3 px-3 py-1 bg-gradient-to-r from-yellow-400 to-amber-500 rounded-full flex items-center gap-1 shadow-lg">
                 <Star className="w-3 h-3 text-black fill-black" />
                 <span className="text-xs font-bold text-black">Featured</span>

@@ -85,6 +85,11 @@ export interface Database {
           is_hidden: boolean;
           youtube_url: string | null;
           tags: string[] | null;
+          membership_tier: 'free' | 'premium' | 'gold' | 'founding_partner';
+          membership_start: string | null;
+          membership_end: string | null;
+          membership_amount: number | null;
+          membership_notes: string | null;
           created_at: string;
           updated_at: string;
           approved_at: string | null;
@@ -132,6 +137,11 @@ export interface Database {
           is_hidden?: boolean;
           youtube_url?: string | null;
           tags?: string[] | null;
+          membership_tier?: 'free' | 'premium' | 'gold' | 'founding_partner';
+          membership_start?: string | null;
+          membership_end?: string | null;
+          membership_amount?: number | null;
+          membership_notes?: string | null;
           created_at?: string;
           updated_at?: string;
           approved_at?: string | null;
@@ -179,6 +189,11 @@ export interface Database {
           is_hidden?: boolean;
           youtube_url?: string | null;
           tags?: string[] | null;
+          membership_tier?: 'free' | 'premium' | 'gold' | 'founding_partner';
+          membership_start?: string | null;
+          membership_end?: string | null;
+          membership_amount?: number | null;
+          membership_notes?: string | null;
           created_at?: string;
           updated_at?: string;
           approved_at?: string | null;

@@ -29,6 +29,9 @@ import {
   ToggleRight,
   Copy,
   EyeOffIcon,
+  Crown,
+  Calendar,
+  AlertCircle,
 } from 'lucide-react';
 import { compressImage } from '@/lib/image-compression';
 
@@ -72,6 +75,11 @@ interface Venue {
   youtube_url: string | null;
   view_count: number;
   like_count: number;
+  membership_tier: 'free' | 'premium' | 'gold' | 'founding_partner';
+  membership_start: string | null;
+  membership_end: string | null;
+  membership_amount: number | null;
+  membership_notes: string | null;
   created_at: string;
   updated_at: string;
   approved_at: string | null;
@@ -187,6 +195,17 @@ export default function AdminVenueEditPage({ params }: { params: Promise<{ id: s
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [showRejectModal, setShowRejectModal] = useState(false);
   const [rejectReason, setRejectReason] = useState('');
+  const [savingMembership, setSavingMembership] = useState(false);
+  const [showCustomDates, setShowCustomDates] = useState(false);
+  
+  // Membership state
+  const [membershipData, setMembershipData] = useState({
+    membership_tier: 'free' as 'free' | 'premium' | 'gold' | 'founding_partner',
+    membership_start: '',
+    membership_end: '',
+    membership_amount: '',
+    membership_notes: '',
+  });
 
   // Opening hours state
   const [openingHours, setOpeningHours] = useState<OpeningHours>({
@@ -303,6 +322,15 @@ export default function AdminVenueEditPage({ params }: { params: Promise<{ id: s
 
         setOpeningHours(parsedHours);
       }
+
+      // Populate membership data
+      setMembershipData({
+        membership_tier: v.membership_tier || 'free',
+        membership_start: v.membership_start ? v.membership_start.split('T')[0] : '',
+        membership_end: v.membership_end ? v.membership_end.split('T')[0] : '',
+        membership_amount: v.membership_amount?.toString() || '',
+        membership_notes: v.membership_notes || '',
+      });
     } catch (error) {
       console.error('Error fetching venue:', error);
       setToast({ message: 'Failed to load venue', type: 'error' });
@@ -598,6 +626,81 @@ export default function AdminVenueEditPage({ params }: { params: Promise<{ id: s
       setSaving(false);
       setShowDeleteModal(false);
     }
+  };
+
+  // Membership handlers
+  const handleSetMembershipDuration = (months: number) => {
+    const today = new Date();
+    const endDate = new Date(today);
+    endDate.setMonth(endDate.getMonth() + months);
+    
+    setMembershipData(prev => ({
+      ...prev,
+      membership_start: today.toISOString().split('T')[0],
+      membership_end: endDate.toISOString().split('T')[0],
+    }));
+    setShowCustomDates(false);
+  };
+
+  const handleSaveMembership = async () => {
+    setSavingMembership(true);
+    try {
+      const updates: Record<string, unknown> = {
+        membership_tier: membershipData.membership_tier,
+        membership_start: membershipData.membership_start || null,
+        membership_end: membershipData.membership_tier === 'founding_partner' ? null : (membershipData.membership_end || null),
+        membership_amount: membershipData.membership_amount ? parseFloat(membershipData.membership_amount) : null,
+        membership_notes: membershipData.membership_notes || null,
+      };
+
+      const response = await fetch(`/api/admin/venues/${resolvedParams.id}`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(updates),
+      });
+
+      if (!response.ok) throw new Error('Failed to save membership');
+
+      const data = await response.json();
+      setVenue(data.venue);
+      setToast({ message: 'Membership updated successfully', type: 'success' });
+    } catch (error) {
+      console.error('Error saving membership:', error);
+      setToast({ message: 'Failed to save membership', type: 'error' });
+    } finally {
+      setSavingMembership(false);
+    }
+  };
+
+  const getMembershipStatusBadge = () => {
+    if (membershipData.membership_tier === 'free') {
+      return <span className="px-3 py-1 text-sm font-medium bg-gray-500/20 text-gray-400 rounded-full">Free Tier</span>;
+    }
+    if (membershipData.membership_tier === 'founding_partner') {
+      return <span className="px-3 py-1 text-sm font-medium bg-green-500/20 text-green-400 rounded-full">Founding Partner — No Expiry</span>;
+    }
+    if (membershipData.membership_end) {
+      const endDate = new Date(membershipData.membership_end);
+      const now = new Date();
+      const daysUntilExpiry = Math.ceil((endDate.getTime() - now.getTime()) / (1000 * 60 * 60 * 24));
+      
+      if (endDate < now) {
+        return <span className="px-3 py-1 text-sm font-medium bg-red-500/20 text-red-400 rounded-full flex items-center gap-1">
+          <AlertCircle className="w-3 h-3" />
+          Expired on {endDate.toLocaleDateString()}
+        </span>;
+      }
+      if (daysUntilExpiry <= 30) {
+        return <span className="px-3 py-1 text-sm font-medium bg-orange-500/20 text-orange-400 rounded-full flex items-center gap-1">
+          <AlertCircle className="w-3 h-3" />
+          Expires in {daysUntilExpiry} days
+        </span>;
+      }
+      return <span className="px-3 py-1 text-sm font-medium bg-green-500/20 text-green-400 rounded-full">
+        Active — expires {endDate.toLocaleDateString()}
+      </span>;
+    }
+    return null;
   };
 
   const handleDeleteGalleryPhoto = async (photoUrl: string) => {
@@ -1628,6 +1731,162 @@ export default function AdminVenueEditPage({ params }: { params: Promise<{ id: s
               Hidden venues won&apos;t appear in search results, listings, or the homepage.
               Remember to click &quot;Save Changes&quot; to apply.
             </p>
+          </div>
+
+          {/* Membership */}
+          <div className="bg-[#1A1A2E] rounded-xl p-6 border border-white/10">
+            <div className="flex items-center gap-2 mb-4">
+              <Crown className="w-5 h-5 text-amber-400" />
+              <h3 className="text-lg font-semibold text-white">Membership</h3>
+            </div>
+
+            {/* Status Badge */}
+            <div className="mb-4">
+              {getMembershipStatusBadge()}
+            </div>
+
+            {/* Tier Dropdown */}
+            <div className="mb-4">
+              <label className="block text-sm text-gray-400 mb-1">Tier</label>
+              <select
+                value={membershipData.membership_tier}
+                onChange={(e) => {
+                  const newTier = e.target.value as typeof membershipData.membership_tier;
+                  setMembershipData(prev => ({ 
+                    ...prev, 
+                    membership_tier: newTier,
+                    // Clear end date for founding partner
+                    membership_end: newTier === 'founding_partner' ? '' : prev.membership_end,
+                  }));
+                }}
+                className="w-full px-3 py-2 bg-white/5 border border-white/10 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-cyan-500/50"
+              >
+                <option value="free">Free</option>
+                <option value="premium">Premium</option>
+                <option value="gold">Gold</option>
+                <option value="founding_partner">Founding Partner</option>
+              </select>
+              <p className="text-xs text-gray-500 mt-1">
+                {membershipData.membership_tier === 'premium' && 'BD 600/year or BD 400/6 months'}
+                {membershipData.membership_tier === 'gold' && 'BD 1,200/year or BD 750/6 months'}
+                {membershipData.membership_tier === 'founding_partner' && 'Free forever — no expiry'}
+                {membershipData.membership_tier === 'free' && 'Basic listing — limited features'}
+              </p>
+            </div>
+
+            {/* Duration Buttons (not for free or founding_partner) */}
+            {membershipData.membership_tier !== 'free' && membershipData.membership_tier !== 'founding_partner' && (
+              <div className="mb-4">
+                <label className="block text-sm text-gray-400 mb-2">Quick Duration</label>
+                <div className="flex gap-2 mb-2">
+                  <button
+                    type="button"
+                    onClick={() => handleSetMembershipDuration(6)}
+                    className="flex-1 px-3 py-2 bg-cyan-500/20 hover:bg-cyan-500/30 text-cyan-400 rounded-lg text-sm font-medium transition-colors"
+                  >
+                    6 Months
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => handleSetMembershipDuration(12)}
+                    className="flex-1 px-3 py-2 bg-cyan-500/20 hover:bg-cyan-500/30 text-cyan-400 rounded-lg text-sm font-medium transition-colors"
+                  >
+                    12 Months
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setShowCustomDates(!showCustomDates)}
+                    className={`flex-1 px-3 py-2 rounded-lg text-sm font-medium transition-colors ${
+                      showCustomDates 
+                        ? 'bg-purple-500/30 text-purple-400' 
+                        : 'bg-white/5 hover:bg-white/10 text-gray-400'
+                    }`}
+                  >
+                    Custom
+                  </button>
+                </div>
+
+                {/* Custom Date Pickers */}
+                {showCustomDates && (
+                  <div className="grid grid-cols-2 gap-2 mt-2">
+                    <div>
+                      <label className="block text-xs text-gray-500 mb-1">Start Date</label>
+                      <input
+                        type="date"
+                        value={membershipData.membership_start}
+                        onChange={(e) => setMembershipData(prev => ({ ...prev, membership_start: e.target.value }))}
+                        className="w-full px-2 py-1.5 bg-white/5 border border-white/10 rounded-lg text-white text-sm focus:outline-none focus:ring-2 focus:ring-cyan-500/50"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-xs text-gray-500 mb-1">End Date</label>
+                      <input
+                        type="date"
+                        value={membershipData.membership_end}
+                        onChange={(e) => setMembershipData(prev => ({ ...prev, membership_end: e.target.value }))}
+                        className="w-full px-2 py-1.5 bg-white/5 border border-white/10 rounded-lg text-white text-sm focus:outline-none focus:ring-2 focus:ring-cyan-500/50"
+                      />
+                    </div>
+                  </div>
+                )}
+
+                {/* Show current dates if set */}
+                {(membershipData.membership_start || membershipData.membership_end) && !showCustomDates && (
+                  <div className="flex items-center gap-2 mt-2 text-xs text-gray-400">
+                    <Calendar className="w-3 h-3" />
+                    <span>
+                      {membershipData.membership_start && new Date(membershipData.membership_start).toLocaleDateString()}
+                      {membershipData.membership_start && membershipData.membership_end && ' → '}
+                      {membershipData.membership_end && new Date(membershipData.membership_end).toLocaleDateString()}
+                    </span>
+                  </div>
+                )}
+              </div>
+            )}
+
+            {/* Amount Paid */}
+            {membershipData.membership_tier !== 'free' && membershipData.membership_tier !== 'founding_partner' && (
+              <div className="mb-4">
+                <label className="block text-sm text-gray-400 mb-1">Amount Paid</label>
+                <div className="flex items-center gap-2">
+                  <span className="text-gray-400 text-sm">BD</span>
+                  <input
+                    type="number"
+                    step="0.001"
+                    value={membershipData.membership_amount}
+                    onChange={(e) => setMembershipData(prev => ({ ...prev, membership_amount: e.target.value }))}
+                    placeholder="0.000"
+                    className="flex-1 px-3 py-2 bg-white/5 border border-white/10 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-cyan-500/50"
+                  />
+                </div>
+              </div>
+            )}
+
+            {/* Notes */}
+            <div className="mb-4">
+              <label className="block text-sm text-gray-400 mb-1">Notes (internal)</label>
+              <textarea
+                value={membershipData.membership_notes}
+                onChange={(e) => setMembershipData(prev => ({ ...prev, membership_notes: e.target.value }))}
+                placeholder="e.g., Paid via bank transfer 26 Feb 2026"
+                rows={2}
+                className="w-full px-3 py-2 bg-white/5 border border-white/10 rounded-lg text-white text-sm focus:outline-none focus:ring-2 focus:ring-cyan-500/50 resize-none"
+              />
+            </div>
+
+            {/* Save Button */}
+            <button
+              onClick={handleSaveMembership}
+              disabled={savingMembership}
+              className="w-full flex items-center justify-center gap-2 px-4 py-2 bg-amber-500 hover:bg-amber-600 text-black rounded-lg font-medium transition-colors disabled:opacity-50"
+            >
+              {savingMembership ? (
+                <Loader2 className="w-4 h-4 animate-spin" />
+              ) : (
+                <Crown className="w-4 h-4" />
+              )}
+              Save Membership
+            </button>
           </div>
 
           {/* Stats */}

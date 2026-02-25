@@ -18,6 +18,8 @@ import {
   ArrowUpDown,
   Loader2,
   RefreshCw,
+  Crown,
+  AlertCircle,
 } from 'lucide-react';
 
 interface Venue {
@@ -38,6 +40,8 @@ interface Venue {
   is_verified: boolean;
   is_featured: boolean;
   is_hidden: boolean;
+  membership_tier: 'free' | 'premium' | 'gold' | 'founding_partner';
+  membership_end: string | null;
 }
 
 interface VenueCounts {
@@ -68,6 +72,7 @@ export default function AdminVenuesPage() {
   const [activeTab, setActiveTab] = useState<VenueStatus>('all');
   const [searchQuery, setSearchQuery] = useState('');
   const [categoryFilter, setCategoryFilter] = useState('all');
+  const [tierFilter, setTierFilter] = useState('all');
   const [showHiddenOnly, setShowHiddenOnly] = useState(false);
   const [openActionMenu, setOpenActionMenu] = useState<string | null>(null);
   const [selectedVenues, setSelectedVenues] = useState<string[]>([]);
@@ -105,6 +110,11 @@ export default function AdminVenuesPage() {
         venuesList = venuesList.filter((v: Venue) => v.is_hidden);
       }
 
+      // Filter by membership tier
+      if (tierFilter !== 'all') {
+        venuesList = venuesList.filter((v: Venue) => v.membership_tier === tierFilter);
+      }
+
       setVenues(venuesList);
 
       // Count hidden venues
@@ -118,7 +128,7 @@ export default function AdminVenuesPage() {
     } finally {
       setIsLoading(false);
     }
-  }, [activeTab, categoryFilter, searchQuery, showHiddenOnly]);
+  }, [activeTab, categoryFilter, searchQuery, showHiddenOnly, tierFilter]);
 
   useEffect(() => {
     fetchVenues();
@@ -310,6 +320,46 @@ export default function AdminVenuesPage() {
     return venue.logo_url || venue.cover_image_url || '/placeholder-venue.jpg';
   };
 
+  const getTierBadge = (venue: Venue) => {
+    const tier = venue.membership_tier || 'free';
+    const isExpiringSoon = venue.membership_end && 
+      new Date(venue.membership_end) > new Date() && 
+      new Date(venue.membership_end) < new Date(Date.now() + 30 * 24 * 60 * 60 * 1000);
+    const isExpired = venue.membership_end && new Date(venue.membership_end) < new Date();
+    
+    const showWarning = tier !== 'free' && tier !== 'founding_partner' && (isExpiringSoon || isExpired);
+    
+    switch (tier) {
+      case 'gold':
+        return (
+          <span className="flex items-center gap-1 px-2 py-1 text-xs font-medium bg-amber-500/20 text-amber-400 rounded-full">
+            <Crown className="w-3 h-3" />
+            Gold
+            {showWarning && <AlertCircle className="w-3 h-3 text-red-400" />}
+          </span>
+        );
+      case 'premium':
+        return (
+          <span className="flex items-center gap-1 px-2 py-1 text-xs font-medium bg-blue-500/20 text-blue-400 rounded-full">
+            Premium
+            {showWarning && <AlertCircle className="w-3 h-3 text-red-400" />}
+          </span>
+        );
+      case 'founding_partner':
+        return (
+          <span className="px-2 py-1 text-xs font-medium bg-green-500/20 text-green-400 rounded-full">
+            Founding
+          </span>
+        );
+      default:
+        return (
+          <span className="px-2 py-1 text-xs font-medium bg-gray-500/20 text-gray-500 rounded-full">
+            Free
+          </span>
+        );
+    }
+  };
+
   if (error === 'Unauthorized access') {
     return (
       <div className="flex flex-col items-center justify-center min-h-[400px] text-center">
@@ -413,6 +463,22 @@ export default function AdminVenuesPage() {
           <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400 pointer-events-none" />
         </div>
 
+        {/* Tier Filter */}
+        <div className="relative">
+          <select
+            value={tierFilter}
+            onChange={(e) => setTierFilter(e.target.value)}
+            className="appearance-none px-4 py-2.5 pr-10 bg-white/5 border border-white/10 rounded-xl text-white text-sm focus:outline-none focus:border-cyan-500/50 cursor-pointer"
+          >
+            <option value="all" className="bg-[#1A1A2E]">All Tiers</option>
+            <option value="gold" className="bg-[#1A1A2E]">Gold</option>
+            <option value="premium" className="bg-[#1A1A2E]">Premium</option>
+            <option value="founding_partner" className="bg-[#1A1A2E]">Founding Partner</option>
+            <option value="free" className="bg-[#1A1A2E]">Free</option>
+          </select>
+          <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400 pointer-events-none" />
+        </div>
+
         {/* Sort */}
         <button className="flex items-center gap-2 px-4 py-2.5 bg-white/5 border border-white/10 rounded-xl text-gray-400 hover:text-white transition-colors">
           <ArrowUpDown className="w-4 h-4" />
@@ -510,8 +576,8 @@ export default function AdminVenuesPage() {
                   <th className="text-left p-4 text-sm font-medium text-gray-400">Venue</th>
                   <th className="text-left p-4 text-sm font-medium text-gray-400">Category</th>
                   <th className="text-left p-4 text-sm font-medium text-gray-400">Area</th>
+                  <th className="text-left p-4 text-sm font-medium text-gray-400">Tier</th>
                   <th className="text-left p-4 text-sm font-medium text-gray-400">Contact</th>
-                  <th className="text-left p-4 text-sm font-medium text-gray-400">CR</th>
                   <th className="text-left p-4 text-sm font-medium text-gray-400">Stats</th>
                   <th className="text-left p-4 text-sm font-medium text-gray-400">Status</th>
                   <th className="text-left p-4 text-sm font-medium text-gray-400">Registered</th>
@@ -560,12 +626,10 @@ export default function AdminVenuesPage() {
                     </td>
                     <td className="p-4 text-gray-300">{venue.category}</td>
                     <td className="p-4 text-gray-300">{venue.area}</td>
+                    <td className="p-4">{getTierBadge(venue)}</td>
                     <td className="p-4 text-gray-400 text-sm">
                       <div>{venue.email || '-'}</div>
                       <div className="text-xs">{venue.phone || '-'}</div>
-                    </td>
-                    <td className="p-4 text-gray-400 text-sm">
-                      {venue.cr_number || '-'}
                     </td>
                     <td className="p-4 text-gray-400 text-sm">
                       <div>{venue.view_count} views</div>

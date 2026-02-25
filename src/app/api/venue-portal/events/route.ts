@@ -8,6 +8,7 @@ interface VenueBasicData {
   name: string;
   slug: string;
   email: string;
+  membership_tier?: 'free' | 'premium' | 'gold' | 'founding_partner';
 }
 
 const VENUE_SESSION_SECRET = new TextEncoder().encode(
@@ -146,11 +147,11 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Get venue info
+    // Get venue info including membership tier
     const supabase = getAdminClient();
     const { data: venueData } = await supabase
       .from('venues')
-      .select('name, slug, email')
+      .select('name, slug, email, membership_tier')
       .eq('id', venueId)
       .single();
 
@@ -161,6 +162,35 @@ export async function POST(request: NextRequest) {
         { error: 'Venue not found' },
         { status: 404 }
       );
+    }
+
+    // Check free tier event limit (max 2 events per calendar month)
+    const membershipTier = venue.membership_tier || 'free';
+    if (membershipTier === 'free') {
+      // Get current month's start and end dates
+      const now = new Date();
+      const monthStart = new Date(now.getFullYear(), now.getMonth(), 1);
+      const monthEnd = new Date(now.getFullYear(), now.getMonth() + 1, 0);
+      
+      // Count events created this month by this venue
+      const { count, error: countError } = await supabase
+        .from('events')
+        .select('*', { count: 'exact', head: true })
+        .eq('venue_id', venueId)
+        .gte('created_at', monthStart.toISOString())
+        .lte('created_at', monthEnd.toISOString());
+
+      if (countError) {
+        console.error('Error counting venue events:', countError);
+      } else if (count !== null && count >= 2) {
+        return NextResponse.json(
+          { 
+            error: 'Free tier venues can post up to 2 events per month. Contact us to upgrade to Premium for unlimited event posting.',
+            code: 'FREE_TIER_LIMIT_REACHED'
+          },
+          { status: 403 }
+        );
+      }
     }
 
     // Generate unique slug

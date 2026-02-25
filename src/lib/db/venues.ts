@@ -61,15 +61,16 @@ export async function getVenues(filters: VenueFilters = {}): Promise<Venue[]> {
 
 // Get approved venues only (for public pages)
 // Excludes hidden venues from public display
+// Sorted by membership tier: gold > premium > founding_partner > free
 export async function getApprovedVenues(filters: Omit<VenueFilters, 'status'> = {}): Promise<Venue[]> {
   const supabase = getAdminClient();
 
+  // Note: Supabase doesn't support CASE in ORDER BY directly, so we fetch and sort in JS
   let query = supabase
     .from('venues')
     .select('*')
     .eq('status', 'approved')
-    .eq('is_hidden', false)
-    .order('created_at', { ascending: false });
+    .eq('is_hidden', false);
 
   if (filters.category) {
     query = query.eq('category', filters.category);
@@ -102,7 +103,29 @@ export async function getApprovedVenues(filters: Omit<VenueFilters, 'status'> = 
     throw new Error(`Failed to fetch venues: ${error.message || error.code || JSON.stringify(error)}`);
   }
 
-  return (data || []) as Venue[];
+  // Sort by membership tier: gold (1) > premium (2) > founding_partner (3) > free (4)
+  // Within each tier, sort by like_count DESC
+  const tierOrder: Record<string, number> = {
+    gold: 1,
+    premium: 2,
+    founding_partner: 3,
+    free: 4,
+  };
+
+  const venues = (data || []) as Venue[];
+  venues.sort((a, b) => {
+    const tierA = tierOrder[a.membership_tier || 'free'] || 5;
+    const tierB = tierOrder[b.membership_tier || 'free'] || 5;
+    
+    if (tierA !== tierB) {
+      return tierA - tierB;
+    }
+    
+    // Same tier, sort by like_count DESC
+    return (b.like_count || 0) - (a.like_count || 0);
+  });
+
+  return venues;
 }
 
 // Get pending venues (for admin)
