@@ -101,10 +101,10 @@ const internationalHighlights = [
   { num: 21, name: 'Butter Chicken', desc: 'Creamy tomato-based curry that\'s become a Bahrain staple. The Indian community has perfected it here.', where: 'Zafran, Copper Chimney, Lanterns', price: '$$' },
   { num: 22, name: 'Biryani', desc: 'Fragrant rice layered with spiced meat. Hyderabadi and Lucknowi styles are both popular in Bahrain.', where: 'Zafran, Lanterns, Copper Chimney', price: '$$' },
   { num: 23, name: 'Fish and Chips', desc: 'British classic done right at Bahrain\'s British-style pubs and restaurants.', where: 'JJ\'s Irish Pub, British Club', price: '$$' },
-  { num: 24, name: 'Sushi Omakase', desc: 'Chef\'s choice sushi experience with premium imported fish. Bahrain\'s Japanese scene is booming.', where: 'Sushi Shin, Bushido, Mirai', price: '$$$$' },
+  { num: 24, name: 'Sushi Omakase', desc: 'Chef\'s choice sushi experience with premium imported fish. Bahrain\'s Japanese scene is booming.', where: 'Bushido, Mirai, ROKA', price: '$$$$' },
   { num: 25, name: 'Neapolitan Pizza', desc: 'Wood-fired pizza with San Marzano tomatoes and buffalo mozzarella. Authenticity is key.', where: 'Masso, Segafredo, Italian restaurants', price: '$$' },
   { num: 26, name: 'Pad Thai', desc: 'Stir-fried noodles with tamarind, peanuts, and lime. Thai restaurants in Bahrain don\'t disappoint.', where: 'Thai Express, hotel Thai restaurants', price: '$$' },
-  { num: 27, name: 'Peking Duck', desc: 'Crispy-skinned duck with pancakes and hoisin sauce. A special occasion worthy dish.', where: 'Dynasty, hotel Chinese restaurants', price: '$$$' },
+  { num: 27, name: 'Peking Duck', desc: 'Crispy-skinned duck with pancakes and hoisin sauce. A special occasion worthy dish.', where: 'China Garden (Gulf Hotel), hotel Chinese restaurants', price: '$$$' },
   { num: 28, name: 'Wagyu Steak', desc: 'Premium Japanese beef grilled to perfection. Several Bahrain restaurants offer A5 grade.', where: 'CUT by Wolfgang Puck, Nusr-Et', price: '$$$$' },
   { num: 29, name: 'Tacos Al Pastor', desc: 'Spit-roasted pork tacos with pineapple. Latin American flavors are gaining ground in Bahrain.', where: 'Calexico, Mexican restaurants', price: '$$' },
   { num: 30, name: 'Pho', desc: 'Vietnamese noodle soup with fragrant broth. Comfort in a bowl, especially on cooler evenings.', where: 'Vietnamese restaurants, food courts', price: '$' },
@@ -119,7 +119,7 @@ const seafoodSpecials = [
   { num: 36, name: 'Seafood Machboos', desc: 'The rice dish made with fresh Gulf fish instead of meat. A coastal Bahraini specialty.', where: 'Traditional restaurants, Budaiya area', price: '$$' },
   { num: 37, name: 'Crab Curry', desc: 'Fresh crab in rich, spicy gravy. The best ones use local mud crabs.', where: 'Indian seafood restaurants', price: '$$' },
   { num: 38, name: 'Grilled Zubaidi', desc: 'Silver pomfret, a Gulf delicacy, grilled whole with lemon and herbs.', where: 'Lanterns, traditional restaurants', price: '$$' },
-  { num: 39, name: 'Sashimi Platter', desc: 'Pristine raw fish from Tokyo\'s markets, sliced to perfection.', where: 'Bushido, Sushi Shin, Mirai', price: '$$$' },
+  { num: 39, name: 'Sashimi Platter', desc: 'Pristine raw fish from Tokyo\'s markets, sliced to perfection.', where: 'Bushido, Mirai, ROKA', price: '$$$' },
   { num: 40, name: 'Seafood Tower', desc: 'An impressive display of oysters, prawns, crab, and lobster on ice.', where: 'CUT, Plums, fine dining restaurants', price: '$$$$' },
 ];
 

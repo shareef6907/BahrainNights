@@ -139,8 +139,8 @@ const bestByCuisine = [
     restaurants: [
       { name: 'Bushido', location: 'Gulf Hotel', desc: 'The complete Japanese experience with teppanyaki, sushi, and performances.' },
       { name: 'Mirai', location: 'Bahrain Bay', desc: 'Authentic omakase with seasonal fish from Japan.' },
-      { name: 'Sushi Shin', location: 'Adliya', desc: 'Neighborhood sushi bar with exceptional quality and fair prices.' },
-      { name: 'Meisei', location: 'Seef', desc: 'Casual Japanese with excellent ramen and robatayaki.' },
+      { name: 'ROKA', location: 'Bahrain Harbour', desc: 'Contemporary Japanese robatayaki with sushi counter and stunning views.' },
+      { name: 'Meisei', location: 'Adliya', desc: 'Casual Japanese with excellent ramen and robatayaki.' },
     ]
   },
   {

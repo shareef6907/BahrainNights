@@ -171,7 +171,7 @@ const venueTypes = [
     venues: [
       { name: 'CUT by Wolfgang Puck', location: 'Four Seasons, Bahrain Bay', desc: 'Premium steakhouse with a spectacular lounge area. Stunning views of the bay and city skyline.' },
       { name: 'Sky Lounge', location: 'Four Seasons, Bahrain Bay', desc: 'Sophisticated rooftop bar with panoramic bay views and expertly crafted cocktails.' },
-      { name: 'La Fontaine', location: 'Amwaj Islands', desc: 'Mediterranean-style venue with sea views and live music. Perfect for al fresco evenings.' },
+      { name: 'La Fontaine', location: 'Manama (Hoora)', desc: 'Art center and restaurant in a 150-year-old heritage building. Intimate atmosphere for evening gatherings.' },
       { name: 'Trader Vic\'s', location: 'Ritz-Carlton, Seef', desc: 'Legendary Polynesian bar on the ground floor by the lagoon. Famous for Mai Tais and pupu platters in a tiki-themed setting.' },
     ]
   },
