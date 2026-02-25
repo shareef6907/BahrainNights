@@ -140,12 +140,6 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       priority: 0.8,
     },
     {
-      url: `${BASE_URL}/blog/valentines-day-bahrain-2026`,
-      lastModified: new Date(),
-      changeFrequency: 'monthly',
-      priority: 0.8,
-    },
-    {
       url: `${BASE_URL}/blog/weekend-guide-bahrain-february-2026`,
       lastModified: new Date(),
       changeFrequency: 'monthly',

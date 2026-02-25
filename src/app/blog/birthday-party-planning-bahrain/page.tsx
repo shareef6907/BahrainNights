@@ -580,10 +580,10 @@ export default function BirthdayPartyGuidePage() {
           <div className="max-w-6xl mx-auto">
             <h2 className="text-2xl font-bold text-white mb-8">Related Guides</h2>
             <div className="grid md:grid-cols-3 gap-6">
-              <Link href="/blog/valentines-day-bahrain-2026" className="p-6 bg-gray-800/50 rounded-xl hover:bg-gray-800 transition group">
+              <Link href="/guides/romantic" className="p-6 bg-gray-800/50 rounded-xl hover:bg-gray-800 transition group">
                 <Heart className="w-8 h-8 text-red-400 mb-3" />
-                <h3 className="font-semibold text-white group-hover:text-red-300 transition">Valentine's Day Guide</h3>
-                <p className="text-sm text-gray-400 mt-2">Romantic restaurants & events</p>
+                <h3 className="font-semibold text-white group-hover:text-red-300 transition">Romantic Dining Guide</h3>
+                <p className="text-sm text-gray-400 mt-2">Best date night restaurants</p>
               </Link>
               <Link href="/family-kids" className="p-6 bg-gray-800/50 rounded-xl hover:bg-gray-800 transition group">
                 <Users className="w-8 h-8 text-cyan-400 mb-3" />

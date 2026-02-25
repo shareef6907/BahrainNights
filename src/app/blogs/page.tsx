@@ -98,15 +98,6 @@ const blogPosts = [
     readTime: '18 min read',
   },
   {
-    title: 'Valentine\'s Day in Bahrain 2026',
-    slug: 'valentines-day-bahrain-2026',
-    description: 'Make Valentine\'s Day unforgettable. Romantic restaurants, exclusive events, and unique experiences.',
-    icon: Heart,
-    color: 'from-red-500 to-pink-600',
-    category: 'Special Events',
-    readTime: '10 min read',
-  },
-  {
     title: 'Weekend Guide: What\'s Happening in Bahrain',
     slug: 'weekend-guide-bahrain-february-2026',
     description: 'Your complete guide to the best events, brunches, and activities in Bahrain this weekend.',

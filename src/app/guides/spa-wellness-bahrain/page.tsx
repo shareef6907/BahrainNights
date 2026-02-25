@@ -385,7 +385,7 @@ export default function SpaWellnessBahrainPage() {
           <h2 className="text-xl font-bold mb-6">Related Guides</h2>
           <div className="grid md:grid-cols-4 gap-4">
             {[
-              { title: 'Valentine\'s Day', href: '/guides/valentines-day-bahrain', emoji: '💕' },
+              { title: 'Romantic Dining', href: '/guides/romantic', emoji: '💕' },
               { title: 'Mother\'s Day', href: '/guides/mothers-day-bahrain', emoji: '👩' },
               { title: 'Date Night', href: '/guides/best-date-night-bahrain', emoji: '💑' },
               { title: 'Beach Clubs', href: '/guides/beach-clubs', emoji: '🏖️' },
