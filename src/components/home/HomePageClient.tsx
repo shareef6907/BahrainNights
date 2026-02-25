@@ -568,7 +568,7 @@ export default function HomePageClient({ initialMovies, initialStats, initialTod
               {menuItems.map((item) => (
                 <div
                   key={item.name}
-                  className="relative"
+                  className="relative pb-2"
                   onMouseEnter={() => setActiveDropdown(item.name)}
                   onMouseLeave={() => setActiveDropdown(null)}
                 >
@@ -584,7 +584,7 @@ export default function HomePageClient({ initialMovies, initialStats, initialTod
                   {/* Desktop Dropdown - CSS animations instead of framer-motion */}
                   {activeDropdown === item.name && (
                     <div
-                      className="absolute top-full left-0 mt-2 w-64 bg-slate-900/98 backdrop-blur-xl border border-white/10 rounded-2xl shadow-2xl shadow-black/50 overflow-hidden animate-dropdown-in"
+                      className="absolute top-full left-0 w-64 bg-slate-900/98 backdrop-blur-xl border border-white/10 rounded-2xl shadow-2xl shadow-black/50 overflow-hidden animate-dropdown-in"
                     >
                       <div className="py-2">
                         {item.dropdown.map((subItem, index) => (
