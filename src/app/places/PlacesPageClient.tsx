@@ -45,6 +45,7 @@ function venueToPlace(venue: Venue): Place {
     upcomingEventsCount: 0,
     likeCount: venue.like_count || 0,
     is_featured: venue.is_featured || false,
+    membership_tier: venue.membership_tier || 'free',
   };
 }
 
