@@ -128,18 +128,28 @@ export default function ShoppingPage() {
           </h2>
           <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-4">
             {malls.map((mall) => (
-              <div
+              <Link
                 key={mall.name}
-                className="bg-white/5 border border-white/10 rounded-xl p-4"
+                href={`/guides/malls/${mall.slug}`}
+                className="group bg-white/5 border border-white/10 rounded-xl p-4 hover:bg-white/10 hover:border-amber-500/30 transition-all"
               >
                 <div className="text-2xl mb-2">{mall.emoji}</div>
-                <h3 className="font-semibold text-white text-sm">
+                <h3 className="font-semibold text-white group-hover:text-amber-400 transition-colors text-sm">
                   {mall.name}
                 </h3>
                 <p className="text-xs text-gray-500 mt-1">{mall.area}</p>
                 <p className="text-xs text-amber-400/80 mt-1">{mall.stores} stores</p>
-              </div>
+              </Link>
             ))}
+          </div>
+          <div className="mt-4">
+            <Link
+              href="/guides/malls"
+              className="inline-flex items-center gap-2 px-4 py-2 bg-amber-500/20 border border-amber-500/30 rounded-xl text-sm text-amber-400 hover:bg-amber-500/30 transition-colors"
+            >
+              View All Malls
+              <ArrowRight className="w-4 h-4" />
+            </Link>
           </div>
         </motion.div>
       </section>
@@ -191,20 +201,25 @@ export default function ShoppingPage() {
         </motion.div>
       </section>
 
-      {/* Shopping Info */}
+      {/* More Shopping Guides */}
       <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pb-16">
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.4 }}
         >
-          <h2 className="text-xl font-bold text-white mb-6">Shopping in Bahrain</h2>
+          <h2 className="text-xl font-bold text-white mb-6">More Shopping Guides</h2>
           <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
-            <div className="bg-gradient-to-br from-amber-500/10 to-orange-500/10 border border-amber-500/20 rounded-xl p-6">
+            <Link
+              href="/guides/malls"
+              className="group bg-gradient-to-br from-amber-500/10 to-orange-500/10 border border-amber-500/20 rounded-xl p-6 hover:border-amber-500/40 transition-all"
+            >
               <span className="text-3xl mb-3 block">🏬</span>
-              <h3 className="font-bold text-white">Modern Malls</h3>
-              <p className="text-sm text-gray-400 mt-1">World-class shopping centers with international brands</p>
-            </div>
+              <h3 className="font-bold text-white group-hover:text-amber-400 transition-colors">
+                Complete Mall Guide
+              </h3>
+              <p className="text-sm text-gray-400 mt-1">All malls with store directories</p>
+            </Link>
 
             <div className="bg-gradient-to-br from-amber-500/10 to-orange-500/10 border border-amber-500/20 rounded-xl p-6">
               <span className="text-3xl mb-3 block">🏺</span>
@@ -214,8 +229,8 @@ export default function ShoppingPage() {
 
             <div className="bg-gradient-to-br from-green-500/10 to-emerald-500/10 border border-green-500/20 rounded-xl p-6">
               <span className="text-3xl mb-3 block">💰</span>
-              <h3 className="font-bold text-white">Great Value</h3>
-              <p className="text-sm text-gray-400 mt-1">Tax-free shopping with regular sales & promotions</p>
+              <h3 className="font-bold text-white">Tax-Free Shopping</h3>
+              <p className="text-sm text-gray-400 mt-1">Great value with regular sales & promotions</p>
             </div>
           </div>
         </motion.div>
