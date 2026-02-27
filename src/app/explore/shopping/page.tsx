@@ -128,28 +128,18 @@ export default function ShoppingPage() {
           </h2>
           <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-4">
             {malls.map((mall) => (
-              <Link
+              <div
                 key={mall.name}
-                href={`/guides/malls/${mall.slug}`}
-                className="group bg-white/5 border border-white/10 rounded-xl p-4 hover:bg-white/10 hover:border-amber-500/30 transition-all"
+                className="bg-white/5 border border-white/10 rounded-xl p-4"
               >
                 <div className="text-2xl mb-2">{mall.emoji}</div>
-                <h3 className="font-semibold text-white group-hover:text-amber-400 transition-colors text-sm">
+                <h3 className="font-semibold text-white text-sm">
                   {mall.name}
                 </h3>
                 <p className="text-xs text-gray-500 mt-1">{mall.area}</p>
                 <p className="text-xs text-amber-400/80 mt-1">{mall.stores} stores</p>
-              </Link>
+              </div>
             ))}
-          </div>
-          <div className="mt-4">
-            <Link
-              href="/guides/malls"
-              className="inline-flex items-center gap-2 px-4 py-2 bg-amber-500/20 border border-amber-500/30 rounded-xl text-sm text-amber-400 hover:bg-amber-500/30 transition-colors"
-            >
-              View All Malls
-              <ArrowRight className="w-4 h-4" />
-            </Link>
           </div>
         </motion.div>
       </section>
@@ -183,17 +173,16 @@ export default function ShoppingPage() {
 
                 <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-4">
                   {category.brands.map((brand) => (
-                    <Link
+                    <div
                       key={brand.slug}
-                      href={`/guides/brands/${brand.slug}`}
-                      className="group bg-white/5 border border-white/10 rounded-xl p-4 hover:bg-white/10 hover:border-white/20 transition-all"
+                      className="bg-white/5 border border-white/10 rounded-xl p-4"
                     >
                       <div className="text-3xl mb-2">{brand.emoji}</div>
-                      <h4 className="font-semibold text-white group-hover:text-amber-400 transition-colors">
+                      <h4 className="font-semibold text-white">
                         {brand.name}
                       </h4>
-                      <p className="text-xs text-gray-500 mt-1">Store locations →</p>
-                    </Link>
+                      <p className="text-xs text-gray-500 mt-1">Available in Bahrain</p>
+                    </div>
                   ))}
                 </div>
               </motion.div>
@@ -202,47 +191,32 @@ export default function ShoppingPage() {
         </motion.div>
       </section>
 
-      {/* More Shopping Guides */}
+      {/* Shopping Info */}
       <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pb-16">
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.4 }}
         >
-          <h2 className="text-xl font-bold text-white mb-6">More Shopping Guides</h2>
+          <h2 className="text-xl font-bold text-white mb-6">Shopping in Bahrain</h2>
           <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
-            <Link
-              href="/guides/malls"
-              className="group bg-gradient-to-br from-amber-500/10 to-orange-500/10 border border-amber-500/20 rounded-xl p-6 hover:border-amber-500/40 transition-all"
-            >
+            <div className="bg-gradient-to-br from-amber-500/10 to-orange-500/10 border border-amber-500/20 rounded-xl p-6">
               <span className="text-3xl mb-3 block">🏬</span>
-              <h3 className="font-bold text-white group-hover:text-amber-400 transition-colors">
-                Complete Mall Guide
-              </h3>
-              <p className="text-sm text-gray-400 mt-1">All malls with store directories</p>
-            </Link>
+              <h3 className="font-bold text-white">Modern Malls</h3>
+              <p className="text-sm text-gray-400 mt-1">World-class shopping centers with international brands</p>
+            </div>
 
-            <Link
-              href="/guides/souks"
-              className="group bg-gradient-to-br from-amber-500/10 to-orange-500/10 border border-amber-500/20 rounded-xl p-6 hover:border-amber-500/40 transition-all"
-            >
+            <div className="bg-gradient-to-br from-amber-500/10 to-orange-500/10 border border-amber-500/20 rounded-xl p-6">
               <span className="text-3xl mb-3 block">🏺</span>
-              <h3 className="font-bold text-white group-hover:text-amber-400 transition-colors">
-                Traditional Souks
-              </h3>
-              <p className="text-sm text-gray-400 mt-1">Gold Souq, Bab Al Bahrain & more</p>
-            </Link>
+              <h3 className="font-bold text-white">Traditional Souks</h3>
+              <p className="text-sm text-gray-400 mt-1">Gold Souq, Bab Al Bahrain & local markets</p>
+            </div>
 
-            <Link
-              href="/guides/budget"
-              className="group bg-gradient-to-br from-green-500/10 to-emerald-500/10 border border-green-500/20 rounded-xl p-6 hover:border-green-500/40 transition-all"
-            >
+            <div className="bg-gradient-to-br from-green-500/10 to-emerald-500/10 border border-green-500/20 rounded-xl p-6">
               <span className="text-3xl mb-3 block">💰</span>
-              <h3 className="font-bold text-white group-hover:text-green-400 transition-colors">
-                Budget Shopping
-              </h3>
-              <p className="text-sm text-gray-400 mt-1">Best deals and discounts</p>
-            </Link>
+              <h3 className="font-bold text-white">Great Value</h3>
+              <p className="text-sm text-gray-400 mt-1">Tax-free shopping with regular sales & promotions</p>
+            </div>
           </div>
         </motion.div>
       </section>
