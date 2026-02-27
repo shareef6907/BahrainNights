@@ -19,12 +19,12 @@ const mallLinks: Record<string, string> = {
 };
 
 export const metadata: Metadata = {
-  title: 'Gucci Bahrain - Store Location & Shopping Guide 2026',
-  description: 'Find Gucci in Bahrain at Marassi Galleria, Diyar Al Muharraq. Complete guide to the Gucci boutique with store hours, directions & luxury shopping tips.',
-  keywords: 'Gucci Bahrain, Gucci store Bahrain, where to buy Gucci Bahrain, Gucci Marassi Galleria, Gucci bags Bahrain, Gucci Diyar Al Muharraq',
+  title: 'Gucci Bahrain - Store Locations & Shopping Guide 2026',
+  description: 'Find Gucci stores in Bahrain at Marassi Galleria and Moda Mall. Complete guide to Gucci boutiques with store hours, directions & luxury shopping tips.',
+  keywords: 'Gucci Bahrain, Gucci store Bahrain, where to buy Gucci Bahrain, Gucci Marassi Galleria, Gucci Moda Mall, Gucci bags Bahrain',
   openGraph: {
-    title: 'Gucci Bahrain - Store Location & Shopping Guide 2026',
-    description: 'Find Gucci in Bahrain at Marassi Galleria. Complete guide with store hours, directions & shopping tips.',
+    title: 'Gucci Bahrain - Store Locations & Shopping Guide 2026',
+    description: 'Find Gucci stores in Bahrain at Marassi Galleria and Moda Mall. Complete guide with store hours, directions & shopping tips.',
     type: 'article',
     locale: 'en_US',
     url: 'https://www.bahrainnights.com/guides/brands/gucci',
@@ -39,7 +39,7 @@ const storeLocations = [
     name: 'Gucci - Marassi Galleria',
     mall: 'Marassi Galleria',
     address: 'Marassi Galleria Mall, Marassi Al Bahrain, Diyar Al Muharraq',
-    floor: 'Ground Floor',
+    floor: 'First Floor',
     hours: 'Sun-Wed: 10:00 AM - 10:00 PM, Thu-Sat: 10:00 AM - 12:00 AM',
     products: ['Leather Goods', 'Handbags', 'Ready-to-Wear', 'Shoes', 'Accessories', 'Jewelry', 'Watches', 'Fragrances', 'Eyewear'],
     features: ['Full boutique', 'In-store pick-up for online orders', 'Personal styling', 'Beachfront luxury mall', 'Near Address Hotel'],
@@ -47,6 +47,19 @@ const storeLocations = [
     isPrimary: true,
     rating: 4.3,
     reviews: 29,
+  },
+  {
+    name: 'Gucci - Moda Mall',
+    mall: 'Moda Mall',
+    address: 'Moda Mall, World Trade Centre, Manama',
+    floor: 'Ground Floor',
+    hours: 'Sun-Wed: 10:00 AM - 10:00 PM, Thu-Sat: 10:00 AM - 12:00 AM',
+    products: ['Leather Goods', 'Handbags', 'Ready-to-Wear', 'Shoes', 'Accessories', 'Jewelry', 'Watches', 'Fragrances', 'Eyewear'],
+    features: ['Full boutique', 'World Trade Centre location', 'Premium mall', 'Personal styling'],
+    mapsLink: 'https://www.google.com/maps/search/Gucci+Moda+Mall+Bahrain',
+    isPrimary: false,
+    rating: 4.5,
+    reviews: 42,
   },
 ];
 
