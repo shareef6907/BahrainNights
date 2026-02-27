@@ -200,6 +200,11 @@ const nextConfig: NextConfig = {
         destination: '/best-lounges-bahrain',
         permanent: true,
       },
+      {
+        source: '/shopping',
+        destination: '/explore/shopping',
+        permanent: true,
+      },
     ];
   },
 
