@@ -183,16 +183,17 @@ export default function ShoppingPage() {
 
                 <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-4">
                   {category.brands.map((brand) => (
-                    <div
+                    <Link
                       key={brand.slug}
-                      className="bg-white/5 border border-white/10 rounded-xl p-4"
+                      href={`/guides/brands/${brand.slug}`}
+                      className="group bg-white/5 border border-white/10 rounded-xl p-4 hover:bg-white/10 hover:border-white/20 transition-all"
                     >
                       <div className="text-3xl mb-2">{brand.emoji}</div>
-                      <h4 className="font-semibold text-white">
+                      <h4 className="font-semibold text-white group-hover:text-amber-400 transition-colors">
                         {brand.name}
                       </h4>
-                      <p className="text-xs text-gray-500 mt-1">Available in Bahrain</p>
-                    </div>
+                      <p className="text-xs text-gray-500 mt-1">Store locations →</p>
+                    </Link>
                   ))}
                 </div>
               </motion.div>
@@ -221,11 +222,16 @@ export default function ShoppingPage() {
               <p className="text-sm text-gray-400 mt-1">All malls with store directories</p>
             </Link>
 
-            <div className="bg-gradient-to-br from-amber-500/10 to-orange-500/10 border border-amber-500/20 rounded-xl p-6">
+            <Link
+              href="/guides/souks"
+              className="group bg-gradient-to-br from-amber-500/10 to-orange-500/10 border border-amber-500/20 rounded-xl p-6 hover:border-amber-500/40 transition-all"
+            >
               <span className="text-3xl mb-3 block">🏺</span>
-              <h3 className="font-bold text-white">Traditional Souks</h3>
+              <h3 className="font-bold text-white group-hover:text-amber-400 transition-colors">
+                Traditional Souks
+              </h3>
               <p className="text-sm text-gray-400 mt-1">Gold Souq, Bab Al Bahrain & local markets</p>
-            </div>
+            </Link>
 
             <div className="bg-gradient-to-br from-green-500/10 to-emerald-500/10 border border-green-500/20 rounded-xl p-6">
               <span className="text-3xl mb-3 block">💰</span>
