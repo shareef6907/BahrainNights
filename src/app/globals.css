@@ -197,6 +197,48 @@
     filter: drop-shadow(0 0 8px rgba(255, 255, 255, 0.5));
   }
 
+  /* Emergency Category Button - Red with pulse */
+  .category-btn-emergency {
+    background: #dc2626;
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    color: #ffffff;
+    border: 1px solid rgba(255, 255, 255, 0.3);
+    text-shadow:
+      0 0 10px rgba(255, 255, 255, 0.7),
+      0 0 20px rgba(220, 38, 38, 0.5);
+    box-shadow:
+      0 4px 15px rgba(220, 38, 38, 0.4),
+      0 0 20px rgba(220, 38, 38, 0.2);
+    animation: emergency-btn-pulse 2s ease-in-out infinite;
+    transition: all 0.3s ease;
+  }
+
+  .category-btn-emergency:hover {
+    background: #ef4444;
+    border-color: rgba(255, 255, 255, 0.5);
+    text-shadow:
+      0 0 15px rgba(255, 255, 255, 0.9),
+      0 0 30px rgba(220, 38, 38, 0.8);
+    box-shadow:
+      0 4px 25px rgba(220, 38, 38, 0.6),
+      0 0 40px rgba(220, 38, 38, 0.3);
+    transform: scale(1.05);
+  }
+
+  @keyframes emergency-btn-pulse {
+    0%, 100% {
+      box-shadow:
+        0 4px 15px rgba(220, 38, 38, 0.4),
+        0 0 20px rgba(220, 38, 38, 0.2);
+    }
+    50% {
+      box-shadow:
+        0 4px 25px rgba(220, 38, 38, 0.6),
+        0 0 35px rgba(220, 38, 38, 0.4);
+    }
+  }
+
   /* Neon Glow Navigation Items - Always visible on any background */
   .nav-item-glow {
     background: rgba(0, 0, 0, 0.5);

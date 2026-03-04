@@ -2,7 +2,6 @@
 
 import dynamic from 'next/dynamic';
 import RamadanBanner from '@/components/Ramadan/RamadanBanner'; // Direct import for LCP
-import EmergencyBanner from '@/components/emergency/EmergencyBanner'; // Emergency contacts banner
 
 // Dynamic imports for non-critical components (improves initial load)
 // Using ssr: false since these are purely client-side interactive components
@@ -37,7 +36,6 @@ interface ClientComponentsProps {
 export function ClientComponents({ children }: ClientComponentsProps) {
   return (
     <>
-      <EmergencyBanner />
       <RamadanBanner />
       <SwipeBackHandler threshold={50} edgeWidth={50} />
       {children}
