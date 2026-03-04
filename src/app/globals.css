@@ -494,4 +494,31 @@
   .safe-area-inset-right {
     padding-right: env(safe-area-inset-right, 0px);
   }
+
+  /* Emergency Banner Animations */
+  @keyframes emergency-pulse {
+    0%, 100% {
+      background-color: rgb(185 28 28); /* red-700 */
+    }
+    50% {
+      background-color: rgb(220 38 38); /* red-600 */
+    }
+  }
+
+  @keyframes emergency-shimmer {
+    0% {
+      transform: translateX(-100%);
+    }
+    100% {
+      transform: translateX(100%);
+    }
+  }
+
+  .animate-emergency-pulse {
+    animation: emergency-pulse 2s ease-in-out infinite;
+  }
+
+  .animate-emergency-shimmer {
+    animation: emergency-shimmer 3s ease-in-out infinite;
+  }
 }
