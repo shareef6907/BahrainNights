@@ -39,22 +39,22 @@ const governoratePolice: ContactItem[] = [
 ];
 
 const embassies: ContactItem[] = [
-  { name: 'Bangladesh', numbers: ['17233925'] },
-  { name: 'Germany', numbers: ['17745277', '39458537'] },
-  { name: 'India', numbers: ['38400433', '39418071'] },
-  { name: 'Japan', numbers: ['17716565'] },
-  { name: 'Kuwait', numbers: ['17534040'] },
-  { name: 'Nepal', numbers: ['17725583'] },
-  { name: 'Oman', numbers: ['17293663'] },
-  { name: 'Pakistan', numbers: ['17244113', '39826823'] },
-  { name: 'Philippines', numbers: ['39953235'] },
-  { name: 'Qatar', numbers: ['17722922'] },
-  { name: 'Saudi Arabia', numbers: ['17537722', '33500012'] },
-  { name: 'Sri Lanka', numbers: ['33530290'] },
-  { name: 'Thailand', numbers: ['33622445', '39417067'] },
-  { name: 'UAE', numbers: ['17748333'] },
-  { name: 'United Kingdom', numbers: ['17574100'] },
-  { name: 'United States', numbers: ['17242700'] },
+  { name: '🇧🇩 Bangladesh', numbers: ['17233925'] },
+  { name: '🇩🇪 Germany', numbers: ['17745277', '39458537'] },
+  { name: '🇮🇳 India', numbers: ['38400433', '39418071'] },
+  { name: '🇯🇵 Japan', numbers: ['17716565'] },
+  { name: '🇰🇼 Kuwait', numbers: ['17534040'] },
+  { name: '🇳🇵 Nepal', numbers: ['17725583'] },
+  { name: '🇴🇲 Oman', numbers: ['17293663'] },
+  { name: '🇵🇰 Pakistan', numbers: ['17244113', '39826823'] },
+  { name: '🇵🇭 Philippines', numbers: ['39953235'] },
+  { name: '🇶🇦 Qatar', numbers: ['17722922'] },
+  { name: '🇸🇦 Saudi Arabia', numbers: ['17537722', '33500012'] },
+  { name: '🇱🇰 Sri Lanka', numbers: ['33530290'] },
+  { name: '🇹🇭 Thailand', numbers: ['33622445', '39417067'] },
+  { name: '🇦🇪 UAE', numbers: ['17748333'] },
+  { name: '🇬🇧 United Kingdom', numbers: ['17574100'] },
+  { name: '🇺🇸 United States', numbers: ['17242700'] },
 ];
 
 const sections: ContactSection[] = [
