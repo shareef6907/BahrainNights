@@ -9,6 +9,7 @@ import { FavoritesProvider } from "@/contexts/FavoritesContext";
 import { PageTracker } from "@/components/analytics/PageTracker";
 import { GoogleAnalytics } from "@/components/analytics/GoogleAnalytics";
 import { ClientComponents } from "@/components/ClientComponents";
+import { RegionalDisclaimer } from "@/components/RegionalDisclaimer";
 
 const inter = Inter({
   variable: "--font-inter",
@@ -205,6 +206,7 @@ export default function RootLayout({
       </head>
       <body className={`${inter.variable} ${ibmPlexArabic.variable} font-inter antialiased`}>
         <GoogleAnalytics />
+        <RegionalDisclaimer />
         <TranslationProvider>
           <PublicAuthProvider>
             <AuthProvider>
