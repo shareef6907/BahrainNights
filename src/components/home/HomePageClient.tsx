@@ -419,21 +419,11 @@ export default function HomePageClient({ initialMovies, initialStats, initialTod
     setIsEventModalOpen(true);
   };
 
-  // Lazy load video after initial render for better LCP
+  // Auto-play video as soon as it can play
   useEffect(() => {
     const video = videoRef.current;
     if (!video) return;
 
-    // Delay video loading significantly to improve LCP (load after main content)
-    const timer = setTimeout(() => {
-      const source = video.getAttribute('data-src');
-      if (source) {
-        video.src = source;
-        video.load();
-      }
-    }, 2500);
-
-    // Play as soon as we have any data
     const playVideo = () => {
       video.play().catch(() => {});
     };
@@ -445,12 +435,9 @@ export default function HomePageClient({ initialMovies, initialStats, initialTod
 
     // Listen for when video can start playing
     video.addEventListener('canplay', playVideo);
-    video.addEventListener('loadeddata', playVideo);
 
     return () => {
-      clearTimeout(timer);
       video.removeEventListener('canplay', playVideo);
-      video.removeEventListener('loadeddata', playVideo);
     };
   }, []);
 
@@ -719,12 +706,13 @@ export default function HomePageClient({ initialMovies, initialStats, initialTod
             muted
             loop
             playsInline
-            preload="none"
+            autoPlay
+            preload="auto"
             poster="/header-video-poster.webp"
             disablePictureInPicture
             className="absolute inset-0 w-full h-full object-cover"
             style={{ objectPosition: 'center center' }}
-            data-src="/Header-Video1.mp4"
+            src="/Header-Video1.mp4"
           />
           {/* Dark overlay for better text readability */}
           <div className="absolute inset-0 bg-black/50" />
