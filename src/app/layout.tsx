@@ -4,7 +4,6 @@ import "./globals.css";
 import { AuthProvider } from "@/lib/auth-context";
 import { TranslationProvider } from "@/lib/i18n/TranslationContext";
 import { PublicAuthProvider } from "@/context/PublicAuthContext";
-import { RamadanProvider } from "@/contexts/RamadanContext";
 import { FavoritesProvider } from "@/contexts/FavoritesContext";
 import { PageTracker } from "@/components/analytics/PageTracker";
 import { GoogleAnalytics } from "@/components/analytics/GoogleAnalytics";
@@ -208,14 +207,12 @@ export default function RootLayout({
         <TranslationProvider>
           <PublicAuthProvider>
             <AuthProvider>
-              <RamadanProvider>
-                <FavoritesProvider>
-                  <PageTracker />
-                  <ClientComponents>
-                    {children}
-                  </ClientComponents>
-                </FavoritesProvider>
-              </RamadanProvider>
+              <FavoritesProvider>
+                <PageTracker />
+                <ClientComponents>
+                  {children}
+                </ClientComponents>
+              </FavoritesProvider>
             </AuthProvider>
           </PublicAuthProvider>
         </TranslationProvider>
