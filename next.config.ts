@@ -205,6 +205,16 @@ const nextConfig: NextConfig = {
         destination: '/explore/shopping',
         permanent: true,
       },
+      {
+        source: '/tonight',
+        destination: '/things-to-do-in-bahrain',
+        permanent: true,
+      },
+      {
+        source: '/this-weekend',
+        destination: '/weekend-in-bahrain',
+        permanent: true,
+      },
     ];
   },
 
