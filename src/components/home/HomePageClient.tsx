@@ -706,8 +706,7 @@ export default function HomePageClient({ initialMovies, initialStats, initialTod
             muted
             loop
             playsInline
-            autoPlay
-            preload="auto"
+            preload="metadata"
             poster="/header-video-poster.webp"
             disablePictureInPicture
             className="absolute inset-0 w-full h-full object-cover"
@@ -857,6 +856,8 @@ export default function HomePageClient({ initialMovies, initialStats, initialTod
                     sizes="(max-width: 768px) 50vw, 25vw"
                     priority={index < 2}
                     loading={index < 2 ? 'eager' : 'lazy'}
+                    placeholder="blur"
+                    blurDataURL="data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/2wBDAAYEBQYFBAYGBQYHBwYIChAKCgkJChQODwwQFxQYGBcUFhYaHSUfGhsjHBYWICwgIyYnKSopGR8tMC0oMCUoKSj/2wBDAQcHBwoIChMKChMoGhYaKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCj/wAARCAAIAAoDASIAAhEBAxEB/8QAFgABAQEAAAAAAAAAAAAAAAAAAAUH/8QAIhAAAgEDAwUBAAAAAAAAAAAAAQIDBAURAAYhEhMxQVFh/8QAFQEBAQAAAAAAAAAAAAAAAAAAAAX/xAAZEQACAwEAAAAAAAAAAAAAAAABAgADESH/2gAMAwEAAhEDEEA/ANNuV7t8FxnhiqI2kjdkYAnggkH+aKnb+6Lo0StNcJnKgEhmyD+HGjRTCt2YxjKuf//Z"
                   />
                   {/* Mobile-friendly play trailer button - always visible on mobile */}
                   {movie.trailer_url && (
@@ -933,7 +934,7 @@ export default function HomePageClient({ initialMovies, initialStats, initialTod
                   className="group relative bg-white/5 backdrop-blur-sm border border-white/10 rounded-2xl overflow-hidden cursor-pointer hover:border-orange-400/50 hover:scale-[1.02] transition-all duration-200 block"
                 >
                   <div className="relative h-72 overflow-hidden">
-                    <Image src={event.image} alt={event.title} fill sizes="(max-width: 768px) 100vw, (max-width: 1024px) 50vw, 25vw" className="object-cover group-hover:scale-105 transition-transform duration-300" loading="lazy" />
+                    <Image src={event.image} alt={event.title} fill sizes="(max-width: 768px) 100vw, (max-width: 1024px) 50vw, 25vw" className="object-cover group-hover:scale-105 transition-transform duration-300" loading="lazy" placeholder="blur" blurDataURL="data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/2wBDAAYEBQYFBAYGBQYHBwYIChAKCgkJChQODwwQFxQYGBcUFhYaHSUfGhsjHBYWICwgIyYnKSopGR8tMC0oMCUoKSj/2wBDAQcHBwoIChMKChMoGhYaKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCj/wAARCAAIAAoDASIAAhEBAxEB/8QAFgABAQEAAAAAAAAAAAAAAAAAAAUH/8QAIhAAAgEDAwUBAAAAAAAAAAAAAQIDBAURAAYhEhMxQVFh/8QAFQEBAQAAAAAAAAAAAAAAAAAAAAX/xAAZEQACAwEAAAAAAAAAAAAAAAABAgADESH/2gAMAwEAAhEDEEA/ANNuV7t8FxnhiqI2kjdkYAnggkH+aKnb+6Lo0StNcJnKgEhmyD+HGjRTCt2YxjKuf//Z" />
                     <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/30 to-transparent" />
                     <div className="absolute top-4 right-4 px-4 py-1.5 bg-yellow-500 text-black text-xs font-bold rounded-full">
                       {event.category}
