@@ -28,7 +28,22 @@ export async function GET() {
   try {
     const supabase = getAdminClient();
 
-    // First check if the table exists by trying to query it
+    // Check if table exists using information_schema (bypasses RLS issues)
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const { data: tableInfo, error: tableError } = await (supabase as any)
+      .from('information_schema.tables')
+      .select('table_name')
+      .eq('table_schema', 'public')
+      .eq('table_name', 'cinema_featured_trailers')
+      .single();
+
+    const tableExists = !tableError && !!tableInfo;
+
+    if (!tableExists) {
+      return NextResponse.json({ trailers: [], tableExists: false });
+    }
+
+    // Table exists, fetch the data
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const { data: trailers, error } = await (supabase as any)
       .from('cinema_featured_trailers')
@@ -43,12 +58,8 @@ export async function GET() {
       .order('display_order', { ascending: true }) as { data: FeaturedTrailer[] | null; error: { message: string; code?: string } | null };
 
     if (error) {
-      // If table doesn't exist, return empty array
-      if (error.code === '42P01' || error.message?.includes('does not exist')) {
-        return NextResponse.json({ trailers: [], tableExists: false });
-      }
       console.error('Cinema featured trailers fetch error:', error);
-      return NextResponse.json({ error: error.message, trailers: [] }, { status: 200 });
+      return NextResponse.json({ error: error.message, trailers: [], tableExists: true }, { status: 200 });
     }
 
     // Now fetch the movie details for each trailer
