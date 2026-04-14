@@ -3,18 +3,6 @@ import { getAdminClient } from '@/lib/supabase/server';
 
 export const dynamic = 'force-dynamic';
 
-interface Movie {
-  id: string;
-  title: string;
-  poster_url: string | null;
-  backdrop_url: string | null;
-  trailer_url: string | null;
-  trailer_key: string | null;
-  synopsis: string | null;
-  genre: string[] | null;
-  tmdb_rating: number | null;
-}
-
 export async function GET() {
   try {
     const supabase = getAdminClient();
@@ -26,23 +14,23 @@ export async function GET() {
       .select('id, movie_id, display_order, is_active, created_at, updated_at')
       .order('display_order', { ascending: true });
 
-    // Debug: return error info so we can see what's happening
-    console.log('Direct query result:', { error, errorCode: error?.code, errorMessage: error?.message });
+    // If there's NO error, the table EXISTS (just has no rows yet)
+    // If error code is 42P01, table doesn't exist
+    const isTableNotFound = error && error.code === '42P01';
 
-    // Check if table doesn't exist (error code 42P01 = undefined_table)
-    const tableDoesNotExist = error && (error.code === '42P01' || (error.message && error.message.includes('relation') && error.message.includes('does not exist')));
-
-    if (tableDoesNotExist) {
-      return NextResponse.json({ trailers: [], tableExists: false, debug: { errorCode: error?.code, errorMessage: error?.message } });
+    if (isTableNotFound) {
+      console.log('Table cinema_featured_trailers does not exist');
+      return NextResponse.json({ trailers: [], tableExists: false });
     }
 
+    // Any other error OR success - table exists
+    // If there was an error (like RLS), we still return tableExists: true so the UI works
     if (error) {
-      console.error('Cinema featured trailers fetch error:', error);
-      // Table might exist but RLS is blocking - treat as exists
-      return NextResponse.json({ error: error.message, trailers: [], tableExists: true }, { status: 200 });
+      console.error('Cinema featured trailers fetch error (table exists):', error);
+      return NextResponse.json({ trailers: [], tableExists: true, error: error.message });
     }
 
-    // Fetch movie details for each trailer
+    // Success - fetch movie details for each trailer
     const trailersWithMovies = await Promise.all(
       (trailers || []).map(async (trailer: any) => {
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -59,7 +47,7 @@ export async function GET() {
     return NextResponse.json({ trailers: trailersWithMovies, tableExists: true });
   } catch (err) {
     console.error('Cinema featured trailers exception:', err);
-    return NextResponse.json({ error: String(err), trailers: [] }, { status: 200 });
+    return NextResponse.json({ error: String(err), trailers: [], tableExists: false }, { status: 200 });
   }
 }
 
