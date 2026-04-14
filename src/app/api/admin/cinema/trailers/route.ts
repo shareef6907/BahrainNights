@@ -14,21 +14,18 @@ export async function GET() {
       .select('id, movie_id, display_order, is_active, created_at, updated_at')
       .order('display_order', { ascending: true });
 
-    // If there's NO error, the table EXISTS (just has no rows yet)
-    // If error code is 42P01, table doesn't exist
-    const isTableNotFound = error && error.code === '42P01';
-
-    if (isTableNotFound) {
-      console.log('Table cinema_featured_trailers does not exist');
-      return NextResponse.json({ trailers: [], tableExists: false });
-    }
-
-    // Any other error OR success - table exists
-    // If there was an error (like RLS), we still return tableExists: true so the UI works
-    if (error) {
-      console.error('Cinema featured trailers fetch error (table exists):', error);
-      return NextResponse.json({ trailers: [], tableExists: true, error: error.message });
-    }
+    // Debug: Always return tableExists as true since we confirmed it exists
+    // Return whatever error we got for debugging
+    console.log('Query result:', { error, hasData: !!trailers });
+    return NextResponse.json({ 
+      trailers: [], 
+      tableExists: true,
+      debug: { 
+        hasError: !!error,
+        errorCode: error?.code || 'none',
+        errorMessage: error?.message || 'none' 
+      }
+    });
 
     // Success - fetch movie details for each trailer
     const trailersWithMovies = await Promise.all(
