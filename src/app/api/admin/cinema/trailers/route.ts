@@ -7,25 +7,30 @@ export async function GET() {
   try {
     const supabase = getAdminClient();
 
-    // Try to query the table directly
+    // Try to query the table directly - select specific columns that should exist
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const { data: trailers, error } = await (supabase as any)
       .from('cinema_featured_trailers')
-      .select('id, movie_id, display_order, is_active, created_at, updated_at')
+      .select('id, movie_id, display_order, is_active')
       .order('display_order', { ascending: true });
 
-    // Debug: Always return tableExists as true since we confirmed it exists
-    // Return whatever error we got for debugging
-    console.log('Query result:', { error, hasData: !!trailers });
-    return NextResponse.json({ 
-      trailers: [], 
-      tableExists: true,
-      debug: { 
-        hasError: !!error,
-        errorCode: error?.code || 'none',
-        errorMessage: error?.message || 'none' 
-      }
-    });
+    // If error code is 42P01, table doesn't exist
+    const isTableNotFound = error && error.code === '42P01';
+
+    if (isTableNotFound) {
+      console.log('Table cinema_featured_trailers does not exist');
+      return NextResponse.json({ trailers: [], tableExists: false });
+    }
+
+    // If there's any other error (like missing column), still return tableExists: true
+    if (error) {
+      console.error('Query error (table exists):', error.message);
+      return NextResponse.json({ 
+        trailers: [], 
+        tableExists: true, 
+        error: error.message 
+      });
+    }
 
     // Success - fetch movie details for each trailer
     const trailersWithMovies = await Promise.all(
