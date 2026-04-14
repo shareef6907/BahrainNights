@@ -37,6 +37,9 @@ export async function GET() {
       .eq('table_name', 'cinema_featured_trailers')
       .single();
 
+    // DEBUG: Log what we find
+    console.log('Table check:', { tableInfo, tableError, tableExists: !tableError && !!tableInfo });
+
     const tableExists = !tableError && !!tableInfo;
 
     if (!tableExists) {
