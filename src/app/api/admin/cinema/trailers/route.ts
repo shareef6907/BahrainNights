@@ -3,15 +3,6 @@ import { getAdminClient } from '@/lib/supabase/server';
 
 export const dynamic = 'force-dynamic';
 
-interface FeaturedTrailer {
-  id: string;
-  movie_id: string;
-  display_order: number;
-  is_active: boolean;
-  created_at: string;
-  updated_at: string;
-}
-
 interface Movie {
   id: string;
   title: string;
@@ -28,64 +19,38 @@ export async function GET() {
   try {
     const supabase = getAdminClient();
 
-    // DEBUG: Log Supabase URL (masked)
-    const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || 'NOT SET';
-    const serviceKeySet = !!process.env.SUPABASE_SERVICE_ROLE_KEY;
-    console.log('DEBUG: Supabase URL:', supabaseUrl.substring(0, 30) + '...');
-    console.log('DEBUG: Service role key set:', serviceKeySet);
-
-    // Check if table exists using information_schema (bypasses RLS issues)
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const { data: tableInfo, error: tableError } = await (supabase as any)
-      .from('information_schema.tables')
-      .select('table_name')
-      .eq('table_schema', 'public')
-      .eq('table_name', 'cinema_featured_trailers')
-      .single();
-
-    // DEBUG: Log what we find
-    console.log('Table check result:', { tableInfo, tableError });
-    console.log('tableExists =', !tableError && !!tableInfo);
-
-    const tableExists = !tableError && !!tableInfo;
-
-    if (!tableExists) {
-      return NextResponse.json({ trailers: [], tableExists: false });
-    }
-
-    // Table exists, fetch the data
+    // Try to query the table directly - if RLS is disabled, this should work
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const { data: trailers, error } = await (supabase as any)
       .from('cinema_featured_trailers')
-      .select(`
-        id,
-        movie_id,
-        display_order,
-        is_active,
-        created_at,
-        updated_at
-      `)
-      .order('display_order', { ascending: true }) as { data: FeaturedTrailer[] | null; error: { message: string; code?: string } | null };
+      .select('id, movie_id, display_order, is_active, created_at, updated_at')
+      .order('display_order', { ascending: true });
+
+    // Check if table doesn't exist (error code 42P01 = undefined_table)
+    const tableDoesNotExist = error && (error.code === '42P01' || (error.message && error.message.includes('does not exist')));
+
+    if (tableDoesNotExist) {
+      console.log('Table cinema_featured_trailers does not exist');
+      return NextResponse.json({ trailers: [], tableExists: false });
+    }
 
     if (error) {
       console.error('Cinema featured trailers fetch error:', error);
+      // Table might exist but RLS is blocking - treat as exists
       return NextResponse.json({ error: error.message, trailers: [], tableExists: true }, { status: 200 });
     }
 
-    // Now fetch the movie details for each trailer
+    // Fetch movie details for each trailer
     const trailersWithMovies = await Promise.all(
-      (trailers || []).map(async (trailer) => {
+      (trailers || []).map(async (trailer: any) => {
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         const { data: movie } = await (supabase as any)
           .from('movies')
           .select('id, title, poster_url, backdrop_url, trailer_url, trailer_key, synopsis, genre, tmdb_rating')
           .eq('id', trailer.movie_id)
-          .single() as { data: Movie | null };
+          .single();
 
-        return {
-          ...trailer,
-          movie: movie || null,
-        };
+        return { ...trailer, movie: movie || null };
       })
     );
 
