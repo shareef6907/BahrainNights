@@ -19,19 +19,21 @@ export async function GET() {
   try {
     const supabase = getAdminClient();
 
-    // Try to query the table directly - if RLS is disabled, this should work
+    // Try to query the table directly
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const { data: trailers, error } = await (supabase as any)
       .from('cinema_featured_trailers')
       .select('id, movie_id, display_order, is_active, created_at, updated_at')
       .order('display_order', { ascending: true });
 
+    // Debug: return error info so we can see what's happening
+    console.log('Direct query result:', { error, errorCode: error?.code, errorMessage: error?.message });
+
     // Check if table doesn't exist (error code 42P01 = undefined_table)
-    const tableDoesNotExist = error && (error.code === '42P01' || (error.message && error.message.includes('does not exist')));
+    const tableDoesNotExist = error && (error.code === '42P01' || (error.message && error.message.includes('relation') && error.message.includes('does not exist')));
 
     if (tableDoesNotExist) {
-      console.log('Table cinema_featured_trailers does not exist');
-      return NextResponse.json({ trailers: [], tableExists: false });
+      return NextResponse.json({ trailers: [], tableExists: false, debug: { errorCode: error?.code, errorMessage: error?.message } });
     }
 
     if (error) {
