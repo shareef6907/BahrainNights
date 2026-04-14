@@ -28,6 +28,12 @@ export async function GET() {
   try {
     const supabase = getAdminClient();
 
+    // DEBUG: Log Supabase URL (masked)
+    const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || 'NOT SET';
+    const serviceKeySet = !!process.env.SUPABASE_SERVICE_ROLE_KEY;
+    console.log('DEBUG: Supabase URL:', supabaseUrl.substring(0, 30) + '...');
+    console.log('DEBUG: Service role key set:', serviceKeySet);
+
     // Check if table exists using information_schema (bypasses RLS issues)
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const { data: tableInfo, error: tableError } = await (supabase as any)
@@ -38,7 +44,8 @@ export async function GET() {
       .single();
 
     // DEBUG: Log what we find
-    console.log('Table check:', { tableInfo, tableError, tableExists: !tableError && !!tableInfo });
+    console.log('Table check result:', { tableInfo, tableError });
+    console.log('tableExists =', !tableError && !!tableInfo);
 
     const tableExists = !tableError && !!tableInfo;
 
