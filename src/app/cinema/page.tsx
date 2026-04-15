@@ -5,8 +5,8 @@ import { Movie } from '@/components/cinema/MovieCard';
 import MovieListSchema from '@/components/SEO/MovieListSchema';
 import BreadcrumbSchema from '@/components/SEO/BreadcrumbSchema';
 
-// Revalidate every 5 minutes for fresh data
-export const revalidate = 300;
+// Revalidate every 60 seconds for fresh data (especially for featured trailers from admin)
+export const revalidate = 60;
 
 // Database movie type
 interface DBMovie {
