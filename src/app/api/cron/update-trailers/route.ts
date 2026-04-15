@@ -102,17 +102,11 @@ export async function GET(request: Request) {
     const threeMonthsAgo = new Date(now.getTime() - (90 * 24 * 60 * 60 * 1000));
     const threeMonthsAgoStr = threeMonthsAgo.toISOString().split('T')[0];
     
-    // Query ALL movies missing trailers (not just recent ones)
-    // Exclude sports events but include more movies
+    // Query ALL movies missing trailers - exclude sports events
     const { data: movies, error } = await supabase
       .from('movies')
       .select('id, title, release_date, trailer_url, trailer_key, is_now_showing, is_coming_soon')
-      .or('trailer_url.is.null,trailer_key.is.null')
-      .not('title', 'like', '%UEFA%')
-      .not('title', 'like', '%Premier League%')
-      .not('title', 'like', '%LaLiga%')
-      .not('title', 'like', '%ICC MT20%')
-      .not('title', 'like', '% vs %');
+      .or('trailer_url.is.null,trailer_key.is.null');
     
     if (error) {
       throw error;
