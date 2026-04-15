@@ -102,8 +102,8 @@ export async function GET(request: Request) {
     const threeMonthsAgo = new Date(now.getTime() - (90 * 24 * 60 * 60 * 1000));
     const threeMonthsAgoStr = threeMonthsAgo.toISOString().split('T')[0];
     
-    // Query movies missing trailers - recent release dates OR now showing OR coming soon
-    // Exclude sports events
+    // Query ALL movies missing trailers (not just recent ones)
+    // Exclude sports events but include more movies
     const { data: movies, error } = await supabase
       .from('movies')
       .select('id, title, release_date, trailer_url, trailer_key, is_now_showing, is_coming_soon')
@@ -112,8 +112,7 @@ export async function GET(request: Request) {
       .not('title', 'like', '%Premier League%')
       .not('title', 'like', '%LaLiga%')
       .not('title', 'like', '%ICC MT20%')
-      .not('title', 'like', '% vs %')
-      .or(`release_date.gte.${threeMonthsAgoStr},is_now_showing.eq.true,is_coming_soon.eq.true`);
+      .not('title', 'like', '% vs %');
     
     if (error) {
       throw error;
@@ -151,8 +150,8 @@ export async function GET(request: Request) {
     
     // Process each movie (with rate limiting for YouTube API)
     // Free tier: 10,000 quota/day, search costs 100 units
-    // So limit to ~50 searches per run to be safe
-    const moviesToProcess = moviesNeedingTrailers.slice(0, 50);
+    // Increase limit to catch all remaining movies
+    const moviesToProcess = moviesNeedingTrailers.slice(0, 100);
     
     for (const movie of moviesToProcess) {
       const title = movie.title || '';
