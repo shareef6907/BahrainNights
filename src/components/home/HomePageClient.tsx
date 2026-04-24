@@ -48,11 +48,7 @@ const EventModal = dynamic(() => import('@/components/events/EventModal'), {
   ssr: false,
 });
 
-// Regional disruption notice - dismissible banner
-const RegionalNotice = dynamic(() => import('@/components/home/RegionalNotice'), {
-  loading: () => null,
-  ssr: false,
-});
+// Ad Banner - lazy loaded
 
 // NEW UNIQUE FEATURES - Lazy load for performance
 const HappeningNow = dynamic(() => import('@/components/home/HappeningNow'), {
@@ -503,7 +499,6 @@ export default function HomePageClient({ initialMovies, initialStats, initialTod
 
   // Quick filter buttons with direct page links (not search)
   const quickFilters = [
-    { label: '🚨 Emergency', href: '/emergency', isEmergency: true },
     { label: `🎢 ${t.categories.attractions}`, href: '/attractions' },
     { label: `🎭 ${t.home.quickFilters.events}`, href: '/events' },
     { label: `🎤 Artists`, href: '/artists' },
@@ -768,11 +763,7 @@ export default function HomePageClient({ initialMovies, initialStats, initialTod
                 <Link
                   key={filter.label}
                   href={filter.href}
-                  className={`px-6 py-3 rounded-full text-sm font-medium hover:scale-105 active:scale-98 transition-transform ${
-                    'isEmergency' in filter && filter.isEmergency
-                      ? 'category-btn-emergency'
-                      : 'category-btn-neon'
-                  }`}
+                  className="px-6 py-3 rounded-full text-sm font-medium hover:scale-105 active:scale-98 transition-transform category-btn-neon"
                 >
                   {filter.label}
                 </Link>
@@ -783,7 +774,6 @@ export default function HomePageClient({ initialMovies, initialStats, initialTod
       </section>
 
       {/* Regional Disruption Notice - below hero */}
-      <RegionalNotice />
 
       {/* Premium Ad Slider - Deferred loading for performance */}
       {showAds && (
