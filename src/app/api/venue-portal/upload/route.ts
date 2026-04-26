@@ -172,7 +172,7 @@ export async function POST(request: NextRequest) {
         break;
     }
 
-    console.log('[VP-UPLOAD] Uploading:', { s3Key, imageType, entityType, venueSlug, fileType: file.type, fileSize: file.size });
+    console.log('[VP-UPLOAD] Uploading:', { s3Key, imageType, venueSlug, fileType: file.type, fileSize: file.size });
 
     // Process image locally with Sharp (compression, resize, convert to WebP)
     const processed = await processImage(buffer, {
