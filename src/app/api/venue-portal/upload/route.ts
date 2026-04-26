@@ -59,7 +59,7 @@ async function getVenueFromSession() {
         .select('slug')
         .eq('id', venueId)
         .single();
-      venueSlug = data?.slug || venueId;
+      venueSlug = (data as any)?.slug || venueId;
     }
 
     return { venueId, venueSlug };
