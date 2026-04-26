@@ -2,7 +2,6 @@ import { NextRequest, NextResponse } from 'next/server';
 import { cookies } from 'next/headers';
 import { jwtVerify } from 'jose';
 import { S3Client, PutObjectCommand } from '@aws-sdk/client-s3';
-import { getAdminClient } from '@/lib/supabase/server';
 import { processImage } from '@/lib/image-processing';
 
 export const dynamic = 'force-dynamic';
@@ -23,6 +22,10 @@ const S3_BASE_URL = `https://${BUCKET}.s3.${REGION}.amazonaws.com`;
 
 const VENUE_SESSION_SECRET = new TextEncoder().encode(
   process.env.JWT_SECRET || 'venue-portal-secret-key-min-32-chars!'
+);
+
+const ADMIN_SECRET = new TextEncoder().encode(
+  process.env.JWT_SECRET || 'admin-portal-secret-key-min-32-chars!'
 );
 
 // Allowed image types
@@ -49,40 +52,73 @@ async function getVenueFromSession() {
 
     // If venueSlug not in token, fetch from database
     if (!venueSlug) {
+      const { getAdminClient } = await import('@/lib/supabase/server');
       const supabase = getAdminClient();
-      const { data } = await (supabase
-        .from('venues') as any)
+      const { data } = await supabase
+        .from('venues')
         .select('slug')
         .eq('id', venueId)
         .single();
-      venueSlug = (data as { slug?: string })?.slug || venueId;
+      venueSlug = data?.slug || venueId;
     }
 
-    return {
-      venueId,
-      venueSlug,
-    };
+    return { venueId, venueSlug };
   } catch (error) {
     console.error('Session verification error:', error);
     return null;
   }
 }
 
+async function getAdminFromSession() {
+  const cookieStore = await cookies();
+  const token = cookieStore.get('auth_token')?.value;
+
+  if (!token) {
+    return null;
+  }
+
+  try {
+    const { payload } = await jwtVerify(token, ADMIN_SECRET);
+    if (!payload?.isAdmin && payload?.role !== 'admin') {
+      return null;
+    }
+    return { isAdmin: true };
+  } catch (error) {
+    return null;
+  }
+}
+
 export async function POST(request: NextRequest) {
   try {
-    // Authenticate venue owner
-    const venue = await getVenueFromSession();
-    if (!venue) {
-      return NextResponse.json(
-        { error: 'Unauthorized - Please log in to your venue portal' },
-        { status: 401 }
-      );
+    // Accept both venue and admin auth
+    let venueSlug: string | undefined;
+    const formData = await request.formData();
+    const imageType = formData.get('imageType') as string || 'gallery';
+
+    // Check if admin is uploading (venueSlug from formData for admin)
+    const adminAuth = await getAdminFromSession();
+    if (adminAuth) {
+      // Admin uploads need venueSlug in formData
+      venueSlug = formData.get('venueSlug') as string | undefined;
+      if (!venueSlug) {
+        return NextResponse.json(
+          { error: 'venueSlug required for admin uploads' },
+          { status: 400 }
+        );
+      }
+    } else {
+      // Venue portal uploads - get slug from session
+      const venue = await getVenueFromSession();
+      if (!venue) {
+        return NextResponse.json(
+          { error: 'Unauthorized - Please log in to your venue portal' },
+          { status: 401 }
+        );
+      }
+      venueSlug = venue.venueSlug;
     }
 
-    // Parse form data
-    const formData = await request.formData();
     const file = formData.get('file') as File | null;
-    const imageType = formData.get('imageType') as string || 'gallery';
 
     // Validate file
     if (!file) {
@@ -117,22 +153,22 @@ export async function POST(request: NextRequest) {
 
     switch (imageType) {
       case 'logo':
-        s3Key = `processed/venues/${venue.venueSlug}/logo.webp`;
+        s3Key = `processed/venues/${venueSlug}/logo.webp`;
         break;
       case 'cover':
-        s3Key = `processed/venues/${venue.venueSlug}/cover.webp`;
+        s3Key = `processed/venues/${venueSlug}/cover.webp`;
         break;
       case 'event':
         const eventSlug = formData.get('eventSlug') as string || `event-${timestamp}`;
-        s3Key = `processed/events/${venue.venueSlug}/${eventSlug}/cover.webp`;
+        s3Key = `processed/events/${venueSlug}/${eventSlug}/cover.webp`;
         break;
       case 'offer':
         const offerSlug = formData.get('offerSlug') as string || `offer-${timestamp}`;
-        s3Key = `processed/offers/${venue.venueSlug}/${offerSlug}.webp`;
+        s3Key = `processed/offers/${venueSlug}/${offerSlug}.webp`;
         break;
       case 'gallery':
       default:
-        s3Key = `processed/venues/${venue.venueSlug}/gallery/${timestamp}.webp`;
+        s3Key = `processed/venues/${venueSlug}/gallery/${timestamp}.webp`;
         break;
     }
 

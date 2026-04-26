@@ -504,7 +504,7 @@ export default function AdminVenueEditPage({ params }: { params: Promise<{ id: s
       uploadFormData.append('imageType', type);
       uploadFormData.append('venueSlug', venue?.slug || resolvedParams.id);
 
-      const response = await fetch('/api/upload', {
+      const response = await fetch('/api/venue-portal/upload', {
         method: 'POST',
         body: uploadFormData,
       });
