@@ -64,6 +64,12 @@ const nextConfig: NextConfig = {
       },
       {
         protocol: 'https',
+        hostname: 'bahrainnights-production-us.s3.us-east-1.amazonaws.com',
+        port: '',
+        pathname: '/**',
+      },
+      {
+        protocol: 'https',
         hostname: 'image.tmdb.org',
         port: '',
         pathname: '/**',
