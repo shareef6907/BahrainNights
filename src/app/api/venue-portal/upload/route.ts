@@ -172,6 +172,8 @@ export async function POST(request: NextRequest) {
         break;
     }
 
+    console.log('[VP-UPLOAD] Uploading:', { s3Key, imageType, entityType, venueSlug, fileType: file.type, fileSize: file.size });
+
     // Process image locally with Sharp (compression, resize, convert to WebP)
     const processed = await processImage(buffer, {
       addWatermark: false,
@@ -205,7 +207,7 @@ export async function POST(request: NextRequest) {
       processedSize: processed.size,
     });
   } catch (error) {
-    console.error('Venue upload error:', error);
+    console.error('[VP-UPLOAD] Upload failed:', error);
     return NextResponse.json(
       { error: error instanceof Error ? error.message : 'Upload failed' },
       { status: 500 }
