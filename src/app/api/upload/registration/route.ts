@@ -25,8 +25,7 @@ const MAX_FILE_SIZE = 4 * 1024 * 1024; // 4MB (Vercel limit)
 
 /**
  * Upload endpoint for venue registration
- * Gallery images go to uploads/ folder for Lambda watermarking
- * Logo/cover go directly to processed/ folder (no watermark)
+ * All images upload directly to processed/ (no Lambda - watermarking disabled)
  */
 export async function POST(request: NextRequest) {
   try {
@@ -66,28 +65,24 @@ export async function POST(request: NextRequest) {
 
     // Determine S3 key based on image type
     let s3Key: string;
-    let isGallery = false;
 
     switch (imageType) {
       case 'logo':
-        // Logo goes directly to processed (no watermark needed)
         s3Key = `processed/venues/pending-${registrationId}/logo.webp`;
         break;
       case 'cover':
-        // Cover goes directly to processed (no watermark needed)
         s3Key = `processed/venues/pending-${registrationId}/cover.webp`;
         break;
       case 'gallery':
       default:
-        // Gallery images go to uploads/ folder for Lambda watermarking
-        s3Key = `uploads/venues/pending-${registrationId}/gallery/${timestamp}.webp`;
-        isGallery = true;
+        // Direct upload to processed/ (no Lambda - watermarking disabled)
+        s3Key = `processed/venues/pending-${registrationId}/gallery/${timestamp}.webp`;
         break;
     }
 
     // Process image locally with Sharp (compression, resize, convert to WebP)
     const processed = await processImage(buffer, {
-      addWatermark: false, // Watermark is added by Lambda for gallery images
+      addWatermark: false,
       format: 'webp',
       quality: 80,
       maxWidth: 1920,
@@ -105,23 +100,17 @@ export async function POST(request: NextRequest) {
       })
     );
 
-    // For gallery images, Lambda will process and move to 'processed/' folder
-    // Return the final URL where the image will be available
-    const finalKey = isGallery
-      ? s3Key.replace('uploads/', 'processed/')
-      : s3Key;
-    const finalUrl = `${S3_BASE_URL}/${finalKey}`;
+    // Return URL immediately (no Lambda dependency)
+    const finalUrl = `${S3_BASE_URL}/${s3Key}`;
 
     return NextResponse.json({
       success: true,
       url: finalUrl,
-      key: finalKey,
+      key: s3Key,
       width: processed.width,
       height: processed.height,
       originalSize: file.size,
       processedSize: processed.size,
-      // Let client know if Lambda processing is pending
-      lambdaProcessing: isGallery,
     });
   } catch (error) {
     console.error('Registration upload error:', error);

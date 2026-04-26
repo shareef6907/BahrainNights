@@ -142,8 +142,8 @@ export async function POST(request: NextRequest) {
         break;
       case 'gallery':
       default:
-        // Gallery images may be processed by Lambda for watermarking
-        s3Key = `uploads/venues/${venue.venueSlug}/gallery/${timestamp}.${extension}`;
+        // Direct upload to processed/ (no Lambda - watermarking disabled)
+        s3Key = `processed/venues/${venue.venueSlug}/gallery/${timestamp}.${extension}`;
         break;
     }
 

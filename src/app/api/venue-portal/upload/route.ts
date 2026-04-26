@@ -50,7 +50,6 @@ async function getVenueFromSession() {
     // If venueSlug not in token, fetch from database
     if (!venueSlug) {
       const supabase = getAdminClient();
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       const { data } = await (supabase
         .from('venues') as any)
         .select('slug')
@@ -68,7 +67,6 @@ async function getVenueFromSession() {
     return null;
   }
 }
-
 
 export async function POST(request: NextRequest) {
   try {
@@ -114,10 +112,7 @@ export async function POST(request: NextRequest) {
     // Get timestamp for unique filenames
     const timestamp = Date.now();
 
-    // For gallery images: upload to 'uploads/' folder so Lambda can add watermark
-    // For other types: upload directly to 'processed/' folder (no watermark needed)
-    const isGallery = imageType === 'gallery';
-
+    // All images upload directly to processed/ (no Lambda - watermarking disabled)
     let s3Key: string;
 
     switch (imageType) {
@@ -137,14 +132,13 @@ export async function POST(request: NextRequest) {
         break;
       case 'gallery':
       default:
-        // Gallery images go to uploads/ folder for Lambda watermarking
-        s3Key = `uploads/venues/${venue.venueSlug}/gallery/${timestamp}.webp`;
+        s3Key = `processed/venues/${venue.venueSlug}/gallery/${timestamp}.webp`;
         break;
     }
 
     // Process image locally with Sharp (compression, resize, convert to WebP)
     const processed = await processImage(buffer, {
-      addWatermark: false, // Watermark is added by Lambda for gallery images
+      addWatermark: false,
       format: 'webp',
       quality: 80,
       maxWidth: 1920,
@@ -162,23 +156,17 @@ export async function POST(request: NextRequest) {
       })
     );
 
-    // For gallery images, Lambda will process and move to 'processed/' folder
-    // Return the final URL where the image will be available
-    const finalKey = isGallery
-      ? s3Key.replace('uploads/', 'processed/')
-      : s3Key;
-    const finalUrl = `${S3_BASE_URL}/${finalKey}`;
+    // Return URL immediately (no Lambda dependency)
+    const finalUrl = `${S3_BASE_URL}/${s3Key}`;
 
     return NextResponse.json({
       success: true,
       url: finalUrl,
-      key: finalKey,
+      key: s3Key,
       width: processed.width,
       height: processed.height,
       originalSize: file.size,
       processedSize: processed.size,
-      // Let client know if Lambda processing is pending
-      lambdaProcessing: isGallery,
     });
   } catch (error) {
     console.error('Venue upload error:', error);
