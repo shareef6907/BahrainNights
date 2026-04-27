@@ -145,7 +145,6 @@ export default function NetflixHero({ movies, onMovieClick, onBookClick }: Netfl
       disablekb: '1',
       playsinline: '1',
       enablejsapi: '1', // Required for postMessage API
-      origin: typeof window !== 'undefined' ? window.location.origin : '',
     });
     return `https://www.youtube.com/embed/${id}?${params.toString()}`;
   };
@@ -176,7 +175,7 @@ export default function NetflixHero({ movies, onMovieClick, onBookClick }: Netfl
             {/* Video container - cover behavior on all devices for Netflix feel */}
             <div className="absolute inset-0 w-full h-full overflow-hidden flex items-center justify-center">
               <iframe
-                src={getEmbedUrl(videoId, false)}
+                src={getEmbedUrl(videoId, isMuted)}
                 className="pointer-events-none"
                 style={{
                   // Cover behavior - fill container cinematically
@@ -189,10 +188,12 @@ export default function NetflixHero({ movies, onMovieClick, onBookClick }: Netfl
                   minHeight: '100%',
                   minWidth: '177.78vh',
                   transform: 'translate(-50%, -50%)',
+                  zIndex: 1,
                 }}
-                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; fullscreen; webkit-playsinline"
                 allowFullScreen
                 title={currentMovie?.title || 'Movie Trailer'}
+                loading="eager"
               />
             </div>
           </motion.div>
