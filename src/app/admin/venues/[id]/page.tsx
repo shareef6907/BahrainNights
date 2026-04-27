@@ -500,11 +500,11 @@ export default function AdminVenueEditPage({ params }: { params: Promise<{ id: s
     try {
       const uploadFormData = new FormData();
       uploadFormData.append('file', file);
-      uploadFormData.append('entityType', 'venue');
       uploadFormData.append('imageType', type);
       uploadFormData.append('venueSlug', venue?.slug || resolvedParams.id);
 
-      const response = await fetch('/api/venue-portal/upload', {
+      // Use admin upload endpoint (authenticated via admin cookie)
+      const response = await fetch('/api/admin/venues/upload-image', {
         method: 'POST',
         body: uploadFormData,
       });
