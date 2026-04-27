@@ -59,6 +59,11 @@ export default function CinemaPageClient({
         }}
       />
 
+      {/* Hero to content gradient blend */}
+      <div className="relative -mt-32 h-32 z-10 pointer-events-none" 
+        style={{ background: 'linear-gradient(to bottom, transparent, #0a0a0a)' }} 
+      />
+
       {/* Navigation Tabs */}
       <div className="sticky top-0 z-40 bg-[#0a0a0a]/95 backdrop-blur-md border-b border-white/10">
         <div className="max-w-7xl mx-auto px-4 sm:px-6">
@@ -241,9 +246,8 @@ function MovieModal({
 
   // Generate cinema links
   const movieSearchQuery = encodeURIComponent(movie.title);
-  const voxLink = `https://bhr.voxcinemas.com/movies?search=${movieSearchQuery}`;
-  const cinecoLink = `https://bahrain.cineco.net/?s=${movieSearchQuery}`;
-  const platinumLink = `https://www.platinumlist.net/aff/?ref=yjg3yzi&link=${encodeURIComponent(voxLink)}`;
+  const voxLink = `https://bhr.voxcinemas.com/`;
+  const cinecoLink = `https://bahrain.cineco.net/now-showing/`;
 
   return (
     <div 
@@ -266,14 +270,15 @@ function MovieModal({
           <X className="w-5 h-5" />
         </button>
 
-        {/* Backdrop Image */}
-        {movie.backdrop && (
+        {/* Backdrop Image - use poster as fallback */}
+        {(movie.backdrop || movie.poster) && (
           <div className="relative h-64 sm:h-80">
             <Image
-              src={movie.backdrop}
+              src={movie.backdrop || movie.poster}
               alt={movie.title}
               fill
               className="object-cover"
+              priority
             />
             <div className="absolute inset-0 bg-gradient-to-t from-[#141414] to-transparent" />
           </div>
@@ -387,15 +392,6 @@ function MovieModal({
                       className="flex items-center gap-2 px-4 py-2.5 bg-white/10 text-white font-medium rounded-lg hover:bg-white/20 transition-colors border border-white/20"
                     >
                       Cineco
-                      <ExternalLink className="w-4 h-4" />
-                    </a>
-                    <a
-                      href={platinumLink}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="flex items-center gap-2 px-4 py-2.5 bg-white/10 text-white font-medium rounded-lg hover:bg-white/20 transition-colors border border-white/20"
-                    >
-                      Platinumlist
                       <ExternalLink className="w-4 h-4" />
                     </a>
                   </div>

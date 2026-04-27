@@ -51,6 +51,18 @@ export default function NetflixHero({ movies, onMovieClick, onBookClick }: Netfl
     return () => window.removeEventListener('resize', checkMobile);
   }, []);
 
+  // Initialize iframe as muted (required for autoplay)
+  useEffect(() => {
+    const iframe = document.getElementById('trailer-iframe') as HTMLIFrameElement;
+    if (iframe && iframe.contentWindow) {
+      // Start muted - YouTube will respect autoplay with muted=1
+      iframe.contentWindow.postMessage(
+        JSON.stringify({ event: 'command', func: 'mute', args: '' }),
+        'https://www.youtube.com'
+      );
+    }
+  }, []);
+
   // Auto-unmute on desktop after first load
   useEffect(() => {
     if (!isMobile && !userInteracted) {
@@ -100,15 +112,19 @@ export default function NetflixHero({ movies, onMovieClick, onBookClick }: Netfl
   }, [currentIndex, movies.length, goToSlide]);
 
   const toggleMute = useCallback(() => {
-    // Use YouTube API to toggle mute without reloading the iframe
-    const iframe = document.querySelector('iframe[title="Movie Trailer"]') as HTMLIFrameElement;
+    // Use YouTube postMessage API to toggle mute - this doesn't reload the video
+    const iframe = document.getElementById('trailer-iframe') as HTMLIFrameElement;
     if (iframe && iframe.contentWindow) {
-      iframe.contentWindow.postMessage('{"event":"command","func":"toggleMute","args":""}', 'https://www.youtube.com');
+      const newMuted = !isMuted;
+      iframe.contentWindow.postMessage(
+        JSON.stringify({ event: 'command', func: newMuted ? 'mute' : 'unmute', args: '' }),
+        'https://www.youtube.com'
+      );
     }
-    // Also update local state for UI
+    // Toggle UI state
     setIsMuted((prev) => !prev);
     setUserInteracted(true);
-  }, []);
+  }, [isMuted]);
 
   if (!movies || movies.length === 0) {
     return (
@@ -175,7 +191,8 @@ export default function NetflixHero({ movies, onMovieClick, onBookClick }: Netfl
             {/* Video container - cover behavior on all devices for Netflix feel */}
             <div className="absolute inset-0 w-full h-full overflow-hidden flex items-center justify-center">
               <iframe
-                src={getEmbedUrl(videoId, isMuted)}
+                id="trailer-iframe"
+                src={getEmbedUrl(videoId, false)}
                 className="pointer-events-none"
                 style={{
                   // Cover behavior - fill container cinematically
