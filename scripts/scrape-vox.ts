@@ -1,13 +1,13 @@
 #!/usr/bin/env npx tsx
 
 /**
- * VOX Bahrain Cinema Scraper
+ * VOX Bahrain Cinema Scraper - Using HTTP requests + Cheerio
  * Scrapes movie titles from VOX Cinema Bahrain website
  * 
  * Run: npx tsx scripts/scrape-vox.ts
  */
 
-import { chromium, type Browser, type Page } from 'playwright';
+import * as cheerio from 'cheerio';
 
 const VOX_URLS = {
   nowShowing: 'https://bhr.voxcinemas.com/movies/whatson',
@@ -44,16 +44,29 @@ function isSportsEvent(title: string): boolean {
 function cleanTitle(title: string): string {
   if (!title) return '';
   
-  return title
+  let cleaned = title
     // Remove HTML entities
     .replace(/&amp;/g, '&')
     .replace(/&#39;/g, "'")
     .replace(/&quot;/g, '"')
     .replace(/&lt;/g, '<')
     .replace(/&gt;/g, '>')
+    // Remove age rating prefixes: PG15, 18TC, PG13, 15+, etc.
+    .replace(/^(PG\s*\d*|18TC|15\+|TC\s*\d+|R|Rated\s+\w+|Rated)\s*/i, '')
     // Remove extra whitespace
     .replace(/\s+/g, ' ')
     .trim();
+  
+  // Remove sports/concert keywords
+  const lower = cleaned.toLowerCase();
+  const eventKeywords = ['tour', 'experience', 'live', 'concert', 'festival', 'championship', 'match', 'game'];
+  for (const keyword of eventKeywords) {
+    if (lower.includes(keyword)) {
+      return ''; // Mark for removal
+    }
+  }
+  
+  return cleaned;
 }
 
 /**
@@ -74,42 +87,60 @@ function isValidTitle(title: string): boolean {
 }
 
 /**
- * Scrape movie titles from a VOX page
+ * Scrape movie titles from a VOX page using HTTP + Cheerio
  */
-async function scrapePage(page: Page, url: string): Promise<string[]> {
+async function scrapePage(url: string): Promise<string[]> {
   console.log(`\n📄 Scraping: ${url}`);
   
   try {
-    await page.goto(url, { waitUntil: 'networkidle', timeout: 30000 });
-    
-    // Wait for movie cards to load
-    await page.waitForSelector('[data-title]', { timeout: 15000 }).catch(() => {
-      console.log('  ⚠️ Primary selector not found, trying fallback...');
+    const response = await fetch(url, {
+      headers: {
+        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
+        'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*',
+        'Accept-Language': 'en-US,en;q=0.9',
+      },
     });
     
-    // Additional wait for any dynamic content
-    await page.waitForTimeout(2000);
+    if (!response.ok) {
+      console.log(`  ❌ HTTP error: ${response.status}`);
+      return [];
+    }
     
-    // Extract movie titles using data-title attribute
-    const titles = await page.$$eval('[data-title]', (elements) => {
-      return elements
-        .map(el => el.getAttribute('data-title'))
-        .filter((title): title is string => !!title && title.length > 0);
+    const html = await response.text();
+    const $ = cheerio.load(html);
+    
+    const titles: string[] = [];
+    
+    // Extract from data-title attribute
+    $('[data-title]').each((_, el) => {
+      const title = $(el).attr('data-title');
+      if (title) {
+        titles.push(title);
+      }
     });
     
     // Also try h3 headings as fallback
-    const h3Titles = await page.$$eval('h3', (elements) => {
-      return elements
-        .map(el => el.textContent?.trim())
-        .filter((title): title is string => !!title && title.length > 0);
+    $('h3').each((_, el) => {
+      const text = $(el).text().trim();
+      if (text && text.length > 2) {
+        titles.push(text);
+      }
     });
     
-    // Combine and deduplicate
-    const allTitles = [...new Set([...titles, ...h3Titles])];
+    // Try movie card elements
+    $('.movie-card, .film-card, [class*="movie"] h3, article h3').each((_, el) => {
+      const text = $(el).text().trim();
+      if (text && text.length > 2 && text.length < 200) {
+        titles.push(text);
+      }
+    });
     
-    console.log(`  Found ${allTitles.length} titles`);
+    // Deduplicate
+    const uniqueTitles = [...new Set(titles)];
     
-    return allTitles;
+    console.log(`  Found ${uniqueTitles.length} raw titles`);
+    
+    return uniqueTitles;
   } catch (error) {
     console.error(`  ❌ Error scraping ${url}:`, error instanceof Error ? error.message : error);
     return [];
@@ -126,41 +157,38 @@ export async function scrapeVOX(): Promise<ScrapeResult> {
     errors: [],
   };
   
-  let browser: Browser | null = null;
-  
   try {
     console.log('🎬 Starting VOX Bahrain Cinema Scraper');
     console.log('='.repeat(50));
     
-    // Launch browser
-    browser = await chromium.launch({ headless: true });
-    const context = await browser.newContext({
-      userAgent: 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
-    });
-    const page = await context.newPage();
-    
     // Scrape Now Showing
-    const nowShowingRaw = await scrapePage(page, VOX_URLS.nowShowing);
+    const nowShowingRaw = await scrapePage(VOX_URLS.nowShowing);
     result.nowShowing = nowShowingRaw
       .map(cleanTitle)
       .filter(isValidTitle);
     
-    // Small delay between pages
-    await page.waitForTimeout(1000);
-    
     // Scrape Coming Soon
-    const comingSoonRaw = await scrapePage(page, VOX_URLS.comingSoon);
+    const comingSoonRaw = await scrapePage(VOX_URLS.comingSoon);
     result.comingSoon = comingSoonRaw
       .map(cleanTitle)
       .filter(isValidTitle);
     
-    // Remove duplicates within each category
-    result.nowShowing = [...new Set(result.nowShowing.map(t => t.toLowerCase()))].map(t => 
-      result.nowShowing.find(x => x.toLowerCase() === t) || t
-    );
-    result.comingSoon = [...new Set(result.comingSoon.map(t => t.toLowerCase()))].map(t => 
-      result.comingSoon.find(x => x.toLowerCase() === t) || t
-    );
+    // Remove duplicates within each category (case-insensitive)
+    const seenNow = new Set<string>();
+    result.nowShowing = result.nowShowing.filter(title => {
+      const key = title.toLowerCase();
+      if (seenNow.has(key)) return false;
+      seenNow.add(key);
+      return true;
+    });
+    
+    const seenSoon = new Set<string>();
+    result.comingSoon = result.comingSoon.filter(title => {
+      const key = title.toLowerCase();
+      if (seenSoon.has(key)) return false;
+      seenSoon.add(key);
+      return true;
+    });
     
     // Remove movies that appear in both lists (prioritize now showing)
     const nowShowingSet = new Set(result.nowShowing.map(t => t.toLowerCase()));
@@ -177,10 +205,6 @@ export async function scrapeVOX(): Promise<ScrapeResult> {
   } catch (error) {
     console.error('❌ Critical error:', error);
     result.errors.push(error instanceof Error ? error.message : 'Unknown error');
-  } finally {
-    if (browser) {
-      await browser.close();
-    }
   }
   
   return result;
