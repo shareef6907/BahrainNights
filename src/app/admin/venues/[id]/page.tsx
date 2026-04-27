@@ -737,48 +737,27 @@ export default function AdminVenueEditPage({ params }: { params: Promise<{ id: s
       // Step 1: Compress image client-side (target: 600KB-1MB)
       const compressedFile = await compressImage(file);
 
-      // Step 2: Get presigned URL for direct S3 upload (bypasses Vercel's 4.5MB limit)
-      const timestamp = Date.now();
-      const randomSuffix = Math.random().toString(36).substring(2, 8);
-      const filename = `gallery-${timestamp}-${randomSuffix}.jpg`;
+      // Step 2: Upload via venue-portal endpoint (processes with Sharp, saves to processed/)
+      const uploadFormData = new FormData();
+      uploadFormData.append('file', compressedFile);
+      uploadFormData.append('entityType', 'venue');
+      uploadFormData.append('imageType', 'gallery');
+      uploadFormData.append('venueSlug', venue?.slug || resolvedParams.id);
 
-      const presignResponse = await fetch('/api/upload/presign', {
+      const uploadResponse = await fetch('/api/venue-portal/upload', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          filename,
-          contentType: compressedFile.type,
-          entityType: 'venue',
-          entitySlug: venue?.slug || resolvedParams.id,
-          imageType: 'gallery',
-        }),
+        body: uploadFormData,
       });
 
-      if (!presignResponse.ok) {
-        const errorData = await presignResponse.json().catch(() => ({}));
-        throw new Error(errorData.error || 'Failed to prepare upload');
+      if (!uploadResponse.ok) {
+        const errorData = await uploadResponse.json().catch(() => ({}));
+        throw new Error(errorData.error || 'Failed to upload image');
       }
 
-      const { uploadUrl, processedUrl } = await presignResponse.json();
+      const uploadData = await uploadResponse.json();
+      const processedUrl = uploadData.url;
 
-      // Step 3: Upload directly to S3 using presigned URL
-      const s3Response = await fetch(uploadUrl, {
-        method: 'PUT',
-        body: compressedFile,
-        headers: {
-          'Content-Type': compressedFile.type,
-        },
-        mode: 'cors',
-      });
-
-      if (!s3Response.ok) {
-        throw new Error(`Failed to upload to storage: ${s3Response.status}`);
-      }
-
-      // Step 4: Wait for Lambda to process the image
-      await new Promise(resolve => setTimeout(resolve, 3000));
-
-      // Step 5: Add the processed photo URL to venue's gallery array
+      // Step 3: Add the processed photo URL to venue's gallery array
       const galleryResponse = await fetch(`/api/admin/venues/${resolvedParams.id}/gallery`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -822,45 +801,26 @@ export default function AdminVenueEditPage({ params }: { params: Promise<{ id: s
         // Step 1: Compress image client-side
         const compressedFile = await compressImage(file);
 
-        // Step 2: Get presigned URL for direct S3 upload
-        const timestamp = Date.now();
-        const randomSuffix = Math.random().toString(36).substring(2, 8);
-        const filename = `gallery-${timestamp}-${randomSuffix}.jpg`;
+        // Step 2: Upload via venue-portal endpoint (processes with Sharp, saves to processed/)
+        const uploadFormData = new FormData();
+        uploadFormData.append('file', compressedFile);
+        uploadFormData.append('entityType', 'venue');
+        uploadFormData.append('imageType', 'gallery');
+        uploadFormData.append('venueSlug', venue?.slug || resolvedParams.id);
 
-        const presignResponse = await fetch('/api/upload/presign', {
+        const uploadResponse = await fetch('/api/venue-portal/upload', {
           method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            filename,
-            contentType: compressedFile.type,
-            entityType: 'venue',
-            entitySlug: venue?.slug || resolvedParams.id,
-            imageType: 'gallery',
-          }),
+          body: uploadFormData,
         });
 
-        if (!presignResponse.ok) {
-          throw new Error('Failed to prepare upload');
+        if (!uploadResponse.ok) {
+          throw new Error('Failed to upload image');
         }
 
-        const { uploadUrl, processedUrl } = await presignResponse.json();
+        const uploadData = await uploadResponse.json();
+        const processedUrl = uploadData.url;
 
-        // Step 3: Upload directly to S3
-        const s3Response = await fetch(uploadUrl, {
-          method: 'PUT',
-          body: compressedFile,
-          headers: { 'Content-Type': compressedFile.type },
-          mode: 'cors',
-        });
-
-        if (!s3Response.ok) {
-          throw new Error('Failed to upload to storage');
-        }
-
-        // Step 4: Wait for Lambda processing
-        await new Promise(resolve => setTimeout(resolve, 3000));
-
-        // Step 5: Add the photo URL to venue's gallery
+        // Step 3: Add the photo URL to venue's gallery
         const galleryResponse = await fetch(`/api/admin/venues/${resolvedParams.id}/gallery`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
