@@ -199,4 +199,4 @@ if (require.main === module) {
     });
 }
 
-export { scrapeVOX, VOX_URLS };
+export { VOX_URLS };

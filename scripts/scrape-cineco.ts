@@ -221,4 +221,4 @@ if (require.main === module) {
     });
 }
 
-export { scrapeCineco, CINE_CO_URLS };
+export { CINE_CO_URLS };
