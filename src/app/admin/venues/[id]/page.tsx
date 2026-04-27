@@ -498,24 +498,44 @@ export default function AdminVenueEditPage({ params }: { params: Promise<{ id: s
     else setUploadingCover(true);
 
     try {
-      const uploadFormData = new FormData();
-      uploadFormData.append('file', file);
-      uploadFormData.append('imageType', type);
-      uploadFormData.append('venueSlug', venue?.slug || resolvedParams.id);
+      // Step 1: Compress image (same as venue portal)
+      const compressedFile = await compressImage(file);
 
-      // Use admin upload endpoint (authenticated via admin cookie)
-      const response = await fetch('/api/admin/venues/upload-image', {
+      // Step 2: Get presigned URL (same as venue portal, but uses admin auth)
+      const presignResponse = await fetch('/api/admin/upload/presign', {
         method: 'POST',
-        body: uploadFormData,
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          fileName: compressedFile.name,
+          fileType: compressedFile.type,
+          fileSize: compressedFile.size,
+          imageType: type,
+          venueSlug: venue?.slug || resolvedParams.id,
+        }),
       });
 
-      if (!response.ok) {
-        const errorData = await response.json().catch(() => ({}));
-        throw new Error(errorData.error || 'Failed to upload image');
+      if (!presignResponse.ok) {
+        const errorData = await presignResponse.json().catch(() => ({}));
+        throw new Error(errorData.error || 'Failed to prepare upload');
       }
 
-      const data = await response.json();
-      const imageUrl = data.url;
+      const { presignedUrl, finalUrl } = await presignResponse.json();
+
+      // Step 3: Upload directly to S3 using presigned URL
+      const uploadResponse = await fetch(presignedUrl, {
+        method: 'PUT',
+        body: compressedFile,
+        headers: {
+          'Content-Type': compressedFile.type,
+        },
+        mode: 'cors',
+      });
+
+      if (!uploadResponse.ok) {
+        throw new Error(`Failed to upload to storage: ${uploadResponse.status}`);
+      }
+
+      const imageUrl = `${finalUrl}?t=${Date.now()}`;
 
       if (type === 'logo') {
         setFormData((prev) => ({ ...prev, logo_url: imageUrl }));
