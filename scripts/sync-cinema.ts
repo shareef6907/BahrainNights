@@ -49,28 +49,36 @@ function normalizeTitle(title: string): string {
 async function findMovieByTitle(title: string): Promise<{ id: string; title: string } | null> {
   const normalized = normalizeTitle(title);
   
-  // Get all movies that might match
+  // Get all movies from database
   const { data: movies } = await supabase
     .from('movies')
     .select('id, title')
-    .limit(50);
+    .order('title');
   
-  if (!movies) return null;
+  if (!movies || movies.length === 0) return null;
   
+  // Try exact match first (normalized)
   for (const movie of movies) {
     if (normalizeTitle(movie.title) === normalized) {
+      console.log(`  ✓ Exact match found: "${movie.title}" for "${title}"`);
       return movie;
     }
   }
   
-  // Try partial match
+  // Try case-insensitive contains
+  const lowerTitle = title.toLowerCase();
   for (const movie of movies) {
-    const movieNorm = normalizeTitle(movie.title);
-    if (normalized.includes(movieNorm) || movieNorm.includes(normalized)) {
-      return movie;
+    const movieLower = movie.title.toLowerCase();
+    if (movieLower.includes(lowerTitle) || lowerTitle.includes(movieLower)) {
+      // Only match if lengths are similar (avoid "I" matching "I Swear")
+      if (Math.abs(movieLower.length - lowerTitle.length) < 10) {
+        console.log(`  ✓ Partial match found: "${movie.title}" for "${title}"`);
+        return movie;
+      }
     }
   }
   
+  // No match found
   return null;
 }
 
