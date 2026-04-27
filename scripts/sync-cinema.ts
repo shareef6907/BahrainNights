@@ -76,6 +76,7 @@ async function findMovieByTitle(title: string): Promise<{ id: string; title: str
 
 /**
  * Search TMDB for movie by title
+ * FIXED: No 6-month filter - insert ALL movies
  */
 async function searchTMDB(title: string, year?: number): Promise<any | null> {
   if (!TMDB_API_KEY) {
@@ -83,10 +84,7 @@ async function searchTMDB(title: string, year?: number): Promise<any | null> {
     return null;
   }
   
-  // Get current year for filtering
   const currentYear = year || new Date().getFullYear();
-  const sixMonthsAgo = new Date();
-  sixMonthsAgo.setMonth(sixMonthsAgo.getMonth() - 6);
   
   try {
     // First try with current year
@@ -94,7 +92,7 @@ async function searchTMDB(title: string, year?: number): Promise<any | null> {
     let response = await fetch(searchUrl);
     let data = await response.json();
     
-    // If no results with year, try without year filter
+    // If no results, try without year
     if (!data.results || data.results.length === 0) {
       searchUrl = `https://api.themoviedb.org/3/search/movie?api_key=${TMDB_API_KEY}&query=${encodeURIComponent(title)}`;
       response = await fetch(searchUrl);
@@ -102,28 +100,14 @@ async function searchTMDB(title: string, year?: number): Promise<any | null> {
     }
     
     if (data.results && data.results.length > 0) {
-      // Find a valid match (not older than 6 months)
-      for (const movie of data.results) {
-        const releaseDate = movie.release_date ? new Date(movie.release_date) : null;
-        
-        // Skip movies without release dates or older than 6 months
-        if (releaseDate && releaseDate < sixMonthsAgo) {
-          console.log(`  ⏭️ Skipping "${movie.title}" (${movie.release_date}) — too old`);
-          continue;
-        }
-        
-        // Found a valid recent movie - get full details
-        const detailsUrl = `https://api.themoviedb.org/3/movie/${movie.id}?api_key=${TMDB_API_KEY}&append_to_response=credits,videos`;
-        const detailsResponse = await fetch(detailsUrl);
-        const details = await detailsResponse.json();
-        
-        console.log(`  ✓ Matched: "${movie.title}" (${movie.release_date})`);
-        return details;
-      }
+      // Take first match - no age filter
+      const movie = data.results[0];
+      const detailsUrl = `https://api.themoviedb.org/3/movie/${movie.id}?api_key=${TMDB_API_KEY}&append_to_response=credits,videos`;
+      const detailsResponse = await fetch(detailsUrl);
+      const details = await detailsResponse.json();
       
-      // All results too old - return null to use cinema site poster instead
-      console.log(`  ⚠️ No recent TMDB matches for "${title}" — will use cinema site poster`);
-      return null;
+      console.log(`  ✓ Matched: "${movie.title}"`);
+      return details;
     }
     
     return null;

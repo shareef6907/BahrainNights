@@ -70,7 +70,22 @@ function isValidTitle(title: string): boolean {
   // Skip if only numbers and special chars
   if (/^[^a-zA-Z]*$/.test(title)) return false;
   
-  return true;
+  // Skip junk UI text - comprehensive list
+  const junk = [
+    'now playing', 'now showing', 'coming soon', 'buy ticket', 'book now',
+    'learn more', 'read more', 'view details', 'english', 'arabic',
+    'malayalam', 'hindi', 'tamil', 'telugu', 'kannada',
+    'english)', 'arabic)', '(3d)', '(2d)', '3d', '2d',
+    'in the spotlight', 'now playing', 'site', 'book',
+    'connect with us', 'cookie policy', 'privacy policy',
+    'terms of service', 'all rights reserved'
+  ];
+  if (junk.some(j => lower === j || lower.includes(j + ' ') || lower.includes(' ' + j))) return false;
+  
+  // Skip ALL CAPS short text (probably navigation)
+  if (title === title.toUpperCase() && title.length < 12) return false;
+  
+  return title.length >= 3;
 }
 
 /**

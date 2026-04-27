@@ -1,13 +1,13 @@
 #!/usr/bin/env npx tsx
 
 /**
- * VOX Bahrain Cinema Scraper - Using HTTP requests + Cheerio
- * Scrapes movie titles from VOX Cinema Bahrain website
+ * VOX Bahrain Cinema Scraper - Using Playwright
+ * Handles lazy-loaded content and website protections
  * 
  * Run: npx tsx scripts/scrape-vox.ts
  */
 
-import * as cheerio from 'cheerio';
+import { chromium, type Browser, type Page } from 'playwright';
 
 const VOX_URLS = {
   nowShowing: 'https://bhr.voxcinemas.com/movies/whatson',
@@ -20,9 +20,6 @@ interface ScrapeResult {
   errors: string[];
 }
 
-/**
- * Sports/event keywords to filter out (these are not movies)
- */
 const SPORTS_KEYWORDS = [
   'uefa', 'laliga', 'premier league', 'icc', 'cricket', 'football',
   'rugby', 'tennis', 'boxing', 'mma', 'wwe', 'ufc', 'basketball',
@@ -30,197 +27,155 @@ const SPORTS_KEYWORDS = [
   'athletics', 'marathon', 'olympics', 'world cup', 'euro', 'championship'
 ];
 
-/**
- * Check if title is a sports event (not a movie)
- */
 function isSportsEvent(title: string): boolean {
   const lower = title.toLowerCase();
   return SPORTS_KEYWORDS.some(keyword => lower.includes(keyword));
 }
 
-/**
- * Clean and normalize movie title
- */
 function cleanTitle(title: string): string {
   if (!title) return '';
-  
-  let cleaned = title
-    // Remove HTML entities
+  return title
     .replace(/&amp;/g, '&')
     .replace(/&#39;/g, "'")
     .replace(/&quot;/g, '"')
-    .replace(/&lt;/g, '<')
-    .replace(/&gt;/g, '>')
-    // Remove age rating prefixes: PG15, 18TC, PG13, 15+, etc.
     .replace(/^(PG\s*\d*|18TC|15\+|TC\s*\d+|R|Rated\s+\w+|Rated)\s*/i, '')
-    // Remove extra whitespace
     .replace(/\s+/g, ' ')
     .trim();
-  
-  // Remove sports/concert keywords
-  const lower = cleaned.toLowerCase();
-  const eventKeywords = ['tour', 'experience', 'live', 'concert', 'festival', 'championship', 'match', 'game'];
-  for (const keyword of eventKeywords) {
-    if (lower.includes(keyword)) {
-      return ''; // Mark for removal
-    }
-  }
-  
-  return cleaned;
 }
 
-/**
- * Check if title is valid movie title
- */
 function isValidTitle(title: string): boolean {
   if (!title || title.length < 2) return false;
-  
   const lower = title.toLowerCase();
-  
-  // Skip sports events
   if (isSportsEvent(lower)) return false;
-  
-  // Skip if only numbers and special chars
   if (/^[^a-zA-Z]*$/.test(title)) return false;
   
-  return true;
+  // Skip junk UI text
+  const junk = ['now playing', 'coming soon', 'buy ticket', 'book now', 'english', 'arabic', 'malayalam', '3d', '2d'];
+  if (junk.some(j => lower === j || lower.includes(j + ' '))) return false;
+  
+  return title.length >= 3;
 }
 
-/**
- * Scrape movie titles from a VOX page using HTTP + Cheerio
- */
-async function scrapePage(url: string): Promise<string[]> {
-  console.log(`\n📄 Scraping: ${url}`);
-  
-  try {
-    const response = await fetch(url, {
-      headers: {
-        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
-        'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*',
-        'Accept-Language': 'en-US,en;q=0.9',
-      },
-    });
-    
-    if (!response.ok) {
-      console.log(`  ❌ HTTP error: ${response.status}`);
-      return [];
-    }
-    
-    const html = await response.text();
-    const $ = cheerio.load(html);
-    
-    const titles: string[] = [];
-    
-    // Extract from data-title attribute
-    $('[data-title]').each((_, el) => {
-      const title = $(el).attr('data-title');
-      if (title) {
-        titles.push(title);
-      }
-    });
-    
-    // Also try h3 headings as fallback
-    $('h3').each((_, el) => {
-      const text = $(el).text().trim();
-      if (text && text.length > 2) {
-        titles.push(text);
-      }
-    });
-    
-    // Try movie card elements
-    $('.movie-card, .film-card, [class*="movie"] h3, article h3').each((_, el) => {
-      const text = $(el).text().trim();
-      if (text && text.length > 2 && text.length < 200) {
-        titles.push(text);
-      }
-    });
-    
-    // Deduplicate
-    const uniqueTitles = [...new Set(titles)];
-    
-    console.log(`  Found ${uniqueTitles.length} raw titles`);
-    
-    return uniqueTitles;
-  } catch (error) {
-    console.error(`  ❌ Error scraping ${url}:`, error instanceof Error ? error.message : error);
-    return [];
+async function scrollPage(page: Page): Promise<void> {
+  for (let i = 0; i < 10; i++) {
+    await page.evaluate(() => window.scrollBy(0, 500));
+    await page.waitForTimeout(300);
   }
 }
 
-/**
- * Main scrape function
- */
+async function scrapePage(page: Page, url: string): Promise<string[]> {
+  console.log(`\n📄 Scraping: ${url}`);
+  
+  let retries = 3;
+  while (retries > 0) {
+    try {
+      await page.goto(url, { waitUntil: 'domcontentloaded', timeout: 30000 });
+      await page.waitForTimeout(3000);
+      await scrollPage(page);
+      break;
+    } catch (e) {
+      retries--;
+      if (retries === 0) {
+        console.error(`  ❌ Failed: ${e}`);
+        return [];
+      }
+      await page.waitForTimeout(2000);
+    }
+  }
+  
+  let titles: string[] = [];
+  
+  // Try data-title attribute
+  const dataTitles = await page.$$eval('[data-title]', els => els.map(e => e.getAttribute('data-title')).filter(Boolean));
+  if (dataTitles.length) titles = [...titles, ...dataTitles];
+  
+  // Try movie title selectors
+  const selectors = ['.movie-title', '.movie-name', '.film-title', 'h3[class*=""]', '[class*="title"]'];
+  for (const sel of selectors) {
+    try {
+      const found = await page.$$eval(sel, els => els.map(e => e.textContent?.trim()).filter(t => t && t.length > 2));
+      if (found.length > titles.length) titles = found;
+    } catch {}
+  }
+  
+  // Fallback: all headings
+  if (!titles.length) {
+    titles = await page.$$eval('h3, h4', els => els.map(e => e.textContent?.trim()).filter(t => t && t.length > 2));
+  }
+  
+  console.log(`  Found ${titles.length} titles`);
+  return [...new Set(titles)];
+}
+
 export async function scrapeVOX(): Promise<ScrapeResult> {
-  const result: ScrapeResult = {
-    nowShowing: [],
-    comingSoon: [],
-    errors: [],
-  };
+  const result: ScrapeResult = { nowShowing: [], comingSoon: [], errors: [] };
+  let browser: Browser | null = null;
   
   try {
     console.log('🎬 Starting VOX Bahrain Cinema Scraper');
     console.log('='.repeat(50));
     
-    // Scrape Now Showing
-    const nowShowingRaw = await scrapePage(VOX_URLS.nowShowing);
-    result.nowShowing = nowShowingRaw
-      .map(cleanTitle)
-      .filter(isValidTitle);
+    browser = await chromium.launch({ headless: true });
+    const context = await browser.newContext({
+      userAgent: 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/121.0.0.0 Safari/537.36',
+    });
+    const page = await context.newPage();
     
-    // Scrape Coming Soon
-    const comingSoonRaw = await scrapePage(VOX_URLS.comingSoon);
-    result.comingSoon = comingSoonRaw
-      .map(cleanTitle)
-      .filter(isValidTitle);
+    const nowRaw = await scrapePage(page, VOX_URLS.nowShowing);
+    result.nowShowing = nowRaw.map(cleanTitle).filter(isValidTitle);
     
-    // Remove duplicates within each category (case-insensitive)
+    await page.waitForTimeout(1000);
+    
+    const soonRaw = await scrapePage(page, VOX_URLS.comingSoon);
+    result.comingSoon = soonRaw.map(cleanTitle).filter(isValidTitle);
+    
+    // Deduplicate
     const seenNow = new Set<string>();
-    result.nowShowing = result.nowShowing.filter(title => {
-      const key = title.toLowerCase();
-      if (seenNow.has(key)) return false;
-      seenNow.add(key);
+    result.nowShowing = result.nowShowing.filter(t => {
+      const k = t.toLowerCase();
+      if (seenNow.has(k)) return false;
+      seenNow.add(k);
       return true;
     });
     
     const seenSoon = new Set<string>();
-    result.comingSoon = result.comingSoon.filter(title => {
-      const key = title.toLowerCase();
-      if (seenSoon.has(key)) return false;
-      seenSoon.add(key);
+    result.comingSoon = result.comingSoon.filter(t => {
+      const k = t.toLowerCase();
+      if (seenSoon.has(k)) return false;
+      seenSoon.add(k);
       return true;
     });
     
-    // Remove movies that appear in both lists (prioritize now showing)
-    const nowShowingSet = new Set(result.nowShowing.map(t => t.toLowerCase()));
-    result.comingSoon = result.comingSoon.filter(t => !nowShowingSet.has(t.toLowerCase()));
+    // Remove now showing from coming soon
+    const nowSet = new Set(result.nowShowing.map(t => t.toLowerCase()));
+    result.comingSoon = result.comingSoon.filter(t => !nowSet.has(t.toLowerCase()));
     
     console.log('\n' + '='.repeat(50));
     console.log('📊 VOX SCRAPE SUMMARY');
     console.log('='.repeat(50));
     console.log(`Now Showing: ${result.nowShowing.length}`);
-    result.nowShowing.forEach((title, i) => console.log(`  ${i + 1}. ${title}`));
+    result.nowShowing.forEach((t, i) => console.log(`  ${i + 1}. ${t}`));
     console.log(`\nComing Soon: ${result.comingSoon.length}`);
-    result.comingSoon.forEach((title, i) => console.log(`  ${i + 1}. ${title}`));
+    result.comingSoon.forEach((t, i) => console.log(`  ${i + 1}. ${t}`));
     
   } catch (error) {
     console.error('❌ Critical error:', error);
     result.errors.push(error instanceof Error ? error.message : 'Unknown error');
+  } finally {
+    if (browser) await browser.close();
   }
   
   return result;
 }
 
-// Run if called directly
 if (require.main === module) {
-  scrapeVOX()
-    .then(result => {
-      console.log('\n✅ VOX scrape complete');
-      process.exit(result.errors.length > 0 ? 1 : 0);
-    })
-    .catch(error => {
-      console.error('❌ Fatal error:', error);
-      process.exit(1);
-    });
+  scrapeVOX().then(r => {
+    console.log('\n✅ VOX scrape complete');
+    process.exit(r.errors.length > 0 ? 1 : 0);
+  }).catch(e => {
+    console.error('❌ Fatal error:', e);
+    process.exit(1);
+  });
 }
 
 export { VOX_URLS };
