@@ -1,13 +1,13 @@
 name: Cinema Sync - VOX & Cineco Bahrain
 
 # Cinema Scraper for BahrainNights
-# Runs Saturday, Monday, Thursday at 6 AM Bahrain time (3 AM UTC)
+# Runs every 3 days at 6 AM Bahrain time (3 AM UTC)
 # Scrapes VOX and Cineco cinemas using Playwright browser automation
 # Deduplicates movies and updates the database
 
 on:
   schedule:
-    - cron: '0 3 * * 1,4,6'  # 3 AM UTC = 6 AM Bahrain | Mon, Thu, Sat
+    - cron: '0 3 */3 * *'  # Every 3 days at 3 AM UTC = 6 AM Bahrain
   workflow_dispatch:  # Allow manual runs
 
 jobs:
@@ -43,10 +43,3 @@ jobs:
           SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
           TMDB_API_KEY: ${{ secrets.TMDB_API_KEY }}
         run: npx tsx scripts/run-cineco-scraper.ts
-
-      # Run cleanup for old movies
-      - name: Cleanup old movies
-        env:
-          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
-          SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
-        run: node scripts/cleanup-cinema.js || true

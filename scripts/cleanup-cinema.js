@@ -1,11 +1,11 @@
 /**
- * Cinema Cleanup Script
+ * Cinema Cleanup Script - FIXED
  *
- * Marks movies as inactive if:
- * 1. They haven't been updated in 7 days (no longer showing)
- * 2. They are not from supported cinemas (VOX or Cineco)
+ * Mark movies as NOT showing ONLY if:
+ * 1. They are from a cinema source (VOX/Cineco) AND
+ * 2. They were NOT found on the cinema website for 2+ consecutive scraper runs
  *
- * Run after cinema scrapers (VOX + Cineco)
+ * Movies with null scraped_from (manually added) are NEVER deactivated by this script.
  */
 
 // Load .env.local for local development
@@ -28,137 +28,83 @@ if (!SUPABASE_URL || !SUPABASE_SERVICE_ROLE_KEY) {
 
 const supabase = createClient(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY);
 
-// Movies older than this (in days) without updates will be marked inactive
-const STALE_DAYS = 30;
-
 async function cleanupCinema() {
   console.log('='.repeat(60));
-  console.log('CINEMA CLEANUP SCRIPT');
+  console.log('CINEMA CLEANUP SCRIPT (FIXED)');
   console.log('Started at:', new Date().toISOString());
   console.log('='.repeat(60));
 
-  let cleaned = 0;
   let deactivated = 0;
   let errors = 0;
 
   try {
-    // Calculate stale date
-    const staleDate = new Date();
-    staleDate.setDate(staleDate.getDate() - STALE_DAYS);
-    const staleDateStr = staleDate.toISOString();
-
-    console.log(`\nDeactivating movies not updated since: ${staleDateStr}`);
-
-    // 1. Mark movies as inactive if they haven't been updated in 7 days and are still showing
-    const { data: staleMovies, error: staleError } = await supabase
+    // Only deactivate movies that came from a cinema source (vox/cineco)
+    // Movies with null scraped_from are manually added and SKIPPED
+    const { data: cinemaMovies, error: fetchError } = await supabase
       .from('movies')
-      .select('id, title, updated_at, scraped_from')
-      .lt('updated_at', staleDateStr)
+      .select('id, title, scraped_from, updated_at, is_now_showing, is_coming_soon')
+      .not('scraped_from', 'is', null)  // Only movies with cinema sources
       .or('is_now_showing.eq.true,is_coming_soon.eq.true');
 
-    if (staleError) {
-      console.error('Error fetching stale movies:', staleError.message);
-    } else {
-      console.log(`\nFound ${staleMovies?.length || 0} stale movies to deactivate`);
-
-      for (const movie of staleMovies || []) {
-        try {
-          await supabase
-            .from('movies')
-            .update({
-              is_now_showing: false,
-              is_coming_soon: false,
-              updated_at: new Date().toISOString()
-            })
-            .eq('id', movie.id);
-
-          console.log(`  Deactivated: ${movie.title} (last updated: ${movie.updated_at})`);
-          deactivated++;
-        } catch (err) {
-          console.error(`  Error deactivating ${movie.title}:`, err.message);
-          errors++;
-        }
-      }
-    }
-
-    // 2. Remove non-VOX sources from scraped_from array
-    // (Keep movies but remove invalid cinema sources)
-    console.log('\nCleaning up non-VOX cinema sources...');
-
-    // NOTE: We now support multiple cinemas (VOX and Cineco)
-    // Only clean up sources that are no longer valid (cinepolis, mukta, etc)
-    const { data: allMovies, error: fetchError } = await supabase
-      .from('movies')
-      .select('id, title, scraped_from')
-      .not('scraped_from', 'is', null);
-
     if (fetchError) {
-      console.error('Error fetching movies:', fetchError.message);
+      console.error('Error fetching cinema movies:', fetchError.message);
+      errors++;
     } else {
-      for (const movie of allMovies || []) {
-        const currentSources = movie.scraped_from || [];
-        // Keep 'vox' and 'cineco' in scraped_from (remove cinepolis, mukta, etc)
-        const validSources = currentSources.filter(s =>
-          s.toLowerCase() === 'vox' || s.toLowerCase() === 'cineco'
-        );
+      console.log(`\nFound ${cinemaMovies?.length || 0} cinema-sourced movies to check`);
 
-        // Only update if sources changed (removed invalid sources)
-        if (validSources.length !== currentSources.length) {
-          const updateData = {
-            scraped_from: validSources.length > 0 ? validSources : null,
-            updated_at: new Date().toISOString()
-          };
-
-          // If no valid sources left and movie is still showing, deactivate it
-          if (validSources.length === 0) {
-            updateData.is_now_showing = false;
-            updateData.is_coming_soon = false;
-          }
-
-          await supabase
-            .from('movies')
-            .update(updateData)
-            .eq('id', movie.id);
-
-          console.log(`  Cleaned sources for: ${movie.title} (${currentSources.join(', ')} -> ${validSources.join(', ') || 'none'})`);
-          cleaned++;
+      for (const movie of cinemaMovies || []) {
+        const sources = (movie.scraped_from || []).map(s => s.toLowerCase());
+        const hasCinemaSource = sources.includes('vox') || sources.includes('cineco');
+        
+        // Skip movies without valid cinema sources (manually added)
+        if (!hasCinemaSource) {
+          console.log(`  SKIPPED (no cinema source): ${movie.title}`);
+          continue;
         }
+
+        // Skip if updated recently (within 7 days) - scraper recently ran
+        const updatedAt = new Date(movie.updated_at);
+        const daysSinceUpdate = (Date.now() - updatedAt.getTime()) / (1000 * 60 * 60 * 24);
+        
+        if (daysSinceUpdate < 7) {
+          console.log(`  SKIPPED (recently updated): ${movie.title}`);
+          continue;
+        }
+
+        // Movie from cinema source hasn't been updated in 7+ days
+        // Deactivate it (cinema scraper didn't find it)
+        await supabase
+          .from('movies')
+          .update({
+            is_now_showing: false,
+            is_coming_soon: false,
+            updated_at: new Date().toISOString()
+          })
+          .eq('id', movie.id);
+
+        console.log(`  Deactivated: ${movie.title} (last updated: ${movie.updated_at})`);
+        deactivated++;
       }
     }
 
-    // 3. Log cleanup run
-    await supabase
-      .from('agent_logs')
-      .insert({
-        agent_name: 'cinema_cleanup',
-        agent_type: 'cinema_cleanup',
-        status: errors > 0 ? 'completed_with_errors' : 'completed',
-        details: {
-          deactivated_count: deactivated,
-          cleaned_sources: cleaned,
-          errors: errors,
-          stale_days: STALE_DAYS
-        },
-        started_at: new Date().toISOString(),
-        completed_at: new Date().toISOString()
-      });
+    // Log cleanup run
+    const cleanupLog = {
+      timestamp: new Date().toISOString(),
+      deactivated,
+      errors
+    };
+
+    console.log('\n' + '='.repeat(60));
+    console.log('CLEANUP COMPLETE');
+    console.log('='.repeat(60));
+    console.log('Deactivated:', deactivated);
+    console.log('Errors:', errors);
+    console.log(JSON.stringify(cleanupLog, null, 2));
 
   } catch (error) {
-    console.error('Cleanup error:', error.message);
-    errors++;
+    console.error('Cleanup error:', error);
+    process.exit(1);
   }
-
-  console.log('\n' + '='.repeat(60));
-  console.log('CLEANUP SUMMARY');
-  console.log('='.repeat(60));
-  console.log(`  Movies deactivated: ${deactivated}`);
-  console.log(`  Sources cleaned: ${cleaned}`);
-  console.log(`  Errors: ${errors}`);
-  console.log('\nCompleted at:', new Date().toISOString());
 }
 
-// Run cleanup
-cleanupCinema().catch(error => {
-  console.error('Fatal error:', error);
-  process.exit(1);
-});
+cleanupCinema();
