@@ -5,7 +5,7 @@ import { Movie } from '@/components/cinema/MovieCard';
 import MovieListSchema from '@/components/SEO/MovieListSchema';
 import BreadcrumbSchema from '@/components/SEO/BreadcrumbSchema';
 
-// Revalidate every 60 seconds for fresh data (especially for featured trailers from admin)
+// Revalidate every 60 seconds for fresh data
 export const revalidate = 60;
 
 // Database movie type
@@ -42,7 +42,7 @@ function getPosterUrl(posterPath: string | null): string {
 function getBackdropUrl(backdropPath: string | null): string {
   if (!backdropPath) return '/images/backdrop-placeholder.jpg';
   if (backdropPath.startsWith('http')) return backdropPath;
-  return `https://image.tmdb.org/t/p/w1280${backdropPath}`;
+  return `https://image.tmdb.org/t/p/original${backdropPath}`;
 }
 
 // Convert DB movie to component Movie format
@@ -52,10 +52,9 @@ function convertToMovieFormat(dbMovie: DBMovie): Movie {
   const mins = durationMins % 60;
   const durationStr = hours > 0 ? `${hours}h ${mins}min` : `${mins}min`;
 
-  // Prefer trailer_key (YouTube ID) over trailer_url
   let trailerUrl = '';
   if (dbMovie.trailer_key) {
-    trailerUrl = dbMovie.trailer_key; // Just the YouTube ID
+    trailerUrl = dbMovie.trailer_key;
   } else if (dbMovie.trailer_url) {
     trailerUrl = dbMovie.trailer_url;
   }
@@ -83,19 +82,17 @@ function convertToMovieFormat(dbMovie: DBMovie): Movie {
   };
 }
 
-// Filter and deduplicate movies
+// Filter movies with valid posters
 function filterValidMovies(movies: DBMovie[]): DBMovie[] {
-  // Filter movies with valid poster URLs
   const validMovies = movies.filter(movie => {
     const poster = movie.poster_url || '';
-    // Must have valid poster URL (not placeholder, not null, starts with http or is TMDB path)
     if (!poster || poster.includes('placeholder') || poster.includes('null')) {
       return false;
     }
     return true;
   });
 
-  // Remove duplicates by title (case-insensitive)
+  // Remove duplicates by title
   const seen = new Set<string>();
   return validMovies.filter(movie => {
     const key = movie.title.toLowerCase().trim();
@@ -105,26 +102,21 @@ function filterValidMovies(movies: DBMovie[]): DBMovie[] {
   });
 }
 
-// Fetch all movies on the server (VOX + Cineco + manual entries)
+// Fetch all movies - now showing OR coming soon
 async function getMovies() {
   const [nowShowingRes, comingSoonRes] = await Promise.all([
     supabaseAdmin
       .from('movies')
       .select('*')
       .eq('is_now_showing', true)
-      // Show VOX, Cineco movies or manual entries (no scraped_from)
-      .or('scraped_from.is.null,scraped_from.cs.{vox},scraped_from.cs.{cineco}')
       .order('tmdb_rating', { ascending: false }),
     supabaseAdmin
       .from('movies')
       .select('*')
       .eq('is_coming_soon', true)
-      // Show VOX, Cineco movies or manual entries (no scraped_from)
-      .or('scraped_from.is.null,scraped_from.cs.{vox},scraped_from.cs.{cineco}')
       .order('release_date', { ascending: true })
   ]);
 
-  // Filter out invalid posters and duplicates
   const filteredNowShowing = filterValidMovies(nowShowingRes.data || []);
   const filteredComingSoon = filterValidMovies(comingSoonRes.data || []);
 
@@ -137,7 +129,6 @@ async function getMovies() {
 // Fetch featured trailers from admin selection
 async function getFeaturedTrailers(): Promise<Movie[]> {
   try {
-    // First try to get admin-selected featured trailers
     const { data: featured, error: featuredError } = await supabaseAdmin
       .from('cinema_featured_trailers')
       .select('movie_id, display_order, is_active')
@@ -145,7 +136,6 @@ async function getFeaturedTrailers(): Promise<Movie[]> {
       .order('display_order', { ascending: true });
 
     if (!featuredError && featured && featured.length > 0) {
-      // Fetch the actual movie data for featured trailers
       const movieIds = featured.map(f => f.movie_id);
       const { data: movies } = await supabaseAdmin
         .from('movies')
@@ -153,7 +143,6 @@ async function getFeaturedTrailers(): Promise<Movie[]> {
         .in('id', movieIds);
 
       if (movies && movies.length > 0) {
-        // Sort movies by display_order from featured_trailers
         const movieMap = new Map(movies.map(m => [m.id, m]));
         const orderedMovies = featured
           .map(f => movieMap.get(f.movie_id))
@@ -172,7 +161,6 @@ async function getFeaturedTrailers(): Promise<Movie[]> {
       .select('*')
       .eq('is_now_showing', true)
       .not('trailer_key', 'is', null)
-      .or('scraped_from.is.null,scraped_from.cs.{vox},scraped_from.cs.{cineco}')
       .order('release_date', { ascending: false })
       .limit(8);
 
@@ -185,48 +173,10 @@ async function getFeaturedTrailers(): Promise<Movie[]> {
   }
 }
 
-// Fetch cinemas for filter dropdown
-async function getCinemas() {
-  const { data } = await supabaseAdmin
-    .from('cinemas')
-    .select('id, name')
-    .order('name');
-
-  interface Cinema {
-    id: string;
-    name: string;
-  }
-
-  return [
-    { value: 'all', label: 'All Cinemas' },
-    ...(data || []).map((c: Cinema) => ({
-      value: c.id,
-      label: c.name,
-    })),
-  ];
-}
-
-// Fetch last scraper update time
-async function getLastUpdated() {
-  const { data } = await supabaseAdmin
-    .from('agent_logs')
-    .select('completed_at')
-    .eq('agent_type', 'cinema_scraper_github')
-    .eq('status', 'completed')
-    .order('completed_at', { ascending: false })
-    .limit(1)
-    .single();
-
-  return data?.completed_at || null;
-}
-
-// Server Component - data is fetched BEFORE the page renders
+// Server Component
 export default async function CinemaPage() {
-  // Fetch all data on the server - NO loading state needed!
-  const [{ nowShowing, comingSoon }, cinemas, lastUpdated, featuredTrailers] = await Promise.all([
+  const [{ nowShowing, comingSoon }, featuredTrailers] = await Promise.all([
     getMovies(),
-    getCinemas(),
-    getLastUpdated(),
     getFeaturedTrailers(),
   ]);
 
@@ -239,15 +189,15 @@ export default async function CinemaPage() {
       <MovieListSchema
         movies={nowShowing}
         pageTitle="Movies Now Showing in Bahrain - VOX Cinemas"
-        pageDescription="Find movies now showing at VOX Cinemas Bahrain - VOX City Centre and VOX The Avenues"
+        pageDescription="Find movies now showing at VOX Cinemas Bahrain"
         pageUrl="https://www.bahrainnights.com/cinema"
       />
       <Suspense fallback={null}>
         <CinemaPageClient
           initialNowShowing={nowShowing}
           initialComingSoon={comingSoon}
-          initialCinemas={cinemas}
-          lastUpdated={lastUpdated}
+          initialCinemas={[{ value: 'all', label: 'All Cinemas' }]}
+          lastUpdated={null}
           featuredTrailers={featuredTrailers}
         />
       </Suspense>
@@ -258,11 +208,11 @@ export default async function CinemaPage() {
 // Metadata for SEO
 export const metadata = {
   title: 'Cinema in Bahrain - Movies Now Showing & Coming Soon | VOX & Cineco',
-  description: 'Find movies now showing at VOX Cinemas and Cineco Bahrain. Check what\'s playing, watch trailers, and book tickets online at VOX City Centre, VOX The Avenues, Cineco Seef, and more.',
-  keywords: ['cinema in Bahrain', 'movies in Bahrain', 'Bahrain cinema', 'now showing Bahrain', 'VOX Bahrain', 'Cineco Bahrain', 'VOX City Centre', 'VOX The Avenues', 'Cineco Seef', 'movie showtimes Bahrain'],
+  description: 'Find movies now showing at VOX Cinemas and Cineco Bahrain. Check what\'s playing, watch trailers, and book tickets online.',
+  keywords: ['cinema in Bahrain', 'movies in Bahrain', 'Bahrain cinema', 'now showing Bahrain', 'VOX Bahrain', 'Cineco Bahrain'],
   openGraph: {
-    title: 'Cinema in Bahrain - Movies Now Showing & Coming Soon | VOX & Cineco',
-    description: 'Find movies now showing at VOX Cinemas and Cineco Bahrain. Watch trailers and book tickets online.',
+    title: 'Cinema in Bahrain - Movies Now Showing & Coming Soon',
+    description: 'Find movies now showing at VOX Cinemas and Cineco Bahrain.',
     url: 'https://www.bahrainnights.com/cinema',
     type: 'website',
   },
@@ -272,6 +222,6 @@ export const metadata = {
   twitter: {
     card: 'summary_large_image',
     title: 'Cinema in Bahrain - Movies Now Showing & Coming Soon',
-    description: 'Find movies now showing at VOX Cinemas and Cineco Bahrain. Book tickets online.',
+    description: 'Find movies now showing at VOX Cinemas and Cineco Bahrain.',
   },
 };
