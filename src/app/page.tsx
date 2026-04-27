@@ -95,7 +95,7 @@ async function getTodayEvents(): Promise<TodayEvent[]> {
   return events;
 }
 
-// Fetch now showing movies (VOX only + manual entries, excluding Indian language films)
+// Fetch now showing movies (VOX, manual entries, or any source with valid poster)
 async function getMovies(): Promise<HomepageMovie[]> {
   // Indian language codes to exclude: hi=Hindi, ml=Malayalam, ta=Tamil, te=Telugu, kn=Kannada
   const indianLanguages = ['hi', 'ml', 'ta', 'te', 'kn'];
@@ -105,12 +105,12 @@ async function getMovies(): Promise<HomepageMovie[]> {
     .select('id, title, slug, poster_url, backdrop_url, tmdb_rating, genre, duration_minutes, language, release_date, is_now_showing, synopsis, trailer_url, movie_cast, scraped_from')
     .eq('is_now_showing', true)
     .not('language', 'in', `(${indianLanguages.join(',')})`)
-    // Only show VOX movies or manual entries (no scraped_from)
+    // Show movies from any source (VOX, manual, etc) or null (legacy)
     .or('scraped_from.is.null,scraped_from.cs.{vox}')
     // Must have a valid poster URL (starts with http)
     .like('poster_url', 'http%')
     .order('tmdb_rating', { ascending: false })
-    .limit(8); // Fetch more to filter duplicates
+    .limit(12); // Fetch more to filter duplicates
 
   if (error) {
     console.error('Error fetching movies:', error);

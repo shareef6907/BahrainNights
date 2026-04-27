@@ -100,6 +100,12 @@ export default function NetflixHero({ movies, onMovieClick, onBookClick }: Netfl
   }, [currentIndex, movies.length, goToSlide]);
 
   const toggleMute = useCallback(() => {
+    // Use YouTube API to toggle mute without reloading the iframe
+    const iframe = document.querySelector('iframe[title="Movie Trailer"]') as HTMLIFrameElement;
+    if (iframe && iframe.contentWindow) {
+      iframe.contentWindow.postMessage('{"event":"command","func":"toggleMute","args":""}', 'https://www.youtube.com');
+    }
+    // Also update local state for UI
     setIsMuted((prev) => !prev);
     setUserInteracted(true);
   }, []);
@@ -138,6 +144,7 @@ export default function NetflixHero({ movies, onMovieClick, onBookClick }: Netfl
       iv_load_policy: '3',
       disablekb: '1',
       playsinline: '1',
+      enablejsapi: '1', // Required for postMessage API
       origin: typeof window !== 'undefined' ? window.location.origin : '',
     });
     return `https://www.youtube.com/embed/${id}?${params.toString()}`;
@@ -159,7 +166,7 @@ export default function NetflixHero({ movies, onMovieClick, onBookClick }: Netfl
       <AnimatePresence mode="wait">
         {videoId && (
           <motion.div
-            key={`video-${currentIndex}-${isMuted}`}
+            key={`video-${currentIndex}`}
             className="absolute inset-0 w-full h-full"
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
@@ -169,7 +176,7 @@ export default function NetflixHero({ movies, onMovieClick, onBookClick }: Netfl
             {/* Video container - cover behavior on all devices for Netflix feel */}
             <div className="absolute inset-0 w-full h-full overflow-hidden flex items-center justify-center">
               <iframe
-                src={getEmbedUrl(videoId, isMuted)}
+                src={getEmbedUrl(videoId, false)}
                 className="pointer-events-none"
                 style={{
                   // Cover behavior - fill container cinematically
