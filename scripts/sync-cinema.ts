@@ -405,23 +405,37 @@ async function syncCinema() {
     // Step 6: Cleanup - remove movies no longer showing
     console.log('\n🧹 Step 6: Cleaning up stale movies...');
     
-    const { data: staleMovies } = await supabase
-      .from('movies')
-      .select('id, title')
-      .or('is_now_showing.eq.true,is_coming_soon.eq.true');
+    // SAFETY: Only cleanup if scraper found movies (prevents wiping everything on failed scrape)
+    const totalMoviesFound = mergedNowShowing.length + mergedComingSoon.length;
+    const MIN_MOVIES_THRESHOLD = 5;
     
-    for (const movie of staleMovies || []) {
-      const normTitle = normalizeTitle(movie.title);
+    if (totalMoviesFound === 0) {
+      console.log('  ⚠️ WARNING: Scraper found 0 movies! Skipping cleanup to prevent data loss.');
+      console.log('  ⚠️ This indicates a problem with the scraper (site may be down or selectors changed).');
+      console.log('  ⚠️ Manual intervention required. Existing movies preserved.');
+    } else if (totalMoviesFound < MIN_MOVIES_THRESHOLD) {
+      console.log(`  ⚠️ WARNING: Scraper found only ${totalMoviesFound} movies (expected ${MIN_MOVIES_THRESHOLD}+).`);
+      console.log('  ⚠️ Proceeding with cleanup but watching for false positives.');
+      console.log('  ⚠️ If this persists, check if VOX/Cineco site structure changed.');
+    } else {
+      const { data: staleMovies } = await supabase
+        .from('movies')
+        .select('id, title')
+        .or('is_now_showing.eq.true,is_coming_soon.eq.true');
       
-      // Check if still in any list
-      const inNowShowing = nowShowingSet.has(normTitle);
-      const inComingSoon = comingSoonSet.has(normTitle);
-      
-      if (!inNowShowing && !inComingSoon) {
-        // Mark as not showing
-        await updateMovieStatus(movie.id, false, false);
-        console.log(`  🗑️ Removed from showing: ${movie.title}`);
-        stats.removed++;
+      for (const movie of staleMovies || []) {
+        const normTitle = normalizeTitle(movie.title);
+        
+        // Check if still in any list
+        const inNowShowing = nowShowingSet.has(normTitle);
+        const inComingSoon = comingSoonSet.has(normTitle);
+        
+        if (!inNowShowing && !inComingSoon) {
+          // Mark as not showing
+          await updateMovieStatus(movie.id, false, false);
+          console.log(`  🗑️ Removed from showing: ${movie.title}`);
+          stats.removed++;
+        }
       }
     }
     
