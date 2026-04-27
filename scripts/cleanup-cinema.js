@@ -29,7 +29,7 @@ if (!SUPABASE_URL || !SUPABASE_SERVICE_ROLE_KEY) {
 const supabase = createClient(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY);
 
 // Movies older than this (in days) without updates will be marked inactive
-const STALE_DAYS = 7;
+const STALE_DAYS = 30;
 
 async function cleanupCinema() {
   console.log('='.repeat(60));
