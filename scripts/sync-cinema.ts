@@ -77,26 +77,53 @@ async function findMovieByTitle(title: string): Promise<{ id: string; title: str
 /**
  * Search TMDB for movie by title
  */
-async function searchTMDB(title: string): Promise<any | null> {
+async function searchTMDB(title: string, year?: number): Promise<any | null> {
   if (!TMDB_API_KEY) {
     console.log('  ⚠️ TMDB_API_KEY not set, skipping TMDB lookup');
     return null;
   }
   
+  // Get current year for filtering
+  const currentYear = year || new Date().getFullYear();
+  const sixMonthsAgo = new Date();
+  sixMonthsAgo.setMonth(sixMonthsAgo.getMonth() - 6);
+  
   try {
-    const searchUrl = `https://api.themoviedb.org/3/search/movie?api_key=${TMDB_API_KEY}&query=${encodeURIComponent(title)}`;
-    const response = await fetch(searchUrl);
-    const data = await response.json();
+    // First try with current year
+    let searchUrl = `https://api.themoviedb.org/3/search/movie?api_key=${TMDB_API_KEY}&query=${encodeURIComponent(title)}&year=${currentYear}`;
+    let response = await fetch(searchUrl);
+    let data = await response.json();
+    
+    // If no results with year, try without year filter
+    if (!data.results || data.results.length === 0) {
+      searchUrl = `https://api.themoviedb.org/3/search/movie?api_key=${TMDB_API_KEY}&query=${encodeURIComponent(title)}`;
+      response = await fetch(searchUrl);
+      data = await response.json();
+    }
     
     if (data.results && data.results.length > 0) {
-      const movie = data.results[0];
+      // Find a valid match (not older than 6 months)
+      for (const movie of data.results) {
+        const releaseDate = movie.release_date ? new Date(movie.release_date) : null;
+        
+        // Skip movies without release dates or older than 6 months
+        if (releaseDate && releaseDate < sixMonthsAgo) {
+          console.log(`  ⏭️ Skipping "${movie.title}" (${movie.release_date}) — too old`);
+          continue;
+        }
+        
+        // Found a valid recent movie - get full details
+        const detailsUrl = `https://api.themoviedb.org/3/movie/${movie.id}?api_key=${TMDB_API_KEY}&append_to_response=credits,videos`;
+        const detailsResponse = await fetch(detailsUrl);
+        const details = await detailsResponse.json();
+        
+        console.log(`  ✓ Matched: "${movie.title}" (${movie.release_date})`);
+        return details;
+      }
       
-      // Get full details with credits
-      const detailsUrl = `https://api.themoviedb.org/3/movie/${movie.id}?api_key=${TMDB_API_KEY}&append_to_response=credits,videos`;
-      const detailsResponse = await fetch(detailsUrl);
-      const details = await detailsResponse.json();
-      
-      return details;
+      // All results too old - return null to use cinema site poster instead
+      console.log(`  ⚠️ No recent TMDB matches for "${title}" — will use cinema site poster`);
+      return null;
     }
     
     return null;
@@ -158,13 +185,15 @@ function createSlug(title: string): string {
 async function insertMovie(
   title: string,
   tmdbData: any,
-  isNowShowing: boolean
+  isNowShowing: boolean,
+  cinemaPosterUrl?: string
 ): Promise<string | null> {
   try {
     const slug = createSlug(title);
-    const posterUrl = tmdbData?.poster_path 
+    // Use cinema site poster if TMDB didn't have a valid match
+    const posterUrl = cinemaPosterUrl || (tmdbData?.poster_path 
       ? `https://image.tmdb.org/t/p/w500${tmdbData.poster_path}` 
-      : null;
+      : null);
     const backdropUrl = tmdbData?.backdrop_path 
       ? `https://image.tmdb.org/t/p/original${tmdbData.backdrop_path}` 
       : null;
@@ -325,7 +354,8 @@ async function syncCinema() {
       } else {
         // Search TMDB and insert new
         console.log(`  🔍 New movie: ${title} - searching TMDB...`);
-        const tmdbData = await searchTMDB(title);
+        const currentYear = new Date().getFullYear();
+        const tmdbData = await searchTMDB(title, currentYear);
         await wait(300); // Rate limit
         
         if (tmdbData) {
@@ -335,7 +365,7 @@ async function syncCinema() {
           }
         } else {
           stats.tmdbErrors++;
-          console.log(`  ⚠️ Could not find TMDB data for: ${title}`);
+          console.log(`  ⚠️ Could not find valid TMDB data for: ${title} (may be too old or not in TMDB)`);
         }
       }
     }
@@ -356,7 +386,8 @@ async function syncCinema() {
       } else {
         // Search TMDB and insert new
         console.log(`  🔍 New movie: ${title} - searching TMDB...`);
-        const tmdbData = await searchTMDB(title);
+        const currentYear = new Date().getFullYear();
+        const tmdbData = await searchTMDB(title, currentYear);
         await wait(300); // Rate limit
         
         if (tmdbData) {
@@ -366,7 +397,7 @@ async function syncCinema() {
           }
         } else {
           stats.tmdbErrors++;
-          console.log(`  ⚠️ Could not find TMDB data for: ${title}`);
+          console.log(`  ⚠️ Could not find valid TMDB data for: ${title} (may be too old or not in TMDB)`);
         }
       }
     }
