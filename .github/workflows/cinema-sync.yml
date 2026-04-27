@@ -1,17 +1,17 @@
 name: Cinema Sync - VOX & Cineco Bahrain
 
 # Cinema Scraper for BahrainNights
-# Runs every 3 days at 6 AM Bahrain time (3 AM UTC)
+# Runs Monday, Wednesday, Friday at 6 AM Bahrain time (3 AM UTC)
 # Scrapes VOX and Cineco cinemas using Playwright browser automation
-# Deduplicates movies and updates the database
+# Deduplicates movies and updates the database with TMDB metadata
 
 on:
   schedule:
-    - cron: '0 3 */3 * *'  # Every 3 days at 3 AM UTC = 6 AM Bahrain
+    - cron: '0 3 * * 1,3,5'  # 3 AM UTC = 6 AM Bahrain | Mon, Wed, Fri
   workflow_dispatch:  # Allow manual runs
 
 jobs:
-  scrape-cinemas:
+  sync-cinema:
     runs-on: ubuntu-latest
     timeout-minutes: 30
     steps:
@@ -28,18 +28,10 @@ jobs:
       - name: Install Playwright browsers
         run: npx playwright install chromium --with-deps
 
-      # Run VOX Bahrain scraper (Playwright browser automation)
-      - name: Scrape VOX Bahrain
+      - name: Run Cinema Sync
         env:
           SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
           SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
           TMDB_API_KEY: ${{ secrets.TMDB_API_KEY }}
-        run: npx tsx scripts/run-vox-scraper.ts
-
-      # Run Cineco scraper
-      - name: Scrape Cineco Bahrain
-        env:
-          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
-          SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
-          TMDB_API_KEY: ${{ secrets.TMDB_API_KEY }}
-        run: npx tsx scripts/run-cineco-scraper.ts
+          YOUTUBE_API_KEY: ${{ secrets.YOUTUBE_API_KEY }}
+        run: npx tsx scripts/sync-cinema.ts
