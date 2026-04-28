@@ -35,7 +35,7 @@ function getYouTubeId(url: string | undefined): string | null {
 
 export default function NetflixHero({ movies, onMovieClick, onBookClick }: NetflixHeroProps) {
   const [currentIndex, setCurrentIndex] = useState(0);
-  const [isMuted, setIsMuted] = useState(true); // Start muted for autoplay (browser requirement)
+  const [isMuted, setIsMuted] = useState(false); // Start with audio
   const [userInteracted, setUserInteracted] = useState(false);
   const [showControls, setShowControls] = useState(false);
   const [ytApiReady, setYtApiReady] = useState(false);
@@ -94,7 +94,7 @@ export default function NetflixHero({ movies, onMovieClick, onBookClick }: Netfl
         videoId: videoId,
         playerVars: {
           autoplay: 1,
-          mute: 1, // Must start muted for mobile autoplay
+          mute: 0, // Start with audio
           controls: 0,
           showinfo: 0,
           rel: 0,
@@ -108,10 +108,19 @@ export default function NetflixHero({ movies, onMovieClick, onBookClick }: Netfl
         },
         events: {
           onReady: (event: { target: any }) => {
-            // Force play on ready
+            // Force play and unmute on ready
+            event.target.unMute();
+            event.target.setVolume(50);
             event.target.playVideo();
             // Loop the video
             event.target.seekTo(0);
+          },
+          onError: (event: { target: any; data: number }) => {
+            // If autoplay with audio fails, retry muted
+            console.log('YouTube autoplay error, retrying muted');
+            event.target.mute();
+            event.target.setVolume(50);
+            event.target.playVideo();
           },
           onStateChange: (event: { target: any; data: number }) => {
             // Loop when video ends (YT.PlayerState.ENDED = 0)
@@ -137,8 +146,18 @@ export default function NetflixHero({ movies, onMovieClick, onBookClick }: Netfl
     const currentMovie = movies[currentIndex];
     const videoId = getYouTubeId(currentMovie?.trailerUrl);
     
-    if (videoId && !initializedRef.current) {
-      createPlayer(videoId);
+    if (videoId) {
+      if (playerRef.current && playerRef.current.loadVideoById) {
+        // Video already exists - load new video
+        playerRef.current.loadVideoById(videoId);
+        playerRef.current.unMute();
+        playerRef.current.setVolume(50);
+        playerRef.current.playVideo();
+        playerRef.current.seekTo(0);
+      } else if (!initializedRef.current) {
+        // No player yet - create new one
+        createPlayer(videoId);
+      }
     }
   }, [movies, currentIndex, ytApiReady, createPlayer]);
 
