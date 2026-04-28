@@ -11,26 +11,6 @@ interface NetflixHeroProps {
   onBookClick: (movie: Movie) => void;
 }
 
-// Global YouTube API reference
-declare global {
-  interface Window {
-    YT: any;
-    onYouTubeIframeAPIReady: () => void;
-  }
-}
-
-interface YouTubePlayer {
-  playVideo: () => void;
-  pauseVideo: () => void;
-  mute: () => void;
-  unMute: () => void;
-  isMuted: () => boolean;
-  loadVideoById: (videoId: string) => void;
-  seekTo: (seconds: number) => void;
-  setLoop: (loop: boolean) => void;
-  destroy: () => void;
-}
-
 // Extract YouTube video ID from various URL formats
 function getYouTubeId(url: string | undefined): string | null {
   if (!url) return null;
@@ -61,7 +41,7 @@ export default function NetflixHero({ movies, onMovieClick, onBookClick }: Netfl
   const [ytApiReady, setYtApiReady] = useState(false);
   const [isMobile, setIsMobile] = useState(false);
   const autoAdvanceRef = useRef<NodeJS.Timeout | null>(null);
-  const playerRef = useRef<YouTubePlayer | null>(null);
+  const playerRef = useRef<any>(null);
   const playerContainerRef = useRef<HTMLDivElement>(null);
   const initializedRef = useRef(false);
 
@@ -83,7 +63,7 @@ export default function NetflixHero({ movies, onMovieClick, onBookClick }: Netfl
       const firstScriptTag = document.getElementsByTagName('script')[0];
       firstScriptTag.parentNode?.insertBefore(tag, firstScriptTag);
       
-      window.onYouTubeIframeAPIReady = () => {
+      (window as any).onYouTubeIframeAPIReady = () => {
         setYtApiReady(true);
       };
     } else if (window.YT) {
@@ -127,13 +107,13 @@ export default function NetflixHero({ movies, onMovieClick, onBookClick }: Netfl
           origin: typeof window !== 'undefined' ? window.location.origin : undefined,
         },
         events: {
-          onReady: (event: { target: YouTubePlayer }) => {
+          onReady: (event: { target: any }) => {
             // Force play on ready
             event.target.playVideo();
             // Loop the video
             event.target.seekTo(0);
           },
-          onStateChange: (event: { target: YouTubePlayer; data: number }) => {
+          onStateChange: (event: { target: any; data: number }) => {
             // Loop when video ends (YT.PlayerState.ENDED = 0)
             if (event.data === 0) {
               event.target.seekTo(0);
@@ -297,8 +277,8 @@ export default function NetflixHero({ movies, onMovieClick, onBookClick }: Netfl
 
               {/* Meta Info */}
               <div className="flex flex-wrap items-center gap-2 md:gap-3 mb-2 md:mb-4 text-gray-300 text-xs md:text-base">
-                {currentMovie?.tmdb_rating && (
-                  <span className="text-[#d4a853] font-semibold">★ {currentMovie.tmdb_rating}</span>
+                {currentMovie?.rating && (
+                  <span className="text-[#d4a853] font-semibold">★ {currentMovie.rating}/10</span>
                 )}
                 {currentMovie?.genres?.slice(0, isMobile ? 2 : 3).map((genre, i) => (
                   <span key={genre} className="flex items-center">
