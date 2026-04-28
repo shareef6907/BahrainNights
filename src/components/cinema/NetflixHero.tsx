@@ -11,6 +11,26 @@ interface NetflixHeroProps {
   onBookClick: (movie: Movie) => void;
 }
 
+// Global YouTube API reference
+declare global {
+  interface Window {
+    YT: typeof YT;
+    onYouTubeIframeAPIReady: () => void;
+  }
+}
+
+interface YouTubePlayer {
+  playVideo: () => void;
+  pauseVideo: () => void;
+  mute: () => void;
+  unMute: () => void;
+  isMuted: () => boolean;
+  loadVideoById: (videoId: string) => void;
+  seekTo: (seconds: number) => void;
+  setLoop: (loop: boolean) => void;
+  destroy: () => void;
+}
+
 // Extract YouTube video ID from various URL formats
 function getYouTubeId(url: string | undefined): string | null {
   if (!url) return null;
@@ -35,11 +55,15 @@ function getYouTubeId(url: string | undefined): string | null {
 
 export default function NetflixHero({ movies, onMovieClick, onBookClick }: NetflixHeroProps) {
   const [currentIndex, setCurrentIndex] = useState(0);
-  const [isMuted, setIsMuted] = useState(true); // Start muted for autoplay
+  const [isMuted, setIsMuted] = useState(true); // Start muted for autoplay (browser requirement)
   const [userInteracted, setUserInteracted] = useState(false);
-  const [isMobile, setIsMobile] = useState(false);
   const [showControls, setShowControls] = useState(false);
+  const [ytApiReady, setYtApiReady] = useState(false);
+  const [isMobile, setIsMobile] = useState(false);
   const autoAdvanceRef = useRef<NodeJS.Timeout | null>(null);
+  const playerRef = useRef<YouTubePlayer | null>(null);
+  const playerContainerRef = useRef<HTMLDivElement>(null);
+  const initializedRef = useRef(false);
 
   // Detect mobile
   useEffect(() => {
@@ -51,25 +75,107 @@ export default function NetflixHero({ movies, onMovieClick, onBookClick }: Netfl
     return () => window.removeEventListener('resize', checkMobile);
   }, []);
 
-  // Initialize iframe as muted (required for autoplay)
+  // Load YouTube IFrame Player API
   useEffect(() => {
-    const iframe = document.getElementById('trailer-iframe') as HTMLIFrameElement;
-    if (iframe && iframe.contentWindow) {
-      // Start muted - YouTube will respect autoplay with muted=1
-      iframe.contentWindow.postMessage(
-        JSON.stringify({ event: 'command', func: 'mute', args: '' }),
-        'https://www.youtube.com'
-      );
+    if (typeof window !== 'undefined' && !window.YT) {
+      const tag = document.createElement('script');
+      tag.src = 'https://www.youtube.com/iframe_api';
+      const firstScriptTag = document.getElementsByTagName('script')[0];
+      firstScriptTag.parentNode?.insertBefore(tag, firstScriptTag);
+      
+      window.onYouTubeIframeAPIReady = () => {
+        setYtApiReady(true);
+      };
+    } else if (window.YT) {
+      setYtApiReady(true);
     }
   }, []);
 
-  // Auto-unmute on desktop after first load
+  // Create YouTube player
+  const createPlayer = useCallback((videoId: string) => {
+    if (!window.YT || !playerContainerRef.current || !ytApiReady) return;
+    
+    // Destroy existing player
+    if (playerRef.current) {
+      try {
+        playerRef.current.destroy();
+      } catch (e) {
+        // Ignore destroy errors
+      }
+      playerRef.current = null;
+    }
+
+    // Clear container
+    playerContainerRef.current.innerHTML = '';
+
+    // Create new player instance
+    try {
+      const player = new window.YT.Player(playerContainerRef.current.id, {
+        videoId: videoId,
+        playerVars: {
+          autoplay: 1,
+          mute: 1, // Must start muted for mobile autoplay
+          controls: 0,
+          showinfo: 0,
+          rel: 0,
+          loop: 1,
+          playsinline: 1, // Critical for iOS
+          modestbranding: 1,
+          iv_load_policy: 3,
+          disablekb: 1,
+          fs: 0,
+          origin: typeof window !== 'undefined' ? window.location.origin : undefined,
+        },
+        events: {
+          onReady: (event: { target: YouTubePlayer }) => {
+            // Force play on ready
+            event.target.playVideo();
+            // Loop the video
+            event.target.seekTo(0);
+          },
+          onStateChange: (event: { target: YouTubePlayer; data: number }) => {
+            // Loop when video ends (YT.PlayerState.ENDED = 0)
+            if (event.data === 0) {
+              event.target.seekTo(0);
+              event.target.playVideo();
+            }
+          },
+        },
+      });
+      
+      playerRef.current = player;
+      initializedRef.current = true;
+    } catch (e) {
+      console.error('Failed to create YouTube player:', e);
+    }
+  }, [ytApiReady]);
+
+  // Initialize player when movie changes
   useEffect(() => {
-    if (!isMobile && !userInteracted) {
+    if (!movies || movies.length === 0 || !ytApiReady) return;
+    
+    const currentMovie = movies[currentIndex];
+    const videoId = getYouTubeId(currentMovie?.trailerUrl);
+    
+    if (videoId && !initializedRef.current) {
+      createPlayer(videoId);
+    }
+  }, [movies, currentIndex, ytApiReady, createPlayer]);
+
+  // Auto-unmute on desktop after user interaction
+  useEffect(() => {
+    if (!isMobile && !userInteracted && playerRef.current) {
       const timer = setTimeout(() => {
-        setIsMuted(false);
+        if (playerRef.current) {
+          try {
+            playerRef.current.unMute();
+            setIsMuted(false);
+          } catch (e) {
+            // Ignore if already unmuted
+          }
+        }
         setUserInteracted(true);
-      }, 1500);
+      }, 2000);
       return () => clearTimeout(timer);
     }
   }, [isMobile, userInteracted]);
@@ -81,7 +187,6 @@ export default function NetflixHero({ movies, onMovieClick, onBookClick }: Netfl
     }
     autoAdvanceRef.current = setInterval(() => {
       setCurrentIndex((prev) => (prev + 1) % movies.length);
-      // DO NOT reset isMuted - preserve user's mute preference
     }, 25000);
   }, [movies.length]);
 
@@ -96,11 +201,10 @@ export default function NetflixHero({ movies, onMovieClick, onBookClick }: Netfl
     };
   }, [movies.length, startAutoAdvance]);
 
-  // Navigate to specific slide - PRESERVE mute state
+  // Navigate to specific slide
   const goToSlide = useCallback((index: number) => {
     setCurrentIndex(index);
     startAutoAdvance();
-    // DO NOT change isMuted here - preserve user's choice
   }, [startAutoAdvance]);
 
   const goToPrevious = useCallback(() => {
@@ -111,18 +215,20 @@ export default function NetflixHero({ movies, onMovieClick, onBookClick }: Netfl
     goToSlide((currentIndex + 1) % movies.length);
   }, [currentIndex, movies.length, goToSlide]);
 
+  // Toggle mute using YouTube API
   const toggleMute = useCallback(() => {
-    // Use YouTube postMessage API to toggle mute - this doesn't reload the video
-    const iframe = document.getElementById('trailer-iframe') as HTMLIFrameElement;
-    if (iframe && iframe.contentWindow) {
-      const newMuted = !isMuted;
-      iframe.contentWindow.postMessage(
-        JSON.stringify({ event: 'command', func: newMuted ? 'mute' : 'unmute', args: '' }),
-        'https://www.youtube.com'
-      );
+    if (playerRef.current) {
+      try {
+        if (isMuted) {
+          playerRef.current.unMute();
+        } else {
+          playerRef.current.mute();
+        }
+      } catch (e) {
+        console.error('Mute toggle error:', e);
+      }
     }
-    // Toggle UI state
-    setIsMuted((prev) => !prev);
+    setIsMuted(!isMuted);
     setUserInteracted(true);
   }, [isMuted]);
 
@@ -144,99 +250,37 @@ export default function NetflixHero({ movies, onMovieClick, onBookClick }: Netfl
   const currentMovie = movies[currentIndex];
   const videoId = getYouTubeId(currentMovie?.trailerUrl);
 
-  // Build YouTube embed URL
-  // Both mobile and desktop: hide YouTube controls for Netflix-like feel
-  // Sound control handled via our custom button + iframe reload
-  const getEmbedUrl = (id: string, muted: boolean) => {
-    const params = new URLSearchParams({
-      autoplay: '1',
-      mute: muted ? '1' : '0',
-      controls: '0', // Always hide YouTube controls for clean look
-      loop: '1',
-      playlist: id,
-      modestbranding: '1',
-      rel: '0',
-      showinfo: '0',
-      iv_load_policy: '3',
-      disablekb: '1',
-      playsinline: '1',
-      enablejsapi: '1', // Required for postMessage API
-    });
-    return `https://www.youtube.com/embed/${id}?${params.toString()}`;
-  };
-
   return (
     <div 
       className="relative overflow-hidden bg-black"
       style={{ 
         width: '100vw', 
-        height: isMobile ? '50vh' : '80vh', 
-        minHeight: isMobile ? '300px' : '600px', 
+        height: isMobile ? '70vh' : '85vh', 
+        minHeight: isMobile ? '400px' : '600px', 
         marginLeft: 'calc(-50vw + 50%)' 
       }}
       onMouseEnter={() => setShowControls(true)}
       onMouseLeave={() => setShowControls(false)}
     >
-      {/* YouTube Video Background */}
-      <AnimatePresence mode="wait">
-        {videoId && (
-          <motion.div
-            key={`video-${currentIndex}`}
-            className="absolute inset-0 w-full h-full"
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            transition={{ duration: 0.3 }}
-          >
-            {/* Video container - cover behavior on all devices for Netflix feel */}
-            <div className="absolute inset-0 w-full h-full overflow-hidden flex items-center justify-center">
-              <iframe
-                id="trailer-iframe"
-                src={getEmbedUrl(videoId, false)}
-                className="pointer-events-none"
-                style={{
-                  // Cover behavior - fill container cinematically
-                  border: 'none',
-                  position: 'absolute',
-                  top: '50%',
-                  left: '50%',
-                  width: '100vw',
-                  height: '56.25vw',
-                  minHeight: '100%',
-                  minWidth: '177.78vh',
-                  transform: 'translate(-50%, -50%)',
-                  zIndex: 1,
-                }}
-                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; fullscreen; webkit-playsinline"
-                allowFullScreen
-                title={currentMovie?.title || 'Movie Trailer'}
-                loading="eager"
-              />
-            </div>
-          </motion.div>
-        )}
-      </AnimatePresence>
-
-      {/* Fallback backdrop if no trailer */}
-      {!videoId && currentMovie?.backdrop && (
-        <motion.div
-          key={`backdrop-${currentIndex}`}
-          className="absolute inset-0 w-full h-full bg-cover bg-center"
-          style={{ backgroundImage: `url(${currentMovie.backdrop})` }}
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          exit={{ opacity: 0 }}
-        />
-      )}
+      {/* YouTube Player Container - full width, scaled to fill */}
+      <div 
+        id="youtube-player"
+        ref={playerContainerRef}
+        className="absolute inset-0 w-full h-full pointer-events-none"
+        style={{ 
+          transform: 'scale(1.15)',
+          transformOrigin: 'center center',
+        }}
+      />
 
       {/* Gradient overlays for cinematic feel */}
-      <div className="absolute inset-0 bg-gradient-to-r from-black/90 via-black/40 to-transparent" />
-      <div className="absolute inset-0 bg-gradient-to-t from-[#0a0a0a] via-transparent to-black/20" />
-      <div className="absolute bottom-0 left-0 right-0 h-40 bg-gradient-to-t from-[#0a0a0a] to-transparent" />
+      <div className="absolute inset-0 bg-gradient-to-r from-black/90 via-black/40 to-transparent z-[5]" />
+      <div className="absolute inset-0 bg-gradient-to-t from-[#0a0a0a] via-transparent to-black/20 z-[5]" />
+      <div className="absolute bottom-0 left-0 right-0 h-40 bg-gradient-to-t from-[#0a0a0a] to-transparent z-[5]" />
 
-      {/* Content Overlay */}
-      <div className="absolute inset-0 flex items-end pb-16 md:pb-32">
-        <div className="w-full max-w-7xl mx-auto px-4 md:px-6">
+      {/* Content Overlay - Netflix style, on top of video */}
+      <div className="absolute inset-0 flex items-end z-10">
+        <div className="w-full max-w-7xl mx-auto px-4 md:px-6 pb-16 md:pb-32">
           <AnimatePresence mode="wait">
             <motion.div
               key={currentIndex}
@@ -251,8 +295,11 @@ export default function NetflixHero({ movies, onMovieClick, onBookClick }: Netfl
                 {currentMovie?.title}
               </h1>
 
-              {/* Meta Info - simplified on mobile */}
+              {/* Meta Info */}
               <div className="flex flex-wrap items-center gap-2 md:gap-3 mb-2 md:mb-4 text-gray-300 text-xs md:text-base">
+                {currentMovie?.tmdb_rating && (
+                  <span className="text-[#d4a853] font-semibold">★ {currentMovie.tmdb_rating}</span>
+                )}
                 {currentMovie?.genres?.slice(0, isMobile ? 2 : 3).map((genre, i) => (
                   <span key={genre} className="flex items-center">
                     {i > 0 && <span className="mx-1 md:mx-2 text-gray-500">•</span>}
@@ -267,7 +314,7 @@ export default function NetflixHero({ movies, onMovieClick, onBookClick }: Netfl
                 )}
               </div>
 
-              {/* Synopsis - hidden on mobile */}
+              {/* Synopsis - hidden on mobile for space */}
               {currentMovie?.synopsis && (
                 <p className="hidden md:block text-gray-300 text-sm md:text-base line-clamp-2 md:line-clamp-3 mb-6 max-w-xl">
                   {currentMovie.synopsis}
@@ -311,26 +358,14 @@ export default function NetflixHero({ movies, onMovieClick, onBookClick }: Netfl
         </div>
       </div>
 
-      {/* Mute/Unmute Button - shown on all devices */}
+      {/* Mute/Unmute Button */}
       <button
         onClick={toggleMute}
-        className={`absolute ${isMobile ? 'bottom-20 right-4' : 'bottom-32 right-6'} p-2.5 md:p-3 bg-gray-800/70 hover:bg-gray-700/90 active:bg-gray-600/90 rounded-full border border-gray-600 text-white transition-all z-20`}
+        className={`absolute ${isMobile ? 'bottom-24 right-4' : 'bottom-32 right-6'} p-2.5 md:p-3 bg-gray-800/70 hover:bg-gray-700/90 active:bg-gray-600/90 rounded-full border border-gray-600 text-white transition-all z-20`}
         aria-label={isMuted ? 'Unmute' : 'Mute'}
       >
         {isMuted ? <VolumeX className="w-4 h-4 md:w-5 md:h-5" /> : <Volume2 className="w-4 h-4 md:w-5 md:h-5" />}
       </button>
-
-      {/* Tap to unmute hint - mobile only, when muted */}
-      {isMobile && isMuted && !userInteracted && (
-        <motion.div 
-          className="absolute bottom-20 right-16 bg-black/80 text-white text-xs px-3 py-1.5 rounded-full z-20"
-          initial={{ opacity: 0, x: 10 }}
-          animate={{ opacity: 1, x: 0 }}
-          transition={{ delay: 1, duration: 0.3 }}
-        >
-          Tap for sound
-        </motion.div>
-      )}
 
       {/* Navigation Arrows */}
       {movies.length > 1 && (
@@ -373,7 +408,6 @@ export default function NetflixHero({ movies, onMovieClick, onBookClick }: Netfl
           ))}
         </div>
       )}
-
     </div>
   );
 }
