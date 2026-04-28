@@ -35,7 +35,7 @@ function getYouTubeId(url: string | undefined): string | null {
 
 export default function NetflixHero({ movies, onMovieClick, onBookClick }: NetflixHeroProps) {
   const [currentIndex, setCurrentIndex] = useState(0);
-  const [isMuted, setIsMuted] = useState(false); // Start with audio
+  const [isMuted, setIsMuted] = useState(true); // Start muted for mobile autoplay
   const [userInteracted, setUserInteracted] = useState(false);
   const [showControls, setShowControls] = useState(false);
   const [ytApiReady, setYtApiReady] = useState(false);
@@ -94,7 +94,7 @@ export default function NetflixHero({ movies, onMovieClick, onBookClick }: Netfl
         videoId: videoId,
         playerVars: {
           autoplay: 1,
-          mute: 0, // Start with audio
+          mute: 1, // MUST be 1 for mobile autoplay to work
           controls: 0,
           showinfo: 0,
           rel: 0,
@@ -108,12 +108,19 @@ export default function NetflixHero({ movies, onMovieClick, onBookClick }: Netfl
         },
         events: {
           onReady: (event: { target: any }) => {
-            // Force play and unmute on ready
-            event.target.unMute();
-            event.target.setVolume(50);
+            // Start muted for autoplay, then try to unmute after playback begins
             event.target.playVideo();
-            // Loop the video
-            event.target.seekTo(0);
+            // Try to unmute after playback starts (works if user has interacted with page before)
+            setTimeout(() => {
+              try {
+                event.target.unMute();
+                event.target.setVolume(50);
+                setIsMuted(false);
+              } catch (e) {
+                // Browser blocked unmute — keep muted, show unmute button
+                setIsMuted(true);
+              }
+            }, 1000);
           },
           onError: (event: { target: any; data: number }) => {
             // If autoplay with audio fails, retry muted
@@ -148,12 +155,21 @@ export default function NetflixHero({ movies, onMovieClick, onBookClick }: Netfl
     
     if (videoId) {
       if (playerRef.current && playerRef.current.loadVideoById) {
-        // Video already exists - load new video
+        // Video already exists - load new video (start muted for mobile autoplay)
         playerRef.current.loadVideoById(videoId);
-        playerRef.current.unMute();
-        playerRef.current.setVolume(50);
+        playerRef.current.mute(); // Start muted
         playerRef.current.playVideo();
         playerRef.current.seekTo(0);
+        // Try to unmute after playback starts
+        setTimeout(() => {
+          try {
+            playerRef.current?.unMute();
+            playerRef.current?.setVolume(50);
+            setIsMuted(false);
+          } catch (e) {
+            setIsMuted(true);
+          }
+        }, 1000);
       } else if (!initializedRef.current) {
         // No player yet - create new one
         createPlayer(videoId);
@@ -357,13 +373,15 @@ export default function NetflixHero({ movies, onMovieClick, onBookClick }: Netfl
         </div>
       </div>
 
-      {/* Mute/Unmute Button */}
+      {/* Mute/Unmute Button - prominent on mobile with pulse animation */}
       <button
         onClick={toggleMute}
-        className={`absolute ${isMobile ? 'bottom-24 right-4' : 'bottom-32 right-6'} p-2.5 md:p-3 bg-gray-800/70 hover:bg-gray-700/90 active:bg-gray-600/90 rounded-full border border-gray-600 text-white transition-all z-20`}
+        className={`absolute ${isMobile ? 'bottom-28 right-4' : 'bottom-32 right-6'} p-3 md:p-3 bg-red-600 hover:bg-red-500 active:bg-red-700 rounded-full border-2 border-white text-white transition-all z-20 ${
+          isMobile ? 'animate-pulse' : ''
+        }`}
         aria-label={isMuted ? 'Unmute' : 'Mute'}
       >
-        {isMuted ? <VolumeX className="w-4 h-4 md:w-5 md:h-5" /> : <Volume2 className="w-4 h-4 md:w-5 md:h-5" />}
+        {isMuted ? <VolumeX className="w-5 h-5 md:w-5 md:h-5" /> : <Volume2 className="w-5 h-5 md:w-5 md:h-5" />}
       </button>
 
       {/* Navigation Arrows */}
