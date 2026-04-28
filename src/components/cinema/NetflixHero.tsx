@@ -14,7 +14,7 @@ interface NetflixHeroProps {
 // Global YouTube API reference
 declare global {
   interface Window {
-    YT: typeof YT;
+    YT: any;
     onYouTubeIframeAPIReady: () => void;
   }
 }
