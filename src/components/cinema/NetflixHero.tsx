@@ -57,17 +57,22 @@ export default function NetflixHero({ movies, onMovieClick, onBookClick }: Netfl
 
   // Load YouTube IFrame Player API
   useEffect(() => {
-    if (typeof window !== 'undefined' && !window.YT) {
+    if (typeof window !== 'undefined') {
+      // If API already loaded, initialize directly
+      if (window.YT && window.YT.Player) {
+        setYtApiReady(true);
+        return;
+      }
+      
+      // Set callback BEFORE loading script
+      (window as any).onYouTubeIframeAPIReady = () => {
+        setYtApiReady(true);
+      };
+      
       const tag = document.createElement('script');
       tag.src = 'https://www.youtube.com/iframe_api';
       const firstScriptTag = document.getElementsByTagName('script')[0];
       firstScriptTag.parentNode?.insertBefore(tag, firstScriptTag);
-      
-      (window as any).onYouTubeIframeAPIReady = () => {
-        setYtApiReady(true);
-      };
-    } else if (window.YT) {
-      setYtApiReady(true);
     }
   }, []);
 
@@ -108,7 +113,7 @@ export default function NetflixHero({ movies, onMovieClick, onBookClick }: Netfl
         },
         events: {
           onReady: (event: { target: any }) => {
-            // Start muted for autoplay, then try to unmute after playback begins
+            console.log('YT Player ready, state:', event.target.getPlayerState());
             event.target.playVideo();
             // Try to unmute after playback starts (works if user has interacted with page before)
             setTimeout(() => {
@@ -146,7 +151,22 @@ export default function NetflixHero({ movies, onMovieClick, onBookClick }: Netfl
     }
   }, [ytApiReady]);
 
-  // Initialize player when movie changes
+  // Initialize player on mount (with delay for DOM to be ready)
+  useEffect(() => {
+    if (!movies || movies.length === 0 || !ytApiReady) return;
+    
+    const videoId = getYouTubeId(movies[0]?.trailerUrl);
+    
+    if (videoId && !playerRef.current) {
+      // Small delay to ensure DOM is ready and visible
+      const timer = setTimeout(() => {
+        createPlayer(videoId);
+      }, 500);
+      return () => clearTimeout(timer);
+    }
+  }, [ytApiReady, createPlayer]);
+
+  // When currentIndex changes, load new video
   useEffect(() => {
     if (!movies || movies.length === 0 || !ytApiReady) return;
     
