@@ -111,16 +111,16 @@ export default function MovieModal({
               <motion.div
                 className="relative w-full max-w-4xl bg-slate-900 rounded-2xl overflow-hidden shadow-2xl"
                 data-testid="movie-modal"
-                initial={{ opacity: 0, y: 50, scale: 0.95 }}
-                animate={{ opacity: 1, y: 0, scale: 1 }}
-                exit={{ opacity: 0, y: 50, scale: 0.95 }}
-                transition={{ duration: 0.3 }}
+                initial={{ opacity: 0, scale: 0.95, y: 20 }}
+                animate={{ opacity: 1, scale: 1, y: 0 }}
+                exit={{ opacity: 0, scale: 0.95, y: 20 }}
+                transition={{ duration: 0.25, ease: [0.4, 0, 0.2, 1] }}
                 onClick={(e) => e.stopPropagation()}
               >
                 {/* Header with Backdrop - fallback to poster if no backdrop */}
                 <div className="relative h-[250px] md:h-[300px]">
                   <Image
-                    src={movie.backdrop && !movie.backdrop.includes('placeholder') ? movie.backdrop : movie.poster}
+                    src={movie.backdrop || movie.poster}
                     alt={movie.title}
                     fill
                     className="object-cover"

@@ -188,7 +188,9 @@ async function insertMovie(
       : null);
     const backdropUrl = tmdbData?.backdrop_path 
       ? `https://image.tmdb.org/t/p/original${tmdbData.backdrop_path}` 
-      : null;
+      : tmdbData?.poster_path 
+        ? `https://image.tmdb.org/t/p/w500${tmdbData.poster_path}` 
+        : null;
     
     // Search for trailer
     const trailerKey = await searchYouTubeTrailer(title);
