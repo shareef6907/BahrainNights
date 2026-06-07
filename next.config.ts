@@ -247,7 +247,7 @@ const nextConfig: NextConfig = {
         destination: '/places',
         permanent: true,
       },
- - fixed 404s causing traffic collapse (Jun 2026)
+      // fixed 404s causing traffic collapse (Jun 2026)
       {
         source: '/bars',
         destination: '/places',
