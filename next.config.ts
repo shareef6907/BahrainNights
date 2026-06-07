@@ -221,7 +221,33 @@ const nextConfig: NextConfig = {
         destination: '/weekend-in-bahrain',
         permanent: true,
       },
-      // Critical redirects - fixed 404s causing traffic collapse (Jun 2026)
+      // Critical redirects
+      {
+        source: '/best-bars',
+        destination: '/places',
+        permanent: true,
+      },
+      {
+        source: '/best-clubs',
+        destination: '/places',
+        permanent: true,
+      },
+      {
+        source: '/clubs',
+        destination: '/places',
+        permanent: true,
+      },
+      {
+        source: '/hotels',
+        destination: '/places',
+        permanent: true,
+      },
+      {
+        source: '/spas',
+        destination: '/places',
+        permanent: true,
+      },
+ - fixed 404s causing traffic collapse (Jun 2026)
       {
         source: '/bars',
         destination: '/places',
