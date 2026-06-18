@@ -1,6 +1,7 @@
 import { Suspense } from 'react';
 import { createClient } from '@supabase/supabase-js';
 import EventsPageClient, { Event, Attraction } from '@/components/events/EventsPageClient';
+import InternationalEventsSection from '@/components/events/InternationalEventsSection';
 import EventListSchema from '@/components/SEO/EventListSchema';
 import BreadcrumbSchema from '@/components/SEO/BreadcrumbSchema';
 import InternalLinks, { guideLinks, placeLinks } from '@/components/SEO/InternalLinks';
@@ -260,12 +261,95 @@ async function getAttractions(): Promise<Attraction[]> {
   }));
 }
 
+// Fetch international events (non-Bahrain)
+async function getInternationalEvents() {
+  const supabase = createClient(supabaseUrl, supabaseServiceKey, {
+    auth: {
+      autoRefreshToken: false,
+      persistSession: false
+    }
+  });
+
+  const today = new Date().toISOString().split('T')[0];
+  const sixMonthsAgo = new Date();
+  sixMonthsAgo.setMonth(sixMonthsAgo.getMonth() - 6);
+  const sixMonthsAgoStr = sixMonthsAgo.toISOString().split('T')[0];
+
+  const { data, error } = await supabase
+    .from('events')
+    .select(`
+      id, title, slug, description, category, venue_name, date, time,
+      start_date, end_date, start_time, featured_image, cover_url,
+      affiliate_url, country, city
+    `)
+    .neq('country', 'Bahrain')
+    .eq('status', 'published')
+    .eq('is_active', true)
+    .or(`start_date.gte.${today},date.gte.${today},end_date.gte.${today})`)
+    .order('start_date', { ascending: true, nullsFirst: false });
+
+  if (error || !data) {
+    console.error('Error fetching international events:', error);
+    return { events: [], eventsByCountry: {}, countries: [] };
+  }
+
+  // Filter to last 6 months
+  const filteredEvents = data.filter(e => {
+    const startDate = e.start_date || e.date;
+    return startDate >= sixMonthsAgoStr;
+  });
+
+  // Build events by country
+  const eventsByCountry: Record<string, typeof data> = {};
+  const uniqueCountries = [...new Set(filteredEvents.map(e => e.country).filter(Boolean))];
+
+  uniqueCountries.forEach(countryName => {
+    eventsByCountry[countryName] = filteredEvents.filter(e => e.country === countryName);
+  });
+
+  // Build countries with flags
+  const COUNTRY_CONFIG: Record<string, { flag: string; code: string }> = {
+    'UAE': { flag: '🇦🇪', code: 'uae' },
+    'United Arab Emirates': { flag: '🇦🇪', code: 'uae' },
+    'Saudi Arabia': { flag: '🇸🇦', code: 'saudi-arabia' },
+    'Qatar': { flag: '🇶🇦', code: 'qatar' },
+    'Kuwait': { flag: '🇰🇼', code: 'kuwait' },
+    'Oman': { flag: '🇴🇲', code: 'oman' },
+    'Jordan': { flag: '🇯🇴', code: 'jordan' },
+    'Lebanon': { flag: '🇱🇧', code: 'lebanon' },
+    'Türkiye': { flag: '🇹🇷', code: 'turkiye' },
+    'Turkey': { flag: '🇹🇷', code: 'turkiye' },
+    'Egypt': { flag: '🇪🇬', code: 'egypt' },
+    'Morocco': { flag: '🇲🇦', code: 'morocco' },
+    'UK': { flag: '🇬🇧', code: 'uk' },
+    'United Kingdom': { flag: '🇬🇧', code: 'uk' },
+    'Germany': { flag: '🇩🇪', code: 'germany' },
+    'France': { flag: '🇫🇷', code: 'france' },
+    'Spain': { flag: '🇪🇸', code: 'spain' },
+    'Italy': { flag: '🇮🇹', code: 'italy' },
+    'India': { flag: '🇮🇳', code: 'india' },
+  };
+
+  const countries = uniqueCountries.map(countryName => {
+    const config = COUNTRY_CONFIG[countryName] || { flag: '🌍', code: countryName.toLowerCase().replace(/\s+/g, '-') };
+    return {
+      code: config.code,
+      name: countryName,
+      flag: config.flag,
+      fullName: countryName,
+    };
+  }).sort((a, b) => (eventsByCountry[b.name]?.length || 0) - (eventsByCountry[a.name]?.length || 0));
+
+  return { events: filteredEvents, eventsByCountry, countries };
+}
+
 // Server Component - data is fetched BEFORE the page renders
 export default async function EventsPage() {
   // Fetch all data on the server - NO loading state needed!
-  const [events, attractions] = await Promise.all([
+  const [events, attractions, internationalData] = await Promise.all([
     getEvents(),
-    getAttractions()
+    getAttractions(),
+    getInternationalEvents()
   ]);
 
   // Transform events for schema - map to format expected by EventListSchema
@@ -293,6 +377,16 @@ export default async function EventsPage() {
       <Suspense fallback={null}>
         <EventsPageClient initialEvents={events} familyAttractions={attractions} />
       </Suspense>
+      
+      {/* International Events Section */}
+      {internationalData.events.length > 0 && (
+        <InternationalEventsSection
+          events={internationalData.events}
+          eventsByCountry={internationalData.eventsByCountry}
+          countries={internationalData.countries}
+        />
+      )}
+      
       <EventServicesPromo />
       <InternalLinks title="Explore Bahrain" links={[...guideLinks, ...placeLinks]} />
     </>
