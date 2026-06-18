@@ -142,7 +142,7 @@ export default function NetflixHero({ movies, onMovieClick, onBookClick }: Netfl
             }
           },
         },
-      });
+      } as any);
       
       playerRef.current = player;
       initializedRef.current = true;
