@@ -745,8 +745,7 @@ export default function HomePageClient({ initialMovies, initialStats, initialTod
           >
             {t.home.hero.subtitle} •
             <span className="text-white font-semibold"> {stats.events > 0 ? stats.events.toLocaleString() : '33'} local</span> •
-            <span className="text-white font-semibold">{initialInternationalEvents.length > 0 ? initialInternationalEvents.length.toLocaleString() : '351'} worldwide</span> •
-            <span className="text-white font-semibold"> {stats.venues > 0 ? stats.venues.toLocaleString() : '847'} {t.nav.venues.toLowerCase()}</span>
+            <span className="text-white font-semibold">{initialInternationalEvents.length > 0 ? initialInternationalEvents.length.toLocaleString() : '351'} worldwide</span>
           </p>
 
           {/* Search Bar */}
