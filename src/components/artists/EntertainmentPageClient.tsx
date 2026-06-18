@@ -74,7 +74,7 @@ export default function EntertainmentPageClient({ artists, categoryCounts }: Pro
             className="w-full h-full object-cover scale-105 transition-transform duration-[20s] ease-linear"
             poster="/images/entertainment-poster.jpg"
           >
-            <source src="https://bahrainnights-production.s3.me-south-1.amazonaws.com/processed/artists/header-video.mp4" type="video/mp4" />
+            <source src="https://bahrainnights-production-us.s3.us-east-1.amazonaws.com/artists/artist-header-video-final.mp4" type="video/mp4" />
           </video>
           {/* Gradient Overlay */}
           <div className="absolute inset-0 bg-gradient-to-t from-[#0a0a0a] via-[#0a0a0a]/60 to-transparent" />

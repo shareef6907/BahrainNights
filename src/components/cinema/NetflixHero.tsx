@@ -109,7 +109,7 @@ export default function NetflixHero({ movies, onMovieClick, onBookClick }: Netfl
           iv_load_policy: 3,
           disablekb: 1,
           fs: 0,
-          origin: typeof window !== 'undefined' ? window.location.origin : undefined,
+          origin: typeof window !== 'undefined' ? window.location.origin : '',
         },
         events: {
           onReady: (event: { target: any }) => {
@@ -142,7 +142,7 @@ export default function NetflixHero({ movies, onMovieClick, onBookClick }: Netfl
             }
           },
         },
-      });
+      } as any);
       
       playerRef.current = player;
       initializedRef.current = true;
