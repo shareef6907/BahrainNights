@@ -745,8 +745,8 @@ export default function HomePageClient({ initialMovies, initialStats, initialTod
             style={{ textShadow: '0 2px 8px rgba(0, 0, 0, 0.8)' }}
           >
             {t.home.hero.subtitle} •
-            <span className="text-white font-semibold"> {initialLiveEventCounts?.local || stats.events || 0} local</span> •
-            <span className="text-white font-semibold">{initialLiveEventCounts?.international || initialInternationalEvents.length || 0} in GCC and UK</span>
+            <span className="text-white font-semibold"> {initialLiveEventCounts?.local || stats.events || 0} local events</span> •
+            <span className="text-white font-semibold">{initialLiveEventCounts?.international || initialInternationalEvents.length || 0} Events in GCC and UK</span>
           </p>
 
           {/* Search Bar */}
