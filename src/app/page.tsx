@@ -232,6 +232,39 @@ async function getInternationalEvents() {
   return diverseEvents;
 }
 
+// Fetch live event counts matching /events and /international sources
+async function getLiveEventCounts() {
+  const today = new Date().toISOString().split('T')[0];
+  
+  try {
+    // Local count: same filter as /events page (current/upcoming Bahrain events)
+    const localResult = await supabaseAdmin
+      .from('events')
+      .select('id', { count: 'exact', head: true })
+      .eq('status', 'published')
+      .eq('is_hidden', false)
+      .eq('country', 'Bahrain')
+      .or(`start_date.gte.${today},date.gte.${today},end_date.gte.${today}`);
+
+    // International count: same filter as /international page (non-Bahrain, active, current)
+    const internationalResult = await supabaseAdmin
+      .from('events')
+      .select('id', { count: 'exact', head: true })
+      .neq('country', 'Bahrain')
+      .eq('status', 'published')
+      .eq('is_active', true)
+      .or(`start_date.gte.${today},date.gte.${today},end_date.gte.${today}`);
+
+    return {
+      local: localResult.count || 0,
+      international: internationalResult.count || 0,
+    };
+  } catch (error) {
+    console.error('Error fetching live event counts:', error);
+    return { local: 0, international: 0 };
+  }
+}
+
 // Fetch stats for the homepage
 async function getStats() {
   const defaultStats = { events: 0, venues: 0, cinema: 0, offers: 0, explore: 0, attractions: 0, blog: 0 };
@@ -378,14 +411,15 @@ async function getSurpriseData() {
 // Server Component - data is fetched BEFORE the page renders
 export default async function BahrainNightsHomepage() {
   // Fetch all data on the server - NO loading state needed!
-  const [movies, stats, todayEvents, internationalEvents, happeningNowEvents, surpriseData, trendingData] = await Promise.all([
+  const [movies, stats, todayEvents, internationalEvents, happeningNowEvents, surpriseData, trendingData, liveEventCounts] = await Promise.all([
     getMovies(),
     getStats(),
     getTodayEvents(),
     getInternationalEvents(),
     getHappeningNowEvents(),
     getSurpriseData(),
-    getTrendingData()
+    getTrendingData(),
+    getLiveEventCounts()
   ]);
 
   return (
@@ -397,6 +431,7 @@ export default async function BahrainNightsHomepage() {
       initialHappeningNowEvents={happeningNowEvents}
       initialSurpriseData={surpriseData}
       initialTrendingData={trendingData}
+      initialLiveEventCounts={liveEventCounts}
     />
   );
 }
