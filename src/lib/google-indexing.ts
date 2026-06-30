@@ -17,11 +17,34 @@
  */
 
 import { SignJWT, importPKCS8 } from 'jose';
+import * as fs from 'fs';
+import * as path from 'path';
 
 const INDEXING_API_ENDPOINT = 'https://indexing.googleapis.com/v3/urlNotifications:publish';
 const BATCH_ENDPOINT = 'https://indexing.googleapis.com/batch';
 const TOKEN_ENDPOINT = 'https://oauth2.googleapis.com/token';
 const SCOPE = 'https://www.googleapis.com/auth/indexing';
+
+/**
+ * Get credentials from service account JSON file
+ * Uses ~/.config/gcloud/bahrain-nights-service-account.json by default
+ */
+function getServiceAccountCredentials(): { clientEmail: string; privateKey: string } | null {
+  const credsPath = path.join(process.env.HOME || '', '.config/gcloud/bahrain-nights-service-account.json');
+  
+  try {
+    if (fs.existsSync(credsPath)) {
+      const creds = JSON.parse(fs.readFileSync(credsPath, 'utf8'));
+      return {
+        clientEmail: creds.client_email,
+        privateKey: creds.private_key.replace(/\\n/g, '\n'),
+      };
+    }
+  } catch (e) {
+    // Credentials file not found or invalid
+  }
+  return null;
+}
 
 interface IndexingResult {
   success: boolean;
@@ -46,18 +69,31 @@ interface BatchResult {
  * Check if Google Indexing API is configured
  */
 export function isIndexingConfigured(): boolean {
-  return !!(
-    process.env.GOOGLE_INDEXING_CLIENT_EMAIL &&
-    process.env.GOOGLE_INDEXING_PRIVATE_KEY
-  );
+  // Check environment variables first
+  if (process.env.GOOGLE_INDEXING_CLIENT_EMAIL && process.env.GOOGLE_INDEXING_PRIVATE_KEY) {
+    return true;
+  }
+  // Fall back to service account JSON file
+  const creds = getServiceAccountCredentials();
+  return creds !== null;
 }
 
 /**
  * Get an access token using service account credentials
  */
 async function getAccessToken(): Promise<string> {
-  const clientEmail = process.env.GOOGLE_INDEXING_CLIENT_EMAIL;
-  const privateKey = process.env.GOOGLE_INDEXING_PRIVATE_KEY?.replace(/\\n/g, '\n');
+  // First try environment variables, then fall back to service account file
+  let clientEmail = process.env.GOOGLE_INDEXING_CLIENT_EMAIL;
+  let privateKey = process.env.GOOGLE_INDEXING_PRIVATE_KEY?.replace(/\\n/g, '\n');
+
+  // Fall back to service account JSON file
+  if (!clientEmail || !privateKey) {
+    const creds = getServiceAccountCredentials();
+    if (creds) {
+      clientEmail = creds.clientEmail;
+      privateKey = creds.privateKey;
+    }
+  }
 
   if (!clientEmail || !privateKey) {
     throw new Error('Google Indexing API credentials not configured');
