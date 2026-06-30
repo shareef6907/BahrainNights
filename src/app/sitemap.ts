@@ -107,12 +107,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       changeFrequency: 'weekly',
       priority: 0.95,
     },
-    {
-      url: `${BASE_URL}/lounges-bars`,
-      lastModified: new Date(),
-      changeFrequency: 'weekly',
-      priority: 0.95,
-    },
+    
     // REMOVED: /things-to-do-bahrain - redirects to /things-to-do-in-bahrain
     {
       url: `${BASE_URL}/bahrain-events-this-week`,
