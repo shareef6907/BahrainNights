@@ -22,16 +22,6 @@
       "permanent": true
     }
   ],
-  "rewrites": [
-    {
-      "source": "/marketing",
-      "destination": "https://nightsout-riyadh-lurvk7m9k-shareef-alis-projects.vercel.app/marketing/en"
-    },
-    {
-      "source": "/marketing/:path*",
-      "destination": "https://nightsout-riyadh-lurvk7m9k-shareef-alis-projects.vercel.app/marketing/:path*"
-    }
-  ],
   "crons": [
     {
       "path": "/api/keep-alive",

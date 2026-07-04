@@ -266,6 +266,23 @@ const nextConfig: NextConfig = {
     ];
   },
 
+  // Multi-zone: serve marketing site at /marketing
+  // beforeFiles rewrites run before checking filesystem/static assets
+  async rewrites() {
+    return {
+      beforeFiles: [
+        {
+          source: '/marketing',
+          destination: 'https://nightsoutriyadh.com/marketing',
+        },
+        {
+          source: '/marketing/:path*',
+          destination: 'https://nightsoutriyadh.com/marketing/:path*',
+        },
+      ],
+    };
+  },
+
   // Webpack optimizations
   webpack: (config, { isServer }) => {
     // Don't include node modules in client bundle
