@@ -123,6 +123,6 @@ export const config = {
      * - public files (images, etc.)
      * - marketing (served by another zone)
      */
-    '/((?!api|_next/static|_next/image|favicon.ico|.*\\..*|_vercel|marketing).*)',
+    '/((?!api|_next/static|_next/image|favicon.ico|.*\\..*|_vercel|marketing($|/)).*)',
   ],
 };
