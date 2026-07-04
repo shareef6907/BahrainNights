@@ -121,7 +121,8 @@ export const config = {
      * - _next/image (image optimization files)
      * - favicon.ico (favicon file)
      * - public files (images, etc.)
+     * - marketing (served by another zone)
      */
-    '/((?!api|_next/static|_next/image|favicon.ico|.*\\..*|_vercel).*)',
+    '/((?!api|_next/static|_next/image|favicon.ico|.*\\..*|_vercel|marketing).*)',
   ],
 };
