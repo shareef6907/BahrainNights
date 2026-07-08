@@ -5,16 +5,6 @@ import Image from 'next/image';
 import { Volume2, VolumeX, Info, ChevronLeft, ChevronRight, Play } from 'lucide-react';
 import Link from 'next/link';
 
-// YouTube Player API commands via postMessage
-const sendYouTubeCommand = (iframe: HTMLIFrameElement | null, command: string) => {
-  if (iframe?.contentWindow) {
-    iframe.contentWindow.postMessage(
-      JSON.stringify({ event: 'command', func: command }),
-      '*'
-    );
-  }
-};
-
 interface Movie {
   id: string;
   title: string;
@@ -26,52 +16,152 @@ interface Movie {
   backdrop_url?: string | null;
 }
 
+// Extract YouTube video ID from various URL formats (same as NetflixHero)
+function getYouTubeId(url: string | undefined): string | null {
+  if (!url) return null;
+  
+  // Handle direct video IDs (no URL)
+  if (/^[a-zA-Z0-9_-]{11}$/.test(url)) {
+    return url;
+  }
+  
+  const patterns = [
+    /(?:youtube\.com\/watch\?v=|youtu\.be\/|youtube\.com\/embed\/)([a-zA-Z0-9_-]{11})/,
+    /youtube\.com\/v\/([a-zA-Z0-9_-]{11})/,
+  ];
+  
+  for (const pattern of patterns) {
+    const match = url.match(pattern);
+    if (match) return match[1];
+  }
+  
+  return null;
+}
+
 export function HeroTrailerPlayer() {
   const [movies, setMovies] = useState<Movie[]>([]);
   const [currentIndex, setCurrentIndex] = useState(0);
   const [isMobile, setIsMobile] = useState(false);
-  const [isMuted, setIsMuted] = useState(true); // UI state for mute toggle
+  const [isMuted, setIsMuted] = useState(true);
   const [isLoading, setIsLoading] = useState(true);
-  const [isDeviceReady, setIsDeviceReady] = useState(false); // Wait for device detection before rendering iframe
+  const [ytApiReady, setYtApiReady] = useState(false);
   const [showMobileHint, setShowMobileHint] = useState(false);
-  const [videoError, setVideoError] = useState(false); // Track if current video has error/unavailable
+  const [videoError, setVideoError] = useState(false);
   const autoAdvanceRef = useRef<NodeJS.Timeout | null>(null);
-  const iframeRef = useRef<HTMLIFrameElement | null>(null);
-  // IMPORTANT: initialMuted is used in iframe URL and NEVER changes
-  // This prevents iframe reload when toggling mute via postMessage
-  const initialMutedRef = useRef<boolean>(true);
+  const playerRef = useRef<any>(null);
+  const playerContainerRef = useRef<HTMLDivElement>(null);
+  const initializedRef = useRef(false);
 
-  // Detect mobile/touch device and set initial mute state
+  // Detect mobile (same as NetflixHero)
   useEffect(() => {
-    const checkDevice = () => {
-      // Detect touch devices (phones, tablets including modern iPads)
-      // Modern iPads report as "Macintosh" but have touch support
-      const isTouchDevice = 'ontouchstart' in window || navigator.maxTouchPoints > 0;
-
-      // Also check for mobile user agents (fallback)
-      const isMobileUA = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
-
-      // Detect iPad specifically (modern iPads report as Mac with touch)
-      const isIPad = /iPad/.test(navigator.userAgent) ||
-        (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
-
-      const mobile = isTouchDevice || isMobileUA || isIPad;
-      setIsMobile(mobile);
-
-      // Touch devices: MUST be muted for autoplay to work (browser requirement)
-      // Desktop: Can autoplay unmuted
-      initialMutedRef.current = mobile;
-      setIsMuted(mobile);
-      // Show sound hint on touch devices
-      setShowMobileHint(mobile);
-      // Mark device detection as complete - now safe to render iframe
-      setIsDeviceReady(true);
+    const checkMobile = () => {
+      setIsMobile(window.innerWidth < 768 || 'ontouchstart' in window);
     };
-
-    checkDevice();
-    // Don't add resize listener to avoid changing mute state after initial load
+    checkMobile();
+    window.addEventListener('resize', checkMobile);
+    return () => window.removeEventListener('resize', checkMobile);
   }, []);
 
+  // Load YouTube IFrame Player API (same as NetflixHero)
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      if (window.YT && window.YT.Player) {
+        setYtApiReady(true);
+        return;
+      }
+      
+      (window as any).onYouTubeIframeAPIReady = () => {
+        setYtApiReady(true);
+      };
+      
+      const tag = document.createElement('script');
+      tag.src = 'https://www.youtube.com/iframe_api';
+      const firstScriptTag = document.getElementsByTagName('script')[0];
+      firstScriptTag.parentNode?.insertBefore(tag, firstScriptTag);
+    }
+  }, []);
+
+  // Create YouTube player (same as NetflixHero)
+  const createPlayer = useCallback((videoId: string) => {
+    if (!window.YT || !playerContainerRef.current || !ytApiReady) return;
+    
+    // Cleanup existing player
+    if (playerRef.current) {
+      try {
+        playerRef.current.destroy();
+      } catch (e) {
+        // Ignore
+      }
+      playerRef.current = null;
+    }
+
+    playerContainerRef.current.innerHTML = '';
+
+    try {
+      // Use UNIQUE container ID to prevent collision with NetflixHero
+      const player = new window.YT.Player('regional-youtube-player', {
+        videoId: videoId,
+        playerVars: {
+          autoplay: 1,
+          mute: 1,
+          controls: 0,
+          showinfo: 0,
+          rel: 0,
+          loop: 1,
+          playsinline: 1,
+          modestbranding: 1,
+          iv_load_policy: 3,
+          disablekb: 1,
+          fs: 0,
+          origin: typeof window !== 'undefined' ? window.location.origin : '',
+        },
+        events: {
+          onReady: (event: { target: any }) => {
+            event.target.playVideo();
+            setTimeout(() => {
+              try {
+                event.target.unMute();
+                event.target.setVolume(50);
+                setIsMuted(false);
+              } catch (e) {
+                setIsMuted(true);
+              }
+            }, 1000);
+          },
+          onError: (event: { target: any; data: number }) => {
+            setVideoError(true);
+          },
+          onStateChange: (event: { target: any; data: number }) => {
+            if (event.data === 0) {
+              event.target.seekTo(0);
+              event.target.playVideo();
+            }
+          },
+        },
+      } as any);
+      
+      playerRef.current = player;
+      initializedRef.current = true;
+    } catch (e) {
+      console.error('Failed to create YouTube player:', e);
+    }
+  }, [ytApiReady]);
+
+  // Cleanup on unmount
+  useEffect(() => {
+    return () => {
+      if (playerRef.current) {
+        try {
+          playerRef.current.destroy();
+        } catch (e) {
+          // Ignore cleanup errors
+        }
+        playerRef.current = null;
+      }
+    };
+  }, []);
+
+  // Fetch trailers
   useEffect(() => {
     fetchFeaturedTrailers();
   }, []);
@@ -100,7 +190,6 @@ export function HeroTrailerPlayer() {
       }
     } catch (error) {
       console.error('Failed to fetch trailers:', error);
-      // Try fallback
       try {
         const res = await fetch('/api/cinema/trailers?limit=5');
         const data = await res.json();
@@ -115,6 +204,49 @@ export function HeroTrailerPlayer() {
     }
   };
 
+  // Initialize player on mount (same as NetflixHero)
+  useEffect(() => {
+    if (!movies || movies.length === 0 || !ytApiReady) return;
+    
+    const videoId = getYouTubeId(movies[0]?.trailer_key || movies[0]?.trailer_url || undefined);
+    
+    if (videoId && !playerRef.current) {
+      const timer = setTimeout(() => {
+        createPlayer(videoId);
+      }, 500);
+      return () => clearTimeout(timer);
+    }
+  }, [ytApiReady, createPlayer, movies]);
+
+  // When currentIndex changes, load new video (same as NetflixHero)
+  useEffect(() => {
+    if (!movies || movies.length === 0 || !ytApiReady) return;
+    
+    const currentMovie = movies[currentIndex];
+    const videoId = getYouTubeId(currentMovie?.trailer_key || currentMovie?.trailer_url || undefined);
+    
+    if (videoId) {
+      if (playerRef.current && playerRef.current.loadVideoById) {
+        playerRef.current.loadVideoById(videoId);
+        playerRef.current.mute();
+        playerRef.current.playVideo();
+        playerRef.current.seekTo(0);
+        setTimeout(() => {
+          try {
+            playerRef.current?.unMute();
+            playerRef.current?.setVolume(50);
+            setIsMuted(false);
+          } catch (e) {
+            setIsMuted(true);
+          }
+        }, 1000);
+        setVideoError(false);
+      } else if (!initializedRef.current) {
+        createPlayer(videoId);
+      }
+    }
+  }, [movies, currentIndex, ytApiReady, createPlayer]);
+
   // Auto-advance trailers
   useEffect(() => {
     if (movies.length > 1) {
@@ -127,65 +259,16 @@ export function HeroTrailerPlayer() {
     };
   }, [movies.length]);
 
-  // On mobile, reset to muted when changing slides to ensure video plays
-  // Mobile browsers require muted autoplay - trying to unmute new iframes is unreliable
-  // Also reset video error state for new slide
+  // Reset mute on mobile when changing slides
   useEffect(() => {
     if (isMobile && !isMuted) {
       setIsMuted(true);
     }
-    setVideoError(false); // Reset error state for new video
-  }, [currentIndex]); // eslint-disable-line react-hooks/exhaustive-deps
-
-  // Listen for YouTube iframe error messages to detect unavailable videos
-  useEffect(() => {
-    const handleMessage = (event: MessageEvent) => {
-      // Only process YouTube messages
-      if (event.origin !== 'https://www.youtube.com') return;
-
-      try {
-        const data = typeof event.data === 'string' ? JSON.parse(event.data) : event.data;
-
-        // YouTube sends error events with specific codes:
-        // 2 = Invalid video ID, 5 = HTML5 player error, 100 = Video not found
-        // 101/150 = Video owner doesn't allow embedding
-        if (data.event === 'onError' ||
-            (data.info && typeof data.info === 'number' && [2, 5, 100, 101, 150].includes(data.info))) {
-          setVideoError(true);
-        }
-
-        // Also detect 'initialDelivery' with error state
-        if (data.event === 'initialDelivery' && data.info?.playerState === -1) {
-          // Player state -1 can indicate error on some embeds
-          // Give it a moment to recover, then check
-          setTimeout(() => {
-            // If still no playback after 3 seconds, might be unavailable
-          }, 3000);
-        }
-      } catch {
-        // Not a JSON message, ignore
-      }
-    };
-
-    window.addEventListener('message', handleMessage);
-    return () => window.removeEventListener('message', handleMessage);
-  }, []);
-
-  const currentMovie = movies[currentIndex];
-
-  // Get YouTube video ID
-  const getVideoId = useCallback((movie: Movie): string | null => {
-    if (movie.trailer_key) return movie.trailer_key;
-    if (movie.trailer_url) {
-      const match = movie.trailer_url.match(/(?:youtube\.com\/(?:watch\?v=|embed\/)|youtu\.be\/)([^&\s?]+)/);
-      return match?.[1] || null;
-    }
-    return null;
-  }, []);
+    setVideoError(false);
+  }, [currentIndex, isMobile, isMuted]);
 
   const goToSlide = (index: number) => {
     setCurrentIndex(index);
-    // Reset auto-advance timer
     if (autoAdvanceRef.current) {
       clearInterval(autoAdvanceRef.current);
       autoAdvanceRef.current = setInterval(() => {
@@ -197,14 +280,24 @@ export function HeroTrailerPlayer() {
   const goNext = () => goToSlide((currentIndex + 1) % movies.length);
   const goPrev = () => goToSlide((currentIndex - 1 + movies.length) % movies.length);
 
-  const toggleMute = () => {
-    setShowMobileHint(false); // Hide hint after user interaction
-    // Use YouTube postMessage API to toggle mute without recreating iframe
-    // This prevents video from stopping on mobile when toggling sound
-    const newMutedState = !isMuted;
-    sendYouTubeCommand(iframeRef.current, newMutedState ? 'mute' : 'unMute');
-    setIsMuted(newMutedState);
-  };
+  const toggleMute = useCallback(() => {
+    setShowMobileHint(false);
+    if (playerRef.current) {
+      try {
+        if (isMuted) {
+          playerRef.current.unMute();
+        } else {
+          playerRef.current.mute();
+        }
+      } catch (e) {
+        console.error('Mute toggle error:', e);
+      }
+    }
+    setIsMuted(!isMuted);
+  }, [isMuted]);
+
+  const currentMovie = movies[currentIndex];
+  const videoId = currentMovie ? getYouTubeId(currentMovie.trailer_key || currentMovie.trailer_url || undefined) : null;
 
   if (isLoading) {
     return (
@@ -236,57 +329,48 @@ export function HeroTrailerPlayer() {
     );
   }
 
-  const videoId = currentMovie ? getVideoId(currentMovie) : null;
-
-  // IMPORTANT: Only create ONE iframe URL for the CURRENT trailer
-  // This prevents multiple audio streams playing simultaneously
-  // playsinline=1 is required for iOS autoplay
-  // CRITICAL: Use initialMutedRef (not isMuted) so URL doesn't change when toggling sound
-  // Mobile MUST start muted for autoplay to work, postMessage handles unmute
-  const iframeUrl = videoId
-    ? `https://www.youtube.com/embed/${videoId}?autoplay=1&mute=${initialMutedRef.current ? 1 : 0}&controls=0&loop=1&playlist=${videoId}&modestbranding=1&rel=0&showinfo=0&iv_load_policy=3&disablekb=1&enablejsapi=1&playsinline=1&origin=${typeof window !== 'undefined' ? window.location.origin : ''}`
-    : null;
-
   const genreDisplay = currentMovie && Array.isArray(currentMovie.genre)
     ? currentMovie.genre.slice(0, 3).join(' • ')
     : currentMovie?.genre;
 
   return (
-    <div className="relative w-full h-[70vh] md:h-[85vh] overflow-hidden bg-black">
-      {/* SINGLE Video Background - Only current trailer loads */}
-      <div className="absolute inset-0">
-        {/* Always show backdrop image as fallback (visible when video fails/unavailable/standalone) */}
-        {(currentMovie?.backdrop_url || currentMovie?.poster_url) && (
-          <Image
-            src={currentMovie?.backdrop_url || currentMovie?.poster_url || ''}
-            alt={currentMovie?.title || 'Movie backdrop'}
-            fill
-            sizes="100vw"
-            className="object-cover"
-            priority
-          />
-        )}
-        {/* YouTube iframe overlays the backdrop - wait for device detection to ensure correct mute state for autoplay */}
-        {iframeUrl && !videoError && isDeviceReady && (
-          <iframe
-            ref={iframeRef}
-            key={`trailer-${currentIndex}`} // Only re-render on trailer change, NOT on mute toggle
-            src={iframeUrl}
-            className="absolute inset-0 w-[300%] h-[300%] top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 pointer-events-none"
-            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-            style={{ border: 'none' }}
-          />
-        )}
-      </div>
+    <div 
+      className="relative overflow-hidden bg-black"
+      style={{ 
+        width: '100vw', 
+        height: isMobile ? '70vh' : '85vh', 
+        marginLeft: 'calc(-50vw + 50%)' 
+      }}
+    >
+      {/* YouTube Player Container - UNIQUE ID to prevent collision */}
+      <div 
+        id="regional-youtube-player"
+        ref={playerContainerRef}
+        className="absolute inset-0 w-full h-full pointer-events-none"
+        style={{ 
+          transform: 'scale(1.15)',
+          transformOrigin: 'center center',
+        }}
+      />
 
-      {/* Mobile Play Overlay removed - trailers auto-play muted on mobile */}
+      {/* Fallback backdrop image */}
+      {(currentMovie?.backdrop_url || currentMovie?.poster_url) && (
+        <Image
+          src={currentMovie?.backdrop_url || currentMovie?.poster_url || ''}
+          alt={currentMovie?.title || 'Movie backdrop'}
+          fill
+          sizes="100vw"
+          className="object-cover"
+          priority
+        />
+      )}
 
-      {/* Gradient Overlays */}
+      {/* Gradient Overlays - preserved from original /regional */}
       <div className="absolute inset-0 bg-gradient-to-r from-black/90 via-black/50 to-transparent" />
       <div className="absolute inset-0 bg-gradient-to-t from-gray-950 via-transparent to-black/40" />
       <div className="absolute bottom-0 left-0 right-0 h-32 bg-gradient-to-t from-gray-950 to-transparent" />
 
-      {/* Content */}
+      {/* Content - preserved from original /regional */}
       <div className="absolute inset-0 flex items-center">
         <div className="w-full max-w-7xl mx-auto px-6 md:px-12">
           <div className="max-w-2xl">
@@ -309,9 +393,9 @@ export function HeroTrailerPlayer() {
               </p>
             )}
 
+            {/* Mute button - preserved styling from original */}
             <div className="flex flex-wrap items-center gap-4">
-              {/* Show sound toggle when video is available */}
-              {iframeUrl && !videoError ? (
+              {videoId && !videoError ? (
                 <button
                   onClick={toggleMute}
                   className={`flex items-center gap-2 px-8 py-3 rounded-lg font-bold text-lg transition-colors ${
@@ -324,7 +408,6 @@ export function HeroTrailerPlayer() {
                   {isMuted ? 'Enable Sound' : 'Mute'}
                 </button>
               ) : videoId ? (
-                /* Show Watch Trailer link only when video is unavailable/error */
                 <a
                   href={`https://www.youtube.com/watch?v=${videoId}`}
                   target="_blank"
@@ -348,7 +431,7 @@ export function HeroTrailerPlayer() {
         </div>
       </div>
 
-      {/* Navigation Arrows */}
+      {/* Navigation Arrows - preserved */}
       {movies.length > 1 && (
         <>
           <button
@@ -368,7 +451,7 @@ export function HeroTrailerPlayer() {
         </>
       )}
 
-      {/* Trailer Indicators */}
+      {/* Trailer Indicators - preserved */}
       {movies.length > 1 && (
         <div className="absolute bottom-8 left-1/2 -translate-x-1/2 flex items-center gap-2">
           {movies.map((_, index) => (
@@ -386,8 +469,8 @@ export function HeroTrailerPlayer() {
         </div>
       )}
 
-      {/* Mobile Sound Hint - Tap for sound on mobile */}
-      {showMobileHint && isMuted && iframeUrl && !videoError && (
+      {/* Mobile Sound Hint - preserved */}
+      {showMobileHint && isMuted && videoId && !videoError && (
         <button
           onClick={toggleMute}
           className="absolute bottom-32 left-1/2 -translate-x-1/2 flex items-center gap-3 bg-yellow-500 hover:bg-yellow-400 text-black px-6 py-3 rounded-full font-bold shadow-lg animate-pulse transition-colors"
