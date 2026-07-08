@@ -20,7 +20,7 @@ export function HeroTrailerPlayer() {
   const [movies, setMovies] = useState<Movie[]>([]);
   const [currentIndex, setCurrentIndex] = useState(0);
   const [isMobile, setIsMobile] = useState(false);
-  const [isMuted, setIsMuted] = useState(true);
+  const [isMuted, setIsMuted] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
   const [showMobileHint, setShowMobileHint] = useState(false);
   const [videoError, setVideoError] = useState(false);
@@ -197,9 +197,9 @@ export function HeroTrailerPlayer() {
 
   const videoId = currentMovie ? getVideoId(currentMovie) : null;
 
-  // Build iframe URL - minimal params, let YouTube decide
+  // Build iframe URL - match cinema exactly
   const iframeUrl = videoId
-    ? `https://www.youtube.com/embed/${videoId}?autoplay=1&mute=0&loop=1&playlist=${videoId}&rel=0&modestbranding=1`
+    ? `https://www.youtube.com/embed/${videoId}?autoplay=1&mute=1&controls=0&showinfo=0&rel=0&loop=1&playsinline=1&modestbranding=1&iv_load_policy=3&disablekb=1&fs=0&origin=${typeof window !== 'undefined' ? window.location.origin : ''}`
     : null;
 
   const genreDisplay = currentMovie && Array.isArray(currentMovie.genre)
