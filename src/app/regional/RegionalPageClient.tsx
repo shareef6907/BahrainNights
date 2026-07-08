@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import Link from 'next/link';
-import { HeroTrailerPlayer } from '@/components/regional/HeroTrailerPlayer';
+import RegionalTrailerHero from '@/components/regional/RegionalTrailerHero';
 import { BlogRow } from '@/components/regional/BlogRow';
 import { BlogModal } from '@/components/regional/BlogModal';
 import { EventModal } from '@/components/regional/EventModal';
@@ -103,7 +103,7 @@ export function RegionalPageClient({
   return (
     <div className="min-h-screen bg-gray-950">
       {/* Full-Screen Hero Trailer */}
-      <HeroTrailerPlayer />
+      <RegionalTrailerHero />
 
       {/* Stats Bar - matches homepage pattern */}
       <div className="relative z-10 -mt-24 mb-8">
