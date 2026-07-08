@@ -197,9 +197,9 @@ export function HeroTrailerPlayer() {
 
   const videoId = currentMovie ? getVideoId(currentMovie) : null;
 
-  // Build iframe URL - match cinema exactly
+  // Build iframe URL - match cinema but with sound
   const iframeUrl = videoId
-    ? `https://www.youtube.com/embed/${videoId}?autoplay=1&mute=1&controls=0&showinfo=0&rel=0&loop=1&playsinline=1&modestbranding=1&iv_load_policy=3&disablekb=1&fs=0&origin=${typeof window !== 'undefined' ? window.location.origin : ''}`
+    ? `https://www.youtube.com/embed/${videoId}?autoplay=1&mute=0&controls=0&showinfo=0&rel=0&loop=1&playsinline=1&modestbranding=1&iv_load_policy=3&disablekb=1&fs=0&origin=${typeof window !== 'undefined' ? window.location.origin : ''}`
     : null;
 
   const genreDisplay = currentMovie && Array.isArray(currentMovie.genre)
