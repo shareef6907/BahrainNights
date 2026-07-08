@@ -106,12 +106,22 @@ export function HeroTrailerPlayer() {
     setVideoError(false);
   }, [currentIndex, isMobile, isMuted]);
 
-  // Listen for YouTube errors
+  // Listen for YouTube errors and ready state
   useEffect(() => {
     const handleMessage = (event: MessageEvent) => {
       if (event.origin !== 'https://www.youtube.com') return;
       try {
         const data = typeof event.data === 'string' ? JSON.parse(event.data) : event.data;
+        // When player is ready, try to unmute
+        if (data.event === 'onReady' && iframeRef.current?.contentWindow) {
+          iframeRef.current.contentWindow.postMessage(
+            JSON.stringify({ event: 'command', func: 'unMute' }), '*'
+          );
+          iframeRef.current.contentWindow.postMessage(
+            JSON.stringify({ event: 'command', func: 'setVolume', args: [50] }), '*'
+          );
+          setIsMuted(false);
+        }
         if (data.event === 'onError' ||
             (data.info && typeof data.info === 'number' && [2, 5, 100, 101, 150].includes(data.info))) {
           setVideoError(true);
@@ -197,9 +207,9 @@ export function HeroTrailerPlayer() {
 
   const videoId = currentMovie ? getVideoId(currentMovie) : null;
 
-  // Build iframe URL - match cinema but with sound
+  // Build iframe URL - start muted for autoplay, unmute via postMessage (same as cinema)
   const iframeUrl = videoId
-    ? `https://www.youtube.com/embed/${videoId}?autoplay=1&mute=0&controls=0&showinfo=0&rel=0&loop=1&playsinline=1&modestbranding=1&iv_load_policy=3&disablekb=1&fs=0&origin=${typeof window !== 'undefined' ? window.location.origin : ''}`
+    ? `https://www.youtube.com/embed/${videoId}?autoplay=1&mute=1&controls=0&showinfo=0&rel=0&loop=1&playsinline=1&modestbranding=1&iv_load_policy=3&disablekb=1&fs=0&origin=${typeof window !== 'undefined' ? window.location.origin : ''}&enablejsapi=1`
     : null;
 
   const genreDisplay = currentMovie && Array.isArray(currentMovie.genre)
