@@ -101,6 +101,8 @@ export function HeroTrailerPlayer() {
       // Use container ref's ID like NetflixHero does
       const player = new window.YT.Player(playerContainerRef.current!.id, {
         videoId: videoId,
+        width: '100%',
+        height: '100%',
         playerVars: {
           autoplay: 1,
           mute: 1,
