@@ -54,7 +54,7 @@ export function HeroTrailerPlayer() {
     playerContainerRef.current.innerHTML = '';
 
     try {
-      const player = new window.YT.Player('yt-player-regional', {
+      const player = new window.YT.Player(playerContainerRef.current!.id, {
         videoId,
         playerVars: {
           autoplay: 1,
@@ -158,7 +158,7 @@ export function HeroTrailerPlayer() {
   return (
     <div className="relative overflow-hidden bg-black" style={{ width: '100vw', height: isMobile ? '70vh' : '85vh', marginLeft: 'calc(-50vw + 50%)' }}>
       {/* Player */}
-      <div id="yt-player-regional" ref={playerContainerRef} className="absolute inset-0 w-full h-full" style={{ transform: 'scale(1.15)', transformOrigin: 'center center' }} />
+      <div id="youtube-player" ref={playerContainerRef} className="absolute inset-0 w-full h-full pointer-events-none" style={{ transform: 'scale(1.15)', transformOrigin: 'center center' }} />
       
       {/* Backdrop */}
       {(currentMovie?.backdrop_url || currentMovie?.poster_url) && <Image src={currentMovie.backdrop_url || currentMovie.poster_url || ''} alt="" fill className="object-cover" priority />}
