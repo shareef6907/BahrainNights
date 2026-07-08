@@ -197,9 +197,9 @@ export function HeroTrailerPlayer() {
 
   const videoId = currentMovie ? getVideoId(currentMovie) : null;
 
-  // Build iframe URL - same pattern as cinema
+  // Build iframe URL - minimal params, let YouTube decide
   const iframeUrl = videoId
-    ? `https://www.youtube.com/embed/${videoId}?autoplay=1&mute=${initialMutedRef.current ? 1 : 0}&controls=0&loop=1&playlist=${videoId}&modestbranding=1&rel=0&showinfo=0&iv_load_policy=3&disablekb=1&enablejsapi=1&playsinline=1&origin=${typeof window !== 'undefined' ? window.location.origin : ''}`
+    ? `https://www.youtube.com/embed/${videoId}?autoplay=1&mute=0&loop=1&playlist=${videoId}&rel=0&modestbranding=1`
     : null;
 
   const genreDisplay = currentMovie && Array.isArray(currentMovie.genre)
@@ -229,19 +229,17 @@ export function HeroTrailerPlayer() {
           />
         )}
         
-        {/* YouTube iframe - full viewport, scaled to fill like cinema */}
+        {/* YouTube iframe - full viewport coverage */}
         {iframeUrl && !videoError && (
           <iframe
             ref={iframeRef}
             key={`trailer-${currentIndex}`}
             src={iframeUrl}
-            className="absolute inset-0 w-full h-full"
-            style={{ 
-              transform: 'scale(1.15)',
-              transformOrigin: 'center center',
-            }}
-            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+            className="absolute top-0 left-0 w-full h-full"
+            style={{ transform: 'scale(1.15)', transformOrigin: 'center center' }}
+            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; webkit-fullscreen; mozfullscreen"
             allowFullScreen
+            frameBorder="0"
           />
         )}
       </div>
