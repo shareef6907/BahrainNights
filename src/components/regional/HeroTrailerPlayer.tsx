@@ -108,12 +108,14 @@ export function HeroTrailerPlayer() {
           showinfo: 0,
           rel: 0,
           loop: 1,
+          playlist: videoId,
           playsinline: 1,
           modestbranding: 1,
           iv_load_policy: 3,
           disablekb: 1,
           fs: 0,
           origin: typeof window !== 'undefined' ? window.location.origin : '',
+          playerapiid: 'regionalplayer',
         },
         events: {
           onReady: (event: { target: any }) => {
