@@ -168,7 +168,7 @@ async function getInternationalEvents() {
     .neq('country', 'Bahrain')
     .eq('status', 'published')
     .eq('is_active', true)
-    .or(`start_date.gte.${today},date.gte.${today},end_date.gte.${today}`)
+    .or(`start_date.gte.${today},date.gte.${today}`)
     .order('start_date', { ascending: true, nullsFirst: false })
     .limit(100);
 
@@ -244,7 +244,7 @@ async function getLiveEventCounts() {
       .eq('status', 'published')
       .eq('is_hidden', false)
       .eq('country', 'Bahrain')
-      .or(`start_date.gte.${today},date.gte.${today},end_date.gte.${today}`);
+      .or(`start_date.gte.${today},date.gte.${today}`);
 
     // International count: same filter as /international page (non-Bahrain, active, current)
     const internationalResult = await supabaseAdmin
@@ -253,7 +253,7 @@ async function getLiveEventCounts() {
       .neq('country', 'Bahrain')
       .eq('status', 'published')
       .eq('is_active', true)
-      .or(`start_date.gte.${today},date.gte.${today},end_date.gte.${today}`);
+      .or(`start_date.gte.${today},date.gte.${today}`);
 
     return {
       local: localResult.count || 0,

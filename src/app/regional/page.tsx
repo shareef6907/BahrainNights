@@ -1,5 +1,6 @@
 import { Metadata } from 'next';
 import { getAdminClient } from '@/lib/supabase/server';
+import { supabaseAdmin } from '@/lib/supabase';
 import { RegionalPageClient } from './RegionalPageClient';
 
 export const metadata: Metadata = {
@@ -54,9 +55,8 @@ async function getUpcomingEvents(): Promise<RegionalItem[]> {
       .select('id, title, slug, description, cover_url, featured_image, country, city, category, date, start_date, end_date, venue_name, affiliate_url, is_featured')
       .eq('status', 'published')
       .eq('is_active', true)
-      .or(`start_date.gte.${today},date.gte.${today},end_date.gte.${today}`)
-      .order('start_date', { ascending: true })
-      .limit(200);
+      .or(`start_date.gte.${today},date.gte.${today}`)
+      .order('start_date', { ascending: true });
 
     if (error) {
       console.error('Events fetch error:', error);
@@ -83,6 +83,66 @@ async function getUpcomingEvents(): Promise<RegionalItem[]> {
     }));
   } catch (err) {
     console.error('Events exception:', err);
+    return [];
+  }
+}
+
+// Fetch live event counts matching homepage stats
+async function getLiveEventCounts() {
+  const today = new Date().toISOString().split('T')[0];
+  
+  try {
+    // Local count: Bahrain events only, future only
+    const localResult = await supabaseAdmin
+      .from('events')
+      .select('id', { count: 'exact', head: true })
+      .eq('status', 'published')
+      .eq('is_hidden', false)
+      .eq('country', 'Bahrain')
+      .or(`start_date.gte.${today},date.gte.${today}`);
+
+    // GCC + UK count: GCC countries (Bahrain, UAE, Saudi, Qatar, Kuwait, Oman) + UK
+    const gccCountries = ['Bahrain', 'UAE', 'United Arab Emirates', 'Saudi Arabia', 'Qatar', 'Kuwait', 'Oman'];
+    const internationalResult = await supabaseAdmin
+      .from('events')
+      .select('id', { count: 'exact', head: true })
+      .eq('status', 'published')
+      .eq('is_active', true)
+      .or(`start_date.gte.${today},date.gte.${today}`)
+      .or(`country.in.(${gccCountries.join(',')}),country.eq.UK,country.eq.United Kingdom`);
+
+    return {
+      local: localResult.count || 0,
+      international: internationalResult.count || 0,
+    };
+  } catch (error) {
+    console.error('Error fetching live event counts:', error);
+    return { local: 0, international: 0 };
+  }
+}
+
+// Fetch unique countries from events for dynamic country tabs
+async function getUniqueCountries(): Promise<string[]> {
+  const today = new Date().toISOString().split('T')[0];
+  
+  try {
+    const { data, error } = await supabaseAdmin
+      .from('events')
+      .select('country')
+      .eq('status', 'published')
+      .eq('is_active', true)
+      .or(`start_date.gte.${today},date.gte.${today}`)
+      .not('country', 'is', null);
+
+    if (error) {
+      console.error('Error fetching countries:', error);
+      return [];
+    }
+
+    const countries = [...new Set(data?.map(e => e.country).filter(Boolean))];
+    return countries as string[];
+  } catch (error) {
+    console.error('Error fetching countries:', error);
     return [];
   }
 }
@@ -154,10 +214,12 @@ function filterByLocation(items: RegionalItem[], cities: string[], countries: st
 }
 
 export default async function RegionalPage() {
-  // Fetch both events and blog articles
-  const [events, articles] = await Promise.all([
+  // Fetch events, blog articles, live counts, and countries in parallel
+  const [events, articles, liveCounts, countries] = await Promise.all([
     getUpcomingEvents(),
     getBlogArticles(),
+    getLiveEventCounts(),
+    getUniqueCountries(),
   ]);
 
   // Combine all items
@@ -244,6 +306,9 @@ export default async function RegionalPage() {
       latest={latest}
       hasContent={hasContent}
       totalEvents={events.length}
+      localEvents={liveCounts.local}
+      gccUkEvents={liveCounts.international}
+      uniqueCountries={countries}
     />
   );
 }

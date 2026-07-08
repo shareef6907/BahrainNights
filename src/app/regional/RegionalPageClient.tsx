@@ -44,6 +44,9 @@ interface Props {
   latest: RegionalItem[];
   hasContent: boolean;
   totalEvents: number;
+  localEvents: number;
+  gccUkEvents: number;
+  uniqueCountries: string[];
 }
 
 export function RegionalPageClient({
@@ -63,6 +66,9 @@ export function RegionalPageClient({
   latest,
   hasContent,
   totalEvents,
+  localEvents,
+  gccUkEvents,
+  uniqueCountries,
 }: Props) {
   // State for blog article modal
   const [selectedArticle, setSelectedArticle] = useState<RegionalItem | null>(null);
@@ -99,24 +105,22 @@ export function RegionalPageClient({
       {/* Full-Screen Hero Trailer */}
       <HeroTrailerPlayer />
 
-      {/* Stats Bar */}
+      {/* Stats Bar - matches homepage pattern */}
       <div className="relative z-10 -mt-24 mb-8">
         <div className="max-w-6xl mx-auto px-4">
           <div className="bg-gradient-to-r from-yellow-500/20 to-orange-500/20 backdrop-blur-sm rounded-2xl p-6 border border-yellow-500/30">
             <div className="flex flex-wrap justify-center gap-8 text-center">
               <div>
-                <p className="text-3xl font-black text-yellow-400">{totalEvents}</p>
-                <p className="text-sm text-gray-400">Upcoming Events</p>
+                <p className="text-3xl font-black text-yellow-400">{localEvents}</p>
+                <p className="text-sm text-gray-400">Local Events</p>
               </div>
               <div>
-                <p className="text-3xl font-black text-yellow-400">10+</p>
+                <p className="text-3xl font-black text-yellow-400">{gccUkEvents}</p>
+                <p className="text-sm text-gray-400">GCC + UK Events</p>
+              </div>
+              <div>
+                <p className="text-3xl font-black text-yellow-400">{uniqueCountries.length}</p>
                 <p className="text-sm text-gray-400">Countries</p>
-              </div>
-              <div>
-                <p className="text-3xl font-black text-yellow-400">
-                  {bahrain.length + dubai.length + abuDhabi.length + riyadh.length + jeddah.length + doha.length}
-                </p>
-                <p className="text-sm text-gray-400">Gulf Events</p>
               </div>
             </div>
           </div>

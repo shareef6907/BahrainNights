@@ -134,7 +134,7 @@ export default async function CountryPage({ params }: Props) {
       .eq('country', countryConfig.dbName)
       .eq('status', 'published')
       .eq('is_active', true)
-      .or(`start_date.gte.${today},date.gte.${today},end_date.gte.${today}`)
+      .or(`start_date.gte.${today},date.gte.${today}`)
       .order('start_date', { ascending: true, nullsFirst: false })
       .limit(100);
     events = result.data;

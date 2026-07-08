@@ -111,7 +111,7 @@ export default async function InternationalPage() {
     .neq('country', 'Bahrain')
       .eq('status', 'published')
       .eq('is_active', true)
-      .or(`start_date.gte.${today},date.gte.${today},end_date.gte.${today}`)
+      .or(`start_date.gte.${today},date.gte.${today}`)
       .order('start_date', { ascending: true, nullsFirst: false });
     events = result.data;
     error = result.error;

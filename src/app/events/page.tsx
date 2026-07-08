@@ -91,7 +91,7 @@ async function getEvents(): Promise<Event[]> {
     .eq('status', 'published')
     .eq('is_hidden', false)
     .eq('country', 'Bahrain')
-    .or(`date.gte.${today},end_date.gte.${today}`)
+    .or(`date.gte.${today},start_date.gte.${today}`)
     .order('date', { ascending: true });
 
   if (error) {
@@ -285,7 +285,7 @@ async function getInternationalEvents() {
     .neq('country', 'Bahrain')
     .eq('status', 'published')
     .eq('is_active', true)
-    .or(`start_date.gte.${today},date.gte.${today},end_date.gte.${today})`)
+    .or(`start_date.gte.${today},date.gte.${today}`)
     .order('start_date', { ascending: true, nullsFirst: false });
 
   if (error || !data) {

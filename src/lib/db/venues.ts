@@ -396,7 +396,7 @@ export async function getVenueEvents(venueName: string): Promise<{
     .select('id, title, slug, date, time, cover_url, image_url, featured_image, category')
     .eq('status', 'published')
     .ilike('venue_name', `%${venueName}%`)
-    .or(`date.gte.${today},end_date.gte.${today}`)
+    .or(`date.gte.${today},start_date.gte.${today}`)
     .order('date', { ascending: true })
     .limit(6);
 
