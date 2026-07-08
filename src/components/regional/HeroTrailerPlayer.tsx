@@ -98,8 +98,8 @@ export function HeroTrailerPlayer() {
     playerContainerRef.current.innerHTML = '';
 
     try {
-      // Use UNIQUE container ID to prevent collision with NetflixHero
-      const player = new window.YT.Player('regional-youtube-player', {
+      // Use container ref's ID like NetflixHero does
+      const player = new window.YT.Player(playerContainerRef.current!.id, {
         videoId: videoId,
         playerVars: {
           autoplay: 1,
