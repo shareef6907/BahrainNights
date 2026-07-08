@@ -16,156 +16,34 @@ interface Movie {
   backdrop_url?: string | null;
 }
 
-// Extract YouTube video ID from various URL formats (same as NetflixHero)
-function getYouTubeId(url: string | undefined): string | null {
-  if (!url) return null;
-  
-  // Handle direct video IDs (no URL)
-  if (/^[a-zA-Z0-9_-]{11}$/.test(url)) {
-    return url;
-  }
-  
-  const patterns = [
-    /(?:youtube\.com\/watch\?v=|youtu\.be\/|youtube\.com\/embed\/)([a-zA-Z0-9_-]{11})/,
-    /youtube\.com\/v\/([a-zA-Z0-9_-]{11})/,
-  ];
-  
-  for (const pattern of patterns) {
-    const match = url.match(pattern);
-    if (match) return match[1];
-  }
-  
-  return null;
-}
-
 export function HeroTrailerPlayer() {
   const [movies, setMovies] = useState<Movie[]>([]);
   const [currentIndex, setCurrentIndex] = useState(0);
   const [isMobile, setIsMobile] = useState(false);
   const [isMuted, setIsMuted] = useState(true);
   const [isLoading, setIsLoading] = useState(true);
-  const [ytApiReady, setYtApiReady] = useState(false);
   const [showMobileHint, setShowMobileHint] = useState(false);
   const [videoError, setVideoError] = useState(false);
   const autoAdvanceRef = useRef<NodeJS.Timeout | null>(null);
-  const playerRef = useRef<any>(null);
-  const playerContainerRef = useRef<HTMLDivElement>(null);
-  const initializedRef = useRef(false);
+  const iframeRef = useRef<HTMLIFrameElement>(null);
+  const initialMutedRef = useRef<boolean>(true);
 
-  // Detect mobile (same as NetflixHero)
+  // Detect mobile/touch device
   useEffect(() => {
-    const checkMobile = () => {
-      setIsMobile(window.innerWidth < 768 || 'ontouchstart' in window);
+    const checkDevice = () => {
+      const isTouchDevice = 'ontouchstart' in window || navigator.maxTouchPoints > 0;
+      const isMobileUA = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+      const isIPad = /iPad/.test(navigator.userAgent) ||
+        (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+      const mobile = isTouchDevice || isMobileUA || isIPad;
+      setIsMobile(mobile);
+      initialMutedRef.current = mobile;
+      setIsMuted(mobile);
+      setShowMobileHint(mobile);
     };
-    checkMobile();
-    window.addEventListener('resize', checkMobile);
-    return () => window.removeEventListener('resize', checkMobile);
+    checkDevice();
   }, []);
 
-  // Load YouTube IFrame Player API (same as NetflixHero)
-  useEffect(() => {
-    if (typeof window !== 'undefined') {
-      if (window.YT && window.YT.Player) {
-        setYtApiReady(true);
-        return;
-      }
-      
-      (window as any).onYouTubeIframeAPIReady = () => {
-        setYtApiReady(true);
-      };
-      
-      const tag = document.createElement('script');
-      tag.src = 'https://www.youtube.com/iframe_api';
-      const firstScriptTag = document.getElementsByTagName('script')[0];
-      firstScriptTag.parentNode?.insertBefore(tag, firstScriptTag);
-    }
-  }, []);
-
-  // Create YouTube player (same as NetflixHero)
-  const createPlayer = useCallback((videoId: string) => {
-    if (!window.YT || !playerContainerRef.current || !ytApiReady) return;
-    
-    // Cleanup existing player
-    if (playerRef.current) {
-      try {
-        playerRef.current.destroy();
-      } catch (e) {
-        // Ignore
-      }
-      playerRef.current = null;
-    }
-
-    playerContainerRef.current.innerHTML = '';
-
-    try {
-      // Use container ref's ID like NetflixHero does
-      const player = new window.YT.Player(playerContainerRef.current!.id, {
-        videoId: videoId,
-        width: '100%',
-        height: '100%',
-        playerVars: {
-          autoplay: 1,
-          mute: 1,
-          controls: 0,
-          showinfo: 0,
-          rel: 0,
-          loop: 1,
-          playlist: videoId,
-          playsinline: 1,
-          modestbranding: 1,
-          iv_load_policy: 3,
-          disablekb: 1,
-          fs: 0,
-          origin: typeof window !== 'undefined' ? window.location.origin : '',
-          playerapiid: 'regionalplayer',
-        },
-        events: {
-          onReady: (event: { target: any }) => {
-            event.target.playVideo();
-            setTimeout(() => {
-              try {
-                event.target.unMute();
-                event.target.setVolume(50);
-                setIsMuted(false);
-              } catch (e) {
-                setIsMuted(true);
-              }
-            }, 1000);
-          },
-          onError: (event: { target: any; data: number }) => {
-            setVideoError(true);
-          },
-          onStateChange: (event: { target: any; data: number }) => {
-            if (event.data === 0) {
-              event.target.seekTo(0);
-              event.target.playVideo();
-            }
-          },
-        },
-      } as any);
-      
-      playerRef.current = player;
-      initializedRef.current = true;
-    } catch (e) {
-      console.error('Failed to create YouTube player:', e);
-    }
-  }, [ytApiReady]);
-
-  // Cleanup on unmount
-  useEffect(() => {
-    return () => {
-      if (playerRef.current) {
-        try {
-          playerRef.current.destroy();
-        } catch (e) {
-          // Ignore cleanup errors
-        }
-        playerRef.current = null;
-      }
-    };
-  }, []);
-
-  // Fetch trailers
   useEffect(() => {
     fetchFeaturedTrailers();
   }, []);
@@ -208,49 +86,6 @@ export function HeroTrailerPlayer() {
     }
   };
 
-  // Initialize player on mount (same as NetflixHero)
-  useEffect(() => {
-    if (!movies || movies.length === 0 || !ytApiReady) return;
-    
-    const videoId = getYouTubeId(movies[0]?.trailer_key || movies[0]?.trailer_url || undefined);
-    
-    if (videoId && !playerRef.current) {
-      const timer = setTimeout(() => {
-        createPlayer(videoId);
-      }, 500);
-      return () => clearTimeout(timer);
-    }
-  }, [ytApiReady, createPlayer, movies]);
-
-  // When currentIndex changes, load new video (same as NetflixHero)
-  useEffect(() => {
-    if (!movies || movies.length === 0 || !ytApiReady) return;
-    
-    const currentMovie = movies[currentIndex];
-    const videoId = getYouTubeId(currentMovie?.trailer_key || currentMovie?.trailer_url || undefined);
-    
-    if (videoId) {
-      if (playerRef.current && playerRef.current.loadVideoById) {
-        playerRef.current.loadVideoById(videoId);
-        playerRef.current.mute();
-        playerRef.current.playVideo();
-        playerRef.current.seekTo(0);
-        setTimeout(() => {
-          try {
-            playerRef.current?.unMute();
-            playerRef.current?.setVolume(50);
-            setIsMuted(false);
-          } catch (e) {
-            setIsMuted(true);
-          }
-        }, 1000);
-        setVideoError(false);
-      } else if (!initializedRef.current) {
-        createPlayer(videoId);
-      }
-    }
-  }, [movies, currentIndex, ytApiReady, createPlayer]);
-
   // Auto-advance trailers
   useEffect(() => {
     if (movies.length > 1) {
@@ -263,13 +98,42 @@ export function HeroTrailerPlayer() {
     };
   }, [movies.length]);
 
-  // Reset mute on mobile when changing slides
+  // Reset on slide change
   useEffect(() => {
     if (isMobile && !isMuted) {
       setIsMuted(true);
     }
     setVideoError(false);
   }, [currentIndex, isMobile, isMuted]);
+
+  // Listen for YouTube errors
+  useEffect(() => {
+    const handleMessage = (event: MessageEvent) => {
+      if (event.origin !== 'https://www.youtube.com') return;
+      try {
+        const data = typeof event.data === 'string' ? JSON.parse(event.data) : event.data;
+        if (data.event === 'onError' ||
+            (data.info && typeof data.info === 'number' && [2, 5, 100, 101, 150].includes(data.info))) {
+          setVideoError(true);
+        }
+      } catch {
+        // Not JSON
+      }
+    };
+    window.addEventListener('message', handleMessage);
+    return () => window.removeEventListener('message', handleMessage);
+  }, []);
+
+  const currentMovie = movies[currentIndex];
+
+  const getVideoId = useCallback((movie: Movie): string | null => {
+    if (movie.trailer_key) return movie.trailer_key;
+    if (movie.trailer_url) {
+      const match = movie.trailer_url.match(/(?:youtube\.com\/(?:watch\?v=|embed\/)|youtu\.be\/)([^&\s?]+)/);
+      return match?.[1] || null;
+    }
+    return null;
+  }, []);
 
   const goToSlide = (index: number) => {
     setCurrentIndex(index);
@@ -284,24 +148,22 @@ export function HeroTrailerPlayer() {
   const goNext = () => goToSlide((currentIndex + 1) % movies.length);
   const goPrev = () => goToSlide((currentIndex - 1 + movies.length) % movies.length);
 
-  const toggleMute = useCallback(() => {
-    setShowMobileHint(false);
-    if (playerRef.current) {
-      try {
-        if (isMuted) {
-          playerRef.current.unMute();
-        } else {
-          playerRef.current.mute();
-        }
-      } catch (e) {
-        console.error('Mute toggle error:', e);
-      }
+  // YouTube postMessage for mute toggle
+  const sendYouTubeCommand = (command: string) => {
+    if (iframeRef.current?.contentWindow) {
+      iframeRef.current.contentWindow.postMessage(
+        JSON.stringify({ event: 'command', func: command }),
+        '*'
+      );
     }
-    setIsMuted(!isMuted);
-  }, [isMuted]);
+  };
 
-  const currentMovie = movies[currentIndex];
-  const videoId = currentMovie ? getYouTubeId(currentMovie.trailer_key || currentMovie.trailer_url || undefined) : null;
+  const toggleMute = () => {
+    setShowMobileHint(false);
+    const newMutedState = !isMuted;
+    sendYouTubeCommand(newMutedState ? 'mute' : 'unMute');
+    setIsMuted(newMutedState);
+  };
 
   if (isLoading) {
     return (
@@ -333,6 +195,13 @@ export function HeroTrailerPlayer() {
     );
   }
 
+  const videoId = currentMovie ? getVideoId(currentMovie) : null;
+
+  // Build iframe URL - same pattern as cinema
+  const iframeUrl = videoId
+    ? `https://www.youtube.com/embed/${videoId}?autoplay=1&mute=${initialMutedRef.current ? 1 : 0}&controls=0&loop=1&playlist=${videoId}&modestbranding=1&rel=0&showinfo=0&iv_load_policy=3&disablekb=1&enablejsapi=1&playsinline=1&origin=${typeof window !== 'undefined' ? window.location.origin : ''}`
+    : null;
+
   const genreDisplay = currentMovie && Array.isArray(currentMovie.genre)
     ? currentMovie.genre.slice(0, 3).join(' • ')
     : currentMovie?.genre;
@@ -346,35 +215,43 @@ export function HeroTrailerPlayer() {
         marginLeft: 'calc(-50vw + 50%)' 
       }}
     >
-      {/* YouTube Player Container - UNIQUE ID to prevent collision */}
-      <div 
-        id="regional-youtube-player"
-        ref={playerContainerRef}
-        className="absolute inset-0 w-full h-full pointer-events-none"
-        style={{ 
-          transform: 'scale(1.15)',
-          transformOrigin: 'center center',
-        }}
-      />
+      {/* Video Container - matching cinema approach */}
+      <div className="absolute inset-0 w-full h-full">
+        {/* Backdrop image */}
+        {(currentMovie?.backdrop_url || currentMovie?.poster_url) && (
+          <Image
+            src={currentMovie?.backdrop_url || currentMovie?.poster_url || ''}
+            alt={currentMovie?.title || 'Movie backdrop'}
+            fill
+            sizes="100vw"
+            className="object-cover"
+            priority
+          />
+        )}
+        
+        {/* YouTube iframe - full viewport, scaled to fill like cinema */}
+        {iframeUrl && !videoError && (
+          <iframe
+            ref={iframeRef}
+            key={`trailer-${currentIndex}`}
+            src={iframeUrl}
+            className="absolute inset-0 w-full h-full"
+            style={{ 
+              transform: 'scale(1.15)',
+              transformOrigin: 'center center',
+            }}
+            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+            allowFullScreen
+          />
+        )}
+      </div>
 
-      {/* Fallback backdrop image */}
-      {(currentMovie?.backdrop_url || currentMovie?.poster_url) && (
-        <Image
-          src={currentMovie?.backdrop_url || currentMovie?.poster_url || ''}
-          alt={currentMovie?.title || 'Movie backdrop'}
-          fill
-          sizes="100vw"
-          className="object-cover"
-          priority
-        />
-      )}
-
-      {/* Gradient Overlays - preserved from original /regional */}
+      {/* Gradient Overlays */}
       <div className="absolute inset-0 bg-gradient-to-r from-black/90 via-black/50 to-transparent" />
       <div className="absolute inset-0 bg-gradient-to-t from-gray-950 via-transparent to-black/40" />
       <div className="absolute bottom-0 left-0 right-0 h-32 bg-gradient-to-t from-gray-950 to-transparent" />
 
-      {/* Content - preserved from original /regional */}
+      {/* Content */}
       <div className="absolute inset-0 flex items-center">
         <div className="w-full max-w-7xl mx-auto px-6 md:px-12">
           <div className="max-w-2xl">
@@ -397,9 +274,8 @@ export function HeroTrailerPlayer() {
               </p>
             )}
 
-            {/* Mute button - preserved styling from original */}
             <div className="flex flex-wrap items-center gap-4">
-              {videoId && !videoError ? (
+              {iframeUrl && !videoError ? (
                 <button
                   onClick={toggleMute}
                   className={`flex items-center gap-2 px-8 py-3 rounded-lg font-bold text-lg transition-colors ${
@@ -435,7 +311,7 @@ export function HeroTrailerPlayer() {
         </div>
       </div>
 
-      {/* Navigation Arrows - preserved */}
+      {/* Navigation Arrows */}
       {movies.length > 1 && (
         <>
           <button
@@ -455,7 +331,7 @@ export function HeroTrailerPlayer() {
         </>
       )}
 
-      {/* Trailer Indicators - preserved */}
+      {/* Trailer Indicators */}
       {movies.length > 1 && (
         <div className="absolute bottom-8 left-1/2 -translate-x-1/2 flex items-center gap-2">
           {movies.map((_, index) => (
@@ -473,7 +349,7 @@ export function HeroTrailerPlayer() {
         </div>
       )}
 
-      {/* Mobile Sound Hint - preserved */}
+      {/* Mobile Sound Hint */}
       {showMobileHint && isMuted && videoId && !videoError && (
         <button
           onClick={toggleMute}
