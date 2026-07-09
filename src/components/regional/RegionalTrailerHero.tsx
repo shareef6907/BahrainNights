@@ -82,10 +82,20 @@ export default function RegionalTrailerHero({ movies: propMovies, onMovieClick, 
         playerVars: { autoplay: 1, mute: 1, controls: 0, showinfo: 0, rel: 0, loop: 1, playsinline: 1, modestbranding: 1, iv_load_policy: 3, disablekb: 1, fs: 0 },
         events: {
           onReady: (e: any) => {
+            // Explicit mute BEFORE playVideo - required for iOS Safari
+            e.target.mute();
             e.target.playVideo();
             setTimeout(() => { try { e.target.unMute(); e.target.setVolume(50); setIsMuted(false); } catch {} }, 1000);
           },
-          onStateChange: (e: any) => { if (e.data === 0) { e.target.seekTo(0); e.target.playVideo(); } },
+          onStateChange: (e: any) => { 
+            if (e.data === 0) { e.target.seekTo(0); e.target.playVideo(); }
+            // If UNSTARTED (-1) or CUED (5) after 2s, retry play - covers Low Power Mode
+            if (e.data === -1 || e.data === 5) {
+              setTimeout(() => {
+                try { e.target.mute(); e.target.playVideo(); } catch {}
+              }, 2000);
+            }
+          },
         },
       } as any);
       playerRef.current = player;
@@ -133,9 +143,31 @@ export default function RegionalTrailerHero({ movies: propMovies, onMovieClick, 
     return <div className="h-[70vh] md:h-[85vh] bg-gray-900 flex items-center justify-center"><div className="w-16 h-16 border-4 border-yellow-500 border-t-transparent rounded-full animate-spin" /></div>;
   }
 
+  // Tap-to-play fallback for iOS Low Power Mode
+  useEffect(() => {
+    if (!isMobile) return;
+    
+    const handleTapToPlay = () => {
+      if (playerRef.current && playerRef.current.playVideo) {
+        try {
+          playerRef.current.mute();
+          playerRef.current.playVideo();
+        } catch {}
+      }
+    };
+    
+    document.addEventListener('touchstart', handleTapToPlay, { once: true });
+    document.addEventListener('click', handleTapToPlay, { once: true });
+    
+    return () => {
+      document.removeEventListener('touchstart', handleTapToPlay);
+      document.removeEventListener('click', handleTapToPlay);
+    };
+  }, [isMobile]);
+
   return (
     <div className="relative overflow-hidden bg-black" style={{ width: '100vw', height: isMobile ? '70vh' : '85vh', marginLeft: 'calc(-50vw + 50%)' }}>
-      <div id="youtube-player" ref={playerContainerRef} className="absolute inset-0 w-full h-full" style={{ transform: 'scale(1.15)', transformOrigin: 'center center' }} />
+      <div id="regional-youtube-player" ref={playerContainerRef} className="absolute inset-0 w-full h-full" style={{ transform: 'scale(1.15)', transformOrigin: 'center center' }} />
       <div className="absolute inset-0 bg-gradient-to-r from-black/90 via-black/50 to-transparent" />
       <div className="absolute inset-0 bg-gradient-to-t from-gray-950 via-transparent to-black/40" />
       <div className="absolute bottom-0 left-0 right-0 h-32 bg-gradient-to-t from-gray-950 to-transparent" />
