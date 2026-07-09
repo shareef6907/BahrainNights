@@ -155,13 +155,56 @@ export function HeroTrailerPlayer() {
   if (isLoading) return <div className="h-[70vh] md:h-[85vh] bg-gray-900 flex items-center justify-center"><div className="w-16 h-16 border-4 border-yellow-500 border-t-transparent rounded-full animate-spin" /></div>;
   if (!movies.length) return <div className="h-[70vh] md:h-[85vh] bg-gray-950 flex items-center justify-center"><h1 className="text-4xl md:text-6xl font-black text-white">BahrainNights Blog</h1></div>;
 
+  // PLAN B: On mobile, show branded poster with play button
+  const showPosterInsteadOfPlayer = isMobile;
+  const backdropUrl = currentMovie?.backdrop_url || currentMovie?.poster_url;
+
+  // Handle mobile play button tap
+  const handleMobilePlay = () => {
+    const videoId = currentMovie?.trailer_key;
+    if (videoId) {
+      window.open(`https://www.youtube.com/watch?v=${videoId}`, '_blank');
+    }
+  };
+
   return (
     <div className="relative overflow-hidden bg-black" style={{ width: '100vw', height: isMobile ? '70vh' : '85vh', marginLeft: 'calc(-50vw + 50%)' }}>
-      {/* Player */}
-      <div id="youtube-player" ref={playerContainerRef} className="absolute inset-0 w-full h-full pointer-events-none" style={{ transform: 'scale(1.15)', transformOrigin: 'center center' }} />
-      
-      {/* Backdrop */}
-      {(currentMovie?.backdrop_url || currentMovie?.poster_url) && <Image src={currentMovie.backdrop_url || currentMovie.poster_url || ''} alt="" fill className="object-cover" priority />}
+      {/* DESKTOP: YouTube Player */}
+      {!showPosterInsteadOfPlayer && (
+        <>
+          <div id="regional-youtube-player" ref={playerContainerRef} className="absolute inset-0 w-full h-full pointer-events-none" style={{ transform: 'scale(1.15)', transformOrigin: 'center center' }} />
+          {(currentMovie?.backdrop_url || currentMovie?.poster_url) && <Image src={currentMovie.backdrop_url || currentMovie.poster_url || ''} alt="" fill className="object-cover" priority />}
+        </>
+      )}
+
+      {/* MOBILE: Branded poster with play button */}
+      {showPosterInsteadOfPlayer && backdropUrl && (
+        <div 
+          className="absolute inset-0 w-full h-full"
+          style={{
+            backgroundImage: `url(${backdropUrl})`,
+            backgroundSize: 'cover',
+            backgroundPosition: 'center',
+          }}
+        >
+          <div className="absolute inset-0 bg-black/50" />
+          <button
+            onClick={handleMobilePlay}
+            className="absolute inset-0 flex items-center justify-center"
+            aria-label="Play trailer"
+          >
+            <div className="w-20 h-20 rounded-full bg-[#d4a853] hover:bg-[#c49a48] flex items-center justify-center transition-all transform hover:scale-110 shadow-2xl">
+              <Play className="w-10 h-10 text-black ml-1" fill="black" />
+            </div>
+          </button>
+        </div>
+      )}
+
+      {showPosterInsteadOfPlayer && !backdropUrl && (
+        <div className="absolute inset-0 bg-gray-900 flex items-center justify-center">
+          <Play className="w-16 h-16 text-gray-600" />
+        </div>
+      )}
 
       <div className="absolute inset-0 bg-gradient-to-r from-black/90 via-black/50 to-transparent" />
       <div className="absolute inset-0 bg-gradient-to-t from-gray-950 via-transparent to-black/40" />

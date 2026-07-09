@@ -285,6 +285,17 @@ export default function NetflixHero({ movies, onMovieClick, onBookClick }: Netfl
   const currentMovie = movies[currentIndex];
   const videoId = getYouTubeId(currentMovie?.trailerUrl);
 
+  // PLAN B: On mobile, show branded poster with play button instead of iframe
+  const showPosterInsteadOfPlayer = isMobile;
+  const backdropUrl = currentMovie?.backdrop || currentMovie?.poster;
+
+  // Handle mobile play button tap - opens YouTube fullscreen
+  const handleMobilePlay = useCallback(() => {
+    if (videoId) {
+      window.open(`https://www.youtube.com/watch?v=${videoId}`, '_blank');
+    }
+  }, [videoId]);
+
   return (
     <div 
       className="relative overflow-hidden bg-black"
@@ -297,16 +308,51 @@ export default function NetflixHero({ movies, onMovieClick, onBookClick }: Netfl
       onMouseEnter={() => setShowControls(true)}
       onMouseLeave={() => setShowControls(false)}
     >
-      {/* YouTube Player Container - full width, scaled to fill */}
-      <div 
-        id="youtube-player"
-        ref={playerContainerRef}
-        className="absolute inset-0 w-full h-full pointer-events-none"
-        style={{ 
-          transform: 'scale(1.15)',
-          transformOrigin: 'center center',
-        }}
-      />
+      {/* DESKTOP: YouTube Player */}
+      {!showPosterInsteadOfPlayer && (
+        <div 
+          id="youtube-player"
+          ref={playerContainerRef}
+          className="absolute inset-0 w-full h-full pointer-events-none"
+          style={{ 
+            transform: 'scale(1.15)',
+            transformOrigin: 'center center',
+          }}
+        />
+      )}
+
+      {/* MOBILE: Branded poster with play button (Netflix mobile pattern) */}
+      {showPosterInsteadOfPlayer && backdropUrl && (
+        <div 
+          className="absolute inset-0 w-full h-full"
+          style={{
+            backgroundImage: `url(${backdropUrl})`,
+            backgroundSize: 'cover',
+            backgroundPosition: 'center',
+          }}
+        >
+          {/* Dark overlay for text readability */}
+          <div className="absolute inset-0 bg-black/50" />
+          
+          {/* Play button */}
+          <button
+            onClick={handleMobilePlay}
+            className="absolute inset-0 flex items-center justify-center"
+            aria-label="Play trailer"
+          >
+            <div className="w-20 h-20 rounded-full bg-[#d4a853] hover:bg-[#c49a48] flex items-center justify-center transition-all transform hover:scale-110 shadow-2xl">
+              <Play className="w-10 h-10 text-black ml-1" fill="black" />
+            </div>
+          </button>
+        </div>
+      )}
+
+      {/* MOBILE: Loading/fallback state */}
+      {showPosterInsteadOfPlayer && !backdropUrl && (
+        <div className="absolute inset-0 bg-gray-900 flex items-center justify-center">
+          <Play className="w-16 h-16 text-gray-600" />
+        </div>
+      )}
 
       {/* Gradient overlays for cinematic feel */}
       <div className="absolute inset-0 bg-gradient-to-r from-black/90 via-black/40 to-transparent z-[5]" />
