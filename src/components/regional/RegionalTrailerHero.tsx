@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect, useRef, useCallback } from 'react';
+import Image from 'next/image';
 import { Volume2, VolumeX, ChevronLeft, ChevronRight, Info, Play } from 'lucide-react';
 
 interface Movie {
@@ -32,6 +33,7 @@ export default function RegionalTrailerHero({ movies: propMovies, onMovieClick, 
   const [isMuted, setIsMuted] = useState(true);
   const [ytApiReady, setYtApiReady] = useState(false);
   const [isMobile, setIsMobile] = useState(false);
+  const isMobileRef = useRef(false); // Track current mobile state
   const autoAdvanceRef = useRef<NodeJS.Timeout | null>(null);
   const playerRef = useRef<any>(null);
   const playerContainerRef = useRef<HTMLDivElement>(null);
@@ -57,20 +59,29 @@ export default function RegionalTrailerHero({ movies: propMovies, onMovieClick, 
   }, [movies.length]);
 
   useEffect(() => {
-    const checkMobile = () => setIsMobile(window.innerWidth < 768 || 'ontouchstart' in window);
+    const checkMobile = () => {
+      const mobile = window.innerWidth < 768 || 'ontouchstart' in window;
+      setIsMobile(mobile);
+      isMobileRef.current = mobile; // Keep ref in sync
+    };
     checkMobile();
     window.addEventListener('resize', checkMobile);
     return () => window.removeEventListener('resize', checkMobile);
   }, []);
 
+  // Load YouTube API (desktop only - mobile uses poster)
   useEffect(() => {
+    // Skip on mobile - we use poster image instead of YouTube iframe
+    // Use ref for current value at execution time
+    if (isMobileRef.current) return;
+    
     if (typeof window === 'undefined') return;
     if (window.YT?.Player) { setYtApiReady(true); return; }
     (window as any).onYouTubeIframeAPIReady = () => setYtApiReady(true);
     const tag = document.createElement('script');
     tag.src = 'https://www.youtube.com/iframe_api';
     document.getElementsByTagName('script')[0]?.parentNode?.insertBefore(tag, document.getElementsByTagName('script')[0]);
-  }, []);
+  }, [isMobile]);
 
   const createPlayer = useCallback((videoId: string) => {
     if (!window.YT || !playerContainerRef.current || !ytApiReady) return;
@@ -152,20 +163,22 @@ export default function RegionalTrailerHero({ movies: propMovies, onMovieClick, 
         <div id="regional-youtube-player" ref={playerContainerRef} className="absolute inset-0 w-full h-full" style={{ transform: 'scale(1.15)', transformOrigin: 'center center' }} />
       )}
 
-      {/* MOBILE: Branded poster with play button */}
+      {/* MOBILE: Branded poster with play button - next/image for LCP */}
       {showPosterInsteadOfPlayer && backdropUrl && (
-        <div 
-          className="absolute inset-0 w-full h-full"
-          style={{
-            backgroundImage: `url(${backdropUrl})`,
-            backgroundSize: 'cover',
-            backgroundPosition: 'center',
-          }}
-        >
-          <div className="absolute inset-0 bg-black/50" />
+        <div className="absolute inset-0 w-full h-full">
+          <Image
+            src={backdropUrl}
+            alt={current?.title || 'Movie backdrop'}
+            fill
+            priority
+            className="object-cover"
+            sizes="100vw"
+          />
+          <div className="absolute inset-0 bg-black/50 pointer-events-none" />
           <button
             onClick={handleMobilePlay}
-            className="absolute inset-0 flex items-center justify-center"
+            className="absolute inset-0 flex items-center justify-center cursor-pointer"
+            style={{ pointerEvents: 'auto' }}
             aria-label="Play trailer"
           >
             <div className="w-20 h-20 rounded-full bg-[#d4a853] hover:bg-[#c49a48] flex items-center justify-center transition-all transform hover:scale-110 shadow-2xl">
@@ -180,9 +193,11 @@ export default function RegionalTrailerHero({ movies: propMovies, onMovieClick, 
           <Play className="w-16 h-16 text-gray-600" />
         </div>
       )}
-      <div className="absolute inset-0 bg-gradient-to-r from-black/90 via-black/50 to-transparent" />
-      <div className="absolute inset-0 bg-gradient-to-t from-gray-950 via-transparent to-black/40" />
-      <div className="absolute bottom-0 left-0 right-0 h-32 bg-gradient-to-t from-gray-950 to-transparent" />
+
+      {/* Gradient overlays - pointer-events: none to prevent blocking */}
+      <div className="absolute inset-0 bg-gradient-to-r from-black/90 via-black/50 to-transparent pointer-events-none" />
+      <div className="absolute inset-0 bg-gradient-to-t from-gray-950 via-transparent to-black/40 pointer-events-none" />
+      <div className="absolute bottom-0 left-0 right-0 h-32 bg-gradient-to-t from-gray-950 to-transparent pointer-events-none" />
       
       <div className="absolute inset-0 flex items-center">
         <div className="w-full max-w-7xl mx-auto px-6 md:px-12">

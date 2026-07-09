@@ -63,7 +63,7 @@
     "eslint-config-next": "16.1.1",
     "googleapis": "^171.4.0",
     "pg": "^8.17.1",
-    "playwright": "^1.57.0",
+    "playwright": "^1.61.1",
     "png-to-ico": "^3.0.1",
     "tailwindcss": "^4",
     "tsx": "^4.21.0",
