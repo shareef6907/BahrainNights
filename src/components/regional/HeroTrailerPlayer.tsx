@@ -73,8 +73,6 @@ export function HeroTrailerPlayer() {
         },
         events: {
           onReady: (event: { target: any }) => {
-            // Explicit mute BEFORE playVideo - required for iOS Safari
-            event.target.mute();
             event.target.playVideo();
             setTimeout(() => {
               try {
@@ -90,43 +88,12 @@ export function HeroTrailerPlayer() {
               event.target.seekTo(0);
               event.target.playVideo();
             }
-            // If UNSTARTED (-1) or CUED (5) after 2s, retry play - covers Low Power Mode
-            if (event.data === -1 || event.data === 5) {
-              setTimeout(() => {
-                try {
-                  event.target.mute();
-                  event.target.playVideo();
-                } catch {}
-              }, 2000);
-            }
           },
         },
       } as any);
       playerRef.current = player;
     } catch {}
   }, [ytApiReady]);
-
-  // Tap-to-play fallback for iOS Low Power Mode
-  useEffect(() => {
-    if (!isMobile) return;
-    
-    const handleTapToPlay = () => {
-      if (playerRef.current && playerRef.current.playVideo) {
-        try {
-          playerRef.current.mute();
-          playerRef.current.playVideo();
-        } catch {}
-      }
-    };
-    
-    document.addEventListener('touchstart', handleTapToPlay, { once: true });
-    document.addEventListener('click', handleTapToPlay, { once: true });
-    
-    return () => {
-      document.removeEventListener('touchstart', handleTapToPlay);
-      document.removeEventListener('click', handleTapToPlay);
-    };
-  }, [isMobile]);
 
   // Init on mount
   useEffect(() => {
@@ -191,7 +158,7 @@ export function HeroTrailerPlayer() {
   return (
     <div className="relative overflow-hidden bg-black" style={{ width: '100vw', height: isMobile ? '70vh' : '85vh', marginLeft: 'calc(-50vw + 50%)' }}>
       {/* Player */}
-      <div id="regional-youtube-player" ref={playerContainerRef} className="absolute inset-0 w-full h-full pointer-events-none" style={{ transform: 'scale(1.15)', transformOrigin: 'center center' }} />
+      <div id="youtube-player" ref={playerContainerRef} className="absolute inset-0 w-full h-full pointer-events-none" style={{ transform: 'scale(1.15)', transformOrigin: 'center center' }} />
       
       {/* Backdrop */}
       {(currentMovie?.backdrop_url || currentMovie?.poster_url) && <Image src={currentMovie.backdrop_url || currentMovie.poster_url || ''} alt="" fill className="object-cover" priority />}

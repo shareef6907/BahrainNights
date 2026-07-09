@@ -114,8 +114,6 @@ export default function NetflixHero({ movies, onMovieClick, onBookClick }: Netfl
         events: {
           onReady: (event: { target: any }) => {
             console.log('YT Player ready, state:', event.target.getPlayerState());
-            // Explicit mute BEFORE playVideo - required for iOS Safari
-            event.target.mute();
             event.target.playVideo();
             // Try to unmute after playback starts (works if user has interacted with page before)
             setTimeout(() => {
@@ -141,15 +139,6 @@ export default function NetflixHero({ movies, onMovieClick, onBookClick }: Netfl
             if (event.data === 0) {
               event.target.seekTo(0);
               event.target.playVideo();
-            }
-            // If UNSTARTED (-1) or CUED (5) after 2s, retry play - covers Low Power Mode
-            if (event.data === -1 || event.data === 5) {
-              setTimeout(() => {
-                try {
-                  event.target.mute();
-                  event.target.playVideo();
-                } catch {}
-              }, 2000);
             }
           },
         },
@@ -225,28 +214,6 @@ export default function NetflixHero({ movies, onMovieClick, onBookClick }: Netfl
       return () => clearTimeout(timer);
     }
   }, [isMobile, userInteracted]);
-
-  // Tap-to-play fallback for iOS Low Power Mode
-  useEffect(() => {
-    if (!isMobile) return;
-    
-    const handleTapToPlay = () => {
-      if (playerRef.current && playerRef.current.playVideo) {
-        try {
-          playerRef.current.mute();
-          playerRef.current.playVideo();
-        } catch {}
-      }
-    };
-    
-    document.addEventListener('touchstart', handleTapToPlay, { once: true });
-    document.addEventListener('click', handleTapToPlay, { once: true });
-    
-    return () => {
-      document.removeEventListener('touchstart', handleTapToPlay);
-      document.removeEventListener('click', handleTapToPlay);
-    };
-  }, [isMobile]);
 
   // Auto-advance slides every 25 seconds
   const startAutoAdvance = useCallback(() => {
