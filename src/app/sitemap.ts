@@ -337,6 +337,25 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       lastModified: new Date(),
       changeFrequency: 'yearly',
       priority: 0.3,
+    },
+    // Marketing Studio (high priority commercial page)
+    {
+      url: `${BASE_URL}/marketing`,
+      lastModified: new Date(),
+      changeFrequency: 'weekly',
+      priority: 0.9,
+    },
+    {
+      url: `${BASE_URL}/marketing/en`,
+      lastModified: new Date(),
+      changeFrequency: 'weekly',
+      priority: 0.9,
+    },
+    {
+      url: `${BASE_URL}/marketing/ar`,
+      lastModified: new Date(),
+      changeFrequency: 'weekly',
+      priority: 0.9,
     }
   ];
 
