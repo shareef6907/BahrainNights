@@ -1015,7 +1015,7 @@ export default function HomePageClient({ initialMovies, initialStats, initialTod
             {[
               { title: t.footer.events, links: [{ name: t.footer.todaysEvents, href: '/events?filter=today' }, { name: t.footer.thisWeekend, href: '/events?filter=weekend' }, { name: t.footer.concerts, href: '/events?category=concerts' }, { name: t.footer.fullCalendar, href: '/events/calendar' }] },
               { title: t.footer.dining, links: [{ name: t.footer.restaurants, href: '/places?category=restaurant' }, { name: t.footer.cafes, href: '/places?category=cafe' }, { name: t.footer.nightlife, href: '/places?category=nightclub' }, { name: t.footer.viewAll, href: '/places' }] },
-              { title: 'Explore', links: [{ name: 'Blog & Guides', href: '/blogs' }, { name: 'Regional Events', href: '/regional' }, { name: '🇧🇭 Bahrain', href: '/regional/places-to-go/bahrain' }, { name: '🇦🇪 UAE', href: '/regional/places-to-go/uae' }, { name: '🇸🇦 Saudi Arabia', href: '/regional/places-to-go/saudi-arabia' }] },
+              { title: 'Explore', links: [{ name: 'Blog & Guides', href: '/blogs' }, { name: 'Regional Events', href: '/regional' }, { name: '🇧🇭 Bahrain', href: '/regional/places-to-go/bahrain' }, { name: '🇦🇪 UAE', href: '/regional/places-to-go/uae' }, { name: '🇸🇦 Saudi Arabia', href: '/regional/places-to-go/saudi-arabia' }, { name: 'Premiera Live 🇸🇦', href: 'https://www.premieralive.com', external: true }] },
               { title: t.footer.forBusinesses, links: [{ name: t.footer.registerYourVenue, href: '/register-venue' }, { name: t.footer.venueLogin, href: '/venue-portal/login' }, { name: t.footer.listYourEvent, href: '/list-event' }, { name: t.footer.advertise, href: '/advertise' }, { name: t.footer.contact, href: '/contact' }] }
             ].map(section => (
               <div key={section.title}>
@@ -1023,7 +1023,11 @@ export default function HomePageClient({ initialMovies, initialStats, initialTod
                 <ul className="space-y-3 text-gray-400">
                   {section.links.map(link => (
                     <li key={link.name} className="hover:text-white hover:translate-x-1 transition-all duration-200">
-                      <Link href={link.href}>{link.name}</Link>
+                      {link.external ? (
+                        <a href={link.href} target="_blank" rel="noopener noreferrer">{link.name}</a>
+                      ) : (
+                        <Link href={link.href}>{link.name}</Link>
+                      )}
                     </li>
                   ))}
                 </ul>

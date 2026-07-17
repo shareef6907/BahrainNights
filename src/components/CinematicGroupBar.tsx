@@ -4,7 +4,6 @@ import Link from 'next/link';
 
 const cinematicGroupLinks = [
   { href: 'https://cinematicwebworks.com', label: '🌐 Web Development', external: true },
-  { href: 'https://www.premieralive.com', label: '🎥 Premiera Live — Film, Web & Marketing (Saudi Arabia)', external: true },
   { href: 'https://filmproductionbahrain.com', label: '🎬 Film Production', external: true },
   { href: 'https://eventsbahrain.com', label: '🎪 Events & Equipment', external: true },
   { href: 'https://studentphotos.com', label: '📸 School Photography', external: true },
