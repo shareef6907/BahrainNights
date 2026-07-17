@@ -4,6 +4,7 @@ import Link from 'next/link';
 
 const cinematicGroupLinks = [
   { href: 'https://cinematicwebworks.com', label: '🌐 Web Development', external: true },
+  { href: 'https://www.premieralive.com', label: '🎥 Premiera Live — Film, Web & Marketing (Saudi Arabia)', external: true },
   { href: 'https://filmproductionbahrain.com', label: '🎬 Film Production', external: true },
   { href: 'https://eventsbahrain.com', label: '🎪 Events & Equipment', external: true },
   { href: 'https://studentphotos.com', label: '📸 School Photography', external: true },
@@ -35,7 +36,7 @@ export default function CinematicGroupBar({ context }: CinematicGroupBarProps) {
             <a 
               href="https://cinematicwebworks.com" 
               target="_blank" 
-              rel="noopener noreferrer"
+              rel="noopener"
               className="text-amber-500 hover:underline"
             >
               CinematicWebWorks.com
@@ -45,7 +46,7 @@ export default function CinematicGroupBar({ context }: CinematicGroupBarProps) {
             <a 
               href="https://filmproductionbahrain.com" 
               target="_blank" 
-              rel="noopener noreferrer"
+              rel="noopener"
               className="text-amber-500 hover:underline"
             >
               FilmProductionBahrain.com
@@ -59,7 +60,7 @@ export default function CinematicGroupBar({ context }: CinematicGroupBarProps) {
             <a 
               href="https://eventsbahrain.com" 
               target="_blank" 
-              rel="noopener noreferrer"
+              rel="noopener"
               className="text-amber-500 hover:underline"
             >
               EventsBahrain.com
@@ -69,7 +70,7 @@ export default function CinematicGroupBar({ context }: CinematicGroupBarProps) {
             <a 
               href="https://filmproductionbahrain.com" 
               target="_blank" 
-              rel="noopener noreferrer"
+              rel="noopener"
               className="text-amber-500 hover:underline"
             >
               FilmProductionBahrain.com
@@ -85,7 +86,7 @@ export default function CinematicGroupBar({ context }: CinematicGroupBarProps) {
                 key={link.href}
                 href={link.href}
                 target="_blank"
-                rel="noopener noreferrer"
+                rel="noopener"
                 className="text-gray-500 hover:text-amber-500 transition-colors duration-300"
               >
                 {link.label}
