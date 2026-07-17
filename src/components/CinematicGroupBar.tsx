@@ -36,7 +36,7 @@ export default function CinematicGroupBar({ context }: CinematicGroupBarProps) {
             <a 
               href="https://cinematicwebworks.com" 
               target="_blank" 
-              rel="noopener"
+              rel="noopener noreferrer"
               className="text-amber-500 hover:underline"
             >
               CinematicWebWorks.com
@@ -46,7 +46,7 @@ export default function CinematicGroupBar({ context }: CinematicGroupBarProps) {
             <a 
               href="https://filmproductionbahrain.com" 
               target="_blank" 
-              rel="noopener"
+              rel="noopener noreferrer"
               className="text-amber-500 hover:underline"
             >
               FilmProductionBahrain.com
@@ -60,7 +60,7 @@ export default function CinematicGroupBar({ context }: CinematicGroupBarProps) {
             <a 
               href="https://eventsbahrain.com" 
               target="_blank" 
-              rel="noopener"
+              rel="noopener noreferrer"
               className="text-amber-500 hover:underline"
             >
               EventsBahrain.com
@@ -70,7 +70,7 @@ export default function CinematicGroupBar({ context }: CinematicGroupBarProps) {
             <a 
               href="https://filmproductionbahrain.com" 
               target="_blank" 
-              rel="noopener"
+              rel="noopener noreferrer"
               className="text-amber-500 hover:underline"
             >
               FilmProductionBahrain.com
@@ -86,7 +86,7 @@ export default function CinematicGroupBar({ context }: CinematicGroupBarProps) {
                 key={link.href}
                 href={link.href}
                 target="_blank"
-                rel="noopener"
+                rel="noopener noreferrer"
                 className="text-gray-500 hover:text-amber-500 transition-colors duration-300"
               >
                 {link.label}
