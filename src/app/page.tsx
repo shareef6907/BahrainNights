@@ -1,9 +1,10 @@
 import { supabaseAdmin } from '@/lib/supabase';
 import HomePageClient, { HomepageMovie, TodayEvent } from '@/components/home/HomePageClient';
 
-// ISR: Regenerate page every 2 minutes for fresh data without hitting DB on every request
+// ISR: Regenerate page every hour for fresh data without hitting DB on every request
+// Events update hourly, venues/stats rarely change
 // This is the KEY performance optimization - cached HTML served instantly
-export const revalidate = 120;
+export const revalidate = 3600; // 1 hour
 
 // Category mapping for display
 const categoryDisplay: Record<string, { label: string; icon: string }> = {
