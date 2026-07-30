@@ -314,9 +314,9 @@ export async function getPresignedUploadUrl(
   contentType: string,
   expiresIn: number = 300 // 5 minutes default
 ): Promise<PresignedUrlResult> {
-  const uploadKey = `uploads/${folder}/${filename}`;
-  const processedFilename = filename.replace(/\.[^.]+$/, '.webp');
-  const processedKey = `processed/${folder}/${processedFilename}`;
+  // Lambda watermarking is disabled — upload directly to processed/ (same path for both)
+  const processedKey = `processed/${folder}/${filename}`;
+  const uploadKey = processedKey;
 
   const command = new PutObjectCommand({
     Bucket: BUCKET,
@@ -330,7 +330,7 @@ export async function getPresignedUploadUrl(
     uploadUrl,
     uploadKey,
     processedKey,
-    processedUrl: `${PUBLIC_URL}/${folder}/${processedFilename}`,
+    processedUrl: `${PUBLIC_URL}/${folder}/${filename}`,
   };
 }
 
