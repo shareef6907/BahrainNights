@@ -88,7 +88,7 @@ export default function RegionalTrailerHero({ movies: propMovies, onMovieClick, 
   const current = movies[currentIndex];
   const videoId = getYouTubeId(current?.trailer_key);
   const backdropUrl = current?.backdrop_url || current?.poster_url;
-  const genreDisplay = current?.genre?.slice(0, 3).join(' • ');
+  const genreDisplay = current?.genre?.slice(0, 3).join(' • ') ?? '';
 
   const origin = typeof window !== 'undefined' ? window.location.origin : '';
   const embedSrc = videoId
@@ -213,12 +213,6 @@ export default function RegionalTrailerHero({ movies: propMovies, onMovieClick, 
     }
     setIsMuted(!isMuted);
   };
-
-  if (!movies.length) {
-    return <div className="h-[70vh] md:h-[85vh] bg-gray-900 flex items-center justify-center">
-      <div className="w-16 h-16 border-4 border-yellow-500 border-t-transparent rounded-full animate-spin" />
-    </div>;
-  }
 
   const handleMobilePlay = () => {
     if (videoId) window.open(`https://www.youtube.com/watch?v=${videoId}`, '_blank');
