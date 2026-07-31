@@ -45,6 +45,7 @@ export default function RegionalTrailerHero({ movies: propMovies, onMovieClick, 
   const [iframeLoaded, setIframeLoaded] = useState(false);
   const [apiScriptLoaded, setApiScriptLoaded] = useState(false);
   const [playerBound, setPlayerBound] = useState(false);
+  const [userInteracted, setUserInteracted] = useState(false);
   const [lastState, setLastState] = useState<string>('none');
   const [lastError, setLastError] = useState<string>('none');
   const [confirmedPlaying, setConfirmedPlaying] = useState(false);
@@ -238,12 +239,32 @@ export default function RegionalTrailerHero({ movies: propMovies, onMovieClick, 
     }
   };
 
-  // Sound on first interaction
+  // Auto-unmute on desktop ~2s after player is bound.
+  // playerBound in deps: effect fires exactly once when bindApi() succeeds.
+  // !userInteracted guard: effect fires at most once; a manual mute is never overridden
+  // on slide change because userInteracted stays true across remounts.
+  // If binding never succeeds: no-op, desktop stays muted, toggleMute still works.
+  useEffect(() => {
+    if (!isTouchDeviceRef.current && !userInteracted && playerRef.current) {
+      const timer = setTimeout(() => {
+        if (playerRef.current) {
+          try { playerRef.current.unMute(); playerRef.current.setVolume(50); setIsMuted(false); } catch {}
+        }
+        setUserInteracted(true);
+      }, 2000);
+      return () => clearTimeout(timer);
+    }
+  }, [playerBound, userInteracted]);
+
+  // Sound on first interaction — fallback for edge cases.
+  // playerBound in deps: listener re-registers after binding so playerRef.current
+  // is guaranteed non-null on first click. { once: true } removes it after first use.
   useEffect(() => {
     const enableSound = () => {
       if (playerRef.current && isMuted) {
         try { playerRef.current.unMute(); playerRef.current.setVolume(50); } catch {}
         setIsMuted(false);
+        setUserInteracted(true);
       }
     };
     document.addEventListener('click', enableSound, { once: true, passive: true });
@@ -252,7 +273,7 @@ export default function RegionalTrailerHero({ movies: propMovies, onMovieClick, 
       document.removeEventListener('click', enableSound);
       document.removeEventListener('touchstart', enableSound);
     };
-  }, [isMuted]);
+  }, [playerBound]);
 
   const stateLabels: Record<string, string> = { '-1': 'unstarted', '0': 'ended', '1': 'playing', '2': 'paused', '3': 'buffering', '5': 'cued' };
   const elapsed = (ts: number | null) => ts === null ? '—' : `${Date.now() - mountTimestamp}ms`;

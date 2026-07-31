@@ -183,18 +183,21 @@ export default function NetflixHero({ movies, onMovieClick, onBookClick }: Netfl
     }
   }, [currentIndex]);
 
-  // Auto-unmute on desktop after user interaction
+  // Auto-unmute on desktop ~2s after player is bound.
+  // playerBound in deps: effect fires exactly once when bindApi() succeeds.
+  // Gate !isTouchDeviceRef.current ensures phones/tablets/touchscreen laptops are untouched.
+  // If binding never succeeds: no-op, desktop stays muted, toggleMute still works.
   useEffect(() => {
     if (!isMobile && !isTouchDeviceRef.current && !userInteracted && playerRef.current) {
       const timer = setTimeout(() => {
         if (playerRef.current) {
-          try { playerRef.current.unMute(); setIsMuted(false); } catch {}
+          try { playerRef.current.unMute(); playerRef.current.setVolume(50); setIsMuted(false); } catch {}
         }
         setUserInteracted(true);
       }, 2000);
       return () => clearTimeout(timer);
     }
-  }, [isMobile, userInteracted]);
+  }, [isMobile, userInteracted, playerBound]);
 
   // Auto-advance every 25 seconds
   const startAutoAdvance = useCallback(() => {
@@ -260,7 +263,9 @@ export default function NetflixHero({ movies, onMovieClick, onBookClick }: Netfl
     }
   };
 
-  // Sound on first interaction — any tap anywhere enables sound
+  // Sound on first interaction — fallback for edge cases.
+  // playerBound in deps: listener re-registers after binding so playerRef.current
+  // is guaranteed non-null on first click. { once: true } removes it after first use.
   useEffect(() => {
     const enableSound = () => {
       if (playerRef.current && isMuted) {
@@ -275,7 +280,7 @@ export default function NetflixHero({ movies, onMovieClick, onBookClick }: Netfl
       document.removeEventListener('click', enableSound);
       document.removeEventListener('touchstart', enableSound);
     };
-  }, [isMuted]);
+  }, [playerBound]);
 
   const stateLabels: Record<string, string> = { '-1': 'unstarted', '0': 'ended', '1': 'playing', '2': 'paused', '3': 'buffering', '5': 'cued' };
   const elapsed = (ts: number | null) => ts === null ? '—' : `${Date.now() - mountTimestamp}ms`;
