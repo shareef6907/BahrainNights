@@ -64,6 +64,7 @@ interface RegisterData {
   password: string;
   website?: string | null;
   instagram?: string | null;
+  whatsapp?: string | null;
   youtubeUrl?: string | null;
   instagramReelUrl?: string | null;
   description?: string | null;
@@ -92,6 +93,7 @@ export async function POST(request: NextRequest) {
       password,
       website,
       instagram,
+      whatsapp,
       youtubeUrl,
       instagramReelUrl,
       description,
@@ -253,6 +255,7 @@ export async function POST(request: NextRequest) {
       password_hash: passwordHash, // Store hashed password for venue portal login
       website: website || null,
       instagram: instagram || null,
+      whatsapp: whatsapp || null,
       youtube_url: youtubeUrl || null,
       featured_reel_url: instagramReelUrl || null,
       logo_url: logoUrl,
