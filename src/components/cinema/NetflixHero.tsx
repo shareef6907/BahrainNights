@@ -15,22 +15,22 @@ interface NetflixHeroProps {
 // Extract YouTube video ID from various URL formats
 function getYouTubeId(url: string | undefined): string | null {
   if (!url) return null;
-  
+
   // Handle direct video IDs (no URL)
   if (/^[a-zA-Z0-9_-]{11}$/.test(url)) {
     return url;
   }
-  
+
   const patterns = [
     /(?:youtube\.com\/watch\?v=|youtu\.be\/|youtube\.com\/embed\/)([a-zA-Z0-9_-]{11})/,
     /youtube\.com\/v\/([a-zA-Z0-9_-]{11})/,
   ];
-  
+
   for (const pattern of patterns) {
     const match = url.match(pattern);
     if (match) return match[1];
   }
-  
+
   return null;
 }
 
@@ -46,48 +46,59 @@ export default function NetflixHero({ movies, onMovieClick, onBookClick }: Netfl
   const playerRef = useRef<any>(null);
   const playerContainerRef = useRef<HTMLDivElement>(null);
   const initializedRef = useRef(false);
+  const [showPoster, setShowPoster] = useState(true);
+  const [isTouchDevice, setIsTouchDevice] = useState(false);
+  const isTouchDeviceRef = useRef(false);
+  const lastPosterIndexRef = useRef<number>(0);
 
-  // Detect mobile
+  // Detect mobile and touch capability
   useEffect(() => {
     const checkMobile = () => {
-      const mobile = window.innerWidth < 768 || 'ontouchstart' in window;
+      const mobile = window.innerWidth < 768;
       setIsMobile(mobile);
-      isMobileRef.current = mobile; // Keep ref in sync
+      isMobileRef.current = mobile;
+      const touch = typeof navigator !== 'undefined' && navigator.maxTouchPoints > 0;
+      setIsTouchDevice(touch);
+      isTouchDeviceRef.current = touch;
     };
     checkMobile();
     window.addEventListener('resize', checkMobile);
     return () => window.removeEventListener('resize', checkMobile);
   }, []);
 
-  // Load YouTube IFrame Player API (desktop only - mobile uses poster)
+  // Load YouTube IFrame Player API — all devices.
+  // Runs once on mount ([] dep). On mobile the poster paints first (LCP);
+  // player creation is deferred 100ms in the mount effect.
   useEffect(() => {
-    // Skip on mobile - we use poster image instead of YouTube iframe
-    // Use ref for current value at execution time
-    if (isMobileRef.current) return;
-    
-    if (typeof window !== 'undefined') {
-      // If API already loaded, initialize directly
-      if (window.YT && window.YT.Player) {
-        setYtApiReady(true);
-        return;
-      }
-      
-      // Set callback BEFORE loading script
+    if (typeof window === 'undefined') return;
+
+    if (window.YT && window.YT.Player) {
+      setYtApiReady(true);
+      // Fall through — NOT an early return. Cleanup below must register.
+    } else {
       (window as any).onYouTubeIframeAPIReady = () => {
         setYtApiReady(true);
       };
-      
       const tag = document.createElement('script');
       tag.src = 'https://www.youtube.com/iframe_api';
       const firstScriptTag = document.getElementsByTagName('script')[0];
       firstScriptTag.parentNode?.insertBefore(tag, firstScriptTag);
     }
-  }, [isMobile]);
+
+    // Registered ONCE, reached on every code path including the already-loaded branch.
+    return () => {
+      if (playerRef.current) {
+        try { playerRef.current.destroy(); } catch {}
+        playerRef.current = null;
+      }
+      initializedRef.current = false;
+    };
+  }, []);
 
   // Create YouTube player
   const createPlayer = useCallback((videoId: string) => {
     if (!window.YT || !playerContainerRef.current || !ytApiReady) return;
-    
+
     // Destroy existing player
     if (playerRef.current) {
       try {
@@ -123,7 +134,12 @@ export default function NetflixHero({ movies, onMovieClick, onBookClick }: Netfl
           onReady: (event: { target: any }) => {
             console.log('YT Player ready, state:', event.target.getPlayerState());
             event.target.playVideo();
-            // Try to unmute after playback starts (works if user has interacted with page before)
+            // Fade poster on non-touch devices once player is ready — desktop iframe loads reliably.
+            // On touch devices (phone, iPad): poster fades only on PLAYING to preserve the guarantee.
+            if (!isTouchDeviceRef.current) {
+              setShowPoster(false);
+            }
+            // Try to unmute after playback starts
             setTimeout(() => {
               try {
                 event.target.unMute();
@@ -148,10 +164,16 @@ export default function NetflixHero({ movies, onMovieClick, onBookClick }: Netfl
               event.target.seekTo(0);
               event.target.playVideo();
             }
+            // Fade poster on PLAYING (1) — all devices.
+            // On touch devices: this is the only path that hides the poster.
+            // If video never plays, poster stays (no timer).
+            if (event.data === 1) {
+              setShowPoster(false);
+            }
           },
         },
       } as any);
-      
+
       playerRef.current = player;
       initializedRef.current = true;
     } catch (e) {
@@ -159,17 +181,21 @@ export default function NetflixHero({ movies, onMovieClick, onBookClick }: Netfl
     }
   }, [ytApiReady]);
 
-  // Initialize player on mount (with delay for DOM to be ready)
+  // Initialize player on mount
   useEffect(() => {
     if (!movies || movies.length === 0 || !ytApiReady) return;
-    
+
     const videoId = getYouTubeId(movies[0]?.trailerUrl);
-    
-    if (videoId && !playerRef.current) {
-      // Small delay to ensure DOM is ready and visible
+
+    if (videoId && !initializedRef.current && !playerRef.current) {
+      // Defer on mobile — poster must paint first (LCP). Desktop creates immediately.
+      const delay = isMobileRef.current ? 100 : 0;
       const timer = setTimeout(() => {
-        createPlayer(videoId);
-      }, 500);
+        if (!initializedRef.current && !playerRef.current) {
+          createPlayer(videoId);
+          initializedRef.current = true;
+        }
+      }, delay);
       return () => clearTimeout(timer);
     }
   }, [ytApiReady, createPlayer]);
@@ -177,37 +203,50 @@ export default function NetflixHero({ movies, onMovieClick, onBookClick }: Netfl
   // When currentIndex changes, load new video
   useEffect(() => {
     if (!movies || movies.length === 0 || !ytApiReady) return;
-    
+
     const currentMovie = movies[currentIndex];
     const videoId = getYouTubeId(currentMovie?.trailerUrl);
-    
-    if (videoId) {
-      if (playerRef.current && playerRef.current.loadVideoById) {
-        // Video already exists - load new video (start muted for mobile autoplay)
-        playerRef.current.loadVideoById(videoId);
-        playerRef.current.mute(); // Start muted
-        playerRef.current.playVideo();
-        playerRef.current.seekTo(0);
-        // Try to unmute after playback starts
-        setTimeout(() => {
-          try {
-            playerRef.current?.unMute();
-            playerRef.current?.setVolume(50);
-            setIsMuted(false);
-          } catch (e) {
-            setIsMuted(true);
-          }
-        }, 1000);
-      } else if (!initializedRef.current) {
-        // No player yet - create new one
-        createPlayer(videoId);
-      }
+
+    if (!videoId) return;
+
+    // Only reset poster if the slide actually changed, not on parent re-render
+    if (currentIndex !== lastPosterIndexRef.current) {
+      lastPosterIndexRef.current = currentIndex;
+      setShowPoster(true);
+    }
+
+    if (playerRef.current && playerRef.current.loadVideoById) {
+      // Video already exists — load new video (start muted for mobile autoplay)
+      playerRef.current.loadVideoById(videoId);
+      playerRef.current.mute();
+      playerRef.current.playVideo();
+      playerRef.current.seekTo(0);
+      // Try to unmute after playback starts
+      setTimeout(() => {
+        try {
+          playerRef.current?.unMute();
+          playerRef.current?.setVolume(50);
+          setIsMuted(false);
+        } catch (e) {
+          setIsMuted(true);
+        }
+      }, 1000);
+    } else if (!initializedRef.current) {
+      // No player yet — create new one
+      const delay = isMobileRef.current ? 100 : 0;
+      const timer = setTimeout(() => {
+        if (!initializedRef.current && !playerRef.current) {
+          createPlayer(videoId);
+          initializedRef.current = true;
+        }
+      }, delay);
+      return () => clearTimeout(timer);
     }
   }, [movies, currentIndex, ytApiReady, createPlayer]);
 
   // Auto-unmute on desktop after user interaction
   useEffect(() => {
-    if (!isMobile && !userInteracted && playerRef.current) {
+    if (!isMobile && !isTouchDeviceRef.current && !userInteracted && playerRef.current) {
       const timer = setTimeout(() => {
         if (playerRef.current) {
           try {
@@ -277,7 +316,7 @@ export default function NetflixHero({ movies, onMovieClick, onBookClick }: Netfl
 
   if (!movies || movies.length === 0) {
     return (
-      <div 
+      <div
         className="relative flex items-center justify-center bg-gradient-to-b from-gray-900 to-black"
         style={{ width: '100vw', height: '80vh', marginLeft: 'calc(-50vw + 50%)' }}
       >
@@ -292,47 +331,71 @@ export default function NetflixHero({ movies, onMovieClick, onBookClick }: Netfl
 
   const currentMovie = movies[currentIndex];
   const videoId = getYouTubeId(currentMovie?.trailerUrl);
-
-  // PLAN B: On mobile, show branded poster with play button instead of iframe
-  const showPosterInsteadOfPlayer = isMobile;
   const backdropUrl = currentMovie?.backdrop || currentMovie?.poster;
 
-  // Handle mobile play button tap - opens YouTube fullscreen
+  // Handle mobile play button tap — opens YouTube fullscreen
   const handleMobilePlay = useCallback(() => {
     if (videoId) {
       window.open(`https://www.youtube.com/watch?v=${videoId}`, '_blank');
     }
   }, [videoId]);
 
+  // Tap-to-unmute on mobile: tap the poster/video area to toggle mute.
+  // closest('button') prevents triggering when user taps any button
+  // (play button, Trailer, Book, Info, nav arrows, dots).
+  const handleHeroTap = (e: React.MouseEvent) => {
+    if ((e.target as HTMLElement).closest('button')) return;
+    if (isTouchDeviceRef.current && playerRef.current) {
+      try {
+        if (isMuted) {
+          playerRef.current.unMute();
+          playerRef.current.setVolume(50);
+        } else {
+          playerRef.current.mute();
+        }
+        setIsMuted(!isMuted);
+        setUserInteracted(true);
+      } catch {
+        // Player not ready — ignore
+      }
+    }
+  };
+
   return (
-    <div 
+    <div
       className="relative overflow-hidden bg-black"
-      style={{ 
-        width: '100vw', 
-        height: isMobile ? '70vh' : '85vh', 
-        minHeight: isMobile ? '400px' : '600px', 
-        marginLeft: 'calc(-50vw + 50%)' 
+      style={{
+        width: '100vw',
+        height: isMobile ? '70vh' : '85vh',
+        minHeight: isMobile ? '400px' : '600px',
+        marginLeft: 'calc(-50vw + 50%)'
       }}
       onMouseEnter={() => setShowControls(true)}
       onMouseLeave={() => setShowControls(false)}
+      onClick={handleHeroTap}
     >
-      {/* DESKTOP: YouTube Player */}
-      {!showPosterInsteadOfPlayer && (
-        <div 
-          id="youtube-player"
-          ref={playerContainerRef}
-          className="absolute inset-0 w-full h-full pointer-events-none"
-          style={{ 
-            transform: 'scale(1.15)',
-            transformOrigin: 'center center',
-          }}
-        />
-      )}
+      {/* YouTube iframe — always rendered, z-[1], underneath poster.
+          pointer-events-none: content overlay buttons must remain tappable.
+          On mobile: created after 100ms (deferred for LCP).
+          On desktop: created immediately. */}
+      <div
+        id="youtube-player"
+        ref={playerContainerRef}
+        className="absolute inset-0 w-full h-full pointer-events-none z-[1]"
+        style={{ transform: 'scale(1.15)', transformOrigin: 'center center' }}
+      />
 
-      {/* MOBILE: Branded poster with play button (Netflix mobile pattern) */}
-      {showPosterInsteadOfPlayer && backdropUrl && (
-        <div className="absolute inset-0 w-full h-full">
-          {/* next/image for LCP optimization */}
+      {/* Poster (Plan B) — always rendered, z-[2], above iframe.
+          Fades to opacity 0 on PLAYING (all devices) or onReady (non-touch only).
+          Shows if video never plays — no timer, poster stays.
+          pointer-events-none on container: does not intercept taps.
+          Yellow play button: rendered ONLY on touch devices AND only while poster is visible.
+          Desktop (non-touch): no play button ever. */}
+      {backdropUrl ? (
+        <div
+          className="absolute inset-0 w-full h-full pointer-events-none z-[2]"
+          style={{ opacity: showPoster ? 1 : 0, transition: 'opacity 300ms ease-out' }}
+        >
           <Image
             src={backdropUrl}
             alt={currentMovie?.title || 'Movie backdrop'}
@@ -341,36 +404,39 @@ export default function NetflixHero({ movies, onMovieClick, onBookClick }: Netfl
             className="object-cover"
             sizes="100vw"
           />
-          {/* Dark overlay for text readability */}
           <div className="absolute inset-0 bg-black/50 pointer-events-none" />
-          
-          {/* Play button - pointer-events: auto to ensure tappable */}
-          <button
-            onClick={handleMobilePlay}
-            className="absolute inset-0 flex items-center justify-center cursor-pointer"
-            style={{ pointerEvents: 'auto' }}
-            aria-label="Play trailer"
-          >
-            <div className="w-20 h-20 rounded-full bg-[#d4a853] hover:bg-[#c49a48] flex items-center justify-center transition-all transform hover:scale-110 shadow-2xl">
-              <Play className="w-10 h-10 text-black ml-1" fill="black" />
-            </div>
-          </button>
+          {/* Play button: only rendered on touch devices AND only while poster is visible.
+              Not in DOM after PLAYING — poster-area tap reaches handleHeroTap. */}
+          {isTouchDevice && showPoster && (
+            <button
+              onClick={handleMobilePlay}
+              className="absolute inset-0 flex items-center justify-center cursor-pointer"
+              style={{ pointerEvents: 'auto' }}
+              aria-label="Play trailer"
+            >
+              <div className="w-20 h-20 rounded-full bg-[#d4a853] hover:bg-[#c49a48] flex items-center justify-center transition-all transform hover:scale-110 shadow-2xl">
+                <Play className="w-10 h-10 text-black ml-1" fill="black" />
+              </div>
+            </button>
+          )}
         </div>
-      )}
-
-      {/* MOBILE: Loading/fallback state */}
-      {showPosterInsteadOfPlayer && !backdropUrl && (
-        <div className="absolute inset-0 bg-gray-900 flex items-center justify-center">
+      ) : (
+        /* No-backdrop fallback: same opacity treatment as the poster branch.
+           Fades on the same signals so it never sits above a playing video. */
+        <div
+          className="absolute inset-0 bg-gray-900 flex items-center justify-center z-[2]"
+          style={{ opacity: showPoster ? 1 : 0, transition: 'opacity 300ms ease-out' }}
+        >
           <Play className="w-16 h-16 text-gray-600" />
         </div>
       )}
 
-      {/* Gradient overlays for cinematic feel - pointer-events: none to prevent blocking */}
+      {/* Gradient overlays for cinematic feel — pointer-events: none */}
       <div className="absolute inset-0 bg-gradient-to-r from-black/90 via-black/40 to-transparent z-[5] pointer-events-none" />
       <div className="absolute inset-0 bg-gradient-to-t from-[#0a0a0a] via-transparent to-black/20 z-[5] pointer-events-none" />
       <div className="absolute bottom-0 left-0 right-0 h-40 bg-gradient-to-t from-[#0a0a0a] to-transparent z-[5] pointer-events-none" />
 
-      {/* Content Overlay - Netflix style, on top of video */}
+      {/* Content Overlay — Netflix style, on top of video */}
       <div className="absolute inset-0 flex items-end z-10">
         <div className="w-full max-w-7xl mx-auto px-4 md:px-6 pb-16 md:pb-32">
           <AnimatePresence mode="wait">
@@ -406,7 +472,7 @@ export default function NetflixHero({ movies, onMovieClick, onBookClick }: Netfl
                 )}
               </div>
 
-              {/* Synopsis - hidden on mobile for space */}
+              {/* Synopsis — hidden on mobile for space */}
               {currentMovie?.synopsis && (
                 <p className="hidden md:block text-gray-300 text-sm md:text-base line-clamp-2 md:line-clamp-3 mb-6 max-w-xl">
                   {currentMovie.synopsis}
@@ -450,7 +516,7 @@ export default function NetflixHero({ movies, onMovieClick, onBookClick }: Netfl
         </div>
       </div>
 
-      {/* Mute/Unmute Button - prominent on mobile with pulse animation */}
+      {/* Mute/Unmute Button */}
       <button
         onClick={toggleMute}
         className={`absolute ${isMobile ? 'bottom-28 right-4' : 'bottom-32 right-6'} p-3 md:p-3 bg-red-600 hover:bg-red-500 active:bg-red-700 rounded-full border-2 border-white text-white transition-all z-20 ${
@@ -494,8 +560,8 @@ export default function NetflixHero({ movies, onMovieClick, onBookClick }: Netfl
               onClick={() => goToSlide(index)}
               aria-label={`Go to trailer ${index + 1}`}
               className={`transition-all duration-300 rounded-full ${
-                index === currentIndex 
-                  ? 'w-8 h-2 bg-white' 
+                index === currentIndex
+                  ? 'w-8 h-2 bg-white'
                   : 'w-2 h-2 bg-white/50 hover:bg-white/80'
               }`}
             />
