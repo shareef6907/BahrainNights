@@ -51,6 +51,14 @@ export default function NetflixHero({ movies, onMovieClick, onBookClick }: Netfl
   const isTouchDeviceRef = useRef(false);
   const lastPosterIndexRef = useRef<number>(0);
 
+  // --- DEBUG STATE (remove in one commit) ---
+  const [playerCreated, setPlayerCreated] = useState(false);
+  const [onReadyFired, setOnReadyFired] = useState(false);
+  const [lastStateChange, setLastStateChange] = useState<string>('none');
+  const [lastError, setLastError] = useState<string>('none');
+  const [polledState, setPolledState] = useState<string>('n/a');
+  // --- END DEBUG STATE ---
+
   // Detect mobile and touch capability
   useEffect(() => {
     const checkMobile = () => {
@@ -133,6 +141,7 @@ export default function NetflixHero({ movies, onMovieClick, onBookClick }: Netfl
         events: {
           onReady: (event: { target: any }) => {
             console.log('YT Player ready, state:', event.target.getPlayerState());
+            setOnReadyFired(true);
             event.target.playVideo();
             // Fade poster on non-touch devices once player is ready — desktop iframe loads reliably.
             // On touch devices (phone, iPad): poster fades only on PLAYING to preserve the guarantee.
@@ -152,13 +161,18 @@ export default function NetflixHero({ movies, onMovieClick, onBookClick }: Netfl
             }, 1000);
           },
           onError: (event: { target: any; data: number }) => {
+            // DEBUG: YouTube error codes — https://developers.google.com/youtube/iframe_api_reference#onError
+            // Codes 2 and 5 are usually network/embed issues. Codes 101/150 mean embedding disabled.
+            setLastError(String(event.data));
+            console.log('YouTube onError, code:', event.data);
             // If autoplay with audio fails, retry muted
-            console.log('YouTube autoplay error, retrying muted');
             event.target.mute();
             event.target.setVolume(50);
             event.target.playVideo();
           },
           onStateChange: (event: { target: any; data: number }) => {
+            // DEBUG: track raw state change data
+            setLastStateChange(String(event.data));
             // Loop when video ends (YT.PlayerState.ENDED = 0)
             if (event.data === 0) {
               event.target.seekTo(0);
@@ -176,10 +190,22 @@ export default function NetflixHero({ movies, onMovieClick, onBookClick }: Netfl
 
       playerRef.current = player;
       initializedRef.current = true;
+      setPlayerCreated(true);
     } catch (e) {
       console.error('Failed to create YouTube player:', e);
     }
   }, [ytApiReady]);
+
+  // --- DEBUG: poll getPlayerState every 500ms (remove in one commit) ---
+  useEffect(() => {
+    const interval = setInterval(() => {
+      if (playerRef.current && typeof playerRef.current.getPlayerState === 'function') {
+        const state = playerRef.current.getPlayerState();
+        setPolledState(String(state));
+      }
+    }, 500);
+    return () => clearInterval(interval);
+  }, []);
 
   // Initialize player on mount
   useEffect(() => {
@@ -566,6 +592,41 @@ export default function NetflixHero({ movies, onMovieClick, onBookClick }: Netfl
               }`}
             />
           ))}
+        </div>
+      )}
+
+      {/* DEBUG OVERLAY — visible when ?debug=1 in URL (remove in one commit) */}
+      {typeof window !== 'undefined' && new URLSearchParams(window.location.search).get('debug') === '1' && (
+        <div
+          style={{
+            position: 'fixed',
+            top: 0,
+            left: 0,
+            zIndex: 9999,
+            background: 'rgba(0,0,0,0.92)',
+            color: '#00ff00',
+            fontFamily: 'monospace',
+            fontSize: '12px',
+            padding: '10px 14px',
+            lineHeight: '1.7',
+            minWidth: '280px',
+            border: '1px solid #00ff00',
+          }}
+        >
+          <div style={{ color: '#fff', fontWeight: 'bold', marginBottom: '6px', borderBottom: '1px solid #00ff00', paddingBottom: '4px' }}>
+            NETFLIX HERO DEBUG
+          </div>
+          <div>isMobile: <span style={{ color: isMobile ? '#ff6b6b' : '#aaa' }}>{String(isMobile)}</span></div>
+          <div>isTouchDevice: <span style={{ color: isTouchDevice ? '#ff6b6b' : '#aaa' }}>{String(isTouchDevice)}</span></div>
+          <div>ytApiReady: <span style={{ color: ytApiReady ? '#ff6b6b' : '#aaa' }}>{String(ytApiReady)}</span></div>
+          <div>playerCreated: <span style={{ color: playerCreated ? '#ff6b6b' : '#aaa' }}>{String(playerCreated)}</span></div>
+          <div>onReady fired: <span style={{ color: onReadyFired ? '#ff6b6b' : '#aaa' }}>{String(onReadyFired)}</span></div>
+          <div>lastStateChange: <span style={{ color: '#ff0' }}>{lastStateChange}</span></div>
+          <div>polledState: <span style={{ color: '#ff0' }}>{polledState}</span></div>
+          <div>lastError: <span style={{ color: lastError !== 'none' ? '#ff4444' : '#aaa' }}>{lastError}</span></div>
+          <div style={{ marginTop: '6px', borderTop: '1px solid #00ff00', paddingTop: '4px', color: '#888', fontSize: '10px' }}>
+            state: -1=unstarted, 0=ended, 1=playing, 2=paused, 3=buffering, 5=cued
+          </div>
         </div>
       )}
     </div>
