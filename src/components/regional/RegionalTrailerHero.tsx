@@ -41,23 +41,18 @@ export default function RegionalTrailerHero({ movies: propMovies, onMovieClick, 
   const isTouchDeviceRef = useRef(false);
   const lastIndexRef = useRef<number>(0);
 
-  // Debug state
+  // playerBound: triggers desktop auto-unmute when YouTube API binds.
+  // confirmedPlaying: hides the mobile Play button once PLAYING fires.
+  // iframeLoaded: drives poster fade and the 8s fallback timer.
   const [iframeLoaded, setIframeLoaded] = useState(false);
-  const [apiScriptLoaded, setApiScriptLoaded] = useState(false);
   const [playerBound, setPlayerBound] = useState(false);
   const [userInteracted, setUserInteracted] = useState(false);
-  const [lastState, setLastState] = useState<string>('none');
-  const [lastError, setLastError] = useState<string>('none');
   const [confirmedPlaying, setConfirmedPlaying] = useState(false);
-  const [iframeLoadedAt, setIframeLoadedAt] = useState<number | null>(null);
-  const [apiScriptLoadedAt, setApiScriptLoadedAt] = useState<number | null>(null);
-  const [playerBoundAt, setPlayerBoundAt] = useState<number | null>(null);
 
   // Hydration guard: true only after client mount. Keeps first client render
   // identical to SSR output so no hydration mismatch occurs.
   const [mounted, setMounted] = useState(false);
   useEffect(() => { setMounted(true); }, []);
-  const mountTimestamp = useRef<number>(Date.now()).current;
 
   // 8s fallback timer
   const iframeLoadTimerRef = useRef<NodeJS.Timeout | null>(null);
@@ -111,7 +106,6 @@ export default function RegionalTrailerHero({ movies: propMovies, onMovieClick, 
       iframeLoadTimerRef.current = null;
     }
     setIframeLoaded(true);
-    setIframeLoadedAt(Date.now());
     setShowPoster(false);
 
     // Destroy any previous YT player before rebinding
@@ -120,7 +114,6 @@ export default function RegionalTrailerHero({ movies: propMovies, onMovieClick, 
       playerRef.current = null;
     }
     setPlayerBound(false);
-    setLastState('none');
     setConfirmedPlaying(false);
 
     // Bind YouTube JS API to the existing iframe (does not recreate it)
@@ -130,18 +123,15 @@ export default function RegionalTrailerHero({ movies: propMovies, onMovieClick, 
         const player = new window.YT.Player(iframeRef.current, {
           events: {
             onStateChange: (e: any) => {
-              setLastState(String(e.data));
               if (e.data === 1) setConfirmedPlaying(true);
             },
             onError: (e: any) => {
-              setLastError(String(e.data));
               console.log('YouTube onError, code:', e.data);
             },
           },
         });
         playerRef.current = player;
         setPlayerBound(true);
-        setPlayerBoundAt(Date.now());
       } catch (err) {
         console.warn('YT.Player bind failed:', err);
       }
@@ -151,19 +141,12 @@ export default function RegionalTrailerHero({ movies: propMovies, onMovieClick, 
       bindApi();
     } else {
       (window as any).onYouTubeIframeAPIReady = () => {
-        setApiScriptLoaded(true);
-        setApiScriptLoadedAt(Date.now());
         bindApi();
       };
       if (!document.querySelector('script[src*="youtube.com/iframe_api"]')) {
         const tag = document.createElement('script');
         tag.src = 'https://www.youtube.com/iframe_api';
         document.head.appendChild(tag);
-        setApiScriptLoaded(true);
-        setApiScriptLoadedAt(Date.now());
-      } else {
-        setApiScriptLoaded(true);
-        setApiScriptLoadedAt(Date.now());
       }
     }
   }, []);
@@ -189,10 +172,7 @@ export default function RegionalTrailerHero({ movies: propMovies, onMovieClick, 
       lastIndexRef.current = currentIndex;
       setShowPoster(true);
       setIframeLoaded(false);
-      setIframeLoadedAt(null);
       setPlayerBound(false);
-      setPlayerBoundAt(null);
-      setLastState('none');
       setConfirmedPlaying(false);
     }
   }, [currentIndex]);
@@ -274,9 +254,6 @@ export default function RegionalTrailerHero({ movies: propMovies, onMovieClick, 
       document.removeEventListener('touchstart', enableSound);
     };
   }, [playerBound]);
-
-  const stateLabels: Record<string, string> = { '-1': 'unstarted', '0': 'ended', '1': 'playing', '2': 'paused', '3': 'buffering', '5': 'cued' };
-  const elapsed = (ts: number | null) => ts === null ? '—' : `${Date.now() - mountTimestamp}ms`;
 
   return (
     <div
@@ -365,35 +342,6 @@ export default function RegionalTrailerHero({ movies: propMovies, onMovieClick, 
         </>
       )}
 
-      {/* DEBUG OVERLAY — ?debug=1 (remove in one commit) */}
-      {mounted && new URLSearchParams(window.location.search).get('debug') === '1' && (
-        <div style={{
-          position: 'fixed', top: 0, left: 0, zIndex: 9999,
-          background: 'rgba(0,0,0,0.92)', color: '#00ff00',
-          fontFamily: 'monospace', fontSize: '12px',
-          padding: '10px 14px', lineHeight: '1.8', minWidth: '320px',
-          border: '1px solid #00ff00',
-        }}>
-          <div style={{ color: '#fff', fontWeight: 'bold', marginBottom: '6px', borderBottom: '1px solid #00ff00', paddingBottom: '4px' }}>
-            REGIONAL HERO DEBUG
-          </div>
-          <div>videoId: <span style={{ color: '#ff0' }}>{videoId ?? 'none'}</span></div>
-          <div>isMobile: <span style={{ color: isMobile ? '#ff6b6b' : '#aaa' }}>{String(isMobile)}</span></div>
-          <div>isTouchDevice: <span style={{ color: isTouchDevice ? '#ff6b6b' : '#aaa' }}>{String(isTouchDevice)}</span></div>
-          <div>iframeRendered: <span style={{ color: embedSrc ? '#ff6b6b' : '#aaa' }}>{String(!!embedSrc)}</span></div>
-          <div>onLoad fired: <span style={{ color: iframeLoaded ? '#ff6b6b' : '#aaa' }}>{String(iframeLoaded)}</span> {iframeLoaded ? `+${elapsed(iframeLoadedAt)}` : ''}</div>
-          <div>apiScriptLoaded: <span style={{ color: apiScriptLoaded ? '#ff6b6b' : '#aaa' }}>{String(apiScriptLoaded)}</span> {apiScriptLoaded ? `+${elapsed(apiScriptLoadedAt)}` : ''}</div>
-          <div>playerBound: <span style={{ color: playerBound ? '#ff6b6b' : '#aaa' }}>{String(playerBound)}</span> {playerBound ? `+${elapsed(playerBoundAt)}` : ''}</div>
-          <div>lastState: <span style={{ color: '#ff0' }}>{stateLabels[lastState] ?? lastState}</span></div>
-          <div>confirmedPlaying: <span style={{ color: confirmedPlaying ? '#ff6b6b' : '#aaa' }}>{String(confirmedPlaying)}</span></div>
-          <div>showPoster: <span style={{ color: showPoster ? '#ff6b6b' : '#aaa' }}>{String(showPoster)}</span></div>
-          <div>lastError: <span style={{ color: lastError !== 'none' ? '#ff4444' : '#aaa' }}>{lastError}</span></div>
-          <div style={{ marginTop: '6px', borderTop: '1px solid #00ff00', paddingTop: '4px', color: '#888', fontSize: '10px' }}>
-            state: -1=unstarted, 0=ended, 1=playing, 2=paused, 3=buffering, 5=cued<br />
-            elapsed = ms since mount
-          </div>
-        </div>
-      )}
     </div>
   );
 }
