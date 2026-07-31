@@ -51,6 +51,11 @@ export default function RegionalTrailerHero({ movies: propMovies, onMovieClick, 
   const [iframeLoadedAt, setIframeLoadedAt] = useState<number | null>(null);
   const [apiScriptLoadedAt, setApiScriptLoadedAt] = useState<number | null>(null);
   const [playerBoundAt, setPlayerBoundAt] = useState<number | null>(null);
+
+  // Hydration guard: true only after client mount. Keeps first client render
+  // identical to SSR output so no hydration mismatch occurs.
+  const [mounted, setMounted] = useState(false);
+  useEffect(() => { setMounted(true); }, []);
   const mountTimestamp = useRef<number>(Date.now()).current;
 
   // 8s fallback timer
@@ -90,8 +95,11 @@ export default function RegionalTrailerHero({ movies: propMovies, onMovieClick, 
   const backdropUrl = current?.backdrop_url || current?.poster_url;
   const genreDisplay = current?.genre?.slice(0, 3).join(' • ') ?? '';
 
-  const origin = typeof window !== 'undefined' ? window.location.origin : '';
-  const embedSrc = videoId
+  // origin and embedSrc are built from window.location — only available on the
+  // client. Server (and first client render before useEffect) use empty string
+  // so that SSR and hydration produce identical output (no mismatch).
+  const origin = mounted ? window.location.origin : '';
+  const embedSrc = mounted && videoId
     ? `https://www.youtube.com/embed/${videoId}?autoplay=1&mute=1&playsinline=1&loop=1&playlist=${videoId}&controls=0&modestbranding=1&rel=0&iv_load_policy=3&disablekb=1&fs=0&enablejsapi=1&origin=${encodeURIComponent(origin)}`
     : '';
 
@@ -337,7 +345,7 @@ export default function RegionalTrailerHero({ movies: propMovies, onMovieClick, 
       )}
 
       {/* DEBUG OVERLAY — ?debug=1 (remove in one commit) */}
-      {typeof window !== 'undefined' && new URLSearchParams(window.location.search).get('debug') === '1' && (
+      {mounted && new URLSearchParams(window.location.search).get('debug') === '1' && (
         <div style={{
           position: 'fixed', top: 0, left: 0, zIndex: 9999,
           background: 'rgba(0,0,0,0.92)', color: '#00ff00',
