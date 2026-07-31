@@ -31,33 +31,30 @@ export default function NetflixHero({ movies, onMovieClick, onBookClick }: Netfl
   const [isMuted, setIsMuted] = useState(true);
   const [userInteracted, setUserInteracted] = useState(false);
   const [showControls, setShowControls] = useState(false);
-  const [ytApiReady, setYtApiReady] = useState(false);
   const [isMobile, setIsMobile] = useState(false);
   const isMobileRef = useRef(false);
   const autoAdvanceRef = useRef<NodeJS.Timeout | null>(null);
   const playerRef = useRef<any>(null);
-  const playerContainerRef = useRef<HTMLDivElement>(null);
-  const initializedRef = useRef(false);
+  const iframeRef = useRef<HTMLIFrameElement>(null);
   const [showPoster, setShowPoster] = useState(true);
   const [isTouchDevice, setIsTouchDevice] = useState(false);
   const isTouchDeviceRef = useRef(false);
   const lastPosterIndexRef = useRef<number>(0);
-  // Keep track of the current videoId for the retry timer
-  const currentVideoIdRef = useRef<string | null>(null);
 
-  // --- DEBUG STATE (remove in one commit) ---
-  const [playerCreated, setPlayerCreated] = useState(false);
-  const [onReadyFired, setOnReadyFired] = useState(false);
-  const [lastStateChange, setLastStateChange] = useState<string>('none');
+  // Debug state
+  const [iframeLoaded, setIframeLoaded] = useState(false);
+  const [apiScriptLoaded, setApiScriptLoaded] = useState(false);
+  const [playerBound, setPlayerBound] = useState(false);
+  const [lastState, setLastState] = useState<string>('none');
   const [lastError, setLastError] = useState<string>('none');
-  const [polledState, setPolledState] = useState<string>('n/a');
-  const [mountTimestamp, setMountTimestamp] = useState<number>(Date.now());
-  const [ytApiReadyAt, setYtApiReadyAt] = useState<number | null>(null);
-  const [playerCreatedAt, setPlayerCreatedAt] = useState<number | null>(null);
-  const [onReadyAt, setOnReadyAt] = useState<number | null>(null);
-  const [firstStateAt, setFirstStateAt] = useState<number | null>(null);
-  const [playerRetryCount, setPlayerRetryCount] = useState<number>(0);
-  // --- END DEBUG STATE ---
+  const [confirmedPlaying, setConfirmedPlaying] = useState(false);
+  const [iframeLoadedAt, setIframeLoadedAt] = useState<number | null>(null);
+  const [apiScriptLoadedAt, setApiScriptLoadedAt] = useState<number | null>(null);
+  const [playerBoundAt, setPlayerBoundAt] = useState<number | null>(null);
+  const mountTimestamp = useRef<number>(Date.now()).current;
+
+  // Fallback timer: if iframe onLoad has not fired within 8s, leave poster up
+  const iframeLoadTimerRef = useRef<NodeJS.Timeout | null>(null);
 
   useEffect(() => {
     const checkMobile = () => {
@@ -73,185 +70,118 @@ export default function NetflixHero({ movies, onMovieClick, onBookClick }: Netfl
     return () => window.removeEventListener('resize', checkMobile);
   }, []);
 
-  // Load YouTube IFrame Player API — all devices, once
-  useEffect(() => {
-    if (typeof window === 'undefined') return;
+  const currentMovie = movies[currentIndex];
+  const videoId = getYouTubeId(currentMovie?.trailerUrl);
+  const backdropUrl = currentMovie?.backdrop || currentMovie?.poster;
+
+  const origin = typeof window !== 'undefined' ? window.location.origin : '';
+  const embedSrc = videoId
+    ? `https://www.youtube.com/embed/${videoId}?autoplay=1&mute=1&playsinline=1&loop=1&playlist=${videoId}&controls=0&modestbranding=1&rel=0&iv_load_policy=3&disablekb=1&fs=0&enablejsapi=1&origin=${encodeURIComponent(origin)}`
+    : '';
+
+  // --- iframe onLoad: reliable DOM event, does not depend on postMessage ---
+  const handleIframeLoad = useCallback(() => {
+    if (iframeLoadTimerRef.current) {
+      clearTimeout(iframeLoadTimerRef.current);
+      iframeLoadTimerRef.current = null;
+    }
+    setIframeLoaded(true);
+    setIframeLoadedAt(Date.now());
+    setShowPoster(false);
+
+    // Destroy any previous YT player before rebinding
+    if (playerRef.current) {
+      try { playerRef.current.destroy(); } catch {}
+      playerRef.current = null;
+    }
+    setPlayerBound(false);
+    setLastState('none');
+    setConfirmedPlaying(false);
+
+    // Bind YouTube JS API to the existing iframe (does not recreate it)
+    const bindApi = () => {
+      if (!iframeRef.current || playerRef.current) return;
+      try {
+        const player = new window.YT.Player(iframeRef.current, {
+          events: {
+            onStateChange: (e: any) => {
+              setLastState(String(e.data));
+              if (e.data === 1) setConfirmedPlaying(true);
+            },
+            onError: (e: any) => {
+              setLastError(String(e.data));
+              console.log('YouTube onError, code:', e.data);
+            },
+          },
+        });
+        playerRef.current = player;
+        setPlayerBound(true);
+        setPlayerBoundAt(Date.now());
+      } catch (err) {
+        console.warn('YT.Player bind failed:', err);
+      }
+    };
+
     if (window.YT && window.YT.Player) {
-      setYtApiReady(true);
+      bindApi();
     } else {
       (window as any).onYouTubeIframeAPIReady = () => {
-        setYtApiReady(true);
-        setYtApiReadyAt(Date.now());
+        setApiScriptLoaded(true);
+        setApiScriptLoadedAt(Date.now());
+        bindApi();
       };
-      const tag = document.createElement('script');
-      tag.src = 'https://www.youtube.com/iframe_api';
-      const firstScriptTag = document.getElementsByTagName('script')[0];
-      firstScriptTag.parentNode?.insertBefore(tag, firstScriptTag);
+      if (!document.querySelector('script[src*="youtube.com/iframe_api"]')) {
+        const tag = document.createElement('script');
+        tag.src = 'https://www.youtube.com/iframe_api';
+        document.head.appendChild(tag);
+        setApiScriptLoaded(true);
+        setApiScriptLoadedAt(Date.now());
+      } else {
+        setApiScriptLoaded(true);
+        setApiScriptLoadedAt(Date.now());
+      }
     }
+  }, []);
+
+  // Start 8s fallback timer when embedSrc becomes truthy
+  useEffect(() => {
+    if (!embedSrc) return;
+    if (iframeLoaded) return; // onLoad already fired
+    iframeLoadTimerRef.current = setTimeout(() => {
+      console.warn('iframe onLoad did not fire within 8s — poster remains');
+    }, 8000);
+    return () => {
+      if (iframeLoadTimerRef.current) {
+        clearTimeout(iframeLoadTimerRef.current);
+        iframeLoadTimerRef.current = null;
+      }
+    };
+  }, [embedSrc, iframeLoaded]);
+
+  // Reset state and destroy player when videoId changes (slide change)
+  useEffect(() => {
     return () => {
       if (playerRef.current) {
         try { playerRef.current.destroy(); } catch {}
         playerRef.current = null;
       }
-      initializedRef.current = false;
     };
-  }, []);
+  }, [videoId]);
 
-  // createPlayer — returns true only if player object was actually created
-  const createPlayer = useCallback((videoId: string): boolean => {
-    if (!window.YT || !playerContainerRef.current || !ytApiReady) return false;
-    if (playerRef.current) {
-      try { playerRef.current.destroy(); } catch {}
-    }
-    playerContainerRef.current.innerHTML = '';
-    try {
-      const player = new window.YT.Player(playerContainerRef.current.id, {
-        videoId,
-        playerVars: {
-          autoplay: 1,
-          mute: 1,
-          controls: 0,
-          showinfo: 0,
-          rel: 0,
-          loop: 1,
-          playsinline: 1,
-          modestbranding: 1,
-          iv_load_policy: 3,
-          disablekb: 1,
-          fs: 0,
-          origin: typeof window !== 'undefined' ? window.location.origin : '',
-        },
-        events: {
-          onReady: (event: { target: any }) => {
-            setOnReadyAt(Date.now());
-            setOnReadyFired(true);
-            event.target.playVideo();
-            if (!isTouchDeviceRef.current) setShowPoster(false);
-            setTimeout(() => {
-              try {
-                event.target.unMute();
-                event.target.setVolume(50);
-                setIsMuted(false);
-              } catch (e) {
-                setIsMuted(true);
-              }
-            }, 1000);
-          },
-          onError: (event: { target: any; data: number }) => {
-            setLastError(String(event.data));
-            console.log('YouTube onError, code:', event.data);
-            event.target.mute();
-            event.target.setVolume(50);
-            event.target.playVideo();
-          },
-          onStateChange: (event: { target: any; data: number }) => {
-            setLastStateChange(String(event.data));
-            if (firstStateAt === null) setFirstStateAt(Date.now());
-            if (event.data === 0) {
-              event.target.seekTo(0);
-              event.target.playVideo();
-            }
-            if (event.data === 1) setShowPoster(false);
-          },
-        },
-      } as any);
-      playerRef.current = player;
-      // Only set initializedRef AFTER playerRef is assigned
-      initializedRef.current = true;
-      setPlayerCreated(true);
-      setPlayerCreatedAt(Date.now());
-      return true;
-    } catch (e) {
-      console.error('Failed to create YouTube player:', e);
-      return false;
-    }
-  }, [ytApiReady]);
-
-  // ONE effect responsible for player creation — never creates on slide change
+  // Slide-change: only reset poster, nothing else
+  // key={videoId} in JSX handles the iframe remount and autoplay
   useEffect(() => {
-    if (!movies || movies.length === 0 || !ytApiReady) return;
-    const videoId = getYouTubeId(movies[0]?.trailerUrl);
-    if (!videoId) return;
-    if (playerRef.current || initializedRef.current) return;
-
-    currentVideoIdRef.current = videoId;
-    const success = createPlayer(videoId);
-    if (!success) {
-      // Player creation bailed — reset so this effect can retry when ytApiReady flips
-      initializedRef.current = false;
-      // Retry after short delay in case ytApiReady just flipped
-      const retryTimer = setTimeout(() => {
-        const vid = getYouTubeId(movies[0]?.trailerUrl);
-        if (vid && !playerRef.current && !initializedRef.current) {
-          const ok = createPlayer(vid);
-          if (ok) setPlayerRetryCount(c => c + 1);
-        }
-      }, 500);
-      return () => clearTimeout(retryTimer);
-    }
-  }, [ytApiReady, createPlayer, movies]);
-
-  // Retry: if PLAYING is not reached within 2s of player creation, retry playVideo up to 3 times
-  useEffect(() => {
-    if (!playerRef.current) return;
-    let retries = 0;
-    const maxRetries = 3;
-    const retryTimer = setInterval(() => {
-      if (!playerRef.current) { clearInterval(retryTimer); return; }
-      const state = playerRef.current.getPlayerState();
-      if (state === 1) { clearInterval(retryTimer); return; } // PLAYING
-      if (retries < maxRetries) {
-        retries++;
-        try { playerRef.current.playVideo(); } catch {}
-        console.log(`Retry ${retries}/${maxRetries}, state=${state}`);
-      } else {
-        clearInterval(retryTimer);
-        console.log('Max retries reached, giving up');
-      }
-    }, 2000);
-    return () => clearInterval(retryTimer);
-  }, [playerCreated]); // re-arm when player is (re)created
-
-  // Slide-change effect — ONLY calls loadVideoById, never creates player
-  useEffect(() => {
-    if (!movies || movies.length === 0 || !ytApiReady) return;
-    const currentMovie = movies[currentIndex];
-    const videoId = getYouTubeId(currentMovie?.trailerUrl);
-    if (!videoId) return;
-
-    // Only reset poster if the slide actually changed
     if (currentIndex !== lastPosterIndexRef.current) {
       lastPosterIndexRef.current = currentIndex;
       setShowPoster(true);
+      setIframeLoaded(false);
+      setIframeLoadedAt(null);
+      setPlayerBound(false);
+      setPlayerBoundAt(null);
+      setLastState('none');
+      setConfirmedPlaying(false);
     }
-
-    // Only load into existing player — never create one here
-    if (playerRef.current && playerRef.current.loadVideoById) {
-      playerRef.current.loadVideoById(videoId);
-      playerRef.current.mute();
-      playerRef.current.playVideo();
-      playerRef.current.seekTo(0);
-      setTimeout(() => {
-        try {
-          playerRef.current?.unMute();
-          playerRef.current?.setVolume(50);
-          setIsMuted(false);
-        } catch (e) {
-          setIsMuted(true);
-        }
-      }, 1000);
-    }
-  }, [movies, currentIndex, ytApiReady]);
-
-  // --- DEBUG: poll getPlayerState every 500ms (remove in one commit) ---
-  useEffect(() => {
-    const interval = setInterval(() => {
-      if (playerRef.current && typeof playerRef.current.getPlayerState === 'function') {
-        setPolledState(String(playerRef.current.getPlayerState()));
-      }
-    }, 500);
-    return () => clearInterval(interval);
-  }, []);
+  }, [currentIndex]);
 
   // Auto-unmute on desktop after user interaction
   useEffect(() => {
@@ -313,15 +243,11 @@ export default function NetflixHero({ movies, onMovieClick, onBookClick }: Netfl
     );
   }
 
-  const currentMovie = movies[currentIndex];
-  const videoId = getYouTubeId(currentMovie?.trailerUrl);
-  const backdropUrl = currentMovie?.backdrop || currentMovie?.poster;
-
   const handleMobilePlay = useCallback(() => {
     if (videoId) window.open(`https://www.youtube.com/watch?v=${videoId}`, '_blank');
   }, [videoId]);
 
-  // Tap-to-unmute on mobile
+  // Tap-to-toggle on mobile
   const handleHeroTap = (e: React.MouseEvent) => {
     if ((e.target as HTMLElement).closest('button')) return;
     if (isTouchDeviceRef.current && playerRef.current) {
@@ -334,7 +260,7 @@ export default function NetflixHero({ movies, onMovieClick, onBookClick }: Netfl
     }
   };
 
-  // SOUND ON FIRST INTERACTION: one-time listener for first tap anywhere on page
+  // Sound on first interaction — any tap anywhere enables sound
   useEffect(() => {
     const enableSound = () => {
       if (playerRef.current && isMuted) {
@@ -351,6 +277,9 @@ export default function NetflixHero({ movies, onMovieClick, onBookClick }: Netfl
     };
   }, [isMuted]);
 
+  const stateLabels: Record<string, string> = { '-1': 'unstarted', '0': 'ended', '1': 'playing', '2': 'paused', '3': 'buffering', '5': 'cued' };
+  const elapsed = (ts: number | null) => ts === null ? '—' : `${Date.now() - mountTimestamp}ms`;
+
   return (
     <div
       className="relative overflow-hidden bg-black"
@@ -364,13 +293,25 @@ export default function NetflixHero({ movies, onMovieClick, onBookClick }: Netfl
       onMouseLeave={() => setShowControls(false)}
       onClick={handleHeroTap}
     >
-      <div
-        id="youtube-player"
-        ref={playerContainerRef}
-        className="absolute inset-0 w-full h-full pointer-events-none z-[1]"
-        style={{ transform: 'scale(1.15)', transformOrigin: 'center center' }}
-      />
+      {/* Declarative YouTube iframe — z-[1], below poster.
+          key={videoId} causes React to remount on slide change — new video autoplays.
+          autoplay, mute, playsinline, loop params are in the URL. No script needed. */}
+      {embedSrc && (
+        <iframe
+          key={videoId}
+          ref={iframeRef}
+          src={embedSrc}
+          title="Trailer"
+          allow="autoplay; encrypted-media; picture-in-picture"
+          allowFullScreen
+          frameBorder="0"
+          onLoad={handleIframeLoad}
+          className="absolute inset-0 w-full h-full pointer-events-none z-[1]"
+          style={{ transform: 'scale(1.15)', transformOrigin: 'center center', border: 0 }}
+        />
+      )}
 
+      {/* Poster — z-[2], fades on iframe onLoad (not on PLAYING). */}
       {backdropUrl ? (
         <div
           className="absolute inset-0 w-full h-full pointer-events-none z-[2]"
@@ -378,19 +319,27 @@ export default function NetflixHero({ movies, onMovieClick, onBookClick }: Netfl
         >
           <Image src={backdropUrl} alt={currentMovie?.title || 'Movie backdrop'} fill priority className="object-cover" sizes="100vw" />
           <div className="absolute inset-0 bg-black/50 pointer-events-none" />
-          {isTouchDevice && showPoster && (
-            <button onClick={handleMobilePlay} className="absolute inset-0 flex items-center justify-center cursor-pointer" style={{ pointerEvents: 'auto' }} aria-label="Play trailer">
-              <div className="w-20 h-20 rounded-full bg-[#d4a853] hover:bg-[#c49a48] flex items-center justify-center transition-all transform hover:scale-110 shadow-2xl">
-                <Play className="w-10 h-10 text-black ml-1" fill="black" />
-              </div>
-            </button>
-          )}
         </div>
       ) : (
         <div className="absolute inset-0 bg-gray-900 flex items-center justify-center z-[2]"
           style={{ opacity: showPoster ? 1 : 0, transition: 'opacity 300ms ease-out' }}>
           <Play className="w-16 h-16 text-gray-600" />
         </div>
+      )}
+
+      {/* Small play button — touch devices only, bottom-right, above content.
+          Renders while confirmedPlaying === false.
+          Disappears within ~1-2s when PLAYING fires from the JS API.
+          If JS API never binds: button remains as the escape hatch. */}
+      {isTouchDevice && !confirmedPlaying && (
+        <button
+          onClick={handleMobilePlay}
+          className="absolute bottom-28 right-4 flex items-center gap-2 px-4 py-2 bg-[#d4a853] hover:bg-[#c49a48] text-black font-bold rounded-lg z-[25] shadow-xl"
+          aria-label="Play trailer"
+        >
+          <Play className="w-5 h-5 fill-current" />
+          <span className="text-sm">Play</span>
+        </button>
       )}
 
       <div className="absolute inset-0 bg-gradient-to-r from-black/90 via-black/40 to-transparent z-[5] pointer-events-none" />
@@ -492,37 +441,35 @@ export default function NetflixHero({ movies, onMovieClick, onBookClick }: Netfl
         </div>
       )}
 
-      {/* DEBUG OVERLAY — visible when ?debug=1 in URL (remove in one commit) */}
-      {typeof window !== 'undefined' && new URLSearchParams(window.location.search).get('debug') === '1' && (() => {
-        const elapsed = (n: number | null) => n === null ? '—' : `${Date.now() - mountTimestamp}ms`;
-        const stateLabels: Record<string, string> = { '-1': 'unstarted', '0': 'ended', '1': 'playing', '2': 'paused', '3': 'buffering', '5': 'cued' };
-        return (
-          <div style={{
-            position: 'fixed', top: 0, left: 0, zIndex: 9999,
-            background: 'rgba(0,0,0,0.92)', color: '#00ff00',
-            fontFamily: 'monospace', fontSize: '12px',
-            padding: '10px 14px', lineHeight: '1.8', minWidth: '300px',
-            border: '1px solid #00ff00',
-          }}>
-            <div style={{ color: '#fff', fontWeight: 'bold', marginBottom: '6px', borderBottom: '1px solid #00ff00', paddingBottom: '4px' }}>
-              NETFLIX HERO DEBUG
-            </div>
-            <div>isMobile: <span style={{ color: isMobile ? '#ff6b6b' : '#aaa' }}>{String(isMobile)}</span></div>
-            <div>isTouchDevice: <span style={{ color: isTouchDevice ? '#ff6b6b' : '#aaa' }}>{String(isTouchDevice)}</span></div>
-            <div>ytApiReady: <span style={{ color: ytApiReady ? '#ff6b6b' : '#aaa' }}>{String(ytApiReady)}</span> {ytApiReady ? `+${elapsed(ytApiReadyAt)}` : ''}</div>
-            <div>playerCreated: <span style={{ color: playerCreated ? '#ff6b6b' : '#aaa' }}>{String(playerCreated)}</span> {playerCreated ? `+${elapsed(playerCreatedAt)}` : ''}</div>
-            <div>onReady fired: <span style={{ color: onReadyFired ? '#ff6b6b' : '#aaa' }}>{String(onReadyFired)}</span> {onReadyFired ? `+${elapsed(onReadyAt)}` : ''}</div>
-            <div>lastStateChange: <span style={{ color: '#ff0' }}>{lastStateChange}</span> {firstStateAt !== null ? `+${elapsed(firstStateAt)}` : ''}</div>
-            <div>polledState: <span style={{ color: '#ff0' }}>{stateLabels[polledState] ?? polledState}</span></div>
-            <div>lastError: <span style={{ color: lastError !== 'none' ? '#ff4444' : '#aaa' }}>{lastError}</span></div>
-            <div>retries: <span style={{ color: '#ff0' }}>{playerRetryCount}</span></div>
-            <div style={{ marginTop: '6px', borderTop: '1px solid #00ff00', paddingTop: '4px', color: '#888', fontSize: '10px' }}>
-              state: -1=unstarted, 0=ended, 1=playing, 2=paused, 3=buffering, 5=cued<br />
-              elapsed = ms since mount
-            </div>
+      {/* DEBUG OVERLAY — ?debug=1 (remove in one commit) */}
+      {typeof window !== 'undefined' && new URLSearchParams(window.location.search).get('debug') === '1' && (
+        <div style={{
+          position: 'fixed', top: 0, left: 0, zIndex: 9999,
+          background: 'rgba(0,0,0,0.92)', color: '#00ff00',
+          fontFamily: 'monospace', fontSize: '12px',
+          padding: '10px 14px', lineHeight: '1.8', minWidth: '320px',
+          border: '1px solid #00ff00',
+        }}>
+          <div style={{ color: '#fff', fontWeight: 'bold', marginBottom: '6px', borderBottom: '1px solid #00ff00', paddingBottom: '4px' }}>
+            NETFLIX HERO DEBUG
           </div>
-        );
-      })()}
+          <div>videoId: <span style={{ color: '#ff0' }}>{videoId ?? 'none'}</span></div>
+          <div>isMobile: <span style={{ color: isMobile ? '#ff6b6b' : '#aaa' }}>{String(isMobile)}</span></div>
+          <div>isTouchDevice: <span style={{ color: isTouchDevice ? '#ff6b6b' : '#aaa' }}>{String(isTouchDevice)}</span></div>
+          <div>iframeRendered: <span style={{ color: embedSrc ? '#ff6b6b' : '#aaa' }}>{String(!!embedSrc)}</span></div>
+          <div>onLoad fired: <span style={{ color: iframeLoaded ? '#ff6b6b' : '#aaa' }}>{String(iframeLoaded)}</span> {iframeLoaded ? `+${elapsed(iframeLoadedAt)}` : ''}</div>
+          <div>apiScriptLoaded: <span style={{ color: apiScriptLoaded ? '#ff6b6b' : '#aaa' }}>{String(apiScriptLoaded)}</span> {apiScriptLoaded ? `+${elapsed(apiScriptLoadedAt)}` : ''}</div>
+          <div>playerBound: <span style={{ color: playerBound ? '#ff6b6b' : '#aaa' }}>{String(playerBound)}</span> {playerBound ? `+${elapsed(playerBoundAt)}` : ''}</div>
+          <div>lastState: <span style={{ color: '#ff0' }}>{stateLabels[lastState] ?? lastState}</span></div>
+          <div>confirmedPlaying: <span style={{ color: confirmedPlaying ? '#ff6b6b' : '#aaa' }}>{String(confirmedPlaying)}</span></div>
+          <div>showPoster: <span style={{ color: showPoster ? '#ff6b6b' : '#aaa' }}>{String(showPoster)}</span></div>
+          <div>lastError: <span style={{ color: lastError !== 'none' ? '#ff4444' : '#aaa' }}>{lastError}</span></div>
+          <div style={{ marginTop: '6px', borderTop: '1px solid #00ff00', paddingTop: '4px', color: '#888', fontSize: '10px' }}>
+            state: -1=unstarted, 0=ended, 1=playing, 2=paused, 3=buffering, 5=cued<br />
+            elapsed = ms since mount
+          </div>
+        </div>
+      )}
     </div>
   );
 }
