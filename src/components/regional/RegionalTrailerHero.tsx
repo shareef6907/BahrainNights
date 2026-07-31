@@ -31,14 +31,33 @@ export default function RegionalTrailerHero({ movies: propMovies, onMovieClick, 
   const [movies, setMovies] = useState<Movie[]>(propMovies || []);
   const [currentIndex, setCurrentIndex] = useState(0);
   const [isMuted, setIsMuted] = useState(true);
-  const [ytApiReady, setYtApiReady] = useState(false);
   const [isMobile, setIsMobile] = useState(false);
-  const isMobileRef = useRef(false); // Track current mobile state
+  const isMobileRef = useRef(false);
   const autoAdvanceRef = useRef<NodeJS.Timeout | null>(null);
   const playerRef = useRef<any>(null);
-  const playerContainerRef = useRef<HTMLDivElement>(null);
+  const iframeRef = useRef<HTMLIFrameElement>(null);
+  const [showPoster, setShowPoster] = useState(true);
+  const [isTouchDevice, setIsTouchDevice] = useState(false);
+  const isTouchDeviceRef = useRef(false);
+  const lastIndexRef = useRef<number>(0);
 
-  // Fetch movies
+  // playerBound: triggers desktop auto-unmute when YouTube API binds.
+  // confirmedPlaying: hides the mobile Play button once PLAYING fires.
+  // iframeLoaded: drives poster fade and the 8s fallback timer.
+  const [iframeLoaded, setIframeLoaded] = useState(false);
+  const [playerBound, setPlayerBound] = useState(false);
+  const [userInteracted, setUserInteracted] = useState(false);
+  const [confirmedPlaying, setConfirmedPlaying] = useState(false);
+
+  // Hydration guard: true only after client mount. Keeps first client render
+  // identical to SSR output so no hydration mismatch occurs.
+  const [mounted, setMounted] = useState(false);
+  useEffect(() => { setMounted(true); }, []);
+
+  // 8s fallback timer
+  const iframeLoadTimerRef = useRef<NodeJS.Timeout | null>(null);
+
+  // Fetch movies from API if not passed as prop
   useEffect(() => {
     if (movies.length > 0) return;
     fetch('/api/cinema/trailers?limit=5')
@@ -46,13 +65,8 @@ export default function RegionalTrailerHero({ movies: propMovies, onMovieClick, 
       .then(d => {
         if (d.movies) {
           setMovies(d.movies.map((m: any) => ({
-            id: m.id,
-            title: m.title,
-            synopsis: m.synopsis,
-            genre: m.genre,
-            trailer_key: m.trailer_key,
-            poster_url: m.poster_url,
-            backdrop_url: m.backdrop_url,
+            id: m.id, title: m.title, synopsis: m.synopsis, genre: m.genre,
+            trailer_key: m.trailer_key, poster_url: m.poster_url, backdrop_url: m.backdrop_url,
           })));
         }
       });
@@ -60,66 +74,118 @@ export default function RegionalTrailerHero({ movies: propMovies, onMovieClick, 
 
   useEffect(() => {
     const checkMobile = () => {
-      const mobile = window.innerWidth < 768 || 'ontouchstart' in window;
+      const mobile = window.innerWidth < 768;
       setIsMobile(mobile);
-      isMobileRef.current = mobile; // Keep ref in sync
+      isMobileRef.current = mobile;
+      const touch = typeof navigator !== 'undefined' && navigator.maxTouchPoints > 0;
+      setIsTouchDevice(touch);
+      isTouchDeviceRef.current = touch;
     };
     checkMobile();
     window.addEventListener('resize', checkMobile);
     return () => window.removeEventListener('resize', checkMobile);
   }, []);
 
-  // Load YouTube API (desktop only - mobile uses poster)
-  useEffect(() => {
-    // Skip on mobile - we use poster image instead of YouTube iframe
-    // Use ref for current value at execution time
-    if (isMobileRef.current) return;
-    
-    if (typeof window === 'undefined') return;
-    if (window.YT?.Player) { setYtApiReady(true); return; }
-    (window as any).onYouTubeIframeAPIReady = () => setYtApiReady(true);
-    const tag = document.createElement('script');
-    tag.src = 'https://www.youtube.com/iframe_api';
-    document.getElementsByTagName('script')[0]?.parentNode?.insertBefore(tag, document.getElementsByTagName('script')[0]);
-  }, [isMobile]);
+  const current = movies[currentIndex];
+  const videoId = getYouTubeId(current?.trailer_key);
+  const backdropUrl = current?.backdrop_url || current?.poster_url;
+  const genreDisplay = current?.genre?.slice(0, 3).join(' • ') ?? '';
 
-  const createPlayer = useCallback((videoId: string) => {
-    if (!window.YT || !playerContainerRef.current || !ytApiReady) return;
-    if (playerRef.current) { try { playerRef.current.destroy(); } catch {} }
-    playerContainerRef.current.innerHTML = '';
-    try {
-      const player = new window.YT.Player(playerContainerRef.current.id, {
-        videoId,
-        playerVars: { autoplay: 1, mute: 1, controls: 0, showinfo: 0, rel: 0, loop: 1, playsinline: 1, modestbranding: 1, iv_load_policy: 3, disablekb: 1, fs: 0 },
-        events: {
-          onReady: (e: any) => {
-            e.target.playVideo();
-            setTimeout(() => { try { e.target.unMute(); e.target.setVolume(50); setIsMuted(false); } catch {} }, 1000);
-          },
-          onStateChange: (e: any) => { if (e.data === 0) { e.target.seekTo(0); e.target.playVideo(); } },
-        },
-      } as any);
-      playerRef.current = player;
-    } catch {}
-  }, [ytApiReady]);
+  // origin and embedSrc are built from window.location — only available on the
+  // client. Server (and first client render before useEffect) use empty string
+  // so that SSR and hydration produce identical output (no mismatch).
+  const origin = mounted ? window.location.origin : '';
+  const embedSrc = mounted && videoId
+    ? `https://www.youtube.com/embed/${videoId}?autoplay=1&mute=1&playsinline=1&loop=1&playlist=${videoId}&controls=0&modestbranding=1&rel=0&iv_load_policy=3&disablekb=1&fs=0&enablejsapi=1&origin=${encodeURIComponent(origin)}`
+    : '';
 
-  useEffect(() => {
-    if (!movies.length || !ytApiReady) return;
-    const id = getYouTubeId(movies[0]?.trailer_key);
-    if (id && !playerRef.current) setTimeout(() => createPlayer(id), 500);
-  }, [movies.length, ytApiReady, createPlayer]);
-
-  useEffect(() => {
-    if (!movies.length || !ytApiReady || !playerRef.current) return;
-    const id = getYouTubeId(movies[currentIndex]?.trailer_key);
-    if (id && playerRef.current.loadVideoById) {
-      playerRef.current.loadVideoById(id);
-      playerRef.current.mute();
-      playerRef.current.playVideo();
-      playerRef.current.seekTo(0);
-      setTimeout(() => { try { playerRef.current.unMute(); playerRef.current.setVolume(50); setIsMuted(false); } catch {} }, 1000);
+  // --- iframe onLoad: reliable DOM event, does not depend on postMessage ---
+  const handleIframeLoad = useCallback(() => {
+    if (iframeLoadTimerRef.current) {
+      clearTimeout(iframeLoadTimerRef.current);
+      iframeLoadTimerRef.current = null;
     }
-  }, [currentIndex, movies, ytApiReady]);
+    setIframeLoaded(true);
+    setShowPoster(false);
+
+    // Destroy any previous YT player before rebinding
+    if (playerRef.current) {
+      try { playerRef.current.destroy(); } catch {}
+      playerRef.current = null;
+    }
+    setPlayerBound(false);
+    setConfirmedPlaying(false);
+
+    // Bind YouTube JS API to the existing iframe (does not recreate it)
+    const bindApi = () => {
+      if (!iframeRef.current || playerRef.current) return;
+      try {
+        const player = new window.YT.Player(iframeRef.current, {
+          events: {
+            onStateChange: (e: any) => {
+              if (e.data === 1) setConfirmedPlaying(true);
+            },
+            onError: (e: any) => {
+              console.log('YouTube onError, code:', e.data);
+            },
+          },
+        });
+        playerRef.current = player;
+        setPlayerBound(true);
+      } catch (err) {
+        console.warn('YT.Player bind failed:', err);
+      }
+    };
+
+    if (window.YT && window.YT.Player) {
+      bindApi();
+    } else {
+      (window as any).onYouTubeIframeAPIReady = () => {
+        bindApi();
+      };
+      if (!document.querySelector('script[src*="youtube.com/iframe_api"]')) {
+        const tag = document.createElement('script');
+        tag.src = 'https://www.youtube.com/iframe_api';
+        document.head.appendChild(tag);
+      }
+    }
+  }, []);
+
+  // 8s fallback timer
+  useEffect(() => {
+    if (!embedSrc) return;
+    if (iframeLoaded) return;
+    iframeLoadTimerRef.current = setTimeout(() => {
+      console.warn('iframe onLoad did not fire within 8s — poster remains');
+    }, 8000);
+    return () => {
+      if (iframeLoadTimerRef.current) {
+        clearTimeout(iframeLoadTimerRef.current);
+        iframeLoadTimerRef.current = null;
+      }
+    };
+  }, [embedSrc, iframeLoaded]);
+
+  // Reset on slide change — key={videoId} in JSX handles iframe remount
+  useEffect(() => {
+    if (currentIndex !== lastIndexRef.current) {
+      lastIndexRef.current = currentIndex;
+      setShowPoster(true);
+      setIframeLoaded(false);
+      setPlayerBound(false);
+      setConfirmedPlaying(false);
+    }
+  }, [currentIndex]);
+
+  // Cleanup player on unmount
+  useEffect(() => {
+    return () => {
+      if (playerRef.current) {
+        try { playerRef.current.destroy(); } catch {}
+        playerRef.current = null;
+      }
+    };
+  }, [videoId]);
 
   useEffect(() => {
     if (movies.length > 1) {
@@ -137,68 +203,114 @@ export default function RegionalTrailerHero({ movies: propMovies, onMovieClick, 
     setIsMuted(!isMuted);
   };
 
-  const current = movies[currentIndex];
-  const genreDisplay = current?.genre?.slice(0, 3).join(' • ');
-
-  if (!movies.length) {
-    return <div className="h-[70vh] md:h-[85vh] bg-gray-900 flex items-center justify-center"><div className="w-16 h-16 border-4 border-yellow-500 border-t-transparent rounded-full animate-spin" /></div>;
-  }
-
-  // PLAN B: On mobile, show branded poster with play button instead of iframe
-  const showPosterInsteadOfPlayer = isMobile;
-  const backdropUrl = current?.backdrop_url || current?.poster_url;
-
-  // Handle mobile play button tap
   const handleMobilePlay = () => {
-    const videoId = current?.trailer_key;
-    if (videoId) {
-      window.open(`https://www.youtube.com/watch?v=${videoId}`, '_blank');
+    if (videoId) window.open(`https://www.youtube.com/watch?v=${videoId}`, '_blank');
+  };
+
+  // Tap-to-toggle on mobile
+  const handleHeroTap = (e: React.MouseEvent) => {
+    if ((e.target as HTMLElement).closest('button')) return;
+    if (isTouchDeviceRef.current && playerRef.current) {
+      try {
+        if (isMuted) { playerRef.current.unMute(); playerRef.current.setVolume(50); }
+        else { playerRef.current.mute(); }
+        setIsMuted(!isMuted);
+      } catch {}
     }
   };
 
+  // Auto-unmute on desktop ~2s after player is bound.
+  // playerBound in deps: effect fires exactly once when bindApi() succeeds.
+  // !userInteracted guard: effect fires at most once; a manual mute is never overridden
+  // on slide change because userInteracted stays true across remounts.
+  // If binding never succeeds: no-op, desktop stays muted, toggleMute still works.
+  useEffect(() => {
+    if (!isTouchDeviceRef.current && !userInteracted && playerRef.current) {
+      const timer = setTimeout(() => {
+        if (playerRef.current) {
+          try { playerRef.current.unMute(); playerRef.current.setVolume(50); setIsMuted(false); } catch {}
+        }
+        setUserInteracted(true);
+      }, 2000);
+      return () => clearTimeout(timer);
+    }
+  }, [playerBound, userInteracted]);
+
+  // Sound on first interaction — fallback for edge cases.
+  // playerBound in deps: listener re-registers after binding so playerRef.current
+  // is guaranteed non-null on first click. { once: true } removes it after first use.
+  useEffect(() => {
+    const enableSound = () => {
+      if (playerRef.current && isMuted) {
+        try { playerRef.current.unMute(); playerRef.current.setVolume(50); } catch {}
+        setIsMuted(false);
+        setUserInteracted(true);
+      }
+    };
+    document.addEventListener('click', enableSound, { once: true, passive: true });
+    document.addEventListener('touchstart', enableSound, { once: true, passive: true });
+    return () => {
+      document.removeEventListener('click', enableSound);
+      document.removeEventListener('touchstart', enableSound);
+    };
+  }, [playerBound]);
+
   return (
-    <div className="relative overflow-hidden bg-black" style={{ width: '100vw', height: isMobile ? '70vh' : '85vh', marginLeft: 'calc(-50vw + 50%)' }}>
-      {/* DESKTOP: YouTube Player */}
-      {!showPosterInsteadOfPlayer && (
-        <div id="regional-youtube-player" ref={playerContainerRef} className="absolute inset-0 w-full h-full" style={{ transform: 'scale(1.15)', transformOrigin: 'center center' }} />
+    <div
+      className="relative overflow-hidden bg-black"
+      style={{ width: '100vw', height: isMobile ? '70vh' : '85vh', marginLeft: 'calc(-50vw + 50%)' }}
+      onClick={handleHeroTap}
+    >
+      {/* Declarative YouTube iframe — z-[1], below poster.
+          key={videoId} causes React to remount on slide change — new video autoplays. */}
+      {embedSrc && (
+        <iframe
+          key={videoId}
+          ref={iframeRef}
+          src={embedSrc}
+          title="Trailer"
+          allow="autoplay; encrypted-media; picture-in-picture"
+          allowFullScreen
+          frameBorder="0"
+          onLoad={handleIframeLoad}
+          className="absolute inset-0 w-full h-full pointer-events-none z-[1]"
+          style={{ transform: 'scale(1.15)', transformOrigin: 'center center', border: 0 }}
+        />
       )}
 
-      {/* MOBILE: Branded poster with play button - next/image for LCP */}
-      {showPosterInsteadOfPlayer && backdropUrl && (
-        <div className="absolute inset-0 w-full h-full">
-          <Image
-            src={backdropUrl}
-            alt={current?.title || 'Movie backdrop'}
-            fill
-            priority
-            className="object-cover"
-            sizes="100vw"
-          />
+      {/* Poster — z-[2], fades on iframe onLoad. */}
+      {backdropUrl ? (
+        <div
+          className="absolute inset-0 w-full h-full pointer-events-none z-[2]"
+          style={{ opacity: showPoster ? 1 : 0, transition: 'opacity 300ms ease-out' }}
+        >
+          <Image src={backdropUrl} alt={current?.title || 'Movie backdrop'} fill priority className="object-cover" sizes="100vw" />
           <div className="absolute inset-0 bg-black/50 pointer-events-none" />
-          <button
-            onClick={handleMobilePlay}
-            className="absolute inset-0 flex items-center justify-center cursor-pointer"
-            style={{ pointerEvents: 'auto' }}
-            aria-label="Play trailer"
-          >
-            <div className="w-20 h-20 rounded-full bg-[#d4a853] hover:bg-[#c49a48] flex items-center justify-center transition-all transform hover:scale-110 shadow-2xl">
-              <Play className="w-10 h-10 text-black ml-1" fill="black" />
-            </div>
-          </button>
         </div>
-      )}
-
-      {showPosterInsteadOfPlayer && !backdropUrl && (
-        <div className="absolute inset-0 bg-gray-900 flex items-center justify-center">
+      ) : (
+        <div className="absolute inset-0 bg-gray-900 flex items-center justify-center z-[2]"
+          style={{ opacity: showPoster ? 1 : 0, transition: 'opacity 300ms ease-out' }}>
           <Play className="w-16 h-16 text-gray-600" />
         </div>
       )}
 
-      {/* Gradient overlays - pointer-events: none to prevent blocking */}
+      {/* Small play button — touch devices only, bottom-right, above content.
+          Renders while confirmedPlaying === false. Disappears when PLAYING fires. */}
+      {isTouchDevice && !confirmedPlaying && (
+        <button
+          onClick={handleMobilePlay}
+          className="absolute bottom-28 right-4 flex items-center gap-2 px-4 py-2 bg-[#d4a853] hover:bg-[#c49a48] text-black font-bold rounded-lg z-[25] shadow-xl"
+          aria-label="Play trailer"
+        >
+          <Play className="w-5 h-5 fill-current" />
+          <span className="text-sm">Play</span>
+        </button>
+      )}
+
       <div className="absolute inset-0 bg-gradient-to-r from-black/90 via-black/50 to-transparent pointer-events-none" />
       <div className="absolute inset-0 bg-gradient-to-t from-gray-950 via-transparent to-black/40 pointer-events-none" />
       <div className="absolute bottom-0 left-0 right-0 h-32 bg-gradient-to-t from-gray-950 to-transparent pointer-events-none" />
-      
+
       <div className="absolute inset-0 flex items-center">
         <div className="w-full max-w-7xl mx-auto px-6 md:px-12">
           <div className="max-w-2xl">
@@ -229,6 +341,7 @@ export default function RegionalTrailerHero({ movies: propMovies, onMovieClick, 
           </div>
         </>
       )}
+
     </div>
   );
 }
