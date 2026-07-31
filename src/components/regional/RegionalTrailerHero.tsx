@@ -33,7 +33,7 @@ export default function RegionalTrailerHero({ movies: propMovies, onMovieClick, 
   const [isMuted, setIsMuted] = useState(true);
   const [ytApiReady, setYtApiReady] = useState(false);
   const [isMobile, setIsMobile] = useState(false);
-  const isMobileRef = useRef(false); // Track current mobile state
+  const isMobileRef = useRef(false);
   const autoAdvanceRef = useRef<NodeJS.Timeout | null>(null);
   const playerRef = useRef<any>(null);
   const playerContainerRef = useRef<HTMLDivElement>(null);
@@ -42,8 +42,8 @@ export default function RegionalTrailerHero({ movies: propMovies, onMovieClick, 
   const [isTouchDevice, setIsTouchDevice] = useState(false);
   const isTouchDeviceRef = useRef(false);
   const lastIndexRef = useRef<number>(0);
+  const currentVideoIdRef = useRef<string | null>(null);
 
-  // Fetch movies
   useEffect(() => {
     if (movies.length > 0) return;
     fetch('/api/cinema/trailers?limit=5')
@@ -51,19 +51,13 @@ export default function RegionalTrailerHero({ movies: propMovies, onMovieClick, 
       .then(d => {
         if (d.movies) {
           setMovies(d.movies.map((m: any) => ({
-            id: m.id,
-            title: m.title,
-            synopsis: m.synopsis,
-            genre: m.genre,
-            trailer_key: m.trailer_key,
-            poster_url: m.poster_url,
-            backdrop_url: m.backdrop_url,
+            id: m.id, title: m.title, synopsis: m.synopsis, genre: m.genre,
+            trailer_key: m.trailer_key, poster_url: m.poster_url, backdrop_url: m.backdrop_url,
           })));
         }
       });
   }, [movies.length]);
 
-  // Detect mobile and touch capability
   useEffect(() => {
     const checkMobile = () => {
       const mobile = window.innerWidth < 768;
@@ -78,23 +72,17 @@ export default function RegionalTrailerHero({ movies: propMovies, onMovieClick, 
     return () => window.removeEventListener('resize', checkMobile);
   }, []);
 
-  // Load YouTube IFrame Player API — all devices.
-  // Runs once on mount ([] dep). On mobile the poster paints first (LCP);
-  // player creation is deferred 100ms in the mount effect.
+  // Load YouTube IFrame Player API — all devices, once
   useEffect(() => {
     if (typeof window === 'undefined') return;
-
     if (window.YT?.Player) {
       setYtApiReady(true);
-      // Fall through — NOT an early return. Cleanup below must register.
     } else {
       (window as any).onYouTubeIframeAPIReady = () => setYtApiReady(true);
       const tag = document.createElement('script');
       tag.src = 'https://www.youtube.com/iframe_api';
       document.getElementsByTagName('script')[0]?.parentNode?.insertBefore(tag, document.getElementsByTagName('script')[0]);
     }
-
-    // Registered ONCE, reached on every code path including the already-loaded branch.
     return () => {
       if (playerRef.current) {
         try { playerRef.current.destroy(); } catch {}
@@ -104,58 +92,85 @@ export default function RegionalTrailerHero({ movies: propMovies, onMovieClick, 
     };
   }, []);
 
-  const initializePlayer = useCallback((videoId: string) => {
-    if (!window.YT || !playerContainerRef.current || !ytApiReady) return;
+  // initializePlayer — returns true only if player was actually created
+  const initializePlayer = useCallback((videoId: string): boolean => {
+    if (!window.YT || !playerContainerRef.current || !ytApiReady) return false;
     if (playerRef.current) { try { playerRef.current.destroy(); } catch {} }
     playerContainerRef.current.innerHTML = '';
     try {
       const player = new window.YT.Player(playerContainerRef.current.id, {
         videoId,
-        playerVars: { autoplay: 1, mute: 1, controls: 0, showinfo: 0, rel: 0, loop: 1, playsinline: 1, modestbranding: 1, iv_load_policy: 3, disablekb: 1, fs: 0 },
+        playerVars: {
+          autoplay: 1, mute: 1, controls: 0, showinfo: 0, rel: 0, loop: 1,
+          playsinline: 1, modestbranding: 1, iv_load_policy: 3, disablekb: 1, fs: 0,
+          origin: typeof window !== 'undefined' ? window.location.origin : '', // added — was missing
+        },
         events: {
           onReady: (e: any) => {
             e.target.playVideo();
-            // Fade poster on non-touch devices once player is ready — desktop iframe loads reliably.
-            // On touch devices (phone, iPad): poster fades only on PLAYING to preserve the guarantee.
-            if (!isTouchDeviceRef.current) {
-              setShowPoster(false);
-            }
+            if (!isTouchDeviceRef.current) setShowPoster(false);
             setTimeout(() => { try { e.target.unMute(); e.target.setVolume(50); setIsMuted(false); } catch {} }, 1000);
           },
           onStateChange: (e: any) => {
             if (e.data === 0) { e.target.seekTo(0); e.target.playVideo(); }
-            // Fade poster on PLAYING (1) — all devices.
-            // On touch devices: this is the only path that hides the poster.
-            // If video never plays, poster stays (no timer).
             if (e.data === 1) setShowPoster(false);
           },
         },
       } as any);
       playerRef.current = player;
+      // Only set initializedRef AFTER playerRef is assigned
       initializedRef.current = true;
-    } catch {}
+      return true;
+    } catch { return false; }
   }, [ytApiReady]);
 
-  // Initialize player on mount
+  // ONE effect responsible for player creation — never creates on slide change
   useEffect(() => {
     if (!movies.length || !ytApiReady) return;
     const id = getYouTubeId(movies[0]?.trailer_key);
-    if (id && !initializedRef.current && !playerRef.current) {
-      // Defer only on mobile — poster must paint first (LCP). Desktop creates immediately.
-      const delay = isMobileRef.current ? 100 : 0;
-      const timer = setTimeout(() => {
-        if (!initializedRef.current && !playerRef.current) initializePlayer(id);
-      }, delay);
-      return () => clearTimeout(timer);
-    }
-  }, [movies.length, ytApiReady, initializePlayer]);
+    if (!id) return;
+    if (playerRef.current || initializedRef.current) return;
 
-  // When currentIndex changes, load new video
+    currentVideoIdRef.current = id;
+    const success = initializePlayer(id);
+    if (!success) {
+      // Bailout — reset so this effect can retry when ytApiReady flips
+      initializedRef.current = false;
+      const retryTimer = setTimeout(() => {
+        const vid = getYouTubeId(movies[0]?.trailer_key);
+        if (vid && !playerRef.current && !initializedRef.current) {
+          initializePlayer(vid);
+        }
+      }, 500);
+      return () => clearTimeout(retryTimer);
+    }
+  }, [ytApiReady, initializePlayer, movies]);
+
+  // Retry: if PLAYING not reached within 2s, retry playVideo up to 3 times
+  useEffect(() => {
+    if (!playerRef.current) return;
+    let retries = 0;
+    const maxRetries = 3;
+    const retryTimer = setInterval(() => {
+      if (!playerRef.current) { clearInterval(retryTimer); return; }
+      const state = playerRef.current.getPlayerState();
+      if (state === 1) { clearInterval(retryTimer); return; }
+      if (retries < maxRetries) {
+        retries++;
+        try { playerRef.current.playVideo(); } catch {}
+        console.log(`Retry ${retries}/${maxRetries}, state=${state}`);
+      } else {
+        clearInterval(retryTimer);
+      }
+    }, 2000);
+    return () => clearInterval(retryTimer);
+  }, [initializedRef.current]); // re-arm when player is (re)created
+
+  // Slide-change — ONLY calls loadVideoById, never creates player
   useEffect(() => {
     if (!movies.length || !ytApiReady) return;
     const id = getYouTubeId(movies[currentIndex]?.trailer_key);
     if (!id) return;
-    // Only reset poster if the slide actually changed, not on parent re-render
     if (currentIndex !== lastIndexRef.current) {
       lastIndexRef.current = currentIndex;
       setShowPoster(true);
@@ -166,14 +181,8 @@ export default function RegionalTrailerHero({ movies: propMovies, onMovieClick, 
       playerRef.current.playVideo();
       playerRef.current.seekTo(0);
       setTimeout(() => { try { playerRef.current.unMute(); playerRef.current.setVolume(50); setIsMuted(false); } catch {} }, 1000);
-    } else if (!initializedRef.current) {
-      const delay = isMobileRef.current ? 100 : 0;
-      const timer = setTimeout(() => {
-        if (!initializedRef.current && !playerRef.current) initializePlayer(id);
-      }, delay);
-      return () => clearTimeout(timer);
     }
-  }, [currentIndex, movies, ytApiReady, initializePlayer]);
+  }, [currentIndex, movies, ytApiReady]);
 
   useEffect(() => {
     if (movies.length > 1) {
@@ -196,32 +205,43 @@ export default function RegionalTrailerHero({ movies: propMovies, onMovieClick, 
   const backdropUrl = current?.backdrop_url || current?.poster_url;
 
   if (!movies.length) {
-    return <div className="h-[70vh] md:h-[85vh] bg-gray-900 flex items-center justify-center"><div className="w-16 h-16 border-4 border-yellow-500 border-t-transparent rounded-full animate-spin" /></div>;
+    return <div className="h-[70vh] md:h-[85vh] bg-gray-900 flex items-center justify-center">
+      <div className="w-16 h-16 border-4 border-yellow-500 border-t-transparent rounded-full animate-spin" />
+    </div>;
   }
 
-  // Handle mobile play button tap — opens YouTube fullscreen
   const handleMobilePlay = () => {
     const videoId = current?.trailer_key;
-    if (videoId) {
-      window.open(`https://www.youtube.com/watch?v=${videoId}`, '_blank');
-    }
+    if (videoId) window.open(`https://www.youtube.com/watch?v=${videoId}`, '_blank');
   };
 
-  // Tap-to-unmute on mobile: tap the poster/video area to toggle mute.
+  // Tap-to-unmute on mobile
   const handleHeroTap = (e: React.MouseEvent) => {
     if ((e.target as HTMLElement).closest('button')) return;
     if (isTouchDeviceRef.current && playerRef.current) {
       try {
-        if (isMuted) {
-          playerRef.current.unMute();
-          playerRef.current.setVolume(50);
-        } else {
-          playerRef.current.mute();
-        }
+        if (isMuted) { playerRef.current.unMute(); playerRef.current.setVolume(50); }
+        else { playerRef.current.mute(); }
         setIsMuted(!isMuted);
       } catch {}
     }
   };
+
+  // SOUND ON FIRST INTERACTION: one-time listener for first tap anywhere on page
+  useEffect(() => {
+    const enableSound = () => {
+      if (playerRef.current && isMuted) {
+        try { playerRef.current.unMute(); playerRef.current.setVolume(50); } catch {}
+        setIsMuted(false);
+      }
+    };
+    document.addEventListener('click', enableSound, { once: true, passive: true });
+    document.addEventListener('touchstart', enableSound, { once: true, passive: true });
+    return () => {
+      document.removeEventListener('click', enableSound);
+      document.removeEventListener('touchstart', enableSound);
+    };
+  }, [isMuted]);
 
   return (
     <div
@@ -229,10 +249,6 @@ export default function RegionalTrailerHero({ movies: propMovies, onMovieClick, 
       style={{ width: '100vw', height: isMobile ? '70vh' : '85vh', marginLeft: 'calc(-50vw + 50%)' }}
       onClick={handleHeroTap}
     >
-      {/* YouTube iframe — always rendered, z-[1], underneath poster.
-          pointer-events-none: content overlay buttons must remain tappable.
-          On mobile: created after 100ms (deferred for LCP).
-          On desktop: created immediately. */}
       <div
         id="regional-youtube-player"
         ref={playerContainerRef}
@@ -240,35 +256,16 @@ export default function RegionalTrailerHero({ movies: propMovies, onMovieClick, 
         style={{ transform: 'scale(1.15)', transformOrigin: 'center center' }}
       />
 
-      {/* Poster (Plan B) — always rendered, z-[2], above iframe.
-          Fades to opacity 0 on PLAYING (all devices) or onReady (non-touch only).
-          Shows if video never plays — no timer, poster stays.
-          pointer-events-none on container: does not intercept taps.
-          Yellow play button: rendered ONLY on touch devices AND only while poster is visible.
-          Desktop (non-touch): no play button ever. */}
       {backdropUrl ? (
         <div
           className="absolute inset-0 w-full h-full pointer-events-none z-[2]"
           style={{ opacity: showPoster ? 1 : 0, transition: 'opacity 300ms ease-out' }}
         >
-          <Image
-            src={backdropUrl}
-            alt={current?.title || 'Movie backdrop'}
-            fill
-            priority
-            className="object-cover"
-            sizes="100vw"
-          />
+          <Image src={backdropUrl} alt={current?.title || 'Movie backdrop'} fill priority className="object-cover" sizes="100vw" />
           <div className="absolute inset-0 bg-black/50 pointer-events-none" />
-          {/* Play button: only rendered on touch devices AND only while poster is visible.
-              Not in DOM after PLAYING — poster-area tap reaches handleHeroTap. */}
           {isTouchDevice && showPoster && (
-            <button
-              onClick={handleMobilePlay}
-              className="absolute inset-0 flex items-center justify-center cursor-pointer"
-              style={{ pointerEvents: 'auto' }}
-              aria-label="Play trailer"
-            >
+            <button onClick={handleMobilePlay} className="absolute inset-0 flex items-center justify-center cursor-pointer"
+              style={{ pointerEvents: 'auto' }} aria-label="Play trailer">
               <div className="w-20 h-20 rounded-full bg-[#d4a853] hover:bg-[#c49a48] flex items-center justify-center transition-all transform hover:scale-110 shadow-2xl">
                 <Play className="w-10 h-10 text-black ml-1" fill="black" />
               </div>
@@ -276,17 +273,12 @@ export default function RegionalTrailerHero({ movies: propMovies, onMovieClick, 
           )}
         </div>
       ) : (
-        /* No-backdrop fallback: same opacity treatment as the poster branch.
-           Fades on the same signals so it never sits above a playing video. */
-        <div
-          className="absolute inset-0 bg-gray-900 flex items-center justify-center z-[2]"
-          style={{ opacity: showPoster ? 1 : 0, transition: 'opacity 300ms ease-out' }}
-        >
+        <div className="absolute inset-0 bg-gray-900 flex items-center justify-center z-[2]"
+          style={{ opacity: showPoster ? 1 : 0, transition: 'opacity 300ms ease-out' }}>
           <Play className="w-16 h-16 text-gray-600" />
         </div>
       )}
 
-      {/* Gradient overlays — pointer-events: none */}
       <div className="absolute inset-0 bg-gradient-to-r from-black/90 via-black/50 to-transparent pointer-events-none" />
       <div className="absolute inset-0 bg-gradient-to-t from-gray-950 via-transparent to-black/40 pointer-events-none" />
       <div className="absolute bottom-0 left-0 right-0 h-32 bg-gradient-to-t from-gray-950 to-transparent pointer-events-none" />
