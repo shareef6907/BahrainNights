@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { X, Link2, Check } from 'lucide-react';
 
@@ -13,6 +13,18 @@ interface ShareModalProps {
 
 export default function ShareModal({ isOpen, onClose, title, url }: ShareModalProps) {
   const [copied, setCopied] = useState(false);
+
+  // Lock body scroll when modal is open
+  useEffect(() => {
+    if (isOpen) {
+      document.body.style.overflow = 'hidden';
+    } else {
+      document.body.style.overflow = 'unset';
+    }
+    return () => {
+      document.body.style.overflow = 'unset';
+    };
+  }, [isOpen]);
 
   const copyToClipboard = async () => {
     try {
