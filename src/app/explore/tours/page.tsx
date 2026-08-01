@@ -10,10 +10,7 @@ export const revalidate = 3600;
 async function getTours(): Promise<ExploreItem[]> {
   const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
   const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
-  if (!supabaseUrl || !supabaseServiceKey) {
-    console.warn('Supabase credentials not available at build time');
-    return [];
-  }
+  if (!supabaseUrl || !supabaseServiceKey) { throw new Error('Supabase credentials missing at build time'); }
   const supabase = createClient(supabaseUrl, supabaseServiceKey, {
     auth: { autoRefreshToken: false, persistSession: false }
   });
@@ -29,8 +26,7 @@ async function getTours(): Promise<ExploreItem[]> {
     .order('tripadvisor_rating', { ascending: false, nullsFirst: false });
 
   if (error) {
-    console.error('Error fetching attractions for tours:', error);
-    return [];
+    throw new Error('Supabase query failed: attractions for tours');
   }
 
   if (!data || data.length === 0) {

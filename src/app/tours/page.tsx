@@ -9,10 +9,7 @@ export const revalidate = 3600;
 async function getTours(): Promise<Tour[]> {
   const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
   const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
-  if (!supabaseUrl || !supabaseServiceKey) {
-    console.warn('Supabase credentials not available at build time');
-    return [];
-  }
+  if (!supabaseUrl || !supabaseServiceKey) { throw new Error('Supabase credentials missing at build time'); }
   const supabase = createClient(supabaseUrl, supabaseServiceKey, {
     auth: {
       autoRefreshToken: false,
@@ -40,8 +37,7 @@ async function getTours(): Promise<Tour[]> {
     .order('display_order', { ascending: true });
 
   if (error) {
-    console.error('Error fetching tours:', error);
-    return [];
+    throw new Error('Supabase query failed: tours');
   }
 
   if (!data || data.length === 0) {
