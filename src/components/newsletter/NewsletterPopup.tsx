@@ -58,6 +58,18 @@ export function NewsletterPopup({
     };
   }, [delayMs, scrollThreshold, hasBeenTriggered, hasBeenDismissed]);
 
+  // Lock body scroll when popup is visible
+  useEffect(() => {
+    if (isVisible) {
+      document.body.style.overflow = 'hidden';
+    } else {
+      document.body.style.overflow = 'unset';
+    }
+    return () => {
+      document.body.style.overflow = 'unset';
+    };
+  }, [isVisible]);
+
   const handleDismiss = () => {
     setIsVisible(false);
     setHasBeenDismissed(true);
