@@ -126,7 +126,7 @@ export default function RegisterVenuePage() {
   // Upload file directly to S3 using presigned URL
   const uploadToS3 = async (file: File, imageType: 'logo' | 'cover'): Promise<string | null> => {
     try {
-      // Get presigned URL from our API
+      // Get presigned POST fields from our API
       const presignResponse = await fetch('/api/upload/presign', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -143,13 +143,18 @@ export default function RegisterVenuePage() {
         throw new Error(errorData.error || 'Failed to get upload URL');
       }
 
-      const { uploadUrl, processedUrl } = await presignResponse.json();
+      const { url, fields, processedUrl } = await presignResponse.json();
 
-      // Upload directly to S3
-      const uploadResponse = await fetch(uploadUrl, {
-        method: 'PUT',
-        headers: { 'Content-Type': file.type },
-        body: file
+      // Upload via POST with FormData (presigned POST, not PUT)
+      const formData = new FormData();
+      for (const [key, value] of Object.entries(fields)) {
+        formData.append(key, value as string);
+      }
+      formData.append('file', file);
+
+      const uploadResponse = await fetch(url, {
+        method: 'POST',
+        body: formData,
       });
 
       if (!uploadResponse.ok) {
