@@ -2,16 +2,14 @@ import { Suspense } from 'react';
 import { createClient } from '@supabase/supabase-js';
 import ToursPageClient, { Tour } from '@/components/tours/ToursPageClient';
 
-// Force dynamic rendering
-export const dynamic = 'force-dynamic';
-export const revalidate = 0;
-
-// Create Supabase client
-const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!;
-const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY!;
+// ISR: revalidate every hour
+export const revalidate = 3600;
 
 // Fetch tours
 async function getTours(): Promise<Tour[]> {
+  const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
+  const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
+  if (!supabaseUrl || !supabaseServiceKey) { throw new Error('Supabase credentials missing at build time'); }
   const supabase = createClient(supabaseUrl, supabaseServiceKey, {
     auth: {
       autoRefreshToken: false,
@@ -39,8 +37,7 @@ async function getTours(): Promise<Tour[]> {
     .order('display_order', { ascending: true });
 
   if (error) {
-    console.error('Error fetching tours:', error);
-    return [];
+    throw new Error('Supabase query failed: tours');
   }
 
   if (!data || data.length === 0) {
