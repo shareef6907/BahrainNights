@@ -147,7 +147,11 @@ export async function GET() {
       };
     });
 
-    return NextResponse.json({ offers: transformedOffers });
+    return NextResponse.json({ offers: transformedOffers }, {
+      headers: {
+        'Cache-Control': 'public, s-maxage=300, stale-while-revalidate=600',
+      },
+    });
   } catch (error) {
     console.error('Get offers error:', error);
     return NextResponse.json(

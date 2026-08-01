@@ -3,16 +3,17 @@ import { createClient } from '@supabase/supabase-js';
 import ToursExploreClient from './ToursExploreClient';
 import { ExploreItem } from '@/components/explore/ExploreGrid';
 
-// Force dynamic rendering
-export const dynamic = 'force-dynamic';
-export const revalidate = 0;
-
-// Create Supabase client
-const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!;
-const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY!;
+// ISR: revalidate every hour
+export const revalidate = 3600;
 
 // Fetch tours/attractions from database - only Platinum List sourced items
 async function getTours(): Promise<ExploreItem[]> {
+  const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
+  const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
+  if (!supabaseUrl || !supabaseServiceKey) {
+    console.warn('Supabase credentials not available at build time');
+    return [];
+  }
   const supabase = createClient(supabaseUrl, supabaseServiceKey, {
     auth: { autoRefreshToken: false, persistSession: false }
   });

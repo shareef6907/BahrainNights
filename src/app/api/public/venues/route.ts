@@ -165,6 +165,10 @@ export async function GET(request: NextRequest) {
       total: count || 0,
       limit,
       offset,
+    }, {
+      headers: {
+        'Cache-Control': 'public, s-maxage=300, stale-while-revalidate=600',
+      },
     });
   } catch (error) {
     console.error('Error in venues API:', error);

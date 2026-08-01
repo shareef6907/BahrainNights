@@ -51,7 +51,11 @@ export async function GET(request: NextRequest) {
       moviesWithTrailers.unshift(avatar);
     }
 
-    return NextResponse.json({ movies: moviesWithTrailers.slice(0, limit) });
+    return NextResponse.json({ movies: moviesWithTrailers.slice(0, limit) }, {
+      headers: {
+        'Cache-Control': 'public, s-maxage=300, stale-while-revalidate=600',
+      },
+    });
   } catch (err) {
     console.error('Trailers API exception:', err);
     return NextResponse.json({ movies: [], error: String(err) }, { status: 200 });
