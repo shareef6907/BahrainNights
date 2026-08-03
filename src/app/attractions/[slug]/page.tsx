@@ -17,11 +17,11 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
 
   if (!attraction) {
     return {
-      title: 'Attraction Not Found | BahrainNights',
+      title: 'Attraction Not Found | Bahrain Nights',
     };
   }
 
-  const title = attraction.seo_title || `${attraction.name} | Things to Do in Bahrain | BahrainNights`;
+  const title = attraction.seo_title || `${attraction.name} | Things to Do in Bahrain | Bahrain Nights`;
   const description = attraction.seo_description ||
     attraction.short_description ||
     attraction.description?.slice(0, 160) ||

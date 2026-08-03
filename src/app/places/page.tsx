@@ -3,7 +3,7 @@ import PlacesPageClient from './PlacesPageClient';
 import BreadcrumbSchema from '@/components/SEO/BreadcrumbSchema';
 
 export const metadata: Metadata = {
-  title: 'Best Restaurants, Lounges, Cafes & Nightlife in Bahrain | BahrainNights',
+  title: 'Best Restaurants, Lounges, Cafes & Nightlife in Bahrain | Bahrain Nights',
   description: 'Discover the best dining and nightlife spots in Bahrain. Explore top restaurants, cafes, lounges, and nightclubs across Manama, Seef, Juffair, and more.',
   keywords: 'bahrain restaurants, bahrain nightlife, bahrain lounges, bahrain cafes, best restaurants bahrain, nightclubs bahrain, dining bahrain',
   alternates: {

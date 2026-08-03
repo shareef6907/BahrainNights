@@ -13,12 +13,12 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
 
   if (!venue || venue.status !== 'approved') {
     return {
-      title: 'Beach & Pool Club Not Found | BahrainNights',
+      title: 'Beach & Pool Club Not Found | Bahrain Nights',
     };
   }
 
   return {
-    title: `${venue.name} | Beach & Pool Clubs in Bahrain | BahrainNights`,
+    title: `${venue.name} | Beach & Pool Clubs in Bahrain | Bahrain Nights`,
     description: venue.description?.slice(0, 160) || `Discover ${venue.name} in ${venue.area}, Bahrain. View photos, amenities, and more.`,
     openGraph: {
       title: venue.name,

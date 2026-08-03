@@ -5,13 +5,13 @@ import BreadcrumbSchema from '@/components/SEO/BreadcrumbSchema';
 import EventListSchema from '@/components/SEO/EventListSchema';
 
 export const metadata: Metadata = {
-  title: 'International Events | Concerts, Shows & Experiences Worldwide | BahrainNights',
+  title: 'International Events | Concerts, Shows & Experiences Worldwide | Bahrain Nights',
   description: 'Discover amazing events across UAE, Saudi Arabia, Qatar, Kuwait, Oman, Egypt, Türkiye, UK, India, Morocco, Lebanon, and 20+ countries. Book tickets to concerts, shows, and experiences worldwide.',
   alternates: {
     canonical: 'https://www.bahrainnights.com/international',
   },
   openGraph: {
-    title: 'International Events | BahrainNights',
+    title: 'International Events | Bahrain Nights',
     description: 'Discover concerts, shows & experiences across 25+ countries - Middle East, Europe, Asia & beyond',
     images: ['/images/og-international.jpg'],
   },

@@ -6,11 +6,11 @@ export const dynamic = 'force-dynamic';
 export const revalidate = 0;
 
 export const metadata: Metadata = {
-  title: 'Book World-Class Entertainment | DJs, Live Bands, Performers | BahrainNights',
+  title: 'Book World-Class Entertainment | DJs, Live Bands, Performers | Bahrain Nights',
   description: 'Book premium DJs, live bands, vocalists, fire shows, and performers for your event in Bahrain. Exclusive artist bookings through BahrainNights - Bahrain\'s premier entertainment agency.',
   keywords: ['entertainment booking Bahrain', 'hire DJ Bahrain', 'live band Bahrain', 'wedding entertainment', 'corporate event entertainment', 'fire show Bahrain', 'book artist Bahrain'],
   openGraph: {
-    title: 'Book World-Class Entertainment | BahrainNights',
+    title: 'Book World-Class Entertainment | Bahrain Nights',
     description: 'Bahrain\'s premier artist booking agency. DJs, live bands, vocalists, fire shows, and more.',
     type: 'website',
     url: 'https://bahrainnights.com/artists',

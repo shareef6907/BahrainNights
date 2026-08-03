@@ -112,11 +112,11 @@ function AttractionsLoadingSkeleton() {
 
 // Metadata for SEO
 export const metadata = {
-  title: 'Attractions & Experiences in Bahrain - Tours, Water Sports & More | BahrainNights',
+  title: 'Attractions & Experiences in Bahrain - Tours, Water Sports & More | Bahrain Nights',
   description: 'Discover the best attractions, tours, water sports, and experiences in Bahrain. Book pearl diving, boat tours, island trips, indoor activities, and more.',
   keywords: ['Bahrain attractions', 'things to do in Bahrain', 'Bahrain tours', 'water sports Bahrain', 'pearl diving Bahrain', 'boat tours Bahrain', 'indoor activities Bahrain'],
   openGraph: {
-    title: 'Attractions & Experiences in Bahrain | BahrainNights',
+    title: 'Attractions & Experiences in Bahrain | Bahrain Nights',
     description: 'Explore the best tours, water sports, and experiences in Bahrain',
     url: 'https://www.bahrainnights.com/attractions',
     type: 'website',
@@ -134,7 +134,7 @@ export const metadata = {
   },
   twitter: {
     card: 'summary_large_image',
-    title: 'Attractions & Experiences in Bahrain | BahrainNights',
+    title: 'Attractions & Experiences in Bahrain | Bahrain Nights',
     description: 'Discover the best attractions, tours, water sports, and experiences in Bahrain.',
   },
 };

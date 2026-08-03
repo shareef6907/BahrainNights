@@ -55,10 +55,10 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
   const info = categoryInfo[category] || { label: category, description: `${category} events in Bahrain` };
 
   return {
-    title: `${info.label} Events in Bahrain | BahrainNights`,
+    title: `${info.label} Events in Bahrain | Bahrain Nights`,
     description: `Discover the best ${info.description.toLowerCase()} in Bahrain. Browse upcoming ${info.label.toLowerCase()} events.`,
     openGraph: {
-      title: `${info.label} Events in Bahrain | BahrainNights`,
+      title: `${info.label} Events in Bahrain | Bahrain Nights`,
       description: `Discover the best ${info.description.toLowerCase()} in Bahrain.`,
       url: `https://www.bahrainnights.com/events/category/${category}`,
     },

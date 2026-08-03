@@ -105,7 +105,7 @@ export const metadata = {
   description: 'Book the best tours and experiences in Bahrain. Cultural heritage tours, pearl diving, food tours, boat trips to islands, and private guided experiences with local experts.',
   keywords: ['Bahrain tours', 'pearl diving Bahrain', 'cultural tours Bahrain', 'food tours Bahrain', 'local guides Bahrain', 'private tours Bahrain', 'things to do Bahrain', 'island tours Bahrain'],
   openGraph: {
-    title: 'Tours & Experiences in Bahrain | BahrainNights',
+    title: 'Tours & Experiences in Bahrain | Bahrain Nights',
     description: 'Discover Bahrain with expert local guides. Cultural tours, pearl diving, food experiences, and island boat trips.',
     url: 'https://www.bahrainnights.com/tours',
     type: 'website',

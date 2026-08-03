@@ -1,7 +1,7 @@
 import { Metadata } from 'next';
 
 export const metadata: Metadata = {
-  title: 'Register Your Venue on BahrainNights | BahrainNights',
+  title: 'Register Your Venue on BahrainNights | Bahrain Nights',
   description: 'List your restaurant, bar, lounge, or venue on BahrainNights. Reach thousands of people looking for the best places in Bahrain.',
   alternates: {
     canonical: 'https://www.bahrainnights.com/register-venue',

@@ -1,7 +1,7 @@
 import { Metadata } from 'next';
 
 export const metadata: Metadata = {
-  title: 'Advertise on BahrainNights - Reach Bahrain\'s Largest Audience | BahrainNights',
+  title: 'Advertise on BahrainNights - Reach Bahrain\'s Largest Audience | Bahrain Nights',
   description: 'Promote your business, venue, or event on BahrainNights. Reach thousands of engaged users looking for things to do in Bahrain. Sponsored listings, banner ads, and featured placements.',
   keywords: 'advertise bahrain, bahrain advertising, promote business bahrain, bahrain marketing, event promotion bahrain',
   alternates: {

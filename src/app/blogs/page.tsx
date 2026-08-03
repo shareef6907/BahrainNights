@@ -3,7 +3,7 @@ import Link from 'next/link';
 import { FileText, ArrowLeft } from 'lucide-react';
 
 export const metadata: Metadata = {
-  title: 'Blog | BahrainNights — Guides & Reviews Coming Soon',
+  title: 'Blog | Bahrain Nights — Guides & Reviews Coming Soon',
   description: 'Expert local guides and reviews about restaurants, nightlife, and things to do in Bahrain. Content coming soon.',
   alternates: {
     canonical: 'https://www.bahrainnights.com/blogs',

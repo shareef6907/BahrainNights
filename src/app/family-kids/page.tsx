@@ -80,7 +80,7 @@ export const metadata = {
   description: 'Discover the best family-friendly attractions, activities, and things to do with kids in Bahrain. From water parks to museums, find perfect family outings.',
   keywords: ['family activities Bahrain', 'things to do with kids Bahrain', 'family attractions Bahrain', 'kids activities Bahrain', 'water parks Bahrain', 'family fun Bahrain'],
   openGraph: {
-    title: 'Family & Kids Activities in Bahrain | BahrainNights',
+    title: 'Family & Kids Activities in Bahrain | Bahrain Nights',
     description: 'Discover the best family-friendly attractions and activities in Bahrain. Perfect for parents looking for fun things to do with kids.',
     url: 'https://www.bahrainnights.com/family-kids',
     type: 'website',

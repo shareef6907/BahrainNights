@@ -1,7 +1,7 @@
 import { Metadata } from 'next';
 
 export const metadata: Metadata = {
-  title: 'Best Hotels in Bahrain - Luxury, Business & Budget Hotels | BahrainNights',
+  title: 'Best Hotels in Bahrain - Luxury, Business & Budget Hotels | Bahrain Nights',
   description: 'Find the best hotels in Bahrain. From luxury 5-star resorts to business hotels and budget-friendly stays in Manama, Seef, Juffair, and Amwaj Islands.',
   keywords: 'bahrain hotels, best hotels bahrain, luxury hotels bahrain, 5 star hotels bahrain, manama hotels, seef hotels',
   alternates: {

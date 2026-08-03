@@ -1,7 +1,7 @@
 import { Metadata } from 'next';
 
 export const metadata: Metadata = {
-  title: 'Kids Activities & Entertainment in Bahrain | BahrainNights',
+  title: 'Kids Activities & Entertainment in Bahrain | Bahrain Nights',
   description: 'Find the best kids activities, play areas, and family entertainment in Bahrain. Indoor playgrounds, water parks, educational activities, and fun days out.',
   keywords: 'kids activities bahrain, children entertainment bahrain, play areas bahrain, family fun bahrain',
   alternates: {

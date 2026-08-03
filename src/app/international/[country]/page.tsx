@@ -51,15 +51,15 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 
   if (!countryConfig) {
     return {
-      title: 'Country Not Found | BahrainNights',
+      title: 'Country Not Found | Bahrain Nights',
     };
   }
 
   return {
-    title: `Events in ${countryConfig.fullName} | BahrainNights`,
+    title: `Events in ${countryConfig.fullName} | Bahrain Nights`,
     description: `Discover amazing events, concerts, shows, and experiences in ${countryConfig.fullName}. Book tickets to the best events.`,
     openGraph: {
-      title: `Events in ${countryConfig.fullName} | BahrainNights`,
+      title: `Events in ${countryConfig.fullName} | Bahrain Nights`,
       description: `Discover amazing events in ${countryConfig.fullName}`,
       images: [`/images/og-${country}.jpg`],
     },

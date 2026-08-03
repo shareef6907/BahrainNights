@@ -1,7 +1,7 @@
 import { Metadata } from 'next';
 
 export const metadata: Metadata = {
-  title: 'Events Calendar Bahrain - What\'s On Today & This Week | BahrainNights',
+  title: 'Events Calendar Bahrain - What\'s On Today & This Week | Bahrain Nights',
   description: 'Browse the complete Bahrain events calendar. Find concerts, parties, family activities, sports events, and more happening today, this week, and this month in Bahrain.',
   keywords: 'bahrain events calendar, what\'s on bahrain, bahrain events today, bahrain events this week, things to do bahrain today',
   alternates: {

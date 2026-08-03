@@ -19,7 +19,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   }
 
   return {
-    title: `Places to Go in ${locationInfo.name} - Best Events, Nightlife & Attractions | BahrainNights`,
+    title: `Places to Go in ${locationInfo.name} - Best Events, Nightlife & Attractions | Bahrain Nights`,
     description: `Discover the best places to go in ${locationInfo.name}. Find events, concerts, nightlife, restaurants, and attractions. Your complete guide to ${locationInfo.name} entertainment.`,
     keywords: [
       `places to go in ${locationInfo.name}`,
@@ -33,7 +33,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
       `${locationInfo.name} entertainment`,
     ],
     openGraph: {
-      title: `Places to Go in ${locationInfo.name} | BahrainNights`,
+      title: `Places to Go in ${locationInfo.name} | Bahrain Nights`,
       description: `Your complete guide to the best events, nightlife, and attractions in ${locationInfo.name}`,
       type: 'website',
     },

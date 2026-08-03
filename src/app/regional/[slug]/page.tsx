@@ -32,11 +32,11 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
     .single() as { data: ArticleMeta | null };
 
   if (!article) {
-    return { title: 'Article Not Found | BahrainNights' };
+    return { title: 'Article Not Found | Bahrain Nights' };
   }
 
   return {
-    title: article.meta_title || `${article.title} | BahrainNights Blog`,
+    title: article.meta_title || `${article.title} | Bahrain Nights Blog`,
     description: article.meta_description || article.excerpt || `Read about ${article.title} on BahrainNights Blog`,
     keywords: article.keywords?.join(', '),
     openGraph: {

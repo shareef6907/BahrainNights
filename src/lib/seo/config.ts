@@ -76,7 +76,6 @@ export const SEO_CONFIG = {
   // Organization schema data
   organization: {
     name: 'Bahrain Nights',
-    legalName: 'BahrainNights',
     url: 'https://www.bahrainnights.com',
     logo: 'https://bahrainnights-production.s3.me-south-1.amazonaws.com/logo.png',
     foundingDate: '2024',
