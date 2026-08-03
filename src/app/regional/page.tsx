@@ -4,7 +4,7 @@ import { supabaseAdmin } from '@/lib/supabase';
 import { RegionalPageClient } from './RegionalPageClient';
 
 export const metadata: Metadata = {
-  title: 'Regional Events | Bahrain Nights - Middle East Entertainment Guide',
+  title: 'Regional Events - Middle East Entertainment Guide',
   description: 'Discover the best events, concerts, and experiences across Bahrain, UAE, Saudi Arabia, Qatar, and UK. Your complete guide to entertainment in the Middle East.',
   keywords: ['middle east events', 'dubai events', 'saudi arabia events', 'qatar events', 'uae concerts', 'regional entertainment', 'gulf events'],
   openGraph: {
