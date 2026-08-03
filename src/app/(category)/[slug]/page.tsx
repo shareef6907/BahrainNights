@@ -21,7 +21,7 @@ export async function generateMetadata({ params }: CategoryPageProps): Promise<M
 
   if (!config) {
     return {
-      title: 'Category Not Found | BahrainNights',
+      title: 'Category Not Found',
     };
   }
 
@@ -33,7 +33,7 @@ export async function generateMetadata({ params }: CategoryPageProps): Promise<M
       title: config.metaTitle,
       description: config.metaDescription,
       url: `https://www.bahrainnights.com/${config.slug}`,
-      siteName: 'BahrainNights',
+      siteName: 'Bahrain Nights',
       locale: 'en_US',
       type: 'website',
       images: [

@@ -6,7 +6,7 @@ import Link from 'next/link';
 import { ArrowLeft, Camera, Image, FileImage, CheckCircle, XCircle, AlertTriangle, Sparkles } from 'lucide-react';
 
 export const metadata: Metadata = {
-  title: 'Content Guidelines | BahrainNights',
+  title: 'Content Guidelines',
   description: 'Content and image guidelines for submitting venues and events to BahrainNights - Bahrain\'s premier events and lifestyle platform.',
 };
 

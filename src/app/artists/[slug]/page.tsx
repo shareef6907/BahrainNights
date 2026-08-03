@@ -15,7 +15,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 
   if (!artist) {
     return {
-      title: 'Artist Not Found | BahrainNights',
+      title: 'Artist Not Found',
     };
   }
 
@@ -35,7 +35,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
     : categoryLabels[artist.category];
 
   return {
-    title: `${artist.stage_name} - ${displayCategory} | Book Now | BahrainNights`,
+    title: `${artist.stage_name} - ${displayCategory} | Book Now | Bahrain Nights`,
     description: artist.short_description || artist.bio || `Book ${artist.stage_name} for your event in Bahrain. Professional ${displayCategory.toLowerCase()} available for private parties, corporate events, weddings, and more.`,
     openGraph: {
       title: `${artist.stage_name} - ${displayCategory}`,

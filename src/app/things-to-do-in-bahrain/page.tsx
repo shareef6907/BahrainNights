@@ -11,7 +11,7 @@ import {
 
 // SEO Optimized Metadata
 export const metadata: Metadata = {
-  title: 'Things to Do in Bahrain 2026 — Ultimate Guide | BahrainNights',
+  title: 'Things to Do in Bahrain 2026 — Ultimate Guide',
   description: 'Discover the 50 best things to do in Bahrain in 2026! From historical sites and beaches to nightlife, restaurants, and family activities. Your complete Bahrain bucket list with insider tips.',
   keywords: [
     'things to do in Bahrain', 'Bahrain activities', 'Bahrain attractions 2026',
@@ -27,7 +27,7 @@ export const metadata: Metadata = {
     title: '50 Best Things to Do in Bahrain (2026) — Ultimate Activity Guide',
     description: 'The definitive guide to experiencing Bahrain. 50 incredible activities from beaches and culture to nightlife and adventure.',
     url: 'https://www.bahrainnights.com/things-to-do-in-bahrain',
-    siteName: 'BahrainNights',
+    siteName: 'Bahrain Nights',
     images: [
       {
         url: 'https://www.bahrainnights.com/og-things-to-do.jpg',
@@ -127,12 +127,12 @@ function generateSchema() {
         image: 'https://www.bahrainnights.com/og-things-to-do.jpg',
         author: {
           '@type': 'Organization',
-          name: 'BahrainNights',
+          name: 'Bahrain Nights',
           url: 'https://www.bahrainnights.com'
         },
         publisher: {
           '@type': 'Organization',
-          name: 'BahrainNights',
+          name: 'Bahrain Nights',
           logo: {
             '@type': 'ImageObject',
             url: 'https://www.bahrainnights.com/logo.png'

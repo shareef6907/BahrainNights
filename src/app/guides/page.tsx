@@ -3,7 +3,7 @@ import Link from 'next/link';
 import { BookOpen, ArrowLeft } from 'lucide-react';
 
 export const metadata: Metadata = {
-  title: 'Guides | BahrainNights — Local Guides Coming Soon',
+  title: 'Guides — Local Guides Coming Soon',
   description: 'Expert local guides to restaurants, nightlife, activities, and neighborhoods in Bahrain. Content coming soon.',
   alternates: {
     canonical: 'https://www.bahrainnights.com/guides',

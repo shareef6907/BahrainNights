@@ -288,7 +288,7 @@ function PlacesPageContent() {
     <>
       {/* SEO */}
       <head>
-        <title>Best Restaurants, Bars & Nightlife in Bahrain | BahrainNights</title>
+        <title>Best Restaurants, Bars & Nightlife in Bahrain | Bahrain Nights</title>
         <meta
           name="description"
           content="Discover the best dining and nightlife spots in Bahrain. Explore top restaurants, cafes, lounges, bars, and nightclubs across Manama, Seef, Juffair, and more."

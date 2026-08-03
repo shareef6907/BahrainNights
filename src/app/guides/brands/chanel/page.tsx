@@ -390,12 +390,12 @@ export default function ChanelBahrainPage() {
             description: 'Find Chanel stores in Bahrain. Complete guide to Chanel locations at Marassi Galleria and luxury boutiques.',
             author: {
               '@type': 'Organization',
-              name: 'BahrainNights',
+              name: 'Bahrain Nights',
               url: 'https://bahrainnights.com',
             },
             publisher: {
               '@type': 'Organization',
-              name: 'BahrainNights',
+              name: 'Bahrain Nights',
             },
             datePublished: '2026-01-26',
             dateModified: lastUpdated,

@@ -354,12 +354,12 @@ export default function CostaCoffeeBahrainPage() {
             description: 'Find all Costa Coffee locations in Bahrain. Complete guide to Costa cafes.',
             author: {
               '@type': 'Organization',
-              name: 'BahrainNights',
+              name: 'Bahrain Nights',
               url: 'https://bahrainnights.com',
             },
             publisher: {
               '@type': 'Organization',
-              name: 'BahrainNights',
+              name: 'Bahrain Nights',
             },
             datePublished: '2026-01-26',
             dateModified: lastUpdated,

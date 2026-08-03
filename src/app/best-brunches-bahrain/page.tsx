@@ -7,7 +7,7 @@ import {
 
 // SEO Optimized Metadata
 export const metadata: Metadata = {
-  title: 'Best Brunches in Bahrain 2026 — Friday Brunch Guide | BahrainNights',
+  title: 'Best Brunches in Bahrain 2026 — Friday Brunch Guide',
   description: 'Discover the best Friday brunches in Bahrain for 2026! Complete guide to hotel brunches, prices, what to expect, and insider tips. From Gulf Hotel to Four Seasons.',
   keywords: [
     'best brunch Bahrain', 'Friday brunch Bahrain', 'Bahrain brunch 2026',
@@ -22,7 +22,7 @@ export const metadata: Metadata = {
     title: 'Best Brunches in Bahrain 2026 — Friday Brunch Guide',
     description: 'Your ultimate guide to Friday brunches in Bahrain. Compare prices, menus, and atmospheres at top hotels and restaurants.',
     url: 'https://www.bahrainnights.com/best-brunches-bahrain',
-    siteName: 'BahrainNights',
+    siteName: 'Bahrain Nights',
     images: [
       {
         url: 'https://www.bahrainnights.com/og-brunch.jpg',
@@ -59,11 +59,11 @@ function generateSchema() {
         description: 'Discover the best Friday brunches in Bahrain. From luxury hotel spreads to casual café brunches.',
         author: {
           '@type': 'Organization',
-          name: 'BahrainNights'
+          name: 'Bahrain Nights'
         },
         publisher: {
           '@type': 'Organization',
-          name: 'BahrainNights',
+          name: 'Bahrain Nights',
           logo: {
             '@type': 'ImageObject',
             url: 'https://www.bahrainnights.com/logo.png'

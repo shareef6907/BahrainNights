@@ -13,12 +13,12 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
 
   if (!venue || venue.status !== 'approved') {
     return {
-      title: 'Nightclub Not Found | BahrainNights',
+      title: 'Nightclub Not Found',
     };
   }
 
   return {
-    title: `${venue.name} | Nightclubs in Bahrain | BahrainNights`,
+    title: `${venue.name} | Nightclubs in Bahrain | Bahrain Nights`,
     description: venue.description?.slice(0, 160) || `Discover ${venue.name} in ${venue.area}, Bahrain. View photos, event schedule, and more.`,
     openGraph: {
       title: venue.name,

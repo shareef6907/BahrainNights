@@ -1,7 +1,7 @@
 import { Metadata } from 'next';
 
 export const metadata: Metadata = {
-  title: 'Shopping in Bahrain - Malls, Souks & Markets | BahrainNights',
+  title: 'Shopping in Bahrain - Malls, Souks & Markets',
   description: 'Explore the best shopping destinations in Bahrain. From modern malls like City Centre and Marassi Galleria to traditional souks and local markets.',
   keywords: 'shopping bahrain, bahrain malls, souks bahrain, bahrain markets, city centre bahrain, marassi galleria',
   alternates: {

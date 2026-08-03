@@ -4,7 +4,7 @@ import AuthCard from '@/components/auth/AuthCard';
 import LoginForm from '@/components/auth/LoginForm';
 
 export const metadata: Metadata = {
-  title: 'Login | BahrainNights',
+  title: 'Login',
   description: 'Sign in to manage your venue on BahrainNights.com',
 };
 

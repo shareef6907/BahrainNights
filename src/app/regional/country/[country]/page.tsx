@@ -23,7 +23,7 @@ export async function generateMetadata({ params, searchParams }: Props): Promise
   const locationName = city ? `${city}, ${locationInfo.name}` : locationInfo.name;
 
   return {
-    title: `${locationName} Events & Entertainment Guide | BahrainNights Blog`,
+    title: `${locationName} Events & Entertainment Guide | Bahrain Nights Blog`,
     description: `Explore events, nightlife, and entertainment in ${locationName}. Your guide to the best things to do and places to visit.`,
     keywords: [
       `${locationName} events`,

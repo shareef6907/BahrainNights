@@ -381,12 +381,12 @@ export default function GucciBahrainPage() {
             description: 'Find Gucci in Bahrain at Marassi Galleria. Complete guide with store hours, directions & shopping tips.',
             author: {
               '@type': 'Organization',
-              name: 'BahrainNights',
+              name: 'Bahrain Nights',
               url: 'https://bahrainnights.com',
             },
             publisher: {
               '@type': 'Organization',
-              name: 'BahrainNights',
+              name: 'Bahrain Nights',
             },
             datePublished: '2026-01-27',
             dateModified: lastUpdated,

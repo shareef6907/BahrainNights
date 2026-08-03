@@ -330,12 +330,12 @@ export default function LouisVuittonBahrainPage() {
             description: 'Find Louis Vuitton stores in Bahrain. Complete guide to LV locations at Marassi Galleria.',
             author: {
               '@type': 'Organization',
-              name: 'BahrainNights',
+              name: 'Bahrain Nights',
               url: 'https://bahrainnights.com',
             },
             publisher: {
               '@type': 'Organization',
-              name: 'BahrainNights',
+              name: 'Bahrain Nights',
             },
             datePublished: '2026-01-26',
             dateModified: lastUpdated,

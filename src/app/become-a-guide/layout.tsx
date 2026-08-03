@@ -1,13 +1,13 @@
 import { Metadata } from 'next';
 
 export const metadata: Metadata = {
-  title: 'Become a Guide on BahrainNights | BahrainNights',
+  title: 'Become a Guide on Bahrain Nights',
   description: 'Join BahrainNights as a local guide. Share your expertise about Bahrain\'s best restaurants, nightlife, events, and hidden gems with our growing community.',
   alternates: {
     canonical: 'https://www.bahrainnights.com/become-a-guide',
   },
   openGraph: {
-    title: 'Become a Guide on BahrainNights',
+    title: 'Become a Guide on Bahrain Nights',
     description: 'Join BahrainNights as a local guide. Share your expertise about Bahrain\'s best spots.',
     type: 'website',
     locale: 'en_BH',

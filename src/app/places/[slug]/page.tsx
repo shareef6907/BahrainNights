@@ -18,12 +18,12 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
 
   if (!venue || venue.status !== 'approved' || venue.is_hidden) {
     return {
-      title: 'Venue Not Found | BahrainNights',
+      title: 'Venue Not Found',
     };
   }
 
   return {
-    title: `${venue.name} | BahrainNights`,
+    title: `${venue.name} | Bahrain Nights`,
     description: venue.description?.slice(0, 160) || `Discover ${venue.name} in ${venue.area}, Bahrain`,
     alternates: {
       canonical: `https://www.bahrainnights.com/places/${slug}`,

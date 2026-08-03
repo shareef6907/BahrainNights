@@ -6,7 +6,7 @@ import Link from 'next/link';
 import { ArrowLeft, Shield, Eye, Database, Cookie, Mail } from 'lucide-react';
 
 export const metadata: Metadata = {
-  title: 'Privacy Policy | BahrainNights',
+  title: 'Privacy Policy',
   description: 'Privacy Policy for BahrainNights - How we collect, use, and protect your data.',
   alternates: {
     canonical: 'https://www.bahrainnights.com/privacy',

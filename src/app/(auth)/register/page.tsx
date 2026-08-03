@@ -4,7 +4,7 @@ import AuthCard from '@/components/auth/AuthCard';
 import RegisterForm from '@/components/auth/RegisterForm';
 
 export const metadata: Metadata = {
-  title: 'Register Your Venue | BahrainNights',
+  title: 'Register Your Venue',
   description: 'Join BahrainNights.com and promote your venue to thousands of visitors.',
 };
 

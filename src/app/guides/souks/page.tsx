@@ -423,12 +423,12 @@ export default function SouksPage() {
             description: 'Complete guide to traditional souks in Bahrain including Gold Souq, Bab Al Bahrain, and Muharraq markets.',
             author: {
               '@type': 'Organization',
-              name: 'BahrainNights',
+              name: 'Bahrain Nights',
               url: 'https://bahrainnights.com',
             },
             publisher: {
               '@type': 'Organization',
-              name: 'BahrainNights',
+              name: 'Bahrain Nights',
             },
             datePublished: '2026-01-26',
             dateModified: lastUpdated,

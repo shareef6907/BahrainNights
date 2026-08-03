@@ -1,7 +1,7 @@
 import { Metadata } from 'next';
 
 export const metadata: Metadata = {
-  title: 'Best Spas & Wellness in Bahrain - Massage, Hammam & More | BahrainNights',
+  title: 'Best Spas & Wellness in Bahrain - Massage, Hammam & More',
   description: 'Discover the best spas and wellness centers in Bahrain. Luxury spa treatments, traditional hammam, massage therapy, and relaxation experiences.',
   keywords: 'bahrain spas, best spa bahrain, massage bahrain, hammam bahrain, wellness bahrain, spa treatments bahrain',
   alternates: {

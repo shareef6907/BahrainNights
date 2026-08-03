@@ -10,7 +10,7 @@ import {
 
 // SEO Optimized Metadata
 export const metadata: Metadata = {
-  title: 'Best Cafes in Bahrain 2026 — Coffee Shops & Study Spots | BahrainNights',
+  title: 'Best Cafes in Bahrain 2026 — Coffee Shops & Study Spots',
   description: 'Discover the best cafes in Bahrain for 2026! From specialty coffee and study-friendly spots to Instagram-worthy cafes. Complete guide with WiFi info, opening hours, and reviews.',
   keywords: [
     'best cafes Bahrain', 'coffee shops Bahrain', 'study cafes Bahrain',
@@ -26,7 +26,7 @@ export const metadata: Metadata = {
     title: 'Best Cafes in Bahrain 2026 — Coffee Shops & Study Spots',
     description: 'Your ultimate guide to cafes in Bahrain. From specialty coffee to study-friendly spots and Instagram-worthy venues.',
     url: 'https://www.bahrainnights.com/best-cafes-bahrain',
-    siteName: 'BahrainNights',
+    siteName: 'Bahrain Nights',
     images: [
       {
         url: 'https://www.bahrainnights.com/og-cafes.jpg',
@@ -61,11 +61,11 @@ function generateSchema() {
         description: 'Discover the best cafes in Bahrain. From specialty coffee and study-friendly spots to Instagram-worthy venues.',
         author: {
           '@type': 'Organization',
-          name: 'BahrainNights'
+          name: 'Bahrain Nights'
         },
         publisher: {
           '@type': 'Organization',
-          name: 'BahrainNights',
+          name: 'Bahrain Nights',
           logo: {
             '@type': 'ImageObject',
             url: 'https://www.bahrainnights.com/logo.png'

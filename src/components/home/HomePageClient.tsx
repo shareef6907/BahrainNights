@@ -528,7 +528,7 @@ export default function HomePageClient({ initialMovies, initialStats, initialTod
                   className="text-2xl lg:text-3xl font-black bg-gradient-to-r from-yellow-500 via-amber-400 to-yellow-600 bg-clip-text text-transparent"
                   style={{ filter: 'drop-shadow(0 0 8px rgba(217, 119, 6, 0.4))' }}
                 >
-                  BahrainNights
+                  Bahrain Nights
                 </span>
               </Link>
             </div>
@@ -747,6 +747,14 @@ export default function HomePageClient({ initialMovies, initialStats, initialTod
             {t.home.hero.subtitle} •
             <span className="text-white font-semibold"> {initialLiveEventCounts?.local || stats.events || 0} local events</span> •
             <span className="text-white font-semibold">{initialLiveEventCounts?.international || initialInternationalEvents.length || 0} Events in GCC and UK</span>
+          </p>
+
+          {/* Intro copy — visible descriptive text for search engines */}
+          <p
+            className="text-base md:text-lg text-gray-300 mb-8 max-w-2xl mx-auto drop-shadow-lg animate-fade-in animation-delay-250"
+            style={{ textShadow: '0 2px 8px rgba(0, 0, 0, 0.8)' }}
+          >
+            Bahrain Nights is your guide to events, dining, cinema and nightlife across the Kingdom of Bahrain. Discover what&apos;s on tonight, this weekend, and beyond.
           </p>
 
           {/* Search Bar */}
@@ -1000,7 +1008,7 @@ export default function HomePageClient({ initialMovies, initialStats, initialTod
                 className="text-3xl font-black bg-gradient-to-r from-yellow-500 via-amber-400 to-yellow-600 bg-clip-text text-transparent mb-4"
                 style={{ filter: 'drop-shadow(0 0 8px rgba(217, 119, 6, 0.4))' }}
               >
-                BahrainNights
+                Bahrain Nights
               </div>
               <p className="text-gray-400 mb-6">{t.footer.tagline}</p>
               <div className="flex space-x-4">

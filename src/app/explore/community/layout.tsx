@@ -1,7 +1,7 @@
 import { Metadata } from 'next';
 
 export const metadata: Metadata = {
-  title: 'Community Events & Activities in Bahrain | BahrainNights',
+  title: 'Community Events & Activities in Bahrain',
   description: 'Discover community events, social gatherings, networking meetups, and group activities happening in Bahrain.',
   keywords: 'bahrain community, community events bahrain, meetups bahrain, social events bahrain, networking bahrain',
   alternates: {

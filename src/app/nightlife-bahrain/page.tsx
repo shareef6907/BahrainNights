@@ -7,7 +7,7 @@ import {
 
 // SEO Optimized Metadata
 export const metadata: Metadata = {
-  title: 'Nightlife in Bahrain 2026 | Clubs & Lounges | BahrainNights',
+  title: 'Nightlife in Bahrain 2026 | Clubs & Lounges',
   description: 'Complete guide to Bahrain nightlife 2026. Discover the best nightclubs and lounges in Adliya, Juffair, and Seef. Ladies nights, dress codes, and insider tips.',
   keywords: [
     'Bahrain nightlife', 'lounges in Bahrain', 'clubs in Bahrain', 'nightclubs Bahrain',
@@ -22,7 +22,7 @@ export const metadata: Metadata = {
     title: 'Nightlife in Bahrain 2026 | Clubs & Lounges',
     description: 'Your ultimate guide to Bahrain\'s nightlife scene. Best clubs and lounges in every area.',
     url: 'https://www.bahrainnights.com/nightlife-bahrain',
-    siteName: 'BahrainNights',
+    siteName: 'Bahrain Nights',
     images: [
       {
         url: 'https://www.bahrainnights.com/og-nightlife.jpg',
@@ -59,11 +59,11 @@ function generateSchema() {
         description: 'Complete guide to Bahrain nightlife. Discover the best bars, clubs, and lounges across the island.',
         author: {
           '@type': 'Organization',
-          name: 'BahrainNights'
+          name: 'Bahrain Nights'
         },
         publisher: {
           '@type': 'Organization',
-          name: 'BahrainNights',
+          name: 'Bahrain Nights',
           logo: {
             '@type': 'ImageObject',
             url: 'https://www.bahrainnights.com/logo.png'

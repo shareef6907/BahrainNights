@@ -206,12 +206,12 @@ export async function generateMetadata({ params }: PageProps) {
 
   if (!event) {
     return {
-      title: 'Event Not Found | BahrainNights',
+      title: 'Event Not Found',
     };
   }
 
   return {
-    title: `${event.title} | BahrainNights`,
+    title: `${event.title} | Bahrain Nights`,
     description: event.description?.slice(0, 160) || `${event.title} at ${event.venue_name}`,
     alternates: {
       canonical: `https://www.bahrainnights.com/events/${slug}`,

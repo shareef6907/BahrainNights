@@ -342,12 +342,12 @@ export default function ShakeShackBahrainPage() {
             description: 'Find Shake Shack locations in Bahrain. ShackBurger, crinkle fries & shakes.',
             author: {
               '@type': 'Organization',
-              name: 'BahrainNights',
+              name: 'Bahrain Nights',
               url: 'https://bahrainnights.com',
             },
             publisher: {
               '@type': 'Organization',
-              name: 'BahrainNights',
+              name: 'Bahrain Nights',
             },
             datePublished: '2026-01-26',
             dateModified: lastUpdated,

@@ -2,7 +2,7 @@ import { Metadata } from 'next';
 import Link from 'next/link';
 
 export const metadata: Metadata = {
-  title: 'Sitemap | Bahrain Nights',
+  title: 'Sitemap',
   description: 'Complete sitemap of Bahrain Nights - Find all pages for events, venues, guides, and more in Bahrain.',
 };
 

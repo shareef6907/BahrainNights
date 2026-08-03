@@ -396,12 +396,12 @@ export default function DiorBahrainPage() {
             description: 'Find Dior stores in Bahrain. Complete guide to Dior locations at Marassi Galleria.',
             author: {
               '@type': 'Organization',
-              name: 'BahrainNights',
+              name: 'Bahrain Nights',
               url: 'https://bahrainnights.com',
             },
             publisher: {
               '@type': 'Organization',
-              name: 'BahrainNights',
+              name: 'Bahrain Nights',
             },
             datePublished: '2026-01-26',
             dateModified: lastUpdated,

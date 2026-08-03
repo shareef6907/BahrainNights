@@ -1,13 +1,13 @@
 import { Metadata } from 'next';
 
 export const metadata: Metadata = {
-  title: 'Submit Your Venue | BahrainNights',
+  title: 'Submit Your Venue',
   description: 'Submit your venue to be listed on BahrainNights. Get discovered by thousands of people looking for restaurants, lounges, and entertainment in Bahrain.',
   alternates: {
     canonical: 'https://www.bahrainnights.com/submit-venue',
   },
   openGraph: {
-    title: 'Submit Your Venue | BahrainNights',
+    title: 'Submit Your Venue',
     description: 'Submit your venue to be listed on BahrainNights.',
     type: 'website',
     locale: 'en_BH',

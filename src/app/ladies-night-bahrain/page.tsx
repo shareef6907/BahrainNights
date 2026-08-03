@@ -7,7 +7,7 @@ import {
 
 // SEO Optimized Metadata
 export const metadata: Metadata = {
-  title: 'Ladies Night Bahrain — Best Deals This Week 2026 | BahrainNights',
+  title: 'Ladies Night Bahrain — Best Deals This Week 2026',
   description: 'Complete guide to Ladies Night in Bahrain 2026. Free drinks, free entry, and best deals every day of the week. Updated weekly with the latest offers from top venues.',
   keywords: [
     'ladies night Bahrain', 'ladies night Manama', 'free drinks Bahrain',
@@ -23,7 +23,7 @@ export const metadata: Metadata = {
     title: 'Ladies Night Bahrain — Best Deals This Week 2026',
     description: 'Free drinks & entry at the best venues in Bahrain. Updated weekly guide to ladies night deals.',
     url: 'https://www.bahrainnights.com/ladies-night-bahrain',
-    siteName: 'BahrainNights',
+    siteName: 'Bahrain Nights',
     images: [
       {
         url: 'https://www.bahrainnights.com/og-ladies-night.jpg',
@@ -60,11 +60,11 @@ function generateSchema() {
         description: 'Complete weekly guide to ladies night deals in Bahrain. Free drinks and entry at top venues.',
         author: {
           '@type': 'Organization',
-          name: 'BahrainNights'
+          name: 'Bahrain Nights'
         },
         publisher: {
           '@type': 'Organization',
-          name: 'BahrainNights',
+          name: 'Bahrain Nights',
           logo: {
             '@type': 'ImageObject',
             url: 'https://www.bahrainnights.com/logo.png'

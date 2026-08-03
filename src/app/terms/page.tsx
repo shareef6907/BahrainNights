@@ -6,7 +6,7 @@ import Link from 'next/link';
 import { ArrowLeft, Shield, Users, Camera, MapPin, AlertTriangle, Scale, Mail } from 'lucide-react';
 
 export const metadata: Metadata = {
-  title: 'Terms of Service | BahrainNights',
+  title: 'Terms of Service',
   description: 'Terms of Service and Content Guidelines for BahrainNights - Bahrain\'s premier events and lifestyle platform.',
   alternates: {
     canonical: 'https://www.bahrainnights.com/terms',

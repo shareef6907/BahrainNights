@@ -361,12 +361,12 @@ export default function HMBahrainPage() {
             description: 'Find all H&M stores in Bahrain. Complete guide to H&M locations across the Kingdom.',
             author: {
               '@type': 'Organization',
-              name: 'BahrainNights',
+              name: 'Bahrain Nights',
               url: 'https://bahrainnights.com',
             },
             publisher: {
               '@type': 'Organization',
-              name: 'BahrainNights',
+              name: 'Bahrain Nights',
             },
             datePublished: '2026-01-26',
             dateModified: lastUpdated,

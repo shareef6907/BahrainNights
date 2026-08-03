@@ -10,7 +10,7 @@ import {
 
 // SEO Optimized Metadata
 export const metadata: Metadata = {
-  title: 'Events in Bahrain This Week — What\'s On | BahrainNights',
+  title: 'Events in Bahrain This Week — What\'s On',
   description: 'Discover what\'s happening in Bahrain this week! Live concerts, comedy shows, brunches, exhibitions, and more. Your weekly guide to events in the Kingdom of Bahrain.',
   keywords: [
     'events Bahrain this week', 'what\'s on Bahrain', 'Bahrain events today',
@@ -26,7 +26,7 @@ export const metadata: Metadata = {
     title: 'Events in Bahrain This Week — What\'s On',
     description: 'Your weekly guide to events, concerts, shows, and things to do in Bahrain.',
     url: 'https://www.bahrainnights.com/bahrain-events-this-week',
-    siteName: 'BahrainNights',
+    siteName: 'Bahrain Nights',
     images: [
       {
         url: 'https://www.bahrainnights.com/og-events.jpg',
@@ -64,11 +64,11 @@ function generateSchema() {
         description: 'Weekly guide to events, concerts, shows, and entertainment in Bahrain.',
         author: {
           '@type': 'Organization',
-          name: 'BahrainNights'
+          name: 'Bahrain Nights'
         },
         publisher: {
           '@type': 'Organization',
-          name: 'BahrainNights',
+          name: 'Bahrain Nights',
           logo: {
             '@type': 'ImageObject',
             url: 'https://www.bahrainnights.com/logo.png'
