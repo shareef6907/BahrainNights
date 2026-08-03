@@ -37,37 +37,37 @@ export const SEO_CONFIG = {
       keywords: ['events in bahrain', 'nightlife in bahrain', 'things to do in bahrain', 'bahrain entertainment']
     },
     events: {
-      title: 'Events in Bahrain | Concerts, Parties & Shows | BahrainNights',
+      title: 'Events in Bahrain | Concerts, Parties & Shows | Bahrain Nights',
       description: 'Find the latest events in Bahrain - concerts, parties, exhibitions, and more. Discover what\'s happening in Bahrain today and this weekend.',
       keywords: ['events in bahrain', 'bahrain events today', 'things to do in bahrain', 'bahrain entertainment']
     },
     nightlife: {
-      title: 'Nightlife in Bahrain | Clubs, Bars & Lounges | BahrainNights',
+      title: 'Nightlife in Bahrain | Clubs, Bars & Lounges | Bahrain Nights',
       description: 'Explore the best nightlife in Bahrain - top clubs, bars, lounges, and late-night venues. Your guide to Bahrain nightclubs and bars.',
       keywords: ['nightlife in bahrain', 'bahrain clubs', 'bahrain bars', 'bahrain nightclubs']
     },
     restaurants: {
-      title: 'Best Restaurants in Bahrain | Dining Guide | BahrainNights',
+      title: 'Best Restaurants in Bahrain | Dining Guide | Bahrain Nights',
       description: 'Discover the best restaurants in Bahrain - fine dining, casual eats, cafes, and more. Find where to eat in Bahrain with reviews and menus.',
       keywords: ['bahrain restaurants', 'best restaurants bahrain', 'dining in bahrain', 'where to eat bahrain']
     },
     cinema: {
-      title: 'Cinema in Bahrain | Movies Now Showing | BahrainNights',
+      title: 'Cinema in Bahrain | Movies Now Showing | Bahrain Nights',
       description: 'Find movies now showing in Bahrain cinemas. Check showtimes at VOX, Cineco, and more. Your complete guide to Bahrain cinema.',
       keywords: ['bahrain cinema', 'movies in bahrain', 'cinema showtimes bahrain', 'vox bahrain']
     },
     attractions: {
-      title: 'Attractions in Bahrain | Things to Do & See | BahrainNights',
+      title: 'Attractions in Bahrain | Things to Do & See | Bahrain Nights',
       description: 'Explore top attractions in Bahrain - museums, landmarks, beaches, and experiences. Discover the best things to do in Bahrain.',
       keywords: ['attractions in bahrain', 'things to do in bahrain', 'bahrain tourism', 'bahrain sightseeing']
     },
     places: {
-      title: 'Places in Bahrain | Venues & Locations | BahrainNights',
+      title: 'Places in Bahrain | Venues & Locations | Bahrain Nights',
       description: 'Browse all venues and places in Bahrain - restaurants, clubs, cafes, and more. Find the perfect spot for any occasion.',
       keywords: ['places in bahrain', 'venues bahrain', 'bahrain locations', 'where to go bahrain']
     },
     family: {
-      title: 'Family Activities in Bahrain | Kids Events | BahrainNights',
+      title: 'Family Activities in Bahrain | Kids Events | Bahrain Nights',
       description: 'Find family-friendly activities and events in Bahrain. Kid-friendly venues, family dining, and fun things to do with children.',
       keywords: ['family activities bahrain', 'things to do with kids bahrain', 'family events bahrain', 'kids activities bahrain']
     }
