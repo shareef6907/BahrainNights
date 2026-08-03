@@ -206,7 +206,7 @@ export async function generateMetadata({ params }: PageProps) {
 
   if (!event) {
     return {
-      title: 'Event Not Found | Bahrain Nights',
+      title: 'Event Not Found',
     };
   }
 

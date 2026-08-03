@@ -7,7 +7,7 @@ export const metadata: Metadata = {
     canonical: 'https://www.bahrainnights.com/search',
   },
   openGraph: {
-    title: 'Search BahrainNights',
+    title: 'Search Bahrain Nights',
     description: 'Search for events, restaurants, nightlife venues, activities, and more across Bahrain.',
     type: 'website',
     locale: 'en_BH',

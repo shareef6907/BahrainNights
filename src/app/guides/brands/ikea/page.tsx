@@ -361,12 +361,12 @@ export default function IKEABahrainPage() {
             description: 'Visit IKEA Bahrain for affordable furniture, home decor & Swedish food.',
             author: {
               '@type': 'Organization',
-              name: 'BahrainNights',
+              name: 'Bahrain Nights',
               url: 'https://bahrainnights.com',
             },
             publisher: {
               '@type': 'Organization',
-              name: 'BahrainNights',
+              name: 'Bahrain Nights',
             },
             datePublished: '2026-01-26',
             dateModified: lastUpdated,

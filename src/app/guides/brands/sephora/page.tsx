@@ -376,12 +376,12 @@ export default function SephoraBahrainPage() {
             description: 'Find Sephora stores in Bahrain. Complete guide to Sephora locations.',
             author: {
               '@type': 'Organization',
-              name: 'BahrainNights',
+              name: 'Bahrain Nights',
               url: 'https://bahrainnights.com',
             },
             publisher: {
               '@type': 'Organization',
-              name: 'BahrainNights',
+              name: 'Bahrain Nights',
             },
             datePublished: '2026-01-26',
             dateModified: lastUpdated,

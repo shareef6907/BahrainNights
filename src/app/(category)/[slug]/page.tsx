@@ -21,7 +21,7 @@ export async function generateMetadata({ params }: CategoryPageProps): Promise<M
 
   if (!config) {
     return {
-      title: 'Category Not Found | Bahrain Nights',
+      title: 'Category Not Found',
     };
   }
 

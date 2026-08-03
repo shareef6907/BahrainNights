@@ -15,7 +15,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 
   if (!artist) {
     return {
-      title: 'Artist Not Found | Bahrain Nights',
+      title: 'Artist Not Found',
     };
   }
 

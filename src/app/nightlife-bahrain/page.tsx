@@ -59,11 +59,11 @@ function generateSchema() {
         description: 'Complete guide to Bahrain nightlife. Discover the best bars, clubs, and lounges across the island.',
         author: {
           '@type': 'Organization',
-          name: 'BahrainNights'
+          name: 'Bahrain Nights'
         },
         publisher: {
           '@type': 'Organization',
-          name: 'BahrainNights',
+          name: 'Bahrain Nights',
           logo: {
             '@type': 'ImageObject',
             url: 'https://www.bahrainnights.com/logo.png'

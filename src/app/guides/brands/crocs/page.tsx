@@ -350,12 +350,12 @@ export default function CrocsBahrainPage() {
             description: 'Find Crocs stores in Bahrain. Complete guide to Crocs locations.',
             author: {
               '@type': 'Organization',
-              name: 'BahrainNights',
+              name: 'Bahrain Nights',
               url: 'https://bahrainnights.com',
             },
             publisher: {
               '@type': 'Organization',
-              name: 'BahrainNights',
+              name: 'Bahrain Nights',
             },
             datePublished: '2026-01-26',
             dateModified: lastUpdated,

@@ -9,7 +9,7 @@ import {
 
 // SEO Optimized Metadata
 export const metadata: Metadata = {
-  title: 'Best Restaurants in Bahrain 2026 | Dining Guide | Bahrain Nights',
+  title: 'Best Restaurants in Bahrain 2026 | Dining Guide',
   description: 'Discover the best restaurants in Bahrain for 2026! From fine dining and seafood to brunches and hidden gems. Curated guide with reviews, prices, and booking tips.',
   keywords: [
     'best restaurants Bahrain', 'restaurants in Bahrain', 'Bahrain dining guide',
@@ -93,11 +93,11 @@ function generateSchema() {
         description: 'Discover the best restaurants in Bahrain. From fine dining and seafood to brunches and local gems.',
         author: {
           '@type': 'Organization',
-          name: 'BahrainNights'
+          name: 'Bahrain Nights'
         },
         publisher: {
           '@type': 'Organization',
-          name: 'BahrainNights',
+          name: 'Bahrain Nights',
           logo: {
             '@type': 'ImageObject',
             url: 'https://www.bahrainnights.com/logo.png'

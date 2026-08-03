@@ -1,7 +1,7 @@
 import { Metadata } from 'next';
 
 export const metadata: Metadata = {
-  title: 'Tours & Sightseeing in Bahrain | Bahrain Nights',
+  title: 'Tours & Sightseeing in Bahrain',
   description: 'Book guided tours and sightseeing experiences in Bahrain. City tours, cultural excursions, boat trips, and unique local experiences.',
   keywords: 'bahrain tours, sightseeing bahrain, guided tours bahrain, bahrain excursions, bahrain boat tours',
   alternates: {

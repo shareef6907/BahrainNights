@@ -13,7 +13,7 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
 
   if (!venue || venue.status !== 'approved') {
     return {
-      title: 'Cafe Not Found | Bahrain Nights',
+      title: 'Cafe Not Found',
     };
   }
 

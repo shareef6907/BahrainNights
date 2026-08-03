@@ -365,12 +365,12 @@ export default function BathBodyWorksBahrainPage() {
             description: 'Find Bath & Body Works stores in Bahrain. Complete guide to BBW locations.',
             author: {
               '@type': 'Organization',
-              name: 'BahrainNights',
+              name: 'Bahrain Nights',
               url: 'https://bahrainnights.com',
             },
             publisher: {
               '@type': 'Organization',
-              name: 'BahrainNights',
+              name: 'Bahrain Nights',
             },
             datePublished: '2026-01-26',
             dateModified: lastUpdated,

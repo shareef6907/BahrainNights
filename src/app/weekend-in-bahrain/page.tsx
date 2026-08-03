@@ -10,7 +10,7 @@ import {
 
 // SEO Optimized Metadata
 export const metadata: Metadata = {
-  title: 'Your Perfect Weekend in Bahrain (2026) — 48-Hour Itinerary | Bahrain Nights',
+  title: 'Your Perfect Weekend in Bahrain (2026) — 48-Hour Itinerary',
   description: 'Plan your perfect weekend in Bahrain with our 48-hour itinerary! From Friday brunch to Saturday beach, discover the best way to spend 2 days in Bahrain.',
   keywords: [
     'weekend in Bahrain', 'Bahrain itinerary', '48 hours in Bahrain', '2 days in Bahrain',
@@ -105,11 +105,11 @@ function generateSchema() {
         description: 'Plan your perfect weekend in Bahrain with this comprehensive 48-hour itinerary.',
         author: {
           '@type': 'Organization',
-          name: 'BahrainNights'
+          name: 'Bahrain Nights'
         },
         publisher: {
           '@type': 'Organization',
-          name: 'BahrainNights',
+          name: 'Bahrain Nights',
           logo: {
             '@type': 'ImageObject',
             url: 'https://www.bahrainnights.com/logo.png'

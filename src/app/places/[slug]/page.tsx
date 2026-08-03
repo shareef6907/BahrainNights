@@ -18,7 +18,7 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
 
   if (!venue || venue.status !== 'approved' || venue.is_hidden) {
     return {
-      title: 'Venue Not Found | Bahrain Nights',
+      title: 'Venue Not Found',
     };
   }
 

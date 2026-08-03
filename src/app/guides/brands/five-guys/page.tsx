@@ -354,12 +354,12 @@ export default function FiveGuysBahrainPage() {
             description: 'Find Five Guys locations in Bahrain. Burgers with free toppings, Cajun fries & milkshakes.',
             author: {
               '@type': 'Organization',
-              name: 'BahrainNights',
+              name: 'Bahrain Nights',
               url: 'https://bahrainnights.com',
             },
             publisher: {
               '@type': 'Organization',
-              name: 'BahrainNights',
+              name: 'Bahrain Nights',
             },
             datePublished: '2026-01-26',
             dateModified: lastUpdated,

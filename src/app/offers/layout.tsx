@@ -1,7 +1,7 @@
 import { Metadata } from 'next';
 
 export const metadata: Metadata = {
-  title: 'Best Deals & Offers in Bahrain - Restaurant & Lounge Deals | Bahrain Nights',
+  title: 'Best Deals & Offers in Bahrain - Restaurant & Lounge Deals',
   description: 'Find the best deals, happy hours, and special offers from restaurants, lounges, and venues across Bahrain. Ladies nights, brunches, and daily specials.',
   keywords: 'bahrain deals, bahrain offers, happy hour bahrain, ladies night bahrain, restaurant deals bahrain, lounge offers bahrain',
   alternates: {

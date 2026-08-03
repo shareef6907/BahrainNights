@@ -4,7 +4,7 @@ import AuthCard from '@/components/auth/AuthCard';
 import ResetPasswordForm from '@/components/auth/ResetPasswordForm';
 
 export const metadata: Metadata = {
-  title: 'Reset Password | Bahrain Nights',
+  title: 'Reset Password',
   description: 'Create a new password for your BahrainNights.com account.',
 };
 

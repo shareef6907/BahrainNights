@@ -352,12 +352,12 @@ export default function ZaraBahrainPage() {
             description: 'Find all Zara stores in Bahrain. Complete guide to Zara locations at City Centre, Seef Mall, The Avenues & more.',
             author: {
               '@type': 'Organization',
-              name: 'BahrainNights',
+              name: 'Bahrain Nights',
               url: 'https://bahrainnights.com',
             },
             publisher: {
               '@type': 'Organization',
-              name: 'BahrainNights',
+              name: 'Bahrain Nights',
             },
             datePublished: '2026-01-26',
             dateModified: lastUpdated,

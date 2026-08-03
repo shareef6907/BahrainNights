@@ -399,7 +399,7 @@ export const metadata = {
   description: 'Discover the best events happening in Bahrain. Find concerts, shows, parties, family activities, and cultural events. Updated daily with all events in Bahrain.',
   keywords: ['events in Bahrain', 'Bahrain events', 'events happening in Bahrain', 'Bahrain parties', 'concerts in Bahrain', 'things to do in Bahrain'],
   openGraph: {
-    title: 'Events in Bahrain - Concerts, Shows & Happenings | Bahrain Nights',
+    title: 'Events in Bahrain - Concerts, Shows & Happenings',
     description: 'Discover the best events happening in Bahrain. Find concerts, shows, parties, family activities, and cultural events.',
     url: 'https://www.bahrainnights.com/events',
     type: 'website',
@@ -409,7 +409,7 @@ export const metadata = {
   },
   twitter: {
     card: 'summary_large_image',
-    title: 'Events in Bahrain - Concerts, Shows & Happenings | Bahrain Nights',
+    title: 'Events in Bahrain - Concerts, Shows & Happenings',
     description: 'Discover the best events happening in Bahrain. Find concerts, shows, parties, family activities, and cultural events.',
   },
 };

@@ -312,12 +312,12 @@ export default function UniqloBahrainPage() {
             description: 'Looking for Uniqlo in Bahrain? Uniqlo does not currently have stores in Bahrain. Find alternatives.',
             author: {
               '@type': 'Organization',
-              name: 'BahrainNights',
+              name: 'Bahrain Nights',
               url: 'https://bahrainnights.com',
             },
             publisher: {
               '@type': 'Organization',
-              name: 'BahrainNights',
+              name: 'Bahrain Nights',
             },
             datePublished: '2026-01-28',
             dateModified: lastUpdated,

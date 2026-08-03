@@ -17,7 +17,7 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
 
   if (!attraction) {
     return {
-      title: 'Attraction Not Found | Bahrain Nights',
+      title: 'Attraction Not Found',
     };
   }
 

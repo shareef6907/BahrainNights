@@ -414,12 +414,12 @@ export default function NikeBahrainPage() {
             description: 'Find Nike stores in Bahrain. Complete guide to Nike locations across the Kingdom.',
             author: {
               '@type': 'Organization',
-              name: 'BahrainNights',
+              name: 'Bahrain Nights',
               url: 'https://bahrainnights.com',
             },
             publisher: {
               '@type': 'Organization',
-              name: 'BahrainNights',
+              name: 'Bahrain Nights',
             },
             datePublished: '2026-01-26',
             dateModified: lastUpdated,

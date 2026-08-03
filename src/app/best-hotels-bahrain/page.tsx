@@ -10,7 +10,7 @@ import {
 
 // SEO Optimized Metadata
 export const metadata: Metadata = {
-  title: 'Best Hotels in Bahrain 2026 — Luxury to Budget | Bahrain Nights',
+  title: 'Best Hotels in Bahrain 2026 — Luxury to Budget',
   description: 'Complete guide to the best hotels in Bahrain for 2026. From 5-star luxury resorts to budget-friendly stays. Reviews, prices, amenities & booking tips for Four Seasons, Ritz-Carlton, and more.',
   keywords: [
     'best hotels Bahrain', 'luxury hotels Bahrain', 'hotels in Bahrain',
@@ -61,11 +61,11 @@ function generateSchema() {
         description: 'Complete guide to the best hotels in Bahrain from luxury 5-star resorts to budget-friendly options.',
         author: {
           '@type': 'Organization',
-          name: 'BahrainNights'
+          name: 'Bahrain Nights'
         },
         publisher: {
           '@type': 'Organization',
-          name: 'BahrainNights',
+          name: 'Bahrain Nights',
           logo: {
             '@type': 'ImageObject',
             url: 'https://www.bahrainnights.com/logo.png'

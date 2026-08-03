@@ -322,12 +322,12 @@ export default function CheesecakeFactoryBahrainPage() {
             description: 'Find The Cheesecake Factory in Bahrain at The Avenues Mall. Menu, cheesecakes, and reservations.',
             author: {
               '@type': 'Organization',
-              name: 'BahrainNights',
+              name: 'Bahrain Nights',
               url: 'https://bahrainnights.com',
             },
             publisher: {
               '@type': 'Organization',
-              name: 'BahrainNights',
+              name: 'Bahrain Nights',
             },
             datePublished: '2026-01-26',
             dateModified: lastUpdated,

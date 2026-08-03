@@ -516,12 +516,12 @@ export default function MallsPage() {
             description: 'Complete guide to shopping malls in Bahrain including City Centre, Seef Mall, The Avenues, and more.',
             author: {
               '@type': 'Organization',
-              name: 'BahrainNights',
+              name: 'Bahrain Nights',
               url: 'https://bahrainnights.com',
             },
             publisher: {
               '@type': 'Organization',
-              name: 'BahrainNights',
+              name: 'Bahrain Nights',
             },
             datePublished: '2026-01-26',
             dateModified: lastUpdated,

@@ -8,7 +8,7 @@ export const metadata: Metadata = {
   description: 'Discover the best events, concerts, and experiences across Bahrain, UAE, Saudi Arabia, Qatar, and UK. Your complete guide to entertainment in the Middle East.',
   keywords: ['middle east events', 'dubai events', 'saudi arabia events', 'qatar events', 'uae concerts', 'regional entertainment', 'gulf events'],
   openGraph: {
-    title: 'Regional Events | Bahrain Nights',
+    title: 'Regional Events',
     description: 'Your guide to the best events and experiences across the Middle East',
     url: 'https://www.bahrainnights.com/regional',
     type: 'website',
