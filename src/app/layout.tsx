@@ -137,7 +137,7 @@ export default function RootLayout({
                 {
                   '@type': 'Organization',
                   '@id': 'https://www.bahrainnights.com/#organization',
-                  name: 'BahrainNights',
+                  name: 'Bahrain Nights',
                   alternateName: 'BahrainNights',
                   url: 'https://www.bahrainnights.com',
                   logo: {
