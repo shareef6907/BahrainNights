@@ -27,8 +27,8 @@ const ibmPlexArabic = IBM_Plex_Sans_Arabic({
 export const metadata: Metadata = {
   metadataBase: new URL('https://www.bahrainnights.com'),
   title: {
-    default: "BahrainNights - Events, Nightlife & Things to Do in Bahrain",
-    template: "%s | BahrainNights"
+    default: "Bahrain Nights - Events, Nightlife & Things to Do in Bahrain",
+    template: "%s | Bahrain Nights"
   },
   description: "Discover the best events, restaurants, nightlife, cinema, and things to do in Bahrain. Your complete guide to happenings in Bahrain - from family activities to parties.",
   keywords: [
@@ -38,7 +38,7 @@ export const metadata: Metadata = {
     "hotels in Bahrain", "spas in Bahrain", "gyms in Bahrain", "Bahrain sports",
     "BahrainNights", "Bahrain Nights"
   ],
-  authors: [{ name: "BahrainNights" }],
+  authors: [{ name: "Bahrain Nights" }],
   creator: "BahrainNights",
   publisher: "BahrainNights",
   manifest: "/manifest.json",
@@ -64,16 +64,16 @@ export const metadata: Metadata = {
     ],
   },
   openGraph: {
-    title: "BahrainNights - Events, Nightlife & Things to Do in Bahrain",
+    title: "Bahrain Nights - Events, Nightlife & Things to Do in Bahrain",
     description: "Discover the best events, restaurants, nightlife, cinema, and things to do in Bahrain. Your complete guide to happenings in Bahrain.",
     url: "https://www.bahrainnights.com",
-    siteName: "BahrainNights",
+    siteName: "Bahrain Nights",
     images: [
       {
         url: "/og-image.png",
         width: 1200,
         height: 630,
-        alt: "BahrainNights - Events, Nightlife & Things to Do in Bahrain",
+        alt: "Bahrain Nights - Events, Nightlife & Things to Do in Bahrain",
       },
     ],
     locale: "en_BH",
@@ -81,7 +81,7 @@ export const metadata: Metadata = {
   },
   twitter: {
     card: 'summary_large_image',
-    title: 'BahrainNights - Events, Nightlife & Things to Do in Bahrain',
+    title: 'Bahrain Nights - Events, Nightlife & Things to Do in Bahrain',
     description: 'Discover the best events, restaurants, nightlife, cinema, and things to do in Bahrain.',
     images: ['/og-image.png'],
   },
@@ -184,7 +184,7 @@ export default function RootLayout({
                   '@type': 'WebSite',
                   '@id': 'https://www.bahrainnights.com/#website',
                   url: 'https://www.bahrainnights.com',
-                  name: 'BahrainNights',
+                  name: 'Bahrain Nights',
                   description: 'Discover events, dining, nightlife, and entertainment in Bahrain and the region.',
                   publisher: {
                     '@id': 'https://www.bahrainnights.com/#organization'

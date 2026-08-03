@@ -1,9 +1,9 @@
 // SEO Configuration for BahrainNights.com
 
 export const SEO_CONFIG = {
-  siteName: 'BahrainNights',
+  siteName: 'Bahrain Nights',
   siteUrl: 'https://www.bahrainnights.com',
-  defaultTitle: 'BahrainNights - Events, Nightlife & Attractions in Bahrain',
+  defaultTitle: 'Bahrain Nights - Events, Nightlife & Attractions in Bahrain',
   defaultDescription: 'Discover the best events, nightlife, restaurants, clubs, and attractions in Bahrain. Your ultimate guide to things to do in Bahrain.',
   defaultImage: 'https://bahrainnights-production.s3.me-south-1.amazonaws.com/og-default.jpg',
   twitterHandle: '@bahaborainnights',
@@ -32,7 +32,7 @@ export const SEO_CONFIG = {
   // Page-specific SEO templates
   pageTemplates: {
     home: {
-      title: 'BahrainNights - Events, Nightlife & Things to Do in Bahrain',
+      title: 'Bahrain Nights - Events, Nightlife & Things to Do in Bahrain',
       description: 'Discover the best events, nightlife, restaurants, clubs, and attractions in Bahrain. Your ultimate guide to things to do in Bahrain this weekend.',
       keywords: ['events in bahrain', 'nightlife in bahrain', 'things to do in bahrain', 'bahrain entertainment']
     },
@@ -75,7 +75,7 @@ export const SEO_CONFIG = {
 
   // Organization schema data
   organization: {
-    name: 'BahrainNights',
+    name: 'Bahrain Nights',
     legalName: 'BahrainNights',
     url: 'https://www.bahrainnights.com',
     logo: 'https://bahrainnights-production.s3.me-south-1.amazonaws.com/logo.png',
