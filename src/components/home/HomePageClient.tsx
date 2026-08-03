@@ -528,7 +528,7 @@ export default function HomePageClient({ initialMovies, initialStats, initialTod
                   className="text-2xl lg:text-3xl font-black bg-gradient-to-r from-yellow-500 via-amber-400 to-yellow-600 bg-clip-text text-transparent"
                   style={{ filter: 'drop-shadow(0 0 8px rgba(217, 119, 6, 0.4))' }}
                 >
-                  BahrainNights
+                  Bahrain Nights
                 </span>
               </Link>
             </div>
@@ -1008,7 +1008,7 @@ export default function HomePageClient({ initialMovies, initialStats, initialTod
                 className="text-3xl font-black bg-gradient-to-r from-yellow-500 via-amber-400 to-yellow-600 bg-clip-text text-transparent mb-4"
                 style={{ filter: 'drop-shadow(0 0 8px rgba(217, 119, 6, 0.4))' }}
               >
-                BahrainNights
+                Bahrain Nights
               </div>
               <p className="text-gray-400 mb-6">{t.footer.tagline}</p>
               <div className="flex space-x-4">
