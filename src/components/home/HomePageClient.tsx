@@ -749,6 +749,14 @@ export default function HomePageClient({ initialMovies, initialStats, initialTod
             <span className="text-white font-semibold">{initialLiveEventCounts?.international || initialInternationalEvents.length || 0} Events in GCC and UK</span>
           </p>
 
+          {/* Intro copy — visible descriptive text for search engines */}
+          <p
+            className="text-base md:text-lg text-gray-300 mb-8 max-w-2xl mx-auto drop-shadow-lg animate-fade-in animation-delay-250"
+            style={{ textShadow: '0 2px 8px rgba(0, 0, 0, 0.8)' }}
+          >
+            Bahrain Nights is your guide to events, dining, cinema and nightlife across the Kingdom of Bahrain. Discover what&apos;s on tonight, this weekend, and beyond.
+          </p>
+
           {/* Search Bar */}
           <div
             className="max-w-2xl mx-auto animate-fade-in-up animation-delay-300"

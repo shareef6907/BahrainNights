@@ -138,6 +138,7 @@ export default function RootLayout({
                   '@type': 'Organization',
                   '@id': 'https://www.bahrainnights.com/#organization',
                   name: 'BahrainNights',
+                  alternateName: 'BahrainNights',
                   url: 'https://www.bahrainnights.com',
                   logo: {
                     '@type': 'ImageObject',
@@ -147,7 +148,7 @@ export default function RootLayout({
                   },
                   description: "Bahrain's premier guide to events, dining, nightlife, and entertainment. Discover the best things to do in Bahrain and the region.",
                   sameAs: [
-                    'https://www.instagram.com/bh.nights',
+                    'https://www.instagram.com/bh.nights/',
                     'https://facebook.com/BahrainNights',
                     'https://www.eventsbahrain.com',
                     'https://www.filmproductionbahrain.com'
