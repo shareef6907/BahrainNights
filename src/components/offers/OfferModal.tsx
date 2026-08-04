@@ -179,8 +179,8 @@ export default function OfferModal({ offer, isOpen, onClose }: OfferModalProps) 
                 )}
               </div>
 
-              {/* Venue Logo */}
-              <div className="absolute -bottom-6 left-6 w-16 h-16 bg-white rounded-2xl shadow-lg overflow-hidden border-4 border-slate-900">
+              {/* Venue Logo — matches PlaceCard treatment */}
+              <div className="absolute -bottom-6 left-6 w-16 h-16 rounded-2xl shadow-lg overflow-hidden border-4 border-slate-900 ring-2 ring-white/20">
                 <Image
                   src={offer.venue.logo}
                   alt={offer.venue.name}
