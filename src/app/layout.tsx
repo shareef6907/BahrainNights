@@ -123,7 +123,7 @@ export default function RootLayout({
         <link rel="preconnect" href="https://bahrainnights-production.s3.me-south-1.amazonaws.com" />
         <link rel="preconnect" href="https://image.tmdb.org" />
         {/* Preload hero poster for faster LCP */}
-        <link rel="preload" href="/header-video-poster.webp" as="image" type="image/webp" />
+        <link rel="preload" href="/header-poster.webp" as="image" type="image/webp" />
         <link rel="dns-prefetch" href="https://bahrainnights-production.s3.me-south-1.amazonaws.com" />
         <link rel="dns-prefetch" href="https://image.tmdb.org" />
         <link rel="dns-prefetch" href="https://cdn.platinumlist.net" />

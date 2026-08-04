@@ -703,13 +703,15 @@ export default function HomePageClient({ initialMovies, initialStats, initialTod
             loop
             playsInline
             autoPlay
-            preload="auto"
-            poster="/header-video-poster.webp"
+            preload="metadata"
+            poster="/header-poster.webp"
             disablePictureInPicture
             className="absolute inset-0 w-full h-full object-cover"
             style={{ objectPosition: 'center center' }}
-            src="/Header-Video1.mp4"
-          />
+          >
+            <source src="/header-1080p-hq.webm" type="video/webm" />
+            <source src="/header-1080p-hq.mp4" type="video/mp4" />
+          </video>
           {/* Dark overlay for better text readability */}
           <div className="absolute inset-0 bg-black/50" />
           {/* Subtle navy blue gradient at bottom to blend with background */}
