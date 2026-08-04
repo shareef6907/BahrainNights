@@ -69,8 +69,8 @@ function DayOfferRow({ offer, onClick }: DayRowProps) {
       whileHover={{ x: 4 }}
       whileTap={{ scale: 0.98 }}
     >
-      {/* Venue Logo */}
-      <div className="relative w-14 h-14 rounded-xl overflow-hidden flex-shrink-0 bg-white shadow-lg">
+      {/* Venue Logo — matches PlaceCard treatment */}
+      <div className="relative w-14 h-14 rounded-xl overflow-hidden flex-shrink-0 shadow-lg ring-2 ring-white/20">
         <Image
           src={offer.venue.logo}
           alt={offer.venue.name}

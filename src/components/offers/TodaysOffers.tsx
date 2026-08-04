@@ -56,8 +56,8 @@ function OfferMiniCard({ offer, onClick }: OfferMiniCardProps) {
       whileHover={{ x: 4 }}
       whileTap={{ scale: 0.98 }}
     >
-      {/* Venue Logo */}
-      <div className="relative w-12 h-12 rounded-lg overflow-hidden flex-shrink-0 bg-white">
+      {/* Venue Logo — matches PlaceCard treatment */}
+      <div className="relative w-12 h-12 rounded-lg overflow-hidden flex-shrink-0 ring-2 ring-white/20">
         <Image
           src={offer.venue.logo}
           alt={offer.venue.name}
