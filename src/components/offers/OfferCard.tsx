@@ -128,13 +128,13 @@ function OfferCard({ offer, index, onClick }: OfferCardProps) {
             )}
           </div>
 
-          {/* Venue Logo */}
-          <div className="absolute bottom-3 left-3 w-12 h-12 bg-white rounded-xl shadow-lg overflow-hidden">
+          {/* Venue Logo — matches PlaceCard treatment: transparent bg, ring, object-cover */}
+          <div className="absolute bottom-3 left-3 w-12 h-12 rounded-xl shadow-lg overflow-hidden ring-2 ring-white/20">
             <Image
               src={offer.venue.logo}
               alt={`${offer.venue.name} logo`}
               fill
-              className="object-contain p-1"
+              className="object-cover"
               sizes="48px"
             />
           </div>
