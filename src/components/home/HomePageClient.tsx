@@ -116,6 +116,7 @@ export interface HomepageMovie {
   is_now_showing: boolean;
   synopsis: string | null;
   trailer_url: string | null;
+  trailer_key: string | null;
   movie_cast: string[];
   scraped_from: string[];
 }
@@ -858,7 +859,7 @@ export default function HomePageClient({ initialMovies, initialStats, initialTod
                     loading={index < 2 ? 'eager' : 'lazy'}
                   />
                   {/* Mobile-friendly play trailer button - always visible on mobile */}
-                  {movie.trailer_url && (
+                  {movie.trailer_key && (
                     <button
                       onClick={(e) => {
                         e.stopPropagation();
@@ -880,7 +881,7 @@ export default function HomePageClient({ initialMovies, initialStats, initialTod
                         </div>
                       )}
                       {/* Play trailer button - hover only on desktop */}
-                      {movie.trailer_url && (
+                      {movie.trailer_key && (
                         <button
                           onClick={(e) => {
                             e.stopPropagation();

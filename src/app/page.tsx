@@ -102,15 +102,16 @@ async function getMovies(): Promise<HomepageMovie[]> {
 
   const { data, error } = await supabaseAdmin
     .from('movies')
-    .select('id, title, slug, poster_url, backdrop_url, tmdb_rating, genre, duration_minutes, language, release_date, is_now_showing, synopsis, trailer_url, movie_cast, scraped_from')
+    .select('id, title, slug, poster_url, backdrop_url, tmdb_rating, genre, duration_minutes, language, release_date, is_now_showing, synopsis, trailer_key, trailer_url, movie_cast, scraped_from')
     .eq('is_now_showing', true)
+    // Only movies WITH a trailer (non-null trailer_key = has a YouTube video)
+    .not('trailer_key', 'is', null)
     .not('language', 'in', `(${indianLanguages.join(',')})`)
-    // Show movies from any source (VOX, manual, etc) or null (legacy)
-    .or('scraped_from.is.null,scraped_from.cs.{vox}')
     // Must have a valid poster URL (starts with http)
     .like('poster_url', 'http%')
-    .order('tmdb_rating', { ascending: false })
-    .limit(12); // Fetch more to filter duplicates
+    // Newest releases first
+    .order('release_date', { ascending: false })
+    .limit(8);
 
   if (error) {
     console.error('Error fetching movies:', error);
@@ -136,7 +137,7 @@ async function getMovies(): Promise<HomepageMovie[]> {
     return true;
   });
 
-  return uniqueMovies.slice(0, 4);
+  return uniqueMovies.slice(0, 4) as HomepageMovie[];
 }
 
 // Fetch international events for homepage section

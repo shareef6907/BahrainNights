@@ -4,6 +4,7 @@ import CinemaPageClient from '@/components/cinema/CinemaPageClient';
 import { Movie } from '@/components/cinema/MovieCard';
 import MovieListSchema from '@/components/SEO/MovieListSchema';
 import BreadcrumbSchema from '@/components/SEO/BreadcrumbSchema';
+import { normalizeTitle } from '@/lib/cinema-normalize';
 
 // Revalidate every 60 seconds for fresh data
 export const revalidate = 60;
@@ -82,7 +83,16 @@ function convertToMovieFormat(dbMovie: DBMovie): Movie {
   };
 }
 
-// Filter movies with valid posters
+/**
+ * Filter movies for display on /cinema.
+ *
+ * Rules:
+ *  1. Must have a valid poster (non-null, not a placeholder).
+ *     Movies without posters are still INSERTED into the DB by the sync
+ *     pipeline — they are just not displayed here.
+ *  2. Deduplication: uses the SAME normalizeTitle() as the sync pipeline
+ *     to ensure consistent dedup keys between scrape/insert and display.
+ */
 function filterValidMovies(movies: DBMovie[]): DBMovie[] {
   const validMovies = movies.filter(movie => {
     const poster = movie.poster_url || '';
@@ -92,10 +102,10 @@ function filterValidMovies(movies: DBMovie[]): DBMovie[] {
     return true;
   });
 
-  // Remove duplicates by title
+  // Remove duplicates using the shared normalization key
   const seen = new Set<string>();
   return validMovies.filter(movie => {
-    const key = movie.title.toLowerCase().trim();
+    const key = normalizeTitle(movie.title);
     if (seen.has(key)) return false;
     seen.add(key);
     return true;
