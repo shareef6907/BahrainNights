@@ -165,11 +165,6 @@ export default function InternationalEventsSection({ events, eventsByCountry, co
         ? (eventsByCountry[selectedCountry] || [])
         : events;
     
-    // Limit to 6 per city when viewing a specific city
-    if (selectedCity) {
-      filtered = filtered.slice(0, 6);
-    }
-    
     return filtered;
   }, [selectedCountry, selectedCity, events, eventsByCountry, citiesByCountry]);
 
@@ -184,7 +179,7 @@ export default function InternationalEventsSection({ events, eventsByCountry, co
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-gray-900 via-gray-900 to-black">
+    <div className="py-16 bg-gradient-to-b from-gray-900 via-gray-900 to-black">
       {/* Section Header */}
       <div className="relative overflow-hidden">
         <div className="absolute inset-0 bg-gradient-to-r from-purple-900/30 via-blue-900/30 to-teal-900/30" />
@@ -306,14 +301,6 @@ export default function InternationalEventsSection({ events, eventsByCountry, co
             <h3 className="text-2xl font-bold text-white">
               {selectedCity} {selectedCity && <span className="text-gray-400">({displayedEvents.length} events)</span>}
             </h3>
-            {(displayedEvents.length >= 6) && (
-              <Link
-                href={`/international/${selectedCountry?.toLowerCase().replace(/\s+/g, '-')}?city=${encodeURIComponent(selectedCity)}`}
-                className="text-purple-400 hover:text-purple-300 text-sm mt-2 inline-block"
-              >
-                View all in {selectedCity} →
-              </Link>
-            )}
           </div>
         )}
 
