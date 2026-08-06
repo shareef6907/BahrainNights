@@ -704,13 +704,13 @@ export default function HomePageClient({ initialMovies, initialStats, initialTod
             playsInline
             autoPlay
             preload="metadata"
-            poster="/header-poster-v2.webp"
+            poster="/header-poster-v3.jpg"
             disablePictureInPicture
             className="absolute inset-0 w-full h-full object-cover"
             style={{ objectPosition: 'center center' }}
           >
-            <source src="/header-1080p-hq-v2.webm" type="video/webm" />
-            <source src="/header-1080p-hq-v2.mp4" type="video/mp4" />
+            <source src="/header-1080p-v3.webm" type="video/webm" />
+            <source src="/header-1080p-hq-v3.mp4" type="video/mp4" />
           </video>
           {/* Dark overlay for better text readability */}
           <div className="absolute inset-0 bg-black/50" />
