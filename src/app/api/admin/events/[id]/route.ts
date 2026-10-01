@@ -4,7 +4,7 @@ import { cookies } from 'next/headers';
 import { supabaseAdmin } from '@/lib/supabase';
 import { verifyToken } from '@/lib/auth';
 import { sendEventApprovalEmail, sendEventRejectionEmail } from '@/lib/email';
-import { indexEventPage, pingSitemap, isIndexingConfigured } from '@/lib/google-indexing';
+// Indexing API disabled per standing mission Part 2 Rule 3
 
 export const dynamic = 'force-dynamic';
 
@@ -177,21 +177,7 @@ export async function PATCH(
       console.log(`No contact email found for event: ${eventTitle}`);
     }
 
-    // Request Google indexing for approved events (time-sensitive!)
-    if (action === 'approve' && eventSlug && isIndexingConfigured()) {
-      try {
-        const indexResult = await indexEventPage(eventSlug);
-        if (indexResult.success) {
-          console.log(`Google indexing requested for event: /events/${eventSlug}`);
-          await pingSitemap();
-        } else {
-          console.warn(`Google indexing failed for event: ${eventSlug}`, indexResult.error);
-        }
-      } catch (indexError) {
-        // Log but don't fail the request
-        console.error('Failed to request Google indexing:', indexError);
-      }
-    }
+    // Google Indexing API permanently disabled per standing mission Part 2 Rule 3
 
     return NextResponse.json({
       success: true,
