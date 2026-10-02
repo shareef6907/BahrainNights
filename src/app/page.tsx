@@ -1,5 +1,6 @@
 import { supabaseAdmin } from '@/lib/supabase';
 import HomePageClient, { HomepageMovie, TodayEvent } from '@/components/home/HomePageClient';
+import { getInternationalCountrySummaries } from '@/lib/international-events';
 
 // ISR: Regenerate page every 2 minutes for fresh data without hitting DB on every request
 // This is the KEY performance optimization - cached HTML served instantly
@@ -411,7 +412,7 @@ async function getSurpriseData() {
 // Server Component - data is fetched BEFORE the page renders
 export default async function BahrainNightsHomepage() {
   // Fetch all data on the server - NO loading state needed!
-  const [movies, stats, todayEvents, internationalEvents, happeningNowEvents, surpriseData, trendingData, liveEventCounts] = await Promise.all([
+  const [movies, stats, todayEvents, internationalEvents, happeningNowEvents, surpriseData, trendingData, liveEventCounts, internationalCountries] = await Promise.all([
     getMovies(),
     getStats(),
     getTodayEvents(),
@@ -419,7 +420,8 @@ export default async function BahrainNightsHomepage() {
     getHappeningNowEvents(),
     getSurpriseData(),
     getTrendingData(),
-    getLiveEventCounts()
+    getLiveEventCounts(),
+    getInternationalCountrySummaries(),
   ]);
 
   return (
@@ -428,6 +430,7 @@ export default async function BahrainNightsHomepage() {
       initialStats={stats}
       initialTodayEvents={todayEvents}
       initialInternationalEvents={internationalEvents}
+      initialInternationalCountries={internationalCountries}
       initialHappeningNowEvents={happeningNowEvents}
       initialSurpriseData={surpriseData}
       initialTrendingData={trendingData}
