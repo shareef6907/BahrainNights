@@ -8,6 +8,7 @@ import Image from 'next/image';
 import { MapPin, Clock, Star, ChevronRight, ChevronDown, Menu, X, Play, Building2, LogIn } from 'lucide-react';
 import GlobalSearch from '@/components/search/GlobalSearch';
 import { useTranslation } from '@/lib/i18n/TranslationContext';
+import type { InternationalCountrySummary } from '@/lib/international-events';
 import { Movie } from '@/components/cinema/MovieCard';
 
 // Lazy load below-fold components for faster initial load
@@ -272,22 +273,27 @@ interface HomePageClientProps {
   initialStats: { events: number; venues: number; cinema: number; offers: number; explore: number; attractions: number; blog: number };
   initialTodayEvents: TodayEvent[];
   initialInternationalEvents: HomepageInternationalEvent[];
+  initialInternationalCountries?: InternationalCountrySummary[];
   initialHappeningNowEvents: HappeningNowEvent[];
   initialSurpriseData: { events: SurpriseOption[], places: SurpriseOption[], attractions: SurpriseOption[] };
   initialTrendingData?: { venues: TrendingVenue[], events: TrendingEvent[] };
   initialLiveEventCounts?: { local: number; international: number };
 }
 
-export default function HomePageClient({ initialMovies, initialStats, initialTodayEvents, initialInternationalEvents, initialHappeningNowEvents, initialSurpriseData, initialTrendingData, initialLiveEventCounts }: HomePageClientProps) {
+export default function HomePageClient({ initialMovies, initialStats, initialTodayEvents, initialInternationalEvents, initialInternationalCountries, initialHappeningNowEvents, initialSurpriseData, initialTrendingData, initialLiveEventCounts }: HomePageClientProps) {
   const { t } = useTranslation();
 
-  // International dropdown - GCC countries + UK
+  // International dropdown — built dynamically from real data, sorted by event count (desc)
+  // Countries with ≥1 upcoming international event appear here.
+  // If initialInternationalCountries is not available (e.g. during development), fall back gracefully.
   const internationalDropdownItems = [
     { name: t.nav.allInternational || 'All International Events', icon: '🎭', href: '/international' },
-    { name: 'UAE', icon: '🇦🇪', href: '/international/uae' },
-    { name: 'Qatar', icon: '🇶🇦', href: '/international/qatar' },
-    { name: 'Saudi Arabia', icon: '🇸🇦', href: '/international/saudi-arabia' },
-    { name: 'UK', icon: '🇬🇧', href: '/international/uk' },
+    ...(initialInternationalCountries || []).map(country => ({
+      name: country.name,
+      icon: country.flag,
+      href: `/international/${country.code}`,
+    })),
+    { name: 'View All International', icon: '🌍', href: '/international' },
   ];
 
   // Navigation menu data with translations
