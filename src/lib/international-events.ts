@@ -118,10 +118,38 @@ function sortByDisplayDate(events: InternationalEvent[], today: string): Interna
   });
 }
 
+// ─── Shared filter query builder ───────────────────────────────────────────────
+// ONE filter rule — all callers use this, no duplication.
+// Accepts any Supabase select string so callers can optimize column count.
+function buildInternationalEventsQuery(
+  supabase: typeof supabaseAdmin,
+  today: string,
+  select: string,
+  countryFilter?: { eq: string },
+) {
+  let query = supabase
+    .from('events')
+    .select(select)
+    .eq('status', 'published')
+    .eq('is_active', true)
+    .or(`start_date.gte.${today},date.gte.${today}`)
+    .order('start_date', { ascending: true, nullsFirst: false });
+
+  if (countryFilter) {
+    return query.eq('country', countryFilter.eq);
+  }
+  return query.neq('country', 'Bahrain');
+}
+
 // ─── Shared post-filter: 6-month window ─────────────────────────────────────
-function applyPostFilter(events: InternationalEvent[], sixMonthsAgoStr: string): InternationalEvent[] {
+// ONE filter function — called by every code path that filters by date range.
+// Accepts any event-like object with start_date/date fields.
+function applyPostFilter<T extends { start_date: string | null; date: string | null }>(
+  events: T[],
+  sixMonthsAgoStr: string,
+): T[] {
   return events.filter(event => {
-    const startDate = event.start_date || event.date;
+    const startDate = (event.start_date || event.date) ?? '';
     return startDate >= sixMonthsAgoStr;
   });
 }
@@ -130,7 +158,6 @@ function applyPostFilter(events: InternationalEvent[], sixMonthsAgoStr: string):
 async function fetchInternationalEventsCore(
   today: string,
   countryFilter?: { eq: string },
-  // no limit — caller decides what to do with the full list
 ): Promise<InternationalEvent[]> {
   const BATCH_SIZE = 1000;
   const sixMonthsAgo = new Date();
@@ -141,21 +168,9 @@ async function fetchInternationalEventsCore(
   let from = 0;
 
   while (true) {
-    let query = supabaseAdmin
-      .from('events')
-      .select(SELECT_FULL)
-      .eq('status', 'published')
-      .eq('is_active', true)
-      .or(`start_date.gte.${today},date.gte.${today}`)
-      .range(from, from + BATCH_SIZE - 1)
-      .order('start_date', { ascending: true, nullsFirst: false });
-
-    if (countryFilter) {
-      query = query.eq('country', countryFilter.eq);
-    } else {
-      query = query.neq('country', 'Bahrain');
-    }
-
+    // ONE query builder — same filter as getInternationalCountrySummaries
+    let query = buildInternationalEventsQuery(supabaseAdmin, today, SELECT_FULL, countryFilter);
+    query = query.range(from, from + BATCH_SIZE - 1);
     const { data, error } = await query;
 
     if (error) {
@@ -165,8 +180,8 @@ async function fetchInternationalEventsCore(
 
     if (!data || data.length === 0) break;
 
-    // Apply 6-month post-filter and smart sort per batch
-    const filtered = applyPostFilter(data as InternationalEvent[], sixMonthsAgoStr);
+    // ONE filter function — same 6-month rule as getInternationalCountrySummaries
+    const filtered = applyPostFilter(data as unknown as InternationalEvent[], sixMonthsAgoStr);
     allRows = allRows.concat(filtered);
 
     if (data.length < BATCH_SIZE) break;
@@ -210,14 +225,9 @@ export async function getInternationalCountrySummaries(): Promise<InternationalC
   let from = 0;
 
   while (true) {
-    const { data, error } = await supabaseAdmin
-      .from('events')
-      .select(SELECT_LIGHT)
-      .neq('country', 'Bahrain')
-      .eq('status', 'published')
-      .eq('is_active', true)
-      .or(`start_date.gte.${today},date.gte.${today}`)
-      .range(from, from + BATCH_SIZE - 1);
+    // ONE filter query — same builder as fetchInternationalEventsCore
+    let query = buildInternationalEventsQuery(supabaseAdmin, today, SELECT_LIGHT);
+    const { data, error } = await query.range(from, from + BATCH_SIZE - 1);
 
     if (error) {
       console.error('Error fetching international country summaries:', error);
@@ -226,11 +236,8 @@ export async function getInternationalCountrySummaries(): Promise<InternationalC
 
     if (!data || data.length === 0) break;
 
-    // Apply 6-month post-filter in JS
-    const filtered = (data as LightEventRow[]).filter(event => {
-      const startDate = (event.start_date || event.date) ?? '';
-      return startDate >= sixMonthsAgoStr;
-    });
+    // ONE filter function — same 6-month rule as fetchInternationalEventsCore
+    const filtered = applyPostFilter(data as unknown as LightEventRow[], sixMonthsAgoStr);
 
     allRows = allRows.concat(filtered);
 
