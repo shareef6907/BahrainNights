@@ -15,6 +15,7 @@ export const metadata: Metadata = {
     type: 'website',
     locale: 'en_BH',
     url: 'https://www.bahrainnights.com/places',
+    siteName: 'BahrainNights',
   },
   twitter: {
     card: 'summary_large_image',
