@@ -769,7 +769,7 @@ export default function HotelsBahrainPage() {
               <Link href="/bahrain-nightlife-guide" className="p-6 bg-gray-800/50 rounded-xl hover:bg-gray-800 transition text-center group">
                 <span className="text-3xl mb-3 block">🌙</span>
                 <h3 className="font-semibold text-white group-hover:text-blue-300">Nightlife</h3>
-                <p className="text-sm text-gray-400 mt-2">Bars & clubs</p>
+                <p className="text-sm text-gray-400 mt-2">Lounges & clubs</p>
               </Link>
               
               <Link href="/events" className="p-6 bg-gray-800/50 rounded-xl hover:bg-gray-800 transition text-center group">

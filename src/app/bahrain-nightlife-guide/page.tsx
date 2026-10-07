@@ -10,13 +10,13 @@ import {
 
 // SEO Optimized Metadata
 export const metadata: Metadata = {
-  title: 'Bahrain Nightlife Guide (2026) — Best Bars, Clubs & Parties',
-  description: 'The ultimate Bahrain nightlife guide for 2026! Discover the best bars, clubs, lounges, and party spots in Juffair, Adliya, and beyond. Ladies nights, live music, and more.',
+  title: 'Bahrain Nightlife Guide (2026) — Best Lounges, Clubs & Parties',
+  description: 'The ultimate Bahrain nightlife guide for 2026! Discover the best lounges, clubs, and party spots in Juffair, Adliya, and beyond. Ladies nights, live music, and more.',
   keywords: [
-    'Bahrain nightlife', 'bars in Bahrain', 'clubs in Bahrain', 'Bahrain party',
-    'Juffair nightlife', 'Adliya bars', 'Bahrain ladies night', 'nightclubs Bahrain',
-    'best bars Bahrain', 'Bahrain clubbing', 'party in Bahrain', 'live music Bahrain',
-    'Bahrain lounges', 'rooftop bars Bahrain', 'where to party Bahrain',
+    'Bahrain nightlife', 'lounges in Bahrain', 'clubs in Bahrain', 'Bahrain party',
+    'Juffair nightlife', 'Adliya lounges', 'Bahrain ladies night', 'nightclubs Bahrain',
+    'best lounges Bahrain', 'Bahrain clubbing', 'party in Bahrain', 'live music Bahrain',
+    'Bahrain lounges', 'rooftop lounges Bahrain', 'where to party Bahrain',
     'Bahrain night out', 'Bahrain DJ', 'Bahrain weekend'
   ].join(', '),
   alternates: {
@@ -41,7 +41,7 @@ export const metadata: Metadata = {
   twitter: {
     card: 'summary_large_image',
     title: 'Bahrain Nightlife Guide (2026)',
-    description: 'Best bars, clubs & parties in Bahrain!',
+    description: 'Best lounges, clubs & parties in Bahrain!',
   },
   robots: {
     index: true,
