@@ -288,10 +288,10 @@ function PlacesPageContent() {
     <>
       {/* SEO */}
       <head>
-        <title>Best Restaurants, Bars & Nightlife in Bahrain | Bahrain Nights</title>
+        <title>Best Restaurants, Lounges & Nightlife in Bahrain | Bahrain Nights</title>
         <meta
           name="description"
-          content="Discover the best dining and nightlife spots in Bahrain. Explore top restaurants, cafes, lounges, bars, and nightclubs across Manama, Seef, Juffair, and more."
+          content="Discover the best dining and nightlife spots in Bahrain. Explore top restaurants, cafes, lounges, and nightclubs across Manama, Seef, Juffair, and more."
         />
       </head>
 
@@ -489,9 +489,9 @@ function PlacesPageContent() {
               __html: JSON.stringify({
                 '@context': 'https://schema.org',
                 '@type': 'WebPage',
-                name: 'Best Restaurants, Bars & Nightlife in Bahrain',
+                name: 'Best Restaurants, Lounges & Nightlife in Bahrain',
                 description:
-                  'Discover the best dining and nightlife spots in Bahrain. Explore top restaurants, cafes, lounges, bars, and nightclubs.',
+                  'Discover the best dining and nightlife spots in Bahrain. Explore top restaurants, cafes, lounges, and nightclubs.',
                 url: 'https://www.bahrainnights.com/places',
                 mainEntity: {
                   '@type': 'ItemList',
