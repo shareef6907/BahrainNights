@@ -922,6 +922,15 @@ export default function HomePageClient({ initialMovies, initialStats, initialTod
             </Link>
           </div>
 
+          <div className="mb-4 flex gap-4">
+            <Link href="/tonight" className="text-sm text-purple-400 hover:text-purple-300 flex items-center gap-1 transition-colors">
+              🌙 Tonight in Bahrain
+            </Link>
+            <Link href="/events/this-weekend" className="text-sm text-pink-400 hover:text-pink-300 flex items-center gap-1 transition-colors">
+              📅 This Weekend
+            </Link>
+          </div>
+
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
             {todayEvents.length > 0 ? (
               todayEvents.map(event => (
