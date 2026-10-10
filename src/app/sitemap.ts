@@ -70,12 +70,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       changeFrequency: 'daily',
       priority: 0.95,
     },
-    {
-      url: `${BASE_URL}/this-weekend`,
-      lastModified: new Date(),
-      changeFrequency: 'daily',
-      priority: 0.95,
-    },
+
     // New SEO landing pages (Feb 2026)
     {
       url: `${BASE_URL}/best-hotels-bahrain`,
@@ -338,25 +333,6 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       changeFrequency: 'yearly',
       priority: 0.3,
     },
-    // Marketing Studio (high priority commercial page)
-    {
-      url: `${BASE_URL}/marketing`,
-      lastModified: new Date(),
-      changeFrequency: 'weekly',
-      priority: 0.9,
-    },
-    {
-      url: `${BASE_URL}/marketing/en`,
-      lastModified: new Date(),
-      changeFrequency: 'weekly',
-      priority: 0.9,
-    },
-    {
-      url: `${BASE_URL}/marketing/ar`,
-      lastModified: new Date(),
-      changeFrequency: 'weekly',
-      priority: 0.9,
-    }
   ];
 
   // If Supabase is not available (build time), return only static pages
