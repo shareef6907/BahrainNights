@@ -1,6 +1,8 @@
 import { Suspense } from 'react';
 import { createClient } from '@supabase/supabase-js';
 import ToursPageClient, { Tour } from '@/components/tours/ToursPageClient';
+import BreadcrumbSchema from '@/components/SEO/BreadcrumbSchema';
+import TourListSchema from '@/components/SEO/TourListSchema';
 
 // ISR: revalidate every hour
 export const revalidate = 3600;
@@ -98,9 +100,35 @@ export default async function ToursPage() {
   const tours = await getTours();
 
   return (
-    <Suspense fallback={null}>
-      <ToursPageClient initialTours={tours} />
-    </Suspense>
+    <>
+      <BreadcrumbSchema
+        items={[
+          { name: 'Home', url: 'https://www.bahrainnights.com' },
+          { name: 'Tours & Experiences', url: 'https://www.bahrainnights.com/tours' },
+        ]}
+      />
+      <TourListSchema
+        tours={tours.map(t => ({
+          id: t.id,
+          name: t.name,
+          slug: t.slug,
+          description: t.description,
+          shortDescription: t.shortDescription,
+          image: t.image,
+          duration: t.duration,
+          category: t.category,
+          priceFrom: t.priceFrom,
+          currency: t.currency,
+          rating: t.rating,
+        }))}
+        pageTitle="Tours & Experiences in Bahrain"
+        pageDescription="Book the best tours and experiences in Bahrain. Cultural heritage tours, pearl diving, food tours, boat trips to islands, and private guided experiences with local experts."
+        pageUrl="https://www.bahrainnights.com/tours"
+      />
+      <Suspense fallback={null}>
+        <ToursPageClient initialTours={tours} />
+      </Suspense>
+    </>
   );
 }
 
@@ -113,6 +141,7 @@ export const metadata = {
     title: 'Tours & Experiences in Bahrain',
     description: 'Discover Bahrain with expert local guides. Cultural tours, pearl diving, food experiences, and island boat trips.',
     url: 'https://www.bahrainnights.com/tours',
+    siteName: 'Bahrain Nights',
     type: 'website',
     images: [
       {
@@ -125,5 +154,14 @@ export const metadata = {
   },
   alternates: {
     canonical: 'https://www.bahrainnights.com/tours',
+  },
+  twitter: {
+    card: 'summary_large_image',
+    title: 'Tours & Experiences in Bahrain',
+    description: 'Discover Bahrain with expert local guides. Cultural tours, pearl diving, food experiences, and island boat trips.',
+  },
+  robots: {
+    index: true,
+    follow: true,
   },
 };
