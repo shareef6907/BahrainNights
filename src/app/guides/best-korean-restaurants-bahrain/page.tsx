@@ -128,6 +128,44 @@ const restaurants = [
   },
 ];
 
+function generateSchema() {
+  return {
+    '@context': 'https://schema.org',
+    '@graph': [
+      {
+        '@type': 'Article',
+        '@id': 'https://www.bahrainnights.com/guides/best-korean-restaurants-bahrain#article',
+        headline: 'Best Korean Restaurants in Bahrain 2026 | BBQ, Fried Chicken & More',
+        description: 'Discover the best Korean restaurants in Bahrain. From Korean BBQ and unlimited samgyeopsal to crispy fried chicken. Complete guide with prices, locations, and must-try dishes.',
+        author: {
+          '@type': 'Organization',
+          name: 'Bahrain Nights'
+        },
+        publisher: {
+          '@type': 'Organization',
+          name: 'Bahrain Nights',
+          logo: {
+            '@type': 'ImageObject',
+            url: 'https://www.bahrainnights.com/logo.png'
+          }
+        },
+        datePublished: '2026-01-01',
+        dateModified: new Date().toISOString().split('T')[0],
+      },
+      {
+        '@type': 'ItemList',
+        name: 'Korean Restaurants in Bahrain',
+        itemListElement: restaurants.map((r, i) => ({
+          '@type': 'ListItem',
+          position: i + 1,
+          name: r.name,
+          description: `${r.style} — ${r.location}. ${r.highlight}`,
+        })),
+      },
+    ],
+  };
+}
+
 export default function BestKoreanRestaurantsPage() {
   return (
     <div className="min-h-screen bg-gradient-to-b from-slate-950 via-pink-950/20 to-slate-950 text-white">
@@ -438,6 +476,11 @@ export default function BestKoreanRestaurantsPage() {
           { title: 'Block 338 Nightlife', href: '/guides/adliya-restaurants-bars' },
           { title: 'Best Fried Chicken', href: '/guides/best-fried-chicken-bahrain' },
         ]} 
+      />
+
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(generateSchema()) }}
       />
     </div>
   );
