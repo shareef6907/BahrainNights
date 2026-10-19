@@ -179,9 +179,52 @@ const restaurants = [
   },
 ];
 
+function generateSchema() {
+  return {
+    '@context': 'https://schema.org',
+    '@graph': [
+      {
+        '@type': 'Article',
+        '@id': 'https://www.bahrainnights.com/guides/best-turkish-restaurants-bahrain#article',
+        headline: 'Best Turkish Restaurants in Bahrain 2026',
+        description: 'Discover the best Turkish restaurants in Bahrain. From CZN Burak to authentic grillhouses, this guide covers the finest kebabs, pide, and Turkish BBQ.',
+        author: {
+          '@type': 'Organization',
+          name: 'Bahrain Nights'
+        },
+        publisher: {
+          '@type': 'Organization',
+          name: 'Bahrain Nights',
+          logo: {
+            '@type': 'ImageObject',
+            url: 'https://www.bahrainnights.com/logo.png'
+          }
+        },
+        datePublished: '2026-01-01',
+        dateModified: new Date().toISOString().split('T')[0],
+      },
+      {
+        '@type': 'ItemList',
+        name: 'Turkish Restaurants in Bahrain',
+        numberOfItems: restaurants.length,
+        itemListElement: restaurants.map((r, i) => ({
+          '@type': 'ListItem',
+          position: i + 1,
+          name: r.name,
+          description: `${r.style} — ${r.location}. ${r.highlight}`,
+        })),
+      },
+    ],
+  };
+}
+
 export default function BestTurkishRestaurantsPage() {
   return (
     <div className="min-h-screen bg-gradient-to-b from-slate-950 via-red-950/20 to-slate-950 text-white">
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(generateSchema()) }}
+      />
       <BreadcrumbSchema items={[
         { name: 'Home', url: 'https://www.bahrainnights.com' },
         { name: 'Guides', url: 'https://www.bahrainnights.com/guides' },
