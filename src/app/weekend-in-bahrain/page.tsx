@@ -843,7 +843,7 @@ export default async function WeekendPage() {
               <Link href="/bahrain-nightlife-guide" className="p-6 bg-gray-800/50 rounded-xl hover:bg-gray-800 transition text-center group">
                 <Moon className="w-8 h-8 text-purple-400 mx-auto mb-3" />
                 <h3 className="font-semibold text-white group-hover:text-purple-300">Nightlife</h3>
-                <p className="text-sm text-gray-400 mt-2">Bars & clubs</p>
+                <p className="text-sm text-gray-400 mt-2">Lounges & clubs</p>
               </Link>
               
               <Link href="/events/this-weekend" className="p-6 bg-gray-800/50 rounded-xl hover:bg-gray-800 transition text-center group">
