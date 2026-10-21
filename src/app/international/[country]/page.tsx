@@ -1,6 +1,6 @@
 import { Metadata } from 'next';
 import { notFound } from 'next/navigation';
-import { supabaseAdmin } from '@/lib/supabase';
+import { getInternationalEvents } from '@/lib/international-events';
 import CountryPageClient from './CountryPageClient';
 import BreadcrumbSchema from '@/components/SEO/BreadcrumbSchema';
 import EventListSchema from '@/components/SEO/EventListSchema';
@@ -74,26 +74,6 @@ export async function generateStaticParams() {
 
 export const revalidate = 3600; // Revalidate every hour
 
-interface InternationalEvent {
-  id: string;
-  title: string;
-  slug: string;
-  description: string | null;
-  category: string;
-  venue_name: string | null;
-  date: string;
-  time: string | null;
-  start_date: string | null;
-  start_time: string | null;
-  end_date: string | null;
-  end_time: string | null;
-  featured_image: string | null;
-  cover_url: string | null;
-  affiliate_url: string | null;
-  country: string;
-  city: string | null;
-}
-
 export default async function CountryPage({ params }: Props) {
   const { country } = await params;
   const countryConfig = COUNTRIES[country];
@@ -102,76 +82,11 @@ export default async function CountryPage({ params }: Props) {
     notFound();
   }
 
-  const today = new Date().toISOString().split('T')[0];
+  // ONE dataset: full filtered list, NO limit, same sort as /international
+  const countryEvents = await getInternationalEvents({ country: countryConfig.dbName });
 
-  // Fetch events for this country
-  // Filter: start_date >= today OR date >= today OR end_date >= today (for ongoing events)
-  let events: any[] | null = null;
-  let error: any = null;
-  
-  try {
-    const result = await supabaseAdmin
-      .from('events')
-      .select(`
-        id,
-        title,
-        slug,
-        description,
-        category,
-        venue_name,
-        date,
-        time,
-        start_date,
-        start_time,
-        end_date,
-        end_time,
-        featured_image,
-        cover_url,
-        affiliate_url,
-        country,
-        city
-      `)
-      .eq('country', countryConfig.dbName)
-      .eq('status', 'published')
-      .eq('is_active', true)
-      .or(`start_date.gte.${today},date.gte.${today}`)
-      .order('start_date', { ascending: true, nullsFirst: false })
-      .limit(100);
-    events = result.data;
-    error = result.error;
-  } catch (e) {
-    console.error(`Error fetching events for ${countryConfig.name} (may be build time):`, e);
-    events = [];
-  }
-
-  if (error) {
-    console.error(`Error fetching events for ${countryConfig.name}:`, error);
-  }
-
-  // Post-process: filter out events with start_date more than 6 months in the past
-  // and sort by most relevant display date
-  const sixMonthsAgo = new Date();
-  sixMonthsAgo.setMonth(sixMonthsAgo.getMonth() - 6);
-  const sixMonthsAgoStr = sixMonthsAgo.toISOString().split('T')[0];
-
-  const countryEvents: InternationalEvent[] = (events || [])
-    .filter(event => {
-      const startDate = event.start_date || event.date;
-      return startDate >= sixMonthsAgoStr;
-    })
-    .sort((a, b) => {
-      const getDisplayDate = (e: InternationalEvent) => {
-        const start = e.start_date || e.date;
-        const end = e.end_date;
-        if (start >= today) return start;
-        if (end && end >= today) return end;
-        return start;
-      };
-      return getDisplayDate(a).localeCompare(getDisplayDate(b));
-    });
-
-  // Group events by city
-  const eventsByCity: Record<string, InternationalEvent[]> = {};
+  // Group by city — derived from the ONE dataset
+  const eventsByCity: Record<string, typeof countryEvents> = {};
   countryEvents.forEach(event => {
     const city = event.city || 'Other';
     if (!eventsByCity[city]) {
@@ -180,7 +95,7 @@ export default async function CountryPage({ params }: Props) {
     eventsByCity[city].push(event);
   });
 
-  // Transform events for schema
+  // Schema: first 15 events
   const schemaEvents = countryEvents.slice(0, 15).map(event => ({
     title: event.title,
     start_date: event.start_date || event.date,

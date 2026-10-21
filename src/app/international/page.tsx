@@ -1,5 +1,5 @@
 import { Metadata } from 'next';
-import { supabaseAdmin } from '@/lib/supabase';
+import { getInternationalEvents } from '@/lib/international-events';
 import InternationalPageClient from './InternationalPageClient';
 import BreadcrumbSchema from '@/components/SEO/BreadcrumbSchema';
 import EventListSchema from '@/components/SEO/EventListSchema';
@@ -18,25 +18,6 @@ export const metadata: Metadata = {
 };
 
 export const revalidate = 3600; // Revalidate every hour
-
-interface InternationalEvent {
-  id: string;
-  title: string;
-  slug: string;
-  description: string | null;
-  category: string;
-  venue_name: string | null;
-  date: string;
-  time: string | null;
-  start_date: string | null;
-  end_date: string | null;
-  start_time: string | null;
-  featured_image: string | null;
-  cover_url: string | null;
-  affiliate_url: string | null;
-  country: string;
-  city: string | null;
-}
 
 // Country configuration with flags - comprehensive list of all Platinumlist countries
 const COUNTRY_CONFIG: Record<string, { flag: string; code: string }> = {
@@ -79,103 +60,33 @@ const COUNTRY_CONFIG: Record<string, { flag: string; code: string }> = {
 };
 
 export default async function InternationalPage() {
-  const today = new Date().toISOString().split('T')[0];
+  // ONE dataset: full filtered list, no limit, same sort as country pages
+  const internationalEvents = await getInternationalEvents();
 
-  // Fetch all international events (not from Bahrain)
-  // Filter: start_date >= today OR date >= today OR end_date >= today (for ongoing events)
-  // This ensures we show upcoming events AND ongoing events (started in past but still running)
-  let events: any[] | null = null;
-  let error: any = null;
-  
-  try {
-    const result = await supabaseAdmin
-      .from('events')
-    .select(`
-      id,
-      title,
-      slug,
-      description,
-      category,
-      venue_name,
-      date,
-      time,
-      start_date,
-      end_date,
-      start_time,
-      featured_image,
-      cover_url,
-      affiliate_url,
-      country,
-      city
-    `)
-    .neq('country', 'Bahrain')
-      .eq('status', 'published')
-      .eq('is_active', true)
-      .or(`start_date.gte.${today},date.gte.${today}`)
-      .order('start_date', { ascending: true, nullsFirst: false });
-    events = result.data;
-    error = result.error;
-  } catch (e) {
-    console.error('Error fetching international events (may be build time):', e);
-    events = [];
-  }
-
-  if (error) {
-    console.error('Error fetching international events:', error);
-  }
-
-  // Post-process events:
-  // 1. Filter out events with start_date more than 6 months in the past (even if end_date is future)
-  // 2. Sort by display date (start_date if future, else end_date for ongoing events)
-  const sixMonthsAgo = new Date();
-  sixMonthsAgo.setMonth(sixMonthsAgo.getMonth() - 6);
-  const sixMonthsAgoStr = sixMonthsAgo.toISOString().split('T')[0];
-
-  const internationalEvents: InternationalEvent[] = (events || [])
-    .filter(event => {
-      // Keep if start_date is within last 6 months or in the future
-      const startDate = event.start_date || event.date;
-      return startDate >= sixMonthsAgoStr;
-    })
-    .sort((a, b) => {
-      // Sort by the most relevant date for display
-      const getDisplayDate = (e: InternationalEvent) => {
-        const start = e.start_date || e.date;
-        const end = e.end_date;
-        // If start is in future, use it; otherwise use end_date for ongoing events
-        if (start >= today) return start;
-        if (end && end >= today) return end;
-        return start;
-      };
-      return getDisplayDate(a).localeCompare(getDisplayDate(b));
-    });
-
-  // Get unique countries from events and build dynamic country list
+  // Derive country list from the ONE dataset
   const uniqueCountries = [...new Set(internationalEvents.map(e => e.country))].filter(Boolean);
 
-  // Build countries array with flags, sorted by event count
-  const countriesWithEvents = uniqueCountries.map(countryName => {
-    const config = COUNTRY_CONFIG[countryName] || { flag: '🌍', code: countryName.toLowerCase().replace(/\s+/g, '-') };
-    return {
-      code: config.code,
-      name: countryName,
-      flag: config.flag,
-      fullName: countryName,
-    };
-  });
-
-  // Group events by country
-  const eventsByCountry: Record<string, InternationalEvent[]> = {};
+  const eventsByCountry: Record<string, typeof internationalEvents> = {};
   uniqueCountries.forEach(countryName => {
     eventsByCountry[countryName] = internationalEvents.filter(e => e.country === countryName);
   });
 
-  // Sort countries by event count (descending)
-  countriesWithEvents.sort((a, b) =>
-    (eventsByCountry[b.name]?.length || 0) - (eventsByCountry[a.name]?.length || 0)
-  );
+  const countriesWithEvents = uniqueCountries
+    .map(countryName => {
+      const config = COUNTRY_CONFIG[countryName] || {
+        flag: '🌍',
+        code: countryName.toLowerCase().replace(/\s+/g, '-'),
+      };
+      return {
+        code: config.code,
+        name: countryName,
+        flag: config.flag,
+        fullName: countryName,
+      };
+    })
+    .sort((a, b) => (eventsByCountry[b.name]?.length || 0) - (eventsByCountry[a.name]?.length || 0));
 
-  // Transform events for schema
+  // Schema: first 15 events
   const schemaEvents = internationalEvents.slice(0, 15).map(event => ({
     title: event.title,
     start_date: event.start_date || event.date,
