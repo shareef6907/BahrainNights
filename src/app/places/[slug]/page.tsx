@@ -3,6 +3,7 @@ import { Metadata } from 'next';
 import { getVenueBySlug, getApprovedVenues, getVenueEvents, getVenueOffers, getVenueReels } from '@/lib/db/venues';
 import PlaceDetailPageContent from '@/components/places/PlaceDetailPageContent';
 import VenueSchema from '@/components/SEO/VenueSchema';
+import BreadcrumbSchema from '@/components/SEO/BreadcrumbSchema';
 
 // Force dynamic rendering to ensure fresh data after admin approval
 export const dynamic = 'force-dynamic';
@@ -75,6 +76,13 @@ export default async function PlaceDetailPage({ params }: PageProps) {
 
   return (
     <>
+      <BreadcrumbSchema
+        items={[
+          { name: 'Home', url: 'https://www.bahrainnights.com/' },
+          { name: 'Places', url: 'https://www.bahrainnights.com/places' },
+          { name: venue.name, url: `https://www.bahrainnights.com/places/${slug}` },
+        ]}
+      />
       <VenueSchema
         venue={{
           name: venue.name,

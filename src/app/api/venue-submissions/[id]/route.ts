@@ -3,7 +3,7 @@ import { getAdminClient } from '@/lib/supabase/server';
 import { cookies } from 'next/headers';
 import jwt from 'jsonwebtoken';
 import type { VenueSubmission } from '@/types/database';
-import { indexVenuePage, pingSitemap, isIndexingConfigured } from '@/lib/google-indexing';
+// Indexing API disabled per standing mission Part 2 Rule 3
 
 interface JWTPayload {
   userId: string;
@@ -214,30 +214,7 @@ export async function PATCH(request: NextRequest, { params }: PageProps) {
       );
     }
 
-    // Request Google indexing for approved venues
-    if (status === 'approved' && venueId && isIndexingConfigured()) {
-      try {
-        // Get the venue slug for indexing
-        const { data: venue } = await supabase
-          .from('venues')
-          .select('slug')
-          .eq('id', venueId)
-          .single() as { data: { slug: string } | null };
-        
-        if (venue?.slug) {
-          const indexResult = await indexVenuePage(venue.slug);
-          if (indexResult.success) {
-            console.log(`Google indexing requested for venue: /places/${venue.slug}`);
-            await pingSitemap();
-          } else {
-            console.warn(`Google indexing failed for venue: ${venue.slug}`, indexResult.error);
-          }
-        }
-      } catch (indexError) {
-        // Log but don't fail the request
-        console.error('Failed to request Google indexing:', indexError);
-      }
-    }
+    // Google Indexing API permanently disabled per standing mission Part 2 Rule 3
 
     return NextResponse.json({
       success: true,
