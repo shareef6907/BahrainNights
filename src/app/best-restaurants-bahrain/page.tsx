@@ -248,7 +248,7 @@ const restaurantCategories = [
     color: 'from-indigo-500 to-violet-600',
     description: 'When hunger strikes after midnight',
     restaurants: [
-      { name: 'Block 338', cuisine: 'Various', location: 'Adliya', price: '$$', rating: 4.4, desc: 'Trendy destination with multiple restaurants and lounges. Open late every night.', specialties: ['Various Cuisines', 'Cocktails', 'Shisha'], link: '/lounges-bars' },
+      { name: 'Block 338', cuisine: 'Various', location: 'Adliya', price: '$$', rating: 4.4, desc: 'Trendy destination with multiple restaurants and lounges. Open late every night.', specialties: ['Various Cuisines', 'Cocktails', 'Shisha'], link: '/places?category=lounge' },
       { name: 'Bahrain Bay Kitchen', cuisine: 'International', location: 'Four Seasons', price: '$$$', rating: 4.5, desc: '24-hour restaurant at Four Seasons. Perfect for late-night cravings.', specialties: ['All-Day Dining', 'Room Service Quality', 'Night Menu'], link: '/restaurants' },
       { name: 'Al Bandar', cuisine: 'Fast Casual', location: 'Juffair', price: '$', rating: 4.2, desc: 'Late-night spot popular after clubbing. Shawarma and grill favorites.', specialties: ['Shawarma', 'Mixed Grill', 'Hummus'], link: '/restaurants' },
       { name: 'Lulu Hypermarket Food Court', cuisine: 'Various', location: 'Multiple', price: '$', rating: 4.0, desc: 'Budget-friendly option open until midnight. Various cuisines under one roof.', specialties: ['Indian', 'Filipino', 'Arabic'], link: '/restaurants' },

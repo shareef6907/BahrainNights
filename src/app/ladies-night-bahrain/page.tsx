@@ -101,7 +101,7 @@ function generateSchema() {
             name: 'What is ladies night in Bahrain?',
             acceptedAnswer: {
               '@type': 'Answer',
-              text: 'Ladies night in Bahrain is a popular promotion where women receive free drinks, free entry, or special discounts at lounges, clubs, and lounges. Most ladies nights run on Tuesday, Wednesday, or Thursday evenings, typically from 8 PM to midnight.'
+              text: 'Ladies night in Bahrain is a popular promotion where women receive free drinks, free entry, or special discounts at lounges, clubs, and party spots. Most ladies nights run on Tuesday, Wednesday, or Thursday evenings, typically from 8 PM to midnight.'
             }
           },
           {
@@ -649,7 +649,7 @@ export default function LadiesNightPage() {
                 <h3 className="text-xl font-semibold text-white mb-3">What is ladies night in Bahrain?</h3>
                 <p className="text-gray-300">
                   Ladies night is a promotional event where women receive free drinks, free entry, or special 
-                  discounts at lounges, clubs, and lounges. Most run on Tuesday, Wednesday, or Thursday evenings, 
+                  discounts at lounges, clubs, and party spots. Most run on Tuesday, Wednesday, or Thursday evenings, 
                   typically from 8 PM to midnight.
                 </p>
               </div>

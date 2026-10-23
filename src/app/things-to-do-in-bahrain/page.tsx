@@ -234,7 +234,7 @@ const activities = [
     items: [
       { num: 16, name: 'Juffair Nightlife', desc: 'Bahrain\'s party district. Multiple clubs, lounges, and late-night venues. Something for everyone.', link: '/nightlife-bahrain' },
       { num: 17, name: 'Adliya Nightlife', desc: 'Trendy neighborhood with cocktail lounges, live music venues, and art galleries.', link: '/nightlife-bahrain' },
-      { num: 18, name: 'Rooftop Lounges', desc: 'Stunning city views with premium drinks. CUT, Hazel Rooftop, and more.', link: '/lounges-bars' },
+      { num: 18, name: 'Rooftop Lounges', desc: 'Stunning city views with premium drinks. CUT, Hazel Rooftop, and more.', link: '/places?category=lounge' },
       { num: 19, name: 'Live Music Venues', desc: 'Jazz clubs, rock lounges, and Filipino bands. Live entertainment every night of the week.', link: '/events?category=music' },
       { num: 20, name: 'Ladies Night', desc: 'Free drinks and entry for ladies at top venues. Every night has a ladies night somewhere!', link: '/ladies-night-bahrain' },
       { num: 21, name: 'Beach Club Party', desc: 'Daytime parties with pools, DJs, and cocktails. Coral Bay and Jumeirah lead the scene.', link: '/attractions' },

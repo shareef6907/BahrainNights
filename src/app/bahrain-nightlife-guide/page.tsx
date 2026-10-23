@@ -641,7 +641,7 @@ export default async function NightlifePage() {
                 Tonight's Events
               </Link>
               <Link 
-                href="/lounges-bars"
+                href="/places?category=lounge"
                 className="px-8 py-4 bg-gray-800 rounded-full text-white font-semibold hover:bg-gray-700 transition"
               >
                 Browse Venues

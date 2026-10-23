@@ -464,7 +464,7 @@ export default async function TonightPage() {
                 Venues Open Tonight
               </h2>
               <Link
-                href="/lounges-bars"
+                href="/places?category=lounge"
                 className="text-purple-400 hover:text-purple-300 flex items-center gap-1 text-sm font-medium"
               >
                 Browse all venues <ArrowRight className="w-4 h-4" />
@@ -591,7 +591,7 @@ export default async function TonightPage() {
               Full Nightlife Guide
             </Link>
             <Link
-              href="/lounges-bars"
+              href="/places?category=lounge"
               className="px-6 py-3 bg-white/10 hover:bg-white/20 rounded-full font-semibold transition"
             >
               Browse Lounges

@@ -56,7 +56,7 @@ function generateSchema() {
         '@type': 'Article',
         '@id': 'https://www.bahrainnights.com/nightlife-bahrain#article',
         headline: 'Nightlife in Bahrain — Best Lounges, Clubs & Party Spots 2026',
-        description: 'Complete guide to Bahrain nightlife. Discover the best lounges, clubs, and lounges across the island.',
+        description: 'Complete guide to Bahrain nightlife. Discover the best lounges, clubs, and party spots across the island.',
         author: {
           '@type': 'Organization',
           name: 'Bahrain Nights'
@@ -263,7 +263,7 @@ export default function NightlifePage() {
               </h1>
               <p className="text-xl text-gray-300 max-w-3xl mx-auto leading-relaxed">
                 From sophisticated hotel lounges to buzzing nightclubs, Bahrain offers the most vibrant nightlife 
-                in the Gulf. Discover the best lounges, clubs, and lounges across the island.
+                in the Gulf. Discover the best lounges, clubs, and party spots across the island.
               </p>
               
               <div className="flex flex-wrap justify-center gap-8 mt-10">
