@@ -106,7 +106,7 @@ export function UserMenu({ className }: UserMenuProps) {
           {/* Menu items */}
           <div className="py-1">
             <a
-              href="/my-likes"
+              href="/#favorites"
               className="flex items-center gap-3 px-4 py-2 text-white/70 hover:text-white hover:bg-white/5 transition-colors"
             >
               <Heart size={18} />
