@@ -164,12 +164,12 @@ const neighborhoods = [
     vibe: 'Energetic, diverse, loud, fun',
     bestFor: 'Clubbing, bar hopping, late nights',
     venues: [
-      { name: 'Club Downtown', type: 'Nightclub', desc: 'Premier nightclub with international DJs, VIP sections, and huge dance floor. Thursday and Friday nights are legendary.', hours: '10pm-2am', link: '/nightclubs' },
-      { name: 'Wrangler\'s', type: 'Country Bar', desc: 'Unique country-western themed bar with live music, dancing, and American comfort food.', hours: '8pm-2am', link: '/lounges-bars' },
-      { name: 'Diggers', type: 'Sports Bar', desc: 'Popular expat hangout with multiple screens, pool tables, and great pub atmosphere.', hours: '12pm-2am', link: '/lounges-bars' },
-      { name: 'Club Paparazzi', type: 'Nightclub', desc: 'Bollywood nights, hip-hop, and mixed music. Popular with diverse crowds.', hours: '10pm-2am', link: '/nightclubs' },
-      { name: 'Typhoon', type: 'Lounge Bar', desc: 'Asian-inspired lounge with creative cocktails and late-night dining.', hours: '6pm-2am', link: '/lounges-bars' },
-      { name: 'JJ\'s Irish Pub', type: 'Pub', desc: 'Classic Irish pub with live music, quiz nights, and friendly atmosphere.', hours: '12pm-2am', link: '/lounges-bars' },
+      { name: 'Club Downtown', type: 'Nightclub', desc: 'Premier nightclub with international DJs, VIP sections, and huge dance floor. Thursday and Friday nights are legendary.', hours: '10pm-2am', link: '/places?category=nightclub' },
+      { name: 'Wrangler\'s', type: 'Nightclub', desc: 'R&B and hip-hop club at Juffair Grand Hotel with DJs, live performances, and late-night dancing.', hours: '8pm-2am', link: '/places?category=nightclub' },
+      { name: 'Diggers', type: 'Sports Lounge', desc: 'Aussie pub at Delmon International Hotel with multiple screens, pool tables, and a lively crowd.', hours: '12pm-2am', link: '/places?category=lounge' },
+      { name: 'Club Paparazzi', type: 'Nightclub', desc: 'Bollywood nights, hip-hop, and mixed music. Popular with diverse crowds.', hours: '10pm-2am', link: '/places?category=nightclub' },
+      { name: 'Typhoon', type: 'Lounge', desc: 'Asian-inspired lounge with creative cocktails and late-night dining.', hours: '6pm-2am', link: '/places?category=lounge' },
+      { name: 'JJ\'s Irish Pub', type: 'Pub', desc: 'Classic Irish pub with live music, quiz nights, and friendly atmosphere.', hours: '12pm-2am', link: '/places?category=lounge' },
     ]
   },
   {
@@ -181,11 +181,11 @@ const neighborhoods = [
     vibe: 'Trendy, artistic, upscale casual',
     bestFor: 'Cocktails, dinner dates, bar hopping',
     venues: [
-      { name: 'Block 338', type: 'Entertainment Complex', desc: 'The iconic Adliya destination with multiple bars, restaurants, and rooftop venues under one umbrella.', hours: '6pm-2am', link: '/lounges-bars' },
-      { name: 'Hazel Rooftop', type: 'Rooftop Bar', desc: 'Stunning rooftop lounge with city views, craft cocktails, and sophisticated vibe.', hours: '6pm-1am', link: '/lounges-bars' },
-      { name: 'Coda Jazz Lounge', type: 'Jazz Club', desc: 'Intimate jazz venue with live performances. Best cocktails in Adliya.', hours: '8pm-2am', link: '/lounges-bars' },
-      { name: 'Segafredo', type: 'Bar & Café', desc: 'Italian-inspired spot perfect for aperitivo and people watching on the terrace.', hours: '8am-1am', link: '/lounges-bars' },
-      { name: 'Zoe\'s', type: 'Wine Bar', desc: 'Cozy wine bar with excellent selection and cheese boards.', hours: '6pm-12am', link: '/lounges-bars' },
+      { name: 'Block 338', type: 'Entertainment Complex', desc: 'The iconic Adliya destination with multiple lounges, restaurants, and rooftop venues under one umbrella.', hours: '6pm-2am', link: '/places?category=lounge' },
+      { name: 'Hazel Rooftop', type: 'Rooftop Lounge', desc: 'Stunning rooftop lounge with city views, craft cocktails, and sophisticated vibe.', hours: '6pm-1am', link: '/places?category=lounge' },
+      { name: 'Coda Jazz Lounge', type: 'Jazz Club', desc: 'Intimate jazz venue at Premier Hotel, Juffair, with live performances and signature cocktails.', hours: '8pm-2am', link: '/places?category=lounge' },
+      { name: 'Segafredo', type: 'Lounge & Café', desc: 'Italian-inspired spot perfect for aperitivo and people watching on the terrace.', hours: '8am-1am', link: '/places?category=lounge' },
+      { name: 'Zoe\'s', type: 'Wine Lounge', desc: 'Cozy wine lounge with excellent selection and cheese boards.', hours: '6pm-12am', link: '/places?category=lounge' },
     ]
   },
   {
@@ -197,12 +197,12 @@ const neighborhoods = [
     vibe: 'Luxurious, elegant, exclusive',
     bestFor: 'Fine cocktails, date nights, celebrations',
     venues: [
-      { name: 'CUT Lounge', type: 'Rooftop Bar', desc: 'Four Seasons rooftop with panoramic views, signature cocktails, and A-list atmosphere.', hours: '6pm-1am', link: '/lounges-bars' },
-      { name: 'Bushido Lounge', type: 'Cocktail Bar', desc: 'Japanese-inspired cocktail bar at Ritz-Carlton. Exceptional drinks and ambiance.', hours: '6pm-1am', link: '/lounges-bars' },
-      { name: 'Trader Vic\'s', type: 'Tiki Bar', desc: 'Legendary Polynesian bar at Ritz-Carlton. Famous for Mai Tais and pupu platters.', hours: '12pm-1am', link: '/lounges-bars' },
-      { name: 'Sherlock Holmes', type: 'English Pub', desc: 'Gulf Hotel\'s British pub with real ales, pub quiz, and cozy atmosphere.', hours: '12pm-2am', link: '/lounges-bars' },
-      { name: 'Zenj', type: 'Nightclub', desc: 'Gulf Hotel\'s iconic nightclub with live DJs and resident bands.', hours: '10pm-2am', link: '/nightclubs' },
-      { name: 'Vox', type: 'Lounge', desc: 'InterContinental\'s stylish lounge with live music and dancing.', hours: '8pm-2am', link: '/lounges-bars' },
+      { name: 'CUT Lounge', type: 'Rooftop Lounge', desc: 'Four Seasons rooftop with panoramic views, signature cocktails, and A-list atmosphere.', hours: '6pm-1am', link: '/places?category=lounge' },
+      { name: 'Bushido Lounge', type: 'Cocktail Lounge', desc: 'Japanese-inspired lounge next to the Ritz-Carlton in Seef. Exceptional drinks and ambiance.', hours: '6pm-1am', link: '/places?category=lounge' },
+      { name: 'Trader Vic\'s', type: 'Tiki Lounge', desc: 'Legendary Polynesian lounge at the Ritz-Carlton. Famous for Mai Tais and pupu platters.', hours: '12pm-1am', link: '/places?category=lounge' },
+      { name: 'Sherlock Holmes', type: 'English Pub', desc: 'Gulf Hotel\'s British pub with real ales, pub quiz, and cozy atmosphere.', hours: '12pm-2am', link: '/places?category=lounge' },
+      { name: 'Typhoon Terrace', type: 'Nightclub', desc: 'Gulf Hotel\'s signature open-air terrace nightclub with live DJs and resident bands.', hours: '10pm-2am', link: '/places?category=nightclub' },
+      { name: 'Club Lounge', type: 'Lounge', desc: 'InterContinental\'s stylish lounge with live music and dancing.', hours: '8pm-2am', link: '/places?category=lounge' },
     ]
   },
   {
@@ -215,9 +215,9 @@ const neighborhoods = [
     bestFor: 'Pool parties, sunset drinks, weekend vibes',
     venues: [
       { name: 'Coral Bay', type: 'Beach Club', desc: 'The original beach club with pool, beach, and regular party events. Friday brunch is legendary.', hours: '10am-10pm', link: '/attractions' },
-      { name: 'Jumeirah Beach', type: 'Beach Club', desc: 'Luxury beach club with infinity pool, cabanas, and upscale atmosphere.', hours: '10am-8pm', link: '/attractions' },
-      { name: 'Ritz Beach Club', type: 'Beach Club', desc: 'Exclusive beach with premium amenities. Sunset drinks are magical.', hours: '9am-7pm', link: '/attractions' },
-      { name: 'Sofitel Beach', type: 'Beach & Pool', desc: 'Beautiful setting with sea views. Popular for weekend relaxation.', hours: '9am-sunset', link: '/attractions' },
+      { name: 'Royal Beach Club', type: 'Beach Club', desc: 'Private beach club at the Ritz-Carlton Bahrain with infinity pool, cabanas, and upscale atmosphere.', hours: '10am-8pm', link: '/attractions' },
+      { name: 'La Plage', type: 'Beach Club', desc: 'Beach club at Sofitel Zallaq on Bahrain\'s west coast, with sea views and sunset drinks.', hours: '9am-7pm', link: '/attractions' },
+      { name: 'The Art Hotel Amwaj', type: 'Beach & Pool', desc: 'Beach resort on Amwaj Islands with a private shoreline, pools, and relaxed weekend atmosphere.', hours: '9am-sunset', link: '/attractions' },
     ]
   }
 ];
@@ -225,18 +225,18 @@ const neighborhoods = [
 const ladiesNights = [
   { day: 'Sunday', venues: ['Bushido Lounge', 'Trader Vic\'s'] },
   { day: 'Monday', venues: ['CUT Lounge', 'Block 338'] },
-  { day: 'Tuesday', venues: ['Zenj', 'Club Downtown'] },
+  { day: 'Tuesday', venues: ['Typhoon Terrace', 'Club Downtown'] },
   { day: 'Wednesday', venues: ['Hazel Rooftop', 'Coda'] },
-  { day: 'Thursday', venues: ['Most hotels', 'Juffair bars'] },
+  { day: 'Thursday', venues: ['Most hotels', 'Juffair lounges'] },
 ];
 
 const liveMusic = [
   { name: 'JJ\'s Irish Pub', type: 'Rock/Pop covers', days: 'Daily', location: 'Juffair' },
-  { name: 'Coda Jazz Lounge', type: 'Jazz/Blues', days: 'Thu-Sat', location: 'Adliya' },
+  { name: 'Coda Jazz Lounge', type: 'Jazz/Blues', days: 'Thu-Sat', location: 'Juffair' },
   { name: 'Sherlock Holmes', type: 'Acoustic/Pop', days: 'Wed-Sat', location: 'Gulf Hotel' },
-  { name: 'Zenj', type: 'Live band & DJ', days: 'Tue-Sat', location: 'Gulf Hotel' },
+  { name: 'Typhoon Terrace', type: 'Live band & DJ', days: 'Tue-Sat', location: 'Gulf Hotel' },
   { name: 'Gulf Hotel Lobby', type: 'Piano/Jazz', days: 'Daily', location: 'Gulf Hotel' },
-  { name: 'Wrangler\'s', type: 'Country/Rock', days: 'Thu-Sat', location: 'Juffair' },
+  { name: 'Wrangler\'s', type: 'R&B/Hip-Hop', days: 'Thu-Sat', location: 'Juffair' },
 ];
 
 const tips = [

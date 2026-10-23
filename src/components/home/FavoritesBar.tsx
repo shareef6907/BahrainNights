@@ -51,7 +51,7 @@ export default function FavoritesBar() {
   }, {} as Record<FavoriteType, FavoriteItem[]>);
 
   return (
-    <section className="px-4 mb-12 md:mb-24">
+    <section id="favorites" className="px-4 mb-12 md:mb-24">
       <div className="max-w-7xl mx-auto">
         <motion.div
           className="relative overflow-hidden rounded-3xl bg-gradient-to-br from-red-500/10 via-slate-800/80 to-slate-900/80 backdrop-blur-xl border border-red-500/20"

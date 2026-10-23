@@ -202,8 +202,18 @@ const nextConfig: NextConfig = {
   async redirects() {
     return [
       {
+        // /best-lounges-bahrain was deleted in 3bc09e4, so this redirect chain
+        // ended on a 404. Point it at the live venue listing instead.
         source: '/best-bars-bahrain',
-        destination: '/best-lounges-bahrain',
+        destination: '/places?category=lounge',
+        permanent: true,
+      },
+      {
+        // /lounges-bars has no index route - only a [slug] child - so it
+        // rendered a 404 while being linked from several hub pages.
+        // Point it at the live venue listing instead.
+        source: '/lounges-bars',
+        destination: '/places?category=lounge',
         permanent: true,
       },
       {
