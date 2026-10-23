@@ -63,7 +63,7 @@ const categoryLabels: Record<string, string> = {
   restaurant: 'Restaurant',
   cafe: 'Cafe',
   lounge: 'Lounge',
-  bar: 'Bar',
+  bar: 'Lounge',
   nightclub: 'Nightclub',
   'beach-club': 'Beach Club',
   hotel: 'Hotel',

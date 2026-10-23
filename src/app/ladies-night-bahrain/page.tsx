@@ -82,7 +82,7 @@ function generateSchema() {
           { '@type': 'ListItem', position: 1, name: 'Trader Vic\'s', description: 'Tuesday - Free drinks for ladies at Ritz-Carlton' },
           { '@type': 'ListItem', position: 2, name: 'CUT Lounge', description: 'Wednesday - 3 complimentary drinks at Four Seasons' },
           { '@type': 'ListItem', position: 3, name: 'Typhoon', description: 'Tuesday - Free entry and drinks at Le Méridien' },
-          { '@type': 'ListItem', position: 4, name: 'JJ\'s Irish Bar', description: 'Thursday - Ladies drink free all night' },
+          { '@type': 'ListItem', position: 4, name: 'JJ\'s Irish Pub', description: 'Thursday - Ladies drink free all night' },
           { '@type': 'ListItem', position: 5, name: 'Club Wahoo', description: 'Wednesday - Free entry and drinks until midnight' },
         ]
       },
@@ -101,7 +101,7 @@ function generateSchema() {
             name: 'What is ladies night in Bahrain?',
             acceptedAnswer: {
               '@type': 'Answer',
-              text: 'Ladies night in Bahrain is a popular promotion where women receive free drinks, free entry, or special discounts at bars, clubs, and lounges. Most ladies nights run on Tuesday, Wednesday, or Thursday evenings, typically from 8 PM to midnight.'
+              text: 'Ladies night in Bahrain is a popular promotion where women receive free drinks, free entry, or special discounts at lounges, clubs, and lounges. Most ladies nights run on Tuesday, Wednesday, or Thursday evenings, typically from 8 PM to midnight.'
             }
           },
           {
@@ -114,10 +114,10 @@ function generateSchema() {
           },
           {
             '@type': 'Question',
-            name: 'Do all bars in Bahrain have ladies night?',
+            name: 'Do all lounges in Bahrain have ladies night?',
             acceptedAnswer: {
               '@type': 'Answer',
-              text: 'Not all bars offer ladies night, but most hotel bars, popular nightclubs, and many standalone bars have ladies night promotions on at least one day of the week. The deals vary from free drinks to discounted packages.'
+              text: 'Not all lounges offer ladies night, but most hotel lounges, popular nightclubs, and many standalone lounges have ladies night promotions on at least one day of the week. The deals vary from free drinks to discounted packages.'
             }
           },
           {
@@ -164,7 +164,7 @@ const ladiesNightsByDay = [
         offer: '2-for-1 cocktails for ladies',
         time: '6 PM - 11 PM',
         vibe: 'Modern Asian chic',
-        details: 'Contemporary Asian bar with creative cocktails and stunning design.',
+        details: 'Contemporary Asian lounge with creative cocktails and stunning design.',
         link: '/venues'
       },
     ]
@@ -189,7 +189,7 @@ const ladiesNightsByDay = [
         location: 'Gulf Hotel',
         offer: 'Ladies happy hour specials',
         time: '7 PM - 11 PM',
-        vibe: 'Classic piano bar',
+        vibe: 'Classic piano lounge',
         details: 'Live piano entertainment. Elegant atmosphere. Classic cocktails.',
         link: '/venues'
       },
@@ -226,7 +226,7 @@ const ladiesNightsByDay = [
         location: 'Sheraton Hotel',
         offer: 'Complimentary cocktails for ladies',
         time: '7 PM - 11 PM',
-        vibe: 'Classic hotel bar',
+        vibe: 'Classic hotel lounge',
         details: 'Live entertainment. Relaxed atmosphere. Good for early evening drinks.',
         link: '/venues'
       },
@@ -272,8 +272,8 @@ const ladiesNightsByDay = [
         location: 'Adliya',
         offer: '50% off drinks for ladies',
         time: '7 PM - 12 AM',
-        vibe: 'Upscale bar & grill',
-        details: 'South African steakhouse with great bar. Good for dinner and drinks combo.',
+        vibe: 'Upscale lounge & grill',
+        details: 'South African steakhouse with great lounge. Good for dinner and drinks combo.',
         link: '/venues'
       },
       {
@@ -291,7 +291,7 @@ const ladiesNightsByDay = [
         offer: 'Complimentary sake flights for ladies',
         time: '7 PM - 11 PM',
         vibe: 'Japanese elegance',
-        details: 'Premium sake and Japanese whisky bar. Intimate, modern setting.',
+        details: 'Premium sake and Japanese whisky lounge. Intimate, modern setting.',
         link: '/venues'
       },
     ]
@@ -303,7 +303,7 @@ const ladiesNightsByDay = [
     description: 'Weekend kickoff!',
     venues: [
       {
-        name: 'JJ\'s Irish Bar',
+        name: 'JJ\'s Irish Pub',
         location: 'Juffair',
         offer: 'Ladies drink free all night',
         time: '8 PM - 2 AM',
@@ -318,7 +318,7 @@ const ladiesNightsByDay = [
         offer: 'Various ladies night offers',
         time: '8 PM - 2 AM',
         vibe: 'Multiple options',
-        details: 'Several bars and restaurants with Thursday ladies specials. Bar hop through the block!',
+        details: 'Several lounges and restaurants with Thursday ladies specials. Lounge hop through the block!',
         featured: true,
         link: '/venues'
       },
@@ -327,8 +327,8 @@ const ladiesNightsByDay = [
         location: 'Juffair',
         offer: '2-for-1 drinks for ladies',
         time: '7 PM - 1 AM',
-        vibe: 'Australian sports bar',
-        details: 'Casual sports bar atmosphere. Pool tables, big screens, friendly crowd.',
+        vibe: 'Australian sports lounge',
+        details: 'Casual sports lounge atmosphere. Pool tables, big screens, friendly crowd.',
         link: '/venues'
       },
       {
@@ -620,15 +620,15 @@ export default function LadiesNightPage() {
             <h2 className="text-3xl font-bold text-white mb-6 text-center">About Ladies Night in Bahrain</h2>
             <p className="text-gray-300 leading-relaxed">
               Ladies night is a beloved tradition in Bahrain's nightlife scene. Unlike more conservative 
-              neighbors, Bahrain offers a vibrant bar and club culture, and ladies nights are a major part 
+              neighbors, Bahrain offers a vibrant lounge and club culture, and ladies nights are a major part 
               of the social calendar. These promotions typically offer <strong>free drinks</strong>, 
               <strong>free entry</strong>, or significant discounts for women.
             </p>
             <p className="text-gray-300 leading-relaxed">
               Most ladies nights run from <strong>Tuesday through Thursday</strong>, with Tuesday being the 
               most popular night. Deals typically start around <strong>8 PM</strong> and end at 
-              <strong>midnight</strong>, though some venues extend later. Hotel bars tend to offer more 
-              upscale experiences, while standalone bars in Juffair and Adliya have a more casual vibe.
+              <strong>midnight</strong>, though some venues extend later. Hotel lounges tend to offer more 
+              upscale experiences, while standalone lounges in Juffair and Adliya have a more casual vibe.
             </p>
             <p className="text-gray-300 leading-relaxed">
               Popular venues like Trader Vic's at the Ritz-Carlton get very busy, so <strong>booking 
@@ -649,7 +649,7 @@ export default function LadiesNightPage() {
                 <h3 className="text-xl font-semibold text-white mb-3">What is ladies night in Bahrain?</h3>
                 <p className="text-gray-300">
                   Ladies night is a promotional event where women receive free drinks, free entry, or special 
-                  discounts at bars, clubs, and lounges. Most run on Tuesday, Wednesday, or Thursday evenings, 
+                  discounts at lounges, clubs, and lounges. Most run on Tuesday, Wednesday, or Thursday evenings, 
                   typically from 8 PM to midnight.
                 </p>
               </div>
@@ -684,7 +684,7 @@ export default function LadiesNightPage() {
                 <h3 className="text-xl font-semibold text-white mb-3">Are ladies nights in Bahrain safe?</h3>
                 <p className="text-gray-300">
                   Yes, Bahrain is one of the safest countries in the Middle East. Hotel venues have security, 
-                  and the bar districts are well-patrolled. As always, drink responsibly, stay with friends, 
+                  and the nightlife districts are well-patrolled. As always, drink responsibly, stay with friends, 
                   and arrange safe transportation.
                 </p>
               </div>

@@ -44,7 +44,7 @@ interface FormData {
 const CATEGORIES = [
   { value: 'restaurant', label: 'Restaurant' },
   { value: 'cafe', label: 'Cafe' },
-  { value: 'lounge', label: 'Lounge / Bar' },
+  { value: 'lounge', label: 'Lounge' },
   { value: 'nightclub', label: 'Nightclub' },
   { value: 'beach-club', label: 'Beach Club' },
   { value: 'hotel', label: 'Hotel' },

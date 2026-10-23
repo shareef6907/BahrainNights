@@ -37,7 +37,7 @@ export const metadata: Metadata = {
   twitter: {
     card: 'summary_large_image',
     title: 'Nightlife in Bahrain 2026',
-    description: 'Best bars, clubs & lounges - complete guide!',
+    description: 'Best lounges, clubs & party spots - complete guide!',
   },
   robots: {
     index: true,
@@ -55,8 +55,8 @@ function generateSchema() {
       {
         '@type': 'Article',
         '@id': 'https://www.bahrainnights.com/nightlife-bahrain#article',
-        headline: 'Nightlife in Bahrain — Best Bars, Clubs & Lounges 2026',
-        description: 'Complete guide to Bahrain nightlife. Discover the best bars, clubs, and lounges across the island.',
+        headline: 'Nightlife in Bahrain — Best Lounges, Clubs & Party Spots 2026',
+        description: 'Complete guide to Bahrain nightlife. Discover the best lounges, clubs, and lounges across the island.',
         author: {
           '@type': 'Organization',
           name: 'Bahrain Nights'
@@ -79,8 +79,8 @@ function generateSchema() {
         numberOfItems: 20,
         itemListElement: [
           { '@type': 'ListItem', position: 1, name: 'Coda Jazz Lounge', description: 'Live jazz and sophisticated cocktails at Ritz-Carlton' },
-          { '@type': 'ListItem', position: 2, name: 'The Meat Company', description: 'Upscale bar and grill in Adliya' },
-          { '@type': 'ListItem', position: 3, name: 'JJ\'s Irish Bar', description: 'Legendary expat bar' },
+          { '@type': 'ListItem', position: 2, name: 'The Meat Company', description: 'Upscale lounge and grill in Adliya' },
+          { '@type': 'ListItem', position: 3, name: 'JJ\'s Irish Pub', description: 'Legendary expat lounge' },
           { '@type': 'ListItem', position: 4, name: 'Trader Vic\'s', description: 'Tiki cocktails at Ritz-Carlton' },
           { '@type': 'ListItem', position: 5, name: 'Block 338', description: 'Trendy destination with multiple venues' },
         ]
@@ -100,7 +100,7 @@ function generateSchema() {
             name: 'Is alcohol legal in Bahrain?',
             acceptedAnswer: {
               '@type': 'Answer',
-              text: 'Yes, alcohol is legal in Bahrain and available at licensed venues including hotels, restaurants, and bars. You must be 21 or older to purchase alcohol. Non-Muslims can also buy alcohol from licensed stores with a permit.'
+              text: 'Yes, alcohol is legal in Bahrain and available at licensed venues including hotels, restaurants, and lounges. You must be 21 or older to purchase alcohol. Non-Muslims can also buy alcohol from licensed stores with a permit.'
             }
           },
           {
@@ -108,7 +108,7 @@ function generateSchema() {
             name: 'What is the drinking age in Bahrain?',
             acceptedAnswer: {
               '@type': 'Answer',
-              text: 'The legal drinking age in Bahrain is 21 years old. You may be asked for ID at bars and clubs, so always carry your passport or CPR card.'
+              text: 'The legal drinking age in Bahrain is 21 years old. You may be asked for ID at lounges and clubs, so always carry your passport or CPR card.'
             }
           },
           {
@@ -116,7 +116,7 @@ function generateSchema() {
             name: 'What is the dress code for Bahrain nightclubs?',
             acceptedAnswer: {
               '@type': 'Answer',
-              text: 'Most upscale bars and clubs in Bahrain require smart casual attire. No shorts, flip-flops, or sportswear. Collared shirts for men are often required at premium venues. Dress to impress, especially on weekends.'
+              text: 'Most upscale lounges and clubs in Bahrain require smart casual attire. No shorts, flip-flops, or sportswear. Collared shirts for men are often required at premium venues. Dress to impress, especially on weekends.'
             }
           },
           {
@@ -129,10 +129,10 @@ function generateSchema() {
           },
           {
             '@type': 'Question',
-            name: 'What time do bars close in Bahrain?',
+            name: 'What time do lounges close in Bahrain?',
             acceptedAnswer: {
               '@type': 'Answer',
-              text: 'Most bars in Bahrain close between 1:00 AM and 2:00 AM on weeknights. On weekends (Thursday-Friday nights), many venues stay open until 3:00 AM. Some hotel bars have 24-hour licenses.'
+              text: 'Most lounges in Bahrain close between 1:00 AM and 2:00 AM on weeknights. On weekends (Thursday-Friday nights), many venues stay open until 3:00 AM. Some hotel lounges have 24-hour licenses.'
             }
           }
         ]
@@ -147,13 +147,13 @@ const nightlifeAreas = [
     description: 'The heart of Bahrain\'s nightlife scene',
     icon: Flame,
     color: 'from-red-500 to-orange-600',
-    overview: 'Adliya is the undisputed nightlife capital of Bahrain. This trendy neighborhood is packed with bars, restaurants, and clubs, making it the go-to destination for a night out. The famous Block 338 and surrounding streets come alive after sunset with a mix of upscale lounges, casual pubs, and everything in between.',
+    overview: 'Adliya is the undisputed nightlife capital of Bahrain. This trendy neighborhood is packed with lounges, restaurants, and clubs, making it the go-to destination for a night out. The famous Block 338 and surrounding streets come alive after sunset with a mix of upscale lounges, casual pubs, and everything in between.',
     venues: [
-      { name: 'Block 338', type: 'Entertainment Complex', description: 'Multiple venues under one roof including restaurants, bars, and lounges. The heart of Adliya nightlife.', hours: '5PM - 2AM', vibe: 'Trendy & Diverse', link: '/venues' },
-      { name: 'The Meat Company', type: 'Bar & Grill', description: 'Upscale South African steakhouse with excellent cocktails and wine selection. Great for dinner and drinks.', hours: '12PM - 1AM', vibe: 'Sophisticated', link: '/venues' },
-      { name: 'Gaucho', type: 'Bar & Restaurant', description: 'Argentinian grill with vibrant bar scene. Live music on weekends and great sangria.', hours: '12PM - 1AM', vibe: 'Lively', link: '/venues' },
-      { name: 'Segafredo', type: 'Café Bar', description: 'Italian café that transforms into a bustling bar at night. Perfect for people-watching on the terrace.', hours: '8AM - 12AM', vibe: 'Casual', link: '/venues' },
-      { name: 'Coco\'s', type: 'Lounge Bar', description: 'Chic lounge with creative cocktails and shisha. Popular with the fashion-forward crowd.', hours: '6PM - 2AM', vibe: 'Trendy', link: '/venues' },
+      { name: 'Block 338', type: 'Entertainment Complex', description: 'Multiple venues under one roof including restaurants, lounges, and nightclubs. The heart of Adliya nightlife.', hours: '5PM - 2AM', vibe: 'Trendy & Diverse', link: '/venues' },
+      { name: 'The Meat Company', type: 'Lounge & Grill', description: 'Upscale South African steakhouse with excellent cocktails and wine selection. Great for dinner and drinks.', hours: '12PM - 1AM', vibe: 'Sophisticated', link: '/venues' },
+      { name: 'Gaucho', type: 'Lounge & Restaurant', description: 'Argentinian grill with vibrant lounge scene. Live music on weekends and great sangria.', hours: '12PM - 1AM', vibe: 'Lively', link: '/venues' },
+      { name: 'Segafredo', type: 'Café Lounge', description: 'Italian café that transforms into a bustling lounge at night. Perfect for people-watching on the terrace.', hours: '8AM - 12AM', vibe: 'Casual', link: '/venues' },
+      { name: 'Coco\'s', type: 'Lounge', description: 'Chic lounge with creative cocktails and shisha. Popular with the fashion-forward crowd.', hours: '6PM - 2AM', vibe: 'Trendy', link: '/venues' },
     ]
   },
   {
@@ -161,28 +161,28 @@ const nightlifeAreas = [
     description: 'Expat-friendly area with diverse venues',
     icon: PartyPopper,
     color: 'from-purple-500 to-pink-600',
-    overview: 'Juffair is home to many expats and offers a more casual, international nightlife scene. You\'ll find everything from American sports bars to karaoke lounges and nightclubs. It\'s generally more affordable than hotel venues and has a relaxed, friendly atmosphere. Great for pub crawls with friends.',
+    overview: 'Juffair is home to many expats and offers a more casual, international nightlife scene. You\'ll find everything from American sports lounges to karaoke lounges and nightclubs. It\'s generally more affordable than hotel venues and has a relaxed, friendly atmosphere. Great for pub crawls with friends.',
     venues: [
-      { name: 'JJ\'s Irish Bar', type: 'Pub', description: 'Legendary Irish pub that\'s been a Bahrain institution for years. Live sports, cold beer, and friendly atmosphere.', hours: '11AM - 2AM', vibe: 'Classic Pub', link: '/venues' },
-      { name: 'Diggers', type: 'Sports Bar', description: 'Australian sports bar with great food, pool tables, and multiple screens. Popular with the Aussie crowd.', hours: '11AM - 2AM', vibe: 'Casual', link: '/venues' },
+      { name: 'JJ\'s Irish Pub', type: 'Pub', description: 'Legendary Irish pub that\'s been a Bahrain institution for years. Live sports, cold beer, and friendly atmosphere.', hours: '11AM - 2AM', vibe: 'Classic Pub', link: '/venues' },
+      { name: 'Diggers', type: 'Sports Lounge', description: 'Australian sports lounge with great food, pool tables, and multiple screens. Popular with the Aussie crowd.', hours: '11AM - 2AM', vibe: 'Casual', link: '/venues' },
       { name: 'Club Wahoo', type: 'Nightclub', description: 'Popular nightclub with DJs spinning commercial hits. Gets packed on weekends.', hours: '10PM - 3AM', vibe: 'Party', link: '/venues' },
-      { name: 'Bangkok Garden', type: 'Bar & Restaurant', description: 'Thai restaurant with lively bar upstairs. Known for affordable drinks and karaoke.', hours: '12PM - 2AM', vibe: 'Fun & Casual', link: '/venues' },
-      { name: 'Wrangler Bar', type: 'Country Bar', description: 'American-style country bar with live music. Unique concept in Bahrain.', hours: '6PM - 2AM', vibe: 'Country', link: '/venues' },
+      { name: 'Bangkok Garden', type: 'Lounge & Restaurant', description: 'Thai restaurant with lively lounge upstairs. Known for affordable drinks and karaoke.', hours: '12PM - 2AM', vibe: 'Fun & Casual', link: '/venues' },
+      { name: 'Wrangler Lounge', type: 'Country Lounge', description: 'American-style country lounge with live music. Unique concept in Bahrain.', hours: '6PM - 2AM', vibe: 'Country', link: '/venues' },
     ]
   },
   {
-    name: 'Hotel Bars',
+    name: 'Hotel Lounges',
     description: 'Premium venues in five-star properties',
     icon: Crown,
     color: 'from-amber-500 to-yellow-600',
-    overview: 'Bahrain\'s luxury hotels house some of the most sophisticated bars and lounges in the Gulf. From jazz clubs to rooftop terraces, these venues offer premium service, top-shelf spirits, and elegant atmospheres. Perfect for special occasions, business entertaining, or when you want a more refined experience.',
+    overview: 'Bahrain\'s luxury hotels house some of the most sophisticated lounges in the Gulf. From jazz clubs to rooftop terraces, these venues offer premium service, top-shelf spirits, and elegant atmospheres. Perfect for special occasions, business entertaining, or when you want a more refined experience.',
     venues: [
       { name: 'Coda Jazz Lounge', type: 'Jazz Club', hotel: 'Ritz-Carlton', description: 'Intimate jazz club with live performances nightly. Excellent whiskey selection and Cuban cigars.', hours: '7PM - 2AM', vibe: 'Sophisticated', link: '/venues' },
-      { name: 'Trader Vic\'s', type: 'Tiki Bar', hotel: 'Ritz-Carlton', description: 'Legendary tiki bar with tropical cocktails and Polynesian bites. Fun, colorful atmosphere.', hours: '6PM - 2AM', vibe: 'Tropical Fun', link: '/venues' },
-      { name: 'CUT Lounge', type: 'Cocktail Bar', hotel: 'Four Seasons', description: 'Sleek lounge attached to Wolfgang Puck\'s steakhouse. Craft cocktails and stunning views.', hours: '6PM - 1AM', vibe: 'Upscale', link: '/venues' },
-      { name: 're/Asian', type: 'Lounge Bar', hotel: 'Four Seasons', description: 'Modern Asian bar with creative cocktails and small plates. Chic, contemporary design.', hours: '6PM - 1AM', vibe: 'Modern Chic', link: '/venues' },
+      { name: 'Trader Vic\'s', type: 'Tiki Lounge', hotel: 'Ritz-Carlton', description: 'Legendary tiki lounge with tropical cocktails and Polynesian bites. Fun, colorful atmosphere.', hours: '6PM - 2AM', vibe: 'Tropical Fun', link: '/venues' },
+      { name: 'CUT Lounge', type: 'Cocktail Lounge', hotel: 'Four Seasons', description: 'Sleek lounge attached to Wolfgang Puck\'s steakhouse. Craft cocktails and stunning views.', hours: '6PM - 1AM', vibe: 'Upscale', link: '/venues' },
+      { name: 're/Asian', type: 'Lounge', hotel: 'Four Seasons', description: 'Modern Asian lounge with creative cocktails and small plates. Chic, contemporary design.', hours: '6PM - 1AM', vibe: 'Modern Chic', link: '/venues' },
       { name: 'Sheraton Lobby Lounge', type: 'Lounge', hotel: 'Sheraton', description: 'Classic hotel lounge with live entertainment. Great for after-work drinks.', hours: '5PM - 1AM', vibe: 'Classic', link: '/venues' },
-      { name: 'Piano Piano', type: 'Piano Bar', hotel: 'Gulf Hotel', description: 'Classic piano bar with live entertainment nightly. Old-school elegance.', hours: '7PM - 1AM', vibe: 'Classic', link: '/venues' },
+      { name: 'Piano Piano', type: 'Piano Lounge', hotel: 'Gulf Hotel', description: 'Classic piano lounge with live entertainment nightly. Old-school elegance.', hours: '7PM - 1AM', vibe: 'Classic', link: '/venues' },
     ]
   },
   {
@@ -190,11 +190,11 @@ const nightlifeAreas = [
     description: 'Shopping district with hidden gems',
     icon: Sparkles,
     color: 'from-cyan-500 to-blue-600',
-    overview: 'The Seef area is primarily known for shopping, but it hides some excellent bars and lounges, particularly in hotel properties. The area tends to be more family-oriented during the day but offers sophisticated evening options. Great for combining shopping with dinner and drinks.',
+    overview: 'The Seef area is primarily known for shopping, but it hides some excellent lounges, particularly in hotel properties. The area tends to be more family-oriented during the day but offers sophisticated evening options. Great for combining shopping with dinner and drinks.',
     venues: [
-      { name: 'Typhoon', type: 'Lounge Bar', hotel: 'Le Méridien', description: 'Popular bar with live music and diverse crowd. Regular theme nights and promotions.', hours: '6PM - 2AM', vibe: 'Lively', link: '/venues' },
+      { name: 'Typhoon', type: 'Lounge', hotel: 'Le Méridien', description: 'Popular lounge with live music and diverse crowd. Regular theme nights and promotions.', hours: '6PM - 2AM', vibe: 'Lively', link: '/venues' },
       { name: 'Mezzanine', type: 'Lounge', hotel: 'Le Méridien', description: 'Stylish lounge with creative cocktails. Good for pre-dinner drinks.', hours: '5PM - 1AM', vibe: 'Chic', link: '/venues' },
-      { name: 'Bushido Lounge', type: 'Japanese Bar', hotel: 'Ritz-Carlton', description: 'Sake and Japanese whisky bar with modern izakaya vibes.', hours: '6PM - 12AM', vibe: 'Contemporary', link: '/venues' },
+      { name: 'Bushido Lounge', type: 'Japanese Lounge', hotel: 'Ritz-Carlton', description: 'Sake and Japanese whisky lounge with modern izakaya vibes.', hours: '6PM - 12AM', vibe: 'Contemporary', link: '/venues' },
     ]
   }
 ];
@@ -203,7 +203,7 @@ const ladiesNightVenues = [
   { name: 'Trader Vic\'s', day: 'Tuesday', offer: 'Free drinks for ladies 8PM-12AM', venue: 'Ritz-Carlton' },
   { name: 'CUT Lounge', day: 'Wednesday', offer: '3 complimentary drinks for ladies', venue: 'Four Seasons' },
   { name: 'Typhoon', day: 'Tuesday', offer: 'Free entry + 3 drinks', venue: 'Le Méridien' },
-  { name: 'JJ\'s Irish Bar', day: 'Thursday', offer: 'Ladies drink free all night', venue: 'Juffair' },
+  { name: 'JJ\'s Irish Pub', day: 'Thursday', offer: 'Ladies drink free all night', venue: 'Juffair' },
   { name: 'Club Wahoo', day: 'Wednesday', offer: 'Free entry and drinks until 12AM', venue: 'Juffair' },
 ];
 
@@ -263,7 +263,7 @@ export default function NightlifePage() {
               </h1>
               <p className="text-xl text-gray-300 max-w-3xl mx-auto leading-relaxed">
                 From sophisticated hotel lounges to buzzing nightclubs, Bahrain offers the most vibrant nightlife 
-                in the Gulf. Discover the best bars, clubs, and lounges across the island.
+                in the Gulf. Discover the best lounges, clubs, and lounges across the island.
               </p>
               
               <div className="flex flex-wrap justify-center gap-8 mt-10">
@@ -291,7 +291,7 @@ export default function NightlifePage() {
             <p className="text-gray-300 leading-relaxed">
               Bahrain has long been known as the most liberal country in the Gulf, and its nightlife scene reflects 
               this reputation. While neighboring countries have limited options, Bahrain offers everything from 
-              world-class cocktail bars to thumping nightclubs, all within a compact, easy-to-navigate island.
+              world-class cocktail lounges to thumping nightclubs, all within a compact, easy-to-navigate island.
             </p>
             <p className="text-gray-300 leading-relaxed">
               Alcohol is legal and widely available at licensed venues, which are primarily concentrated in hotels 
@@ -301,7 +301,7 @@ export default function NightlifePage() {
             </p>
             <p className="text-gray-300 leading-relaxed">
               Whether you're looking for <strong>live jazz</strong> at a sophisticated lounge, <strong>craft 
-              cocktails</strong> at a rooftop bar, or a <strong>late-night dance floor</strong>, Bahrain has 
+              cocktails</strong> at a rooftop lounge, or a <strong>late-night dance floor</strong>, Bahrain has 
               you covered. The weekend here runs Thursday through Friday, with many venues open until 2 AM on 
               weeknights and 3 AM on weekends.
             </p>
@@ -422,7 +422,7 @@ export default function NightlifePage() {
                 <h3 className="text-xl font-semibold text-white mb-3">Is alcohol legal in Bahrain?</h3>
                 <p className="text-gray-300">
                   Yes, alcohol is legal in Bahrain and readily available at licensed venues including hotels, 
-                  restaurants, and standalone bars. You must be 21 or older to purchase alcohol. Non-Muslims 
+                  restaurants, and standalone lounges. You must be 21 or older to purchase alcohol. Non-Muslims 
                   can also buy alcohol from licensed stores with a personal permit.
                 </p>
               </div>
@@ -430,7 +430,7 @@ export default function NightlifePage() {
               <div className="bg-gray-800/50 rounded-xl p-6">
                 <h3 className="text-xl font-semibold text-white mb-3">What is the dress code for nightclubs?</h3>
                 <p className="text-gray-300">
-                  Most upscale bars and clubs require smart casual attire at minimum. Avoid shorts, flip-flops, 
+                  Most upscale lounges and clubs require smart casual attire at minimum. Avoid shorts, flip-flops, 
                   athletic wear, and torn clothing. Collared shirts for men are often required at premium hotel 
                   venues. When in doubt, dress up rather than down.
                 </p>
@@ -446,17 +446,17 @@ export default function NightlifePage() {
               </div>
               
               <div className="bg-gray-800/50 rounded-xl p-6">
-                <h3 className="text-xl font-semibold text-white mb-3">What time do bars close in Bahrain?</h3>
+                <h3 className="text-xl font-semibold text-white mb-3">What time do lounges close in Bahrain?</h3>
                 <p className="text-gray-300">
-                  Most bars close between 1:00 AM and 2:00 AM on weeknights. On weekends (Thursday and Friday 
-                  nights), many venues stay open until 3:00 AM. Some hotel bars have extended or 24-hour licenses.
+                  Most lounges close between 1:00 AM and 2:00 AM on weeknights. On weekends (Thursday and Friday 
+                  nights), many venues stay open until 3:00 AM. Some hotel lounges have extended or 24-hour licenses.
                 </p>
               </div>
               
               <div className="bg-gray-800/50 rounded-xl p-6">
                 <h3 className="text-xl font-semibold text-white mb-3">Are there cover charges at Bahrain clubs?</h3>
                 <p className="text-gray-300">
-                  Most bars don't have cover charges. Nightclubs may charge 10-20 BHD on busy nights, often 
+                  Most lounges don't have cover charges. Nightclubs may charge 10-20 BHD on busy nights, often 
                   including a drink. Ladies frequently get free entry, especially on designated ladies' nights. 
                   Hotel venues rarely charge covers.
                 </p>

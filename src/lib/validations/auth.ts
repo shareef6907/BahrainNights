@@ -182,7 +182,7 @@ export type ResetPasswordInput = z.infer<typeof resetPasswordSchema>;
 export const venueTypeOptions = [
   { value: 'restaurant', label: 'Restaurant' },
   { value: 'cafe', label: 'Cafe' },
-  { value: 'lounge_bar', label: 'Lounge / Bar' },
+  { value: 'lounge_bar', label: 'Lounge / Nightclub' },
   { value: 'nightclub', label: 'Nightclub' },
   { value: 'beach_pool_club', label: 'Beach / Pool Club' },
   { value: 'hotel', label: 'Hotel' },

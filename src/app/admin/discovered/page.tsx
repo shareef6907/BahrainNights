@@ -69,7 +69,7 @@ export default function AdminDiscoveredVenuesPage() {
     { value: 'all', label: 'All Categories' },
     { value: 'restaurant', label: 'Restaurants' },
     { value: 'cafe', label: 'Cafes' },
-    { value: 'lounge', label: 'Lounges & Bars' },
+    { value: 'lounge', label: 'Lounges' },
     { value: 'nightclub', label: 'Nightclubs' },
     { value: 'spa', label: 'Spas' },
     { value: 'hotel', label: 'Hotels' },

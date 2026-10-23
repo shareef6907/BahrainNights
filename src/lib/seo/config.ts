@@ -18,7 +18,7 @@ export const SEO_CONFIG = {
     'things to do in bahrain',
     'bahrain restaurants',
     'bahrain clubs',
-    'bahrain bars',
+    'bahrain lounges',
     'bahrain cinema',
     'family activities bahrain',
     'weekend in bahrain',
@@ -42,9 +42,9 @@ export const SEO_CONFIG = {
       keywords: ['events in bahrain', 'bahrain events today', 'things to do in bahrain', 'bahrain entertainment']
     },
     nightlife: {
-      title: 'Nightlife in Bahrain | Clubs, Bars & Lounges | Bahrain Nights',
-      description: 'Explore the best nightlife in Bahrain - top clubs, bars, lounges, and late-night venues. Your guide to Bahrain nightclubs and bars.',
-      keywords: ['nightlife in bahrain', 'bahrain clubs', 'bahrain bars', 'bahrain nightclubs']
+      title: 'Nightlife in Bahrain | Clubs, Lounges & Parties | Bahrain Nights',
+      description: 'Explore the best nightlife in Bahrain - top clubs, lounges, and late-night venues. Your guide to Bahrain nightclubs and lounges.',
+      keywords: ['nightlife in bahrain', 'bahrain clubs', 'bahrain lounges', 'bahrain nightclubs']
     },
     restaurants: {
       title: 'Best Restaurants in Bahrain | Dining Guide | Bahrain Nights',

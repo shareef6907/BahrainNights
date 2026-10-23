@@ -38,7 +38,7 @@ const categoryLabels: Record<string, string> = {
   nightclub: '🌙 Nightclub',
   lounge: '🍸 Lounge',
   'beach-club': '🏖️ Beach Club',
-  bar: '🍺 Bar',
+  bar: '🍺 Lounge',
   hotel: '🏨 Hotel',
   spa: '💆 Spa',
 };

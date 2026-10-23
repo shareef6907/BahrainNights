@@ -191,7 +191,7 @@ export default function CategoryShowcase({ stats }: CategoryShowcaseProps) {
     {
       icon: <Music className="w-7 h-7" />,
       name: 'Nightlife',
-      description: 'Clubs, lounges, and bars',
+      description: 'Clubs, lounges, and nightclubs',
       count: Math.round((stats.venues || 847) * 0.3),
       color: 'from-purple-500 to-pink-500',
       glowColor: 'from-purple-500/50 to-pink-500/50',

@@ -113,7 +113,7 @@ const steakhouses = [
     style: 'Brazilian Churrascaria',
     priceRange: 'BD 20-35',
     highlight: 'All-you-can-eat Brazilian experience. Meats carved tableside until you say stop.',
-    mustTry: 'Picanha, Lamb Chops, Chicken Hearts, Salad Bar',
+    mustTry: 'Picanha, Lamb Chops, Chicken Hearts, Salad Counter',
     rating: 4.4,
     vibe: 'Lively',
   },
