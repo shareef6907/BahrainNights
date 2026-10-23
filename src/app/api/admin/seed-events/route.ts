@@ -211,7 +211,7 @@ const sampleEvents = [
   // Nightlife (3 events)
   {
     title: "NYE Countdown Party",
-    description: "The biggest New Year's Eve party in Bahrain! World-class DJs, spectacular midnight fireworks view, premium open bar package, and an unforgettable countdown experience. VIP tables available with bottle service. 21+ only.",
+    description: "The biggest New Year's Eve party in Bahrain! World-class DJs, spectacular midnight fireworks view, premium open drinks package, and an unforgettable countdown experience. VIP tables available with bottle service. 21+ only.",
     category: "nightlife",
     venue_name: "Coral Bay",
     venue_address: "Coral Bay, Bahrain",
@@ -225,7 +225,7 @@ const sampleEvents = [
     title: "Latin Night: Salsa & Bachata",
     description: "Heat up your Friday night with the hottest Latin rhythms! Free salsa lesson at 9pm followed by open dancing until late. Resident DJ spinning the best in Latin, Reggaeton, and Caribbean music. Mojito specials all night.",
     category: "nightlife",
-    venue_name: "JJ's Irish Bar",
+    venue_name: "JJ's Irish Pub",
     venue_address: "Adliya, Block 338",
     date: "2026-01-03",
     time: "21:00",

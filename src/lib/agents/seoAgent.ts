@@ -363,7 +363,7 @@ function getCategoryLabel(category: string): string {
     restaurant: 'Restaurant',
     cafe: 'Cafe',
     lounge: 'Lounge',
-    bar: 'Bar',
+    bar: 'Lounge',
     nightclub: 'Nightclub',
     'beach-club': 'Beach Club',
     'pool-club': 'Pool Club'

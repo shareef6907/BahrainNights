@@ -156,7 +156,7 @@ const cafeCategories = [
         rating: 4.7, 
         price: '$$',
         features: ['Fresh Pastries', 'Artisan Bread', 'WiFi', 'Outdoor Seating'],
-        desc: 'This artisanal bakery-cafe combination has become an Adliya institution. The aroma of freshly baked bread and pastries greets you at the door, while the coffee bar serves perfectly crafted espresso drinks. Their croissants rival any Parisian bakery, and the sourdough bread is baked fresh daily. The rustic-chic interior with exposed brick walls creates a warm, inviting atmosphere. Perfect for a leisurely breakfast or afternoon coffee with something sweet.',
+        desc: 'This artisanal bakery-cafe combination has become an Adliya institution. The aroma of freshly baked bread and pastries greets you at the door, while the coffee counter serves perfectly crafted espresso drinks. Their croissants rival any Parisian bakery, and the sourdough bread is baked fresh daily. The rustic-chic interior with exposed brick walls creates a warm, inviting atmosphere. Perfect for a leisurely breakfast or afternoon coffee with something sweet.',
         specialty: 'Butter croissants and artisan sourdough',
         wifi: true,
         studyFriendly: true
@@ -821,7 +821,7 @@ export default function CafesBahrainPage() {
               <Link href="/bahrain-nightlife-guide" className="p-6 bg-gray-800/50 rounded-xl hover:bg-gray-800 transition text-center group">
                 <span className="text-3xl mb-3 block">🌙</span>
                 <h3 className="font-semibold text-white group-hover:text-orange-300">Nightlife</h3>
-                <p className="text-sm text-gray-400 mt-2">Bars & clubs</p>
+                <p className="text-sm text-gray-400 mt-2">Lounges & clubs</p>
               </Link>
             </div>
           </div>

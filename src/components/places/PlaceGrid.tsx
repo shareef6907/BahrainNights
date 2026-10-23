@@ -17,8 +17,8 @@ interface PlaceGridProps {
 const categoryInfo: Record<string, { name: string; icon: string; color: string }> = {
   restaurant: { name: 'restaurants', icon: '🍽️', color: 'orange' },
   cafe: { name: 'cafes', icon: '☕', color: 'amber' },
-  lounge: { name: 'lounges & bars', icon: '🍸', color: 'purple' },
-  bar: { name: 'bars', icon: '🍺', color: 'purple' },
+  lounge: { name: 'lounges', icon: '🍸', color: 'purple' },
+  bar: { name: 'lounges', icon: '🍺', color: 'purple' },
   nightclub: { name: 'nightclubs', icon: '🎵', color: 'pink' },
   'beach-club': { name: 'beach & pool clubs', icon: '🏖️', color: 'cyan' },
   hotel: { name: 'hotels', icon: '🏨', color: 'blue' },

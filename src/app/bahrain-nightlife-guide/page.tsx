@@ -23,7 +23,7 @@ export const metadata: Metadata = {
     canonical: 'https://www.bahrainnights.com/bahrain-nightlife-guide',
   },
   openGraph: {
-    title: 'Bahrain Nightlife Guide (2026) — Best Bars, Clubs & Parties',
+    title: 'Bahrain Nightlife Guide (2026) — Best Lounges, Clubs & Parties',
     description: 'Your complete guide to nightlife in Bahrain. From upscale lounges to legendary clubs.',
     url: 'https://www.bahrainnights.com/bahrain-nightlife-guide',
     siteName: 'Bahrain Nights',
@@ -93,8 +93,8 @@ function generateSchema() {
       {
         '@type': 'Article',
         '@id': 'https://www.bahrainnights.com/bahrain-nightlife-guide#article',
-        headline: 'Bahrain Nightlife Guide — Best Bars, Clubs & Parties 2026',
-        description: 'The complete guide to nightlife in Bahrain. Discover the best bars, clubs, and party spots.',
+        headline: 'Bahrain Nightlife Guide — Best Lounges, Clubs & Parties 2026',
+        description: 'The complete guide to nightlife in Bahrain. Discover the best lounges, clubs, and party spots.',
         author: {
           '@type': 'Organization',
           name: 'Bahrain Nights'
@@ -118,7 +118,7 @@ function generateSchema() {
           { '@type': 'ListItem', position: 1, name: 'Club Downtown', description: 'Premier nightclub in Juffair' },
           { '@type': 'ListItem', position: 2, name: 'CUT Lounge', description: 'Upscale rooftop at Four Seasons' },
           { '@type': 'ListItem', position: 3, name: 'Block 338', description: 'Entertainment hub in Adliya' },
-          { '@type': 'ListItem', position: 4, name: 'Bushido Lounge', description: 'Sophisticated cocktail bar' },
+          { '@type': 'ListItem', position: 4, name: 'Bushido Lounge', description: 'Sophisticated cocktail lounge' },
           { '@type': 'ListItem', position: 5, name: 'JJ\'s Irish Pub', description: 'Live music and sports' },
         ]
       },
@@ -145,7 +145,7 @@ function generateSchema() {
             name: 'Where is the best nightlife area in Bahrain?',
             acceptedAnswer: {
               '@type': 'Answer',
-              text: 'Juffair is the main nightlife hub with numerous clubs and bars. Adliya is more upscale with cocktail bars and restaurants. Hotel bars (Four Seasons, Ritz-Carlton, Gulf Hotel) offer sophisticated lounges. Each area has its own vibe.'
+              text: 'Juffair is the main nightlife hub with numerous clubs and lounges. Adliya is more upscale with cocktail lounges and restaurants. Hotel lounges (Four Seasons, Ritz-Carlton, Gulf Hotel) offer sophisticated lounges. Each area has its own vibe.'
             }
           }
         ]
@@ -160,9 +160,9 @@ const neighborhoods = [
     tagline: 'The Party District',
     icon: PartyPopper,
     color: 'from-pink-500 to-rose-600',
-    description: 'The heart of Bahrain\'s nightlife scene. Multiple clubs, bars, and late-night venues packed into a few blocks. This is where the party happens every night of the week.',
+    description: 'The heart of Bahrain\'s nightlife scene. Multiple clubs, lounges, and late-night venues packed into a few blocks. This is where the party happens every night of the week.',
     vibe: 'Energetic, diverse, loud, fun',
-    bestFor: 'Clubbing, bar hopping, late nights',
+    bestFor: 'Clubbing, lounge hopping, late nights',
     venues: [
       { name: 'Club Downtown', type: 'Nightclub', desc: 'Premier nightclub with international DJs, VIP sections, and huge dance floor. Thursday and Friday nights are legendary.', hours: '10pm-2am', link: '/places?category=nightclub' },
       { name: 'Wrangler\'s', type: 'Nightclub', desc: 'R&B and hip-hop club at Juffair Grand Hotel with DJs, live performances, and late-night dancing.', hours: '8pm-2am', link: '/places?category=nightclub' },
@@ -177,9 +177,9 @@ const neighborhoods = [
     tagline: 'The Trendy Quarter',
     icon: Martini,
     color: 'from-purple-500 to-indigo-600',
-    description: 'Bahrain\'s coolest neighborhood. Art galleries, boutique bars, rooftop terraces, and the famous Block 338. More sophisticated than Juffair, perfect for a classy night out.',
+    description: 'Bahrain\'s coolest neighborhood. Art galleries, boutique lounges, rooftop terraces, and the famous Block 338. More sophisticated than Juffair, perfect for a classy night out.',
     vibe: 'Trendy, artistic, upscale casual',
-    bestFor: 'Cocktails, dinner dates, bar hopping',
+    bestFor: 'Cocktails, dinner dates, lounge hopping',
     venues: [
       { name: 'Block 338', type: 'Entertainment Complex', desc: 'The iconic Adliya destination with multiple lounges, restaurants, and rooftop venues under one umbrella.', hours: '6pm-2am', link: '/places?category=lounge' },
       { name: 'Hazel Rooftop', type: 'Rooftop Lounge', desc: 'Stunning rooftop lounge with city views, craft cocktails, and sophisticated vibe.', hours: '6pm-1am', link: '/places?category=lounge' },
@@ -193,7 +193,7 @@ const neighborhoods = [
     tagline: 'Sophisticated Elegance',
     icon: Wine,
     color: 'from-amber-500 to-orange-600',
-    description: 'Bahrain\'s luxury hotels host world-class bars and lounges. Expect premium service, creative mixology, and stunning settings. Perfect for special occasions or a refined night out.',
+    description: 'Bahrain\'s luxury hotels host world-class lounges. Expect premium service, creative mixology, and stunning settings. Perfect for special occasions or a refined night out.',
     vibe: 'Luxurious, elegant, exclusive',
     bestFor: 'Fine cocktails, date nights, celebrations',
     venues: [
@@ -241,10 +241,10 @@ const liveMusic = [
 
 const tips = [
   { title: 'Dress Code', desc: 'Smart casual is standard. No shorts, flip-flops, or sportswear at upscale venues. Clubs require stylish attire — when in doubt, overdress.' },
-  { title: 'Timing', desc: 'Bahrainis eat late. Bars fill up around 10-11pm. Clubs don\'t get busy until midnight. The party peaks between midnight and 2am on weekends.' },
-  { title: 'ID Required', desc: 'Always carry ID (passport or CPR). 21+ for bars and clubs. Hotels may be stricter about dress and age policies.' },
+  { title: 'Timing', desc: 'Bahrainis eat late. Lounges fill up around 10-11pm. Clubs don\'t get busy until midnight. The party peaks between midnight and 2am on weekends.' },
+  { title: 'ID Required', desc: 'Always carry ID (passport or CPR). 21+ for lounges and clubs. Hotels may be stricter about dress and age policies.' },
   { title: 'Transportation', desc: 'Use taxis or ride-hailing apps. Never drink and drive — Bahrain has zero tolerance. Parking is available but limited in busy areas.' },
-  { title: 'Prices', desc: 'Drinks cost 4-8 BHD at bars, 8-15 BHD at upscale lounges. Happy hours offer 50% off. Ladies nights offer free drinks (limited).' },
+  { title: 'Prices', desc: 'Drinks cost 4-8 BHD at lounges, 8-15 BHD at upscale lounges. Happy hours offer 50% off. Ladies nights offer free drinks (limited).' },
   { title: 'Weekend', desc: 'The weekend runs Thursday-Friday. Thursday night is the main party night. Wednesday is also popular (ladies nights). Friday is more relaxed.' },
 ];
 
@@ -282,7 +282,7 @@ export default async function NightlifePage() {
                 Bahrain Nightlife Guide
               </h1>
               <p className="text-xl text-gray-300 max-w-3xl mx-auto leading-relaxed">
-                The most comprehensive guide to Bahrain's bars, clubs, and party scene. 
+                The most comprehensive guide to Bahrain's lounges, clubs, and party scene. 
                 From rooftop cocktails to legendary dance floors — this is where the night comes alive.
               </p>
               
@@ -567,8 +567,8 @@ export default async function NightlifePage() {
               <div className="bg-gray-800/50 rounded-xl p-6">
                 <h3 className="text-xl font-semibold text-white mb-3">Where is the best nightlife area in Bahrain?</h3>
                 <p className="text-gray-300">
-                  Juffair is the main nightlife hub with numerous clubs and bars. Adliya is more upscale with 
-                  cocktail bars and restaurants. Hotel bars (Four Seasons, Ritz-Carlton, Gulf Hotel) offer 
+                  Juffair is the main nightlife hub with numerous clubs and lounges. Adliya is more upscale with 
+                  cocktail lounges and restaurants. Hotel lounges (Four Seasons, Ritz-Carlton, Gulf Hotel) offer 
                   sophisticated lounges. Each area has its own vibe.
                 </p>
               </div>
@@ -576,15 +576,15 @@ export default async function NightlifePage() {
               <div className="bg-gray-800/50 rounded-xl p-6">
                 <h3 className="text-xl font-semibold text-white mb-3">What time do clubs close in Bahrain?</h3>
                 <p className="text-gray-300">
-                  Bars typically close around 1-2am. Nightclubs stay open until 2am on weekends (Thursday/Friday). 
+                  Lounges typically close around 1-2am. Nightclubs stay open until 2am on weekends (Thursday/Friday). 
                   Some venues have after-hours on special occasions. The party peaks between midnight and 2am.
                 </p>
               </div>
               
               <div className="bg-gray-800/50 rounded-xl p-6">
-                <h3 className="text-xl font-semibold text-white mb-3">Are tourists allowed in Bahrain bars?</h3>
+                <h3 className="text-xl font-semibold text-white mb-3">Are tourists allowed in Bahrain lounges?</h3>
                 <p className="text-gray-300">
-                  Absolutely! Bahrain's bars and clubs welcome tourists. Bring your passport as ID. 
+                  Absolutely! Bahrain's lounges and clubs welcome tourists. Bring your passport as ID. 
                   The drinking age is 21. Most venues are in hotels or licensed areas. 
                   Smart casual dress code applies at upscale venues.
                 </p>
