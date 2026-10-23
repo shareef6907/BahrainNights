@@ -663,7 +663,7 @@ function MobileRecentSearches({
     { emoji: '🍽️', label: 'Dining', query: 'restaurants' },
     { emoji: '🎬', label: 'Movies', query: 'cinema' },
     { emoji: '🏖️', label: 'Beach', query: 'beach club' },
-    { emoji: '🍸', label: 'Nightlife', query: 'bars' },
+    { emoji: '🍸', label: 'Nightlife', query: 'lounge' },
     { emoji: '💆', label: 'Spa', query: 'spa' },
   ];
 
