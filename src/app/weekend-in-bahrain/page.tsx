@@ -321,7 +321,7 @@ const day2 = {
         'Bring sunscreen and swimwear',
         'Most have pools, beach, and restaurants on-site'
       ],
-      recommended: ['Coral Bay', 'Jumeirah Beach', 'Ritz Beach Club', 'Sofitel Beach'],
+      recommended: ['Coral Bay', 'Royal Beach Club', 'La Plage Beach Club', 'Reef Clubhouse'],
       link: '/attractions'
     },
     {
