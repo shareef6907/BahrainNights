@@ -453,9 +453,9 @@ export default function MallsPage() {
           <div className="grid md:grid-cols-4 gap-4">
             {[
               { title: 'Traditional Souks', href: '/guides/souks', emoji: '🏺' },
-              { title: 'Things to Do', href: '/guides/things-to-do', emoji: '🎯' },
-              { title: 'Restaurants', href: '/guides/restaurants', emoji: '🍽️' },
-              { title: 'Family Activities', href: '/guides/family-activities', emoji: '👨‍👩‍👧‍👦' },
+              { title: 'Things to Do', href: '/things-to-do-in-bahrain', emoji: '🎯' },
+              { title: 'Restaurants', href: '/best-restaurants-bahrain', emoji: '🍽️' },
+              { title: 'Family Activities', href: '/family-kids', emoji: '👨‍👩‍👧‍👦' },
             ].map((guide) => (
               <Link 
                 key={guide.href}

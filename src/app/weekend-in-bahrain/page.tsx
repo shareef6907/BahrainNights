@@ -181,7 +181,7 @@ const day1 = {
         'Airport is only 15 minutes from downtown'
       ],
       recommended: ['Four Seasons', 'Ritz-Carlton', 'Gulf Hotel', 'Intercontinental'],
-      link: '/guides/hotels'
+      link: '/best-hotels-bahrain'
     },
     {
       time: '9:00 PM',
@@ -220,7 +220,7 @@ const day1 = {
         'Try Arabic coffee for an authentic experience'
       ],
       recommended: ['198 Cafe', 'Crust & Crema', 'Lilou', 'Furn Bistro'],
-      link: '/guides/cafes'
+      link: '/best-cafes-bahrain'
     },
     {
       time: '12:30 PM',
@@ -234,7 +234,7 @@ const day1 = {
         'Gulf Hotel\'s Al Waha brunch is the most famous'
       ],
       recommended: ['Gulf Hotel Al Waha', 'Four Seasons', 'Ritz-Carlton', 'InterContinental'],
-      link: '/guides/brunch'
+      link: '/best-brunches-bahrain'
     },
     {
       time: '4:30 PM',
@@ -286,7 +286,7 @@ const day1 = {
         'Some clubs are quieter on Friday (Saturday is a work day for some)'
       ],
       recommended: ['Coda Jazz Lounge', 'JJ\'s Irish Pub', 'Block 338', 'Sherlock Holmes'],
-      link: '/guides/nightlife'
+      link: '/nightlife-bahrain'
     }
   ]
 };
@@ -308,7 +308,7 @@ const day2 = {
         'Try balaleet (sweet vermicelli with eggs)'
       ],
       recommended: ['Haji\'s Café', 'Lilou', 'Hotel Breakfast', 'Furn Bistro'],
-      link: '/guides/cafes'
+      link: '/best-cafes-bahrain'
     },
     {
       time: '10:30 AM',
@@ -322,7 +322,7 @@ const day2 = {
         'Most have pools, beach, and restaurants on-site'
       ],
       recommended: ['Coral Bay', 'Jumeirah Beach', 'Ritz Beach Club', 'Sofitel Beach'],
-      link: '/beach-pool-clubs'
+      link: '/attractions'
     },
     {
       time: '2:00 PM',
@@ -335,7 +335,7 @@ const day2 = {
         'Consider a day bed or cabana for extra comfort'
       ],
       recommended: ['Beach Club Restaurant', 'Poolside Service'],
-      link: '/beach-pool-clubs'
+      link: '/attractions'
     },
     {
       time: '4:00 PM',

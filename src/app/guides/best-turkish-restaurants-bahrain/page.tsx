@@ -506,12 +506,12 @@ export default function BestTurkishRestaurantsPage() {
           <div className="flex flex-wrap gap-2">
             {[
               { title: 'Lebanese', href: '/guides/best-lebanese-restaurants-bahrain' },
-              { title: 'Arabic', href: '/guides/best-arabic-restaurants-bahrain' },
-              { title: 'Indian', href: '/guides/best-indian-restaurants-bahrain' },
+              { title: 'Arabic', href: '/best-restaurants-bahrain' },
+              { title: 'Indian', href: '/best-restaurants-bahrain' },
               { title: 'Steakhouses', href: '/guides/best-steakhouses-bahrain' },
-              { title: 'Italian', href: '/guides/best-italian-restaurants-bahrain' },
+              { title: 'Italian', href: '/best-restaurants-bahrain' },
               { title: 'Fine Dining', href: '/guides/best-fine-dining-bahrain' },
-              { title: 'Seafood', href: '/guides/best-seafood-bahrain' },
+              { title: 'Seafood', href: '/best-restaurants-bahrain' },
             ].map((link) => (
               <Link key={link.href} href={link.href} className="px-3 py-1.5 bg-white/5 hover:bg-red-500/20 rounded text-sm transition-colors">
                 {link.title}
@@ -524,11 +524,11 @@ export default function BestTurkishRestaurantsPage() {
       <InternalLinks 
         title="Explore Dining in Bahrain" 
         links={[
-          { title: 'Best Arabic Restaurants', href: '/guides/best-arabic-restaurants-bahrain' },
-          { title: 'Best Restaurants in Bahrain', href: '/guides/restaurants' },
-          { title: 'Shisha Spots', href: '/guides/shisha' },
-          { title: 'Best Brunches', href: '/guides/brunches' },
-          { title: 'Juffair Restaurants', href: '/guides/juffair-restaurants-bars' },
+          { title: 'Best Arabic Restaurants', href: '/best-restaurants-bahrain' },
+          { title: 'Best Restaurants in Bahrain', href: '/best-restaurants-bahrain' },
+          { title: 'Shisha Spots', href: '/best-restaurants-bahrain' },
+          { title: 'Best Brunches', href: '/best-brunches-bahrain' },
+          { title: 'Juffair Restaurants', href: '/best-restaurants-bahrain' },
         ]} 
       />
     </div>

@@ -3,6 +3,7 @@ import { Metadata } from 'next';
 // Static page with ISR - revalidate every hour
 export const revalidate = 3600;
 import Link from 'next/link';
+import InternalLinks from '@/components/SEO/InternalLinks';
 import { 
   Calendar, MapPin, Clock, Ticket, Music, Film, Users,
   Sparkles, PartyPopper, Mic2, Trophy, Heart, Star, ExternalLink
@@ -633,6 +634,20 @@ export default function EventsThisWeekPage() {
             </Link>
           </div>
         </section>
+
+      <InternalLinks
+        title="Explore More in Bahrain"
+        links={[
+          { title: 'All Events in Bahrain', href: '/events' },
+          { title: 'Events Today', href: '/events/today' },
+          { title: 'This Weekend in Bahrain', href: '/weekend-in-bahrain' },
+          { title: 'Tonight in Bahrain', href: '/tonight' },
+          { title: 'Events Calendar', href: '/calendar' },
+          { title: 'Things to Do in Bahrain', href: '/things-to-do-in-bahrain' },
+          { title: 'Places in Bahrain', href: '/places' },
+          { title: 'Cinema Showtimes', href: '/cinema' },
+        ]}
+      />
       </main>
     </>
   );

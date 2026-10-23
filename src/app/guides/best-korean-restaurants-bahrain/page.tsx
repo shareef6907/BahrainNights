@@ -451,11 +451,11 @@ export default function BestKoreanRestaurantsPage() {
           <h3 className="text-lg font-bold mb-4">More Cuisine Guides</h3>
           <div className="flex flex-wrap gap-2">
             {[
-              { title: 'Japanese', href: '/guides/best-japanese-restaurants-bahrain' },
-              { title: 'Thai', href: '/guides/best-thai-restaurants-bahrain' },
-              { title: 'Chinese', href: '/guides/best-chinese-restaurants-bahrain' },
-              { title: 'Indian', href: '/guides/best-indian-restaurants-bahrain' },
-              { title: 'Italian', href: '/guides/best-italian-restaurants-bahrain' },
+              { title: 'Japanese', href: '/best-restaurants-bahrain' },
+              { title: 'Thai', href: '/best-restaurants-bahrain' },
+              { title: 'Chinese', href: '/best-restaurants-bahrain' },
+              { title: 'Indian', href: '/best-restaurants-bahrain' },
+              { title: 'Italian', href: '/best-restaurants-bahrain' },
               { title: 'Fine Dining', href: '/guides/best-fine-dining-bahrain' },
               { title: 'Steakhouses', href: '/guides/best-steakhouses-bahrain' },
             ].map((link) => (
@@ -470,11 +470,11 @@ export default function BestKoreanRestaurantsPage() {
       <InternalLinks 
         title="Explore Dining in Bahrain" 
         links={[
-          { title: 'Best Japanese Restaurants', href: '/guides/best-japanese-restaurants-bahrain' },
-          { title: 'Best Restaurants in Bahrain', href: '/guides/restaurants' },
-          { title: 'Juffair Restaurants', href: '/guides/juffair-restaurants-bars' },
-          { title: 'Block 338 Nightlife', href: '/guides/adliya-restaurants-bars' },
-          { title: 'Best Fried Chicken', href: '/guides/best-fried-chicken-bahrain' },
+          { title: 'Best Japanese Restaurants', href: '/best-restaurants-bahrain' },
+          { title: 'Best Restaurants in Bahrain', href: '/best-restaurants-bahrain' },
+          { title: 'Juffair Restaurants', href: '/best-restaurants-bahrain' },
+          { title: 'Block 338 Nightlife', href: '/nightlife-bahrain' },
+          { title: 'Best Fried Chicken', href: '/best-restaurants-bahrain' },
         ]} 
       />
 

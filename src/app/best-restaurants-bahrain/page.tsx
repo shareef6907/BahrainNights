@@ -199,7 +199,7 @@ const restaurantCategories = [
       { name: 'Haji\'s Café', cuisine: 'Bahraini', location: 'Muharraq', price: '$', rating: 4.7, desc: 'Legendary local spot for authentic Bahraini breakfast. A must-visit for cultural food experience.', specialties: ['Balaleet', 'Khameer', 'Chai Haleeb'], link: '/restaurants' },
       { name: 'Bahraini Heritage', cuisine: 'Bahraini', location: 'Budaiya', price: '$$', rating: 4.5, desc: 'Traditional Bahraini cuisine in a heritage house setting. Perfect for experiencing local culture.', specialties: ['Machboos', 'Harees', 'Muhammar'], link: '/restaurants' },
       { name: 'Al Abraaj', cuisine: 'Lebanese', location: 'Adliya', price: '$$', rating: 4.4, desc: 'Popular Lebanese restaurant with generous portions and authentic flavors.', specialties: ['Mixed Grill', 'Moutabal', 'Fattoush'], link: '/restaurants' },
-      { name: 'Zafran', cuisine: 'Indian', location: 'Multiple Locations', price: '$$', rating: 4.5, desc: 'Award-winning Indian restaurant with tandoor specialties and rich curries.', specialties: ['Butter Chicken', 'Lamb Biryani', 'Naan'], link: '/guides/indian-restaurants' },
+      { name: 'Zafran', cuisine: 'Indian', location: 'Multiple Locations', price: '$$', rating: 4.5, desc: 'Award-winning Indian restaurant with tandoor specialties and rich curries.', specialties: ['Butter Chicken', 'Lamb Biryani', 'Naan'], link: '/best-restaurants-bahrain' },
       { name: 'Shogun', cuisine: 'Turkish', location: 'Juffair', price: '$$', rating: 4.3, desc: 'Authentic Turkish cuisine with kebabs, pides, and traditional desserts.', specialties: ['Adana Kebab', 'Iskender', 'Baklava'], link: '/restaurants' },
       { name: 'Al Safir', cuisine: 'Arabian', location: 'Manama', price: '$$', rating: 4.4, desc: 'Upscale Arabian restaurant with stunning décor and live entertainment.', specialties: ['Lamb Ouzi', 'Grilled Prawns', 'Um Ali'], link: '/restaurants' },
     ]
@@ -223,10 +223,10 @@ const restaurantCategories = [
     color: 'from-orange-500 to-amber-500',
     description: 'Friday brunches are a Gulf tradition',
     restaurants: [
-      { name: 'Al Waha - Gulf Hotel', cuisine: 'International Brunch', location: 'Gulf Hotel', price: '$$$', rating: 4.8, desc: 'The most famous Friday brunch in Bahrain. Multiple live cooking stations, endless seafood, and free-flowing drinks.', specialties: ['Seafood Station', 'Live Cooking', 'Dessert Room'], link: '/guides/brunch' },
-      { name: 'Bay View - Four Seasons', cuisine: 'International Brunch', location: 'Four Seasons', price: '$$$$', rating: 4.7, desc: 'Elegant brunch with stunning bay views. Premium quality and sophisticated atmosphere.', specialties: ['Champagne Brunch', 'Sushi Bar', 'Carving Station'], link: '/guides/brunch' },
-      { name: 'La Med - Ritz-Carlton', cuisine: 'Mediterranean Brunch', location: 'Ritz-Carlton', price: '$$$', rating: 4.6, desc: 'Mediterranean-focused brunch with outdoor seating by the pool. Family-friendly.', specialties: ['Mezze', 'Grilled Meats', 'Mediterranean'], link: '/guides/brunch' },
-      { name: 'Choices - InterContinental', cuisine: 'International Brunch', location: 'InterContinental', price: '$$$', rating: 4.5, desc: 'Vast selection with themed food stations. Great value for money.', specialties: ['Asian Station', 'BBQ', 'Desserts'], link: '/guides/brunch' },
+      { name: 'Al Waha - Gulf Hotel', cuisine: 'International Brunch', location: 'Gulf Hotel', price: '$$$', rating: 4.8, desc: 'The most famous Friday brunch in Bahrain. Multiple live cooking stations, endless seafood, and free-flowing drinks.', specialties: ['Seafood Station', 'Live Cooking', 'Dessert Room'], link: '/best-brunches-bahrain' },
+      { name: 'Bay View - Four Seasons', cuisine: 'International Brunch', location: 'Four Seasons', price: '$$$$', rating: 4.7, desc: 'Elegant brunch with stunning bay views. Premium quality and sophisticated atmosphere.', specialties: ['Champagne Brunch', 'Sushi Bar', 'Carving Station'], link: '/best-brunches-bahrain' },
+      { name: 'La Med - Ritz-Carlton', cuisine: 'Mediterranean Brunch', location: 'Ritz-Carlton', price: '$$$', rating: 4.6, desc: 'Mediterranean-focused brunch with outdoor seating by the pool. Family-friendly.', specialties: ['Mezze', 'Grilled Meats', 'Mediterranean'], link: '/best-brunches-bahrain' },
+      { name: 'Choices - InterContinental', cuisine: 'International Brunch', location: 'InterContinental', price: '$$$', rating: 4.5, desc: 'Vast selection with themed food stations. Great value for money.', specialties: ['Asian Station', 'BBQ', 'Desserts'], link: '/best-brunches-bahrain' },
     ]
   },
   {
@@ -235,11 +235,11 @@ const restaurantCategories = [
     color: 'from-green-500 to-emerald-600',
     description: 'Perfect for coffee, light meals, and catching up',
     restaurants: [
-      { name: '198 Cafe', cuisine: 'Café', location: 'Manama', price: '$$', rating: 4.6, desc: 'Trendy specialty coffee shop with artisanal brews and healthy bites. Great for remote work.', specialties: ['Pour Over', 'Avocado Toast', 'Smoothie Bowls'], link: '/guides/cafes' },
-      { name: 'Crust & Crema', cuisine: 'Bakery Café', location: 'Adliya', price: '$$', rating: 4.5, desc: 'Artisanal bakery with fresh breads, pastries, and excellent breakfast options.', specialties: ['Croissants', 'Sourdough', 'Eggs Benedict'], link: '/guides/cafes' },
-      { name: 'Lilou', cuisine: 'French Café', location: 'Adliya', price: '$$', rating: 4.5, desc: 'Charming French café with authentic pastries and all-day breakfast. A local favorite.', specialties: ['French Toast', 'Crêpes', 'Macarons'], link: '/guides/cafes' },
-      { name: 'Meisei', cuisine: 'Japanese Café', location: 'Seef', price: '$$', rating: 4.4, desc: 'Unique Japanese café experience with matcha drinks and Japanese desserts.', specialties: ['Matcha Latte', 'Japanese Cheesecake', 'Mochi'], link: '/guides/cafes' },
-      { name: 'The Daily Grind', cuisine: 'Café', location: 'Multiple', price: '$', rating: 4.3, desc: 'Popular local chain with reliable coffee and quick bites. Great for grab-and-go.', specialties: ['Latte', 'Sandwiches', 'Muffins'], link: '/guides/cafes' },
+      { name: '198 Cafe', cuisine: 'Café', location: 'Manama', price: '$$', rating: 4.6, desc: 'Trendy specialty coffee shop with artisanal brews and healthy bites. Great for remote work.', specialties: ['Pour Over', 'Avocado Toast', 'Smoothie Bowls'], link: '/best-cafes-bahrain' },
+      { name: 'Crust & Crema', cuisine: 'Bakery Café', location: 'Adliya', price: '$$', rating: 4.5, desc: 'Artisanal bakery with fresh breads, pastries, and excellent breakfast options.', specialties: ['Croissants', 'Sourdough', 'Eggs Benedict'], link: '/best-cafes-bahrain' },
+      { name: 'Lilou', cuisine: 'French Café', location: 'Adliya', price: '$$', rating: 4.5, desc: 'Charming French café with authentic pastries and all-day breakfast. A local favorite.', specialties: ['French Toast', 'Crêpes', 'Macarons'], link: '/best-cafes-bahrain' },
+      { name: 'Meisei', cuisine: 'Japanese Café', location: 'Seef', price: '$$', rating: 4.4, desc: 'Unique Japanese café experience with matcha drinks and Japanese desserts.', specialties: ['Matcha Latte', 'Japanese Cheesecake', 'Mochi'], link: '/best-cafes-bahrain' },
+      { name: 'The Daily Grind', cuisine: 'Café', location: 'Multiple', price: '$', rating: 4.3, desc: 'Popular local chain with reliable coffee and quick bites. Great for grab-and-go.', specialties: ['Latte', 'Sandwiches', 'Muffins'], link: '/best-cafes-bahrain' },
     ]
   },
   {

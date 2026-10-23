@@ -183,7 +183,7 @@ const eveningActivities = [
   },
   {
     label: 'Beach Clubs',
-    href: '/beach-pool-clubs',
+    href: '/attractions',
     emoji: '🏖️',
     desc: 'Sunset sessions and evening beach vibes',
   },

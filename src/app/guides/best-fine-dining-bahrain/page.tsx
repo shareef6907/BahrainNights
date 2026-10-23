@@ -460,13 +460,13 @@ export default function BestFineDiningPage() {
           <h3 className="text-lg font-bold mb-4">Cuisine Guides</h3>
           <div className="flex flex-wrap gap-2">
             {[
-              { title: 'Italian', href: '/guides/best-italian-restaurants-bahrain' },
-              { title: 'Indian', href: '/guides/best-indian-restaurants-bahrain' },
-              { title: 'Japanese', href: '/guides/best-japanese-restaurants-bahrain' },
-              { title: 'Arabic', href: '/guides/best-arabic-restaurants-bahrain' },
-              { title: 'Seafood', href: '/guides/best-seafood-bahrain' },
-              { title: 'Thai', href: '/guides/best-thai-restaurants-bahrain' },
-              { title: 'Chinese', href: '/guides/best-chinese-restaurants-bahrain' },
+              { title: 'Italian', href: '/best-restaurants-bahrain' },
+              { title: 'Indian', href: '/best-restaurants-bahrain' },
+              { title: 'Japanese', href: '/best-restaurants-bahrain' },
+              { title: 'Arabic', href: '/best-restaurants-bahrain' },
+              { title: 'Seafood', href: '/best-restaurants-bahrain' },
+              { title: 'Thai', href: '/best-restaurants-bahrain' },
+              { title: 'Chinese', href: '/best-restaurants-bahrain' },
             ].map((link) => (
               <Link key={link.href} href={link.href} className="px-3 py-1.5 bg-white/5 hover:bg-amber-500/20 rounded text-sm transition-colors">
                 {link.title}
@@ -479,11 +479,11 @@ export default function BestFineDiningPage() {
       <InternalLinks 
         title="Explore Dining in Bahrain" 
         links={[
-          { title: 'Best Restaurants in Bahrain', href: '/guides/restaurants' },
-          { title: 'Romantic Date Night', href: '/guides/romantic' },
-          { title: 'Adliya Restaurants & Bars', href: '/guides/adliya-restaurants-bars' },
-          { title: 'Best Brunches', href: '/guides/brunches' },
-          { title: 'Rooftop Bars', href: '/guides/rooftop-bars-bahrain' },
+          { title: 'Best Restaurants in Bahrain', href: '/best-restaurants-bahrain' },
+          { title: 'Fine Dining', href: '/guides/best-fine-dining-bahrain' },
+          { title: 'Adliya Lounges & Dining', href: '/nightlife-bahrain' },
+          { title: 'Best Brunches', href: '/best-brunches-bahrain' },
+          { title: 'Rooftop Lounges', href: '/nightlife-bahrain' },
         ]} 
       />
     </div>

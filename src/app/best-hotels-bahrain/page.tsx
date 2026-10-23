@@ -3,6 +3,7 @@ import { Metadata } from 'next';
 // Static page with ISR - revalidate every hour
 export const revalidate = 3600;
 import Link from 'next/link';
+import InternalLinks from '@/components/SEO/InternalLinks';
 import { 
   Building2, MapPin, Star, Wifi, Waves, Utensils, Dumbbell,
   Sparkles, Crown, Gem, Wallet, Users, Car, Coffee, Wine
@@ -789,6 +790,20 @@ export default function HotelsBahrainPage() {
             </p>
           </div>
         </section>
+
+      <InternalLinks
+        title="Explore More in Bahrain"
+        links={[
+          { title: 'Best Restaurants in Bahrain', href: '/best-restaurants-bahrain' },
+          { title: 'Cafes in Bahrain', href: '/best-cafes-bahrain' },
+          { title: 'Best Brunches in Bahrain', href: '/best-brunches-bahrain' },
+          { title: 'Things to Do in Bahrain', href: '/things-to-do-in-bahrain' },
+          { title: 'Events in Bahrain', href: '/events' },
+          { title: 'Nightlife in Bahrain', href: '/nightlife-bahrain' },
+          { title: 'Places in Bahrain', href: '/places' },
+          { title: 'Hotel Spas & Wellness', href: '/explore/spas' },
+        ]}
+      />
       </main>
     </>
   );
