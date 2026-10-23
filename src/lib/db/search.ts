@@ -19,6 +19,24 @@ export interface SearchFilters {
   limit?: number;
 }
 
+/**
+ * Synonym map for nightlife terms. The `category` column stores the historical
+ * value ('bar', 'nightclub'), while all public-facing copy says "lounge".
+ * Both spellings must find the same venues, otherwise a visitor searching
+ * either term hits a dead end.
+ */
+const SEARCH_SYNONYMS: Record<string, string[]> = {
+  bar: ['lounge', 'nightclub'],
+  bars: ['lounge', 'nightclub'],
+  lounge: ['bar', 'nightclub'],
+  lounges: ['bar', 'nightclub'],
+  pub: ['lounge', 'nightclub'],
+  pubs: ['lounge', 'nightclub'],
+  nightclub: ['lounge', 'bar'],
+  nightclubs: ['lounge', 'bar'],
+  nightlife: ['lounge', 'bar', 'nightclub'],
+};
+
 // Search across all content types
 export async function searchAll(query: string, filters: SearchFilters = {}): Promise<SearchResult[]> {
   if (!query || query.trim().length < 2) {
@@ -78,11 +96,29 @@ export async function searchAll(query: string, filters: SearchFilters = {}): Pro
 async function searchVenues(query: string, category?: string): Promise<Venue[]> {
   const supabase = getAdminClient();
 
+  // Venue search previously matched only name/description/area. Display copy
+  // uses "lounge" while the `category` column still stores the historical
+  // value ('bar', 'nightclub', ...), so category-based terms were invisible.
+  // Match on category too, and expand nightlife synonyms so a visitor
+  // searching either spelling finds the same venues.
+  //
+  // Synonyms are matched on `category` only (the column that holds the legacy
+  // value) to keep the OR clause small - the original term still matches the
+  // free-text fields.
+  const synonyms = SEARCH_SYNONYMS[query] ?? [];
+  const orClause = [
+    `name.ilike.%${query}%`,
+    `description.ilike.%${query}%`,
+    `area.ilike.%${query}%`,
+    `category.ilike.%${query}%`,
+    ...synonyms.map(term => `category.ilike.%${term}%`),
+  ].join(',');
+
   let dbQuery = supabase
     .from('venues')
     .select('*')
     .eq('status', 'approved')
-    .or(`name.ilike.%${query}%,description.ilike.%${query}%,area.ilike.%${query}%`)
+    .or(orClause)
     .limit(10);
 
   if (category) {
