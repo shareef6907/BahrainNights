@@ -78,7 +78,7 @@ function generateSchema() {
         itemListOrder: 'https://schema.org/ItemListOrderDescending',
         numberOfItems: 20,
         itemListElement: [
-          { '@type': 'ListItem', position: 1, name: 'Coda Jazz Lounge', description: 'Live jazz and sophisticated cocktails at Ritz-Carlton' },
+          { '@type': 'ListItem', position: 1, name: 'Coda Jazz Lounge', description: 'Live jazz and sophisticated cocktails at Premier Hotel, Juffair' },
           { '@type': 'ListItem', position: 2, name: 'The Meat Company', description: 'Upscale lounge and grill in Adliya' },
           { '@type': 'ListItem', position: 3, name: 'JJ\'s Irish Pub', description: 'Legendary expat lounge' },
           { '@type': 'ListItem', position: 4, name: 'Trader Vic\'s', description: 'Tiki cocktails at Ritz-Carlton' },
@@ -167,7 +167,7 @@ const nightlifeAreas = [
       { name: 'Diggers', type: 'Sports Lounge', description: 'Australian sports lounge with great food, pool tables, and multiple screens. Popular with the Aussie crowd.', hours: '11AM - 2AM', vibe: 'Casual', link: '/venues' },
       { name: 'Club Wahoo', type: 'Nightclub', description: 'Popular nightclub with DJs spinning commercial hits. Gets packed on weekends.', hours: '10PM - 3AM', vibe: 'Party', link: '/venues' },
       { name: 'Bangkok Garden', type: 'Lounge & Restaurant', description: 'Thai restaurant with lively lounge upstairs. Known for affordable drinks and karaoke.', hours: '12PM - 2AM', vibe: 'Fun & Casual', link: '/venues' },
-      { name: 'Wrangler Lounge', type: 'Country Lounge', description: 'American-style country lounge with live music. Unique concept in Bahrain.', hours: '6PM - 2AM', vibe: 'Country', link: '/venues' },
+      { name: 'Wrangler\'s', type: 'Nightclub', description: 'R&B and hip-hop club at Juffair Grand Hotel with DJs, live performances, and late-night dancing. A Bahrain institution since 1999.', hours: '8PM - 2AM', vibe: 'R&B / Hip-Hop', link: '/venues' },
     ]
   },
   {
@@ -177,7 +177,7 @@ const nightlifeAreas = [
     color: 'from-amber-500 to-yellow-600',
     overview: 'Bahrain\'s luxury hotels house some of the most sophisticated lounges in the Gulf. From jazz clubs to rooftop terraces, these venues offer premium service, top-shelf spirits, and elegant atmospheres. Perfect for special occasions, business entertaining, or when you want a more refined experience.',
     venues: [
-      { name: 'Coda Jazz Lounge', type: 'Jazz Club', hotel: 'Ritz-Carlton', description: 'Intimate jazz club with live performances nightly. Excellent whiskey selection and Cuban cigars.', hours: '7PM - 2AM', vibe: 'Sophisticated', link: '/venues' },
+      { name: 'Coda Jazz Lounge', type: 'Jazz Club', hotel: 'Premier Hotel, Juffair', description: 'Intimate jazz club with live performances nightly. Excellent whiskey selection and Cuban cigars.', hours: '7PM - 2AM', vibe: 'Sophisticated', link: '/places?category=lounge' },
       { name: 'Trader Vic\'s', type: 'Tiki Lounge', hotel: 'Ritz-Carlton', description: 'Legendary tiki lounge with tropical cocktails and Polynesian bites. Fun, colorful atmosphere.', hours: '6PM - 2AM', vibe: 'Tropical Fun', link: '/venues' },
       { name: 'CUT Lounge', type: 'Cocktail Lounge', hotel: 'Four Seasons', description: 'Sleek lounge attached to Wolfgang Puck\'s steakhouse. Craft cocktails and stunning views.', hours: '6PM - 1AM', vibe: 'Upscale', link: '/venues' },
       { name: 're/Asian', type: 'Lounge', hotel: 'Four Seasons', description: 'Modern Asian lounge with creative cocktails and small plates. Chic, contemporary design.', hours: '6PM - 1AM', vibe: 'Modern Chic', link: '/venues' },
