@@ -2,6 +2,7 @@ import { Metadata } from 'next';
 import Link from 'next/link';
 import Image from 'next/image';
 import { createClient } from '@supabase/supabase-js';
+import InternalLinks, { exploreLinks } from '@/components/SEO/InternalLinks';
 import { 
   MapPin, Calendar, Utensils, Music, Film, Users, 
   Sun, Moon, ShoppingBag, Landmark, Waves, Car,
@@ -586,6 +587,9 @@ export default async function ThingsToDoPage() {
             </div>
           </div>
         </section>
+
+        {/* Internal Links — helps Google discover /tours and other hub pages */}
+        <InternalLinks title="Explore More in Bahrain" links={exploreLinks} />
 
         {/* CTA Section */}
         <section className="py-20 px-4">
