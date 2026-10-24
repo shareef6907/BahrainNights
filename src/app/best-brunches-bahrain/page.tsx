@@ -155,7 +155,7 @@ const brunchVenues = [
         price: '35-45 BHD',
         time: '12:30 PM - 4:00 PM',
         rating: 4.8,
-        description: 'The undisputed king of Bahrain brunches. Al Waha has been voted the best brunch in the Gulf for years. Features over 15 live cooking stations, an incredible seafood tower, premium sushi bar, and the famous dessert room that\'s an Instagram sensation. The atmosphere is buzzing with live music and entertainment.',
+        description: 'The undisputed king of Bahrain brunches. Al Waha has been voted the best brunch in the Gulf for years. Features over 15 live cooking stations, an incredible seafood tower, premium sushi counter, and the famous dessert room that\'s an Instagram sensation. The atmosphere is buzzing with live music and entertainment.',
         highlights: ['15+ Live Stations', 'Seafood Tower', 'Dessert Room', 'Live Music'],
         tip: 'Book 2 weeks ahead. Ask for terrace seating for the best experience.',
         alcohol: 'Packages available',
@@ -409,7 +409,7 @@ export default function BrunchesPage() {
             </p>
             <p className="text-gray-300 leading-relaxed">
               Unlike Western brunch, Gulf brunches are typically <strong>all-you-can-eat buffet affairs</strong> with an 
-              incredible variety of cuisines. Expect live cooking stations, seafood towers, carving stations, sushi bars, 
+              incredible variety of cuisines. Expect live cooking stations, seafood towers, carving stations, sushi counters, 
               and dessert rooms that rival the main course. Many venues offer packages with unlimited beverages, making 
               it a true celebration.
             </p>

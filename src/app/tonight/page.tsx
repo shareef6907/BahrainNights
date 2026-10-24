@@ -12,7 +12,7 @@ import { parseDate, toISODateString, BAHRAIN_TIMEZONE } from '@/lib/utils/date';
 
 export const metadata: Metadata = {
   title: 'Tonight in Bahrain — What to Do Tonight in Bahrain 2026',
-  description: 'Discover what\'s happening tonight in Bahrain! From evening events and dinner spots to clubs, bars, and movies. Your complete guide to tonight in Bahrain.',
+  description: 'Discover what\'s happening tonight in Bahrain! From evening events and dinner spots to clubs, lounges, and movies. Your complete guide to tonight in Bahrain.',
   keywords: [
     'tonight in Bahrain', 'what to do tonight in Bahrain', 'Bahrain tonight',
     'Bahrain nightlife tonight', 'events tonight Bahrain', 'things to do tonight Manama',
@@ -24,7 +24,7 @@ export const metadata: Metadata = {
   },
   openGraph: {
     title: 'Tonight in Bahrain — What to Do Tonight',
-    description: 'Discover evening events, dinner spots, clubs, bars, and movies happening tonight in Bahrain.',
+    description: 'Discover evening events, dinner spots, clubs, lounges, and movies happening tonight in Bahrain.',
     type: 'website',
     locale: 'en_US',
     url: 'https://www.bahrainnights.com/tonight',
@@ -167,7 +167,7 @@ const eveningActivities = [
     label: 'Nightlife Guide',
     href: '/bahrain-nightlife-guide',
     emoji: '🌙',
-    desc: 'Bars, clubs, and party spots in Bahrain',
+    desc: 'Lounges, clubs, and party spots in Bahrain',
   },
   {
     label: 'Ladies Nights',
@@ -464,7 +464,7 @@ export default async function TonightPage() {
                 Venues Open Tonight
               </h2>
               <Link
-                href="/lounges-bars"
+                href="/places?category=lounge"
                 className="text-purple-400 hover:text-purple-300 flex items-center gap-1 text-sm font-medium"
               >
                 Browse all venues <ArrowRight className="w-4 h-4" />
@@ -580,7 +580,7 @@ export default async function TonightPage() {
               ? `Tonight is ${isFriday ? 'Friday' : 'Saturday'} — Bahrain's busiest party night. Juffair and Adliya are buzzing, hotel lounges are packed, and the clubs are getting started.`
               : isThursday
               ? `Thursday nights are the unofficial start of the weekend in Bahrain. The city comes alive as locals and expats head out for dinner, drinks, and dancing.`
-              : `Bahrain's nightlife runs every night of the week. Whether you're after a quiet cocktail at a rooftop bar or a late-night dance floor, there's always something on.`
+              : `Bahrain's nightlife runs every night of the week. Whether you're after a quiet cocktail at a rooftop lounge or a late-night dance floor, there's always something on.`
             }
           </p>
           <div className="flex flex-wrap justify-center gap-4">
@@ -591,10 +591,10 @@ export default async function TonightPage() {
               Full Nightlife Guide
             </Link>
             <Link
-              href="/lounges-bars"
+              href="/places?category=lounge"
               className="px-6 py-3 bg-white/10 hover:bg-white/20 rounded-full font-semibold transition"
             >
-              Browse Bars & Lounges
+              Browse Lounges
             </Link>
           </div>
         </div>

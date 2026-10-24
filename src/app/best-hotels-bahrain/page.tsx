@@ -114,7 +114,7 @@ function generateSchema() {
             name: 'Where should I stay in Bahrain for nightlife?',
             acceptedAnswer: {
               '@type': 'Answer',
-              text: 'For nightlife, stay in Juffair (Gulf Hotel, The Domain) or Adliya area. Hotels like Gulf Hotel, InterContinental Regency, and Wyndham Grand are near bars and clubs. The Seef area also offers good nightlife options.'
+              text: 'For nightlife, stay in Juffair (Gulf Hotel, The Domain) or Adliya area. Hotels like Gulf Hotel, InterContinental Regency, and Wyndham Grand are near lounges and clubs. The Seef area also offers good nightlife options.'
             }
           },
           {
@@ -159,7 +159,7 @@ const hotelCategories = [
         priceRange: '150-280 BHD',
         style: 'Beachfront Resort',
         amenities: ['Private Beach', 'Lagoon Pools', 'Kids Club', 'Golf Course Access', 'Water Sports'],
-        desc: 'Spread across 20 acres of beachfront paradise, The Ritz-Carlton Bahrain offers the quintessential resort experience in the Kingdom. The property features private villas with pools, a pristine beach, and multiple lagoon-style pools. It\'s essentially a self-contained luxury destination where you could spend your entire holiday without leaving. The dining options are exceptional — from Plums steakhouse to Primavera\'s Italian cuisine. Families particularly love the expansive grounds where children can play freely. The spa is one of the largest in Bahrain, and the fitness facilities are state-of-the-art. Evening brings the property to life with restaurants, bars, and the sound of waves.',
+        desc: 'Spread across 20 acres of beachfront paradise, The Ritz-Carlton Bahrain offers the quintessential resort experience in the Kingdom. The property features private villas with pools, a pristine beach, and multiple lagoon-style pools. It\'s essentially a self-contained luxury destination where you could spend your entire holiday without leaving. The dining options are exceptional — from Plums steakhouse to Primavera\'s Italian cuisine. Families particularly love the expansive grounds where children can play freely. The spa is one of the largest in Bahrain, and the fitness facilities are state-of-the-art. Evening brings the property to life with restaurants, lounges, and the sound of waves.',
         highlights: ['Largest hotel pool in Bahrain', 'Private beach with water sports', 'Outstanding kids\' club', 'Villa accommodations available'],
         bestFor: 'Beach lovers, families, resort experience seekers'
       },
@@ -217,7 +217,7 @@ const hotelCategories = [
         style: 'Business & Leisure',
         amenities: ['Rooftop Pool', 'Multiple Restaurants', 'Spa', 'Nightlife', 'Central Location'],
         desc: 'A stalwart of Bahrain hospitality, the InterContinental Regency has been welcoming guests for years with consistent four-star quality. The central Manama location puts you within easy reach of the business district and attractions. The hotel has cultivated a loyal following among business travelers and tourists alike. Multiple dining venues including the popular Trader Vic\'s provide variety, and the nightlife options within the hotel are well-established. The rooftop pool is a great place to unwind after a day of meetings or sightseeing. Recently renovated rooms maintain comfort and modern amenities.',
-        highlights: ['Prime central Manama location', 'Popular bars and restaurants', 'Well-established property', 'Excellent meeting facilities'],
+        highlights: ['Prime central Manama location', 'Popular lounges and restaurants', 'Well-established property', 'Excellent meeting facilities'],
         bestFor: 'Business travelers, city explorers, those wanting central location'
       },
       { 
@@ -273,7 +273,7 @@ const hotelCategories = [
         priceRange: '45-75 BHD',
         style: 'Business Comfort',
         amenities: ['Central Location', 'Pool', 'Gym', 'Restaurant', 'Meeting Rooms'],
-        desc: 'Downtown Rotana punches above its weight, offering four-star quality at mid-range prices. The central Manama location is excellent for business and exploration. Rooms are modern and comfortable with the reliable Rotana quality standards. The rooftop pool provides city views and a relaxing escape. Restaurant and bar options are adequate for casual dining. This is the go-to choice for savvy business travelers who want quality without overpaying. The Rotana brand guarantees consistent standards.',
+        desc: 'Downtown Rotana punches above its weight, offering four-star quality at mid-range prices. The central Manama location is excellent for business and exploration. Rooms are modern and comfortable with the reliable Rotana quality standards. The rooftop pool provides city views and a relaxing escape. Restaurant and lounge options are adequate for casual dining. This is the go-to choice for savvy business travelers who want quality without overpaying. The Rotana brand guarantees consistent standards.',
         highlights: ['Excellent value for quality', 'Prime downtown location', 'Reliable Rotana standards', 'Good meeting facilities'],
         bestFor: 'Business travelers, value seekers, city explorers'
       },
@@ -296,8 +296,8 @@ const hotelCategories = [
         rating: 4.2, 
         priceRange: '40-65 BHD',
         style: 'Shopping District',
-        amenities: ['Near Malls', 'Pool', 'Restaurant', 'Bar', 'Business Center'],
-        desc: 'A reliable Accor property in the Seef shopping district, Mercure Grand offers predictable quality and convenience. The location is ideal for shoppers and business travelers. Rooms follow the Mercure standard — clean, functional, and comfortable. The pool provides relaxation options, and the restaurant and bar handle dining needs adequately. For travelers who value consistency and location over luxury, this is a solid bet.',
+        amenities: ['Near Malls', 'Pool', 'Restaurant', 'Lounge', 'Business Center'],
+        desc: 'A reliable Accor property in the Seef shopping district, Mercure Grand offers predictable quality and convenience. The location is ideal for shoppers and business travelers. Rooms follow the Mercure standard — clean, functional, and comfortable. The pool provides relaxation options, and the restaurant and lounge handle dining needs adequately. For travelers who value consistency and location over luxury, this is a solid bet.',
         highlights: ['Walking distance to malls', 'Reliable Mercure quality', 'Good value', 'Convenient Seef location'],
         bestFor: 'Shoppers, business travelers, value-conscious guests'
       },
@@ -308,7 +308,7 @@ const hotelCategories = [
         rating: 4.2, 
         priceRange: '35-60 BHD',
         style: 'Comfortable Stay',
-        amenities: ['Pool', 'Restaurant', 'Gym', 'Near Restaurants', 'Bar'],
+        amenities: ['Pool', 'Restaurant', 'Gym', 'Near Restaurants', 'Lounge'],
         desc: 'Golden Tulip in Juffair offers comfortable accommodation in one of Bahrain\'s most vibrant neighborhoods. The surrounding area is filled with restaurants, cafes, and entertainment options. The hotel itself provides all essential amenities — clean rooms, a decent pool, and dining options. Staff are friendly and helpful. This is an excellent base for exploring Juffair\'s offerings while maintaining comfortable accommodation standards.',
         highlights: ['Vibrant Juffair location', 'Walking distance to dining and nightlife', 'Competitive pricing', 'Friendly service'],
         bestFor: 'Nightlife seekers, young travelers, those wanting vibrant location'
@@ -675,7 +675,7 @@ export default function HotelsBahrainPage() {
               <div className="p-6 bg-gray-800/50 rounded-xl">
                 <h3 className="text-xl font-semibold text-amber-400 mb-3">🏨 What to Expect</h3>
                 <ul className="space-y-2 text-gray-300">
-                  <li>• Most hotels have licensed restaurants/bars</li>
+                  <li>• Most hotels have licensed restaurants/lounges</li>
                   <li>• Pools are standard at 4-5 star properties</li>
                   <li>• Airport transfers often available</li>
                   <li>• WiFi is free at most hotels</li>
@@ -732,7 +732,7 @@ export default function HotelsBahrainPage() {
                 <h3 className="text-xl font-semibold text-white mb-3">Where should I stay in Bahrain for nightlife?</h3>
                 <p className="text-gray-300">
                   For nightlife, stay in Juffair (Gulf Hotel, The Domain) or Adliya area. Hotels like 
-                  Gulf Hotel, InterContinental Regency, and Wyndham Grand are near bars and clubs. 
+                  Gulf Hotel, InterContinental Regency, and Wyndham Grand are near lounges and clubs. 
                   The Seef area also offers good nightlife options.
                 </p>
               </div>

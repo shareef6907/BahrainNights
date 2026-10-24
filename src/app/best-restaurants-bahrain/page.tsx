@@ -160,7 +160,7 @@ const restaurantCategories = [
     restaurants: [
       { name: 'CUT by Wolfgang Puck', cuisine: 'American Steakhouse', location: 'Four Seasons', price: '$$$$', rating: 4.8, desc: 'Celebrity chef steakhouse with dry-aged cuts, stunning views, and impeccable service. The wagyu and USDA prime steaks are legendary.', specialties: ['Dry-aged Ribeye', 'Bone-in Filet', 'Truffle Mac & Cheese'], link: '/restaurants' },
       { name: 'Plums', cuisine: 'Steakhouse & Seafood', location: 'Ritz-Carlton', price: '$$$$', rating: 4.7, desc: 'Modern steakhouse with premium cuts and fresh seafood. The décor is as rich as the dishes.', specialties: ['Premium Steaks', 'Fresh Seafood', 'Fine Dining'], link: '/restaurants' },
-      { name: 'Bushido', cuisine: 'Japanese', location: 'Ritz-Carlton', price: '$$$$', rating: 4.7, desc: 'Sophisticated Japanese restaurant with sushi bar, teppanyaki, and robata grill. Stunning ambiance and sake selection.', specialties: ['Omakase', 'Wagyu Tataki', 'Black Cod Miso'], link: '/restaurants' },
+      { name: 'Bushido', cuisine: 'Japanese', location: 'Ritz-Carlton', price: '$$$$', rating: 4.7, desc: 'Sophisticated Japanese restaurant with sushi counter, teppanyaki, and robata grill. Stunning ambiance and sake selection.', specialties: ['Omakase', 'Wagyu Tataki', 'Black Cod Miso'], link: '/restaurants' },
       { name: 'Masso', cuisine: 'Italian', location: 'Four Seasons', price: '$$$$', rating: 4.6, desc: 'Modern Italian cuisine with homemade pastas and wood-fired specialties. Beautiful terrace overlooking Bahrain Bay.', specialties: ['Truffle Pasta', 'Grilled Octopus', 'Tiramisu'], link: '/restaurants' },
       { name: 'Fusions', cuisine: 'International', location: 'Gulf Hotel', price: '$$$$', rating: 4.5, desc: 'Award-winning restaurant known for its creative fusion of Bahraini and international cuisines with seasonal menus.', specialties: ['Bahraini Lamb Shank', 'Seared Scallops', 'Chef Specials'], link: '/restaurants' },
       { name: 'Takht Jamsheed', cuisine: 'Persian', location: 'Gulf Hotel', price: '$$$', rating: 4.6, desc: 'Elegant Persian fine dining with live music. Traditional recipes prepared with premium ingredients.', specialties: ['Lamb Shank', 'Zereshk Polo', 'Koobideh'], link: '/restaurants' },
@@ -224,7 +224,7 @@ const restaurantCategories = [
     description: 'Friday brunches are a Gulf tradition',
     restaurants: [
       { name: 'Al Waha - Gulf Hotel', cuisine: 'International Brunch', location: 'Gulf Hotel', price: '$$$', rating: 4.8, desc: 'The most famous Friday brunch in Bahrain. Multiple live cooking stations, endless seafood, and free-flowing drinks.', specialties: ['Seafood Station', 'Live Cooking', 'Dessert Room'], link: '/best-brunches-bahrain' },
-      { name: 'Bay View - Four Seasons', cuisine: 'International Brunch', location: 'Four Seasons', price: '$$$$', rating: 4.7, desc: 'Elegant brunch with stunning bay views. Premium quality and sophisticated atmosphere.', specialties: ['Champagne Brunch', 'Sushi Bar', 'Carving Station'], link: '/best-brunches-bahrain' },
+      { name: 'Bay View - Four Seasons', cuisine: 'International Brunch', location: 'Four Seasons', price: '$$$$', rating: 4.7, desc: 'Elegant brunch with stunning bay views. Premium quality and sophisticated atmosphere.', specialties: ['Champagne Brunch', 'Sushi Counter', 'Carving Station'], link: '/best-brunches-bahrain' },
       { name: 'La Med - Ritz-Carlton', cuisine: 'Mediterranean Brunch', location: 'Ritz-Carlton', price: '$$$', rating: 4.6, desc: 'Mediterranean-focused brunch with outdoor seating by the pool. Family-friendly.', specialties: ['Mezze', 'Grilled Meats', 'Mediterranean'], link: '/best-brunches-bahrain' },
       { name: 'Choices - InterContinental', cuisine: 'International Brunch', location: 'InterContinental', price: '$$$', rating: 4.5, desc: 'Vast selection with themed food stations. Great value for money.', specialties: ['Asian Station', 'BBQ', 'Desserts'], link: '/best-brunches-bahrain' },
     ]
@@ -248,7 +248,7 @@ const restaurantCategories = [
     color: 'from-indigo-500 to-violet-600',
     description: 'When hunger strikes after midnight',
     restaurants: [
-      { name: 'Block 338', cuisine: 'Various', location: 'Adliya', price: '$$', rating: 4.4, desc: 'Trendy destination with multiple restaurants and bars. Open late every night.', specialties: ['Various Cuisines', 'Cocktails', 'Shisha'], link: '/lounges-bars' },
+      { name: 'Block 338', cuisine: 'Various', location: 'Adliya', price: '$$', rating: 4.4, desc: 'Trendy destination with multiple restaurants and lounges. Open late every night.', specialties: ['Various Cuisines', 'Cocktails', 'Shisha'], link: '/places?category=lounge' },
       { name: 'Bahrain Bay Kitchen', cuisine: 'International', location: 'Four Seasons', price: '$$$', rating: 4.5, desc: '24-hour restaurant at Four Seasons. Perfect for late-night cravings.', specialties: ['All-Day Dining', 'Room Service Quality', 'Night Menu'], link: '/restaurants' },
       { name: 'Al Bandar', cuisine: 'Fast Casual', location: 'Juffair', price: '$', rating: 4.2, desc: 'Late-night spot popular after clubbing. Shawarma and grill favorites.', specialties: ['Shawarma', 'Mixed Grill', 'Hummus'], link: '/restaurants' },
       { name: 'Lulu Hypermarket Food Court', cuisine: 'Various', location: 'Multiple', price: '$', rating: 4.0, desc: 'Budget-friendly option open until midnight. Various cuisines under one roof.', specialties: ['Indian', 'Filipino', 'Arabic'], link: '/restaurants' },
@@ -480,7 +480,7 @@ export default async function RestaurantsPage() {
                 <h3 className="text-xl font-semibold text-white mb-3">Is alcohol available in Bahrain restaurants?</h3>
                 <p className="text-gray-300">
                   Alcohol is served at licensed venues, primarily in hotels and select standalone restaurants. 
-                  Most fine dining restaurants have full bar service. Local restaurants typically don't serve alcohol.
+                  Most fine dining restaurants have full beverage service. Local restaurants typically don't serve alcohol.
                 </p>
               </div>
             </div>

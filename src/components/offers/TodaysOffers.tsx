@@ -257,7 +257,7 @@ export default function TodaysOffers({
             <ChevronRight className="w-4 h-4 text-gray-500" />
           </Link>
           <Link
-            href="/dining"
+            href="/places?category=restaurant"
             className="flex items-center justify-between p-3 bg-white/5 hover:bg-white/10 rounded-xl transition-colors"
           >
             <span className="text-gray-300 text-sm">Dining & Nightlife</span>

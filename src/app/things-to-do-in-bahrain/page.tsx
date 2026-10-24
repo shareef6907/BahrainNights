@@ -232,10 +232,10 @@ const activities = [
     icon: Moon,
     color: 'from-purple-500 to-pink-600',
     items: [
-      { num: 16, name: 'Juffair Nightlife', desc: 'Bahrain\'s party district. Multiple clubs, bars, and late-night venues. Something for everyone.', link: '/nightlife-bahrain' },
-      { num: 17, name: 'Adliya Nightlife', desc: 'Trendy neighborhood with cocktail bars, live music venues, and art galleries.', link: '/nightlife-bahrain' },
-      { num: 18, name: 'Rooftop Lounges', desc: 'Stunning city views with premium drinks. CUT, Hazel Rooftop, and more.', link: '/lounges-bars' },
-      { num: 19, name: 'Live Music Venues', desc: 'Jazz clubs, rock bars, and Filipino bands. Live entertainment every night of the week.', link: '/events?category=music' },
+      { num: 16, name: 'Juffair Nightlife', desc: 'Bahrain\'s party district. Multiple clubs, lounges, and late-night venues. Something for everyone.', link: '/nightlife-bahrain' },
+      { num: 17, name: 'Adliya Nightlife', desc: 'Trendy neighborhood with cocktail lounges, live music venues, and art galleries.', link: '/nightlife-bahrain' },
+      { num: 18, name: 'Rooftop Lounges', desc: 'Stunning city views with premium drinks. CUT, Hazel Rooftop, and more.', link: '/places?category=lounge' },
+      { num: 19, name: 'Live Music Venues', desc: 'Jazz clubs, rock lounges, and Filipino bands. Live entertainment every night of the week.', link: '/events?category=music' },
       { num: 20, name: 'Ladies Night', desc: 'Free drinks and entry for ladies at top venues. Every night has a ladies night somewhere!', link: '/ladies-night-bahrain' },
       { num: 21, name: 'Beach Club Party', desc: 'Daytime parties with pools, DJs, and cocktails. Coral Bay and Jumeirah lead the scene.', link: '/attractions' },
     ]
@@ -564,7 +564,7 @@ export default async function ThingsToDoPage() {
               <Link href="/bahrain-nightlife-guide" className="p-6 bg-gray-800/50 rounded-xl hover:bg-gray-800 transition text-center group">
                 <Moon className="w-8 h-8 text-purple-400 mx-auto mb-3" />
                 <h3 className="font-semibold text-white group-hover:text-purple-300">Nightlife Guide</h3>
-                <p className="text-sm text-gray-400 mt-2">Bars, clubs & parties</p>
+                <p className="text-sm text-gray-400 mt-2">Lounges, clubs & parties</p>
               </Link>
               
               <Link href="/best-restaurants-bahrain" className="p-6 bg-gray-800/50 rounded-xl hover:bg-gray-800 transition text-center group">

@@ -165,7 +165,7 @@ export function generatePlacesMetadata(category?: string): Metadata {
   const categoryTitles: Record<string, string> = {
     restaurants: 'Restaurants in Bahrain',
     cafes: 'Cafes in Bahrain',
-    'lounges-bars': 'Lounges & Bars in Bahrain',
+    'lounges-bars': 'Lounges in Bahrain',
     nightclubs: 'Nightclubs in Bahrain',
     'beach-pool-clubs': 'Beach & Pool Clubs in Bahrain'
   };
@@ -202,7 +202,7 @@ export function generateVenueMetadata(venue: {
     restaurant: 'Restaurant',
     cafe: 'Cafe',
     lounge: 'Lounge',
-    bar: 'Bar',
+    bar: 'Lounge',
     nightclub: 'Nightclub',
     'beach-club': 'Beach Club',
     'pool-club': 'Pool Club'

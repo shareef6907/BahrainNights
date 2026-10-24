@@ -160,7 +160,7 @@ const weeklyHighlights = [
       },
       {
         name: 'Ladies Night',
-        venue: 'Various Hotel Bars',
+        venue: 'Various Hotel Lounges',
         time: '8:00 PM onwards',
         type: 'Nightlife',
         price: 'Free entry + drinks deals',
@@ -189,7 +189,7 @@ const weeklyHighlights = [
         time: '1:00 PM - 4:30 PM',
         type: 'Brunch',
         price: '45-65 BHD',
-        description: 'Elegant brunch experience with bay views, premium selections including sushi bar, and sophisticated atmosphere.',
+        description: 'Elegant brunch experience with bay views, premium selections including sushi counter, and sophisticated atmosphere.',
         ticketLink: null,
         featured: true
       },

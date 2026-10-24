@@ -10,7 +10,7 @@ const VENUE_CATEGORIES = [
   'Restaurant',
   'Cafe',
   'Lounge',
-  'Bar',
+  'Lounge',
   'Nightclub',
   'Beach Club',
   'Hotel',

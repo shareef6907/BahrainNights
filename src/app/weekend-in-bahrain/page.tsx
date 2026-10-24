@@ -260,7 +260,7 @@ const day1 = {
         'Bahrain Bay waterfront is perfect for a sunset walk'
       ],
       recommended: ['CUT Lounge', 'Hazel Rooftop', 'Sky Lounge', 'Trader Vic\'s'],
-      link: '/lounges-bars'
+      link: '/places?category=lounge'
     },
     {
       time: '9:00 PM',
@@ -321,7 +321,7 @@ const day2 = {
         'Bring sunscreen and swimwear',
         'Most have pools, beach, and restaurants on-site'
       ],
-      recommended: ['Coral Bay', 'Jumeirah Beach', 'Ritz Beach Club', 'Sofitel Beach'],
+      recommended: ['Coral Bay', 'Royal Beach Club', 'La Plage Beach Club', 'Reef Clubhouse'],
       link: '/attractions'
     },
     {

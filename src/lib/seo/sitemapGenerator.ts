@@ -68,12 +68,6 @@ function getStaticUrls(): SitemapUrl[] {
       priority: 0.8
     },
     {
-      url: `${SEO_CONFIG.siteUrl}/lounges-bars`,
-      lastmod: today,
-      changefreq: 'weekly',
-      priority: 0.8
-    },
-    {
       url: `${SEO_CONFIG.siteUrl}/nightclubs`,
       lastmod: today,
       changefreq: 'weekly',
