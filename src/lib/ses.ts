@@ -12,6 +12,12 @@ const sesClient = new SESClient({
     accessKeyId: process.env.BAHRAINNIGHTS_AWS_ACCESS_KEY_ID || process.env.AWS_ACCESS_KEY_ID || '',
     secretAccessKey: process.env.BAHRAINNIGHTS_AWS_SECRET_ACCESS_KEY || process.env.AWS_SECRET_ACCESS_KEY || '',
   },
+  // Bound the request so a hung/unreachable SES endpoint fails fast instead of
+  // blocking until the serverless function timeout is reached.
+  requestHandler: {
+    requestTimeout: 10_000,
+    connectionTimeout: 5_000,
+  },
 });
 
 const DEFAULT_FROM_EMAIL = process.env.AWS_SES_FROM_EMAIL || 'BahrainNights <noreply@bahrainnights.com>';
@@ -34,7 +40,7 @@ export interface EmailResult {
 /**
  * Check if SES is properly configured
  */
-function isSESConfigured(): boolean {
+export function isSESConfigured(): boolean {
   const accessKeyId = process.env.BAHRAINNIGHTS_AWS_ACCESS_KEY_ID || process.env.AWS_ACCESS_KEY_ID;
   const secretAccessKey = process.env.BAHRAINNIGHTS_AWS_SECRET_ACCESS_KEY || process.env.AWS_SECRET_ACCESS_KEY;
   return !!(accessKeyId && secretAccessKey);
