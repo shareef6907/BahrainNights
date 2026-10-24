@@ -335,9 +335,64 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     },
   ];
 
+  // Guide pages (malls, brands, restaurants, souks).
+  // These are static, indexable pages that were missing from the sitemap.
+  const guideSlugs = [
+    // Guide section indexes
+    'guides/malls',
+    'guides/brands',
+    // Individual mall guides
+    'guides/malls/bahrain-mall',
+    'guides/malls/city-centre-bahrain',
+    'guides/malls/dragon-city',
+    'guides/malls/enma-mall',
+    'guides/malls/marassi-galleria',
+    'guides/malls/moda-mall',
+    'guides/malls/oasis-mall',
+    'guides/malls/seef-mall',
+    'guides/malls/souq-al-baraha',
+    'guides/malls/the-avenues',
+    // Individual brand guides
+    'guides/brands/adidas',
+    'guides/brands/apple',
+    'guides/brands/bath-body-works',
+    'guides/brands/chanel',
+    'guides/brands/cheesecake-factory',
+    'guides/brands/costa-coffee',
+    'guides/brands/crocs',
+    'guides/brands/dior',
+    'guides/brands/five-guys',
+    'guides/brands/gucci',
+    'guides/brands/hermes',
+    'guides/brands/hm',
+    'guides/brands/ikea',
+    'guides/brands/louis-vuitton',
+    'guides/brands/nike',
+    'guides/brands/sephora',
+    'guides/brands/shake-shack',
+    'guides/brands/starbucks',
+    'guides/brands/uniqlo',
+    'guides/brands/zara',
+    // Food & drink guides
+    'guides/best-fine-dining-bahrain',
+    'guides/best-korean-restaurants-bahrain',
+    'guides/best-lebanese-restaurants-bahrain',
+    'guides/best-mexican-restaurants-bahrain',
+    'guides/best-steakhouses-bahrain',
+    'guides/best-turkish-restaurants-bahrain',
+    'guides/souks',
+  ];
+
+  const guidePages: MetadataRoute.Sitemap = guideSlugs.map((slug) => ({
+    url: `${BASE_URL}/${slug}`,
+    lastModified: new Date(),
+    changeFrequency: 'weekly' as const,
+    priority: slug === 'guides/malls' || slug === 'guides/brands' ? 0.8 : 0.7,
+  }));
+
   // If Supabase is not available (build time), return only static pages
   if (!supabase) {
-    return staticPages;
+    return [...staticPages, ...guidePages];
   }
 
   // Fetch published events (exclude hidden)
@@ -428,5 +483,5 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     console.error('Error fetching regional articles for sitemap:', error);
   }
 
-  return [...staticPages, ...eventPages, ...venuePages, ...moviePages, ...regionalPages];
+  return [...staticPages, ...guidePages, ...eventPages, ...venuePages, ...moviePages, ...regionalPages];
 }
