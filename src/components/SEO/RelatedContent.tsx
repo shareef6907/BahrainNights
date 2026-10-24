@@ -144,10 +144,10 @@ export function RelatedContent({
 // Pre-built related content sections for common use cases
 export function RelatedGuides() {
   const guides: RelatedItem[] = [
-    { title: 'Things to Do in Bahrain', href: '/guides/things-to-do', type: 'guide' },
-    { title: 'Nightlife Guide', href: '/guides/nightlife', type: 'guide' },
-    { title: 'Best Brunches', href: '/guides/brunches', type: 'guide' },
-    { title: 'F1 Grand Prix 2026', href: '/guides/f1-2026', type: 'guide' },
+    { title: 'Things to Do in Bahrain', href: '/things-to-do-in-bahrain', type: 'guide' },
+    { title: 'Nightlife Guide', href: '/nightlife-bahrain', type: 'guide' },
+    { title: 'Best Brunches', href: '/best-brunches-bahrain', type: 'guide' },
+    { title: 'Best Hotels', href: '/best-hotels-bahrain', type: 'guide' },
   ];
 
   return <RelatedContent title="Explore Our Guides" items={guides} variant="compact" />;

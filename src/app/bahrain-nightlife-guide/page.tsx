@@ -214,10 +214,10 @@ const neighborhoods = [
     vibe: 'Relaxed, fun, social',
     bestFor: 'Pool parties, sunset drinks, weekend vibes',
     venues: [
-      { name: 'Coral Bay', type: 'Beach Club', desc: 'The original beach club with pool, beach, and regular party events. Friday brunch is legendary.', hours: '10am-10pm', link: '/beach-pool-clubs' },
-      { name: 'Jumeirah Beach', type: 'Beach Club', desc: 'Luxury beach club with infinity pool, cabanas, and upscale atmosphere.', hours: '10am-8pm', link: '/beach-pool-clubs' },
-      { name: 'Ritz Beach Club', type: 'Beach Club', desc: 'Exclusive beach with premium amenities. Sunset drinks are magical.', hours: '9am-7pm', link: '/beach-pool-clubs' },
-      { name: 'Sofitel Beach', type: 'Beach & Pool', desc: 'Beautiful setting with sea views. Popular for weekend relaxation.', hours: '9am-sunset', link: '/beach-pool-clubs' },
+      { name: 'Coral Bay', type: 'Beach Club', desc: 'The original beach club with pool, beach, and regular party events. Friday brunch is legendary.', hours: '10am-10pm', link: '/attractions' },
+      { name: 'Jumeirah Beach', type: 'Beach Club', desc: 'Luxury beach club with infinity pool, cabanas, and upscale atmosphere.', hours: '10am-8pm', link: '/attractions' },
+      { name: 'Ritz Beach Club', type: 'Beach Club', desc: 'Exclusive beach with premium amenities. Sunset drinks are magical.', hours: '9am-7pm', link: '/attractions' },
+      { name: 'Sofitel Beach', type: 'Beach & Pool', desc: 'Beautiful setting with sea views. Popular for weekend relaxation.', hours: '9am-sunset', link: '/attractions' },
     ]
   }
 ];

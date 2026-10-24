@@ -360,9 +360,9 @@ export default function SouksPage() {
           <div className="grid md:grid-cols-4 gap-4">
             {[
               { title: 'Best Malls', href: '/guides/malls', emoji: '🛍️' },
-              { title: 'Historical Sites', href: '/guides/historical-sites', emoji: '🏰' },
-              { title: 'Manama Guide', href: '/guides/manama', emoji: '🌆' },
-              { title: 'Budget Bahrain', href: '/guides/budget', emoji: '💰' },
+              { title: 'Historical Sites', href: '/attractions', emoji: '🏰' },
+              { title: 'Manama Guide', href: '/things-to-do-in-bahrain', emoji: '🌆' },
+              { title: 'Budget Bahrain', href: '/offers', emoji: '💰' },
             ].map((guide) => (
               <Link 
                 key={guide.href}

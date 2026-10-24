@@ -4,7 +4,7 @@ import EventsPageClient, { Event, Attraction } from '@/components/events/EventsP
 import InternationalEventsSection from '@/components/events/InternationalEventsSection';
 import EventListSchema from '@/components/SEO/EventListSchema';
 import BreadcrumbSchema from '@/components/SEO/BreadcrumbSchema';
-import InternalLinks, { guideLinks, placeLinks } from '@/components/SEO/InternalLinks';
+import InternalLinks, { guideLinks, placeLinks, eventLinks, dedupeLinks } from '@/components/SEO/InternalLinks';
 import EventServicesPromo from '@/components/events/EventServicesPromo';
 import { parseDate, toISODateString } from '@/lib/utils/date';
 
@@ -388,7 +388,7 @@ export default async function EventsPage() {
       )}
       
       <EventServicesPromo />
-      <InternalLinks title="Explore Bahrain" links={[...guideLinks, ...placeLinks]} />
+      <InternalLinks title="Explore Bahrain" links={dedupeLinks(eventLinks, guideLinks, placeLinks)} />
     </>
   );
 }

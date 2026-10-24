@@ -1,5 +1,6 @@
 import { Metadata } from 'next';
 import Link from 'next/link';
+import InternalLinks from '@/components/SEO/InternalLinks';
 import { 
   Coffee, Star, MapPin, Clock, DollarSign, Utensils, Wine,
   Music, Sparkles, Users, Calendar, ChefHat, Cake, Sun
@@ -613,6 +614,20 @@ export default function BrunchesPage() {
             </p>
           </div>
         </section>
+
+      <InternalLinks
+        title="Explore More in Bahrain"
+        links={[
+          { title: 'Best Restaurants in Bahrain', href: '/best-restaurants-bahrain' },
+          { title: 'Best Cafes in Bahrain', href: '/best-cafes-bahrain' },
+          { title: 'Best Hotels in Bahrain', href: '/best-hotels-bahrain' },
+          { title: 'Things to Do in Bahrain', href: '/things-to-do-in-bahrain' },
+          { title: 'Events in Bahrain', href: '/events' },
+          { title: 'This Weekend in Bahrain', href: '/weekend-in-bahrain' },
+          { title: 'Nightlife in Bahrain', href: '/nightlife-bahrain' },
+          { title: 'Places in Bahrain', href: '/places' },
+        ]}
+      />
       </main>
     </>
   );

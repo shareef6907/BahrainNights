@@ -415,11 +415,11 @@ export default function BestLebaneseRestaurantsPage() {
           <h3 className="text-lg font-bold mb-4">More Cuisine Guides</h3>
           <div className="flex flex-wrap gap-2">
             {[
-              { title: 'Arabic', href: '/guides/best-arabic-restaurants-bahrain' },
-              { title: 'Indian', href: '/guides/best-indian-restaurants-bahrain' },
-              { title: 'Italian', href: '/guides/best-italian-restaurants-bahrain' },
+              { title: 'Arabic', href: '/best-restaurants-bahrain' },
+              { title: 'Indian', href: '/best-restaurants-bahrain' },
+              { title: 'Italian', href: '/best-restaurants-bahrain' },
               { title: 'Turkish', href: '/guides/best-turkish-restaurants-bahrain' },
-              { title: 'Seafood', href: '/guides/best-seafood-bahrain' },
+              { title: 'Seafood', href: '/best-restaurants-bahrain' },
               { title: 'Fine Dining', href: '/guides/best-fine-dining-bahrain' },
               { title: 'Steakhouses', href: '/guides/best-steakhouses-bahrain' },
             ].map((link) => (
@@ -434,11 +434,11 @@ export default function BestLebaneseRestaurantsPage() {
       <InternalLinks 
         title="Explore Dining in Bahrain" 
         links={[
-          { title: 'Best Arabic Restaurants', href: '/guides/best-arabic-restaurants-bahrain' },
-          { title: 'Best Restaurants in Bahrain', href: '/guides/restaurants' },
-          { title: 'Adliya Restaurants & Bars', href: '/guides/adliya-restaurants-bars' },
-          { title: 'Best Brunches', href: '/guides/brunches' },
-          { title: 'Shisha Spots', href: '/guides/shisha' },
+          { title: 'Best Arabic Restaurants', href: '/best-restaurants-bahrain' },
+          { title: 'Best Restaurants in Bahrain', href: '/best-restaurants-bahrain' },
+          { title: 'Adliya Lounges & Dining', href: '/nightlife-bahrain' },
+          { title: 'Best Brunches', href: '/best-brunches-bahrain' },
+          { title: 'Shisha Spots', href: '/best-restaurants-bahrain' },
         ]} 
       />
     </div>

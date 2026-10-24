@@ -448,9 +448,9 @@ export default function BestMexicanRestaurantsPage() {
           <div className="flex flex-wrap gap-2">
             {[
               { title: 'Steakhouses', href: '/guides/best-steakhouses-bahrain' },
-              { title: 'Italian', href: '/guides/best-italian-restaurants-bahrain' },
+              { title: 'Italian', href: '/best-restaurants-bahrain' },
               { title: 'Lebanese', href: '/guides/best-lebanese-restaurants-bahrain' },
-              { title: 'Indian', href: '/guides/best-indian-restaurants-bahrain' },
+              { title: 'Indian', href: '/best-restaurants-bahrain' },
               { title: 'Turkish', href: '/guides/best-turkish-restaurants-bahrain' },
               { title: 'Fine Dining', href: '/guides/best-fine-dining-bahrain' },
               { title: 'Korean', href: '/guides/best-korean-restaurants-bahrain' },
@@ -466,11 +466,11 @@ export default function BestMexicanRestaurantsPage() {
       <InternalLinks 
         title="Explore Dining in Bahrain" 
         links={[
-          { title: 'Best Restaurants in Bahrain', href: '/guides/restaurants' },
-          { title: 'Adliya Restaurants & Bars', href: '/guides/adliya-restaurants-bars' },
-          { title: 'Block 338 Guide', href: '/guides/adliya' },
-          { title: 'Best Brunches', href: '/guides/brunches' },
-          { title: 'Juffair Restaurants', href: '/guides/juffair-restaurants-bars' },
+          { title: 'Best Restaurants in Bahrain', href: '/best-restaurants-bahrain' },
+          { title: 'Adliya Lounges & Dining', href: '/nightlife-bahrain' },
+          { title: 'Block 338 Guide', href: '/nightlife-bahrain' },
+          { title: 'Best Brunches', href: '/best-brunches-bahrain' },
+          { title: 'Juffair Restaurants', href: '/best-restaurants-bahrain' },
         ]} 
       />
     </div>

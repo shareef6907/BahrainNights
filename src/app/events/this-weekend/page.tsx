@@ -165,19 +165,19 @@ const weekendSuggestions = [
   {
     title: 'Friday Brunch',
     description: 'Bahrain\'s legendary Friday brunches at top hotels',
-    href: '/guides/brunches',
+    href: '/best-brunches-bahrain',
     icon: '🥂',
   },
   {
     title: 'Beach Day',
     description: 'Hit the beach clubs and pool parties',
-    href: '/guides/beach-clubs',
+    href: '/attractions',
     icon: '🏖️',
   },
   {
     title: 'Nightlife',
     description: 'Explore Bahrain\'s vibrant club scene',
-    href: '/guides/nightlife',
+    href: '/nightlife-bahrain',
     icon: '🌙',
   },
   {
@@ -195,7 +195,7 @@ const weekendSuggestions = [
   {
     title: 'Explore Places',
     description: 'Visit attractions and landmarks',
-    href: '/guides/places-to-visit',
+    href: '/attractions',
     icon: '🗺️',
   },
 ];
@@ -357,10 +357,10 @@ export default async function WeekendEventsPage() {
           <h2 className="text-2xl font-bold mb-8">Weekend Ideas</h2>
           <div className="grid md:grid-cols-4 gap-4">
             {[
-              { title: 'Friday Brunches', href: '/guides/brunches', emoji: '🥂' },
-              { title: 'Best Parties', href: '/guides/parties', emoji: '🎉' },
-              { title: 'Beach Clubs', href: '/guides/beach-clubs', emoji: '🏖️' },
-              { title: 'Things to Do', href: '/guides/things-to-do', emoji: '🎯' },
+              { title: 'Friday Brunches', href: '/best-brunches-bahrain', emoji: '🥂' },
+              { title: 'Best Parties', href: '/events', emoji: '🎉' },
+              { title: 'Beach Clubs', href: '/attractions', emoji: '🏖️' },
+              { title: 'Things to Do', href: '/things-to-do-in-bahrain', emoji: '🎯' },
             ].map((guide) => (
               <Link 
                 key={guide.href}

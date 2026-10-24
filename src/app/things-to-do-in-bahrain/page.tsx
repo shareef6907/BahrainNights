@@ -2,6 +2,7 @@ import { Metadata } from 'next';
 import Link from 'next/link';
 import Image from 'next/image';
 import { createClient } from '@supabase/supabase-js';
+import InternalLinks, { exploreLinks } from '@/components/SEO/InternalLinks';
 import { 
   MapPin, Calendar, Utensils, Music, Film, Users, 
   Sun, Moon, ShoppingBag, Landmark, Waves, Car,
@@ -203,13 +204,13 @@ const activities = [
     color: 'from-amber-500 to-orange-600',
     items: [
       { num: 1, name: 'Bahrain Fort (Qal\'at al-Bahrain)', desc: 'UNESCO World Heritage site with 4,000 years of history. Explore ancient ruins and the on-site museum. Free entry.', link: '/attractions' },
-      { num: 2, name: 'Bahrain National Museum', desc: 'The largest museum in Bahrain showcasing 6,000 years of history. Beautiful architecture and fascinating exhibits.', link: '/guides/museums' },
+      { num: 2, name: 'Bahrain National Museum', desc: 'The largest museum in Bahrain showcasing 6,000 years of history. Beautiful architecture and fascinating exhibits.', link: '/attractions' },
       { num: 3, name: 'Al Fateh Grand Mosque', desc: 'One of the largest mosques in the world. Free guided tours available. Stunning architecture and peaceful atmosphere.', link: '/attractions' },
       { num: 4, name: 'Manama Souq', desc: 'Traditional market in the heart of the capital. Shop for gold, spices, textiles, and souvenirs.', link: '/guides/souks' },
       { num: 5, name: 'Bab Al Bahrain', desc: 'Historic gateway to Manama Souq. Great photo opportunity and starting point for old town exploration.', link: '/attractions' },
-      { num: 6, name: 'Muharraq Heritage Trail', desc: 'Walk through UNESCO-listed pearling path. Traditional houses, old mosques, and authentic Bahraini culture.', link: '/guides/historical-sites' },
+      { num: 6, name: 'Muharraq Heritage Trail', desc: 'Walk through UNESCO-listed pearling path. Traditional houses, old mosques, and authentic Bahraini culture.', link: '/attractions' },
       { num: 7, name: 'A\'ali Burial Mounds', desc: 'Ancient burial mounds dating back to Dilmun civilization. UNESCO World Heritage site.', link: '/attractions' },
-      { num: 8, name: 'Beit Al Quran', desc: 'Museum dedicated to Islamic arts with rare Quran manuscripts and beautiful calligraphy.', link: '/guides/museums' },
+      { num: 8, name: 'Beit Al Quran', desc: 'Museum dedicated to Islamic arts with rare Quran manuscripts and beautiful calligraphy.', link: '/attractions' },
     ]
   },
   {
@@ -218,12 +219,12 @@ const activities = [
     color: 'from-cyan-500 to-blue-600',
     items: [
       { num: 9, name: 'Al Dar Islands', desc: 'Take a boat to this private island paradise. Crystal clear waters, beach activities, and dolphin watching.', link: '/attractions' },
-      { num: 10, name: 'Amwaj Islands Beach', desc: 'Beautiful public beach with water sports. Jet skiing, kayaking, and beachside cafes.', link: '/guides/public-beaches' },
-      { num: 11, name: 'Coral Bay Beach Club', desc: 'Family-friendly beach resort with pools, slides, and beach access. Great for a day trip.', link: '/beach-pool-clubs' },
+      { num: 10, name: 'Amwaj Islands Beach', desc: 'Beautiful public beach with water sports. Jet skiing, kayaking, and beachside cafes.', link: '/attractions' },
+      { num: 11, name: 'Coral Bay Beach Club', desc: 'Family-friendly beach resort with pools, slides, and beach access. Great for a day trip.', link: '/attractions' },
       { num: 12, name: 'Jet Ski Adventure', desc: 'Rent a jet ski at Amwaj or hire a tour. Thrilling way to explore Bahrain\'s coastline.', link: '/attractions' },
       { num: 13, name: 'Scuba Diving', desc: 'Explore underwater wrecks and coral reefs. Multiple dive centers offer courses and trips.', link: '/attractions' },
       { num: 14, name: 'Fishing Trip', desc: 'Traditional dhow fishing or modern sport fishing. Catch hammour, king fish, and more.', link: '/attractions' },
-      { num: 15, name: 'Kayaking in Tubli Bay', desc: 'Paddle through mangroves and spot flamingos. Peaceful nature experience.', link: '/guides/outdoor-activities' },
+      { num: 15, name: 'Kayaking in Tubli Bay', desc: 'Paddle through mangroves and spot flamingos. Peaceful nature experience.', link: '/attractions' },
     ]
   },
   {
@@ -231,12 +232,12 @@ const activities = [
     icon: Moon,
     color: 'from-purple-500 to-pink-600',
     items: [
-      { num: 16, name: 'Juffair Nightlife', desc: 'Bahrain\'s party district. Multiple clubs, bars, and late-night venues. Something for everyone.', link: '/guides/nightlife-juffair' },
-      { num: 17, name: 'Adliya Bar Hopping', desc: 'Trendy neighborhood with cocktail bars, live music venues, and art galleries.', link: '/guides/nightlife-adliya' },
+      { num: 16, name: 'Juffair Nightlife', desc: 'Bahrain\'s party district. Multiple clubs, bars, and late-night venues. Something for everyone.', link: '/nightlife-bahrain' },
+      { num: 17, name: 'Adliya Nightlife', desc: 'Trendy neighborhood with cocktail bars, live music venues, and art galleries.', link: '/nightlife-bahrain' },
       { num: 18, name: 'Rooftop Lounges', desc: 'Stunning city views with premium drinks. CUT, Hazel Rooftop, and more.', link: '/lounges-bars' },
       { num: 19, name: 'Live Music Venues', desc: 'Jazz clubs, rock bars, and Filipino bands. Live entertainment every night of the week.', link: '/events?category=music' },
-      { num: 20, name: 'Ladies Night', desc: 'Free drinks and entry for ladies at top venues. Every night has a ladies night somewhere!', link: '/guides/ladies-nights' },
-      { num: 21, name: 'Beach Club Party', desc: 'Daytime parties with pools, DJs, and cocktails. Coral Bay and Jumeirah lead the scene.', link: '/guides/beach-clubs' },
+      { num: 20, name: 'Ladies Night', desc: 'Free drinks and entry for ladies at top venues. Every night has a ladies night somewhere!', link: '/ladies-night-bahrain' },
+      { num: 21, name: 'Beach Club Party', desc: 'Daytime parties with pools, DJs, and cocktails. Coral Bay and Jumeirah lead the scene.', link: '/attractions' },
     ]
   },
   {
@@ -244,13 +245,13 @@ const activities = [
     icon: Utensils,
     color: 'from-red-500 to-rose-600',
     items: [
-      { num: 22, name: 'Friday Brunch', desc: 'The ultimate Gulf tradition. Unlimited food and drinks at 5-star hotels. Book ahead!', link: '/guides/brunch' },
+      { num: 22, name: 'Friday Brunch', desc: 'The ultimate Gulf tradition. Unlimited food and drinks at 5-star hotels. Book ahead!', link: '/best-brunches-bahrain' },
       { num: 23, name: 'Traditional Bahraini Cuisine', desc: 'Try machboos, muhammar, and harees at local restaurants like Haji\'s Cafe.', link: '/restaurants' },
-      { num: 24, name: 'Seafood by the Sea', desc: 'Fresh fish at Budaiya restaurants. Choose your catch and have it grilled to perfection.', link: '/guides/seafood' },
-      { num: 25, name: 'Street Food Tour', desc: 'Shawarma, falafel, and samosas in Manama. Authentic flavors at local prices.', link: '/guides/street-food' },
+      { num: 24, name: 'Seafood by the Sea', desc: 'Fresh fish at Budaiya restaurants. Choose your catch and have it grilled to perfection.', link: '/best-restaurants-bahrain' },
+      { num: 25, name: 'Street Food Tour', desc: 'Shawarma, falafel, and samosas in Manama. Authentic flavors at local prices.', link: '/best-restaurants-bahrain' },
       { num: 26, name: 'High-End Dining', desc: 'Michelin-quality restaurants at Four Seasons, Ritz-Carlton, and Gulf Hotel.', link: '/restaurants' },
-      { num: 27, name: 'Shisha Experience', desc: 'Relax with flavored tobacco at traditional cafes. A quintessential Gulf experience.', link: '/guides/shisha' },
-      { num: 28, name: 'Specialty Coffee', desc: 'Third-wave coffee scene is booming. Visit 198 Cafe, Crust & Crema, and more.', link: '/guides/cafes' },
+      { num: 27, name: 'Shisha Experience', desc: 'Relax with flavored tobacco at traditional cafes. A quintessential Gulf experience.', link: '/best-restaurants-bahrain' },
+      { num: 28, name: 'Specialty Coffee', desc: 'Third-wave coffee scene is booming. Visit 198 Cafe, Crust & Crema, and more.', link: '/best-cafes-bahrain' },
     ]
   },
   {
@@ -258,10 +259,10 @@ const activities = [
     icon: Users,
     color: 'from-green-500 to-emerald-600',
     items: [
-      { num: 29, name: 'Lost Paradise of Dilmun', desc: 'Massive water park with slides, wave pools, and lazy rivers. Full day of fun for all ages.', link: '/guides/water-parks' },
-      { num: 30, name: 'Bahrain International Circuit', desc: 'Watch F1 or drive the track yourself. Karting, drag racing, and passenger experiences available.', link: '/guides/f1' },
+      { num: 29, name: 'Lost Paradise of Dilmun', desc: 'Massive water park with slides, wave pools, and lazy rivers. Full day of fun for all ages.', link: '/attractions' },
+      { num: 30, name: 'Bahrain International Circuit', desc: 'Watch F1 or drive the track yourself. Karting, drag racing, and passenger experiences available.', link: '/events' },
       { num: 31, name: 'Wahooo! Waterpark', desc: 'Indoor water park at City Centre. Perfect for hot summer days.', link: '/family-kids' },
-      { num: 32, name: 'Kids Kingdom', desc: 'Indoor play areas at every major mall. Air-conditioned fun for little ones.', link: '/guides/things-to-do-with-kids' },
+      { num: 32, name: 'Kids Kingdom', desc: 'Indoor play areas at every major mall. Air-conditioned fun for little ones.', link: '/family-kids' },
       { num: 33, name: 'Al Areen Wildlife Park', desc: 'See Arabian oryx, gazelles, and other desert wildlife in their natural habitat.', link: '/attractions' },
       { num: 34, name: 'Gravity Indoor Skydiving', desc: 'Experience freefall without jumping from a plane. Safe and thrilling for ages 4+.', link: '/attractions' },
     ]
@@ -285,7 +286,7 @@ const activities = [
     color: 'from-violet-500 to-indigo-600',
     items: [
       { num: 41, name: 'Tree of Life', desc: 'Mysterious 400-year-old tree in the desert with no water source. How does it survive?', link: '/attractions' },
-      { num: 42, name: 'Oil Museum', desc: 'Learn about Bahrain\'s first oil well in the Arab world. Free outdoor museum.', link: '/guides/museums' },
+      { num: 42, name: 'Oil Museum', desc: 'Learn about Bahrain\'s first oil well in the Arab world. Free outdoor museum.', link: '/attractions' },
       { num: 43, name: 'Sunset at Bahrain Bay', desc: 'Watch the sun set behind the skyline. Best views from the corniche or a dhow cruise.', link: '/places' },
       { num: 44, name: 'Desert Safari', desc: 'Dune bashing, camel riding, and BBQ dinner under the stars. Book through local tour operators.', link: '/attractions' },
       { num: 45, name: 'Pearl Diving', desc: 'Traditional pearl diving experience. Dive like Bahrainis did for centuries.', link: '/attractions' },
@@ -298,9 +299,9 @@ const activities = [
     icon: Trophy,
     color: 'from-yellow-500 to-amber-600',
     items: [
-      { num: 48, name: 'Golf at Royal Golf Club', desc: '18-hole championship course. Beautiful green oasis in the desert.', link: '/guides/golf' },
+      { num: 48, name: 'Golf at Royal Golf Club', desc: '18-hole championship course. Beautiful green oasis in the desert.', link: '/attractions' },
       { num: 49, name: 'Horse Racing at REHC', desc: 'Free entry to races every Friday during season. Exciting atmosphere and great facilities.', link: '/events?category=sports' },
-      { num: 50, name: 'Paddleboarding', desc: 'Stand-up paddleboarding at Amwaj or Zallaq. Peaceful way to explore the coast.', link: '/guides/outdoor-activities' },
+      { num: 50, name: 'Paddleboarding', desc: 'Stand-up paddleboarding at Amwaj or Zallaq. Peaceful way to explore the coast.', link: '/attractions' },
     ]
   }
 ];
@@ -586,6 +587,9 @@ export default async function ThingsToDoPage() {
             </div>
           </div>
         </section>
+
+        {/* Internal Links — helps Google discover /tours and other hub pages */}
+        <InternalLinks title="Explore More in Bahrain" links={exploreLinks} />
 
         {/* CTA Section */}
         <section className="py-20 px-4">

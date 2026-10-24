@@ -472,12 +472,12 @@ export default function BestSteakhousesPage() {
           <div className="flex flex-wrap gap-2">
             {[
               { title: 'Fine Dining', href: '/guides/best-fine-dining-bahrain' },
-              { title: 'Italian', href: '/guides/best-italian-restaurants-bahrain' },
-              { title: 'Indian', href: '/guides/best-indian-restaurants-bahrain' },
-              { title: 'Seafood', href: '/guides/best-seafood-bahrain' },
-              { title: 'Arabic', href: '/guides/best-arabic-restaurants-bahrain' },
-              { title: 'Adliya Restaurants', href: '/guides/adliya-restaurants-bars' },
-              { title: 'Date Night', href: '/guides/romantic' },
+              { title: 'Italian', href: '/best-restaurants-bahrain' },
+              { title: 'Indian', href: '/best-restaurants-bahrain' },
+              { title: 'Seafood', href: '/best-restaurants-bahrain' },
+              { title: 'Arabic', href: '/best-restaurants-bahrain' },
+              { title: 'Adliya Restaurants', href: '/nightlife-bahrain' },
+              { title: 'Fine Dining', href: '/guides/best-fine-dining-bahrain' },
             ].map((link) => (
               <Link key={link.href} href={link.href} className="px-3 py-1.5 bg-white/5 hover:bg-red-500/20 rounded text-sm transition-colors">
                 {link.title}
@@ -491,10 +491,10 @@ export default function BestSteakhousesPage() {
         title="Explore Dining in Bahrain" 
         links={[
           { title: 'Best Fine Dining', href: '/guides/best-fine-dining-bahrain' },
-          { title: 'Best Restaurants in Bahrain', href: '/guides/restaurants' },
-          { title: 'Adliya Restaurants & Bars', href: '/guides/adliya-restaurants-bars' },
-          { title: 'Rooftop Bars', href: '/guides/rooftop-bars-bahrain' },
-          { title: 'Romantic Date Night', href: '/guides/romantic' },
+          { title: 'Best Restaurants in Bahrain', href: '/best-restaurants-bahrain' },
+          { title: 'Adliya Lounges & Dining', href: '/nightlife-bahrain' },
+          { title: 'Rooftop Lounges', href: '/nightlife-bahrain' },
+          { title: 'Fine Dining', href: '/guides/best-fine-dining-bahrain' },
         ]} 
       />
     </div>
