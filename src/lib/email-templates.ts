@@ -181,6 +181,98 @@ function alertBox(title: string, message: string, type: 'error' | 'warning' | 's
 // ============================================
 
 /**
+ * Escape user-supplied text before it is interpolated into an HTML email.
+ * Prevents HTML/script injection from the contact form into the admin inbox.
+ */
+function escapeHtml(value: string): string {
+  return value
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#39;');
+}
+
+export interface ContactFormData {
+  name: string;
+  email: string;
+  subject: string;
+  message: string;
+}
+
+/**
+ * Notification email sent to the BahrainNights team when the contact form is used.
+ * Reply-To is the visitor so hitting reply reaches them directly.
+ */
+export function contactFormNotification(data: ContactFormData): string {
+  const name = escapeHtml(data.name);
+  const email = escapeHtml(data.email);
+  const subject = escapeHtml(data.subject || 'General enquiry');
+  const message = escapeHtml(data.message).replace(/\n/g, '<br />');
+
+  return baseLayout(`
+    ${gradientHeader('New Contact Enquiry', 'Someone got in touch via bahrainnights.com', '📩')}
+    ${contentBody(`
+      <p style="color: ${COLORS.gray[700]}; font-size: 16px; line-height: 1.6; margin: 0 0 20px;">
+        A new message was submitted through the contact form on BahrainNights.com.
+      </p>
+
+      ${infoBox(`
+        <table role="presentation" width="100%" cellpadding="0" cellspacing="0">
+          <tr>
+            <td style="padding: 4px 0; font-size: 14px; color: ${COLORS.gray[500]}; width: 110px; vertical-align: top;">Name</td>
+            <td style="padding: 4px 0; font-size: 14px; color: ${COLORS.gray[900]}; font-weight: 600;">${name}</td>
+          </tr>
+          <tr>
+            <td style="padding: 4px 0; font-size: 14px; color: ${COLORS.gray[500]}; vertical-align: top;">Email</td>
+            <td style="padding: 4px 0; font-size: 14px;"><a href="mailto:${email}" style="color: ${COLORS.primary};">${email}</a></td>
+          </tr>
+          <tr>
+            <td style="padding: 4px 0; font-size: 14px; color: ${COLORS.gray[500]}; vertical-align: top;">Subject</td>
+            <td style="padding: 4px 0; font-size: 14px; color: ${COLORS.gray[900]}; font-weight: 600;">${subject}</td>
+          </tr>
+        </table>
+      `)}
+
+      <p style="color: ${COLORS.gray[500]}; font-size: 13px; font-weight: 600; margin: 24px 0 8px; text-transform: uppercase; letter-spacing: 0.5px;">Message</p>
+      <div style="background: ${COLORS.gray[50]}; border: 1px solid ${COLORS.gray[200]}; border-radius: 8px; padding: 18px 20px; color: ${COLORS.gray[900]}; font-size: 15px; line-height: 1.7;">
+        ${message}
+      </div>
+
+      ${primaryButton(`Reply to ${name}`, `mailto:${email}?subject=${encodeURIComponent('Re: ' + (data.subject || 'Your enquiry to BahrainNights'))}`)}
+    `)}
+  `);
+}
+
+/**
+ * Confirmation email sent to the visitor after their enquiry is delivered.
+ */
+export function contactFormConfirmation(data: ContactFormData): string {
+  const name = escapeHtml(data.name);
+
+  return baseLayout(`
+    ${gradientHeader('Message received', "We'll get back to you soon", '✅')}
+    ${contentBody(`
+      <p style="color: ${COLORS.gray[700]}; font-size: 16px; line-height: 1.6; margin: 0 0 20px;">
+        Thanks for getting in touch, <strong>${name}</strong> — your message has reached the BahrainNights team.
+      </p>
+
+      <p style="color: ${COLORS.gray[700]}; font-size: 16px; line-height: 1.6; margin: 0 0 20px;">
+        We usually respond within one business day. If it is urgent, call us on
+        <a href="tel:+97339007750" style="color: ${COLORS.primary};">+973 3900 7750</a>.
+      </p>
+
+      ${infoBox(`
+        <p style="color: ${COLORS.gray[500]}; font-size: 14px; margin: 0 0 8px;"><strong>What you sent</strong></p>
+        <p style="color: ${COLORS.gray[700]}; font-size: 14px; margin: 0;">${escapeHtml(data.subject || 'General enquiry')}</p>
+      `)}
+
+      ${primaryButton('Browse what\'s on', `${SITE_URL}/events`)}
+    `)}
+  `);
+}
+
+/**
  * Venue Registration Confirmation Email
  */
 export function venueRegistrationConfirmation(venueName: string): string {

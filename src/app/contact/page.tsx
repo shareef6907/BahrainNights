@@ -2,10 +2,11 @@
 
 import { useState } from 'react';
 import { motion } from 'framer-motion';
-import { Mail, Phone, MapPin, Send, Clock, CheckCircle, MessageSquare } from 'lucide-react';
+import { Mail, Phone, MapPin, Send, Clock, CheckCircle, MessageSquare, Loader2 } from 'lucide-react';
 
 export default function ContactPage() {
-  const [formSubmitted, setFormSubmitted] = useState(false);
+  const [status, setStatus] = useState<'idle' | 'sending' | 'sent' | 'error'>('idle');
+  const [errorMessage, setErrorMessage] = useState<string>('');
   const [formData, setFormData] = useState({
     name: '',
     email: '',
@@ -13,16 +14,64 @@ export default function ContactPage() {
     message: '',
   });
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const SUBJECT_LABELS: Record<string, string> = {
+    general: 'General Inquiry',
+    listing: 'Event Listing',
+    advertising: 'Advertising',
+    partnership: 'Partnership',
+    feedback: 'Feedback',
+    support: 'Technical Support',
+  };
+
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setFormSubmitted(true);
+    setStatus('sending');
+    setErrorMessage('');
+
+    try {
+      const response = await fetch('/api/contact', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          name: formData.name,
+          email: formData.email,
+          subject: SUBJECT_LABELS[formData.subject] || formData.subject,
+          message: formData.message,
+        }),
+      });
+
+      const data = await response.json().catch(() => ({}));
+
+      if (!response.ok || !data.success) {
+        setStatus('error');
+        setErrorMessage(
+          data.error || 'We could not send your message. Please try again, or email us directly.'
+        );
+        return;
+      }
+
+      // Only reach the success screen once the enquiry has actually been delivered.
+      setStatus('sent');
+    } catch {
+      setStatus('error');
+      setErrorMessage(
+        'We could not reach our server. Please check your connection and try again, or email sales@bahrainnights.com.'
+      );
+    }
   };
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
   };
 
-  if (formSubmitted) {
+  // Fallback so a failed send never costs the enquiry
+  const mailtoFallback = `mailto:sales@bahrainnights.com?subject=${encodeURIComponent(
+    SUBJECT_LABELS[formData.subject] || 'General Inquiry'
+  )}&body=${encodeURIComponent(
+    `Name: ${formData.name}\nEmail: ${formData.email}\n\n${formData.message}`
+  )}`;
+
+  if (status === 'sent') {
     return (
       <div className="min-h-screen bg-slate-950 flex items-center justify-center px-4">
         <motion.div
