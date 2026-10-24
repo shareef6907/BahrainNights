@@ -28,8 +28,11 @@ export function GoogleAnalytics() {
       });
     });
 
-    // Track contact form submissions
-    document.querySelectorAll('form').forEach(form => {
+    // Track contact form submissions.
+    // Forms that deliver asynchronously (data-ga-manual) fire their own
+    // conversion event only once delivery actually succeeds — counting them
+    // here would report conversions for enquiries that never arrived.
+    document.querySelectorAll('form:not([data-ga-manual])').forEach(form => {
       form.addEventListener('submit', () => {
         gtag('event', 'contact_form_submit', { page: window.location.pathname });
       });

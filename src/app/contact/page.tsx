@@ -2,10 +2,12 @@
 
 import { useState } from 'react';
 import { motion } from 'framer-motion';
-import { Mail, Phone, MapPin, Send, Clock, CheckCircle, MessageSquare } from 'lucide-react';
+import { Mail, Phone, MapPin, Send, Clock, CheckCircle, MessageSquare, AlertTriangle, Loader2 } from 'lucide-react';
 
 export default function ContactPage() {
-  const [formSubmitted, setFormSubmitted] = useState(false);
+  const [status, setStatus] = useState<'idle' | 'sending' | 'sent' | 'error'>('idle');
+  const [errorMessage, setErrorMessage] = useState('');
+  const [sentTo, setSentTo] = useState('');
   const [formData, setFormData] = useState({
     name: '',
     email: '',
@@ -13,16 +15,63 @@ export default function ContactPage() {
     message: '',
   });
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setFormSubmitted(true);
+
+    if (status === 'sending') return;
+
+    setStatus('sending');
+    setErrorMessage('');
+
+    try {
+      const response = await fetch('/api/contact', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ ...formData, website: '' }),
+      });
+
+      const data = await response.json().catch(() => ({}));
+
+      if (!response.ok) {
+        setStatus('error');
+        setErrorMessage(
+          data.error ||
+            'We could not send your message just now. Please use the direct contact options below and we will pick it up straight away.'
+        );
+        return;
+      }
+
+      setStatus('sent');
+      setSentTo(formData.email);
+
+      // Only count the conversion once the enquiry has actually been delivered.
+      if (typeof window !== 'undefined' && 'gtag' in window) {
+        (window as any).gtag('event', 'contact_form_submit', {
+          page: window.location.pathname,
+          form_location: 'contact_page',
+        });
+      }
+    } catch {
+      setStatus('error');
+      setErrorMessage(
+        'We could not send your message just now. Please use the direct contact options below and we will pick it up straight away.'
+      );
+    }
   };
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
   };
 
-  if (formSubmitted) {
+  // Prefilled mailto so a visitor can always deliver the message themselves
+  // even if our email pipeline is unavailable.
+  const fallbackMailto = `mailto:sales@bahrainnights.com?subject=${encodeURIComponent(
+    `Enquiry from bahrainnights.com: ${formData.subject || 'General Inquiry'}`
+  )}&body=${encodeURIComponent(
+    `Name: ${formData.name}\nEmail: ${formData.email}\nSubject: ${formData.subject}\n\n${formData.message}`
+  )}`;
+
+  if (status === 'sent') {
     return (
       <div className="min-h-screen bg-slate-950 flex items-center justify-center px-4">
         <motion.div
@@ -35,14 +84,61 @@ export default function ContactPage() {
           </div>
           <h1 className="text-3xl font-bold text-white mb-4">Message Sent!</h1>
           <p className="text-gray-400 mb-8">
-            Thank you for reaching out. We&apos;ll get back to you as soon as possible.
+            Thanks {formData.name ? `, ${formData.name.split(' ')[0]}` : ''} — your message is with our
+            team and we&apos;ll reply to <span className="text-gray-300">{sentTo}</span> within 24 hours.
           </p>
-          <a
-            href="/"
-            className="inline-flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-blue-500 to-purple-500 text-white font-semibold rounded-xl hover:shadow-lg transition-all"
-          >
-            Back to Home
-          </a>
+          <div className="flex flex-col sm:flex-row gap-4 justify-center">
+            <a
+              href="/"
+              className="inline-flex items-center justify-center gap-2 px-6 py-3 bg-gradient-to-r from-blue-500 to-purple-500 text-white font-semibold rounded-xl hover:shadow-lg transition-all"
+            >
+              Back to Home
+            </a>
+            <a
+              href="tel:+97339007750"
+              className="inline-flex items-center justify-center gap-2 px-6 py-3 border border-white/20 text-white font-semibold rounded-xl hover:border-white/40 transition-all"
+            >
+              Call +973 3900 7750
+            </a>
+          </div>
+        </motion.div>
+      </div>
+    );
+  }
+
+  if (status === 'error') {
+    return (
+      <div className="min-h-screen bg-slate-950 flex items-center justify-center px-4">
+        <motion.div
+          initial={{ opacity: 0, scale: 0.9 }}
+          animate={{ opacity: 1, scale: 1 }}
+          className="text-center max-w-md"
+        >
+          <div className="w-20 h-20 bg-amber-500/20 rounded-full flex items-center justify-center mx-auto mb-6">
+            <AlertTriangle className="w-10 h-10 text-amber-400" />
+          </div>
+          <h1 className="text-3xl font-bold text-white mb-4">We couldn&apos;t send that yet</h1>
+          <p className="text-gray-400 mb-8">{errorMessage}</p>
+          <div className="flex flex-col sm:flex-row gap-4 justify-center">
+            <a
+              href={fallbackMailto}
+              className="inline-flex items-center justify-center gap-2 px-6 py-3 bg-gradient-to-r from-blue-500 to-purple-500 text-white font-semibold rounded-xl hover:shadow-lg transition-all"
+            >
+              Send via email
+            </a>
+            <a
+              href="tel:+97339007750"
+              className="inline-flex items-center justify-center gap-2 px-6 py-3 border border-white/20 text-white font-semibold rounded-xl hover:border-white/40 transition-all"
+            >
+              Call +973 3900 7750
+            </a>
+            <button
+              onClick={() => setStatus('idle')}
+              className="inline-flex items-center justify-center gap-2 px-6 py-3 border border-white/20 text-white font-semibold rounded-xl hover:border-white/40 transition-all"
+            >
+              Back to form
+            </button>
+          </div>
         </motion.div>
       </div>
     );
@@ -153,7 +249,7 @@ export default function ContactPage() {
                 Send a Message
               </h2>
 
-              <form onSubmit={handleSubmit} className="space-y-6">
+              <form onSubmit={handleSubmit} className="space-y-6" data-ga-manual="true">
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div>
                     <label className="block text-sm font-medium text-gray-300 mb-2">
@@ -223,11 +319,25 @@ export default function ContactPage() {
 
                 <button
                   type="submit"
-                  className="w-full flex items-center justify-center gap-2 px-6 py-4 bg-gradient-to-r from-blue-500 via-purple-500 to-pink-500 text-white font-bold rounded-xl hover:shadow-lg hover:shadow-purple-500/25 transition-all"
+                  disabled={status === 'sending'}
+                  className="w-full flex items-center justify-center gap-2 px-6 py-4 bg-gradient-to-r from-blue-500 via-purple-500 to-pink-500 text-white font-bold rounded-xl hover:shadow-lg hover:shadow-purple-500/25 transition-all disabled:opacity-60 disabled:cursor-not-allowed"
                 >
-                  <Send className="w-5 h-5" />
-                  Send Message
+                  {status === 'sending' ? (
+                    <>
+                      <Loader2 className="w-5 h-5 animate-spin" />
+                      Sending…
+                    </>
+                  ) : (
+                    <>
+                      <Send className="w-5 h-5" />
+                      Send Message
+                    </>
+                  )}
                 </button>
+
+                <p className="text-xs text-gray-500 text-center">
+                  We&apos;ll never share your details. You&apos;ll get a reply within 24 hours.
+                </p>
               </form>
             </div>
           </motion.div>

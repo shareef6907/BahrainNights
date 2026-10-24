@@ -41,6 +41,14 @@ function isSESConfigured(): boolean {
 }
 
 /**
+ * Public helper — callers that need to know whether a send will actually
+ * deliver (rather than fall back to the dev-mode console log) can check this.
+ */
+export function isEmailConfigured(): boolean {
+  return isSESConfigured();
+}
+
+/**
  * Send an email using AWS SES
  * Falls back to console logging if SES is not configured (development)
  */
