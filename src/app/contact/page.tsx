@@ -12,6 +12,7 @@ export default function ContactPage() {
     email: '',
     subject: '',
     message: '',
+    website: '',
   });
 
   const SUBJECT_LABELS: Record<string, string> = {
@@ -37,6 +38,7 @@ export default function ContactPage() {
           email: formData.email,
           subject: SUBJECT_LABELS[formData.subject] || formData.subject,
           message: formData.message,
+          website: formData.website,
         }),
       });
 
@@ -52,6 +54,14 @@ export default function ContactPage() {
 
       // Only reach the success screen once the enquiry has actually been delivered.
       setStatus('sent');
+
+      // Only count the conversion once the enquiry has actually been delivered.
+      if (typeof window !== 'undefined' && 'gtag' in window) {
+        (window as any).gtag('event', 'contact_form_submit', {
+          page: window.location.pathname,
+          form_location: 'contact_page',
+        });
+      }
     } catch {
       setStatus('error');
       setErrorMessage(
@@ -202,7 +212,31 @@ export default function ContactPage() {
                 Send a Message
               </h2>
 
-              <form onSubmit={handleSubmit} className="space-y-6">
+              <form onSubmit={handleSubmit} className="space-y-6" data-ga-manual="true">
+                {status === 'error' && (
+                  <div
+                    role="alert"
+                    className="p-4 rounded-xl border border-red-500/40 bg-red-500/10"
+                  >
+                    <p className="text-sm text-red-200 leading-relaxed">{errorMessage}</p>
+                    <div className="mt-3 flex flex-wrap gap-3">
+                      <a
+                        href={mailtoFallback}
+                        className="inline-flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-semibold text-white bg-gradient-to-r from-blue-500 to-purple-500 hover:opacity-90 transition-opacity"
+                      >
+                        <Mail className="w-4 h-4" />
+                        Send by email instead
+                      </a>
+                      <a
+                        href="tel:+97339007750"
+                        className="inline-flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-semibold text-white border border-white/20 hover:bg-white/10 transition-colors"
+                      >
+                        <Phone className="w-4 h-4" />
+                        Call +973 3900 7750
+                      </a>
+                    </div>
+                  </div>
+                )}
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div>
                     <label className="block text-sm font-medium text-gray-300 mb-2">
@@ -270,12 +304,36 @@ export default function ContactPage() {
                   />
                 </div>
 
+                {/* Honeypot - hidden from real visitors, filled by bots */}
+                <div className="hidden" aria-hidden="true">
+                  <label htmlFor="website">Website</label>
+                  <input
+                    type="text"
+                    id="website"
+                    name="website"
+                    value={formData.website}
+                    onChange={handleChange}
+                    tabIndex={-1}
+                    autoComplete="off"
+                  />
+                </div>
+
                 <button
                   type="submit"
-                  className="w-full flex items-center justify-center gap-2 px-6 py-4 bg-gradient-to-r from-blue-500 via-purple-500 to-pink-500 text-white font-bold rounded-xl hover:shadow-lg hover:shadow-purple-500/25 transition-all"
+                  disabled={status === 'sending'}
+                  className="w-full flex items-center justify-center gap-2 px-6 py-4 bg-gradient-to-r from-blue-500 via-purple-500 to-pink-500 text-white font-bold rounded-xl hover:shadow-lg hover:shadow-purple-500/25 transition-all disabled:opacity-60 disabled:cursor-not-allowed disabled:hover:shadow-none"
                 >
-                  <Send className="w-5 h-5" />
-                  Send Message
+                  {status === 'sending' ? (
+                    <>
+                      <Loader2 className="w-5 h-5 animate-spin" />
+                      Sending…
+                    </>
+                  ) : (
+                    <>
+                      <Send className="w-5 h-5" />
+                      Send Message
+                    </>
+                  )}
                 </button>
               </form>
             </div>

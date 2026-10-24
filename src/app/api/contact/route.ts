@@ -80,6 +80,12 @@ export async function POST(request: NextRequest) {
 
     const payload = (body || {}) as Record<string, unknown>;
 
+    // Honeypot — a hidden field real visitors never see or fill. Bots that fill
+    // it get a success response but nothing is delivered.
+    if (sanitize(payload.website)) {
+      return NextResponse.json({ success: true });
+    }
+
     const name = sanitize(payload.name);
     const email = sanitize(payload.email).toLowerCase();
     const subject = sanitize(payload.subject);
