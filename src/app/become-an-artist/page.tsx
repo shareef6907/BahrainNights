@@ -5,6 +5,9 @@ export const metadata: Metadata = {
   title: 'Join Our Agency | Become a Bahrain Nights Artist',
   description: 'Join Bahrain\'s premier entertainment booking agency. Register as a DJ, vocalist, musician, performer, or entertainer and get booked for events across Bahrain.',
   keywords: ['artist registration Bahrain', 'DJ registration', 'performer registration', 'entertainment agency Bahrain'],
+  alternates: {
+    canonical: '/become-an-artist',
+  },
 };
 
 export default function BecomeAnArtistPage() {

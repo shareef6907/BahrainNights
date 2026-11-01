@@ -33,6 +33,9 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
       `${locationInfo.name} concerts`,
       `${locationInfo.name} entertainment`,
     ],
+    alternates: {
+      canonical: `/regional/places-to-go/${location}`,
+    },
     openGraph: {
       title: `Places to Go in ${locationInfo.name} | Bahrain Nights`,
       description: `Your complete guide to the best events, nightlife, and attractions in ${locationInfo.name}`,

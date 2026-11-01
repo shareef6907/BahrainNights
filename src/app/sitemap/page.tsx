@@ -4,6 +4,9 @@ import Link from 'next/link';
 export const metadata: Metadata = {
   title: 'Sitemap',
   description: 'Complete sitemap of Bahrain Nights - Find all pages for events, venues, guides, and more in Bahrain.',
+  alternates: {
+    canonical: '/sitemap',
+  },
 };
 
 const sitemapData = {
