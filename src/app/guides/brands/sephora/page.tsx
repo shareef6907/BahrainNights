@@ -379,7 +379,7 @@ export default function SephoraBahrainPage() {
             author: {
               '@type': 'Organization',
               name: 'Bahrain Nights',
-              url: 'https://bahrainnights.com',
+              url: 'https://www.bahrainnights.com',
             },
             publisher: {
               '@type': 'Organization',

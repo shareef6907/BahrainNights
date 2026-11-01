@@ -3,7 +3,7 @@
  * Reusable, responsive HTML email templates
  */
 
-const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL || 'https://bahrainnights.com';
+const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL || 'https://www.bahrainnights.com';
 const CURRENT_YEAR = new Date().getFullYear();
 
 // Logo URL - own domain. The old S3 URL

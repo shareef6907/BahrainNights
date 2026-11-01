@@ -426,7 +426,7 @@ export default function SouksPage() {
             author: {
               '@type': 'Organization',
               name: 'Bahrain Nights',
-              url: 'https://bahrainnights.com',
+              url: 'https://www.bahrainnights.com',
             },
             publisher: {
               '@type': 'Organization',
@@ -436,7 +436,7 @@ export default function SouksPage() {
             dateModified: lastUpdated,
             mainEntityOfPage: {
               '@type': 'WebPage',
-              '@id': 'https://bahrainnights.com/guides/souks',
+              '@id': 'https://www.bahrainnights.com/guides/souks',
             },
           }),
         }}

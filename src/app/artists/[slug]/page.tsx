@@ -42,7 +42,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
       description: artist.short_description || `Book ${artist.stage_name} for your event in Bahrain.`,
       images: artist.profile_image ? [{ url: artist.profile_image }] : [],
       type: 'profile',
-      url: `https://bahrainnights.com/artists/${artist.slug}`,
+      url: `https://www.bahrainnights.com/artists/${artist.slug}`,
     },
   };
 }

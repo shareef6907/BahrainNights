@@ -8,7 +8,7 @@ const cinematicGroupLinks = [
   { href: 'https://filmproductionbahrain.com', label: '🎬 Film Production', external: true },
   { href: 'https://eventsbahrain.com', label: '🎪 Events & Equipment', external: true },
   { href: 'https://studentphotos.com', label: '📸 School Photography', external: true },
-  { href: 'https://bahrainnights.com', label: '🌙 What\'s On in Bahrain', external: false },
+  { href: 'https://www.bahrainnights.com', label: '🌙 What\'s On in Bahrain', external: false },
 ];
 
 interface CinematicGroupBarProps {

@@ -39,6 +39,12 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
     title: article.meta_title || `${article.title} | Bahrain Nights Blog`,
     description: article.meta_description || article.excerpt || `Read about ${article.title} on BahrainNights Blog`,
     keywords: article.keywords?.join(', '),
+    // Every indexable URL needs exactly one canonical pointing at itself.
+    // These blog pages are in the sitemap, so a missing canonical lets
+    // duplicate URLs compete for the same content.
+    alternates: {
+      canonical: `/regional/${slug}`,
+    },
     openGraph: {
       title: article.meta_title || article.title,
       description: article.meta_description || article.excerpt || '',

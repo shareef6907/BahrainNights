@@ -63,7 +63,7 @@ export async function PATCH(request: Request, { params }: RouteParams) {
                   <h2 style="color: #f59e0b;">Congratulations, ${currentArtist.stage_name}!</h2>
                   <p>Your artist application has been approved! You are now part of the BahrainNights entertainment roster.</p>
                   <p>Your profile is now live at:</p>
-                  <a href="https://bahrainnights.com/artists/${currentArtist.slug}" 
+                  <a href="https://www.bahrainnights.com/artists/${currentArtist.slug}" 
                      style="display: inline-block; margin: 20px 0; padding: 12px 24px; background: #f59e0b; color: white; text-decoration: none; border-radius: 8px;">
                     View Your Profile
                   </a>

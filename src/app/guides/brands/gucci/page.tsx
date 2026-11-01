@@ -384,7 +384,7 @@ export default function GucciBahrainPage() {
             author: {
               '@type': 'Organization',
               name: 'Bahrain Nights',
-              url: 'https://bahrainnights.com',
+              url: 'https://www.bahrainnights.com',
             },
             publisher: {
               '@type': 'Organization',
@@ -394,7 +394,7 @@ export default function GucciBahrainPage() {
             dateModified: lastUpdated,
             mainEntityOfPage: {
               '@type': 'WebPage',
-              '@id': 'https://bahrainnights.com/guides/brands/gucci',
+              '@id': 'https://www.bahrainnights.com/guides/brands/gucci',
             },
           }),
         }}

@@ -133,7 +133,7 @@ export async function POST(request: Request) {
               </table>
 
               <div style="margin-top: 30px; padding: 20px; background: #111; border-radius: 8px; text-align: center;">
-                <a href="https://bahrainnights.com/admin/artists" style="display: inline-block; padding: 12px 24px; background: #f59e0b; color: white; text-decoration: none; border-radius: 8px; font-weight: bold;">View in Admin Panel</a>
+                <a href="https://www.bahrainnights.com/admin/artists" style="display: inline-block; padding: 12px 24px; background: #f59e0b; color: white; text-decoration: none; border-radius: 8px; font-weight: bold;">View in Admin Panel</a>
               </div>
             </div>
             

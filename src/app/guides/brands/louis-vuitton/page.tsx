@@ -333,7 +333,7 @@ export default function LouisVuittonBahrainPage() {
             author: {
               '@type': 'Organization',
               name: 'Bahrain Nights',
-              url: 'https://bahrainnights.com',
+              url: 'https://www.bahrainnights.com',
             },
             publisher: {
               '@type': 'Organization',
@@ -343,7 +343,7 @@ export default function LouisVuittonBahrainPage() {
             dateModified: lastUpdated,
             mainEntityOfPage: {
               '@type': 'WebPage',
-              '@id': 'https://bahrainnights.com/guides/brands/louis-vuitton',
+              '@id': 'https://www.bahrainnights.com/guides/brands/louis-vuitton',
             },
           }),
         }}

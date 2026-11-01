@@ -400,7 +400,7 @@ export default function AdidasBahrainPage() {
             author: {
               '@type': 'Organization',
               name: 'Bahrain Nights',
-              url: 'https://bahrainnights.com',
+              url: 'https://www.bahrainnights.com',
             },
             publisher: {
               '@type': 'Organization',

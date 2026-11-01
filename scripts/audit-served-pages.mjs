@@ -89,6 +89,8 @@ for (const key of Object.keys(appPaths)) {
   if (!key.endsWith('/page')) continue;
   if (key.includes('/api/')) continue;
   let p = key.replace(/\/page$/, '');
+  // Route groups like (auth) and (category) are not part of the URL.
+  p = p.replace(/\/\([^)]+\)/g, '');
   if (p.includes('[')) continue;
   if (p === '') p = '/';
   if (!p.startsWith('/')) p = '/' + p;
@@ -155,7 +157,17 @@ const NOINDEX_RE = /<meta[^>]*name=["']robots["'][^>]*content=["']([^"']+)["']/i
 const EXPECTED_NOINDEX = [
   /^\/admin(\/|$)/, /^\/api(\/|$)/, /^\/venue-portal(\/|$)/,
   /^\/auth(\/|$)/, /^\/login(\/|$)/, /^\/register(\/|$)/,
-  /^\/forgot-password(\/|$)/, /^\/reset-password(\/|$)/, /^\/offline(\/|$)/,
+  /^\/forgot-password(\/|$)/, /^\/reset-password(\/|$)/,
+  /^\/pending-approval(\/|$)/, /^\/offline(\/|$)/, /^\/search(\/|$)/,
+];
+
+/**
+ * Non-HTML resources. These are served as images / plain text / XML, so they
+ * have no <head> and cannot carry a canonical or an og:image. Counting them as
+ * "pages missing a canonical" is a false positive.
+ */
+const NON_PAGE_RESOURCES = [
+  /^\/favicon\.ico$/, /^\/robots\.txt$/, /^\/sitemap\.xml$/, /^\/manifest/,
 ];
 
 const served = results.filter((r) => r.status === 200);
@@ -170,10 +182,15 @@ console.log(`# other status          : ${other.length}`);
 console.log('');
 
 let noCanonical = 0, dupCanonical = 0, wrongHost = 0, noOg = 0, noindexMismatch = 0;
+let nonPages = 0;
+let indexableMissingCanonical = 0, noindexMissingCanonical = 0;
 const problemRows = [];
 
 for (const r of served) {
   const html = r.text;
+  const isNonPage = NON_PAGE_RESOURCES.some((re) => re.test(r.path))
+    // A JSON route handler is not a document: it has no <head> to audit.
+    || r.path.startsWith('/api/');
   const canonTags = html.match(CANON_RE) || [];
   const canon = html.match(CANON_HREF_RE)?.[1] || null;
   const ogImage = html.match(OG_IMAGE_RE)?.[1] || null;
@@ -182,29 +199,49 @@ for (const r of served) {
   const shouldNoindex = EXPECTED_NOINDEX.some((re) => re.test(r.path));
 
   const problems = [];
-  if (canonTags.length === 0) { noCanonical++; problems.push('no-canonical'); }
-  else if (canonTags.length > 1) { dupCanonical++; problems.push('duplicate-canonical'); }
-  else if (!canon) problems.push('canonical-without-href');
-  else {
-    try {
-      const host = new URL(canon).host;
-      if (host !== OWN_DOMAIN) { wrongHost++; problems.push(`canonical-wrong-host:${host}`); }
-    } catch { problems.push('canonical-not-absolute'); }
+
+  if (isNonPage) {
+    // Not a page: it has no <head>, so there is nothing to audit.
+    nonPages++;
+  } else {
+    if (canonTags.length === 0) {
+      noCanonical++;
+      if (isNoindex) noindexMissingCanonical++;
+      else indexableMissingCanonical++;
+      problems.push('no-canonical');
+    }
+    else if (canonTags.length > 1) { dupCanonical++; problems.push('duplicate-canonical'); }
+    else if (!canon) problems.push('canonical-without-href');
+    else {
+      try {
+        const host = new URL(canon).host;
+        if (host !== OWN_DOMAIN) { wrongHost++; problems.push(`canonical-wrong-host:${host}`); }
+      } catch { problems.push('canonical-not-absolute'); }
+    }
+    if (!ogImage) { noOg++; problems.push('missing-og-image'); }
   }
-  if (!ogImage) { noOg++; problems.push('missing-og-image'); }
-  if (shouldNoindex !== isNoindex) { noindexMismatch++; problems.push('noindex-mismatch'); }
+
+  // A page that IS indexable must not be marked noindex, and a page that is
+  // NOT indexable must be marked noindex. Both directions matter.
+  if (!isNonPage && shouldNoindex !== isNoindex) { noindexMismatch++; problems.push('noindex-mismatch'); }
 
   if (problems.length) problemRows.push({ path: r.path, problems, canon, ogImage, isNoindex, shouldNoindex });
 }
 
 console.log('# === SEO TAG AUDIT (denominator = pages served HTTP 200) ===');
-console.log(`# pages audited                          : ${served.length}`);
+console.log(`# pages audited                          : ${served.length - nonPages}`);
+console.log(`# non-HTML resources (skipped)           : ${nonPages}`);
 console.log(`# missing canonical                      : ${noCanonical}`);
 console.log(`# duplicate canonical                    : ${dupCanonical}`);
 console.log(`# canonical pointing at another domain   : ${wrongHost}`);
 console.log(`# missing og:image                       : ${noOg}`);
 console.log(`# noindex mismatch (expected vs actual)  : ${noindexMismatch}`);
 console.log(`# pages with >=1 problem                 : ${problemRows.length}`);
+console.log('#');
+console.log('# Split by indexability. A canonical on a noindex page is optional, so');
+console.log('# the number that matters is the indexable one.');
+console.log(`# INDEXABLE pages missing canonical      : ${indexableMissingCanonical}`);
+console.log(`# noindex pages missing canonical        : ${noindexMissingCanonical}  (optional)`);
 console.log('');
 if (problemRows.length) {
   console.log('path\tproblems\tcanonical\togImage\tnoindex\texpectedNoindex');

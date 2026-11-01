@@ -31,6 +31,11 @@ export async function generateMetadata({ params, searchParams }: Props): Promise
       `${locationName} nightlife`,
       `${locationName} entertainment`,
     ],
+    // Canonical on the country page itself. The `?city=` variant is the same
+    // page with a filter applied, so it canonicalises to the country page too.
+    alternates: {
+      canonical: `/regional/country/${country}`,
+    },
   };
 }
 

@@ -388,7 +388,7 @@ export default async function WeekendEventsPage() {
             '@type': 'CollectionPage',
             name: 'Events in Bahrain This Weekend',
             description: 'Find events happening in Bahrain this weekend - parties, concerts, brunches, and more.',
-            url: 'https://bahrainnights.com/events/this-weekend',
+            url: 'https://www.bahrainnights.com/events/this-weekend',
             mainEntity: {
               '@type': 'ItemList',
               numberOfItems: events.length,
@@ -403,7 +403,7 @@ export default async function WeekendEventsPage() {
                     '@type': 'Place',
                     name: event.venue_name || 'Bahrain',
                   },
-                  url: `https://bahrainnights.com/events/${event.slug}`,
+                  url: `https://www.bahrainnights.com/events/${event.slug}`,
                 },
               })),
             },

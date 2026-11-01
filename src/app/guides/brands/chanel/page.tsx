@@ -393,7 +393,7 @@ export default function ChanelBahrainPage() {
             author: {
               '@type': 'Organization',
               name: 'Bahrain Nights',
-              url: 'https://bahrainnights.com',
+              url: 'https://www.bahrainnights.com',
             },
             publisher: {
               '@type': 'Organization',
@@ -403,7 +403,7 @@ export default function ChanelBahrainPage() {
             dateModified: lastUpdated,
             mainEntityOfPage: {
               '@type': 'WebPage',
-              '@id': 'https://bahrainnights.com/guides/brands/chanel',
+              '@id': 'https://www.bahrainnights.com/guides/brands/chanel',
             },
           }),
         }}
