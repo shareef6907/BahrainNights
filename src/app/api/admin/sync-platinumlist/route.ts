@@ -97,7 +97,20 @@ function extractVenueFromName(name: string): string | null {
   return nameMatch ? nameMatch[1].trim() : null;
 }
 
-async function fetchFromPlatinumlist(endpoint: string): Promise<{ data: PlatinumlistEvent[] } | null> {
+interface PlatinumlistResponse {
+  data: PlatinumlistEvent[];
+  meta?: {
+    pagination?: {
+      total?: number;
+      count?: number;
+      per_page?: number;
+      current_page?: number;
+      total_pages?: number;
+    };
+  };
+}
+
+async function fetchFromPlatinumlist(endpoint: string): Promise<PlatinumlistResponse | null> {
   const url = `${PLATINUMLIST_API_BASE}${endpoint}&scope=affiliate.show.events&include=price`;
   try {
     const response = await fetch(url, {
@@ -146,14 +159,35 @@ export async function POST(request: NextRequest) {
 
     const stats = { fetched: 0, inserted: 0, updated: 0, errors: 0 };
     const allEvents: PlatinumlistEvent[] = [];
+    let pagesFetched = 0;
+    let totalEventsInFeed = 0;
+    let newestEventStart = 0;
 
-    // Fetch all pages of events
+    // Fetch all pages of events.
+    //
+    // The Platinumlist API returns events OLDEST-FIRST by default, so the newest
+    // (and therefore all future) events sit at the END of the feed. The previous
+    // cap of 30 pages at 50 per page stopped at event 1500 of 1631 and never
+    // requested the tail - which is why future events were missing from the
+    // listings while the API itself was serving them fine.
+    //
+    // Two changes fix it:
+    //  1. `sort=-start` makes the API return the NEWEST events first, so the
+    //     pages we do fetch are the ones that matter. Verified against the live
+    //     API: page 1 at per_page=100 is 100% future events.
+    //  2. Paging runs until the API reports the last page (via its own
+    //     pagination metadata) rather than to a fixed cap, so the sync cannot
+    //     silently fall behind if the feed grows again.
     let page = 1;
-    const perPage = 50;
+    const perPage = 100;
+    const MAX_PAGES = 200; // safety net against a runaway loop
     let hasMore = true;
+    let totalPages: number | null = null;
 
-    while (hasMore && page <= 30) {
-      const response = await fetchFromPlatinumlist(`/events?page=${page}&per_page=${perPage}`);
+    while (hasMore && page <= MAX_PAGES) {
+      const response = await fetchFromPlatinumlist(
+        `/events?page=${page}&per_page=${perPage}&sort=-start`
+      );
       if (!response?.data?.length) {
         hasMore = false;
         break;
@@ -165,14 +199,46 @@ export async function POST(request: NextRequest) {
       );
       
       allEvents.push(...bahrainEvents);
-      hasMore = response.data.length === perPage;
+      totalEventsInFeed += response.data.length;
+
+      // Track the newest event seen in the feed so a future truncation is
+      // visible in the logs instead of silently dropping upcoming events.
+      for (const e of response.data) {
+        if (typeof e.start === 'number' && e.start > newestEventStart) {
+          newestEventStart = e.start;
+        }
+      }
+
+      const pagination = response.meta?.pagination;
+      if (typeof pagination?.total_pages === 'number') {
+        totalPages = pagination.total_pages;
+      }
+      pagesFetched = page;
+
+      // Stop when we have read the last page. Fall back to the short-page
+      // heuristic if the API omits its pagination metadata.
+      hasMore = totalPages !== null ? page < totalPages : response.data.length === perPage;
       page++;
-      
+
       // Rate limiting
       await new Promise(r => setTimeout(r, 300));
     }
 
+    if (hasMore) {
+      console.warn(
+        `Platinumlist sync hit the MAX_PAGES safety cap (${MAX_PAGES} pages). ` +
+        `The feed may be larger than expected - increase MAX_PAGES if this is legitimate.`
+      );
+    }
+
     stats.fetched = allEvents.length;
+    console.log(
+      `Platinumlist sync: fetched ${pagesFetched} page(s) of ${totalPages ?? 'unknown'} in the feed, ` +
+      `${totalEventsInFeed} events in feed, ` +
+      `${allEvents.length} Bahrain events matched. Newest event in feed: ${
+        newestEventStart ? new Date(newestEventStart * 1000).toISOString() : 'unknown'
+      }`
+    );
 
     // Upsert events
     for (const event of allEvents) {
