@@ -1,7 +1,7 @@
 import { Metadata } from 'next';
 import Link from 'next/link';
 import { 
-  MapPin, Clock, ExternalLink, 
+  MapPin, Clock, ExternalLink, Phone,
   Sparkles, ShoppingBag, Star, Info, Home
 } from 'lucide-react';
 import BreadcrumbSchema from '@/components/SEO/BreadcrumbSchema';
@@ -19,12 +19,12 @@ const mallLinks: Record<string, string> = {
 };
 
 export const metadata: Metadata = {
-  title: 'IKEA Bahrain - Store Location & Shopping Guide 2026',
-  description: 'Visit IKEA Bahrain for affordable furniture, home decor & Swedish food. Complete guide with directions, hours, tips & what to expect at IKEA Sitra.',
-  keywords: 'IKEA Bahrain, IKEA store Bahrain, IKEA Sitra, furniture Bahrain, home decor Bahrain, IKEA restaurant Bahrain, IKEA hours Bahrain',
+  title: 'IKEA Bahrain: Salmabad Store Hours, Address & Map',
+  description: 'IKEA Bahrain is at Salmabad, Block 712, Road 100, Manama. Open daily 10 AM - 10 PM. Phone 8000 1120. Directions, IKEA Restaurant hours, Småland and shopping tips.',
+  keywords: 'IKEA Bahrain, IKEA store Bahrain, IKEA Sitra, IKEA Salmabad, IKEA Bahrain address, IKEA Bahrain phone number, IKEA Bahrain hours, IKEA Bahrain location, furniture Bahrain, home decor Bahrain, IKEA restaurant Bahrain, IKEA Smaland Bahrain',
   openGraph: {
-    title: 'IKEA Bahrain - Store Location & Shopping Guide 2026',
-    description: 'Visit IKEA Bahrain for affordable furniture, home decor & Swedish food.',
+    title: 'IKEA Bahrain: Salmabad Store Hours, Address & Map',
+    description: 'IKEA Bahrain is at Salmabad, Block 712, Road 100, Manama. Open daily 10 AM - 10 PM. Phone 8000 1120. Directions, IKEA Restaurant hours and shopping tips.',
     type: 'article',
     locale: 'en_US',
     url: 'https://www.bahrainnights.com/guides/brands/ikea',
@@ -38,6 +38,9 @@ const storeInfo = {
   name: 'IKEA Bahrain',
   address: 'IKEA, Salmabad, Kingdom of Bahrain',
   fullAddress: 'Salmabad, Block 712, Road 100, Manama, Bahrain',
+  area: 'Salmabad (Sitra), Manama',
+  phone: '8000 1120',
+  phoneHref: '+97380001120',
   hours: 'Daily: 10:00 AM - 10:00 PM',
   ramadanHours: 'Ramadan hours may vary',
   mapsLink: 'https://www.google.com/maps/search/IKEA+Bahrain+Salmabad',
@@ -106,11 +109,15 @@ const relatedBrands = [
 const faqs = [
   {
     q: 'Where is IKEA in Bahrain?',
-    a: 'IKEA Bahrain is located in Sitra, in the east of Bahrain. It\'s easily accessible from both Manama and Muharraq via the main highways.',
+    a: 'IKEA Bahrain is at Salmabad, Block 712, Road 100, Manama, in the Sitra area on the east side of the island. The store sits on the main Sitra highway and is easily reached from both Manama and Muharraq.',
+  },
+  {
+    q: 'What is IKEA Bahrain\'s phone number?',
+    a: 'You can reach IKEA Bahrain on 8000 1120 (+973 8000 1120). The same number handles online orders, delivery and customer service.',
   },
   {
     q: 'What are IKEA Bahrain\'s opening hours?',
-    a: 'IKEA Bahrain is open daily from 10:00 AM to 10:00 PM. Hours may vary during Ramadan and public holidays.',
+    a: 'The IKEA Bahrain store is open Sunday to Saturday, 10:00 AM to 10:00 PM. The IKEA Restaurant, Swedish Food Market and cafe follow the same 10:00 AM - 10:00 PM hours. Hours may vary during Ramadan and public holidays.',
   },
   {
     q: 'Does IKEA Bahrain deliver?',
@@ -155,7 +162,7 @@ export default function IKEABahrainPage() {
             </h1>
             <p className="text-xl text-gray-300 max-w-3xl mx-auto">
               The Swedish home furnishing giant offers affordable, well-designed furniture 
-              and home accessories at its Sitra location. From the famous showroom to 
+              and home accessories at its Salmabad location. From the famous showroom to 
               Swedish meatballs, IKEA is a destination shopping experience.
             </p>
             <p className="text-sm text-gray-500 mt-4">
@@ -167,7 +174,7 @@ export default function IKEABahrainPage() {
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mt-12">
             {[
               { label: 'Store', value: '1', icon: ShoppingBag },
-              { label: 'Location', value: 'Sitra', icon: MapPin },
+              { label: 'Location', value: 'Salmabad', icon: MapPin },
               { label: 'Restaurant', value: 'Yes', icon: Star },
               { label: 'Kids Play', value: 'Småland', icon: Home },
             ].map((stat) => (
@@ -200,6 +207,12 @@ export default function IKEABahrainPage() {
                   <p className="flex items-center gap-2 text-gray-300">
                     <Clock className="w-4 h-4 text-gray-500" />
                     {storeInfo.hours}
+                  </p>
+                  <p className="flex items-center gap-2 text-gray-300">
+                    <Phone className="w-4 h-4 text-gray-500" />
+                    <a href={`tel:${storeInfo.phoneHref}`} className="hover:text-blue-400 transition-colors">
+                      {storeInfo.phone}
+                    </a>
                   </p>
                   <p className="flex items-center gap-2 text-yellow-400 text-xs">
                     <Info className="w-4 h-4" />
@@ -384,10 +397,26 @@ export default function IKEABahrainPage() {
             name: 'IKEA Bahrain',
             address: {
               '@type': 'PostalAddress',
-              streetAddress: 'Building 2101, Road 5228, Block 952',
-              addressLocality: 'Sitra',
+              streetAddress: 'Block 712, Road 100, Salmabad',
+              addressLocality: 'Manama',
+              addressRegion: 'Sitra',
+              postalCode: '712',
               addressCountry: 'BH',
             },
+            telephone: '+97380001120',
+            geo: {
+              '@type': 'GeoCoordinates',
+              latitude: 26.1798,
+              longitude: 50.5045,
+            },
+            openingHoursSpecification: [
+              {
+                '@type': 'OpeningHoursSpecification',
+                dayOfWeek: ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'],
+                opens: '10:00',
+                closes: '22:00',
+              },
+            ],
             openingHours: 'Mo-Su 10:00-22:00',
             url: 'https://www.ikea.com/bh/',
           }),
