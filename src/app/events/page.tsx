@@ -1,3 +1,4 @@
+import { OG_IMAGES } from '@/lib/og';
 import { Suspense } from 'react';
 import { createClient } from '@supabase/supabase-js';
 import EventsPageClient, { Event, Attraction } from '@/components/events/EventsPageClient';
@@ -403,6 +404,7 @@ export const metadata = {
     description: 'Discover the best events happening in Bahrain. Find concerts, shows, parties, family activities, and cultural events.',
     url: 'https://www.bahrainnights.com/events',
     type: 'website',
+  images: [OG_IMAGES.events],
   },
   alternates: {
     canonical: 'https://www.bahrainnights.com/events',

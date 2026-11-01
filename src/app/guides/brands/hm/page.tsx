@@ -1,3 +1,4 @@
+import { OG_IMAGE } from '@/lib/og';
 import { Metadata } from 'next';
 import Link from 'next/link';
 import { 
@@ -28,6 +29,7 @@ export const metadata: Metadata = {
     type: 'article',
     locale: 'en_US',
     url: 'https://www.bahrainnights.com/guides/brands/hm',
+  images: [OG_IMAGE],
   },
   alternates: {
     canonical: 'https://www.bahrainnights.com/guides/brands/hm',
@@ -362,7 +364,7 @@ export default function HMBahrainPage() {
             author: {
               '@type': 'Organization',
               name: 'Bahrain Nights',
-              url: 'https://bahrainnights.com',
+              url: 'https://www.bahrainnights.com',
             },
             publisher: {
               '@type': 'Organization',

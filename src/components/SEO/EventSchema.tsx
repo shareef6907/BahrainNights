@@ -152,7 +152,7 @@ export default function EventSchema({ event }: EventSchemaProps) {
   const eventEndDate = event.end_date || eventDate;
   const eventEndTime = event.end_time || eventTime;
 
-  const eventImage = event.cover_url || event.featured_image || event.image_url || 'https://www.bahrainnights.com/og-image.jpg';
+  const eventImage = event.cover_url || event.featured_image || event.image_url || 'https://www.bahrainnights.com/og-image.png';
   const eventUrl = event.affiliate_url || event.booking_url || (event.slug ? `https://www.bahrainnights.com/events/${event.slug}` : 'https://www.bahrainnights.com/events');
   const countryInfo = getCountryInfo(event.country);
   const priceInfo = parsePrice(event.price);

@@ -3,11 +3,14 @@
  * Reusable, responsive HTML email templates
  */
 
-const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL || 'https://bahrainnights.com';
+const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL || 'https://www.bahrainnights.com';
 const CURRENT_YEAR = new Date().getFullYear();
 
-// Logo URL - hosted on S3 (in processed folder for public access)
-const LOGO_URL = 'https://bahrainnights-production.s3.me-south-1.amazonaws.com/processed/assets/logo-email.png';
+// Logo URL - own domain. The old S3 URL
+// (bahrainnights-production.s3.me-south-1.amazonaws.com/processed/assets/logo-email.png)
+// no longer resolves, so every email sent with this template shipped a broken logo.
+// Regenerate with: node scripts/generate-og-images.js
+const LOGO_URL = 'https://www.bahrainnights.com/logo-email.png';
 
 // Brand colors
 const COLORS = {
@@ -63,7 +66,7 @@ function baseLayout(content: string): string {
           <tr>
             <td align="center" style="padding: 30px 20px;">
               <p style="margin: 0 0 10px; color: ${COLORS.gray[500]}; font-size: 12px;">
-                &copy; ${CURRENT_YEAR} BahrainNights.com
+                &copy; ${CURRENT_YEAR} Bahrain Nights Premiera Live (CR 113587-1) • BahrainNights.com
               </p>
               <p style="margin: 0; color: ${COLORS.gray[500]}; font-size: 12px;">
                 Your Nightlife. Our Spotlight.

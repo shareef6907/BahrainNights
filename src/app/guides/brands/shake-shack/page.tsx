@@ -1,3 +1,4 @@
+import { OG_IMAGE } from '@/lib/og';
 import { Metadata } from 'next';
 import Link from 'next/link';
 import { 
@@ -28,6 +29,7 @@ export const metadata: Metadata = {
     type: 'article',
     locale: 'en_US',
     url: 'https://www.bahrainnights.com/guides/brands/shake-shack',
+  images: [OG_IMAGE],
   },
   alternates: {
     canonical: 'https://www.bahrainnights.com/guides/brands/shake-shack',
@@ -343,7 +345,7 @@ export default function ShakeShackBahrainPage() {
             author: {
               '@type': 'Organization',
               name: 'Bahrain Nights',
-              url: 'https://bahrainnights.com',
+              url: 'https://www.bahrainnights.com',
             },
             publisher: {
               '@type': 'Organization',

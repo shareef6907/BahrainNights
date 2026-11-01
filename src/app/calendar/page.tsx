@@ -1,3 +1,4 @@
+import { OG_IMAGES } from '@/lib/og';
 import { Metadata } from 'next';
 import { Suspense } from 'react';
 import { supabaseAdmin } from '@/lib/supabase';
@@ -17,6 +18,7 @@ export const metadata: Metadata = {
     description: 'View all upcoming events in Bahrain on our interactive calendar.',
     type: 'website',
     url: 'https://www.bahrainnights.com/calendar',
+  images: [OG_IMAGES.events],
   },
 };
 

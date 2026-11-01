@@ -1,10 +1,24 @@
 import { Metadata } from 'next';
 import Link from 'next/link';
 import { BookOpen, ArrowLeft } from 'lucide-react';
+import { OG_IMAGE } from '@/lib/og';
 
 export const metadata: Metadata = {
   title: 'Guides — Local Guides Coming Soon',
   description: 'Expert local guides to restaurants, nightlife, activities, and neighborhoods in Bahrain. Content coming soon.',
+  openGraph: {
+    title: 'Guides — Local Guides Coming Soon',
+    description: 'Expert local guides to restaurants, nightlife, activities, and neighborhoods in Bahrain.',
+    type: 'website',
+    url: 'https://www.bahrainnights.com/guides',
+    images: [OG_IMAGE],
+  },
+  twitter: {
+    card: 'summary_large_image',
+    title: 'Guides — Local Guides Coming Soon',
+    description: 'Expert local guides to restaurants, nightlife, activities, and neighborhoods in Bahrain.',
+    images: [OG_IMAGE.url],
+  },
   alternates: {
     canonical: 'https://www.bahrainnights.com/guides',
   },

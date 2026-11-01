@@ -58,6 +58,9 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   return {
     title: `Events in ${countryConfig.fullName}`,
     description: `Discover amazing events, concerts, shows, and experiences in ${countryConfig.fullName}. Book tickets to the best events.`,
+    alternates: {
+      canonical: `/international/${country}`,
+    },
     openGraph: {
       title: `Events in ${countryConfig.fullName}`,
       description: `Discover amazing events in ${countryConfig.fullName}`,

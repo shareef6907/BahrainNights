@@ -1,3 +1,4 @@
+import { OG_IMAGE } from '@/lib/og';
 import { Metadata } from 'next';
 import Link from 'next/link';
 import { 
@@ -28,6 +29,7 @@ export const metadata: Metadata = {
     type: 'article',
     locale: 'en_US',
     url: 'https://www.bahrainnights.com/guides/brands/louis-vuitton',
+  images: [OG_IMAGE],
   },
   alternates: {
     canonical: 'https://www.bahrainnights.com/guides/brands/louis-vuitton',
@@ -331,7 +333,7 @@ export default function LouisVuittonBahrainPage() {
             author: {
               '@type': 'Organization',
               name: 'Bahrain Nights',
-              url: 'https://bahrainnights.com',
+              url: 'https://www.bahrainnights.com',
             },
             publisher: {
               '@type': 'Organization',
@@ -341,7 +343,7 @@ export default function LouisVuittonBahrainPage() {
             dateModified: lastUpdated,
             mainEntityOfPage: {
               '@type': 'WebPage',
-              '@id': 'https://bahrainnights.com/guides/brands/louis-vuitton',
+              '@id': 'https://www.bahrainnights.com/guides/brands/louis-vuitton',
             },
           }),
         }}

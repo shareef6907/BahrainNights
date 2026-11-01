@@ -563,7 +563,7 @@ export default function AttractionDetailContent({
               </Link>
             </div>
             <p className="text-gray-500 text-sm">
-              © {new Date().getFullYear()} BahrainNights. All rights reserved.
+              © {new Date().getFullYear()} Bahrain Nights Premiera Live (CR 113587-1). All rights reserved.
             </p>
           </div>
         </div>

@@ -261,7 +261,8 @@ export default function PrivacyPage() {
           <div className="pl-12 space-y-4 text-gray-300">
             <p>For privacy-related questions or to exercise your rights, contact us:</p>
             <div className="bg-gray-900 rounded-xl p-6 mt-4">
-              <p className="font-semibold text-white mb-2">BahrainNights</p>
+              <p className="font-semibold text-white mb-2">Bahrain Nights Premiera Live</p>
+              <p className="text-gray-400 mb-2">Trading as BahrainNights.com • CR 113587-1</p>
               <p>Email: <a href="mailto:info@bahrainnights.com" className="text-amber-400 hover:underline">info@bahrainnights.com</a></p>
               <p>Website: <a href="https://www.bahrainnights.com" className="text-amber-400 hover:underline">bahrainnights.com</a></p>
               <p className="mt-4 text-gray-400">Manama, Kingdom of Bahrain</p>
@@ -274,7 +275,7 @@ export default function PrivacyPage() {
       {/* Footer */}
       <footer className="border-t border-gray-800 py-8 mt-12">
         <div className="max-w-4xl mx-auto px-4 text-center text-gray-500">
-          <p>© 2026 BahrainNights. All rights reserved.</p>
+          <p>© 2026 Bahrain Nights Premiera Live (CR 113587-1). All rights reserved.</p>
           <div className="flex justify-center gap-6 mt-4">
             <Link href="/privacy" className="hover:text-amber-400 transition-colors">Privacy Policy</Link>
             <Link href="/terms" className="hover:text-amber-400 transition-colors">Terms of Service</Link>

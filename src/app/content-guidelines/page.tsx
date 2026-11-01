@@ -405,7 +405,7 @@ export default function ContentGuidelinesPage() {
       {/* Footer */}
       <footer className="border-t border-gray-800 py-8 mt-12">
         <div className="max-w-4xl mx-auto px-4 text-center text-gray-500">
-          <p>&copy; 2026 BahrainNights. All rights reserved.</p>
+          <p>&copy; 2026 Bahrain Nights Premiera Live (CR 113587-1). All rights reserved.</p>
           <div className="flex justify-center gap-6 mt-4">
             <Link href="/privacy" className="hover:text-purple-400 transition-colors">Privacy Policy</Link>
             <Link href="/terms" className="hover:text-purple-400 transition-colors">Terms of Service</Link>

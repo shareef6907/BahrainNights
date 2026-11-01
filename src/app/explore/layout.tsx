@@ -1,3 +1,4 @@
+import { OG_IMAGE } from '@/lib/og';
 import { Metadata } from 'next';
 
 export const metadata: Metadata = {
@@ -13,6 +14,7 @@ export const metadata: Metadata = {
     type: 'website',
     locale: 'en_BH',
     url: 'https://www.bahrainnights.com/explore',
+  images: [OG_IMAGE],
   },
   twitter: {
     card: 'summary_large_image',

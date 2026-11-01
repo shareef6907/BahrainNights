@@ -41,7 +41,7 @@ function formatDate(dateStr: string): string {
 function generateEventCard(event: any, featured = false): string {
   const cat = getCategoryColor(event.category);
   const imageUrl = event.cover_url || 'https://images.unsplash.com/photo-1492684223066-81342ee5ff30?w=600&h=400&fit=crop';
-  const eventUrl = `https://bahrainnights.com/events/${event.slug}`;
+  const eventUrl = `https://www.bahrainnights.com/events/${event.slug}`;
   
   if (featured) {
     return `
@@ -145,7 +145,7 @@ function generateMovieCard(movie: any): string {
     : movie.poster_path 
       ? `https://image.tmdb.org/t/p/w300${movie.poster_path}`
       : 'https://images.unsplash.com/photo-1489599849927-2ee91cede3ba?w=300&h=450&fit=crop';
-  const movieUrl = `https://bahrainnights.com/cinema`;
+  const movieUrl = `https://www.bahrainnights.com/cinema`;
   
   return `
     <td width="25%" style="padding: 6px; vertical-align: top;">
@@ -305,7 +305,7 @@ export async function GET() {
                 </tr>
                 <tr>
                   <td style="padding-top: 20px; text-align: center;">
-                    <a href="https://bahrainnights.com/events" style="display: inline-block; background: #1E1E2E; color: #ffffff; padding: 14px 28px; border-radius: 10px; text-decoration: none; font-weight: 600; font-size: 14px; border: 1px solid #374151;">
+                    <a href="https://www.bahrainnights.com/events" style="display: inline-block; background: #1E1E2E; color: #ffffff; padding: 14px 28px; border-radius: 10px; text-decoration: none; font-weight: 600; font-size: 14px; border: 1px solid #374151;">
                       View All Events →
                     </a>
                   </td>
@@ -337,7 +337,7 @@ export async function GET() {
                 </tr>
                 <tr>
                   <td style="padding-top: 15px; text-align: center;">
-                    <a href="https://bahrainnights.com/international" style="color: #F59E0B; font-size: 13px; font-weight: 600; text-decoration: none;">
+                    <a href="https://www.bahrainnights.com/international" style="color: #F59E0B; font-size: 13px; font-weight: 600; text-decoration: none;">
                       Explore International Events →
                     </a>
                   </td>
@@ -380,7 +380,7 @@ export async function GET() {
                 ` : ''}
                 <tr>
                   <td style="padding-top: 15px; text-align: center;">
-                    <a href="https://bahrainnights.com/cinema" style="display: inline-block; background: #7C3AED; color: #ffffff; padding: 12px 24px; border-radius: 8px; text-decoration: none; font-weight: 600; font-size: 13px;">
+                    <a href="https://www.bahrainnights.com/cinema" style="display: inline-block; background: #7C3AED; color: #ffffff; padding: 12px 24px; border-radius: 8px; text-decoration: none; font-weight: 600; font-size: 13px;">
                       View All Movies & Showtimes →
                     </a>
                   </td>
@@ -447,7 +447,7 @@ export async function GET() {
                     <a href="https://instagram.com/bh.nights" style="display: inline-block; width: 40px; height: 40px; background: #1E1E2E; border-radius: 10px; line-height: 40px; text-align: center; text-decoration: none; font-size: 18px;">📸</a>
                   </td>
                   <td style="padding: 0 10px;">
-                    <a href="https://bahrainnights.com" style="display: inline-block; width: 40px; height: 40px; background: #1E1E2E; border-radius: 10px; line-height: 40px; text-align: center; text-decoration: none; font-size: 18px;">🌐</a>
+                    <a href="https://www.bahrainnights.com" style="display: inline-block; width: 40px; height: 40px; background: #1E1E2E; border-radius: 10px; line-height: 40px; text-align: center; text-decoration: none; font-size: 18px;">🌐</a>
                   </td>
                 </tr>
               </table>
@@ -456,12 +456,12 @@ export async function GET() {
                 You're receiving this because you subscribed to BahrainNights updates.
               </p>
               <p style="margin: 0; color: #6B7280; font-size: 12px;">
-                <a href="https://bahrainnights.com/unsubscribe" style="color: #9CA3AF; text-decoration: underline;">Unsubscribe</a>
+                <a href="https://www.bahrainnights.com/unsubscribe" style="color: #9CA3AF; text-decoration: underline;">Unsubscribe</a>
                 &nbsp;•&nbsp;
-                <a href="https://bahrainnights.com/privacy" style="color: #9CA3AF; text-decoration: underline;">Privacy Policy</a>
+                <a href="https://www.bahrainnights.com/privacy" style="color: #9CA3AF; text-decoration: underline;">Privacy Policy</a>
               </p>
               <p style="margin: 20px 0 0 0; color: #4B5563; font-size: 11px;">
-                © ${new Date().getFullYear()} BahrainNights. All rights reserved.
+                © ${new Date().getFullYear()} Bahrain Nights Premiera Live (CR 113587-1). All rights reserved.
               </p>
             </td>
           </tr>
@@ -485,7 +485,7 @@ ${featuredEvent ? `⭐ FEATURED EVENT
 ${(featuredEvent as NewsletterEvent).title}
 📅 ${formatDate((featuredEvent as NewsletterEvent).date)}
 📍 ${(featuredEvent as NewsletterEvent).venue_name || 'TBA'}
-🔗 https://bahrainnights.com/events/${(featuredEvent as NewsletterEvent).slug}
+🔗 https://www.bahrainnights.com/events/${(featuredEvent as NewsletterEvent).slug}
 
 ` : ''}
 🔥 MORE EVENTS
@@ -499,7 +499,7 @@ ${intlEvents.map((e: any) => `• ${e.title} - ${e.city || e.country} (${formatD
 ${nowShowing.length > 0 ? `
 🎬 NOW SHOWING AT VOX CINEMAS
 ${nowShowing.slice(0, 6).map((m: any) => `• ${m.title}`).join('\n')}
-See all movies: https://bahrainnights.com/cinema
+See all movies: https://www.bahrainnights.com/cinema
 ` : ''}
 
 ${comingSoon.length > 0 ? `
@@ -514,9 +514,9 @@ ${comingSoon.slice(0, 4).map((m: any) => `• ${m.title}`).join('\n')}
 
 ---
 BahrainNights - Your guide to what's happening
-https://bahrainnights.com
+https://www.bahrainnights.com
 
-Unsubscribe: https://bahrainnights.com/unsubscribe
+Unsubscribe: https://www.bahrainnights.com/unsubscribe
 `;
 
     const response = NextResponse.json({ 
