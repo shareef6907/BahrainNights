@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@supabase/supabase-js';
+import { generateEventSlug } from '@/lib/slug';
 
 export const dynamic = 'force-dynamic';
 export const maxDuration = 300; // 5 minutes max
@@ -91,9 +92,10 @@ function unixToTime(timestamp: number, timezone: string = 'Asia/Dubai'): string 
   return date.toLocaleTimeString('en-GB', { timeZone: timezone, hour: '2-digit', minute: '2-digit', hour12: false });
 }
 
+// Delegates to the shared helper so a non-Latin title (e.g. Cyrillic) still
+// produces a readable slug instead of an empty one like `--108813`.
 function generateSlug(title: string, id: number): string {
-  const baseSlug = title.toLowerCase().replace(/[^a-z0-9\s-]/g, '').replace(/\s+/g, '-').replace(/-+/g, '-').trim();
-  return `${baseSlug}-${id}`;
+  return generateEventSlug(title, id);
 }
 
 function generateAffiliateUrl(originalUrl: string): string {
@@ -238,7 +240,18 @@ export async function GET(request: NextRequest) {
         .single();
 
       if (existing) {
-        const { error } = await supabase.from('events').update(dbEvent).eq('id', existing.id);
+        // Keep the ORIGINAL slug. Platinumlist occasionally renames a title, and
+        // rewriting the slug would break a URL Google has already indexed.
+        const { data: current } = await supabase
+          .from('events')
+          .select('slug')
+          .eq('id', existing.id)
+          .single();
+
+        const { error } = await supabase
+          .from('events')
+          .update({ ...dbEvent, slug: current?.slug ?? dbEvent.slug })
+          .eq('id', existing.id);
         if (error) stats.errors++;
         else stats.updated++;
       } else {
@@ -251,20 +264,29 @@ export async function GET(request: NextRequest) {
     }
   }
 
-  // Cleanup past international events
+  // Past international events are RETAINED, not deleted.
+  //
+  // These rows used to be hard-deleted once their end_date passed. Every one of
+  // them had a page Google had already indexed, so deleting the row turned an
+  // indexed page into a 404 that kept earning impressions and clicks - a
+  // steady, self-inflicted leak (802 such URLs were live 404s at the time of
+  // the fix, taking ~19.7k impressions over 365 days).
+  //
+  // Keeping the rows means the event page keeps resolving and its ranking is
+  // preserved. The public listings already filter on the event dates, so a
+  // finished event never appears in the feeds.
   const today = new Date().toISOString().split('T')[0];
-  const { data: cleaned } = await supabase
+  const { count: retained } = await supabase
     .from('events')
-    .delete()
+    .select('id', { count: 'exact', head: true })
     .eq('source_name', 'platinumlist')
     .neq('country', 'Bahrain')
-    .lt('end_date', today)
-    .select('id');
+    .lt('end_date', today);
 
   const countriesArray = Array.from(stats.countries);
   console.log(`[International Events Cron] Completed: ${stats.inserted} inserted, ${stats.updated} updated, ${stats.errors} errors`);
   console.log(`[International Events Cron] Countries: ${countriesArray.join(', ')}`);
-  console.log(`[International Events Cron] Cleaned ${cleaned?.length || 0} past events`);
+  console.log(`[International Events Cron] Retained ${retained || 0} past events (kept so their URLs stay live)`);
 
   return NextResponse.json({
     success: true,
@@ -274,7 +296,7 @@ export async function GET(request: NextRequest) {
       updated: stats.updated,
       errors: stats.errors,
       countries: countriesArray,
-      cleaned: cleaned?.length || 0,
+      retained: retained || 0,
     },
     message: `Synced ${stats.fetched} international events from ${countriesArray.length} countries`,
   });

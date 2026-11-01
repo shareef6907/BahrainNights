@@ -1,4 +1,5 @@
 import { EVENT_CATEGORY_MAP, ATTRACTION_CATEGORY_MAP } from './types.js';
+import { generateEventSlug } from '../../src/lib/slug.js';
 
 // Platinumlist API Configuration
 export const PLATINUMLIST_API_BASE = 'https://api.platinumlist.net/v/7';
@@ -16,14 +17,19 @@ export function generateAffiliateUrl(originalUrl: string): string {
 /**
  * Generate URL-safe slug from title
  */
-export function generateSlug(title: string, id: number | string): string {
+/**
+ * Delegates to the shared helper so a non-Latin title (e.g. Cyrillic) still
+ * produces a readable slug instead of an empty one like `--108813`.
+ */
+export function generateSlug(title: string, id: number | string, hint?: string | null): string {
   const baseSlug = title
     .toLowerCase()
     .replace(/[^a-z0-9\s-]/g, '')
     .replace(/\s+/g, '-')
     .replace(/-+/g, '-')
     .trim();
-  return `${baseSlug}-${id}`;
+  if (baseSlug) return `${baseSlug}-${id}`;
+  return generateEventSlug(title, id, hint);
 }
 
 /**

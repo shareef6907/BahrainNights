@@ -1,6 +1,11 @@
 import { NextResponse } from 'next/server';
 import type { NextRequest } from 'next/server';
 import { jwtVerify } from 'jose';
+import { eventGonePaths } from '@/data/event-redirects';
+
+// Dead event paths with no live replacement. A Set keeps the middleware lookup
+// O(1) on every request rather than a linear scan of the list.
+const GONE_PATHS = new Set(eventGonePaths);
 
 // Routes that require authentication
 const protectedRoutes = ['/admin'];
@@ -43,6 +48,19 @@ async function verifyToken(token: string): Promise<TokenPayload | null> {
 
 export async function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
+
+  // Dead Platinumlist event URLs with no live replacement: 410 Gone.
+  // Next.js `redirects()` cannot emit a 410, so it is handled here.
+  if (pathname.startsWith('/events/') && GONE_PATHS.has(pathname)) {
+    return new NextResponse(
+      'Gone\n\nThis event has ended and is no longer available.\n',
+      {
+        status: 410,
+        headers: { 'Content-Type': 'text/plain; charset=utf-8', 'X-Robots-Tag': 'noindex' },
+      },
+    );
+  }
+
   const token = request.cookies.get('auth_token')?.value;
 
   // Skip venue portal routes - they use their own authentication (venue_session cookie)
