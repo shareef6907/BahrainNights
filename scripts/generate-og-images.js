@@ -185,7 +185,47 @@ async function main() {
   const left = Math.max(0, minX - pad);
   const top = Math.max(0, minY - pad);
   const width = Math.min(info.width - left, maxX - left + pad);
-  const height = Math.min(info.height - top, maxY - top + pad);
+  let height = Math.min(info.height - top, maxY - top + pad);
+
+  // ---------------------------------------------------------------------
+  // Drop the legacy caption under the wordmark.
+  //
+  // public/logo.png is the "Bahrain-Nights" script wordmark with a
+  // "HD Productions Bahrain" caption beneath it. "HD Productions" is a
+  // DIFFERENT company's name: every brand surface on the site (page copy,
+  // Organization schema, og:site_name, footer) says "Bahrain Nights", and
+  // the operating entity is Bahrain Nights W.L.L. Shipping that caption on
+  // every social share image and every email would put a third party's
+  // name on top of the brand.
+  //
+  // The separator is detected from the RIGHT EDGE of the ink. The script
+  // wordmark's strokes reach the full width of the logo (right edge ~x=655
+  // at width 800); the caption below is a narrower, centred line (right edge
+  // ~x=586). So the last row whose ink still reaches the wordmark's right
+  // edge is the bottom of the wordmark.
+  // ---------------------------------------------------------------------
+  {
+    const rowMaxX = [];
+    for (let y = top; y < top + height; y++) {
+      let mx = -1;
+      for (let x = left; x < left + width; x++) {
+        if (data[(y * info.width + x) * info.channels + 3] > 16) mx = x;
+      }
+      rowMaxX.push(mx);
+    }
+    const overallMaxX = Math.max(...rowMaxX);
+    const edgeFloor = overallMaxX - 60; // the caption sits far inside this
+    let last = -1;
+    for (let i = 0; i < rowMaxX.length; i++) {
+      if (rowMaxX[i] >= edgeFloor) last = i;
+    }
+    if (last > 0 && last < rowMaxX.length - 1) {
+      console.log(`  logo: dropping legacy caption (rows ${top + last + 1}..${top + height - 1} of ${top}..${top + height - 1})`);
+      height = last + 1;
+    } else {
+      console.log('  logo: no caption band detected - using full wordmark');
+    }
+  }
 
   // The source wordmark is black glyphs on a transparent canvas. For the OG
   // canvas (dark background) we want WHITE glyphs that stay transparent
@@ -224,6 +264,78 @@ async function main() {
   console.log(`  logo trimmed to ${width}x${height} (aspect ${aspect.toFixed(2)})`);
 
   const logoB64 = logoBuf.toString('base64');
+
+  // Email logo: the SAME wordmark but BLACK glyphs on a WHITE background.
+  // Emails render on light backgrounds, so the OG canvas treatment (white
+  // glyphs on dark) is inverted here. Unlike the OG logo we DO flatten onto
+  // white - the email background is white, so transparent pixels becoming
+  // white is exactly what we want, and it avoids dark-mode email clients
+  // showing a black box.
+  //
+  // Two-step pipeline on purpose: resize to a buffer FIRST, then extract the
+  // bounding box from that buffer. A single chained resize->extract failed
+  // with "extract_area: bad extract area".
+  const emailResized = await sharp(logoPath).resize({ width: 800 }).png().toBuffer();
+  const { data: eData, info: eInfo } = await sharp(emailResized)
+    .ensureAlpha()
+    .raw()
+    .toBuffer({ resolveWithObject: true });
+
+  // Reuse the SAME wordmark crop the OG canvas uses - including the
+  // legacy-caption cut - so the email logo and the share images carry
+  // exactly the same mark.
+  const eLeft = left;
+  const eTop = top;
+  const eWidth = width;
+  const eHeight = height;
+
+  const blackRaw = Buffer.alloc(eWidth * eHeight * 4);
+  for (let y = 0; y < eHeight; y++) {
+    const srcRow = (eTop + y) * eInfo.width;
+    for (let x = 0; x < eWidth; x++) {
+      const src = (srcRow + eLeft + x) * eInfo.channels;
+      const dst = (y * eWidth + x) * 4;
+      const alpha = eData[src + 3];
+      // Composite the source glyph over white using its alpha as coverage:
+      //   out = src * alpha + 255 * (1 - alpha)
+      // Opaque glyph pixels keep their own colour (black for this wordmark);
+      // fully transparent pixels become white; edges anti-alias in between.
+      const r = eData[src], g = eData[src + 1], b = eData[src + 2];
+      blackRaw[dst] = Math.round(r * alpha + 255 * (1 - alpha));
+      blackRaw[dst + 1] = Math.round(g * alpha + 255 * (1 - alpha));
+      blackRaw[dst + 2] = Math.round(b * alpha + 255 * (1 - alpha));
+      blackRaw[dst + 3] = 255;
+    }
+  }
+
+  const emailLogoPath = path.join(PUBLIC, 'logo-email.png');
+  await sharp(blackRaw, { raw: { width: eWidth, height: eHeight, channels: 4 } })
+    .png({ compressionLevel: 9 })
+    .toFile(emailLogoPath);
+  console.log(`  wrote logo-email.png         ${eWidth}x${eHeight} (black on white)`);
+
+  // Schema wordmark: the SAME crop, black glyphs on a TRANSPARENT background.
+  // Used for the Organization schema logo, so the structured data shows the
+  // same "Bahrain-Nights" mark as every share image and email - not the full
+  // public/logo.png, which still carries the legacy "HD Productions Bahrain"
+  // caption underneath.
+  const transparentRaw = Buffer.alloc(eWidth * eHeight * 4);
+  for (let y = 0; y < eHeight; y++) {
+    const srcRow = (eTop + y) * eInfo.width;
+    for (let x = 0; x < eWidth; x++) {
+      const src = (srcRow + eLeft + x) * eInfo.channels;
+      const dst = (y * eWidth + x) * 4;
+      transparentRaw[dst] = eData[src];
+      transparentRaw[dst + 1] = eData[src + 1];
+      transparentRaw[dst + 2] = eData[src + 2];
+      transparentRaw[dst + 3] = eData[src + 3];
+    }
+  }
+  const wordmarkPath = path.join(PUBLIC, 'logo-wordmark.png');
+  await sharp(transparentRaw, { raw: { width: eWidth, height: eHeight, channels: 4 } })
+    .png({ compressionLevel: 9 })
+    .toFile(wordmarkPath);
+  console.log(`  wrote logo-wordmark.png      ${eWidth}x${eHeight} (black on transparent)`);
 
   const render = async (spec, outPath) => {
     const svg = buildSvg({ ...spec, logoAspect: aspect }).replace('__LOGO__', logoB64);

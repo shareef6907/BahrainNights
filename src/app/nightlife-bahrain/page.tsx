@@ -66,7 +66,7 @@ function generateSchema() {
           name: 'Bahrain Nights',
           logo: {
             '@type': 'ImageObject',
-            url: 'https://www.bahrainnights.com/logo.png'
+            url: 'https://www.bahrainnights.com/logo-wordmark.png'
           }
         },
         datePublished: '2026-01-15',

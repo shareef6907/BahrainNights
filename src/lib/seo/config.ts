@@ -77,7 +77,7 @@ export const SEO_CONFIG = {
   organization: {
     name: 'Bahrain Nights',
     url: 'https://www.bahrainnights.com',
-    logo: 'https://www.bahrainnights.com/logo.png',
+    logo: 'https://www.bahrainnights.com/logo-wordmark.png',
     foundingDate: '2024',
     founders: ['BahrainNights Team'],
     address: {

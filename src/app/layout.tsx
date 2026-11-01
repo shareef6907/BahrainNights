@@ -120,11 +120,9 @@ export default function RootLayout({
         <link rel="apple-touch-icon" sizes="180x180" href="/icons/icon-192x192.png" />
 
         {/* Preconnect to external resources for faster loading */}
-        <link rel="preconnect" href="https://bahrainnights-production.s3.me-south-1.amazonaws.com" />
         <link rel="preconnect" href="https://image.tmdb.org" />
         {/* Preload hero poster for faster LCP */}
         <link rel="preload" href="/header-poster-v3.jpg" as="image" type="image/jpeg" />
-        <link rel="dns-prefetch" href="https://bahrainnights-production.s3.me-south-1.amazonaws.com" />
         <link rel="dns-prefetch" href="https://image.tmdb.org" />
         <link rel="dns-prefetch" href="https://cdn.platinumlist.net" />
         {/* Organization and WebSite Schema for SEO */}
@@ -142,7 +140,11 @@ export default function RootLayout({
                   url: 'https://www.bahrainnights.com',
                   logo: {
                     '@type': 'ImageObject',
-                    url: 'https://www.bahrainnights.com/logo.png',
+                    // logo-wordmark.png is the "Bahrain-Nights" script mark with
+                    // the legacy "HD Productions Bahrain" caption removed. The
+                    // Organization is named "Bahrain Nights", so the schema logo
+                    // must not carry a different company's name.
+                    url: 'https://www.bahrainnights.com/logo-wordmark.png',
                     width: 512,
                     height: 512
                   },
