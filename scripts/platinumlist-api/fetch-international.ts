@@ -227,11 +227,22 @@ async function upsertEvents(events: DbEvent[]): Promise<{ inserted: number; upda
         .single();
 
       if (existing) {
-        // Update existing event
+        // Update existing event.
+        // Keep the ORIGINAL slug: Platinumlist occasionally renames a title, and
+        // rewriting the slug would break a URL Google has already indexed.
+        // The redirect map is keyed on source_event_id -> current slug, so a
+        // stable slug means an indexed URL never stops resolving.
+        const { data: current } = await supabase
+          .from('events')
+          .select('slug')
+          .eq('id', existing.id)
+          .single();
+
         const { error } = await supabase
           .from('events')
           .update({
             ...event,
+            slug: current?.slug ?? event.slug,
             updated_at: new Date().toISOString(),
           })
           .eq('id', existing.id);
@@ -269,25 +280,36 @@ async function upsertEvents(events: DbEvent[]): Promise<{ inserted: number; upda
 }
 
 /**
- * Remove past international events from database
+ * Retain past international events.
+ *
+ * These rows used to be hard-deleted once their end_date passed. Every one of
+ * them had a page Google had already indexed, so deleting the row turned an
+ * indexed page into a 404 that kept earning impressions and clicks — a steady,
+ * self-inflicted leak (802 such URLs were live 404s at the time of the fix,
+ * taking ~19.7k impressions over 365 days).
+ *
+ * They are now simply left in place: the event page keeps resolving (200) and
+ * its existing ranking is preserved, while the public listings already filter
+ * on start_date/end_date so a finished event never appears in the feeds.
+ *
+ * Nothing is deleted or hidden here on purpose.
  */
 async function cleanupPastEvents(): Promise<number> {
   const today = new Date().toISOString().split('T')[0];
 
-  const { data, error } = await supabase
+  const { count, error } = await supabase
     .from('events')
-    .delete()
+    .select('id', { count: 'exact', head: true })
     .eq('source_name', 'platinumlist')
-    .neq('country', 'Bahrain')  // Only international events
-    .lt('end_date', today)
-    .select('id');
+    .neq('country', 'Bahrain')
+    .lt('end_date', today);
 
   if (error) {
-    log(`Error cleaning up past international events: ${error.message}`, 'error');
+    log(`Error counting past international events: ${error.message}`, 'error');
     return 0;
   }
 
-  return data?.length || 0;
+  return count || 0;
 }
 
 /**
@@ -329,10 +351,10 @@ export async function fetchInternationalEvents(): Promise<void> {
       log(`Inserted: ${stats.inserted}, Updated: ${stats.updated}, Errors: ${stats.errors}`, 'success');
     }
 
-    // Step 4: Cleanup past events
-    log('Cleaning up past international events...', 'info');
-    const cleaned = await cleanupPastEvents();
-    log(`Removed ${cleaned} past international events`, 'success');
+    // Step 4: Retain past events (deleting them broke indexed URLs)
+    log('Retaining past international events...', 'info');
+    const retained = await cleanupPastEvents();
+    log(`Retained ${retained} past international events (kept so their URLs stay live)`, 'success');
 
     // Summary
     console.log('='.repeat(50));

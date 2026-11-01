@@ -269,24 +269,34 @@ async function upsertEvents(events: DbEvent[]): Promise<{ inserted: number; upda
 }
 
 /**
- * Remove past events from database
+ * Retain past events.
+ *
+ * These rows used to be hard-deleted once their end_date passed. Every one of
+ * them had a page Google had already indexed, so deleting the row turned an
+ * indexed page into a 404 that kept earning impressions and clicks - a steady,
+ * self-inflicted leak.
+ *
+ * They are now simply left in place: the event page keeps resolving (200) and
+ * its existing ranking is preserved, while the public listings already filter
+ * on start_date/end_date so a finished event never appears in the feeds.
+ *
+ * Nothing is deleted or hidden here on purpose.
  */
 async function cleanupPastEvents(): Promise<number> {
   const today = new Date().toISOString().split('T')[0];
 
-  const { data, error } = await supabase
+  const { count, error } = await supabase
     .from('events')
-    .delete()
+    .select('id', { count: 'exact', head: true })
     .eq('source_name', 'platinumlist')
-    .lt('end_date', today)
-    .select('id');
+    .lt('end_date', today);
 
   if (error) {
-    log(`Error cleaning up past events: ${error.message}`, 'error');
+    log(`Error counting past events: ${error.message}`, 'error');
     return 0;
   }
 
-  return data?.length || 0;
+  return count || 0;
 }
 
 /**
@@ -319,7 +329,7 @@ export async function fetchEvents(): Promise<void> {
     // Step 4: Cleanup past events
     log('Cleaning up past events...', 'info');
     const cleaned = await cleanupPastEvents();
-    log(`Removed ${cleaned} past events`, 'success');
+    log(`Retained ${cleaned} past events (kept so their URLs stay live)`, 'success');
 
     // Summary
     console.log('='.repeat(50));
