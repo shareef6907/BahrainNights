@@ -66,7 +66,7 @@ function baseLayout(content: string): string {
           <tr>
             <td align="center" style="padding: 30px 20px;">
               <p style="margin: 0 0 10px; color: ${COLORS.gray[500]}; font-size: 12px;">
-                &copy; ${CURRENT_YEAR} BahrainNights.com
+                &copy; ${CURRENT_YEAR} Bahrain Nights Premiera Live (CR 113587-1) • BahrainNights.com
               </p>
               <p style="margin: 0; color: ${COLORS.gray[500]}; font-size: 12px;">
                 Your Nightlife. Our Spotlight.

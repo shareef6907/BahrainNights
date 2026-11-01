@@ -461,7 +461,7 @@ export async function GET() {
                 <a href="https://bahrainnights.com/privacy" style="color: #9CA3AF; text-decoration: underline;">Privacy Policy</a>
               </p>
               <p style="margin: 20px 0 0 0; color: #4B5563; font-size: 11px;">
-                © ${new Date().getFullYear()} BahrainNights. All rights reserved.
+                © ${new Date().getFullYear()} Bahrain Nights Premiera Live (CR 113587-1). All rights reserved.
               </p>
             </td>
           </tr>

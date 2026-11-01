@@ -104,6 +104,12 @@ export default function TermsPage() {
               with the best venues, events, entertainment, and experiences across the Kingdom of Bahrain.
             </p>
             <p>
+              BahrainNights.com is operated by <strong className="text-white">Bahrain Nights Premiera Live</strong>,
+              a Bahraini company registered with the Ministry of Industry and Commerce under Commercial
+              Registration number <strong className="text-white">113587-1</strong>. These Terms of Service apply to
+              the BahrainNights.com website and its legal entity, Bahrain Nights Premiera Live.
+            </p>
+            <p>
               Our platform helps businesses reach a wider audience while offering users a comprehensive
               guide to what&apos;s happening in Bahrain.
             </p>
@@ -494,7 +500,7 @@ export default function TermsPage() {
       {/* Footer */}
       <footer className="border-t border-gray-800 py-8 mt-12">
         <div className="max-w-4xl mx-auto px-4 text-center text-gray-500">
-          <p>© 2026 BahrainNights. All rights reserved.</p>
+          <p>© 2026 Bahrain Nights Premiera Live (CR 113587-1). All rights reserved.</p>
           <div className="flex justify-center gap-6 mt-4">
             <Link href="/privacy" className="hover:text-amber-400 transition-colors">Privacy Policy</Link>
             <Link href="/terms" className="hover:text-amber-400 transition-colors">Terms of Service</Link>

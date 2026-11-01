@@ -136,6 +136,10 @@ export default function RootLayout({
                   '@type': 'Organization',
                   '@id': 'https://www.bahrainnights.com/#organization',
                   name: 'Bahrain Nights',
+                  // The consumer-facing brand is "Bahrain Nights". The legal
+                  // entity registered with the Bahrain CR is "Bahrain Nights
+                  // Premiera Live" (CR 113587-1).
+                  legalName: 'Bahrain Nights Premiera Live',
                   alternateName: 'BahrainNights',
                   url: 'https://www.bahrainnights.com',
                   logo: {
