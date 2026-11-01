@@ -145,7 +145,7 @@ export const metadata = {
     type: 'website',
     images: [
       {
-        url: 'https://images.unsplash.com/photo-1469474968028-56623f02e42e?w=1200&h=630&fit=crop',
+        url: 'https://www.bahrainnights.com/og-tours.jpg',
         width: 1200,
         height: 630,
         alt: 'Tours in Bahrain',

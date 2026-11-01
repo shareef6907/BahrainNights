@@ -39,7 +39,7 @@ export default function AttractionListSchema({
         name: attraction.title,
         url: `https://www.bahrainnights.com/attractions/${attraction.id}`,
         description: attraction.description?.slice(0, 200) || attraction.title,
-        image: attraction.image_url || 'https://www.bahrainnights.com/og-image.jpg',
+        image: attraction.image_url || 'https://www.bahrainnights.com/og-image.png',
         address: {
           '@type': 'PostalAddress',
           streetAddress: attraction.location || 'Bahrain',

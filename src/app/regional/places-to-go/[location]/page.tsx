@@ -1,3 +1,4 @@
+import { OG_IMAGE } from '@/lib/og';
 import { Metadata } from 'next';
 import Link from 'next/link';
 import Image from 'next/image';
@@ -36,6 +37,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
       title: `Places to Go in ${locationInfo.name} | Bahrain Nights`,
       description: `Your complete guide to the best events, nightlife, and attractions in ${locationInfo.name}`,
       type: 'website',
+    images: [OG_IMAGE],
     },
   };
 }

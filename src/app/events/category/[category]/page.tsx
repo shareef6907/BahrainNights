@@ -1,3 +1,4 @@
+import { OG_IMAGES } from '@/lib/og';
 import { supabaseAdmin } from '@/lib/supabase';
 import { notFound } from 'next/navigation';
 import { Metadata } from 'next';
@@ -61,6 +62,7 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
       title: `${info.label} Events in Bahrain`,
       description: `Discover the best ${info.description.toLowerCase()} in Bahrain.`,
       url: `https://www.bahrainnights.com/events/category/${category}`,
+    images: [OG_IMAGES.events],
     },
   };
 }

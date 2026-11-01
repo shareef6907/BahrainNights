@@ -45,7 +45,7 @@ export default function TourListSchema({
         name: tour.name,
         url: `https://www.bahrainnights.com/tours#${tour.slug || tour.id}`,
         description: (tour.shortDescription || tour.description || '').slice(0, 200),
-        image: tour.image || 'https://www.bahrainnights.com/og-image.jpg',
+        image: tour.image || 'https://www.bahrainnights.com/og-image.png',
         tourSchedule: tour.duration
           ? {
               '@type': 'Schedule',

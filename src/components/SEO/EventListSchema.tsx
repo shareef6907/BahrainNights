@@ -52,7 +52,7 @@ export default function EventListSchema({
             addressCountry: 'BH',
           },
         },
-        image: event.cover_url || event.image_url || 'https://www.bahrainnights.com/og-image.jpg',
+        image: event.cover_url || event.image_url || 'https://www.bahrainnights.com/og-image.png',
       },
     })),
   };

@@ -455,7 +455,7 @@ export const metadata = {
     type: 'website',
     images: [
       {
-        url: 'https://bahrainnights-production.s3.me-south-1.amazonaws.com/branding/og-image.jpg',
+        url: 'https://www.bahrainnights.com/og-image.png',
         width: 1200,
         height: 630,
         alt: 'Bahrain Nights - Events, Venues & Nightlife in Bahrain',
@@ -466,6 +466,6 @@ export const metadata = {
     card: 'summary_large_image',
     title: 'Bahrain Nights | Events, Venues & Nightlife in Bahrain',
     description: "Your curated guide to Bahrain's best experiences",
-    images: ['https://bahrainnights-production.s3.me-south-1.amazonaws.com/branding/og-image.jpg'],
+    images: ['https://www.bahrainnights.com/og-image.png'],
   },
 };

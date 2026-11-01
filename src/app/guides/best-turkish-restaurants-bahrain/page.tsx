@@ -1,3 +1,4 @@
+import { OG_IMAGES } from '@/lib/og';
 import BreadcrumbSchema from '@/components/SEO/BreadcrumbSchema';
 import FAQSchema from '@/components/SEO/FAQSchema';
 import InternalLinks from '@/components/SEO/InternalLinks';
@@ -15,6 +16,7 @@ export const metadata: Metadata = {
     description: 'Your complete guide to Turkish cuisine in Bahrain — from viral chef CZN Burak to beloved local grillhouses.',
     type: 'article',
     locale: 'en_BH',
+  images: [OG_IMAGES.restaurants],
   },
 };
 

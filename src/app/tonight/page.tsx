@@ -31,7 +31,7 @@ export const metadata: Metadata = {
     siteName: 'Bahrain Nights',
     images: [
       {
-        url: 'https://www.bahrainnights.com/og-tonight.jpg',
+        url: 'https://www.bahrainnights.com/og-events.jpg',
         width: 1200,
         height: 630,
         alt: 'Tonight in Bahrain',

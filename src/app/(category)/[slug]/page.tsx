@@ -38,7 +38,7 @@ export async function generateMetadata({ params }: CategoryPageProps): Promise<M
       type: 'website',
       images: [
         {
-          url: 'https://www.bahrainnights.com/og-image.jpg',
+          url: 'https://www.bahrainnights.com/og-image.png',
           width: 1200,
           height: 630,
           alt: config.title,

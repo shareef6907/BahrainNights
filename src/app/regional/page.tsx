@@ -1,3 +1,4 @@
+import { OG_IMAGE } from '@/lib/og';
 import { Metadata } from 'next';
 import { getAdminClient } from '@/lib/supabase/server';
 import { supabaseAdmin } from '@/lib/supabase';
@@ -12,6 +13,7 @@ export const metadata: Metadata = {
     description: 'Your guide to the best events and experiences across the Middle East',
     url: 'https://www.bahrainnights.com/regional',
     type: 'website',
+  images: [OG_IMAGE],
   },
   alternates: {
     canonical: 'https://www.bahrainnights.com/regional',

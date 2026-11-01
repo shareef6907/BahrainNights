@@ -1,3 +1,4 @@
+import { OG_IMAGES } from '@/lib/og';
 import { Suspense } from 'react';
 import { supabaseAdmin } from '@/lib/supabase';
 import CinemaPageClient from '@/components/cinema/CinemaPageClient';
@@ -215,6 +216,7 @@ export const metadata = {
     description: 'Find movies now showing at VOX Cinemas and Cineco Bahrain.',
     url: 'https://www.bahrainnights.com/cinema',
     type: 'website',
+  images: [OG_IMAGES.default],
   },
   alternates: {
     canonical: 'https://www.bahrainnights.com/cinema',

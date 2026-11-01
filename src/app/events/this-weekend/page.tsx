@@ -1,3 +1,4 @@
+import { OG_IMAGES } from '@/lib/og';
 import { Metadata } from 'next';
 import { Suspense } from 'react';
 import Link from 'next/link';
@@ -19,6 +20,7 @@ export const metadata: Metadata = {
     type: 'website',
     locale: 'en_US',
     url: 'https://www.bahrainnights.com/events/this-weekend',
+  images: [OG_IMAGES.weekend],
   },
   alternates: {
     canonical: 'https://www.bahrainnights.com/events/this-weekend',

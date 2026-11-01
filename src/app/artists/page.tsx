@@ -1,3 +1,4 @@
+import { OG_IMAGES } from '@/lib/og';
 import { Metadata } from 'next';
 import { getApprovedArtists, countArtistsByCategory } from '@/lib/db/artists';
 import EntertainmentPageClient from '@/components/artists/EntertainmentPageClient';
@@ -14,6 +15,7 @@ export const metadata: Metadata = {
     description: 'Bahrain\'s premier artist booking agency. DJs, live bands, vocalists, fire shows, and more.',
     type: 'website',
     url: 'https://bahrainnights.com/artists',
+  images: [OG_IMAGES.events],
   },
 };
 

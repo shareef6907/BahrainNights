@@ -13,7 +13,7 @@ export const metadata: Metadata = {
   openGraph: {
     title: 'International Events',
     description: 'Discover concerts, shows & experiences across 25+ countries - Middle East, Europe, Asia & beyond',
-    images: ['/images/og-international.jpg'],
+    images: ['/og-international.jpg'],
   },
 };
 

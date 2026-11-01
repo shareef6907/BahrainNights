@@ -1,3 +1,4 @@
+import { OG_IMAGE } from '@/lib/og';
 import type { Metadata } from 'next';
 import EmergencyPageClient from './EmergencyPageClient';
 
@@ -9,6 +10,7 @@ export const metadata: Metadata = {
     title: 'Bahrain Emergency Contacts',
     description: 'Essential emergency contact numbers for Bahrain - Police, Ambulance, Embassies, and more.',
     type: 'website',
+  images: [OG_IMAGE],
   },
 };
 

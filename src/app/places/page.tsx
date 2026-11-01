@@ -1,3 +1,4 @@
+import { OG_IMAGE } from '@/lib/og';
 import { Metadata } from 'next';
 import PlacesPageClient from './PlacesPageClient';
 import BreadcrumbSchema from '@/components/SEO/BreadcrumbSchema';
@@ -16,6 +17,7 @@ export const metadata: Metadata = {
     locale: 'en_BH',
     url: 'https://www.bahrainnights.com/places',
     siteName: 'BahrainNights',
+  images: [OG_IMAGE],
   },
   twitter: {
     card: 'summary_large_image',

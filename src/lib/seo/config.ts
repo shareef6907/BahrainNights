@@ -5,7 +5,7 @@ export const SEO_CONFIG = {
   siteUrl: 'https://www.bahrainnights.com',
   defaultTitle: 'Bahrain Nights - Events, Nightlife & Attractions in Bahrain',
   defaultDescription: 'Discover the best events, nightlife, restaurants, clubs, and attractions in Bahrain. Your ultimate guide to things to do in Bahrain.',
-  defaultImage: 'https://bahrainnights-production.s3.me-south-1.amazonaws.com/og-default.jpg',
+  defaultImage: 'https://www.bahrainnights.com/og-default.jpg',
   twitterHandle: '@bahaborainnights',
   locale: 'en_US',
   alternateLocale: 'ar_BH',
@@ -77,7 +77,7 @@ export const SEO_CONFIG = {
   organization: {
     name: 'Bahrain Nights',
     url: 'https://www.bahrainnights.com',
-    logo: 'https://bahrainnights-production.s3.me-south-1.amazonaws.com/logo.png',
+    logo: 'https://www.bahrainnights.com/logo.png',
     foundingDate: '2024',
     founders: ['BahrainNights Team'],
     address: {
