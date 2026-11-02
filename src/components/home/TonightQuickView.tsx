@@ -179,19 +179,29 @@ export default function TonightQuickView({ events, onEventClick }: TonightQuickV
                       };
                       
                       return (
-                        <motion.a
+                        // The card is a stretched link: a single absolutely
+                        // positioned <a> covers the whole card, and the "Book
+                        // Now" affiliate link is a SIBLING of it above it in
+                        // the stacking order.
+                        //
+                        // The card must NOT be an <a> containing the "Book
+                        // Now" <a>: an anchor inside an anchor is invalid
+                        // HTML, and the parser restructures it so the outer
+                        // link breaks and the inner one can end up unreachable.
+                        // It is invisible in the server-rendered HTML (this
+                        // component is ssr:false) and only shows up in the
+                        // browser, so a built-HTML scan will not catch it.
+                        //
+                        // The wrapper carries `group` so the group-hover:*
+                        // styles below still apply.
+                        <motion.div
                           key={event.id}
-                          href={`/events/${event.slug}`}
                           layout
                           initial={{ opacity: 0, scale: 0.9 }}
                           animate={{ opacity: 1, scale: 1 }}
                           exit={{ opacity: 0, scale: 0.9 }}
                           transition={{ delay: index * 0.05 }}
-                          onClick={(e) => {
-                            if (!onEventClick) return;
-                            cardClickHandler(e, () => onEventClick(event));
-                          }}
-                          className="group relative bg-slate-800/50 backdrop-blur-sm border border-white/10 rounded-xl overflow-hidden cursor-pointer hover:border-yellow-500/50 hover:shadow-lg hover:shadow-yellow-500/10 transition-all duration-300 block"
+                          className="group relative bg-slate-800/50 backdrop-blur-sm border border-white/10 rounded-xl overflow-hidden cursor-pointer hover:border-yellow-500/50 hover:shadow-lg hover:shadow-yellow-500/10 transition-all duration-300"
                         >
                           <div className="flex gap-4 p-4">
                             {/* Image */}
@@ -244,14 +254,29 @@ export default function TonightQuickView({ events, onEventClick }: TonightQuickV
                             </div>
                           </div>
 
-                          {/* Book Now Overlay on Hover */}
+                          {/* Stretched link: covers the whole card so the
+                              entire surface is clickable and crawlable. It
+                              sits below the "Book Now" link in z-order. */}
+                          <motion.a
+                            href={`/events/${event.slug}`}
+                            onClick={(e) => {
+                              if (!onEventClick) return;
+                              cardClickHandler(e, () => onEventClick(event));
+                            }}
+                            aria-label={event.title}
+                            className="absolute inset-0 z-10 focus-visible:outline focus-visible:outline-2 focus-visible:outline-yellow-500"
+                          />
+
+                          {/* Book Now Overlay on Hover — a sibling of the
+                              stretched card link, not a child, so no anchor
+                              is nested inside another anchor. */}
                           {event.affiliate_url && (
                             <motion.div
                               initial={{ opacity: 0, y: 10 }}
                               whileHover={{ opacity: 1, y: 0 }}
-                              className="absolute bottom-0 left-0 right-0 p-3 bg-gradient-to-t from-yellow-500 to-yellow-500/80"
+                              className="absolute bottom-0 left-0 right-0 p-3 bg-gradient-to-t from-yellow-500 to-yellow-500/80 z-20"
                             >
-                              <Link 
+                              <Link
                                 href={event.affiliate_url}
                                 target="_blank"
                                 rel="noopener noreferrer"
@@ -263,7 +288,7 @@ export default function TonightQuickView({ events, onEventClick }: TonightQuickV
                               </Link>
                             </motion.div>
                           )}
-                        </motion.a>
+                        </motion.div>
                       );
                     })}
                   </AnimatePresence>
