@@ -4,7 +4,7 @@ import { createClient } from '@supabase/supabase-js';
 import { 
   MapPin, Star, Clock, DollarSign, Utensils, Coffee, Wine,
   Fish, Beef, Salad, Pizza, ChefHat, Heart, ArrowRight, 
-  Flame, Sparkles, Globe, Users, Calendar
+  Sparkles, Globe, Users, Calendar
 } from 'lucide-react';
 
 // SEO Optimized Metadata
@@ -493,28 +493,28 @@ export default async function RestaurantsPage() {
             <h2 className="text-3xl font-bold text-white text-center mb-10">More Dining Guides</h2>
             
             <div className="grid md:grid-cols-4 gap-4">
-              <Link href="/guides/brunch" className="p-6 bg-gray-800/50 rounded-xl hover:bg-gray-800 transition text-center group">
+              <Link href="/best-brunches-bahrain" className="p-6 bg-gray-800/50 rounded-xl hover:bg-gray-800 transition text-center group">
                 <Coffee className="w-8 h-8 text-orange-400 mx-auto mb-3" />
                 <h3 className="font-semibold text-white group-hover:text-orange-300">Brunches</h3>
                 <p className="text-sm text-gray-400 mt-2">Friday brunch guide</p>
               </Link>
               
-              <Link href="/guides/cafes" className="p-6 bg-gray-800/50 rounded-xl hover:bg-gray-800 transition text-center group">
+              <Link href="/best-cafes-bahrain" className="p-6 bg-gray-800/50 rounded-xl hover:bg-gray-800 transition text-center group">
                 <Coffee className="w-8 h-8 text-green-400 mx-auto mb-3" />
                 <h3 className="font-semibold text-white group-hover:text-green-300">Cafés</h3>
                 <p className="text-sm text-gray-400 mt-2">Coffee & light bites</p>
               </Link>
               
-              <Link href="/guides/seafood" className="p-6 bg-gray-800/50 rounded-xl hover:bg-gray-800 transition text-center group">
+              <Link href="/best-restaurants-bahrain#seafood" className="p-6 bg-gray-800/50 rounded-xl hover:bg-gray-800 transition text-center group">
                 <Fish className="w-8 h-8 text-cyan-400 mx-auto mb-3" />
                 <h3 className="font-semibold text-white group-hover:text-cyan-300">Seafood</h3>
                 <p className="text-sm text-gray-400 mt-2">Fresh from the Gulf</p>
               </Link>
               
-              <Link href="/guides/indian-restaurants" className="p-6 bg-gray-800/50 rounded-xl hover:bg-gray-800 transition text-center group">
-                <Flame className="w-8 h-8 text-amber-400 mx-auto mb-3" />
-                <h3 className="font-semibold text-white group-hover:text-amber-300">Indian</h3>
-                <p className="text-sm text-gray-400 mt-2">Curries & tandoor</p>
+              <Link href="/best-restaurants-bahrain#steakhouses" className="p-6 bg-gray-800/50 rounded-xl hover:bg-gray-800 transition text-center group">
+                <Beef className="w-8 h-8 text-amber-400 mx-auto mb-3" />
+                <h3 className="font-semibold text-white group-hover:text-amber-300">Steakhouses</h3>
+                <p className="text-sm text-gray-400 mt-2">Premium cuts & grills</p>
               </Link>
             </div>
           </div>
@@ -535,7 +535,7 @@ export default async function RestaurantsPage() {
                 Browse All Restaurants
               </Link>
               <Link 
-                href="/guides/brunch"
+                href="/best-brunches-bahrain"
                 className="px-8 py-4 bg-gray-800 rounded-full text-white font-semibold hover:bg-gray-700 transition"
               >
                 Friday Brunch Guide

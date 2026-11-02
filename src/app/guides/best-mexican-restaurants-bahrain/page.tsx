@@ -433,8 +433,8 @@ export default function BestMexicanRestaurantsPage() {
             <Link href="/guides/best-steakhouses-bahrain" className="px-6 py-3 bg-white/10 hover:bg-white/20 rounded-full transition-all">
               Steakhouses →
             </Link>
-            <Link href="/guides/best-italian-restaurants-bahrain" className="px-6 py-3 bg-white/10 hover:bg-white/20 rounded-full transition-all">
-              Italian Restaurants →
+            <Link href="/guides/best-turkish-restaurants-bahrain" className="px-6 py-3 bg-white/10 hover:bg-white/20 rounded-full transition-all">
+              Turkish Restaurants →
             </Link>
             <Link href="/places" className="px-6 py-3 bg-gradient-to-r from-green-500 via-white to-red-500 text-slate-900 rounded-full font-medium hover:shadow-lg hover:shadow-orange-500/25 transition-all">
               Browse All Restaurants

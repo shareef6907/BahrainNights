@@ -600,7 +600,7 @@ export default function EventsThisWeekPage() {
                 <p className="text-sm text-gray-400 mt-2">Full events calendar</p>
               </Link>
               
-              <Link href="/guides/brunch" className="p-6 bg-gray-800/50 rounded-xl hover:bg-gray-800 transition text-center group">
+              <Link href="/best-brunches-bahrain" className="p-6 bg-gray-800/50 rounded-xl hover:bg-gray-800 transition text-center group">
                 <span className="text-3xl mb-3 block">🥂</span>
                 <h3 className="font-semibold text-white group-hover:text-purple-300">Brunch Guide</h3>
                 <p className="text-sm text-gray-400 mt-2">All Friday brunches</p>

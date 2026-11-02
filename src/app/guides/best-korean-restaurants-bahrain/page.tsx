@@ -434,11 +434,11 @@ export default function BestKoreanRestaurantsPage() {
           <h2 className="text-3xl font-bold mb-4">Explore More Cuisines</h2>
           <p className="text-gray-400 mb-8">Discover more dining guides</p>
           <div className="flex flex-wrap justify-center gap-4">
-            <Link href="/guides/best-japanese-restaurants-bahrain" className="px-6 py-3 bg-white/10 hover:bg-white/20 rounded-full transition-all">
-              Japanese Restaurants →
+            <Link href="/guides/best-turkish-restaurants-bahrain" className="px-6 py-3 bg-white/10 hover:bg-white/20 rounded-full transition-all">
+              Turkish Restaurants →
             </Link>
-            <Link href="/guides/best-thai-restaurants-bahrain" className="px-6 py-3 bg-white/10 hover:bg-white/20 rounded-full transition-all">
-              Thai Restaurants →
+            <Link href="/guides/best-mexican-restaurants-bahrain" className="px-6 py-3 bg-white/10 hover:bg-white/20 rounded-full transition-all">
+              Mexican Restaurants →
             </Link>
             <Link href="/places" className="px-6 py-3 bg-gradient-to-r from-pink-500 to-red-500 rounded-full font-medium hover:shadow-lg hover:shadow-pink-500/25 transition-all">
               Browse All Restaurants
