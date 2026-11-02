@@ -22,6 +22,7 @@ import {
   sleep,
   isBahrainEvent,
 } from './utils.js';
+import { resolveSlugForUpsert } from '../../src/lib/slug.js';
 
 // Initialize Supabase client
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
@@ -173,17 +174,32 @@ async function upsertAttractions(attractions: DbAttraction[]): Promise<{ inserte
       // Check if attraction exists by source_id (Platinumlist ID)
       const { data: existing } = await supabase
         .from('attractions')
-        .select('id')
+        .select('id,slug')
         .eq('source', 'platinumlist')
         .eq('source_id', attraction.source_id)
         .single();
 
       if (existing) {
+        // KEEP THE ORIGINAL SLUG. Same rule as the events sync and the API
+        // routes: a slug is part of the row's identity in the URL space, and
+        // Platinumlist renames listings. Overwriting the stored slug with a
+        // freshly generated one breaks a URL Google may already have indexed,
+        // turning it into a 404 that keeps earning impressions.
+        //
+        // This script is what the 4-hourly `platinumlist-sync.yml` workflow
+        // runs, so the damage window is four hours.
+        //
+        // The one exception is an UNUSABLE stored slug -- a bare id, or a slug
+        // with no words in it. Those are worth nothing, so they are
+        // regenerated.
+        const slugToWrite = resolveSlugForUpsert(existing.slug, attraction.slug);
+
         // Update existing attraction
         const { error } = await supabase
           .from('attractions')
           .update({
             ...attraction,
+            slug: slugToWrite,
             updated_at: new Date().toISOString(),
           })
           .eq('id', existing.id);
