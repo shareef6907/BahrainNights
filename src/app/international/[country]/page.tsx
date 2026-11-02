@@ -55,12 +55,25 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
     };
   }
 
+  // A country page with no listings is a soft-404: it is live, indexable and
+  // reachable, but it has nothing on it. Google should not rank an empty
+  // page, so it is marked noindex, nofollow.
+  //
+  // The route itself is NOT removed — the URL may have inbound links, and the
+  // country may gain listings later, in which case the page becomes
+  // indexable again automatically.
+  const events = await getInternationalEvents({ country: countryConfig.dbName });
+  const hasListings = events.length > 0;
+
   return {
     title: `Events in ${countryConfig.fullName}`,
     description: `Discover amazing events, concerts, shows, and experiences in ${countryConfig.fullName}. Book tickets to the best events.`,
     alternates: {
       canonical: `/international/${country}`,
     },
+    robots: hasListings
+      ? { index: true, follow: true }
+      : { index: false, follow: false },
     openGraph: {
       title: `Events in ${countryConfig.fullName}`,
       description: `Discover amazing events in ${countryConfig.fullName}`,

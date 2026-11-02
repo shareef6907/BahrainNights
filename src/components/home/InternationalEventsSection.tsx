@@ -6,6 +6,7 @@ import Image from 'next/image';
 import { motion } from 'framer-motion';
 import { ChevronRight, MapPin, Calendar } from 'lucide-react';
 import EventModal, { EventData } from '@/components/events/EventModal';
+import { cardClickHandler } from '@/lib/crawlable-card';
 import { useTranslation } from '@/lib/i18n/TranslationContext';
 
 // Animation variants
@@ -85,9 +86,13 @@ export default function InternationalEventsSection({ events }: Props) {
   const [selectedEvent, setSelectedEvent] = useState<InternationalEvent | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
 
-  const handleEventClick = (event: InternationalEvent) => {
-    setSelectedEvent(event);
-    setIsModalOpen(true);
+  // The card is a real <a href="/events/<slug>">: a plain click opens the
+  // modal exactly as before, a modified click follows the link.
+  const handleEventClick = (event: InternationalEvent, e: React.MouseEvent) => {
+    cardClickHandler(e, () => {
+      setSelectedEvent(event);
+      setIsModalOpen(true);
+    });
   };
 
   const formatDate = (dateStr: string | null) => {
@@ -163,9 +168,10 @@ export default function InternationalEventsSection({ events }: Props) {
           viewport={{ once: true, margin: "-100px" }}
         >
           {events.slice(0, 4).map((event) => (
-            <motion.div
+            <motion.a
               key={event.id}
-              onClick={() => handleEventClick(event)}
+              href={`/events/${event.slug}`}
+              onClick={(e) => handleEventClick(event, e)}
               className="group relative bg-white/5 backdrop-blur-sm border border-white/10 rounded-2xl overflow-hidden cursor-pointer hover:border-purple-500/50 transition-all duration-300"
               variants={fadeIn}
               whileHover={cardHover}
@@ -208,7 +214,7 @@ export default function InternationalEventsSection({ events }: Props) {
                   </div>
                 </div>
               </div>
-            </motion.div>
+            </motion.a>
           ))}
         </motion.div>
 

@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useMemo } from 'react';
+import { cardClickHandler } from '@/lib/crawlable-card';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Search, Filter, MapPin, ExternalLink, X } from 'lucide-react';
 import Link from 'next/link';
@@ -12,6 +13,7 @@ import { RelatedGuides } from '@/components/SEO';
 export interface Attraction {
   id: string;
   title: string;
+  slug: string;
   description: string | null;
   price: number | null;
   price_range: string | null;
@@ -78,9 +80,11 @@ export default function AttractionsPageClient({ initialAttractions, categories }
   const [selectedAttraction, setSelectedAttraction] = useState<Attraction | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
 
-  const handleAttractionClick = (attraction: Attraction) => {
-    setSelectedAttraction(attraction);
-    setIsModalOpen(true);
+  const handleAttractionClick = (attraction: Attraction, e: React.MouseEvent) => {
+    cardClickHandler(e, () => {
+      setSelectedAttraction(attraction);
+      setIsModalOpen(true);
+    });
   };
 
   const handleCloseModal = () => {
@@ -233,8 +237,9 @@ export default function AttractionsPageClient({ initialAttractions, categories }
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ delay: index * 0.05 }}
                   >
-                    <div
-                      onClick={() => handleAttractionClick(attraction)}
+                    <a
+                      href={`/attractions/${attraction.slug}`}
+                      onClick={(e) => handleAttractionClick(attraction, e)}
                       className="group block bg-white/5 border border-white/10 rounded-2xl overflow-hidden hover:border-teal-400/50 transition-all duration-300 hover:-translate-y-1 cursor-pointer"
                     >
                       {/* Image */}
@@ -286,7 +291,7 @@ export default function AttractionsPageClient({ initialAttractions, categories }
                           </span>
                         </div>
                       </div>
-                    </div>
+                    </a>
                   </motion.div>
                 ))}
               </motion.div>

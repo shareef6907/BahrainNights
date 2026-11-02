@@ -6,6 +6,7 @@ import { MapPin, Clock, Calendar, Star, ChevronLeft } from 'lucide-react';
 import Link from 'next/link';
 import Image from 'next/image';
 import EventModal, { EventData } from '@/components/events/EventModal';
+import { cardClickHandler } from '@/lib/crawlable-card';
 
 interface Event {
   id: string;
@@ -85,11 +86,16 @@ export default function CategoryPageClient({ category, categoryInfo, events }: C
     affiliate_url: event.affiliateUrl || '',
   }), []);
 
-  // Handle event card click
+  // Handle event card click.
+  // The card is a real <a href="/events/<slug>">, so a plain click opens the
+  // modal exactly as before, while a modified click (ctrl/cmd/shift or
+  // middle-click) follows the link. Crawlers can now reach every event page
+  // from this category page.
   const handleEventClick = useCallback((event: Event, e: React.MouseEvent) => {
-    e.preventDefault();
-    setSelectedEvent(convertToModalData(event));
-    setIsModalOpen(true);
+    cardClickHandler(e, () => {
+      setSelectedEvent(convertToModalData(event));
+      setIsModalOpen(true);
+    });
   }, [convertToModalData]);
 
   // Close modal
@@ -151,13 +157,14 @@ export default function CategoryPageClient({ category, categoryInfo, events }: C
             animate="visible"
           >
             {events.map((event, index) => (
-              <motion.div
+              <motion.a
                 key={event.id}
+                href={`/events/${event.slug}`}
                 data-testid="event-card"
                 data-featured={event.isFeatured}
                 variants={fadeIn}
                 whileHover={{ y: -6 }}
-                className="group cursor-pointer"
+                className="group cursor-pointer block"
                 onClick={(e) => handleEventClick(event, e)}
               >
                 <div className={`relative bg-white/5 backdrop-blur-sm border ${event.isFeatured ? 'border-yellow-400/50 ring-1 ring-yellow-400/20' : 'border-white/10'} rounded-2xl overflow-hidden hover:border-yellow-400/50 transition-all duration-300`}>
@@ -219,7 +226,7 @@ export default function CategoryPageClient({ category, categoryInfo, events }: C
                     </div>
                   </div>
                 </div>
-              </motion.div>
+              </motion.a>
             ))}
           </motion.div>
         ) : (
