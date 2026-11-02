@@ -14,6 +14,9 @@ import {
   passwordResetEmail,
   passwordChangedEmail,
   welcomeEmail,
+  contactFormNotification,
+  contactFormConfirmation,
+  type ContactFormData,
 } from './email-templates';
 
 /**
@@ -146,6 +149,39 @@ export async function sendPasswordChangedEmail(
     to: email,
     subject: 'Your BahrainNights Password Has Been Changed',
     html: passwordChangedEmail(),
+  });
+}
+
+/**
+ * Send a contact form enquiry to the BahrainNights team.
+ * The visitor's address is set as Reply-To so hitting reply reaches them directly.
+ */
+export async function sendContactFormNotification(
+  data: ContactFormData,
+  recipient: string = process.env.CONTACT_FORM_RECIPIENT || 'sales@bahrainnights.com'
+): Promise<EmailResult> {
+  const subject = data.subject?.trim() || 'General enquiry';
+  return sendEmail({
+    to: recipient,
+    subject: `[BahrainNights] ${subject} — ${data.name}`,
+    html: contactFormNotification(data),
+    text: `New contact form enquiry\n\nName: ${data.name}\nEmail: ${data.email}\nSubject: ${subject}\n\nMessage:\n${data.message}`,
+    replyTo: data.email,
+  });
+}
+
+/**
+ * Send the visitor a confirmation that their enquiry was delivered.
+ */
+export async function sendContactFormConfirmation(
+  data: ContactFormData
+): Promise<EmailResult> {
+  const subject = data.subject?.trim() || 'your enquiry';
+  return sendEmail({
+    to: data.email,
+    subject: 'We received your message — BahrainNights',
+    html: contactFormConfirmation(data),
+    text: `Hi ${data.name},\n\nThanks for getting in touch about "${subject}". Your message has reached the BahrainNights team and we usually respond within one business day.\n\nIf it is urgent, call us on +973 3900 7750.\n\nBahrainNights.com`,
   });
 }
 
