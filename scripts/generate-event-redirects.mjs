@@ -89,19 +89,34 @@ async function platinumlistFeed() {
   let page = 1;
   let totalPages = null;
   do {
-    const res = await fetch(
-      `${PL_BASE}?page=${page}&per_page=100&scope=affiliate.show.events&include=price`,
-      {
-        headers: {
-          'Api-Key': key,
-          'price_scope': 'price',
-          Accept: 'application/json',
-          'Content-Type': 'application/json',
-        },
-      },
-    );
-    if (!res.ok) throw new Error(`Platinumlist ${res.status}`);
-    const body = await res.json();
+    // The feed resets the connection under sustained sequential fetching, so
+    // each page is retried with a backoff. A partial feed would silently
+    // classify live upstream events as dead.
+    let body = null;
+    for (let attempt = 1; attempt <= 5; attempt++) {
+      try {
+        const res = await fetch(
+          `${PL_BASE}?page=${page}&per_page=100&scope=affiliate.show.events&include=price`,
+          {
+            headers: {
+              'Api-Key': key,
+              'price_scope': 'price',
+              Accept: 'application/json',
+              'Content-Type': 'application/json',
+            },
+            signal: AbortSignal.timeout(45000),
+          },
+        );
+        if (!res.ok) throw new Error(`Platinumlist ${res.status}`);
+        body = await res.json();
+        break;
+      } catch (err) {
+        if (attempt === 5) throw err;
+        console.error(`# feed page ${page} attempt ${attempt} failed (${err.message}); retrying...`);
+        await new Promise((r) => setTimeout(r, 1000 * attempt));
+      }
+    }
+    if (!body) throw new Error(`Platinumlist page ${page} could not be fetched`);
     for (const e of body.data || []) events.set(String(e.id), e);
     totalPages = body.meta?.pagination?.total_pages ?? totalPages;
     page++;
@@ -159,45 +174,95 @@ function generateSlug(title, id, hint) {
 async function main() {
   const checkOnly = process.argv.includes('--check');
   const writeCache = process.argv.includes('--cache');
+  const fromCache = process.argv.includes('--from-cache');
 
   // 1. Which event URLs does Google still know about?
-  const token = gscToken();
-  const pageRows = await gscQuery(token, 365, ['page']);
-  const queryRows = await gscQuery(token, 365, ['query', 'page']);
+  let impressions;
+  let queriesByPage;
+  let statuses;
+  let dead;
 
-  const impressions = new Map();
-  for (const row of pageRows) impressions.set(row.keys[0], row.impressions);
+  if (fromCache) {
+    // Regenerate deterministically from the evidence we already verified,
+    // instead of re-querying GSC and re-probing production. The cache holds
+    // the GSC impressions, the per-URL HTTP status, and the dead-URL list.
+    //
+    // The cached STATUSES are the pre-deploy evidence and must not be
+    // re-probed once the map is live: a redirected URL answers 301, not 404,
+    // so a fresh probe would find no dead URLs at all and would silently
+    // empty the map.
+    const cache = JSON.parse(readFileSync(CACHE_FILE, 'utf8'));
+    impressions = new Map(Object.entries(cache.impressions || {}));
+    queriesByPage = new Map();
+    for (const [page, list] of Object.entries(cache.queriesByPage || {})) {
+      queriesByPage.set(page, list);
+    }
+    statuses = new Map(Object.entries(cache.statuses || {}));
+    dead = cache.dead || [];
+    console.error(`# using cached evidence: ${dead.length} dead URLs`);
 
-  const queriesByPage = new Map();
-  for (const row of queryRows) {
-    const [, page] = row.keys;
-    if (!queriesByPage.has(page)) queriesByPage.set(page, []);
-    queriesByPage.get(page).push([row.keys[0], row.impressions]);
+    // The per-URL QUERIES are not in the cache (they were only needed to
+    // infer a country), but they still matter: they are the strongest
+    // evidence of which country a dead URL belonged to. Fetch them live —
+    // GSC query data is stable for a closed date range.
+    try {
+      const token = gscToken();
+      const queryRows = await gscQuery(token, 365, ['query', 'page']);
+      queriesByPage = new Map();
+      for (const row of queryRows) {
+        const [, page] = row.keys;
+        if (!queriesByPage.has(page)) queriesByPage.set(page, []);
+        queriesByPage.get(page).push([row.keys[0], row.impressions]);
+      }
+      console.error(`# live GSC query data: ${queryRows.length} rows`);
+    } catch (e) {
+      console.error(`# WARNING: could not fetch GSC query data (${e.message}); ` +
+        'country inference for some URLs may fall back to slug/feed evidence');
+    }
+  } else {
+    const token = gscToken();
+    const pageRows = await gscQuery(token, 365, ['page']);
+    const queryRows = await gscQuery(token, 365, ['query', 'page']);
+
+    impressions = new Map();
+    for (const row of pageRows) impressions.set(row.keys[0], row.impressions);
+
+    queriesByPage = new Map();
+    for (const row of queryRows) {
+      const [, page] = row.keys;
+      if (!queriesByPage.has(page)) queriesByPage.set(page, []);
+      queriesByPage.get(page).push([row.keys[0], row.impressions]);
+    }
+
+    const eventUrls = [...impressions.keys()]
+      .filter((u) => u.includes('/events/'))
+      .sort();
+    console.error(`# GSC event URLs with impressions (365d): ${eventUrls.length}`);
+
+    // 2. Which of them are actually broken right now?
+    statuses = new Map();
+    const CONCURRENCY = 12;
+    for (let i = 0; i < eventUrls.length; i += CONCURRENCY) {
+      const chunk = eventUrls.slice(i, i + CONCURRENCY);
+      const results = await Promise.all(chunk.map((u) => httpStatus(u)));
+      chunk.forEach((u, j) => statuses.set(u, results[j]));
+    }
+    dead = eventUrls.filter((u) => statuses.get(u).status === 404);
+
+    // A URL that is NOT a 404 needs no redirect. In particular, an event whose
+    // row was restored (a past international event re-imported, a page brought
+    // back by a content change) must keep serving its own page — a redirect
+    // would shadow a live page and hand its ranking to a hub.
+    const live = eventUrls.filter((u) => statuses.get(u).status === 200);
+    console.error(`# currently 200 (left alone): ${live.length}`);
   }
+
+  const deadImpressions = dead.reduce((sum, u) => sum + (impressions.get(u) || 0), 0);
+  console.error(`# dead URLs: ${dead.length}  (${deadImpressions} impressions)`);
 
   const eventUrls = [...impressions.keys()]
     .filter((u) => u.includes('/events/'))
     .sort();
-  console.error(`# GSC event URLs with impressions (365d): ${eventUrls.length}`);
-
-  // 2. Which of them are actually broken right now?
-  const statuses = new Map();
-  const CONCURRENCY = 12;
-  for (let i = 0; i < eventUrls.length; i += CONCURRENCY) {
-    const chunk = eventUrls.slice(i, i + CONCURRENCY);
-    const results = await Promise.all(chunk.map((u) => httpStatus(u)));
-    chunk.forEach((u, j) => statuses.set(u, results[j]));
-  }
-  const dead = eventUrls.filter((u) => statuses.get(u).status === 404);
-  const deadImpressions = dead.reduce((sum, u) => sum + impressions.get(u), 0);
-  console.error(`# currently 404: ${dead.length}  (${deadImpressions} impressions)`);
-
-  // A URL that is NOT a 404 needs no redirect. In particular, an event whose
-  // row was restored (a past international event re-imported, a page brought
-  // back by a content change) must keep serving its own page — a redirect
-  // would shadow a live page and hand its ranking to a hub.
-  const live = eventUrls.filter((u) => statuses.get(u).status === 200);
-  console.error(`# currently 200 (left alone): ${live.length}`);
 
   // 3. Evidence: the DB (for renamed slugs) and the live feed (for new slugs).
   const supabase = createClient(
@@ -285,6 +350,104 @@ async function main() {
   const sortedGone = gone.sort();
   const sources = [...Object.keys(sortedRedirects), ...sortedGone];
 
+  // 4b. A destination that shows NO events is a soft 404: the visitor lands on
+  //     a page that says "No events found" and Google sees a thin page. Worse,
+  //     since PR #38 (2026-11-02) an empty hub is served as `noindex, nofollow`,
+  //     so a redirect into one cannot consolidate any signal at all and the
+  //     visitor gets nothing.
+  //
+  //     Every hub we point at must demonstrably contain real event listings,
+  //     otherwise fall back to the populated index for that level:
+  //       /events/category/<cat> with no events -> /events
+  //       /international/<code> with no events -> /international
+  //
+  //     The emptiness test queries the DATABASE, not the rendered HTML. The
+  //     database is what the page itself queries, so it is the authority, and
+  //     an HTML scrape misreads hashes and build ids as event links.
+  //
+  //     The filters below mirror the pages exactly:
+  //       /events/category/[category]
+  //         status=published, is_hidden=false, country=Bahrain,
+  //         category=<cat>, date >= today
+  //       /international/[country]
+  //         status=published, is_active=true, country=<db name>,
+  //         (start_date >= today OR date >= today), and a 6-month back window
+  const today = new Date().toISOString().split('T')[0];
+  const sixMonthsAgo = new Date();
+  sixMonthsAgo.setMonth(sixMonthsAgo.getMonth() - 6);
+  const sixMonthsAgoStr = sixMonthsAgo.toISOString().split('T')[0];
+
+  const { data: populatedCategories } = await supabase
+    .from('events')
+    .select('category')
+    .eq('status', 'published')
+    .eq('is_hidden', false)
+    .eq('country', 'Bahrain')
+    .gte('date', today)
+    .limit(5000);
+  const populatedCats = new Set(
+    (populatedCategories || []).map((r) => r.category).filter(Boolean),
+  );
+
+  const { data: populatedCountries } = await supabase
+    .from('events')
+    .select('country,start_date,date')
+    .eq('status', 'published')
+    .eq('is_active', true)
+    .or(`start_date.gte.${today},date.gte.${today}`)
+    .neq('country', 'Bahrain')
+    .limit(5000);
+  // The international pages keep a 6-month back window, so a country whose
+  // only listings are recent past events is still a populated page.
+  const populatedCtry = new Set(
+    (populatedCountries || [])
+      .filter((r) => ((r.start_date || r.date) || '') >= sixMonthsAgoStr)
+      .map((r) => r.country)
+      .filter(Boolean),
+  );
+
+  // The site's URL country code -> the country name stored in the DB.
+  const COUNTRY_CODE = {
+    'UAE': 'uae', 'Saudi Arabia': 'saudi-arabia', 'Qatar': 'qatar', 'Kuwait': 'kuwait',
+    'Oman': 'oman', 'Jordan': 'jordan', 'Lebanon': 'lebanon', 'Türkiye': 'turkiye',
+    'Turkey': 'turkiye', 'Cyprus': 'cyprus', 'Egypt': 'egypt', 'Morocco': 'morocco',
+    'South Africa': 'south-africa', 'Nigeria': 'nigeria', 'UK': 'uk',
+    'United Kingdom': 'uk', 'Germany': 'germany', 'France': 'france', 'Spain': 'spain',
+    'Italy': 'italy', 'Greece': 'greece', 'India': 'india', 'Pakistan': 'pakistan',
+    'Singapore': 'singapore', 'Malaysia': 'malaysia', 'Thailand': 'thailand',
+    'Indonesia': 'indonesia', 'Philippines': 'philippines', 'USA': 'usa',
+    'United States': 'usa',
+  };
+
+  console.error(`# populated categories (Bahrain, upcoming, published): ${[...populatedCats].sort().join(', ') || 'none'}`);
+  console.error(`# populated countries (international, upcoming, published): ${[...populatedCtry].sort().join(', ') || 'none'}`);
+
+  const emptyDests = new Map();
+  for (const dest of new Set(Object.values(sortedRedirects))) {
+    if (dest.startsWith('/events/category/')) {
+      const cat = dest.split('/').pop();
+      if (!populatedCats.has(cat)) emptyDests.set(dest, dest);
+    } else if (dest.startsWith('/international/')) {
+      const code = dest.split('/').pop();
+      const dbName = Object.keys(COUNTRY_CODE).find((k) => COUNTRY_CODE[k] === code);
+      if (!dbName || !populatedCtry.has(dbName)) emptyDests.set(dest, dest);
+    }
+  }
+
+  if (emptyDests.size) {
+    console.error(`# ${emptyDests.size} destinations have no event listings; falling back:`);
+    for (const dest of emptyDests.keys()) {
+      const fb = dest.startsWith('/international/') ? '/international' : '/events';
+      console.error(`#   ${dest} -> ${fb}`);
+      for (const [path, d] of Object.entries(sortedRedirects)) {
+        if (d === dest) {
+          sortedRedirects[path] = fb;
+          detail[path] = `${detail[path]}|empty-dest-fallback:${fb}`;
+        }
+      }
+    }
+  }
+
   const payload = {
     generatedAt: new Date().toISOString(),
     totalDead: dead.length,
@@ -299,6 +462,7 @@ async function main() {
   if (writeCache) {
     writeFileSync(CACHE_FILE, JSON.stringify({
       dead, impressions: Object.fromEntries(impressions), statuses: Object.fromEntries(statuses),
+      queriesByPage: Object.fromEntries(queriesByPage),
     }, null, 1));
     console.error(`# cached evidence to ${CACHE_FILE}`);
   }
@@ -368,6 +532,32 @@ async function main() {
         problems.push(`destination is not live (${results[j].status}): ${d}`);
       }
     });
+  }
+
+  // A destination that is served as `noindex` cannot consolidate any ranking
+  // signal, so a redirect into one is a dead end even though it returns 200.
+  // This is the check that would have caught the 89 redirects that PR #38
+  // (2026-11-02) left pointing at empty, noindex hubs.
+  console.error(`# checking ${dests.length} destinations are indexable...`);
+  for (let i = 0; i < dests.length; i += CHECK_CONCURRENCY) {
+    const chunk = dests.slice(i, i + CHECK_CONCURRENCY);
+    const results = await Promise.all(
+      chunk.map(async (d) => {
+        try {
+          const res = await fetch(`${SITE}${d}`, { redirect: 'manual' });
+          const html = await res.text();
+          const robots = (html.match(/<meta name="robots" content="([^"]*)"/) || [])[1] || '';
+          return { dest: d, robots };
+        } catch {
+          return { dest: d, robots: '(unreadable)' };
+        }
+      }),
+    );
+    for (const r of results) {
+      if (/noindex/i.test(r.robots)) {
+        problems.push(`destination is noindex (${r.robots}): ${r.dest}`);
+      }
+    }
   }
   if (problems.length) {
     console.error('\n# SELF-CHECK FAILURES:');
