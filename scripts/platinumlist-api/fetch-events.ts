@@ -164,7 +164,11 @@ async function fetchAllEvents(): Promise<PlatinumlistEvent[]> {
   const allEvents: PlatinumlistEvent[] = [];
   let page = 1;
   const perPage = 50;
-  const maxPages = 30; // Safety limit
+  // Runaway guard only. The real end of the feed is decided by the API's own
+  // pagination metadata below -- NEVER by a hardcoded page count. A fixed cap
+  // silently truncates the feed the moment it grows, and because the feed is
+  // ordered oldest-first, the events that get dropped are the newest ones.
+  const maxPages = 2000; // runaway guard, not a page count
   let hasMore = true;
 
   while (hasMore && page <= maxPages) {

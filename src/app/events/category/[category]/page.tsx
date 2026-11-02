@@ -4,16 +4,18 @@ import { notFound } from 'next/navigation';
 import { Metadata } from 'next';
 import CategoryPageClient from './CategoryPageClient';
 import { sortEventsWithFeatured } from '@/lib/utils/eventSorting';
+import { VALID_CATEGORY_SLUGS } from '@/lib/seo/indexable-hubs';
 
 // Revalidate every 5 minutes
 export const revalidate = 300;
 
-// Valid categories
-const validCategories = [
-  'music', 'sports', 'arts', 'dining', 'community',
-  'shopping', 'nightlife', 'special', 'family', 'wellness',
-  'business', 'cultural', 'concerts'
-];
+// Valid categories.
+//
+// The list lives in src/lib/seo/indexable-hubs.ts so that the sitemap and
+// this page cannot disagree about which category hubs exist. It was
+// duplicated here before, and the sitemap drifted: no /events/category/* hub
+// was listed in it at all.
+const validCategories: readonly string[] = VALID_CATEGORY_SLUGS;
 
 // Category display info
 const categoryInfo: Record<string, { label: string; icon: string; description: string }> = {

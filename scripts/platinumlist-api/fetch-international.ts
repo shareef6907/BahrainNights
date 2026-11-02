@@ -164,7 +164,11 @@ async function fetchAllInternationalEvents(): Promise<PlatinumlistEvent[]> {
   const allEvents: PlatinumlistEvent[] = [];
   let page = 1;
   const perPage = 50;
-  const maxPages = 50; // Higher limit for international events
+  // Runaway guard only. The real end of the feed is decided by the API's own
+  // pagination metadata below -- NEVER by a hardcoded page count. A fixed cap
+  // silently truncates the feed the moment it grows, and because the feed is
+  // ordered oldest-first, the events that get dropped are the newest ones.
+  const maxPages = 2000; // runaway guard, not a page count
   let hasMore = true;
 
   while (hasMore && page <= maxPages) {
@@ -238,11 +242,26 @@ async function upsertEvents(events: DbEvent[]): Promise<{ inserted: number; upda
           .eq('id', existing.id)
           .single();
 
+        // Keep the ORIGINAL slug: Platinumlist occasionally renames a title, and
+        // rewriting the slug would break a URL Google has already indexed.
+        // The redirect map is keyed on source_event_id -> current slug, so a
+        // stable slug means an indexed URL never stops resolving.
+        //
+        // EXCEPT when the stored slug is unusable -- a bare id, or a slug with
+        // no words in it (the old "--108813" shape, produced when the title was
+        // written in a script we could not transliterate). Those are repaired
+        // from the current title, and the old URL is kept alive by a redirect.
+        const storedSlug = current?.slug || '';
+        const slugIsUnusable =
+          !storedSlug ||
+          /^-+/.test(storedSlug) ||
+          /^\d+$/.test(storedSlug);
+
         const { error } = await supabase
           .from('events')
           .update({
             ...event,
-            slug: current?.slug ?? event.slug,
+            slug: slugIsUnusable ? event.slug : storedSlug,
             updated_at: new Date().toISOString(),
           })
           .eq('id', existing.id);

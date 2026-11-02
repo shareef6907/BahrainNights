@@ -1,7 +1,20 @@
 import { MetadataRoute } from 'next';
 import { createClient, SupabaseClient } from '@supabase/supabase-js';
+import { getIndexableHubs } from '@/lib/seo/indexable-hubs';
 
 const BASE_URL = 'https://www.bahrainnights.com';
+
+/**
+ * How many rows to fetch per page when reading the database.
+ *
+ * Supabase/PostgREST caps a single response, so every list is read in pages
+ * and the loop continues until the database says there is nothing left. A
+ * hardcoded `.limit(500)` silently DROPPED 203 published events from the
+ * sitemap -- including 42 events happening in the next three days -- and the
+ * DESC sort that came with it kept the farthest-future events and pushed the
+ * soonest ones off the end.
+ */
+const PAGE_SIZE = 1000;
 
 // Lazy initialization to avoid build-time errors
 let _supabase: SupabaseClient | null = null;
@@ -229,19 +242,6 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       changeFrequency: 'daily',
       priority: 0.8,
     },
-    // International country pages (only pages that exist)
-    {
-      url: `${BASE_URL}/international/uae`,
-      lastModified: new Date(),
-      changeFrequency: 'daily',
-      priority: 0.8,
-    },
-    {
-      url: `${BASE_URL}/international/qatar`,
-      lastModified: new Date(),
-      changeFrequency: 'daily',
-      priority: 0.8,
-    },
     {
       url: `${BASE_URL}/sponsors`,
       lastModified: new Date(),
@@ -396,28 +396,89 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   }
 
   // Fetch published events (exclude hidden)
+  //
+  // Read in pages until the database is exhausted. Do NOT reintroduce a
+  // hardcoded limit here: a limit silently truncates the sitemap, and the
+  // pages that get dropped are whichever ones sort last -- which is not a
+  // random set, it is a consistent set that never reaches Google.
   let eventPages: MetadataRoute.Sitemap = [];
   try {
     const today = new Date().toISOString().split('T')[0];
-    const { data: events } = await supabase
-      .from('events')
-      .select('slug, updated_at, date')
-      .eq('status', 'published')
-      .eq('is_hidden', false)
-      .or(`date.gte.${today},end_date.gte.${today}`)
-      .order('date', { ascending: false })
-      .limit(500);
+    const allEvents: {
+      slug: string;
+      updated_at: string | null;
+      date: string | null;
+    }[] = [];
 
-    if (events) {
-      eventPages = events.map((event) => ({
+    let from = 0;
+    while (true) {
+      const { data, error } = await supabase
+        .from('events')
+        .select('slug, updated_at, date')
+        .eq('status', 'published')
+        .eq('is_hidden', false)
+        .or(`date.gte.${today},end_date.gte.${today}`)
+        // Soonest first. The near-term events are the ones worth having in
+        // the sitemap -- they are what "what's on this weekend" searches land
+        // on. Sorting descending put them last and, combined with a limit,
+        // dropped them entirely.
+        .order('date', { ascending: true, nullsFirst: false })
+        .range(from, from + PAGE_SIZE - 1);
+
+      if (error) {
+        console.error('Error fetching events for sitemap:', error);
+        break;
+      }
+      if (!data || data.length === 0) break;
+
+      allEvents.push(...data);
+      if (data.length < PAGE_SIZE) break;
+      from += PAGE_SIZE;
+    }
+
+    eventPages = allEvents
+      // A row with no slug cannot produce a URL. Skip it rather than
+      // emitting "/events/undefined" or "/events/null".
+      .filter((event) => Boolean(event.slug))
+      .map((event) => ({
         url: `${BASE_URL}/events/${event.slug}`,
         lastModified: event.updated_at ? new Date(event.updated_at) : new Date(),
         changeFrequency: 'daily' as const,
         priority: 0.8,
       }));
-    }
   } catch (error) {
     console.error('Error fetching events for sitemap:', error);
+  }
+
+  // The event hubs -- /events/category/<cat> and /international/<code>.
+  //
+  // These are the primary discovery entry points for event pages, and they
+  // were entirely missing from the sitemap (all 13 category hubs, and 25 of
+  // the 27 country hubs). Google reported the populated ones as "URL is
+  // unknown to Google" despite a 200, a canonical and `index, follow`.
+  //
+  // A hub is listed if and only if it is indexable, which is the same
+  // "does it have listings?" question the page asks for its robots meta tag.
+  let hubPages: MetadataRoute.Sitemap = [];
+  try {
+    const hubs = await getIndexableHubs();
+
+    hubPages = [
+      ...hubs.categories.map((slug) => ({
+        url: `${BASE_URL}/events/category/${slug}`,
+        lastModified: new Date(),
+        changeFrequency: 'daily' as const,
+        priority: 0.85,
+      })),
+      ...hubs.countries.map((slug) => ({
+        url: `${BASE_URL}/international/${slug}`,
+        lastModified: new Date(),
+        changeFrequency: 'daily' as const,
+        priority: 0.8,
+      })),
+    ];
+  } catch (error) {
+    console.error('Error resolving hubs for sitemap:', error);
   }
 
   // Fetch approved venues/places
@@ -483,5 +544,13 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     console.error('Error fetching regional articles for sitemap:', error);
   }
 
-  return [...staticPages, ...guidePages, ...eventPages, ...venuePages, ...moviePages, ...regionalPages];
+  return [
+    ...staticPages,
+    ...guidePages,
+    ...hubPages,
+    ...eventPages,
+    ...venuePages,
+    ...moviePages,
+    ...regionalPages,
+  ];
 }
