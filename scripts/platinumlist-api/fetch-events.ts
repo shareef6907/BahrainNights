@@ -24,6 +24,7 @@ import {
   detectCountry,
   extractCity,
 } from './utils.js';
+import { resolveSlugForUpsert } from '../../src/lib/slug.js';
 
 // Initialize Supabase client
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
@@ -225,17 +226,39 @@ async function upsertEvents(events: DbEvent[]): Promise<{ inserted: number; upda
       // Check if event exists by source_event_id (Platinumlist ID)
       const { data: existing } = await supabase
         .from('events')
-        .select('id')
+        .select('id,slug')
         .eq('source_name', 'platinumlist')
         .eq('source_event_id', event.source_event_id)
         .single();
 
       if (existing) {
+        // KEEP THE ORIGINAL SLUG.
+        //
+        // A slug is part of the row's identity in the URL space. Platinumlist
+        // renames listings -- a subtitle changes, an event is re-worded -- and
+        // when it does, a freshly generated slug no longer matches the stored
+        // one. Writing it over the stored slug breaks the URL that Google has
+        // already indexed, turning it into a 404 that keeps earning
+        // impressions.
+        //
+        // This is the same rule the API routes already follow (see
+        // `resolveSlugForUpsert` in src/lib/slug.ts). It matters most HERE:
+        // this script is what the 4-hourly `platinumlist-sync.yml` workflow
+        // runs, so a rename upstream would break an indexed URL within four
+        // hours.
+        //
+        // The one case where the slug MUST change is when the stored one is
+        // unusable -- a bare id ("108813") or a slug with no words in it (the
+        // old "--108813" shape produced by fully non-Latin titles). Those are
+        // worth nothing as they stand, so they are regenerated.
+        const slugToWrite = resolveSlugForUpsert(existing.slug, event.slug);
+
         // Update existing event
         const { error } = await supabase
           .from('events')
           .update({
             ...event,
+            slug: slugToWrite,
             updated_at: new Date().toISOString(),
           })
           .eq('id', existing.id);
