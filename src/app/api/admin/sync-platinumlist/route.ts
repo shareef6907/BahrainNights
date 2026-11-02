@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { cookies } from 'next/headers';
 import { createClient } from '@supabase/supabase-js';
 import { verifyToken } from '@/lib/auth';
-import { generateEventSlug } from '@/lib/slug';
+import { generateEventSlug, isUnusableSlug } from '@/lib/slug';
 
 export const dynamic = 'force-dynamic';
 export const maxDuration = 300; // 5 minutes for sync
@@ -278,15 +278,32 @@ export async function POST(request: NextRequest) {
         // Check if exists
         const { data: existing } = await supabase
           .from('events')
-          .select('id')
+          .select('id,slug')
           .eq('source_name', 'platinumlist')
           .eq('source_event_id', String(event.id))
           .single();
 
         if (existing) {
+          // KEEP THE ORIGINAL SLUG. A slug is part of the row's identity in
+          // the URL space: if Google has indexed /events/<slug> and the
+          // upstream title changes (a rename, a language switch, a re-worded
+          // listing), regenerating the slug breaks that indexed URL and turns
+          // it into a 404 that keeps earning impressions.
+          //
+          // The one case where the slug must change is when the existing one
+          // is unusable — a bare id, or a slug with no words in it (the old
+          // "-<id>" shape produced by fully non-Latin titles). Those get
+          // regenerated from the current title.
+          const existingSlug = existing.slug || '';
+          const slugIsUnusable = isUnusableSlug(existingSlug);
+
+          const updatePayload = slugIsUnusable
+            ? dbEvent
+            : { ...dbEvent, slug: existingSlug };
+
           const { error } = await supabase
             .from('events')
-            .update(dbEvent)
+            .update(updatePayload)
             .eq('id', existing.id);
           if (error) stats.errors++;
           else stats.updated++;

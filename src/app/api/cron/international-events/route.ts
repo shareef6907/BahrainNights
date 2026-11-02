@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@supabase/supabase-js';
-import { generateEventSlug } from '@/lib/slug';
+import { generateEventSlug, isUnusableSlug } from '@/lib/slug';
 
 export const dynamic = 'force-dynamic';
 export const maxDuration = 300; // 5 minutes max
@@ -242,15 +242,32 @@ export async function GET(request: NextRequest) {
       if (existing) {
         // Keep the ORIGINAL slug. Platinumlist occasionally renames a title, and
         // rewriting the slug would break a URL Google has already indexed.
+        //
+        // The one exception is an UNUSABLE slug: a bare id ("108813") or the
+        // old "-<id>" shape ("--108813") that a fully non-Latin title used to
+        // produce. Those URLs say nothing to a reader and nothing to a
+        // crawler, so they are worth regenerating. The Bahrain sync route
+        // already does this — without the same rule here, an international
+        // event keeps its broken slug forever, because every run "preserves"
+        // it.
+        //
+        // A slug that IS indexed is never rewritten: the old URL is kept
+        // alive by the redirect map instead.
         const { data: current } = await supabase
           .from('events')
           .select('slug')
           .eq('id', existing.id)
           .single();
 
+        const existingSlug = current?.slug ?? '';
+        const slugIsUnusable = isUnusableSlug(existingSlug);
+
         const { error } = await supabase
           .from('events')
-          .update({ ...dbEvent, slug: current?.slug ?? dbEvent.slug })
+          .update({
+            ...dbEvent,
+            slug: slugIsUnusable ? dbEvent.slug : existingSlug,
+          })
           .eq('id', existing.id);
         if (error) stats.errors++;
         else stats.updated++;
