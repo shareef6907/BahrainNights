@@ -153,7 +153,7 @@ function generateSchema() {
           { '@type': 'ListItem', position: 1, name: 'Visit Bahrain Fort (Qal\'at al-Bahrain)', url: 'https://www.bahrainnights.com/attractions' },
           { '@type': 'ListItem', position: 2, name: 'Explore Manama Souq', url: 'https://www.bahrainnights.com/guides/souks' },
           { '@type': 'ListItem', position: 3, name: 'Swim at Al Dar Islands', url: 'https://www.bahrainnights.com/attractions' },
-          { '@type': 'ListItem', position: 4, name: 'Experience Bahrain Nightlife in Juffair', url: 'https://www.bahrainnights.com/guides/nightlife-juffair' },
+          { '@type': 'ListItem', position: 4, name: 'Experience Bahrain Nightlife in Juffair', url: 'https://www.bahrainnights.com/nightlife-bahrain' },
           { '@type': 'ListItem', position: 5, name: 'Watch the Sunset at Bahrain Bay', url: 'https://www.bahrainnights.com/places' },
         ]
       },

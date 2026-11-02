@@ -457,8 +457,8 @@ export default function BestSteakhousesPage() {
             <Link href="/guides/best-fine-dining-bahrain" className="px-6 py-3 bg-white/10 hover:bg-white/20 rounded-full transition-all">
               Fine Dining →
             </Link>
-            <Link href="/guides/best-seafood-bahrain" className="px-6 py-3 bg-white/10 hover:bg-white/20 rounded-full transition-all">
-              Seafood Restaurants →
+            <Link href="/best-restaurants-bahrain" className="px-6 py-3 bg-white/10 hover:bg-white/20 rounded-full transition-all">
+              All Restaurants →
             </Link>
             <Link href="/places" className="px-6 py-3 bg-gradient-to-r from-red-500 to-orange-500 rounded-full font-medium hover:shadow-lg hover:shadow-red-500/25 transition-all">
               Browse All Restaurants

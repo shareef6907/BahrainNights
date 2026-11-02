@@ -870,7 +870,7 @@ export default async function WeekendPage() {
                 Browse Events
               </Link>
               <Link 
-                href="/guides/hotels"
+                href="/best-hotels-bahrain"
                 className="px-8 py-4 bg-gray-800 rounded-full text-white font-semibold hover:bg-gray-700 transition"
               >
                 Find Hotels

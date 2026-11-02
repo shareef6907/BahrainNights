@@ -599,19 +599,19 @@ export default async function NightlifePage() {
             <h2 className="text-3xl font-bold text-white text-center mb-10">Explore More</h2>
             
             <div className="grid md:grid-cols-4 gap-4">
-              <Link href="/guides/nightlife-juffair" className="p-6 bg-gray-800/50 rounded-xl hover:bg-gray-800 transition text-center group">
+              <Link href="/nightlife-bahrain" className="p-6 bg-gray-800/50 rounded-xl hover:bg-gray-800 transition text-center group">
                 <PartyPopper className="w-8 h-8 text-pink-400 mx-auto mb-3" />
-                <h3 className="font-semibold text-white group-hover:text-pink-300">Juffair Guide</h3>
-                <p className="text-sm text-gray-400 mt-2">Complete Juffair nightlife</p>
+                <h3 className="font-semibold text-white group-hover:text-pink-300">Nightlife Guide</h3>
+                <p className="text-sm text-gray-400 mt-2">Lounges & clubs in Bahrain</p>
               </Link>
               
-              <Link href="/guides/ladies-nights" className="p-6 bg-gray-800/50 rounded-xl hover:bg-gray-800 transition text-center group">
+              <Link href="/ladies-night-bahrain" className="p-6 bg-gray-800/50 rounded-xl hover:bg-gray-800 transition text-center group">
                 <Heart className="w-8 h-8 text-purple-400 mx-auto mb-3" />
                 <h3 className="font-semibold text-white group-hover:text-purple-300">Ladies Nights</h3>
                 <p className="text-sm text-gray-400 mt-2">Free drinks & entry</p>
               </Link>
               
-              <Link href="/guides/beach-clubs" className="p-6 bg-gray-800/50 rounded-xl hover:bg-gray-800 transition text-center group">
+              <Link href="/beach-clubs" className="p-6 bg-gray-800/50 rounded-xl hover:bg-gray-800 transition text-center group">
                 <Moon className="w-8 h-8 text-cyan-400 mx-auto mb-3" />
                 <h3 className="font-semibold text-white group-hover:text-cyan-300">Beach Clubs</h3>
                 <p className="text-sm text-gray-400 mt-2">Day-to-night parties</p>

@@ -346,7 +346,7 @@ export default function SouksPage() {
               Modern Malls
             </Link>
             <Link 
-              href="/guides/things-to-do"
+              href="/things-to-do-in-bahrain"
               className="px-8 py-3 bg-white/10 hover:bg-white/20 text-white font-bold rounded-lg transition-colors"
             >
               Things to Do
