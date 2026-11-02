@@ -1,45 +1,17 @@
 import { Metadata } from 'next';
 import { notFound } from 'next/navigation';
 import { getInternationalEvents } from '@/lib/international-events';
+import { COUNTRIES } from '@/lib/seo/indexable-hubs';
 import CountryPageClient from './CountryPageClient';
 import BreadcrumbSchema from '@/components/SEO/BreadcrumbSchema';
 import EventListSchema from '@/components/SEO/EventListSchema';
 
-// Country configuration - comprehensive list of all Platinumlist countries
-const COUNTRIES: Record<string, { name: string; fullName: string; flag: string; dbName: string }> = {
-  // Middle East & GCC
-  'uae': { name: 'UAE', fullName: 'United Arab Emirates', flag: '🇦🇪', dbName: 'UAE' },
-  'saudi-arabia': { name: 'Saudi Arabia', fullName: 'Saudi Arabia', flag: '🇸🇦', dbName: 'Saudi Arabia' },
-  'qatar': { name: 'Qatar', fullName: 'Qatar', flag: '🇶🇦', dbName: 'Qatar' },
-  'kuwait': { name: 'Kuwait', fullName: 'Kuwait', flag: '🇰🇼', dbName: 'Kuwait' },
-  'oman': { name: 'Oman', fullName: 'Oman', flag: '🇴🇲', dbName: 'Oman' },
-  'jordan': { name: 'Jordan', fullName: 'Jordan', flag: '🇯🇴', dbName: 'Jordan' },
-  'lebanon': { name: 'Lebanon', fullName: 'Lebanon', flag: '🇱🇧', dbName: 'Lebanon' },
-  'turkiye': { name: 'Türkiye', fullName: 'Türkiye', flag: '🇹🇷', dbName: 'Türkiye' },
-  'cyprus': { name: 'Cyprus', fullName: 'Cyprus', flag: '🇨🇾', dbName: 'Cyprus' },
-  // Africa
-  'egypt': { name: 'Egypt', fullName: 'Egypt', flag: '🇪🇬', dbName: 'Egypt' },
-  'morocco': { name: 'Morocco', fullName: 'Morocco', flag: '🇲🇦', dbName: 'Morocco' },
-  'south-africa': { name: 'South Africa', fullName: 'South Africa', flag: '🇿🇦', dbName: 'South Africa' },
-  'nigeria': { name: 'Nigeria', fullName: 'Nigeria', flag: '🇳🇬', dbName: 'Nigeria' },
-  // Europe
-  'uk': { name: 'UK', fullName: 'United Kingdom', flag: '🇬🇧', dbName: 'UK' },
-  'germany': { name: 'Germany', fullName: 'Germany', flag: '🇩🇪', dbName: 'Germany' },
-  'france': { name: 'France', fullName: 'France', flag: '🇫🇷', dbName: 'France' },
-  'spain': { name: 'Spain', fullName: 'Spain', flag: '🇪🇸', dbName: 'Spain' },
-  'italy': { name: 'Italy', fullName: 'Italy', flag: '🇮🇹', dbName: 'Italy' },
-  'greece': { name: 'Greece', fullName: 'Greece', flag: '🇬🇷', dbName: 'Greece' },
-  // Asia
-  'india': { name: 'India', fullName: 'India', flag: '🇮🇳', dbName: 'India' },
-  'pakistan': { name: 'Pakistan', fullName: 'Pakistan', flag: '🇵🇰', dbName: 'Pakistan' },
-  'singapore': { name: 'Singapore', fullName: 'Singapore', flag: '🇸🇬', dbName: 'Singapore' },
-  'malaysia': { name: 'Malaysia', fullName: 'Malaysia', flag: '🇲🇾', dbName: 'Malaysia' },
-  'thailand': { name: 'Thailand', fullName: 'Thailand', flag: '🇹🇭', dbName: 'Thailand' },
-  'indonesia': { name: 'Indonesia', fullName: 'Indonesia', flag: '🇮🇩', dbName: 'Indonesia' },
-  'philippines': { name: 'Philippines', fullName: 'Philippines', flag: '🇵🇭', dbName: 'Philippines' },
-  // Americas
-  'usa': { name: 'USA', fullName: 'United States', flag: '🇺🇸', dbName: 'USA' },
-};
+// Country configuration - comprehensive list of all Platinumlist countries.
+//
+// MOVED to src/lib/seo/indexable-hubs.ts so the page and the sitemap are
+// generated from one list. While it lived here only, the sitemap ended up
+// listing 2 of the 27 country hubs (uae and qatar) and Google reported the
+// other populated ones as "URL is unknown to Google".
 
 interface Props {
   params: Promise<{ country: string }>;
