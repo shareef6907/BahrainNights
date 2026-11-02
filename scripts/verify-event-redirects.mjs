@@ -13,6 +13,15 @@
  * Both are correct. A source that is 200 means the map would shadow a page
  * that is live — that is always a failure.
  *
+ * The DESTINATION check is stricter. A source that already redirects, but to
+ * somewhere other than the destination this map prescribes, means the
+ * previously deployed map is still live and points somewhere else. That is
+ * expected while a new map is being prepared, so it is a warning by default
+ * and only a failure once the map under test is the one actually deployed.
+ * Pass --pre-deploy to make that distinction explicit; the recommended proof
+ * is to run the verifier against a local server built from the map under test,
+ * where a mismatch IS a failure.
+ *
  * Exits non-zero if any check fails.
  */
 import { readFileSync } from 'node:fs';
@@ -21,7 +30,6 @@ import { fileURLToPath } from 'node:url';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const ROOT = resolve(__dirname, '..');
-const SITE = 'https://www.bahrainnights.com';
 const CONCURRENCY = 6;
 const ATTEMPTS = 3;
 
@@ -34,7 +42,17 @@ const redirects = {};
 for (const m of redirectBlock[1].matchAll(/"([^"]+)":\s*"([^"]+)"/g)) redirects[m[1]] = m[2];
 const gone = [...goneBlock[1].matchAll(/"([^"]+)"/g)].map((m) => m[1]);
 
+// --pre-deploy: the map under test is not the one live on production yet, so
+// a source serving the OLD redirect is expected, not a failure.
+const preDeploy = process.argv.includes('--pre-deploy');
+// --site: verify against a local build instead of production.
+const SITE = (() => {
+  const i = process.argv.indexOf('--site');
+  return i !== -1 && process.argv[i + 1] ? process.argv[i + 1].replace(/\/$/, '') : 'https://www.bahrainnights.com';
+})();
+
 console.log(`# map: ${Object.keys(redirects).length} x 301, ${gone.length} x 410`);
+console.log(`# target: ${SITE}${preDeploy ? '  (--pre-deploy: stale redirects are warnings)' : ''}`);
 
 async function status(url) {
   for (let attempt = 1; attempt <= ATTEMPTS; attempt++) {
@@ -108,15 +126,25 @@ const wrongApplied = [...sources].filter((s) => {
   if (st !== 301) return false;
   return !applied.includes(s);
 });
+// Under --pre-deploy the previously deployed map is still live, so a source
+// that redirects somewhere else is the OLD map, not a defect in this one.
+const staleApplied = preDeploy ? wrongApplied : [];
+const realWrongApplied = preDeploy ? [] : wrongApplied;
 const other = [...sources].filter((s) => ![200, 404, 301, 410].includes(sourceStatus.get(s)));
 
 console.log(`# sources 404 (map not deployed yet): ${notFound.length}`);
 console.log(`# sources already serving the mapped redirect: ${applied.length}`);
 console.log(`# sources now 200 (SHADOWING a live page): ${live.length}`);
 for (const s of live.slice(0, 40)) console.log(`   shadowed: ${s}`);
-if (wrongApplied.length) {
-  console.log(`# sources serving the WRONG redirect/status: ${wrongApplied.length}`);
-  for (const s of wrongApplied.slice(0, 20)) {
+if (staleApplied.length) {
+  console.log(`# sources serving the PREVIOUSLY deployed redirect (expected pre-deploy): ${staleApplied.length}`);
+  for (const s of staleApplied.slice(0, 20)) {
+    console.log(`   status 301 -> ${res301Target.get(s) || '(none)'}: ${s}`);
+  }
+}
+if (realWrongApplied.length) {
+  console.log(`# sources serving the WRONG redirect/status: ${realWrongApplied.length}`);
+  for (const s of realWrongApplied.slice(0, 20)) {
     console.log(`   status ${sourceStatus.get(s)} -> ${res301Target.get(s) || '(none)'}: ${s}`);
   }
 }
@@ -132,6 +160,23 @@ const badDest = destinations.filter((d) => destStatus.get(d) !== 200);
 console.log(`# destinations returning 200: ${destinations.length - badDest.length}/${destinations.length}`);
 for (const d of badDest) console.log(`   bad destination ${destStatus.get(d)}: ${d}`);
 
+// A destination served as `noindex` cannot consolidate ranking signal, so a
+// redirect into one is a dead end even though it returns 200. This is the
+// check that catches a map generated before an empty hub was made noindex.
+const noindexDests = [];
+for (const d of destinations) {
+  try {
+    const res = await fetch(`${SITE}${d}`, { redirect: 'manual' });
+    const html = await res.text();
+    const robots = (html.match(/<meta name="robots" content="([^"]*)"/) || [])[1] || '';
+    if (/noindex/i.test(robots)) noindexDests.push({ d, robots });
+  } catch {
+    /* network hiccup — the status check above already covers reachability */
+  }
+}
+console.log(`# destinations served as noindex: ${noindexDests.length}/${destinations.length}`);
+for (const { d, robots } of noindexDests) console.log(`   noindex destination (${robots}): ${d}`);
+
 const deadPaths = new Set(sources);
 const chains = Object.entries(redirects).filter(([, d]) => deadPaths.has(d));
 console.log(`# redirect chains: ${chains.length}`);
@@ -143,10 +188,11 @@ console.log(`# paths in both the 301 map and the 410 list: ${both.length}`);
 const failed =
   live.length > 0 ||
   badDest.length > 0 ||
+  noindexDests.length > 0 ||
   chains.length > 0 ||
   both.length > 0 ||
   other.length > 0 ||
-  wrongApplied.length > 0;
+  realWrongApplied.length > 0;
 
 console.log(failed ? '\nFAIL: redirect map is not safe to ship.' : '\nPASS: redirect map is safe to ship.');
 process.exit(failed ? 1 : 0);
