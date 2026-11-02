@@ -5,6 +5,7 @@ import { motion } from 'framer-motion';
 import Link from 'next/link';
 import Image from 'next/image';
 import { Clock, MapPin, ChevronRight, Zap } from 'lucide-react';
+import { cardClickHandler } from '@/lib/crawlable-card';
 
 export interface HappeningNowEvent {
   id: string;
@@ -214,14 +215,17 @@ export default function HappeningNow({ events, onEventClick }: HappeningNowProps
                 viewport={{ once: true }}
                 transition={{ delay: index * 0.1 }}
               >
+                {/* Always a real link, so crawlers can reach the event page.
+                    When a modal handler is supplied, a plain click still opens
+                    the modal; a modified click follows the link. */}
                 {onEventClick ? (
-                  <button
-                    type="button"
-                    onClick={() => onEventClick(event)}
+                  <Link
+                    href={`/events/${event.slug}`}
+                    onClick={(e) => cardClickHandler(e, () => onEventClick(event))}
                     className={cardClassName}
                   >
                     {cardContent}
-                  </button>
+                  </Link>
                 ) : (
                   <Link
                     href={`/events/${event.slug}`}

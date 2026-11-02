@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useMemo } from 'react';
+import { cardClickHandler } from '@/lib/crawlable-card';
 import Link from 'next/link';
 import Image from 'next/image';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -178,15 +179,19 @@ export default function TonightQuickView({ events, onEventClick }: TonightQuickV
                       };
                       
                       return (
-                        <motion.div
+                        <motion.a
                           key={event.id}
+                          href={`/events/${event.slug}`}
                           layout
                           initial={{ opacity: 0, scale: 0.9 }}
                           animate={{ opacity: 1, scale: 1 }}
                           exit={{ opacity: 0, scale: 0.9 }}
                           transition={{ delay: index * 0.05 }}
-                          onClick={() => onEventClick?.(event)}
-                          className="group relative bg-slate-800/50 backdrop-blur-sm border border-white/10 rounded-xl overflow-hidden cursor-pointer hover:border-yellow-500/50 hover:shadow-lg hover:shadow-yellow-500/10 transition-all duration-300"
+                          onClick={(e) => {
+                            if (!onEventClick) return;
+                            cardClickHandler(e, () => onEventClick(event));
+                          }}
+                          className="group relative bg-slate-800/50 backdrop-blur-sm border border-white/10 rounded-xl overflow-hidden cursor-pointer hover:border-yellow-500/50 hover:shadow-lg hover:shadow-yellow-500/10 transition-all duration-300 block"
                         >
                           <div className="flex gap-4 p-4">
                             {/* Image */}
@@ -258,7 +263,7 @@ export default function TonightQuickView({ events, onEventClick }: TonightQuickV
                               </Link>
                             </motion.div>
                           )}
-                        </motion.div>
+                        </motion.a>
                       );
                     })}
                   </AnimatePresence>

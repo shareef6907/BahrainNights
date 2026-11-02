@@ -6,6 +6,7 @@ import Image from 'next/image';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useTranslation } from '@/lib/i18n';
 import EventModal, { EventData } from '@/components/events/EventModal';
+import { cardClickHandler } from '@/lib/crawlable-card';
 
 interface InternationalEvent {
   id: string;
@@ -68,9 +69,16 @@ export default function CountryPageClient({ country, events, eventsByCity }: Pro
   const [selectedCity, setSelectedCity] = useState<string | null>(null);
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
 
-  const handleEventClick = (event: InternationalEvent) => {
-    setSelectedEvent(event);
-    setIsModalOpen(true);
+  // Handle event card click.
+  // The card is a real <a href="/events/<slug>">, so a plain click opens the
+  // modal exactly as before, while a modified click (ctrl/cmd/shift or
+  // middle-click) follows the link. Crawlers can now reach every event page
+  // from this country page.
+  const handleEventClick = (event: InternationalEvent, e: React.MouseEvent) => {
+    cardClickHandler(e, () => {
+      setSelectedEvent(event);
+      setIsModalOpen(true);
+    });
   };
 
   const formatDate = (dateStr: string | null) => {
@@ -248,15 +256,16 @@ export default function CountryPageClient({ country, events, eventsByCity }: Pro
           >
             <AnimatePresence mode="popLayout">
               {displayedEvents.map((event, index) => (
-                <motion.div
+                <motion.a
                   key={event.id}
+                  href={`/events/${event.slug}`}
                   layout
                   initial={{ opacity: 0, scale: 0.9 }}
                   animate={{ opacity: 1, scale: 1 }}
                   exit={{ opacity: 0, scale: 0.9 }}
                   transition={{ duration: 0.3, delay: index * 0.05 }}
-                  onClick={() => handleEventClick(event)}
-                  className="group cursor-pointer"
+                  onClick={(e) => handleEventClick(event, e)}
+                  className="group cursor-pointer block"
                 >
                   <div className="relative bg-gray-800/50 backdrop-blur rounded-2xl overflow-hidden border border-gray-700/50 hover:border-purple-500/50 transition-all duration-300 hover:shadow-xl hover:shadow-purple-500/10">
                     {/* Image */}
@@ -317,7 +326,7 @@ export default function CountryPageClient({ country, events, eventsByCity }: Pro
                       </button>
                     </div>
                   </div>
-                </motion.div>
+                </motion.a>
               ))}
             </AnimatePresence>
           </motion.div>

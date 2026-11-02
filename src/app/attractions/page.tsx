@@ -12,6 +12,7 @@ function toClientAttraction(attr: DbAttraction): Attraction {
   return {
     id: attr.id,
     title: attr.name,
+    slug: attr.slug,
     description: attr.description,
     price: attr.price_from,
     price_range: attr.price_range,

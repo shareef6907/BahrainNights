@@ -11,6 +11,7 @@ import CrossPromoServices from '@/components/CrossPromoServices';
 import { sortEventsWithFeatured } from '@/lib/utils/eventSorting';
 import { useTranslation } from '@/lib/i18n';
 import EventModal, { EventData } from '@/components/events/EventModal';
+import { cardClickHandler } from '@/lib/crawlable-card';
 
 // Event interface
 export interface Event {
@@ -93,10 +94,15 @@ export default function EventsPageClient({ initialEvents, familyAttractions = []
   }), []);
 
   // Handle event card click
+  // The card is a real <a href>, so the default navigation is cancelled ONLY
+  // for a plain click (which opens the modal). A modified click — ctrl/cmd/
+  // shift click, middle click — is left alone so the browser follows the
+  // link and opens the event page in a new tab, exactly as a link should.
   const handleEventClick = useCallback((event: Event, e: React.MouseEvent) => {
-    e.preventDefault();
-    setSelectedEvent(convertToModalData(event));
-    setIsModalOpen(true);
+    cardClickHandler(e, () => {
+      setSelectedEvent(convertToModalData(event));
+      setIsModalOpen(true);
+    });
   }, [convertToModalData]);
 
   // Close modal
@@ -646,15 +652,16 @@ export default function EventsPageClient({ initialEvents, familyAttractions = []
                 }}
               >
                 {filteredEvents.map((event) => (
-                  <motion.div
+                  <motion.a
                     key={event.id}
+                    href={`/events/${event.slug}`}
                     data-testid="event-card"
                     variants={{
                       hidden: { opacity: 0, y: 20 },
                       visible: { opacity: 1, y: 0 }
                     }}
                     whileHover={{ y: -6 }}
-                    className="group cursor-pointer"
+                    className="group cursor-pointer block"
                     onClick={(e) => handleEventClick(event, e)}
                   >
                     <div className={`relative bg-white/5 backdrop-blur-sm border ${event.isFeatured ? 'border-yellow-400/50 ring-1 ring-yellow-400/20' : 'border-white/10'} rounded-2xl overflow-hidden hover:border-yellow-400/50 transition-all duration-300`}>
@@ -701,7 +708,7 @@ export default function EventsPageClient({ initialEvents, familyAttractions = []
                         </div>
                       </div>
                     </div>
-                  </motion.div>
+                  </motion.a>
                 ))}
               </motion.div>
             ) : selectedCategory === 'family' && familyAttractions.length > 0 ? (

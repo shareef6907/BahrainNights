@@ -6,6 +6,7 @@ import Image from 'next/image';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useTranslation } from '@/lib/i18n';
 import EventModal, { EventData } from '@/components/events/EventModal';
+import { cardClickHandler } from '@/lib/crawlable-card';
 
 interface InternationalEvent {
   id: string;
@@ -102,9 +103,13 @@ export default function InternationalEventsSection({ events, eventsByCountry, co
   const [selectedCountry, setSelectedCountry] = useState<string | null>(null);
   const [selectedCity, setSelectedCity] = useState<string | null>(null);
 
-  const handleEventClick = (event: InternationalEvent) => {
-    setSelectedEvent(event);
-    setIsModalOpen(true);
+  // The card is a real <a href="/events/<slug>">: a plain click opens the
+  // modal exactly as before, a modified click follows the link.
+  const handleEventClick = (event: InternationalEvent, e: React.MouseEvent) => {
+    cardClickHandler(e, () => {
+      setSelectedEvent(event);
+      setIsModalOpen(true);
+    });
   };
 
   const formatDate = (dateStr: string | null) => {
@@ -309,14 +314,15 @@ export default function InternationalEventsSection({ events, eventsByCountry, co
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             <AnimatePresence mode="popLayout">
               {displayedEvents.map((event, index) => (
-                <motion.div
+                <motion.a
                   key={event.id}
+                  href={`/events/${event.slug}`}
                   initial={{ opacity: 0, y: 20 }}
                   animate={{ opacity: 1, y: 0 }}
                   exit={{ opacity: 0, scale: 0.9 }}
                   transition={{ delay: index * 0.05 }}
-                  className="group relative bg-gray-800/50 backdrop-blur rounded-2xl overflow-hidden border border-gray-700/50 hover:border-purple-500/50 transition-all duration-300 hover:shadow-xl hover:shadow-purple-500/10 cursor-pointer"
-                  onClick={() => handleEventClick(event)}
+                  className="group relative bg-gray-800/50 backdrop-blur rounded-2xl overflow-hidden border border-gray-700/50 hover:border-purple-500/50 transition-all duration-300 hover:shadow-xl hover:shadow-purple-500/10 cursor-pointer block"
+                  onClick={(e) => handleEventClick(event, e)}
                 >
                   {/* Image */}
                   <div className="relative aspect-[16/9] overflow-hidden">
@@ -366,7 +372,7 @@ export default function InternationalEventsSection({ events, eventsByCountry, co
                       )}
                     </div>
                   </div>
-                </motion.div>
+                </motion.a>
               ))}
             </AnimatePresence>
           </div>

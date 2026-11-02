@@ -9,6 +9,7 @@ import { MapPin, Clock, Star, ChevronRight, ChevronDown, Menu, X, Play, Building
 import GlobalSearch from '@/components/search/GlobalSearch';
 import { useTranslation } from '@/lib/i18n/TranslationContext';
 import type { InternationalCountrySummary } from '@/lib/international-events';
+import { cardClickHandler } from '@/lib/crawlable-card';
 import { Movie } from '@/components/cinema/MovieCard';
 
 // Lazy load below-fold components for faster initial load
@@ -941,11 +942,14 @@ export default function HomePageClient({ initialMovies, initialStats, initialTod
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
             {todayEvents.length > 0 ? (
               todayEvents.map(event => (
-                <div
+                <a
                   key={event.id}
-                  onClick={() => {
-                    setSelectedEvent(event);
-                    setIsEventModalOpen(true);
+                  href={`/events/${event.slug}`}
+                  onClick={(e) => {
+                    cardClickHandler(e, () => {
+                      setSelectedEvent(event);
+                      setIsEventModalOpen(true);
+                    });
                   }}
                   className="group relative bg-white/5 backdrop-blur-sm border border-white/10 rounded-2xl overflow-hidden cursor-pointer hover:border-orange-400/50 hover:scale-[1.02] transition-all duration-200 block"
                 >
@@ -969,7 +973,7 @@ export default function HomePageClient({ initialMovies, initialStats, initialTod
                       </div>
                     </div>
                   </div>
-                </div>
+                </a>
               ))
             ) : (
               <div className="col-span-4 text-center py-12">

@@ -55,12 +55,25 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
   const { category } = await params;
   const info = categoryInfo[category] || { label: category, description: `${category} events in Bahrain` };
 
+  // A category page with no upcoming events is a soft-404: live, indexable,
+  // reachable, but with nothing on it. Google should not rank an empty page,
+  // so it is marked noindex, nofollow.
+  //
+  // The route itself is NOT removed — the URL may have inbound links, and the
+  // category may gain events later, in which case it becomes indexable again
+  // automatically.
+  const events = await getCategoryEvents(category);
+  const hasListings = events.length > 0;
+
   return {
     title: `${info.label} Events in Bahrain`,
     description: `Discover the best ${info.description.toLowerCase()} in Bahrain. Browse upcoming ${info.label.toLowerCase()} events.`,
     alternates: {
       canonical: `/events/category/${category}`,
     },
+    robots: hasListings
+      ? { index: true, follow: true }
+      : { index: false, follow: false },
     openGraph: {
       title: `${info.label} Events in Bahrain`,
       description: `Discover the best ${info.description.toLowerCase()} in Bahrain.`,
