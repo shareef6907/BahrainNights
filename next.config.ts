@@ -232,6 +232,84 @@ const nextConfig: NextConfig = {
         destination: '/places?category=lounge',
         permanent: true,
       },
+      // ---------------------------------------------------------------------
+      // Indexed URLs outside the /events/ namespace that now 404.
+      //
+      // scripts/generate-event-redirects.mjs deliberately covers /events/ only
+      // (it filters GSC rows on '/events/'), so a sweep of every URL that
+      // earns impressions in GSC found a further 7 that 404 and were not
+      // covered by the map. Measured 2026-11-03: 1,518 GSC URLs with
+      // impressions, 14 returning 404, 7 of them not covered by the map.
+      //
+      // These are hand-written rather than generated because they are not
+      // Platinumlist event URLs -- they are deleted static guides, a venue
+      // whose slug lost its trailing dash, and a deactivated attraction.
+      // Same treatment as the /lounges-bars entry above.
+      //
+      // Every destination below was verified live: HTTP 200, `index, follow`,
+      // and carrying real event/venue links.
+      {
+        // 48 impressions. The general restaurant guide was replaced by
+        // /best-restaurants-bahrain, which links out to the related
+        // /best-cafes-bahrain and /best-brunches-bahrain guides.
+        source: '/guides/restaurants',
+        destination: '/best-restaurants-bahrain',
+        statusCode: 301,
+      },
+      {
+        // 98 impressions - the largest single leak in this batch. The 2026
+        // Bahrain Grand Prix guide was deleted after the race and has no
+        // successor page: there is no live F1 content anywhere on the site.
+        // /events is the live hub that carries the site's sports and
+        // international listings (544 event links).
+        //
+        // Note /events/category/sports is NOT a valid target - it is an empty
+        // hub, served as `noindex, nofollow` since PR #38.
+        source: '/guides/f1-2026',
+        destination: '/events',
+        statusCode: 301,
+      },
+      {
+        // 15 impressions. The beach-clubs guide was deleted and there are no
+        // approved `beach-club` venues to point at, so /places?category=beach-club
+        // would render an empty filtered view. /attractions is the live
+        // listing that actually carries the beach content (boat trips,
+        // snorkeling, pearl diving).
+        source: '/guides/beach-clubs',
+        destination: '/attractions',
+        statusCode: 301,
+      },
+      {
+        // 1 impression. A guide to concerts in Saudi Arabia was deleted.
+        // /international/saudi-arabia is the live, populated country hub for
+        // exactly this content (70 event links).
+        source: '/guides/saudi-concerts',
+        destination: '/international/saudi-arabia',
+        statusCode: 301,
+      },
+      {
+        // 2 impressions. The venue exists and is approved, but the indexed URL
+        // carries a trailing dash that the route does not match.
+        source: '/places/vibes-bahrain-entertainment-',
+        destination: '/places/vibes-bahrain-entertainment',
+        statusCode: 301,
+      },
+      {
+        // 1 impression. No venue named "Amber Lounge" exists in the database
+        // (approved or otherwise), so the page is permanently gone. /places is
+        // the venue directory.
+        source: '/places/amber-lounge',
+        destination: '/places',
+        statusCode: 301,
+      },
+      {
+        // 19 impressions. The row still exists but has is_active=false, so
+        // getAttractionBySlug() filters it out and the page 404s by design.
+        // /attractions is the live listing for the same category.
+        source: '/attractions/janat-dilmun-water-park-bahrain-ladies-night-107282',
+        destination: '/attractions',
+        statusCode: 301,
+      },
       {
         source: '/shopping',
         destination: '/explore/shopping',
