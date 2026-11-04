@@ -38,6 +38,16 @@ const wait = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
 function normalizeTitle(title: string): string {
   return title
     .toLowerCase()
+    // Fold diacritics BEFORE stripping punctuation.
+    //
+    // The old order removed every non a-z0-9 character, which DELETED the
+    // accented letter instead of folding it: "Les Misérables" became
+    // "lesmisrables" while "Les Miserables" became "lesmiserables". The same
+    // film listed by two cinemas under different spellings therefore produced
+    // two rows instead of one, and it is why the cinema page showed the same
+    // title twice with different sources.
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '')
     .replace(/^the\s+/i, '')
     .replace(/[^a-z0-9]/g, '')
     .trim();
@@ -46,13 +56,13 @@ function normalizeTitle(title: string): string {
 /**
  * Find movie in database by fuzzy title match
  */
-async function findMovieByTitle(title: string): Promise<{ id: string; title: string } | null> {
+async function findMovieByTitle(title: string): Promise<{ id: string; title: string; scraped_from?: string[] | null } | null> {
   const normalized = normalizeTitle(title);
   
   // Get all movies from database
   const { data: movies } = await supabase
     .from('movies')
-    .select('id, title')
+    .select('id, title, scraped_from')
     .order('title');
   
   if (!movies || movies.length === 0) return null;
@@ -178,7 +188,8 @@ async function insertMovie(
   title: string,
   tmdbData: any,
   isNowShowing: boolean,
-  cinemaPosterUrl?: string
+  cinemaPosterUrl?: string,
+  source: string = 'vox'
 ): Promise<string | null> {
   try {
     const slug = createSlug(title);
@@ -224,7 +235,7 @@ async function insertMovie(
         backdrop_path: tmdbData?.backdrop_path,
         runtime: tmdbData?.runtime,
         popularity: tmdbData?.popularity || 0,
-        scraped_from: ['vox'],
+        scraped_from: [source],
       } as any)
       .select('id')
       .single();
@@ -248,16 +259,29 @@ async function insertMovie(
 async function updateMovieStatus(
   movieId: string,
   isNowShowing: boolean,
-  isComingSoon: boolean
+  isComingSoon: boolean,
+  source?: string,
+  currentSources?: string[] | null
 ): Promise<boolean> {
   try {
+    const update: Record<string, unknown> = {
+      is_now_showing: isNowShowing,
+      is_coming_soon: isComingSoon,
+      updated_at: new Date().toISOString(),
+    };
+
+    // Keep the source list accurate. A film showing at both VOX and Cineco
+    // must list BOTH, and a movie that already carries a source must not have
+    // it overwritten by whichever cinema happened to be scraped first.
+    if (source) {
+      const existing = Array.isArray(currentSources) ? currentSources : [];
+      const merged = Array.from(new Set([...existing, source]));
+      if (merged.length) update.scraped_from = merged;
+    }
+
     const { error } = await supabase
       .from('movies')
-      .update({
-        is_now_showing: isNowShowing,
-        is_coming_soon: isComingSoon,
-        updated_at: new Date().toISOString(),
-      })
+      .update(update)
       .eq('id', movieId);
     
     if (error) {
@@ -308,26 +332,59 @@ async function syncCinema() {
     // Step 3: Merge results (deduplicate)
     console.log('\n🔀 Step 3: Merging results...');
     
-    const allNowShowing = [
-      ...voxResult.nowShowing,
-      ...cinecoResult.nowShowing,
-    ];
-    const allComingSoon = [
-      ...voxResult.comingSoon,
-      ...cinecoResult.comingSoon,
-    ];
+    // Track WHICH cinema each title came from.
+    //
+    // The old code pooled the VOX and Cineco title lists into one array and
+    // then wrote `scraped_from: ['vox']` on every insert. The source was
+    // destroyed at merge time and hard-coded afterwards, so a Cineco-only
+    // film was recorded as a VOX film and a film showing at both was
+    // recorded as a VOX film too. `scraped_from` is what the cinema page and
+    // the orphan check read, so the whole source breakdown was wrong.
+    const sourceByTitle = new Map<string, Set<string>>();
+
+    const addWithSource = (titles: string[], source: string) => {
+      for (const t of titles) {
+        const key = normalizeTitle(t);
+        if (!key) continue;
+        if (!sourceByTitle.has(key)) sourceByTitle.set(key, new Set());
+        sourceByTitle.get(key)!.add(source);
+      }
+    };
+    addWithSource(voxResult.nowShowing, 'vox');
+    addWithSource(cinecoResult.nowShowing, 'cineco');
+    addWithSource(voxResult.comingSoon, 'vox');
+    addWithSource(cinecoResult.comingSoon, 'cineco');
+
+    // The title we keep for a group is the first spelling we saw for it.
+    const labelByTitle = new Map<string, string>();
+    for (const list of [voxResult.nowShowing, cinecoResult.nowShowing, voxResult.comingSoon, cinecoResult.comingSoon]) {
+      for (const t of list) {
+        const key = normalizeTitle(t);
+        if (key && !labelByTitle.has(key)) labelByTitle.set(key, t);
+      }
+    }
     
     // Deduplicate
-    const nowShowingSet = new Set(allNowShowing.map(t => normalizeTitle(t)));
-    const comingSoonSet = new Set(allComingSoon.map(t => normalizeTitle(t)));
+    const nowShowingSet = new Set(
+      [...voxResult.nowShowing, ...cinecoResult.nowShowing].map(normalizeTitle),
+    );
+    const comingSoonSet = new Set(
+      [...voxResult.comingSoon, ...cinecoResult.comingSoon].map(normalizeTitle),
+    );
     
     // Remove from coming soon if also in now showing
     for (const title of nowShowingSet) {
       comingSoonSet.delete(title);
     }
     
-    const mergedNowShowing = Array.from(nowShowingSet);
-    const mergedComingSoon = Array.from(comingSoonSet);
+    const mergedNowShowing = Array.from(nowShowingSet).map(k => labelByTitle.get(k) || k);
+    const mergedComingSoon = Array.from(comingSoonSet).map(k => labelByTitle.get(k) || k);
+
+    // The source(s) each merged title belongs to.
+    const sourcesFor = (title: string): string[] => {
+      const set = sourceByTitle.get(normalizeTitle(title));
+      return set ? Array.from(set) : ['vox'];
+    };
     
     console.log(`  Merged Now Showing: ${mergedNowShowing.length}`);
     console.log(`  Merged Coming Soon: ${mergedComingSoon.length}`);
@@ -337,12 +394,13 @@ async function syncCinema() {
     
     for (const title of mergedNowShowing) {
       const existing = await findMovieByTitle(title);
+      const sources = sourcesFor(title);
       
       if (existing) {
         // Update existing
-        const updated = await updateMovieStatus(existing.id, true, false);
+        const updated = await updateMovieStatus(existing.id, true, false, sources[0], existing.scraped_from);
         if (updated) {
-          console.log(`  🔄 Updated: ${title} (Now Showing)`);
+          console.log(`  🔄 Updated: ${title} (Now Showing) [${sources.join('+')}]`);
           stats.updated++;
         }
       } else {
@@ -353,7 +411,7 @@ async function syncCinema() {
         await wait(300); // Rate limit
         
         if (tmdbData) {
-          const inserted = await insertMovie(title, tmdbData, true);
+          const inserted = await insertMovie(title, tmdbData, true, undefined, sources[0]);
           if (inserted) {
             stats.added++;
           }
@@ -369,12 +427,13 @@ async function syncCinema() {
     
     for (const title of mergedComingSoon) {
       const existing = await findMovieByTitle(title);
+      const sources = sourcesFor(title);
       
       if (existing) {
         // Update existing
-        const updated = await updateMovieStatus(existing.id, false, true);
+        const updated = await updateMovieStatus(existing.id, false, true, sources[0], existing.scraped_from);
         if (updated) {
-          console.log(`  🔄 Updated: ${title} (Coming Soon)`);
+          console.log(`  🔄 Updated: ${title} (Coming Soon) [${sources.join('+')}]`);
           stats.updated++;
         }
       } else {
@@ -385,7 +444,7 @@ async function syncCinema() {
         await wait(300); // Rate limit
         
         if (tmdbData) {
-          const inserted = await insertMovie(title, tmdbData, false);
+          const inserted = await insertMovie(title, tmdbData, false, undefined, sources[0]);
           if (inserted) {
             stats.added++;
           }

@@ -40,9 +40,25 @@ interface SyncResult {
   movies: string[];
 }
 
+/**
+ * Fold a title to its alphanumerics, accents stripped.
+ *
+ * This is the same folding the cinema sync uses to decide that two titles
+ * are the same film (scripts/sync-cinema.ts, normalizeTitle), so a title
+ * that the sync and TMDB spell differently still matches.
+ */
+function foldTitle(title: string | null | undefined): string {
+  return (title || '')
+    .toLowerCase()
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '')
+    .replace(/[^a-z0-9]/g, '');
+}
+
 async function processMovie(
   supabase: ReturnType<typeof getSupabaseAdmin>,
-  movie: TMDBMovie
+  movie: TMDBMovie,
+  titleIndex?: Map<string, { id: string; tmdb_id: number | null }>
 ): Promise<{ action: 'added' | 'updated' | 'error'; title: string; error?: string }> {
   try {
     // Get full movie details
@@ -90,7 +106,33 @@ async function processMovie(
 
       if (error) throw error;
       return { action: 'updated', title: details.title };
-    } else {
+    }
+
+    // Fall back to matching on the title.
+    //
+    // Matching on tmdb_id alone is not enough. A row created by the cinema
+    // scraper can have NO tmdb_id, because the TMDB search failed for it --
+    // usually over an accent or a punctuation difference ("Les Miserables"
+    // vs "Les Misérables"). Such a row never matches on tmdb_id, so this
+    // routine inserts a SECOND row for the same film, and the cinema page
+    // renders every row it is given, so the film appears twice on the page.
+    //
+    // Updating the title-matched row also writes tmdb_id onto it, so from
+    // then on it matches on tmdb_id directly.
+    if (titleIndex) {
+      const byTitle = titleIndex.get(foldTitle(details.title));
+      if (byTitle) {
+        const { error } = await supabase
+          .from('movies')
+          .update(movieData)
+          .eq('id', byTitle.id);
+
+        if (error) throw error;
+        return { action: 'updated', title: details.title };
+      }
+    }
+
+    {
       // Insert new movie
       const { error } = await supabase
         .from('movies')
@@ -154,6 +196,22 @@ export async function POST(request: Request) {
     // Track all TMDB IDs we're processing
     const processedTmdbIds = new Set<number>();
 
+    // Index the existing rows by their folded title, so a row that has no
+    // tmdb_id (the scraper could not match it) can still be recognised as
+    // the same film and updated instead of duplicated. Fetched once per run
+    // rather than per movie -- the table is small and this route runs on
+    // every cron tick.
+    const { data: existingRows } = await supabase
+      .from('movies')
+      .select('id, title, tmdb_id');
+    const titleIndex = new Map<string, { id: string; tmdb_id: number | null }>();
+    for (const row of existingRows || []) {
+      const key = foldTitle(row.title);
+      if (key && !titleIndex.has(key)) {
+        titleIndex.set(key, { id: row.id, tmdb_id: row.tmdb_id });
+      }
+    }
+
     // Process now playing movies (add/update METADATA only)
     // Note: is_now_showing and is_coming_soon are ONLY set by the GitHub Actions
     // cinema scraper based on actual Bahrain cinema websites (Cineco, VOX, Cinepolis, Mukta)
@@ -163,7 +221,7 @@ export async function POST(request: Request) {
       processedTmdbIds.add(movie.id);
 
       // TMDB sync only updates metadata, not is_now_showing or is_coming_soon
-      const res = await processMovie(supabase, movie);
+      const res = await processMovie(supabase, movie, titleIndex);
       if (res.action === 'added') {
         result.added++;
         result.movies.push(`+ ${res.title}`);
@@ -187,7 +245,7 @@ export async function POST(request: Request) {
       processedTmdbIds.add(movie.id);
 
       // TMDB sync only updates metadata, not is_coming_soon
-      const res = await processMovie(supabase, movie);
+      const res = await processMovie(supabase, movie, titleIndex);
       if (res.action === 'added') {
         result.added++;
         result.movies.push(`+ ${res.title} (metadata)`);
