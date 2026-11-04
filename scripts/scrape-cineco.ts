@@ -3,7 +3,7 @@
 /**
  * Cineco Bahrain Cinema Scraper
  * Scrapes movie titles from Cineco Bahrain website
- * 
+ *
  * Run: npx tsx scripts/scrape-cineco.ts
  */
 
@@ -43,7 +43,7 @@ function isSportsEvent(title: string): boolean {
  */
 function cleanTitle(title: string): string {
   if (!title) return '';
-  
+
   return title
     // Remove HTML entities
     .replace(/&amp;/g, '&')
@@ -61,15 +61,15 @@ function cleanTitle(title: string): string {
  */
 function isValidTitle(title: string): boolean {
   if (!title || title.length < 2) return false;
-  
+
   const lower = title.toLowerCase();
-  
+
   // Skip sports events
   if (isSportsEvent(lower)) return false;
-  
+
   // Skip if only numbers and special chars
   if (/^[^a-zA-Z]*$/.test(title)) return false;
-  
+
   // Skip junk UI text - comprehensive list
   const junk = [
     'now playing', 'now showing', 'coming soon', 'buy ticket', 'book now',
@@ -81,15 +81,18 @@ function isValidTitle(title: string): boolean {
     'terms of service', 'all rights reserved'
   ];
   if (junk.some(j => lower === j || lower.includes(j + ' ') || lower.includes(' ' + j))) return false;
-  
+
   // Skip ALL CAPS short text (probably navigation)
   if (title === title.toUpperCase() && title.length < 12) return false;
-  
+
   return title.length >= 3;
 }
 
 /**
- * Scrape movie titles from a Cineco page
+ * Scrape movie titles from a Cineco page.
+ *
+ * Returns the titles in the order they appear, de-duplicated by their
+ * /amy_movie/<slug>/ permalink where one is available.
  */
 async function scrapePage(page: Page, url: string): Promise<string[]> {
   console.log(`\n📄 Scraping: ${url}`);
@@ -99,11 +102,52 @@ async function scrapePage(page: Page, url: string): Promise<string[]> {
     
     // Wait for page to render
     await page.waitForTimeout(3000);
-    
-    // Try multiple selectors for movie cards
+
+    // PRIMARY STRATEGY: the movie permalinks.
+    //
+    // Cineco runs the "Amy Movie" WordPress theme, and every listing links to
+    // /amy_movie/<slug>/. The slugs are stable identifiers that do not change
+    // when the site restyles, whereas the display text and the CSS classes do.
+    //
+    // This matters: the scraper used to rely purely on CSS selectors
+    // (`.movie-title`, `h3.title`, ...). When Cineco changed its theme those
+    // selectors matched nothing and the scrape silently returned ZERO movies
+    // while the site itself was perfectly healthy. A title-based scraper
+    // reading a live WordPress theme is the wrong approach.
+    //
+    // The slug is also the correct DE-DUPLICATION key. The same film is
+    // rendered twice on the page (a poster tile and a text row), so the
+    // titles come back as "Soy Turkish" and "SOY (TURKISH)" -- the same movie
+    // with different casing and punctuation. Comparing the raw titles does not
+    // collapse them; comparing the slugs does.
     let titles: string[] = [];
-    
-    // Try common movie card selectors
+
+    const linked = await page
+      .$$eval('a[href*="/amy_movie/"]', (elements) =>
+        elements.map((el) => {
+          const href = el.getAttribute('href') || '';
+          const slug = (href.match(/\/amy_movie\/([^/?#]+)\/?/) || [])[1] || '';
+          const text = (el.textContent || '').trim();
+          return { slug, text };
+        })
+      )
+      .catch(() => [] as { slug: string; text: string }[]);
+
+    const bySlug = new Map<string, string>();
+    for (const { slug, text } of linked) {
+      if (!slug) continue;
+      const title = text && text.length > 1 ? text : slug.replace(/-/g, ' ');
+      // Keep the first non-empty label we see for this slug.
+      if (!bySlug.has(slug) || (!bySlug.get(slug) && title)) {
+        bySlug.set(slug, title);
+      }
+    }
+    if (bySlug.size) {
+      titles = Array.from(bySlug.values());
+      console.log(`  Found ${titles.length} titles via /amy_movie/ links`);
+    }
+
+    // FALLBACK: CSS selectors, for when the theme changes again.
     const selectors = [
       '.movie-title',
       '.movie-card h3',
@@ -125,14 +169,14 @@ async function scrapePage(page: Page, url: string): Promise<string[]> {
         // Selector didn't work, try next
       }
     }
-    
+
     // If no titles found, try getting all h3 elements
     if (titles.length === 0) {
       titles = await page.$$eval('h3', (elements) =>
         elements.map(el => el.textContent?.trim()).filter(Boolean) as string[]
       );
     }
-    
+
     // Also try links with movie info
     if (titles.length === 0) {
       const linkTitles = await page.$$eval('a[href*="movie"]', (elements) =>
@@ -140,9 +184,9 @@ async function scrapePage(page: Page, url: string): Promise<string[]> {
       );
       titles = [...titles, ...linkTitles];
     }
-    
+
     console.log(`  Found ${titles.length} titles`);
-    
+
     return titles;
   } catch (error) {
     console.error(`  ❌ Error scraping ${url}:`, error instanceof Error ? error.message : error);
@@ -159,50 +203,50 @@ export async function scrapeCineco(): Promise<ScrapeResult> {
     comingSoon: [],
     errors: [],
   };
-  
+
   let browser: Browser | null = null;
-  
+
   try {
     console.log('🎬 Starting Cineco Bahrain Cinema Scraper');
     console.log('='.repeat(50));
-    
+
     // Launch browser
     browser = await chromium.launch({ headless: true });
     const context = await browser.newContext({
       userAgent: 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
     });
     const page = await context.newPage();
-    
+
     // Take screenshot for debugging
     await page.screenshot({ path: 'cineco-debug.png' });
-    
+
     // Scrape Now Showing
     const nowShowingRaw = await scrapePage(page, CINE_CO_URLS.nowShowing);
     result.nowShowing = nowShowingRaw
       .map(cleanTitle)
       .filter(isValidTitle);
-    
+
     // Small delay between pages
     await page.waitForTimeout(1000);
-    
+
     // Scrape Coming Soon
     const comingSoonRaw = await scrapePage(page, CINE_CO_URLS.comingSoon);
     result.comingSoon = comingSoonRaw
       .map(cleanTitle)
       .filter(isValidTitle);
-    
+
     // Remove duplicates within each category
-    result.nowShowing = [...new Set(result.nowShowing.map(t => t.toLowerCase()))].map(t => 
+    result.nowShowing = [...new Set(result.nowShowing.map(t => t.toLowerCase()))].map(t =>
       result.nowShowing.find(x => x.toLowerCase() === t) || t
     );
-    result.comingSoon = [...new Set(result.comingSoon.map(t => t.toLowerCase()))].map(t => 
+    result.comingSoon = [...new Set(result.comingSoon.map(t => t.toLowerCase()))].map(t =>
       result.comingSoon.find(x => x.toLowerCase() === t) || t
     );
-    
+
     // Remove movies that appear in both lists (prioritize now showing)
     const nowShowingSet = new Set(result.nowShowing.map(t => t.toLowerCase()));
     result.comingSoon = result.comingSoon.filter(t => !nowShowingSet.has(t.toLowerCase()));
-    
+
     console.log('\n' + '='.repeat(50));
     console.log('📊 CINE CO SCRAPE SUMMARY');
     console.log('='.repeat(50));
@@ -210,7 +254,7 @@ export async function scrapeCineco(): Promise<ScrapeResult> {
     result.nowShowing.forEach((title, i) => console.log(`  ${i + 1}. ${title}`));
     console.log(`\nComing Soon: ${result.comingSoon.length}`);
     result.comingSoon.forEach((title, i) => console.log(`  ${i + 1}. ${title}`));
-    
+
   } catch (error) {
     console.error('❌ Critical error:', error);
     result.errors.push(error instanceof Error ? error.message : 'Unknown error');
@@ -219,7 +263,7 @@ export async function scrapeCineco(): Promise<ScrapeResult> {
       await browser.close();
     }
   }
-  
+
   return result;
 }
 

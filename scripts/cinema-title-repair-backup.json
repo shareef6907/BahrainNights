@@ -1,0 +1,126 @@
+{
+  "at": "2026-11-03T07:31:59.383Z",
+  "repairs": [
+    {
+      "id": "c6343cf2-28e9-4e0a-8e25-556bc5e55826",
+      "title": "gatto",
+      "slug": "gatto",
+      "newTitle": "Gatto",
+      "newSlug": "gatto"
+    },
+    {
+      "id": "1bc355a3-bdf4-4491-87f2-9088a008a8ea",
+      "title": "hexed",
+      "slug": "hexed",
+      "newTitle": "Hexed",
+      "newSlug": "hexed"
+    },
+    {
+      "id": "c42b924b-8d87-4846-a78c-177cdcdaece9",
+      "title": "scene",
+      "slug": "scene",
+      "newTitle": "Scene",
+      "newSlug": "scene"
+    },
+    {
+      "id": "93091ab9-0868-4b57-90cf-4948f8586eda",
+      "title": "daydrinker",
+      "slug": "daydrinker",
+      "newTitle": "Day Drinker",
+      "newSlug": "day-drinker"
+    },
+    {
+      "id": "91950674-c5e1-4e58-98c7-3ef12dc8401d",
+      "title": "draw",
+      "slug": "draw",
+      "newTitle": "The Draw",
+      "newSlug": "the-draw"
+    },
+    {
+      "id": "81f1a7b2-7e0a-4465-a588-ee96f8db1e39",
+      "title": "Focker-In-Law",
+      "slug": "focker-in-law",
+      "newTitle": "Focker In-Law",
+      "newSlug": "focker-in-law"
+    },
+    {
+      "id": "b30b408a-0cd9-4276-bae3-487fb308211d",
+      "title": "cycle",
+      "slug": "cycle",
+      "newTitle": "The Cycle",
+      "newSlug": "the-cycle"
+    },
+    {
+      "id": "eb973e43-e015-4190-ab7f-895d79e5cbbe",
+      "title": "thomascrownaffair",
+      "slug": "thomascrownaffair",
+      "newTitle": "The Thomas Crown Affair",
+      "newSlug": "the-thomas-crown-affair"
+    },
+    {
+      "id": "2ba8726b-d257-4097-bfe4-9d100fd91d9b",
+      "title": "crypto",
+      "slug": "crypto",
+      "newTitle": "Crypto",
+      "newSlug": "crypto"
+    },
+    {
+      "id": "30d4c746-bbfd-41c3-857a-026b228264e2",
+      "title": "naseeb",
+      "slug": "naseeb",
+      "newTitle": "Naseeb",
+      "newSlug": "naseeb"
+    },
+    {
+      "id": "7442dae3-c6cc-4e2f-9765-dadc63cece35",
+      "title": "violentnight2",
+      "slug": "violentnight2",
+      "newTitle": "Violent Night 2",
+      "newSlug": "violent-night-2"
+    },
+    {
+      "id": "e95dc005-f1c5-4477-8e58-79e8a60a5634",
+      "title": "hadoota",
+      "slug": "hadoota",
+      "newTitle": "Hadoota",
+      "newSlug": "hadoota"
+    }
+  ],
+  "deactivations": [
+    {
+      "id": "ce83f3af-f52b-4e6c-abe2-271c8b09951e",
+      "title": "heartofthebeast",
+      "is_now_showing": true,
+      "is_coming_soon": false,
+      "reason": "duplicate of clean row"
+    },
+    {
+      "id": "0ade87a7-4e1d-4e5a-af6d-e6266e4074ab",
+      "title": "Les Misérables",
+      "is_now_showing": false,
+      "is_coming_soon": true,
+      "reason": "duplicate row"
+    },
+    {
+      "id": "8b7f2c33-444c-4ff7-9872-574a21876ba0",
+      "title": "How to Rob a Bank",
+      "is_now_showing": false,
+      "is_coming_soon": true,
+      "reason": "duplicate row"
+    },
+    {
+      "id": "f35f2787-a97e-4daa-9cda-d9de5eb4e54c",
+      "title": "The Cat in the Hat",
+      "is_now_showing": true,
+      "is_coming_soon": false,
+      "reason": "duplicate row"
+    },
+    {
+      "id": "70180a15-85d1-4be8-890e-eadf99fbcbef",
+      "title": "Sense and Sensibility",
+      "is_now_showing": true,
+      "is_coming_soon": false,
+      "reason": "duplicate row"
+    }
+  ]
+}

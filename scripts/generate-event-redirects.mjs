@@ -37,6 +37,10 @@ const ROOT = resolve(__dirname, '..');
 dotenv.config({ path: resolve(ROOT, '.env.local') });
 
 const OUT_FILE = resolve(ROOT, 'src/data/event-redirects.ts');
+// The committed map is both the file we write AND the baseline we read, so
+// they are deliberately the same path. Kept as a separate name only where it
+// is read for a different purpose (the baseline), to make that intent clear.
+const MAP_FILE = OUT_FILE;
 const CACHE_FILE = resolve(ROOT, '.event-redirects-cache.json');
 const SITE = 'https://www.bahrainnights.com';
 const GSC_SITE = 'sc-domain:bahrainnights.com';
@@ -182,6 +186,17 @@ async function main() {
   let statuses;
   let dead;
 
+  // The committed map is the BASELINE in both modes. A URL that is already in
+  // it must stay in it even though it now answers 301 — a live path computes
+  // "which URLs are 404" and every entry in the map is 301 by definition, so
+  // without this baseline the map would shrink to nothing on the first run
+  // after it goes live.
+  //
+  // The baseline is what makes the map CUMULATIVE: a URL that breaks later
+  // (a slug rewritten by a sync, a row deleted) is picked up on the next run
+  // and added, without disturbing the entries already there.
+  const committed = readCommittedMap();
+
   if (fromCache) {
     // Regenerate deterministically from the evidence we already verified,
     // instead of re-querying GSC and re-probing production. The cache holds
@@ -200,6 +215,26 @@ async function main() {
     statuses = new Map(Object.entries(cache.statuses || {}));
     dead = cache.dead || [];
     console.error(`# using cached evidence: ${dead.length} dead URLs`);
+
+    // The cache is a snapshot, so a URL that broke AFTER the cache was taken
+    // is not in it. Union in the committed map so those are not lost, and
+    // probe just the ones that are not already known.
+    const cachedPaths = new Set(dead.map((u) => u.replace(SITE, '')));
+    const committedPaths = new Set(committed.redirects);
+    const missing = [...committedPaths].filter((p) => !cachedPaths.has(p));
+    if (missing.length) {
+      console.error(`# ${missing.length} committed paths not in the cache; probing...`);
+      const CONCURRENCY = 12;
+      for (let i = 0; i < missing.length; i += CONCURRENCY) {
+        const chunk = missing.slice(i, i + CONCURRENCY);
+        const results = await Promise.all(chunk.map((p) => httpStatus(SITE + p)));
+        chunk.forEach((p, j) => {
+          statuses.set(SITE + p, results[j]);
+          if (results[j].status === 404) dead.push(SITE + p);
+        });
+      }
+      console.error(`# dead URLs after probing: ${dead.length}`);
+    }
 
     // The per-URL QUERIES are not in the cache (they were only needed to
     // infer a country), but they still matter: they are the strongest
@@ -247,7 +282,26 @@ async function main() {
       const results = await Promise.all(chunk.map((u) => httpStatus(u)));
       chunk.forEach((u, j) => statuses.set(u, results[j]));
     }
-    dead = eventUrls.filter((u) => statuses.get(u).status === 404);
+
+    // The committed map is the BASELINE, not just a previous result. A URL that
+    // is already in it must stay in it even though it now answers 301 — a
+    // live path computes "which URLs are 404" and every entry in the map is
+    // 301 by definition, so without this baseline the map would shrink to
+    // nothing on the first run after it goes live.
+    const committedPaths = new Set(committed.redirects);
+    const committedGone = new Set(committed.gone);
+    const brokenNow = eventUrls.filter((u) => statuses.get(u).status === 404);
+    console.error(`# currently 404: ${brokenNow.length}`);
+    console.error(`# already in the committed map: ${committedPaths.size}`);
+
+    dead = [
+      ...new Set([
+        ...eventUrls.filter((u) => committedPaths.has(u.replace(SITE, ''))),
+        ...brokenNow,
+      ]),
+    ].sort();
+    // A path on the 410 list must never also be on the 301 list.
+    dead = dead.filter((u) => !committedGone.has(u.replace(SITE, '')));
 
     // A URL that is NOT a 404 needs no redirect. In particular, an event whose
     // row was restored (a past international event re-imported, a page brought
@@ -289,6 +343,14 @@ async function main() {
   const gone = [];
   const detail = {};
   const stats = {};
+
+  // The committed 410 list is a baseline too. A path on it answers 410 by
+  // design, so it is not "currently 404" and would never be re-derived — it
+  // would silently fall out of the list and start answering 404. Seed the
+  // list with what is already committed so the 410s stay 410.
+  const committedGonePaths = new Set(
+    [...(committed?.gone || [])].map((p) => SITE + p),
+  );
 
   for (const url of dead) {
     const slug = url.split('/').pop();
@@ -340,6 +402,18 @@ async function main() {
     } else {
       gone.push(path);
       detail[path] = `410|${result.reason}|${result.category || '-'}`;
+      stats['410'] = (stats['410'] || 0) + 1;
+    }
+  }
+
+  // The committed 410 paths are re-emitted as 410 even though they are not in
+  // `dead` any more (they answer 410, not 404, so a fresh probe would not
+  // classify them as broken).
+  for (const path of committedGonePaths) {
+    const p = path.replace(SITE, '');
+    if (!gone.includes(p) && !redirects[p]) {
+      gone.push(p);
+      detail[p] = '410|committed|preserved';
       stats['410'] = (stats['410'] || 0) + 1;
     }
   }
@@ -450,7 +524,17 @@ async function main() {
 
   const payload = {
     generatedAt: new Date().toISOString(),
-    totalDead: dead.length,
+    // The header must describe the WHOLE map: the 301s plus the 410s. `dead`
+    // no longer contains the 410 paths (they are re-added separately so they
+    // stay 410), so counting `dead.length` alone under-reports the map by the
+    // number of 410 entries.
+    //
+    // `sortedRedirects` is an OBJECT (Object.fromEntries), so its size is
+    // Object.keys(...).length -- `.length` on it is undefined, which silently
+    // renders "NaN" in the header.
+    totalDead: Object.keys(sortedRedirects).length + sortedGone.length,
+    redirectCount: Object.keys(sortedRedirects).length,
+    goneCount: sortedGone.length,
     deadImpressions,
     redirects: sortedRedirects,
     gone: sortedGone,
@@ -586,6 +670,46 @@ async function main() {
 }
 
 /** Emit a TypeScript module so next.config.ts can import it without a JSON loader. */
+/**
+ * Read the committed redirect map so a regeneration is CUMULATIVE.
+ *
+ * The map's whole purpose is to keep URLs Google has already indexed alive.
+ * Those URLs answer 301 once the map is live, so a regeneration that only
+ * looked for "currently 404" would find nothing and empty the map. The
+ * committed map is therefore the baseline: every path already in it stays,
+ * and paths that break later are added on top.
+ *
+ * Returns the redirect paths and the 410 paths as Sets.
+ */
+function readCommittedMap() {
+  const redirects = new Set();
+  const gone = new Set();
+  let src;
+  try {
+    src = readFileSync(MAP_FILE, 'utf8');
+  } catch {
+    return { redirects, gone };
+  }
+
+  const redirectBlock = src.match(
+    /export const eventRedirects[^=]*=\s*\{([\s\S]*?)\n\};/,
+  );
+  if (redirectBlock) {
+    for (const m of redirectBlock[1].matchAll(/^\s*"([^"]+)"/gm)) {
+      redirects.add(m[1]);
+    }
+  }
+
+  const goneBlock = src.match(/export const eventGonePaths[^=]*=\s*\[([\s\S]*?)\];/);
+  if (goneBlock) {
+    for (const m of goneBlock[1].matchAll(/"([^"]+)"/g)) {
+      gone.add(m[1]);
+    }
+  }
+
+  return { redirects, gone };
+}
+
 function renderModule(payload) {
   const redirectLines = Object.entries(payload.redirects)
     .map(([source, destination]) => `  ${JSON.stringify(source)}: ${JSON.stringify(destination)},`)
@@ -595,9 +719,11 @@ function renderModule(payload) {
   return `// AUTO-GENERATED by scripts/generate-event-redirects.mjs — do not edit by hand.
 //
 // ${payload.totalDead} Platinumlist event URLs that Google still indexes but that
-// return 404 (their rows were removed from the events table). Together they earn
-// ${payload.deadImpressions} impressions over 365 days. Each is mapped to the
-// closest live page so the ranking and the clicks stop leaking.
+// no longer resolve to a live page (their rows were removed from the events table).
+// ${payload.redirectCount} are mapped to the closest live page and served as a 301;
+// ${payload.goneCount} have no honest live replacement and are served as a 410 Gone.
+// Together they earn ${payload.deadImpressions} impressions over 365 days, so the
+// ranking and the clicks stop leaking.
 //
 // Regenerate:  node scripts/generate-event-redirects.mjs
 // Verify:      node scripts/generate-event-redirects.mjs --check
