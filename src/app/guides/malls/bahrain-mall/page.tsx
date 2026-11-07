@@ -317,6 +317,7 @@ export default function BahrainMallPage() {
               { name: 'City Centre Bahrain', href: '/guides/malls/city-centre-bahrain' },
               { name: 'The Avenues', href: '/guides/malls/the-avenues' },
               { name: 'Marassi Galleria', href: '/guides/malls/marassi-galleria' },
+              { name: 'Dana Mall', href: '/guides/malls/dana-mall' },
             ].map((mall) => (
               <Link 
                 key={mall.href}

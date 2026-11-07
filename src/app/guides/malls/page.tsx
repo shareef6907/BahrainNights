@@ -119,7 +119,7 @@ const malls = [
     parking: '1,800 spaces (free)',
     hours: 'Sat-Wed 9AM-10PM, Thu-Fri 9AM-11PM',
     bestFor: 'Grocery shopping, cinema, local community',
-    href: null,
+    href: '/guides/malls/dana-mall',
   },
   {
     name: 'Bahrain Mall',
