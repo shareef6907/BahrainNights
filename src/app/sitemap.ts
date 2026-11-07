@@ -344,6 +344,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     // Individual mall guides
     'guides/malls/bahrain-mall',
     'guides/malls/city-centre-bahrain',
+    'guides/malls/dana-mall',
     'guides/malls/dragon-city',
     'guides/malls/enma-mall',
     'guides/malls/marassi-galleria',
