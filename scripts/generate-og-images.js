@@ -194,7 +194,7 @@ async function main() {
   // "HD Productions Bahrain" caption beneath it. "HD Productions" is a
   // DIFFERENT company's name: every brand surface on the site (page copy,
   // Organization schema, og:site_name, footer) says "Bahrain Nights", and
-  // the operating entity is Bahrain Nights W.L.L. Shipping that caption on
+  // the operating entity is Bahrain Nights Premiera Live. Shipping that caption on
   // every social share image and every email would put a third party's
   // name on top of the brand.
   //

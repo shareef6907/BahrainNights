@@ -9,7 +9,7 @@ interface CrossPromoServicesProps {
 }
 
 /**
- * Cross-promotion banner for Cinematic Group services.
+ * Cross-promotion banner for sister Premiera Live services.
  * Designed to be helpful and contextual, not spammy.
  */
 export default function CrossPromoServices({ context = 'general', compact = false }: CrossPromoServicesProps) {
@@ -87,7 +87,7 @@ export default function CrossPromoServices({ context = 'general', compact = fals
     <section className="py-12 px-4">
       <div className="max-w-6xl mx-auto">
         <div className="text-center mb-8">
-          <p className="text-xs text-gray-500 uppercase tracking-wider mb-2">Cinematic Group Services</p>
+          <p className="text-xs text-gray-500 uppercase tracking-wider mb-2">Premiera Live Services</p>
           <h2 className="text-2xl font-bold text-white">Web, Film & Event Production</h2>
           <p className="text-gray-400 mt-2 max-w-xl mx-auto">
             Need a website, video production, or event equipment? Our sister companies provide end-to-end services across Bahrain.

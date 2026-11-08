@@ -3,6 +3,7 @@
 import { useState, useEffect, useRef } from 'react';
 import dynamic from 'next/dynamic';
 import Link from 'next/link';
+import PremieraLiveCompanyLine from '@/components/PremieraLiveCompanyLine';
 import Image from 'next/image';
 // framer-motion removed for performance - using CSS animations instead
 import { MapPin, Clock, Star, ChevronRight, ChevronDown, Menu, X, Play, Building2, LogIn } from 'lucide-react';
@@ -1066,6 +1067,11 @@ export default function HomePageClient({ initialMovies, initialStats, initialTod
           </div>
           <div className="pt-10 border-t border-white/10 text-center text-gray-400">
             <p>{t.footer.copyright}</p>
+            <p className="mt-3">
+              <Link href="https://www.premieralive.com" target="_blank" rel="noopener noreferrer" className="text-amber-500 hover:underline">
+                A Premiera Live company
+              </Link>
+            </p>
           </div>
         </div>
       </footer>
