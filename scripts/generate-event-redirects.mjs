@@ -271,14 +271,21 @@ async function main() {
   );
   const { data: dbEvents } = await supabase
     .from('events')
-    .select('slug,country,category,source_event_id')
+    .select('slug,country,category,source_event_id,status,is_hidden,date')
     .limit(5000);
   const bySourceId = new Map();
   const dbSlugs = new Set();
+  // Slugs whose page RENDERS right now: the event detail route
+  // (src/app/events/[slug]/page.tsx) selects exactly `status = 'published'`
+  // and `is_hidden = false`, with no date filter. A slug in this set
+  // therefore serves a 200 event page and MUST NOT be redirected.
+  const liveSlugs = new Set();
   for (const e of dbEvents || []) {
     if (e.source_event_id) bySourceId.set(String(e.source_event_id), e);
     if (e.slug) dbSlugs.add(e.slug);
+    if (e.slug && e.status === 'published' && !e.is_hidden) liveSlugs.add(e.slug);
   }
+  console.error(`# live published DB slugs: ${liveSlugs.size}`);
 
   console.error('# fetching the live Platinumlist feed...');
   const feed = await platinumlistFeed();
@@ -295,6 +302,29 @@ async function main() {
     const path = `/events/${slug}`;
     const idMatch = slug.match(/-(\d{5,6})$/);
     const sourceId = idMatch ? idMatch[1] : null;
+
+    // (0) THE SLUG IS LIVE AGAIN IN THE DATABASE.
+    //
+    // A slug can be in the GSC dead list (it 404'd when the map was first
+    // generated) while the event has since been re-imported or restored. The
+    // event detail route renders any row with status='published' and
+    // is_hidden=false, so that slug serves a real 200 page again.
+    //
+    // The HTTP recheck further down CANNOT catch this: once the redirect is
+    // deployed the source URL answers 301, not 200, so the page looks dead
+    // forever. The redirect then SHADOWS a live event page and hands its
+    // ranking to a hub -- and, worse, the sitemap still advertises the slug
+    // (the sitemap reads the same DB), so Google is told to index a URL that
+    // redirects away.
+    //
+    // The database is the authority on whether a page exists, so consult it
+    // here and leave a live slug alone.
+    if (liveSlugs.has(slug)) {
+      detail[path] = 'live-in-db|left-alone';
+      stats['live-in-db'] = (stats['live-in-db'] || 0) + 1;
+      console.error(`# LIVE in DB, not redirecting: ${path}`);
+      continue;
+    }
 
     // (a) The event lives in the DB under a different slug.
     let newSlug = null;
@@ -511,6 +541,18 @@ async function main() {
     chunk.forEach((p, j) => {
       if (results[j].status === 200) liveSources.push(p);
     });
+  }
+  // The HTTP recheck alone has a blind spot: once a redirect is deployed, its
+  // source answers 301 -- not 200 -- so a source whose page came back to life
+  // looks permanently dead to this probe. Check the DATABASE too: a slug with
+  // a published, non-hidden row renders a 200 event page and must not be
+  // shadowed by a redirect.
+  for (const p of sources) {
+    const slug = p.split('/').pop();
+    if (liveSlugs.has(slug) && !liveSources.includes(p)) {
+      liveSources.push(p);
+      console.error(`# source is live in the DB (HTTP probe said ${'not-200'}): ${p}`);
+    }
   }
   if (liveSources.length) {
     problems.push(
