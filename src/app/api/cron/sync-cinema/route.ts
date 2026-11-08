@@ -24,16 +24,39 @@ interface SyncResult {
 }
 
 /**
- * Extract movie titles from VOX cinema page
+ * Extract movie titles from VOX cinema page.
+ *
+ * The User-Agent matters here, and it is the opposite of what you would
+ * expect.
+ *
+ * VOX sits behind Akamai, and Akamai's bot filter treats a REAL browser
+ * User-Agent as a bot from a datacentre IP. Sending the full Chrome string
+ * gets the connection closed with no HTTP response at all (curl reports
+ * status 000, and a headless browser reports ERR_HTTP2_PROTOCOL_ERROR).
+ * The same request with a plain agent succeeds and returns the full page.
+ *
+ * This was silently breaking the whole VOX half of the cinema sync: the
+ * fetch threw, the catch returned [], and the sync carried on with Cineco
+ * data only. It looked like "Cineco has films, VOX has none" rather than
+ * "our request was rejected".
+ *
+ * Verified 2026-11-03 against bhr.voxcinemas.com:
+ *   Chrome UA    -> status 000 (closed), no response
+ *   Googlebot UA -> status 000 (closed), no response
+ *   curl UA      -> status 200, 28 data-title entries on /movies/whatson
+ *   no UA header -> status 200, same content
  */
+const VOX_USER_AGENT = 'curl/8.7.1';
+
 async function getVOXMovies(url: string): Promise<string[]> {
   try {
     const response = await fetch(url, {
       headers: {
-        'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
+        'User-Agent': VOX_USER_AGENT,
+        'Accept-Language': 'en-US,en;q=0.9',
       },
     });
-    
+
     if (!response.ok) {
       throw new Error(`VOX fetch failed: ${response.status}`);
     }
@@ -228,6 +251,27 @@ export async function POST(request: NextRequest): Promise<NextResponse<SyncResul
 
     console.log(`[Cinema Sync] VOX Now Showing: ${voxNowShowing.length}`);
     console.log(`[Cinema Sync] VOX Coming Soon: ${voxComingSoon.length}`);
+
+    // A source that returns NOTHING is a failure, not an empty schedule.
+    //
+    // getVOXMovies() catches its own errors and returns [], so a blocked or
+    // changed request used to look exactly like "the cinema has no films
+    // today". The sync would then happily mark every previously-showing
+    // movie as no longer showing -- which is how a failed scrape becomes
+    // deleted content on the live site.
+    //
+    // Refuse to run if a source produced nothing. It is better to do nothing
+    // than to clear the listings on a technicality.
+    if (voxNowShowing.length === 0 && voxComingSoon.length === 0) {
+      const message =
+        'VOX returned zero titles from both /movies/whatson and /movies/comingsoon. ' +
+        'The request was most likely blocked (Akamai rejects browser User-Agents). ' +
+        'Refusing to sync: marking every movie as no longer showing would be wrong.';
+      console.error(`[Cinema Sync] ${message}`);
+      result.errors.push(message);
+      result.success = false;
+      return NextResponse.json(result, { status: 502 });
+    }
 
     // Get all movies from database
     const { data: dbMovies, error: dbError } = await supabase
