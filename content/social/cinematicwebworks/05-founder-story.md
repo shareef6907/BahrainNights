@@ -31,7 +31,7 @@ WHAT I LEARNED:
 4️⃣ AI is a force multiplier
    I'm a team of one building what used to require 10 people.
 
-Today, Cinematic Group runs:
+Today, our companies run:
 • Film Production Bahrain (video)
 • Events Bahrain (equipment rental)
 • BahrainNights (media platform)

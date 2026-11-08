@@ -562,9 +562,14 @@ export default function AttractionDetailContent({
                 Places
               </Link>
             </div>
-            <p className="text-gray-500 text-sm">
-              © {new Date().getFullYear()} Bahrain Nights Premiera Live (CR 113587-1). All rights reserved.
-            </p>
+            <div className="text-gray-500 text-sm text-center">
+              <p>© {new Date().getFullYear()} Bahrain Nights Premiera Live (CR 113587-1). All rights reserved.</p>
+              <p className="mt-1">
+                <a href="https://www.premieralive.com" target="_blank" rel="noopener noreferrer" className="text-amber-500 hover:underline">
+                  A Premiera Live company
+                </a>
+              </p>
+            </div>
           </div>
         </div>
       </footer>
