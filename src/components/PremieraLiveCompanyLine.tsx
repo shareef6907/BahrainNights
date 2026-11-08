@@ -4,7 +4,7 @@ import Link from 'next/link';
 
 /**
  * Footer line: BahrainNights.com is a Premiera Live company.
- * Replaces the former "Part of the Cinematic Group" bar - "Cinematic Group"
+ * Replaces the former group-ownership bar, which referenced a name that
  * was never an official entity.
  */
 export default function PremieraLiveCompanyLine() {
