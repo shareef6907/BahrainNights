@@ -452,8 +452,9 @@ export default function MallsPage() {
       <section className="py-16 px-4">
         <div className="max-w-6xl mx-auto">
           <h2 className="text-2xl font-bold mb-8">Related Guides</h2>
-          <div className="grid md:grid-cols-4 gap-4">
+          <div className="grid sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4">
             {[
+              { title: 'All Guides', href: '/guides', emoji: '📚' },
               { title: 'Traditional Souks', href: '/guides/souks', emoji: '🏺' },
               { title: 'Things to Do', href: '/things-to-do-in-bahrain', emoji: '🎯' },
               { title: 'Restaurants', href: '/best-restaurants-bahrain', emoji: '🍽️' },
