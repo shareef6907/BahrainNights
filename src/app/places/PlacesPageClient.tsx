@@ -14,6 +14,23 @@ import type { Venue } from '@/types/database';
 import AdBanner from '@/components/ads/AdBanner';
 import { useTranslation } from '@/lib/i18n';
 
+// The page heading. Rendered by every branch of this component (loading,
+// error and loaded) and by the Suspense fallback, so the served HTML always
+// contains exactly one <h1>. Before this, the heading only existed inside the
+// client-rendered "loaded" branch, which meant the server HTML shipped zero
+// <h1> tags and Google had no page heading to index.
+function PlacesHeading() {
+  const { t } = useTranslation();
+  return (
+    <h1 className="text-3xl md:text-5xl font-black text-white mb-4">
+      {t.places.hero.title}{' '}
+      <span className="text-transparent bg-clip-text bg-gradient-to-r from-yellow-400 via-orange-500 to-pink-500">
+        {t.places.hero.titleHighlight}
+      </span>
+    </h1>
+  );
+}
+
 // Convert database venue to Place type
 function venueToPlace(venue: Venue): Place {
   // Extract hideHours from opening_hours if it exists
@@ -256,7 +273,10 @@ function PlacesPageContent() {
   if (loading) {
     return (
       <div className="min-h-screen bg-gradient-to-b from-slate-950 via-slate-900 to-slate-950">
-        <div className="flex items-center justify-center min-h-[60vh]">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 py-12 md:py-16 text-center">
+          <PlacesHeading />
+        </div>
+        <div className="flex items-center justify-center min-h-[40vh]">
           <div className="text-center">
             <Loader2 className="w-12 h-12 text-yellow-400 animate-spin mx-auto mb-4" />
             <p className="text-gray-400">{t.places.loading}</p>
@@ -269,7 +289,10 @@ function PlacesPageContent() {
   if (error) {
     return (
       <div className="min-h-screen bg-gradient-to-b from-slate-950 via-slate-900 to-slate-950">
-        <div className="flex items-center justify-center min-h-[60vh]">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 py-12 md:py-16 text-center">
+          <PlacesHeading />
+        </div>
+        <div className="flex items-center justify-center min-h-[40vh]">
           <div className="text-center">
             <p className="text-red-400 mb-4">{error}</p>
             <button
@@ -305,12 +328,7 @@ function PlacesPageContent() {
               animate={{ opacity: 1, y: 0 }}
               className="text-center mb-8"
             >
-              <h1 className="text-3xl md:text-5xl font-black text-white mb-4">
-                {t.places.hero.title}{' '}
-                <span className="text-transparent bg-clip-text bg-gradient-to-r from-yellow-400 via-orange-500 to-pink-500">
-                  {t.places.hero.titleHighlight}
-                </span>
-              </h1>
+              <PlacesHeading />
               <p className="text-gray-400 text-lg max-w-2xl mx-auto">
                 {t.places.hero.subtitle}
               </p>
@@ -530,7 +548,10 @@ function PlacesPageLoading() {
   const { t } = useTranslation();
   return (
     <div className="min-h-screen bg-gradient-to-b from-slate-950 via-slate-900 to-slate-950">
-      <div className="flex items-center justify-center min-h-[60vh]">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 py-12 md:py-16 text-center">
+        <PlacesHeading />
+      </div>
+      <div className="flex items-center justify-center min-h-[40vh]">
         <div className="text-center">
           <Loader2 className="w-12 h-12 text-yellow-400 animate-spin mx-auto mb-4" />
           <p className="text-gray-400">{t.places.loading}</p>
