@@ -50,6 +50,22 @@ function venueToPlace(venue: Venue): Place {
   };
 }
 
+// The category heading. Rendered by every branch of this component (loading,
+// error and loaded) so the server-rendered HTML always contains exactly one
+// <h1>. Before this, the heading only existed inside the client-rendered
+// "loaded" branch — the venues fetch is client-side, so the HTML Google
+// received was the loading state, with no heading at all.
+function CategoryHeading({ config }: { config: CategoryConfig }) {
+  return (
+    <h1 className="text-3xl md:text-5xl font-black text-white mb-4">
+      {config.title.split(' in ')[0]}{' '}
+      <span className="text-transparent bg-clip-text bg-gradient-to-r from-yellow-400 via-orange-500 to-pink-500">
+        in Bahrain
+      </span>
+    </h1>
+  );
+}
+
 export default function CategoryPage({ config, venues, isLoading = false, error = null }: CategoryPageProps) {
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedArea, setSelectedArea] = useState('all');
@@ -102,7 +118,11 @@ export default function CategoryPage({ config, venues, isLoading = false, error 
   if (isLoading) {
     return (
       <div className="min-h-screen bg-gradient-to-b from-slate-950 via-slate-900 to-slate-950">
-        <div className="flex items-center justify-center min-h-[60vh]">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 py-12 md:py-16 text-center">
+          <div className="text-5xl mb-4">{config.icon}</div>
+          <CategoryHeading config={config} />
+        </div>
+        <div className="flex items-center justify-center min-h-[40vh]">
           <div className="text-center">
             <Loader2 className="w-12 h-12 text-yellow-400 animate-spin mx-auto mb-4" />
             <p className="text-gray-400">Loading {config.name.toLowerCase()}...</p>
@@ -115,7 +135,11 @@ export default function CategoryPage({ config, venues, isLoading = false, error 
   if (error) {
     return (
       <div className="min-h-screen bg-gradient-to-b from-slate-950 via-slate-900 to-slate-950">
-        <div className="flex items-center justify-center min-h-[60vh]">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 py-12 md:py-16 text-center">
+          <div className="text-5xl mb-4">{config.icon}</div>
+          <CategoryHeading config={config} />
+        </div>
+        <div className="flex items-center justify-center min-h-[40vh]">
           <div className="text-center">
             <p className="text-red-400 mb-4">{error}</p>
             <button
@@ -151,12 +175,7 @@ export default function CategoryPage({ config, venues, isLoading = false, error 
             className="text-center mb-8"
           >
             <div className="text-5xl mb-4">{config.icon}</div>
-            <h1 className="text-3xl md:text-5xl font-black text-white mb-4">
-              {config.title.split(' in ')[0]}{' '}
-              <span className="text-transparent bg-clip-text bg-gradient-to-r from-yellow-400 via-orange-500 to-pink-500">
-                in Bahrain
-              </span>
-            </h1>
+            <CategoryHeading config={config} />
             <p className="text-gray-400 text-lg max-w-2xl mx-auto">
               {config.description}
             </p>
