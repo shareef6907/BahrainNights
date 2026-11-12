@@ -1,6 +1,7 @@
 import { MetadataRoute } from 'next';
 import { createClient, SupabaseClient } from '@supabase/supabase-js';
 import { getIndexableHubs } from '@/lib/seo/indexable-hubs';
+import { getAllCategorySlugs } from '@/lib/categories';
 
 const BASE_URL = 'https://www.bahrainnights.com';
 
@@ -391,9 +392,23 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     priority: slug === 'guides/malls' || slug === 'guides/brands' ? 0.8 : 0.7,
   }));
 
+  // Venue category landing pages (/fine-dining, /brunches, /shisha-lounges,
+  // ...). These are real, indexable, server-rendered pages with a self
+  // canonical and their own H1 -- but they were never listed here, so Google
+  // had no sitemap path to them and reported "URL is unknown to Google" for
+  // pages that were live, linked and canonical. The slugs are read from the
+  // same CATEGORY_CONFIGS map the route itself uses, so a new category cannot
+  // be added without also being listed.
+  const categoryPages: MetadataRoute.Sitemap = getAllCategorySlugs().map((slug) => ({
+    url: `${BASE_URL}/${slug}`,
+    lastModified: new Date(),
+    changeFrequency: 'weekly' as const,
+    priority: 0.8,
+  }));
+
   // If Supabase is not available (build time), return only static pages
   if (!supabase) {
-    return [...staticPages, ...guidePages];
+    return [...staticPages, ...guidePages, ...categoryPages];
   }
 
   // Fetch published events (exclude hidden)
@@ -548,6 +563,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   return [
     ...staticPages,
     ...guidePages,
+    ...categoryPages,
     ...hubPages,
     ...eventPages,
     ...venuePages,
