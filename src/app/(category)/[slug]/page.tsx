@@ -30,7 +30,9 @@ export async function generateMetadata({ params }: CategoryPageProps): Promise<M
     description: config.metaDescription,
     keywords: config.keywords.join(', '),
     openGraph: {
-      title: config.metaTitle,
+      // The page title gets " | Bahrain Nights" from the layout template.
+      // Open Graph and Twitter titles do not, so the brand is added here.
+      title: `${config.metaTitle} | Bahrain Nights`,
       description: config.metaDescription,
       url: `https://www.bahrainnights.com/${config.slug}`,
       siteName: 'Bahrain Nights',
@@ -47,7 +49,7 @@ export async function generateMetadata({ params }: CategoryPageProps): Promise<M
     },
     twitter: {
       card: 'summary_large_image',
-      title: config.metaTitle,
+      title: `${config.metaTitle} | Bahrain Nights`,
       description: config.metaDescription,
     },
     alternates: {
