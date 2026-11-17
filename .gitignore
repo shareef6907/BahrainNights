@@ -47,6 +47,7 @@ playwright/.cache/
 
 # Scraper dependencies
 scripts/scrapers/**/node_modules/
+scripts/platinumlist-api/node_modules/
 
 # Playwright test screenshots
 .playwright-mcp/
