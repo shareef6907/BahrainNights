@@ -12,7 +12,12 @@ on:
 
 jobs:
   sync-cinema:
-    runs-on: ubuntu-latest
+    # Pinned deliberately. `ubuntu-latest` now resolves to ubuntu26.04, which
+    # Playwright 1.57.0 does not support:
+    #   ERROR: Playwright does not support chromium on ubuntu26.04-x64
+    # The failure happens in the "install browsers" step, i.e. before the
+    # scraper runs at all, so the whole cinema sync has been silently failing.
+    runs-on: ubuntu-24.04
     timeout-minutes: 30
     steps:
       - uses: actions/checkout@v4
