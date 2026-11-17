@@ -31,24 +31,42 @@ jobs:
         run: npm install --legacy-peer-deps
 
       - name: Install Playwright browsers
-        # Use the repo's OWN Playwright CLI, not `npx playwright`.
+        # The browser-install CLI MUST come from the SAME `playwright` package
+        # that the scrapers import.
         #
-        # `npx` can resolve a DIFFERENT (older) Playwright from the npm registry
-        # than the one in node_modules that scripts/scrape-cineco.ts actually
-        # imports. When the two differ, the CLI downloads a different browser
-        # build than the runtime expects:
+        # package-lock.json pins TWO different Playwright versions:
+        #   node_modules/playwright                        = 1.61.1  <- what
+        #       scripts/scrape-cineco.ts imports (`import { chromium } from
+        #       'playwright'`) -> expects chromium-headless-shell build 1228
+        #   node_modules/@playwright/test                  = 1.57.0
+        #       node_modules/@playwright/test/node_modules/playwright = 1.57.0
         #
-        #   CLI downloaded : chromium_headless_shell-1200
-        #   runtime wanted : chromium_headless_shell-1228
-        #   -> browserType.launch: Executable doesn't exist at ...
-        #      .../chromium_headless_shell-1228/chrome-headless-shell-linux64/chrome-headless-shell
+        # `npm` links the `playwright` bin from @playwright/test, so BOTH
+        # `npx playwright` AND `./node_modules/.bin/playwright` resolve to
+        # 1.57.0 -> they download build 1200, while the runtime demands 1228:
         #
-        # ./node_modules/.bin/playwright is guaranteed to be the same version as
-        # the `playwright` module the scraper imports, so the two can't diverge.
+        #   browserType.launch: Executable doesn't exist at
+        #   .../chromium_headless_shell-1228/chrome-headless-shell-linux64/chrome-headless-shell
+        #
+        # The Cineco scraper catches that error, so the job still exited 0 and
+        # Cineco silently contributed 0 movies while VOX (which uses native
+        # fetch + cheerio, no browser) kept working.
+        #
+        # Invoking node_modules/playwright/cli.js directly guarantees the CLI
+        # and the runtime are the same package, so they cannot diverge. The
+        # version assertion below turns any future divergence into a loud
+        # failure instead of a silently-empty scrape.
         run: |
-          echo "Playwright CLI    : $(./node_modules/.bin/playwright --version)"
-          echo "Playwright module : $(node -p "JSON.parse(require('fs').readFileSync('node_modules/playwright/package.json','utf8')).version")"
-          ./node_modules/.bin/playwright install chromium --with-deps
+          set -euo pipefail
+          CLI_VER=$(node node_modules/playwright/cli.js --version | awk '{print $2}')
+          MOD_VER=$(node -p "require('./node_modules/playwright/package.json').version")
+          echo "Playwright CLI    : $CLI_VER"
+          echo "Playwright module : $MOD_VER"
+          if [ "$CLI_VER" != "$MOD_VER" ]; then
+            echo "::error::Playwright CLI ($CLI_VER) and module ($MOD_VER) differ — the downloaded browser build would not match the runtime, and the Cineco scrape would silently return 0 movies."
+            exit 1
+          fi
+          node node_modules/playwright/cli.js install chromium --with-deps
 
       - name: Run Cinema Sync
         env:
