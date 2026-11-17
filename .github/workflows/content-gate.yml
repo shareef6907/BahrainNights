@@ -31,10 +31,33 @@ jobs:
           GH_TOKEN: ${{ github.token }}
           PR: ${{ github.event.pull_request.number }}
           REPO: ${{ github.repository }}
+          BASE_SHA: ${{ github.event.pull_request.base.sha }}
         run: |
           gh api "repos/$REPO/pulls/$PR/files" --paginate \
             --jq '.[] | [.status, .filename] | @tsv' > "$RUNNER_TEMP/files.tsv"
-          gh pr diff "$PR" --repo "$REPO" > "$RUNNER_TEMP/pr.diff"
+
+          # `gh pr diff` asks the API for a rendered diff, and GitHub refuses
+          # that for any PR with more than 300 changed files:
+          #   HTTP 406: Sorry, the diff exceeded the maximum number of files (300).
+          # So a bulk change (e.g. untracking a committed node_modules tree of
+          # 800+ files) could not be validated by this gate at all -- the run
+          # died before the rules were ever evaluated.
+          #
+          # Fall back to building the same diff from the two commits, which
+          # has no file-count limit. `git diff BASE HEAD` reports every line
+          # present in HEAD but not in BASE with a leading '+', which is
+          # exactly the set of added lines the rules below inspect. It reads
+          # git objects only and never executes any code from the PR.
+          if ! gh pr diff "$PR" --repo "$REPO" > "$RUNNER_TEMP/pr.diff" 2> "$RUNNER_TEMP/pr.diff.err"; then
+            echo "::notice::gh pr diff failed; rebuilding the diff from git."
+            cat "$RUNNER_TEMP/pr.diff.err"
+            git fetch --no-tags --quiet origin \
+              "+refs/pull/$PR/head:refs/remotes/pr/head" || true
+            git diff --no-color "$BASE_SHA" refs/remotes/pr/head > "$RUNNER_TEMP/pr.diff"
+          fi
+
+          echo "files listed: $(wc -l < "$RUNNER_TEMP/files.tsv")"
+          echo "diff lines:   $(wc -l < "$RUNNER_TEMP/pr.diff")"
 
       - name: Run content rules
         env:
