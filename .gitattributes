@@ -1,0 +1,11 @@
+# Mark vendored dependency trees as binary for diff purposes.
+#
+# scripts/platinumlist-api/node_modules was committed to this repository by
+# mistake. Untracking it spans ~800 files and ~590k lines, which exceeds
+# GitHub's API diff limits (300 files / 20,000 lines per pull request), so
+# the deletion cannot be reviewed or CI-gated as a normal textual diff.
+#
+# Marking the path as `-diff` makes GitHub emit a one-line
+# "Binary files differ" entry instead of the full file body, which keeps
+# every part of the removal reviewable and lets the content gate run.
+scripts/platinumlist-api/node_modules/** -diff
