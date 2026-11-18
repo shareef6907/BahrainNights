@@ -171,7 +171,7 @@ async function getInternationalEvents() {
     .eq('is_active', true)
     .or(`start_date.gte.${today},date.gte.${today}`)
     .order('start_date', { ascending: true, nullsFirst: false })
-    .limit(100);
+    .limit(12);
 
   if (error) {
     console.error('Error fetching international events:', error);
@@ -188,6 +188,12 @@ async function getInternationalEvents() {
       const startDate = event.start_date || event.date;
       return startDate >= sixMonthsAgoStr;
     })
+    // Descriptions come from scraped feeds — cap the length before they are
+    // serialised into the server-rendered HTML.
+    .map(event => ({
+      ...event,
+      description: event.description ? event.description.slice(0, 400) : event.description,
+    }))
     .sort((a, b) => {
       const getDisplayDate = (e: typeof a) => {
         const start = e.start_date || e.date;
@@ -360,18 +366,18 @@ async function getSurpriseData() {
       .eq('is_hidden', false)
       .eq('country', 'Bahrain')
       .gte('date', today)
-      .limit(10),
+      .limit(8),
     // Random venues/places
     supabaseAdmin
       .from('venues')
       .select('id, name, slug, cover_url, category')
-      .limit(10),
+      .limit(8),
     // Random attractions
     supabaseAdmin
       .from('attractions')
       .select('id, name, slug, featured_image, category')
       .eq('is_active', true)
-      .limit(10),
+      .limit(8),
   ]);
 
   const events = (eventsResult.data || []).map(e => ({
