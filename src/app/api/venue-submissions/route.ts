@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getAdminClient } from '@/lib/supabase/server';
+import { requireAdmin } from '@/lib/api-auth';
 
 // POST - Create a new venue submission
 export async function POST(request: NextRequest) {
@@ -135,9 +136,17 @@ export async function POST(request: NextRequest) {
   }
 }
 
-// GET - Get submissions (admin only, but for now we'll check later)
+// GET - Get submissions (admin only)
 export async function GET(request: NextRequest) {
   try {
+    // Submissions contain submitter PII (name, email, phone, IP address, user
+    // agent). The route was reachable without authentication — the original
+    // comment even said "admin only, but for now we'll check later".
+    const auth = await requireAdmin(request);
+    if (!auth.authenticated) {
+      return auth.response;
+    }
+
     const searchParams = request.nextUrl.searchParams;
     const status = searchParams.get('status');
     const limit = parseInt(searchParams.get('limit') || '50');

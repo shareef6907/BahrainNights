@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getAdminClient } from '@/lib/supabase/server';
+import { PUBLIC_VENUE_SELECT } from '@/lib/public-venue-fields';
 
 // Get approved venues for public display
 export async function GET(request: NextRequest) {
@@ -16,8 +17,14 @@ export async function GET(request: NextRequest) {
 
     const supabase = getAdminClient();
 
-    // Try the full query with all columns first
-    // If migrations haven't been run, fall back to simpler query
+    // Try the full query with the explicit public column list first.
+    // If migrations haven't been run, fall back to simpler query.
+    //
+    // IMPORTANT: neither branch may use `select('*')`. This route is
+    // unauthenticated and the `venues` table holds `password_hash`
+    // (the bcrypt digest of the venue owner's password), `owner_id`,
+    // `registration_ip` and `registration_user_agent`. `select('*')`
+    // published all of them to anonymous callers.
     let venues;
     let queryError;
     let useSimpleQuery = false;
@@ -26,7 +33,7 @@ export async function GET(request: NextRequest) {
     try {
       let query = supabase
         .from('venues')
-        .select('*')
+        .select(PUBLIC_VENUE_SELECT)
         .eq('status', 'approved')
         .eq('is_hidden', false);
 
@@ -94,9 +101,11 @@ export async function GET(request: NextRequest) {
 
     // Fallback: Simple query without is_hidden and tags columns
     if (useSimpleQuery) {
+      // Fallback still uses the explicit public column list — a fallback that
+      // falls back to `select('*')` re-opens the leak it was meant to avoid.
       let query = supabase
         .from('venues')
-        .select('*')
+        .select(PUBLIC_VENUE_SELECT)
         .eq('status', 'approved');
 
       // Apply basic filters (no is_hidden, no tags)
@@ -157,7 +166,7 @@ export async function GET(request: NextRequest) {
     // Get total count for pagination
     const { count } = await supabase
       .from('venues')
-      .select('*', { count: 'exact', head: true })
+      .select('id', { count: 'exact', head: true })
       .eq('status', 'approved');
 
     return NextResponse.json({
