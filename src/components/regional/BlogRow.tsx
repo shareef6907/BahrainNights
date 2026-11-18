@@ -66,6 +66,10 @@ export function BlogRow({ title, icon, articles, onSelectArticle, seeAllLink }: 
         {seeAllLink && (
           <Link
             href={seeAllLink}
+            // No RSC prefetch: these "See All" links point at the heavy
+            // /international country hubs, and prefetching them on first load
+            // cost ~174 KB of transfer before the visitor clicked anything.
+            prefetch={false}
             className="text-sm text-gray-400 hover:text-white transition-colors flex items-center gap-1"
           >
             See All

@@ -7,6 +7,9 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { useTranslation } from '@/lib/i18n';
 import EventModal, { EventData } from '@/components/events/EventModal';
 import { cardClickHandler } from '@/lib/crawlable-card';
+import InternationalTrailerHeader, {
+  InternationalTrailerFilm,
+} from '@/components/international/InternationalTrailerHeader';
 
 interface InternationalEvent {
   id: string;
@@ -57,9 +60,16 @@ interface Props {
   events: InternationalEvent[];
   eventsByCountry: Record<string, InternationalEvent[]>;
   countries: Country[];
+  /** Trailer films for the header hero, resolved on the server. */
+  trailerFilms?: InternationalTrailerFilm[];
 }
 
-export default function InternationalPageClient({ events, eventsByCountry, countries }: Props) {
+export default function InternationalPageClient({
+  events,
+  eventsByCountry,
+  countries,
+  trailerFilms = [],
+}: Props) {
   const { t } = useTranslation();
   const [selectedEvent, setSelectedEvent] = useState<InternationalEvent | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -115,6 +125,9 @@ export default function InternationalPageClient({ events, eventsByCountry, count
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-gray-900 via-gray-900 to-black">
+      {/* Trailer Header — server-rendered film titles, lazy YouTube player. */}
+      <InternationalTrailerHeader films={trailerFilms} />
+
       {/* Hero Section */}
       <div className="relative overflow-hidden">
         <div className="absolute inset-0 bg-gradient-to-r from-purple-900/50 via-blue-900/50 to-teal-900/50" />

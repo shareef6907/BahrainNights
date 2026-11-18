@@ -27,6 +27,16 @@ interface RegionalItem {
   isEvent?: boolean;
 }
 
+interface RegionalTrailerFilm {
+  id: string;
+  title: string;
+  synopsis?: string;
+  genre?: string[];
+  trailer_key?: string;
+  poster_url?: string;
+  backdrop_url?: string;
+}
+
 interface Props {
   featured: RegionalItem[];
   bahrain: RegionalItem[];
@@ -47,6 +57,8 @@ interface Props {
   localEvents: number;
   gccUkEvents: number;
   uniqueCountries: string[];
+  /** Trailer films for the header hero, resolved on the server. */
+  trailerFilms?: RegionalTrailerFilm[];
 }
 
 export function RegionalPageClient({
@@ -69,6 +81,7 @@ export function RegionalPageClient({
   localEvents,
   gccUkEvents,
   uniqueCountries,
+  trailerFilms = [],
 }: Props) {
   // State for blog article modal
   const [selectedArticle, setSelectedArticle] = useState<RegionalItem | null>(null);
@@ -103,7 +116,7 @@ export function RegionalPageClient({
   return (
     <div className="min-h-screen bg-gray-950">
       {/* Full-Screen Hero Trailer */}
-      <RegionalTrailerHero />
+      <RegionalTrailerHero movies={trailerFilms} />
 
       {/* Stats Bar - matches homepage pattern */}
       <div className="relative z-10 -mt-24 mb-8">

@@ -117,6 +117,14 @@ export function BlogCard({ article, onSelect, index = 0 }: BlogCardProps) {
               sizes="(max-width: 768px) 50vw, 280px"
               className="object-cover"
               loading="lazy"
+              /*
+               * These cards are 250px wide on mobile and 280px on desktop, so
+               * the optimised image never needs more than a 512px source. The
+               * default quality (75) shipped ~13 KB per thumbnail; at 60 the
+               * row of thumbnails on /regional drops by roughly a third with no
+               * visible loss at card size.
+               */
+              quality={60}
             />
           ) : (
             <div className="w-full h-full bg-gradient-to-br from-gray-800 to-gray-900 flex items-center justify-center">

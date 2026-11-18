@@ -3,6 +3,8 @@ import { getInternationalEvents } from '@/lib/international-events';
 import InternationalPageClient from './InternationalPageClient';
 import BreadcrumbSchema from '@/components/SEO/BreadcrumbSchema';
 import EventListSchema from '@/components/SEO/EventListSchema';
+import { getFeaturedTrailers } from '@/lib/cinema/featured-trailers';
+import type { InternationalTrailerFilm } from '@/components/international/InternationalTrailerHeader';
 
 export const metadata: Metadata = {
   title: 'International Events | Concerts, Shows & Experiences Worldwide',
@@ -61,7 +63,24 @@ const COUNTRY_CONFIG: Record<string, { flag: string; code: string }> = {
 
 export default async function InternationalPage() {
   // ONE dataset: full filtered list, no limit, same sort as country pages
-  const internationalEvents = await getInternationalEvents();
+  const [internationalEvents, featuredTrailers] = await Promise.all([
+    getInternationalEvents(),
+    getFeaturedTrailers(6),
+  ]);
+
+  // Trailer films for the header hero — resolved on the SERVER so the film
+  // titles are part of the server-rendered HTML (SEO) and the YouTube player
+  // is created from the first paint (no client-only fetch).
+  const trailerFilms: InternationalTrailerFilm[] = featuredTrailers
+    .filter((t) => t.trailerKey)
+    .map((t) => ({
+      id: t.id,
+      title: t.title,
+      trailerKey: t.trailerKey,
+      poster: t.poster,
+      backdrop: t.backdrop,
+      synopsis: t.synopsis,
+    }));
 
   // Derive country list from the ONE dataset
   const uniqueCountries = [...new Set(internationalEvents.map(e => e.country))].filter(Boolean);
@@ -114,6 +133,7 @@ export default async function InternationalPage() {
         events={internationalEvents}
         eventsByCountry={eventsByCountry}
         countries={countriesWithEvents}
+        trailerFilms={trailerFilms}
       />
     </>
   );

@@ -215,13 +215,78 @@ function filterByLocation(items: RegionalItem[], cities: string[], countries: st
   });
 }
 
+export interface RegionalTrailerFilm {
+  id: string;
+  title: string;
+  synopsis?: string;
+  genre?: string[];
+  trailer_key?: string;
+  poster_url?: string;
+  backdrop_url?: string;
+}
+
+/**
+ * Fetch the trailer films for the header hero ON THE SERVER.
+ *
+ * Previously the regional header fetched /api/cinema/trailers from the client,
+ * which meant the trailer iframe was created late (and the film titles were
+ * missing from the server-rendered HTML). Resolving the list here keeps the
+ * titles in the SSR payload and lets the hero render its poster immediately.
+ */
+async function getRegionalTrailerFilms(): Promise<RegionalTrailerFilm[]> {
+  try {
+    const { data, error } = await supabaseAdmin
+      .from('movies')
+      .select('id, title, synopsis, genre, trailer_key, trailer_url, poster_url, backdrop_url')
+      .eq('is_now_showing', true)
+      .not('trailer_key', 'is', null)
+      .order('release_date', { ascending: false })
+      .limit(8);
+
+    if (error) {
+      console.error('Regional trailer fetch error:', error);
+      return [];
+    }
+
+    const films = (data || [])
+      .map((m) => {
+        const row = m as unknown as {
+          id: string;
+          title: string;
+          synopsis: string | null;
+          genre: string[] | null;
+          trailer_key: string | null;
+          trailer_url: string | null;
+          poster_url: string | null;
+          backdrop_url: string | null;
+        };
+        return {
+          id: row.id,
+          title: row.title,
+          synopsis: row.synopsis ?? undefined,
+          genre: row.genre ?? undefined,
+          trailer_key: row.trailer_key ?? row.trailer_url ?? undefined,
+          poster_url: row.poster_url ?? undefined,
+          backdrop_url: row.backdrop_url ?? undefined,
+        } satisfies RegionalTrailerFilm;
+      })
+      .filter((f) => !!f.trailer_key);
+
+    return films;
+  } catch (err) {
+    console.error('Regional trailer exception:', err);
+    return [];
+  }
+}
+
 export default async function RegionalPage() {
   // Fetch events, blog articles, live counts, and countries in parallel
-  const [events, articles, liveCounts, countries] = await Promise.all([
+  const [events, articles, liveCounts, countries, trailerFilms] = await Promise.all([
     getUpcomingEvents(),
     getBlogArticles(),
     getLiveEventCounts(),
     getUniqueCountries(),
+    getRegionalTrailerFilms(),
   ]);
 
   // Combine all items
@@ -311,6 +376,7 @@ export default async function RegionalPage() {
       localEvents={liveCounts.local}
       gccUkEvents={liveCounts.international}
       uniqueCountries={countries}
+      trailerFilms={trailerFilms}
     />
   );
 }
