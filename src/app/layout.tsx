@@ -19,9 +19,12 @@ const inter = Inter({
 const ibmPlexArabic = IBM_Plex_Sans_Arabic({
   variable: "--font-arabic",
   subsets: ["arabic"],
-  weight: ["400", "500", "700"],
+  weight: ["400", "700"],
   display: "swap",
-  preload: true,
+  // Not preloaded: the Arabic family is only applied to RTL documents
+  // (html[dir="rtl"]), and nothing in the app sets dir="rtl" today.
+  // Preloading it was pulling ~101 KB of woff2 that was never used.
+  preload: false,
 });
 
 export const metadata: Metadata = {
@@ -121,8 +124,9 @@ export default function RootLayout({
 
         {/* Preconnect to external resources for faster loading */}
         <link rel="preconnect" href="https://image.tmdb.org" />
-        {/* Preload hero poster for faster LCP */}
-        <link rel="preload" href="/header-poster-v3.jpg" as="image" type="image/jpeg" />
+        {/* The hero poster is preloaded by next/image (priority) as an
+            optimised AVIF/WebP. A raw <link rel=preload> for the full-size
+            JPEG used to pull 149 KB of the original file ahead of it. */}
         <link rel="dns-prefetch" href="https://image.tmdb.org" />
         <link rel="dns-prefetch" href="https://cdn.platinumlist.net" />
         {/* Organization and WebSite Schema for SEO */}
