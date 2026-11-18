@@ -12,6 +12,8 @@ import { useTranslation } from '@/lib/i18n/TranslationContext';
 import type { InternationalCountrySummary } from '@/lib/international-events';
 import { cardClickHandler } from '@/lib/crawlable-card';
 import { Movie } from '@/components/cinema/MovieCard';
+import HeroVideo from '@/components/home/HeroVideo';
+import Deferred from '@/components/common/Deferred';
 
 // Lazy load below-fold components for faster initial load
 const AdBanner = dynamic(() => import('@/components/ads/AdBanner'), {
@@ -400,7 +402,6 @@ export default function HomePageClient({ initialMovies, initialStats, initialTod
   const [mobileAccordion, setMobileAccordion] = useState<string | null>(null);
   const [isScrolled, setIsScrolled] = useState(false);
   const [showAds, setShowAds] = useState(false); // Defer ads for performance
-  const videoRef = useRef<HTMLVideoElement>(null);
 
   // Data from server - no loading needed!
   const [movies] = useState<HomepageMovie[]>(initialMovies);
@@ -424,28 +425,6 @@ export default function HomePageClient({ initialMovies, initialStats, initialTod
     setSelectedEvent(null); // Clear other event type
     setIsEventModalOpen(true);
   };
-
-  // Auto-play video as soon as it can play
-  useEffect(() => {
-    const video = videoRef.current;
-    if (!video) return;
-
-    const playVideo = () => {
-      video.play().catch(() => {});
-    };
-
-    // Try to play immediately if already loaded
-    if (video.readyState >= 2) {
-      playVideo();
-    }
-
-    // Listen for when video can start playing
-    video.addEventListener('canplay', playVideo);
-
-    return () => {
-      video.removeEventListener('canplay', playVideo);
-    };
-  }, []);
 
   const handleMovieClick = (movie: HomepageMovie) => {
     const convertedMovie = convertToMovieFormat(movie);
@@ -703,29 +682,15 @@ export default function HomePageClient({ initialMovies, initialStats, initialTod
 
       {/* Hero Section with Video Background */}
       <section className="relative pt-32 pb-32 px-4 min-h-[600px] md:min-h-[700px]">
-        {/* Video Background - full size, no cropping from top */}
-        <div className="absolute inset-0 w-full h-full">
-          {/* eslint-disable-next-line jsx-a11y/media-has-caption */}
-          <video
-            ref={videoRef}
-            muted
-            loop
-            playsInline
-            autoPlay
-            preload="metadata"
-            poster="/header-poster-v3.jpg"
-            disablePictureInPicture
-            className="absolute inset-0 w-full h-full object-cover"
-            style={{ objectPosition: 'center center' }}
-          >
-            <source src="/header-1080p-v3.webm" type="video/webm" />
-            <source src="/header-1080p-hq-v3.mp4" type="video/mp4" />
-          </video>
-          {/* Dark overlay for better text readability */}
-          <div className="absolute inset-0 bg-black/50" />
-          {/* Subtle navy blue gradient at bottom to blend with background */}
-          <div className="absolute bottom-0 left-0 right-0 h-32 bg-gradient-to-t from-[#0A0A0F] to-transparent" />
-        </div>
+        {/* Hero media — poster everywhere, video on desktop only and only
+            after load. See src/components/home/HeroVideo.tsx for why the
+            video must not be on the critical path. */}
+        <HeroVideo
+          posterSrc="/header-poster-v3.jpg"
+          webmSrc="/header-720p-v4.webm"
+          mp4Src="/header-720p-v4.mp4"
+          posterAlt="Bahrain Nights — events, nightlife and cinema in Bahrain"
+        />
 
         <div className="relative z-10 max-w-7xl mx-auto text-center">
           {/* Hero content - CSS animations instead of framer-motion for faster load */}
@@ -811,10 +776,12 @@ export default function HomePageClient({ initialMovies, initialStats, initialTod
 
       {/* 🆕 HAPPENING NOW - Real-time events with countdown (UNIQUE FEATURE!) */}
       {initialHappeningNowEvents && initialHappeningNowEvents.length > 0 && (
-        <HappeningNow 
-          events={initialHappeningNowEvents} 
-          onEventClick={handleHappeningNowEventClick}
-        />
+        <Deferred minHeight={420}>
+          <HappeningNow 
+            events={initialHappeningNowEvents} 
+            onEventClick={handleHappeningNowEventClick}
+          />
+        </Deferred>
       )}
 
       {/* 🆕 TONIGHT QUICK VIEW - Expandable section with what's on tonight */}
@@ -993,10 +960,12 @@ export default function HomePageClient({ initialMovies, initialStats, initialTod
       {initialTrendingData && (initialTrendingData.venues.length > 0 || initialTrendingData.events.length > 0) && (
         <section className="px-4 mb-12 md:mb-24">
           <div className="max-w-7xl mx-auto">
-            <TrendingSection 
-              venues={initialTrendingData.venues} 
-              events={initialTrendingData.events} 
-            />
+            <Deferred minHeight={400}>
+              <TrendingSection 
+                venues={initialTrendingData.venues} 
+                events={initialTrendingData.events} 
+              />
+            </Deferred>
           </div>
         </section>
       )}
@@ -1006,20 +975,26 @@ export default function HomePageClient({ initialMovies, initialStats, initialTod
 
       {/* International Events Section - After Trending */}
       {initialInternationalEvents && initialInternationalEvents.length > 0 && (
-        <InternationalEventsSection events={initialInternationalEvents} />
+        <Deferred minHeight={400}>
+          <InternationalEventsSection events={initialInternationalEvents} />
+        </Deferred>
       )}
 
       {/* Sponsors Section */}
-      <SponsorsSection />
+      <Deferred minHeight={300}>
+        <SponsorsSection />
+      </Deferred>
 
       {/* Newsletter Section */}
       <section className="mb-12 md:mb-24">
-        <NewsletterSignup 
-          variant="premium"
-          title="Be the First to Know"
-          description="Weekly newsletter launching soon — get exclusive updates on events, dining, and nightlife in Bahrain."
-          source="homepage"
-        />
+        <Deferred minHeight={300}>
+          <NewsletterSignup 
+            variant="premium"
+            title="Be the First to Know"
+            description="Weekly newsletter launching soon — get exclusive updates on events, dining, and nightlife in Bahrain."
+            source="homepage"
+          />
+        </Deferred>
       </section>
 
       {/* Footer */}
@@ -1076,26 +1051,31 @@ export default function HomePageClient({ initialMovies, initialStats, initialTod
         </div>
       </footer>
 
-      {/* Movie Detail Modal */}
-      <MovieModal
-        movie={selectedMovie}
-        isOpen={isMovieModalOpen}
-        onClose={() => setIsMovieModalOpen(false)}
-        onTrailerClick={() => {
-          if (selectedMovie) {
-            setTrailerMovie(selectedMovie);
-            setIsTrailerModalOpen(true);
-          }
-        }}
-      />
+      {/* Movie Detail Modal — mounted only while open, so its chunk is not
+          fetched on page load. */}
+      {isMovieModalOpen && (
+        <MovieModal
+          movie={selectedMovie}
+          isOpen={isMovieModalOpen}
+          onClose={() => setIsMovieModalOpen(false)}
+          onTrailerClick={() => {
+            if (selectedMovie) {
+              setTrailerMovie(selectedMovie);
+              setIsTrailerModalOpen(true);
+            }
+          }}
+        />
+      )}
 
-      {/* Trailer Modal */}
-      <TrailerModal
-        isOpen={isTrailerModalOpen}
-        onClose={() => setIsTrailerModalOpen(false)}
-        title={trailerMovie?.title || ''}
-        trailerUrl={trailerMovie?.trailerUrl || ''}
-      />
+      {/* Trailer Modal — same: mounted only while open. */}
+      {isTrailerModalOpen && (
+        <TrailerModal
+          isOpen={isTrailerModalOpen}
+          onClose={() => setIsTrailerModalOpen(false)}
+          title={trailerMovie?.title || ''}
+          trailerUrl={trailerMovie?.trailerUrl || ''}
+        />
+      )}
 
       {/* Today Event Modal */}
       {selectedEvent && (

@@ -213,8 +213,28 @@ export async function getInternationalEvents(opts: {
 // Select only the columns the filter needs — keep homepage light.
 const SELECT_LIGHT = 'country,start_date,end_date,date,status,is_active' as const;
 
+// Module-level cache for the country summary counts (see the function below).
+let cachedCountrySummaries: {
+  value: InternationalCountrySummary[];
+  cachedAt: number;
+} | null = null;
+
 export async function getInternationalCountrySummaries(): Promise<InternationalCountrySummary[]> {
   const today = new Date().toISOString().split('T')[0];
+
+  // The counts are derived by reading every matching international event
+  // (538 rows at the time of writing). That query is a sequential scan and
+  // costs ~500 ms, which lands directly on the homepage's server render.
+  // The numbers only need to be roughly right, and they change slowly, so
+  // they are cached in the module for 10 minutes. On a warm serverless
+  // instance this removes the query from most regenerations.
+  const CACHE_TTL_MS = 10 * 60 * 1000;
+  if (
+    cachedCountrySummaries &&
+    Date.now() - cachedCountrySummaries.cachedAt < CACHE_TTL_MS
+  ) {
+    return cachedCountrySummaries.value;
+  }
 
   const BATCH_SIZE = 1000;
   const sixMonthsAgo = new Date();
@@ -253,7 +273,7 @@ export async function getInternationalCountrySummaries(): Promise<InternationalC
     }
   }
 
-  return Object.entries(counts)
+  const summaries = Object.entries(counts)
     .map(([countryName, count]) => {
       const config = COUNTRY_CONFIG[countryName] || {
         flag: '🌍',
@@ -267,4 +287,7 @@ export async function getInternationalCountrySummaries(): Promise<InternationalC
       };
     })
     .sort((a, b) => b.count - a.count); // descending by count
+
+  cachedCountrySummaries = { value: summaries, cachedAt: Date.now() };
+  return summaries;
 }
