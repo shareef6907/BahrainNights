@@ -10,6 +10,12 @@
 import { createClient } from '@supabase/supabase-js';
 import { scrapeVOX } from './scrape-vox';
 import { scrapeCineco } from './scrape-cineco';
+import {
+  catalogueTitleMatches,
+  fetchOEmbed,
+  pickBestSearchResult,
+  pickBestTmdbVideo,
+} from '../src/lib/trailer-verification';
 
 // Load .env.local for local development
 import { config } from 'dotenv';
@@ -93,41 +99,67 @@ async function findMovieByTitle(title: string): Promise<{ id: string; title: str
 }
 
 /**
- * Search TMDB for movie by title
- * FIXED: No 6-month filter - insert ALL movies
+ * Search TMDB for a movie by title.
+ *
+ * The match is VERIFIED, not assumed. A TMDB search for "john doe" returns
+ * some unrelated film, and the sync used to write that film's id, poster and
+ * synopsis onto a row titled "john doe". So a candidate is only accepted when
+ * its title actually refers to the title we searched for.
  */
 async function searchTMDB(title: string, year?: number): Promise<any | null> {
   if (!TMDB_API_KEY) {
     console.log('  ⚠️ TMDB_API_KEY not set, skipping TMDB lookup');
     return null;
   }
-  
+
   const currentYear = year || new Date().getFullYear();
-  
+
   try {
     // First try with current year
     let searchUrl = `https://api.themoviedb.org/3/search/movie?api_key=${TMDB_API_KEY}&query=${encodeURIComponent(title)}&year=${currentYear}`;
     let response = await fetch(searchUrl);
     let data = await response.json();
-    
+
     // If no results, try without year
     if (!data.results || data.results.length === 0) {
       searchUrl = `https://api.themoviedb.org/3/search/movie?api_key=${TMDB_API_KEY}&query=${encodeURIComponent(title)}`;
       response = await fetch(searchUrl);
       data = await response.json();
     }
-    
+
     if (data.results && data.results.length > 0) {
-      // Take first match - no age filter
-      const movie = data.results[0];
+      // Consider the top few candidates, not just the first, and keep only
+      // those whose own title refers to the title we searched for.
+      const candidates = data.results.slice(0, 5);
+      const accepted = candidates.filter((candidate: any) => {
+        // A candidate whose title does not BEGIN with the title we searched
+        // for is a DIFFERENT film.
+        //
+        // `catalogueTitleMatches` allows the catalogue title to be a PREFIX
+        // of the TMDB title — the scraped "khalifa" is the film "Khalifa:
+        // The Ruler" — but not merely to appear somewhere inside it. That is
+        // what keeps "english" from claiming "Johnny English".
+        const acceptable = catalogueTitleMatches(title, candidate.title);
+        if (!acceptable) {
+          console.log(`  ⚠️ Rejecting TMDB match "${candidate.title}" for "${title}" (no title overlap)`);
+        }
+        return acceptable;
+      });
+
+      if (!accepted.length) {
+        console.log(`  ⚠️ No TMDB candidate for "${title}" matched the title`);
+        return null;
+      }
+
+      const movie = accepted[0];
       const detailsUrl = `https://api.themoviedb.org/3/movie/${movie.id}?api_key=${TMDB_API_KEY}&append_to_response=credits,videos`;
       const detailsResponse = await fetch(detailsUrl);
       const details = await detailsResponse.json();
-      
+
       console.log(`  ✓ Matched: "${movie.title}"`);
       return details;
     }
-    
+
     return null;
   } catch (error) {
     console.error('  ❌ TMDB search error:', error instanceof Error ? error.message : error);
@@ -136,35 +168,90 @@ async function searchTMDB(title: string, year?: number): Promise<any | null> {
 }
 
 /**
- * Search YouTube for trailer
+ * Find a trailer for a film.
+ *
+ * The ORIGINAL implementation searched YouTube for "<title> official trailer"
+ * and took the FIRST hit, with no check that the hit belonged to the film. That
+ * is how a crypto video ended up as the trailer for a Tamil thriller, and how
+ * 115 wrong trailers accumulated across the catalogue.
+ *
+ * The order of preference:
+ *
+ *   1. The cinema's OWN trailer. The Cineco and VOX pages embed the exact
+ *      YouTube key for the film they list, so it is authoritative and needs
+ *      no searching at all.
+ *   2. TMDB's own video list for the film.
+ *   3. A YouTube search, but only a result whose own title names the film.
+ *
+ * Returns null when nothing can be positively matched. An empty trailer is
+ * better than a wrong one.
  */
-async function searchYouTubeTrailer(title: string): Promise<string | null> {
-  if (!YOUTUBE_API_KEY) {
-    // Try without API key (limited requests)
-    try {
-      const searchUrl = `https://www.googleapis.com/youtube/v3/search?part=snippet&q=${encodeURIComponent(title + ' official trailer')}&type=video&maxResults=1`;
-      const response = await fetch(searchUrl);
-      const data = await response.json();
-      
-      if (data.items && data.items.length > 0) {
-        return data.items[0].id.videoId;
+async function findTrailer(
+  title: string,
+  cinemaTrailerUrl?: string,
+  tmdbData?: any,
+  filmTitles?: string[]
+): Promise<{ key: string; source: string } | null> {
+  // ---- Source 1: the cinema's own trailer link ------------------------
+  if (cinemaTrailerUrl) {
+    const match = cinemaTrailerUrl.match(/[?&]v=([A-Za-z0-9_-]{11})/);
+    if (match) {
+      const oembed = await fetchOEmbed(match[1]);
+      if (oembed.status === 200) {
+        console.log(`  🎬 Using the cinema's own trailer (${match[1]})`);
+        return { key: match[1], source: 'cinema' };
       }
-    } catch {
-      // No API key, can't search
     }
-    return null;
   }
-  
+
+  // ---- Source 2: TMDB's own video list --------------------------------
+  const titles = filmTitles?.length ? filmTitles : [title];
+  if (tmdbData?.videos?.results?.length) {
+    const oembedCache = new Map<string, string>();
+    for (const video of tmdbData.videos.results) {
+      if (video.site !== 'YouTube' || !video.key) continue;
+      if (video.type === 'Behind the Scenes' || video.type === 'Bloopers' || video.type === 'Featurette') continue;
+      const oembed = await fetchOEmbed(video.key);
+      if (oembed.status === 200) oembedCache.set(video.key, oembed.title);
+    }
+
+    const best = pickBestTmdbVideo(
+      tmdbData.videos.results,
+      titles,
+      (key) => oembedCache.get(key) ?? null
+    );
+    if (best) {
+      console.log(`  🎬 Using TMDB trailer (${best.key}) — ${best.reason}`);
+      return { key: best.key, source: 'tmdb' };
+    }
+  }
+
+  // ---- Source 3: YouTube search, verified ------------------------------
+  if (!YOUTUBE_API_KEY) return null;
+
   try {
-    const searchUrl = `https://www.googleapis.com/youtube/v3/search?part=snippet&q=${encodeURIComponent(title + ' official trailer')}&type=video&maxResults=1&key=${YOUTUBE_API_KEY}`;
+    const searchUrl = `https://www.googleapis.com/youtube/v3/search?part=snippet&q=${encodeURIComponent(title + ' official trailer')}&type=video&maxResults=10&key=${YOUTUBE_API_KEY}`;
     const response = await fetch(searchUrl);
     const data = await response.json();
-    
-    if (data.items && data.items.length > 0) {
-      return data.items[0].id.videoId;
+    if (!data.items?.length) return null;
+
+    const candidates = data.items.map((item: any) => ({
+      videoId: item.id.videoId as string,
+      title: item.snippet.title as string,
+      channelTitle: item.snippet.channelTitle as string,
+    }));
+
+    const best = pickBestSearchResult(candidates, titles);
+    if (!best) {
+      console.log(`  ⚠️ No YouTube result for "${title}" could be matched to the film — leaving the trailer empty`);
+      return null;
     }
-    
-    return null;
+
+    const oembed = await fetchOEmbed(best.key);
+    if (oembed.status !== 200) return null;
+
+    console.log(`  🎬 Using verified YouTube trailer (${best.key}) — ${best.reason}`);
+    return { key: best.key, source: 'youtube-search' };
   } catch (error) {
     console.error('  ⚠️ YouTube search error:', error instanceof Error ? error.message : error);
     return null;
@@ -182,38 +269,50 @@ function createSlug(title: string): string {
 }
 
 /**
- * Insert new movie into database
+ * Insert a new movie into the database.
+ *
+ * The TITLE written here is TMDB's canonical title, not the title the cinema
+ * site displayed. The old code wrote the scraped title, which meant a row
+ * could carry a scraped title ("john doe", "batulo jun") while holding the
+ * metadata of an entirely different film. The scraped spelling is kept only
+ * as an alias, and only when it differs from the canonical one.
  */
 async function insertMovie(
   title: string,
   tmdbData: any,
   isNowShowing: boolean,
   cinemaPosterUrl?: string,
-  source: string = 'vox'
+  source: string = 'vox',
+  cinemaTrailerUrl?: string
 ): Promise<string | null> {
   try {
-    const slug = createSlug(title);
+    // Prefer TMDB's own title. Fall back to the scraped title only when TMDB
+    // gave us nothing.
+    const canonicalTitle = tmdbData?.title || title;
+    const slug = createSlug(canonicalTitle);
     // Use cinema site poster if TMDB didn't have a valid match
-    const posterUrl = cinemaPosterUrl || (tmdbData?.poster_path 
-      ? `https://image.tmdb.org/t/p/w500${tmdbData.poster_path}` 
+    const posterUrl = cinemaPosterUrl || (tmdbData?.poster_path
+      ? `https://image.tmdb.org/t/p/w500${tmdbData.poster_path}`
       : null);
-    const backdropUrl = tmdbData?.backdrop_path 
-      ? `https://image.tmdb.org/t/p/original${tmdbData.backdrop_path}` 
-      : tmdbData?.poster_path 
-        ? `https://image.tmdb.org/t/p/w500${tmdbData.poster_path}` 
+    const backdropUrl = tmdbData?.backdrop_path
+      ? `https://image.tmdb.org/t/p/original${tmdbData.backdrop_path}`
+      : tmdbData?.poster_path
+        ? `https://image.tmdb.org/t/p/w500${tmdbData.poster_path}`
         : null;
-    
-    // Search for trailer
-    const trailerKey = await searchYouTubeTrailer(title);
-    await wait(500); // Rate limit
-    
+
+    // Find a trailer that has been positively matched to this film. The
+    // cinema's own trailer is preferred; TMDB's video list next; a YouTube
+    // search only if its result's own title names the film.
+    const filmTitles = [canonicalTitle, title, tmdbData?.original_title].filter(Boolean);
+    const trailer = await findTrailer(canonicalTitle, cinemaTrailerUrl, tmdbData, filmTitles);
+
     const genres = tmdbData?.genres?.map((g: any) => g.name) || [];
-    
+
     const { data, error } = await supabase
       .from('movies')
       .insert({
         tmdb_id: tmdbData?.id || null,
-        title: title,
+        title: canonicalTitle,
         slug: slug,
         poster_url: posterUrl,
         backdrop_url: backdropUrl,
@@ -228,7 +327,11 @@ async function insertMovie(
         tmdb_rating: tmdbData?.vote_average || null,
         is_now_showing: isNowShowing,
         is_coming_soon: !isNowShowing,
-        trailer_key: trailerKey,
+        // Only a trailer that was matched to THIS film is written. When
+        // nothing matched, the trailer stays empty rather than being filled
+        // with an unrelated video.
+        trailer_key: trailer?.key ?? null,
+        trailer_url: trailer ? `https://www.youtube.com/watch?v=${trailer.key}` : null,
         genres: genres,
         overview: tmdbData?.overview || null,
         poster_path: tmdbData?.poster_path,
@@ -239,13 +342,13 @@ async function insertMovie(
       } as any)
       .select('id')
       .single();
-    
+
     if (error) {
-      console.error(`  ❌ Error inserting "${title}":`, error.message);
+      console.error(`  ❌ Error inserting "${canonicalTitle}":`, error.message);
       return null;
     }
-    
-    console.log(`  ✅ Added: ${title}`);
+
+    console.log(`  ✅ Added: ${canonicalTitle}`);
     return data?.id || null;
   } catch (error) {
     console.error(`  ❌ Error adding "${title}":`, error instanceof Error ? error.message : error);
@@ -342,6 +445,11 @@ async function syncCinema() {
     // the orphan check read, so the whole source breakdown was wrong.
     const sourceByTitle = new Map<string, Set<string>>();
 
+    // The trailer the cinema itself publishes for each film, keyed by the
+    // same normalised title. This is authoritative: it is the trailer the
+    // cinema is actually showing, so it never needs a search.
+    const cinemaTrailerByTitle = new Map<string, string>();
+
     const addWithSource = (titles: string[], source: string) => {
       for (const t of titles) {
         const key = normalizeTitle(t);
@@ -351,25 +459,33 @@ async function syncCinema() {
       }
     };
     addWithSource(voxResult.nowShowing, 'vox');
-    addWithSource(cinecoResult.nowShowing, 'cineco');
+    addWithSource(cinecoResult.nowShowing.map((m) => m.title), 'cineco');
     addWithSource(voxResult.comingSoon, 'vox');
-    addWithSource(cinecoResult.comingSoon, 'cineco');
+    addWithSource(cinecoResult.comingSoon.map((m) => m.title), 'cineco');
+
+    for (const movie of [...cinecoResult.nowShowing, ...cinecoResult.comingSoon]) {
+      if (!movie.trailerKey) continue;
+      const key = normalizeTitle(movie.title);
+      if (key && !cinemaTrailerByTitle.has(key)) {
+        cinemaTrailerByTitle.set(key, movie.trailerKey);
+      }
+    }
 
     // The title we keep for a group is the first spelling we saw for it.
     const labelByTitle = new Map<string, string>();
-    for (const list of [voxResult.nowShowing, cinecoResult.nowShowing, voxResult.comingSoon, cinecoResult.comingSoon]) {
+    for (const list of [voxResult.nowShowing, cinecoResult.nowShowing.map((m) => m.title), voxResult.comingSoon, cinecoResult.comingSoon.map((m) => m.title)]) {
       for (const t of list) {
         const key = normalizeTitle(t);
         if (key && !labelByTitle.has(key)) labelByTitle.set(key, t);
       }
     }
-    
+
     // Deduplicate
     const nowShowingSet = new Set(
-      [...voxResult.nowShowing, ...cinecoResult.nowShowing].map(normalizeTitle),
+      [...voxResult.nowShowing, ...cinecoResult.nowShowing.map((m) => m.title)].map(normalizeTitle),
     );
     const comingSoonSet = new Set(
-      [...voxResult.comingSoon, ...cinecoResult.comingSoon].map(normalizeTitle),
+      [...voxResult.comingSoon, ...cinecoResult.comingSoon.map((m) => m.title)].map(normalizeTitle),
     );
     
     // Remove from coming soon if also in now showing
@@ -411,7 +527,14 @@ async function syncCinema() {
         await wait(300); // Rate limit
         
         if (tmdbData) {
-          const inserted = await insertMovie(title, tmdbData, true, undefined, sources[0]);
+          const inserted = await insertMovie(
+            title,
+            tmdbData,
+            true,
+            undefined,
+            sources[0],
+            cinemaTrailerByTitle.get(normalizeTitle(title))
+          );
           if (inserted) {
             stats.added++;
           }
@@ -444,7 +567,14 @@ async function syncCinema() {
         await wait(300); // Rate limit
         
         if (tmdbData) {
-          const inserted = await insertMovie(title, tmdbData, false, undefined, sources[0]);
+          const inserted = await insertMovie(
+            title,
+            tmdbData,
+            false,
+            undefined,
+            sources[0],
+            cinemaTrailerByTitle.get(normalizeTitle(title))
+          );
           if (inserted) {
             stats.added++;
           }
