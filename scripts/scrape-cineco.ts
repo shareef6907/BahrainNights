@@ -14,9 +14,23 @@ const CINE_CO_URLS = {
   comingSoon: 'https://bahrain.cineco.net/coming-soon/',
 };
 
+/**
+ * A movie as listed by Cineco.
+ *
+ * `trailerKey` is the YouTube key of the trailer the cinema itself publishes
+ * for the film. When present it is authoritative and needs no searching.
+ */
+export interface ScrapedCinecoMovie {
+  slug: string;
+  title: string;
+  trailerKey?: string;
+  /** True when the title came from a real /amy_movie/ permalink. */
+  trusted?: boolean;
+}
+
 interface ScrapeResult {
-  nowShowing: string[];
-  comingSoon: string[];
+  nowShowing: ScrapedCinecoMovie[];
+  comingSoon: ScrapedCinecoMovie[];
   errors: string[];
 }
 
@@ -57,9 +71,39 @@ function cleanTitle(title: string): string {
 }
 
 /**
- * Check if title is valid movie title
+ * Convert an ALL-CAPS display title to a readable one.
+ *
+ * Cineco renders every movie title in capitals ("THE CAT IN THE HAT(2026)").
+ * Storing that verbatim is fine for matching but reads badly on the site.
+ * Words that are already styled (containing an internal period, e.g. "M.I.A.")
+ * are left alone.
  */
-function isValidTitle(title: string): boolean {
+function toTitleCase(text: string): string {
+  return text
+    .split(' ')
+    .map((word) => {
+      if (!word) return word;
+      // Leave styled acronyms alone.
+      if (word.includes('.') && word.length <= 6) return word;
+      // Keep a leading bracket or quote attached to the word.
+      const match = word.match(/^([("'[]*)(.*?)([)"'\].,!?:]*)$/);
+      if (!match) return word;
+      const [, open, core, close] = match;
+      if (!core) return word;
+      return `${open}${core.charAt(0).toUpperCase()}${core.slice(1).toLowerCase()}${close}`;
+    })
+    .join(' ');
+}
+
+/**
+ * Check if title is valid movie title.
+ *
+ * `trusted` means the title came from a real /amy_movie/ permalink on the
+ * Cineco site. Such a title IS a movie by construction, so the heuristics
+ * that exist to filter out navigation junk must not be applied to it --
+ * Cineco renders its titles in capitals, and "JOHN DOE" is a real film.
+ */
+function isValidTitle(title: string, trusted = false): boolean {
   if (!title || title.length < 2) return false;
 
   const lower = title.toLowerCase();
@@ -82,24 +126,29 @@ function isValidTitle(title: string): boolean {
   ];
   if (junk.some(j => lower === j || lower.includes(j + ' ') || lower.includes(' ' + j))) return false;
 
-  // Skip ALL CAPS short text (probably navigation)
-  if (title === title.toUpperCase() && title.length < 12) return false;
+  // Skip ALL CAPS short text (probably navigation). Not applied to a title
+  // that came from a movie permalink -- those are all capitals legitimately.
+  if (!trusted && title === title.toUpperCase() && title.length < 12) return false;
 
   return title.length >= 3;
 }
 
 /**
- * Scrape movie titles from a Cineco page.
+ * Scrape movies from a Cineco page.
  *
- * Returns the titles in the order they appear, de-duplicated by their
+ * Returns the movies in the order they appear, de-duplicated by their
  * /amy_movie/<slug>/ permalink where one is available.
+ *
+ * Each movie carries the trailer the cinema itself publishes for it, when the
+ * page offers one. That trailer is authoritative -- it is the trailer the
+ * cinema is actually showing -- so it needs no searching and no guessing.
  */
-async function scrapePage(page: Page, url: string): Promise<string[]> {
+async function scrapePage(page: Page, url: string): Promise<ScrapedCinecoMovie[]> {
   console.log(`\n📄 Scraping: ${url}`);
-  
+
   try {
     await page.goto(url, { waitUntil: 'networkidle', timeout: 30000 });
-    
+
     // Wait for page to render
     await page.waitForTimeout(3000);
 
@@ -120,7 +169,7 @@ async function scrapePage(page: Page, url: string): Promise<string[]> {
     // titles come back as "Soy Turkish" and "SOY (TURKISH)" -- the same movie
     // with different casing and punctuation. Comparing the raw titles does not
     // collapse them; comparing the slugs does.
-    let titles: string[] = [];
+    let movies: ScrapedCinecoMovie[] = [];
 
     const linked = await page
       .$$eval('a[href*="/amy_movie/"]', (elements) =>
@@ -133,18 +182,65 @@ async function scrapePage(page: Page, url: string): Promise<string[]> {
       )
       .catch(() => [] as { slug: string; text: string }[]);
 
-    const bySlug = new Map<string, string>();
+    // The trailer the cinema publishes for each film. It lives on the movie
+    // card, as a Fancybox link to a YouTube embed.
+    const trailerBySlug = await page
+      .$$eval('.movie-details, .movie-card, [class*="movie"]', (cards) => {
+        const found: Record<string, string> = {};
+        for (const card of cards) {
+          const link = card.querySelector('a[href*="youtube.com/embed"]');
+          const titleLink = card.querySelector('a[href*="/amy_movie/"]');
+          if (!link || !titleLink) continue;
+          const href = titleLink.getAttribute('href') || '';
+          const slug = (href.match(/\/amy_movie\/([^/?#]+)\/?/) || [])[1] || '';
+          if (!slug || found[slug]) continue;
+          const embed = link.getAttribute('href') || '';
+          const id = (embed.match(/embed\/([A-Za-z0-9_-]{11})/) || [])[1] || '';
+          if (id) found[slug] = id;
+        }
+        return found;
+      })
+      .catch((): Record<string, string> => ({}));
+
+    const bySlug = new Map<string, { title: string; fromText: boolean }>();
     for (const { slug, text } of linked) {
       if (!slug) continue;
-      const title = text && text.length > 1 ? text : slug.replace(/-/g, ' ');
-      // Keep the first non-empty label we see for this slug.
-      if (!bySlug.has(slug) || (!bySlug.get(slug) && title)) {
-        bySlug.set(slug, title);
+      const hasText = Boolean(text) && text.length > 1;
+      const existing = bySlug.get(slug);
+
+      if (!existing) {
+        // No label seen for this slug yet.
+        bySlug.set(slug, { title: hasText ? text : '', fromText: hasText });
+        continue;
+      }
+      if (existing.fromText) continue; // Already have real text.
+
+      // A slug-derived fallback is only a placeholder. Real link text always
+      // wins over it.
+      //
+      // This matters more than it looks. Each movie is rendered TWICE: once
+      // as a poster tile whose link has NO text, and once as a text row whose
+      // link reads "JOHN DOE". The old code kept whichever came first, which
+      // was always the textless poster link, so it fell back to the slug and
+      // produced "john doe" -- lowercased, and with the year stuck on
+      // ("the cat in the hat2026"). The real title was on the page the whole
+      // time.
+      if (hasText) {
+        bySlug.set(slug, { title: text, fromText: true });
       }
     }
-    if (bySlug.size) {
-      titles = Array.from(bySlug.values());
-      console.log(`  Found ${titles.length} titles via /amy_movie/ links`);
+
+    // Fall back to the slug only for a movie we never saw any text for.
+    const resolved = Array.from(bySlug.entries()).map(([slug, entry]) => ({
+      slug,
+      title: entry.title || slug.replace(/-/g, ' '),
+      trailerKey: trailerBySlug[slug] || undefined,
+      trusted: entry.fromText,
+    }));
+
+    if (resolved.length) {
+      movies = resolved;
+      console.log(`  Found ${movies.length} movies via /amy_movie/ links`);
     }
 
     // FALLBACK: CSS selectors, for when the theme changes again.
@@ -156,38 +252,39 @@ async function scrapePage(page: Page, url: string): Promise<string[]> {
       'h3.title',
       '.card-title',
     ];
-    
+
     for (const selector of selectors) {
       try {
         const found = await page.$$eval(selector, (elements) =>
           elements.map(el => el.textContent?.trim()).filter(Boolean) as string[]
         );
-        if (found.length > titles.length) {
-          titles = found;
+        if (found.length > movies.length) {
+          movies = found.map((title) => ({ slug: '', title }));
         }
       } catch {
         // Selector didn't work, try next
       }
     }
 
-    // If no titles found, try getting all h3 elements
-    if (titles.length === 0) {
-      titles = await page.$$eval('h3', (elements) =>
+    // If no movies found, try getting all h3 elements
+    if (movies.length === 0) {
+      const headings = await page.$$eval('h3', (elements) =>
         elements.map(el => el.textContent?.trim()).filter(Boolean) as string[]
       );
+      movies = headings.map((title) => ({ slug: '', title }));
     }
 
     // Also try links with movie info
-    if (titles.length === 0) {
+    if (movies.length === 0) {
       const linkTitles = await page.$$eval('a[href*="movie"]', (elements) =>
         elements.map(el => el.textContent?.trim()).filter(Boolean) as string[]
       );
-      titles = [...titles, ...linkTitles];
+      movies = linkTitles.map((title) => ({ slug: '', title }));
     }
 
-    console.log(`  Found ${titles.length} titles`);
+    console.log(`  Found ${movies.length} movies`);
 
-    return titles;
+    return movies;
   } catch (error) {
     console.error(`  ❌ Error scraping ${url}:`, error instanceof Error ? error.message : error);
     return [];
@@ -223,8 +320,11 @@ export async function scrapeCineco(): Promise<ScrapeResult> {
     // Scrape Now Showing
     const nowShowingRaw = await scrapePage(page, CINE_CO_URLS.nowShowing);
     result.nowShowing = nowShowingRaw
-      .map(cleanTitle)
-      .filter(isValidTitle);
+      .map((movie) => ({
+        ...movie,
+        title: cleanTitle(movie.trusted ? toTitleCase(movie.title) : movie.title),
+      }))
+      .filter((movie) => isValidTitle(movie.title, movie.trusted));
 
     // Small delay between pages
     await page.waitForTimeout(1000);
@@ -232,28 +332,52 @@ export async function scrapeCineco(): Promise<ScrapeResult> {
     // Scrape Coming Soon
     const comingSoonRaw = await scrapePage(page, CINE_CO_URLS.comingSoon);
     result.comingSoon = comingSoonRaw
-      .map(cleanTitle)
-      .filter(isValidTitle);
+      .map((movie) => ({
+        ...movie,
+        title: cleanTitle(movie.trusted ? toTitleCase(movie.title) : movie.title),
+      }))
+      .filter((movie) => isValidTitle(movie.title, movie.trusted));
 
-    // Remove duplicates within each category
-    result.nowShowing = [...new Set(result.nowShowing.map(t => t.toLowerCase()))].map(t =>
-      result.nowShowing.find(x => x.toLowerCase() === t) || t
-    );
-    result.comingSoon = [...new Set(result.comingSoon.map(t => t.toLowerCase()))].map(t =>
-      result.comingSoon.find(x => x.toLowerCase() === t) || t
-    );
+    // Remove duplicates within each category, by slug when we have one and by
+    // title otherwise. The slug is the stable identity; the title is not.
+    const dedupe = (movies: ScrapedCinecoMovie[]) => {
+      const seen = new Map<string, ScrapedCinecoMovie>();
+      for (const movie of movies) {
+        const key = movie.slug || movie.title.toLowerCase();
+        const existing = seen.get(key);
+        if (!existing) {
+          seen.set(key, movie);
+          continue;
+        }
+        // Keep whichever entry actually carries a trailer.
+        if (!existing.trailerKey && movie.trailerKey) {
+          seen.set(key, { ...existing, trailerKey: movie.trailerKey });
+        }
+      }
+      return Array.from(seen.values());
+    };
+    result.nowShowing = dedupe(result.nowShowing);
+    result.comingSoon = dedupe(result.comingSoon);
 
     // Remove movies that appear in both lists (prioritize now showing)
-    const nowShowingSet = new Set(result.nowShowing.map(t => t.toLowerCase()));
-    result.comingSoon = result.comingSoon.filter(t => !nowShowingSet.has(t.toLowerCase()));
+    const nowShowingSet = new Set(
+      result.nowShowing.map((movie) => (movie.slug || movie.title).toLowerCase())
+    );
+    result.comingSoon = result.comingSoon.filter(
+      (movie) => !nowShowingSet.has((movie.slug || movie.title).toLowerCase())
+    );
 
     console.log('\n' + '='.repeat(50));
     console.log('📊 CINE CO SCRAPE SUMMARY');
     console.log('='.repeat(50));
     console.log(`Now Showing: ${result.nowShowing.length}`);
-    result.nowShowing.forEach((title, i) => console.log(`  ${i + 1}. ${title}`));
+    result.nowShowing.forEach((movie, i) =>
+      console.log(`  ${i + 1}. ${movie.title}${movie.trailerKey ? ` [trailer ${movie.trailerKey}]` : ''}`)
+    );
     console.log(`\nComing Soon: ${result.comingSoon.length}`);
-    result.comingSoon.forEach((title, i) => console.log(`  ${i + 1}. ${title}`));
+    result.comingSoon.forEach((movie, i) =>
+      console.log(`  ${i + 1}. ${movie.title}${movie.trailerKey ? ` [trailer ${movie.trailerKey}]` : ''}`)
+    );
 
   } catch (error) {
     console.error('❌ Critical error:', error);
