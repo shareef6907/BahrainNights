@@ -250,7 +250,7 @@ try {
   // ---------------------------------------------------------------------
   console.log('='.repeat(78));
   console.log(
-    `now showing: ${nowRows.length} rows -> ${expected} with a usable poster | ` +
+    `now showing: ${nowRows.length} rows -> ${expected} distinct titles | ` +
       `coming soon: ${soonRows.length} rows -> ${expectedSoon} | rendered: ${rendered}`
   );
   if (failures.length) {
