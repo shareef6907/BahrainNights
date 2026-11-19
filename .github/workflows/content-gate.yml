@@ -18,7 +18,10 @@ concurrency:
 
 jobs:
   content-gate:
-    runs-on: ubuntu-latest
+    # Pinned deliberately. `ubuntu-latest` now resolves to ubuntu26.04, and
+    # it will keep moving. This workflow does not install Playwright, so it is
+    # not broken today, but pinning it removes the class of surprise.
+    runs-on: ubuntu-24.04
     timeout-minutes: 5
     steps:
       - name: Check out base branch (trusted copy of the check script)

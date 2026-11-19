@@ -2,7 +2,7 @@
 
 import React from 'react';
 import { motion } from 'framer-motion';
-import { Play, Star, Clock } from 'lucide-react';
+import { Play, Star, Clock, Film } from 'lucide-react';
 import Image from 'next/image';
 
 export interface Movie {
@@ -10,6 +10,12 @@ export interface Movie {
   title: string;
   slug: string;
   poster: string;
+  /**
+   * False when there is no usable poster artwork. The card then renders a
+   * branded fallback poster instead of a broken image — a film that is
+   * showing must never be hidden for lack of a poster.
+   */
+  hasPoster?: boolean;
   backdrop: string;
   rating: number;
   genres: string[];
@@ -41,15 +47,30 @@ function MovieCard({ movie, index = 0, onMovieClick, onTrailerClick }: MovieCard
       onClick={() => onMovieClick(movie)}
     >
       <div className="relative aspect-[2/3] rounded-xl overflow-hidden bg-slate-800 shadow-lg group-hover:shadow-2xl group-hover:shadow-yellow-500/10 transition-all duration-300">
-        {/* Poster Image */}
-        <Image
-          src={movie.poster}
-          alt={movie.title}
-          fill
-          className="object-cover group-hover:scale-105 transition-transform duration-500"
-          sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 25vw"
-          unoptimized
-        />
+        {/* Poster Image — or a branded fallback when the film has no artwork */}
+        {movie.hasPoster !== false && movie.poster ? (
+          <Image
+            src={movie.poster}
+            alt={movie.title}
+            fill
+            className="object-cover group-hover:scale-105 transition-transform duration-500"
+            sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 25vw"
+            unoptimized
+          />
+        ) : (
+          <div
+            className="absolute inset-0 flex flex-col items-center justify-center bg-gradient-to-br from-[#1c1c1c] via-[#141414] to-[#0a0a0a] px-4 text-center"
+            role="img"
+            aria-label={`${movie.title} — poster unavailable`}
+          >
+            <div className="flex h-14 w-14 items-center justify-center rounded-xl border border-[#d4a853]/40 bg-[#d4a853]/10 mb-3">
+              <Film className="h-6 w-6 text-[#d4a853]" />
+            </div>
+            <span className="text-[10px] font-semibold uppercase tracking-[0.25em] text-[#d4a853]/70">
+              Bahrain Nights
+            </span>
+          </div>
+        )}
 
         {/* Rating Badge */}
         <div className="absolute top-3 right-3 flex items-center gap-1 px-2 py-1 bg-black/80 backdrop-blur-sm rounded-lg">

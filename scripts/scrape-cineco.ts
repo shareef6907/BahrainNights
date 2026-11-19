@@ -8,6 +8,7 @@
  */
 
 import { chromium, type Browser, type Page } from 'playwright';
+import { cleanTitle } from '../src/lib/cinema/title-clean';
 
 const CINE_CO_URLS = {
   nowShowing: 'https://bahrain.cineco.net/now-showing/',
@@ -50,49 +51,6 @@ const SPORTS_KEYWORDS = [
 function isSportsEvent(title: string): boolean {
   const lower = title.toLowerCase();
   return SPORTS_KEYWORDS.some(keyword => lower.includes(keyword));
-}
-
-/**
- * Clean and normalize movie title
- */
-function cleanTitle(title: string): string {
-  if (!title) return '';
-
-  return title
-    // Remove HTML entities
-    .replace(/&amp;/g, '&')
-    .replace(/&#39;/g, "'")
-    .replace(/&quot;/g, '"')
-    .replace(/&lt;/g, '<')
-    .replace(/&gt;/g, '>')
-    // Remove extra whitespace
-    .replace(/\s+/g, ' ')
-    .trim();
-}
-
-/**
- * Convert an ALL-CAPS display title to a readable one.
- *
- * Cineco renders every movie title in capitals ("THE CAT IN THE HAT(2026)").
- * Storing that verbatim is fine for matching but reads badly on the site.
- * Words that are already styled (containing an internal period, e.g. "M.I.A.")
- * are left alone.
- */
-function toTitleCase(text: string): string {
-  return text
-    .split(' ')
-    .map((word) => {
-      if (!word) return word;
-      // Leave styled acronyms alone.
-      if (word.includes('.') && word.length <= 6) return word;
-      // Keep a leading bracket or quote attached to the word.
-      const match = word.match(/^([("'[]*)(.*?)([)"'\].,!?:]*)$/);
-      if (!match) return word;
-      const [, open, core, close] = match;
-      if (!core) return word;
-      return `${open}${core.charAt(0).toUpperCase()}${core.slice(1).toLowerCase()}${close}`;
-    })
-    .join(' ');
 }
 
 /**
@@ -322,7 +280,11 @@ export async function scrapeCineco(): Promise<ScrapeResult> {
     result.nowShowing = nowShowingRaw
       .map((movie) => ({
         ...movie,
-        title: cleanTitle(movie.trusted ? toTitleCase(movie.title) : movie.title),
+        // The shared cleanTitle strips entities, a leading rating token and
+        // trailing tags such as the "(2026)" Cineco appends to its titles.
+        // `toTitleCase` is applied only to a title that came from a real
+        // permalink -- Cineco renders those in capitals.
+        title: cleanTitle(movie.title, { toTitleCase: movie.trusted }),
       }))
       .filter((movie) => isValidTitle(movie.title, movie.trusted));
 
@@ -334,7 +296,7 @@ export async function scrapeCineco(): Promise<ScrapeResult> {
     result.comingSoon = comingSoonRaw
       .map((movie) => ({
         ...movie,
-        title: cleanTitle(movie.trusted ? toTitleCase(movie.title) : movie.title),
+        title: cleanTitle(movie.title, { toTitleCase: movie.trusted }),
       }))
       .filter((movie) => isValidTitle(movie.title, movie.trusted));
 
