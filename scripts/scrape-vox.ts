@@ -6,6 +6,7 @@
  */
 
 import * as cheerio from 'cheerio';
+import { cleanTitle } from '../src/lib/cinema/title-clean';
 
 const VOX_URLS = {
   nowShowing: 'https://bhr.voxcinemas.com/movies/whatson',
@@ -24,20 +25,17 @@ function isSportsEvent(title: string): boolean {
   return SPORTS_KEYWORDS.some(k => title.toLowerCase().includes(k));
 }
 
-function cleanTitle(title: string): string {
-  if (!title) return '';
-  let cleaned = title
-    .replace(/&amp;/g, '&')
-    .replace(/&#39;/g, "'")
-    .replace(/&quot;/g, '"')
-    .replace(/^(PG\s*\d*|18TC|15\+|TC\s*\d+|R|Rated\s+\w+|Rated)\s*/i, '')
-    .replace(/\s+/g, ' ')
-    .trim();
-  // Skip junk
-  const lower = cleaned.toLowerCase();
+/**
+ * Titles a cinema prints that are not films.
+ *
+ * This is deliberately NOT part of the shared cleanTitle: it is a VOX-specific
+ * filter about what the page contains, not a rule about how a title is
+ * formatted. Formatting lives in src/lib/cinema/title-clean.ts and is shared.
+ */
+function isJunkTitle(title: string): boolean {
+  const lower = title.toLowerCase();
   const junk = ['now playing', 'coming soon', 'buy ticket', 'book now', 'english', 'arabic', 'malayalam', '3d', '2d'];
-  if (junk.some(j => lower === j || lower.includes(j + ' '))) return '';
-  return cleaned;
+  return junk.some(j => lower === j || lower.includes(j + ' '));
 }
 
 async function scrapePage(url: string): Promise<string[]> {
@@ -66,10 +64,14 @@ async function scrapeVOX(): Promise<ScrapeResult> {
   console.log('='.repeat(40));
   
   const nowRaw = await scrapePage(VOX_URLS.nowShowing);
-  result.nowShowing = nowRaw.map(cleanTitle).filter(t => t && t.length > 2 && !isSportsEvent(t));
+  result.nowShowing = nowRaw
+    .map(cleanTitle)
+    .filter(t => t && t.length > 2 && !isSportsEvent(t) && !isJunkTitle(t));
   
   const soonRaw = await scrapePage(VOX_URLS.comingSoon);
-  result.comingSoon = soonRaw.map(cleanTitle).filter(t => t && t.length > 2 && !isSportsEvent(t));
+  result.comingSoon = soonRaw
+    .map(cleanTitle)
+    .filter(t => t && t.length > 2 && !isSportsEvent(t) && !isJunkTitle(t));
   
   // Remove duplicates and cross-dups
   const nowSet = new Set(result.nowShowing.map(t => t.toLowerCase()));

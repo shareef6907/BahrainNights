@@ -33,16 +33,35 @@ interface DBMovie {
   scraped_from: string[];
 }
 
-// Helper to construct full TMDB image URLs
+/**
+ * Is this a poster URL we can actually render?
+ *
+ * NOTE: the old check was `poster.includes('null')` — a SUBSTRING test. A
+ * legitimate URL can contain the letters "null" anywhere in it, and such a
+ * film was silently dropped from the page. This compares against the literal
+ * strings instead.
+ */
+function hasUsablePoster(poster: string | null | undefined): boolean {
+  if (!poster) return false;
+  const p = poster.trim();
+  if (!p) return false;
+  if (p === 'null' || p === 'undefined') return false;
+  if (p.includes('placeholder')) return false;
+  return true;
+}
+
+// Helper to construct full TMDB image URLs.
+// Returns '' when there is no usable image, so the caller can render a
+// branded fallback instead of a broken image.
 function getPosterUrl(posterPath: string | null): string {
-  if (!posterPath) return '/images/movie-placeholder.jpg';
-  if (posterPath.startsWith('http')) return posterPath;
+  if (!hasUsablePoster(posterPath)) return '';
+  if (posterPath!.startsWith('http')) return posterPath!;
   return `https://image.tmdb.org/t/p/w500${posterPath}`;
 }
 
 function getBackdropUrl(backdropPath: string | null): string {
-  if (!backdropPath) return '/images/backdrop-placeholder.jpg';
-  if (backdropPath.startsWith('http')) return backdropPath;
+  if (!hasUsablePoster(backdropPath)) return '';
+  if (backdropPath!.startsWith('http')) return backdropPath!;
   return `https://image.tmdb.org/t/p/original${backdropPath}`;
 }
 
@@ -65,6 +84,7 @@ function convertToMovieFormat(dbMovie: DBMovie): Movie {
     title: dbMovie.title,
     slug: dbMovie.slug,
     poster: getPosterUrl(dbMovie.poster_url),
+    hasPoster: hasUsablePoster(dbMovie.poster_url),
     backdrop: getBackdropUrl(dbMovie.backdrop_url),
     rating: dbMovie.tmdb_rating || 0,
     genres: dbMovie.genre || [],
@@ -83,23 +103,113 @@ function convertToMovieFormat(dbMovie: DBMovie): Movie {
   };
 }
 
-// Filter movies with valid posters
-function filterValidMovies(movies: DBMovie[]): DBMovie[] {
-  const validMovies = movies.filter(movie => {
-    const poster = movie.poster_url || '';
-    if (!poster || poster.includes('placeholder') || poster.includes('null')) {
-      return false;
-    }
-    return true;
-  });
+/**
+ * How far is this row's release date from the current cinema window?
+ *
+ * The film actually screening now is the one whose release year is closest to
+ * today. A row with no release date at all is the furthest possible answer,
+ * so it is only ever chosen when nothing better exists.
+ */
+function releaseDistanceFromNow(movie: DBMovie, now: number): number {
+  if (!movie.release_date) return Number.POSITIVE_INFINITY;
+  const t = new Date(movie.release_date).getTime();
+  if (Number.isNaN(t)) return Number.POSITIVE_INFINITY;
+  return Math.abs(t - now);
+}
 
-  // Remove duplicates by title
-  const seen = new Set<string>();
-  return validMovies.filter(movie => {
+/**
+ * Resolve a group of rows that share a title down to the ONE film that is
+ * actually screening.
+ *
+ * WHY NOT "highest rated" or "whichever row sorted first":
+ * The old code kept whichever row the query happened to return first, which
+ * was decided by the ORDER BY — `tmdb_rating DESC` for now-showing and
+ * `release_date ASC` for coming-soon. Both are wrong:
+ *
+ *   - `tmdb_rating DESC` kept the 1995 "Sense and Sensibility" (7.4) over the
+ *     2026 one (7.2) that is actually on screen this month.
+ *   - `release_date ASC` kept the OLDEST row of a coming-soon title, which is
+ *     the same bug class with a different tiebreak.
+ *
+ * The rule is now: the film whose release date is CLOSEST TO NOW wins, because
+ * that is the film the cinema is screening. Only when two rows are equally
+ * close does it fall back to "the one we can actually show" (has a poster),
+ * then to the better rated one, then to a stable id comparison.
+ */
+function resolveCollision(rows: DBMovie[]): DBMovie {
+  if (rows.length === 1) return rows[0];
+  const now = Date.now();
+  return [...rows].sort((a, b) => {
+    const distance = releaseDistanceFromNow(a, now) - releaseDistanceFromNow(b, now);
+    if (distance !== 0) return distance;
+
+    const posterA = hasUsablePoster(a.poster_url) ? 0 : 1;
+    const posterB = hasUsablePoster(b.poster_url) ? 0 : 1;
+    if (posterA !== posterB) return posterA - posterB;
+
+    const ratingA = a.tmdb_rating ?? -1;
+    const ratingB = b.tmdb_rating ?? -1;
+    if (ratingA !== ratingB) return ratingB - ratingA;
+
+    return String(a.id).localeCompare(String(b.id));
+  })[0];
+}
+
+/**
+ * Collapse rows that share a title down to one row per film.
+ *
+ * NOTE: this deliberately does NOT drop rows without a poster. A film that is
+ * showing now must never be hidden for lack of artwork — the card renders a
+ * branded fallback poster instead.
+ */
+function dedupeMovies(movies: DBMovie[]): DBMovie[] {
+  const groups = new Map<string, DBMovie[]>();
+  for (const movie of movies) {
     const key = movie.title.toLowerCase().trim();
-    if (seen.has(key)) return false;
-    seen.add(key);
-    return true;
+    const existing = groups.get(key);
+    if (existing) {
+      existing.push(movie);
+    } else {
+      groups.set(key, [movie]);
+    }
+  }
+  return Array.from(groups.values()).map(resolveCollision);
+}
+
+/**
+ * Display order.
+ *
+ * The ordering is done in JS rather than in the query so it is not at the
+ * mercy of Postgres' NULL handling: `ORDER BY x DESC` puts NULLs FIRST by
+ * default, which is how films with no rating were ending up at the top of the
+ * grid.
+ */
+function sortNowShowing(movies: DBMovie[]): DBMovie[] {
+  return [...movies].sort((a, b) => {
+    const dateA = a.release_date ?? '';
+    const dateB = b.release_date ?? '';
+    if (dateA !== dateB) {
+      if (!dateA) return 1;
+      if (!dateB) return -1;
+      return dateB.localeCompare(dateA);
+    }
+    const ratingA = a.tmdb_rating ?? -1;
+    const ratingB = b.tmdb_rating ?? -1;
+    if (ratingA !== ratingB) return ratingB - ratingA;
+    return a.title.localeCompare(b.title);
+  });
+}
+
+function sortComingSoon(movies: DBMovie[]): DBMovie[] {
+  return [...movies].sort((a, b) => {
+    const dateA = a.release_date ?? '';
+    const dateB = b.release_date ?? '';
+    if (dateA !== dateB) {
+      if (!dateA) return 1;
+      if (!dateB) return -1;
+      return dateA.localeCompare(dateB);
+    }
+    return a.title.localeCompare(b.title);
   });
 }
 
@@ -109,17 +219,15 @@ async function getMovies() {
     supabaseAdmin
       .from('movies')
       .select('*')
-      .eq('is_now_showing', true)
-      .order('tmdb_rating', { ascending: false }),
+      .eq('is_now_showing', true),
     supabaseAdmin
       .from('movies')
       .select('*')
       .eq('is_coming_soon', true)
-      .order('release_date', { ascending: true })
   ]);
 
-  const filteredNowShowing = filterValidMovies(nowShowingRes.data || []);
-  const filteredComingSoon = filterValidMovies(comingSoonRes.data || []);
+  const filteredNowShowing = sortNowShowing(dedupeMovies(nowShowingRes.data || []));
+  const filteredComingSoon = sortComingSoon(dedupeMovies(comingSoonRes.data || []));
 
   const nowShowing = filteredNowShowing.map((m: DBMovie) => convertToMovieFormat(m));
   const comingSoon = filteredComingSoon.map((m: DBMovie) => convertToMovieFormat(m));
@@ -165,7 +273,11 @@ async function getFeaturedTrailers(): Promise<Movie[]> {
       .order('release_date', { ascending: false })
       .limit(8);
 
-    return filterValidMovies(fallbackMovies || [])
+    // The hero needs artwork. A trailer with neither a poster nor a backdrop
+    // is skipped HERE — this is the hero's own requirement, not the grid's.
+    // A film in the grid is never hidden for lack of a poster.
+    return sortNowShowing(dedupeMovies(fallbackMovies || []))
+      .filter(m => hasUsablePoster(m.poster_url) || hasUsablePoster(m.backdrop_url))
       .filter(m => m.trailer_key)
       .map(m => convertToMovieFormat(m));
   } catch (err) {

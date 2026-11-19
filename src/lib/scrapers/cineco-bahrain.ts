@@ -5,6 +5,7 @@
  */
 
 import * as cheerio from 'cheerio';
+import { cleanTitle } from '../cinema/title-clean';
 
 // Types
 export interface ScrapedMovie {
@@ -31,28 +32,20 @@ export const CINECO_URLS = {
 };
 
 /**
- * Clean and normalize movie title
+ * Clean and normalize movie title.
+ *
+ * The implementation is shared with every other cinema scraper — see
+ * src/lib/cinema/title-clean.ts. There used to be FOUR copies of this
+ * function, and the one sync-cinema actually ran was the broken one.
+ *
+ * This scraper reads Cineco's all-caps titles, so it asks the shared
+ * implementation for Title Case as well.
  */
-export function cleanTitle(title: string): string {
-  if (!title) return '';
+export { cleanTitle } from '../cinema/title-clean';
 
-  return title
-    .trim()
-    // Remove (YEAR) suffix like (2025) or (NEPALI 2026)
-    .replace(/\s*\([A-Z]*\s*\d{4}\)\s*$/gi, '')
-    // Remove language suffix in parens like (EN), (TAMIL)
-    .replace(/\s*\((?:EN|AR|HI|TA|TE|ML|SI|NE|ENGLISH|ARABIC|HINDI|TAMIL|TELUGU|MALAYALAM|SINHALA|NEPALI)\)\s*$/gi, '')
-    // Remove common tags and ratings
-    .replace(/\s*\(?\s*(pg|pg-?\d+|15\+?|18\+?|tbc|tc)\s*\)?$/gi, '')
-    // Remove duration info
-    .replace(/\s*-?\s*\d+\s*(mins?|hours?|hr?s?)\s*$/gi, '')
-    // Clean up multiple spaces
-    .replace(/\s+/g, ' ')
-    // Convert to title case for consistency
-    .split(' ')
-    .map(word => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase())
-    .join(' ')
-    .trim();
+/** This scraper's variant: Cineco renders every title in capitals. */
+function cleanCinecoTitle(title: string): string {
+  return cleanTitle(title, { toTitleCase: true });
 }
 
 /**
@@ -114,7 +107,7 @@ function parseNowShowingFromHTML(html: string): ScrapedMovie[] {
       
       // Get title
       const rawTitle = $link.text().trim();
-      const title = cleanTitle(rawTitle);
+      const title = cleanCinecoTitle(rawTitle);
       
       if (!isValidTitle(title)) return;
       
@@ -232,7 +225,7 @@ function parseComingSoonFromHTML(html: string): ScrapedMovie[] {
       
       // Get title
       const rawTitle = $link.text().trim();
-      const title = cleanTitle(rawTitle);
+      const title = cleanCinecoTitle(rawTitle);
       
       if (!isValidTitle(title)) return;
       

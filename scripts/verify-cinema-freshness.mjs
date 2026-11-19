@@ -84,43 +84,63 @@ async function getText(url) {
 }
 
 /**
- * Mirrors filterValidMovies() in src/app/cinema/page.tsx exactly:
- * a movie must have a poster_url that is not a placeholder, and duplicates are
- * removed by lower-cased title. If this copy ever drifts from the page's
- * filter, CHECK C would report a false loss - so it is kept deliberately
- * literal.
+ * Mirrors the page's dedupe in src/app/cinema/page.tsx:
+ * duplicates are removed by lower-cased title, and the surviving row of each
+ * group is the one whose release_date is closest to now (the film actually
+ * screening) — NOT the highest rated and NOT whichever row sorted first.
+ *
+ * It deliberately does NOT drop rows without a poster any more: the page now
+ * renders a branded fallback poster instead of hiding the film, so every
+ * now-showing row reaches the page.
+ *
+ * If this copy ever drifts from the page's logic, CHECK C would report a false
+ * loss - so it is kept deliberately literal.
  */
-function filterValidMovies(movies) {
-  const valid = movies.filter((m) => {
-    const poster = m.poster_url || '';
-    if (!poster || poster.includes('placeholder') || poster.includes('null')) return false;
-    return true;
-  });
-  const seen = new Set();
-  return valid.filter((m) => {
+function dedupeMovies(movies) {
+  const groups = new Map();
+  for (const m of movies) {
     const key = (m.title || '').toLowerCase().trim();
-    if (seen.has(key)) return false;
-    seen.add(key);
-    return true;
-  });
+    const list = groups.get(key);
+    if (list) list.push(m);
+    else groups.set(key, [m]);
+  }
+  const now = Date.now();
+  const distance = (m) => {
+    if (!m.release_date) return Number.POSITIVE_INFINITY;
+    const t = new Date(m.release_date).getTime();
+    if (Number.isNaN(t)) return Number.POSITIVE_INFINITY;
+    return Math.abs(t - now);
+  };
+  const out = [];
+  for (const list of groups.values()) {
+    const sorted = [...list].sort((a, b) => {
+      const d = distance(a) - distance(b);
+      if (d !== 0) return d;
+      const pa = a.poster_url ? 0 : 1;
+      const pb = b.poster_url ? 0 : 1;
+      if (pa !== pb) return pa - pb;
+      const ra = a.tmdb_rating ?? -1;
+      const rb = b.tmdb_rating ?? -1;
+      if (ra !== rb) return rb - ra;
+      return String(a.id).localeCompare(String(b.id));
+    });
+    out.push(sorted[0]);
+  }
+  return out;
 }
 
 /**
  * Counts the movie cards actually rendered on the page.
  *
- * Movie cards render their poster with loading="lazy"; the Netflix-style hero
- * image above the grid does not. Counting only lazy-loaded <img> tags gives
- * exactly the "Now Showing" grid - which is what the server renders, because
- * "Coming Soon" is behind a client-side tab and is not in the initial HTML.
+ * Each grid card carries data-testid="cinema-movie-card". Counting that
+ * marker is exact for BOTH kinds of card: one with a poster image and one
+ * with the branded fallback poster for a film that has no artwork. (An earlier
+ * version counted lazy-loaded <img> tags, which silently under-counted every
+ * film without a poster.)
  */
 function countRenderedCards(html) {
-  const lazyTags = html.match(/<img[^>]*loading="lazy"[^>]*>/g) || [];
-  const alts = new Set();
-  for (const tag of lazyTags) {
-    const m = tag.match(/alt="([^"]*)"/);
-    if (m) alts.add(m[1]);
-  }
-  return alts.size;
+  const matches = html.match(/data-testid="cinema-movie-card"/g) || [];
+  return matches.length;
 }
 
 console.log('='.repeat(78));
@@ -207,8 +227,8 @@ try {
   console.log('C. PAGE RENDERING');
   const html = await getText(`${SITE}/cinema`);
   const rendered = countRenderedCards(html);
-  const expected = filterValidMovies(nowRows).length;
-  const expectedSoon = filterValidMovies(soonRows).length;
+  const expected = dedupeMovies(nowRows).length;
+  const expectedSoon = dedupeMovies(soonRows).length;
 
   if (rendered === 0) {
     fail('The /cinema page rendered 0 movie cards.');

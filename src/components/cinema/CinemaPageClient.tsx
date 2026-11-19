@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useCallback } from 'react';
 import Image from 'next/image';
-import { Play, X, Star, Clock, Calendar, ExternalLink } from 'lucide-react';
+import { Play, X, Star, Clock, Calendar, ExternalLink, Film } from 'lucide-react';
 import { Movie } from './MovieCard';
 import NetflixHero from './NetflixHero';
 
@@ -149,6 +149,7 @@ function MovieCard({
   return (
     <div
       className="group relative aspect-[2/3] rounded-xl overflow-hidden cursor-pointer transition-all duration-300 ease-out"
+      data-testid="cinema-movie-card"
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
       onClick={onClick}
@@ -157,14 +158,29 @@ function MovieCard({
         boxShadow: isHovered ? '0 20px 40px rgba(212, 168, 83, 0.15)' : 'none',
       }}
     >
-      {/* Poster Image */}
-      <Image
-        src={movie.poster}
-        alt={movie.title}
-        fill
-        className="object-cover transition-transform duration-500 group-hover:scale-105"
-        sizes="(max-width: 640px) 50vw, (max-width: 768px) 33vw, (max-width: 1024px) 25vw, 20vw"
-      />
+      {/* Poster Image — or a branded fallback when the film has no artwork */}
+      {movie.hasPoster !== false && movie.poster ? (
+        <Image
+          src={movie.poster}
+          alt={movie.title}
+          fill
+          className="object-cover transition-transform duration-500 group-hover:scale-105"
+          sizes="(max-width: 640px) 50vw, (max-width: 768px) 33vw, (max-width: 1024px) 25vw, 20vw"
+        />
+      ) : (
+        <div
+          className="absolute inset-0 flex flex-col items-center justify-center bg-gradient-to-br from-[#1c1c1c] via-[#141414] to-[#0a0a0a] px-4 text-center"
+          role="img"
+          aria-label={`${movie.title} — poster unavailable`}
+        >
+          <div className="flex h-14 w-14 items-center justify-center rounded-xl border border-[#d4a853]/40 bg-[#d4a853]/10 mb-3">
+            <Film className="h-6 w-6 text-[#d4a853]" />
+          </div>
+          <span className="text-[10px] font-semibold uppercase tracking-[0.25em] text-[#d4a853]/70">
+            Bahrain Nights
+          </span>
+        </div>
+      )}
 
       {/* Gradient Overlay */}
       <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/20 to-transparent opacity-60 group-hover:opacity-80 transition-opacity" />
@@ -290,12 +306,23 @@ function MovieModal({
             {/* Poster */}
             <div className="flex-shrink-0">
               <div className="relative w-40 sm:w-48 aspect-[2/3] rounded-xl overflow-hidden shadow-2xl">
-                <Image
-                  src={movie.poster}
-                  alt={movie.title}
-                  fill
-                  className="object-cover"
-                />
+                {movie.hasPoster !== false && movie.poster ? (
+                  <Image
+                    src={movie.poster}
+                    alt={movie.title}
+                    fill
+                    className="object-cover"
+                  />
+                ) : (
+                  <div className="absolute inset-0 flex flex-col items-center justify-center bg-gradient-to-br from-[#1c1c1c] via-[#141414] to-[#0a0a0a] px-3 text-center">
+                    <div className="flex h-12 w-12 items-center justify-center rounded-xl border border-[#d4a853]/40 bg-[#d4a853]/10 mb-2">
+                      <Film className="h-5 w-5 text-[#d4a853]" />
+                    </div>
+                    <span className="text-[9px] font-semibold uppercase tracking-[0.2em] text-[#d4a853]/70">
+                      Bahrain Nights
+                    </span>
+                  </div>
+                )}
                 {isComingSoon && (
                   <div className="absolute inset-0 bg-black/40 flex items-center justify-center">
                     <span className="bg-[#d4a853] text-black text-xs font-bold px-3 py-1 rounded-full">

@@ -3,7 +3,7 @@
 /**
  * Cinema Sync - Main Orchestrator
  * Scrapes VOX & Cineco, syncs with database using TMDB
- * 
+ *
  * Run: npx tsx scripts/sync-cinema.ts
  */
 
@@ -62,17 +62,17 @@ function normalizeTitle(title: string): string {
 /**
  * Find movie in database by fuzzy title match
  */
-async function findMovieByTitle(title: string): Promise<{ id: string; title: string; scraped_from?: string[] | null } | null> {
+async function findMovieByTitle(title: string): Promise<{ id: string; title: string; poster_url?: string | null; scraped_from?: string[] | null } | null> {
   const normalized = normalizeTitle(title);
   
   // Get all movies from database
   const { data: movies } = await supabase
     .from('movies')
-    .select('id, title, scraped_from')
+    .select('id, title, poster_url, scraped_from')
     .order('title');
-  
+
   if (!movies || movies.length === 0) return null;
-  
+
   // Try exact match first (normalized)
   for (const movie of movies) {
     if (normalizeTitle(movie.title) === normalized) {
@@ -80,7 +80,7 @@ async function findMovieByTitle(title: string): Promise<{ id: string; title: str
       return movie;
     }
   }
-  
+
   // Try case-insensitive contains
   const lowerTitle = title.toLowerCase();
   for (const movie of movies) {
@@ -93,7 +93,7 @@ async function findMovieByTitle(title: string): Promise<{ id: string; title: str
       }
     }
   }
-  
+
   // No match found
   return null;
 }
@@ -136,8 +136,8 @@ async function searchTMDB(title: string, year?: number): Promise<any | null> {
         // for is a DIFFERENT film.
         //
         // `catalogueTitleMatches` allows the catalogue title to be a PREFIX
-        // of the TMDB title — the scraped "khalifa" is the film "Khalifa:
-        // The Ruler" — but not merely to appear somewhere inside it. That is
+        // of the TMDB title - the scraped "khalifa" is the film "Khalifa:
+        // The Ruler" - but not merely to appear somewhere inside it. That is
         // what keeps "english" from claiming "Johnny English".
         const acceptable = catalogueTitleMatches(title, candidate.title);
         if (!acceptable) {
@@ -221,7 +221,7 @@ async function findTrailer(
       (key) => oembedCache.get(key) ?? null
     );
     if (best) {
-      console.log(`  🎬 Using TMDB trailer (${best.key}) — ${best.reason}`);
+      console.log(`  🎬 Using TMDB trailer (${best.key}) - ${best.reason}`);
       return { key: best.key, source: 'tmdb' };
     }
   }
@@ -243,14 +243,14 @@ async function findTrailer(
 
     const best = pickBestSearchResult(candidates, titles);
     if (!best) {
-      console.log(`  ⚠️ No YouTube result for "${title}" could be matched to the film — leaving the trailer empty`);
+      console.log(`  ⚠️ No YouTube result for "${title}" could be matched to the film - leaving the trailer empty`);
       return null;
     }
 
     const oembed = await fetchOEmbed(best.key);
     if (oembed.status !== 200) return null;
 
-    console.log(`  🎬 Using verified YouTube trailer (${best.key}) — ${best.reason}`);
+    console.log(`  🎬 Using verified YouTube trailer (${best.key}) - ${best.reason}`);
     return { key: best.key, source: 'youtube-search' };
   } catch (error) {
     console.error('  ⚠️ YouTube search error:', error instanceof Error ? error.message : error);
@@ -269,15 +269,97 @@ function createSlug(title: string): string {
 }
 
 /**
- * Insert a new movie into the database.
+ * Find a row by TMDB id.
  *
- * The TITLE written here is TMDB's canonical title, not the title the cinema
- * site displayed. The old code wrote the scraped title, which meant a row
- * could carry a scraped title ("john doe", "batulo jun") while holding the
- * metadata of an entirely different film. The scraped spelling is kept only
- * as an alias, and only when it differs from the canonical one.
+ * tmdb_id carries a UNIQUE index (movies_tmdb_id_key), so this is an indexed
+ * lookup and there can be at most one match.
  */
-async function insertMovie(
+async function findMovieByTmdbId(tmdbId: number): Promise<{ id: string; slug: string } | null> {
+  const { data } = await supabase
+    .from('movies')
+    .select('id, slug')
+    .eq('tmdb_id', tmdbId)
+    .maybeSingle();
+  return (data as { id: string; slug: string } | null) || null;
+}
+
+/**
+ * Find a row by slug. slug carries a UNIQUE constraint.
+ */
+async function findMovieBySlug(slug: string): Promise<{ id: string; slug: string; tmdb_id: number | null } | null> {
+  const { data } = await supabase
+    .from('movies')
+    .select('id, slug, tmdb_id')
+    .eq('slug', slug)
+    .maybeSingle();
+  return (data as { id: string; slug: string; tmdb_id: number | null } | null) || null;
+}
+
+/**
+ * Work out a slug that is safe to write.
+ *
+ * The slug is published in the sitemap and in search results, so it must not
+ * change from one sync to the next. The rules:
+ *
+ *   - If the film is already in the table under this TMDB id, its EXISTING
+ *     slug is reused. A re-sync never churns a published URL.
+ *   - Otherwise the plain slug of the canonical title is used, and if that is
+ *     already held by a DIFFERENT film it is disambiguated with the TMDB id
+ *     (matching the convention the table already uses, e.g. "rocky-1366").
+ */
+async function resolveSlug(canonicalTitle: string, tmdbId: number | null, source: string): Promise<string> {
+  const base = createSlug(canonicalTitle);
+  if (!base) return `movie-${Date.now()}`;
+
+  const holder = await findMovieBySlug(base);
+  if (!holder) return base;
+
+  // The slug is held by the same film (same TMDB id, or both without one) -
+  // keep it.
+  if (tmdbId !== null && holder.tmdb_id === tmdbId) return base;
+  if (tmdbId === null && holder.tmdb_id === null) return base;
+
+  const withId = tmdbId !== null ? `${base}-${tmdbId}` : `${base}-${source}`;
+  if (!(await findMovieBySlug(withId))) return withId;
+
+  let n = 2;
+  while (await findMovieBySlug(`${withId}-${n}`)) n++;
+  return `${withId}-${n}`;
+}
+
+/**
+ * Write a film into the table, updating it in place when it is already there.
+ *
+ * WHY AN UPSERT AND NOT AN INSERT
+ * -------------------------------
+ * The old code used `.insert(`. On 2026-11-18 that produced, in the
+ * production log:
+ *
+ *   ❌ Error inserting "OM - Chapter 1: Udhiram - The Blood":
+ *      duplicate key value violates unique constraint "movies_tmdb_id_key"
+ *
+ * The film was simply LOST - the error was logged and the sync moved on. An
+ * upsert on the same unique key updates the existing row instead of failing.
+ *
+ * THE NULL tmdb_id PROBLEM
+ * ------------------------
+ * `ON CONFLICT` never fires for a NULL key, so an upsert on `tmdb_id` would
+ * INSERT a brand new row on every single run for a film that TMDB does not
+ * know about - the table would grow a duplicate every run.
+ *
+ * The strategy is therefore two conflict targets:
+ *
+ *   - the film HAS a TMDB id  -> conflict on `tmdb_id` (there is a UNIQUE
+ *     index on it, movies_tmdb_id_key), so the same film updates in place
+ *     even when its title spelling changed;
+ *   - the film has NO TMDB id -> conflict on `slug`, which is UNIQUE and NOT
+ *     NULL on every row, so the film still updates in place instead of
+ *     duplicating.
+ *
+ * Only fields we actually know are written. A run with no TMDB data does not
+ * blank out a poster, a rating or a release date that a previous run stored.
+ */
+async function upsertMovie(
   title: string,
   tmdbData: any,
   isNowShowing: boolean,
@@ -289,7 +371,8 @@ async function insertMovie(
     // Prefer TMDB's own title. Fall back to the scraped title only when TMDB
     // gave us nothing.
     const canonicalTitle = tmdbData?.title || title;
-    const slug = createSlug(canonicalTitle);
+    const tmdbId: number | null = tmdbData?.id ?? null;
+
     // Use cinema site poster if TMDB didn't have a valid match
     const posterUrl = cinemaPosterUrl || (tmdbData?.poster_path
       ? `https://image.tmdb.org/t/p/w500${tmdbData.poster_path}`
@@ -300,6 +383,11 @@ async function insertMovie(
         ? `https://image.tmdb.org/t/p/w500${tmdbData.poster_path}`
         : null;
 
+    // Reuse the slug the film already has, so a re-sync never churns a URL
+    // that the sitemap has published.
+    const existingByTmdb = tmdbId !== null ? await findMovieByTmdbId(tmdbId) : null;
+    const slug = existingByTmdb?.slug ?? (await resolveSlug(canonicalTitle, tmdbId, source));
+
     // Find a trailer that has been positively matched to this film. The
     // cinema's own trailer is preferred; TMDB's video list next; a YouTube
     // search only if its result's own title names the film.
@@ -308,51 +396,134 @@ async function insertMovie(
 
     const genres = tmdbData?.genres?.map((g: any) => g.name) || [];
 
+    // Fields that are always safe to write.
+    const payload: Record<string, unknown> = {
+      title: canonicalTitle,
+      slug,
+      is_now_showing: isNowShowing,
+      is_coming_soon: !isNowShowing,
+      scraped_from: [source],
+      updated_at: new Date().toISOString(),
+    };
+
+    // TMDB fields are only written when we actually have them. Writing a
+    // null would blank out a value a previous run stored.
+    if (tmdbData) {
+      payload.tmdb_id = tmdbId;
+      if (posterUrl) payload.poster_url = posterUrl;
+      if (backdropUrl) payload.backdrop_url = backdropUrl;
+      payload.duration_minutes = tmdbData.runtime || null;
+      payload.genre = genres;
+      payload.rating = tmdbData.release_dates?.results?.[0]?.release_dates?.[0]?.certification || null;
+      payload.synopsis = tmdbData.overview || null;
+      payload.release_date = tmdbData.release_date || null;
+      payload.language = tmdbData.original_language || null;
+      payload.director = tmdbData.credits?.crew?.find((c: any) => c.job === 'Director')?.name || null;
+      payload.movie_cast = tmdbData.credits?.cast?.slice(0, 5).map((c: any) => c.name) || null;
+      payload.tmdb_rating = tmdbData.vote_average || null;
+      // Only a trailer that was matched to THIS film is written. When
+      // nothing matched, the trailer stays empty rather than being filled
+      // with an unrelated video.
+      payload.trailer_key = trailer?.key ?? null;
+      payload.trailer_url = trailer ? `https://www.youtube.com/watch?v=${trailer.key}` : null;
+      payload.genres = genres;
+      payload.overview = tmdbData.overview || null;
+      payload.poster_path = tmdbData.poster_path;
+      payload.backdrop_path = tmdbData.backdrop_path;
+      payload.runtime = tmdbData.runtime;
+      payload.popularity = tmdbData.popularity || 0;
+    } else if (cinemaPosterUrl) {
+      // No TMDB data, but the cinema published artwork for the film.
+      payload.poster_url = cinemaPosterUrl;
+    }
+
+    // Merge the source list rather than overwriting it: a film showing at
+    // both VOX and Cineco must list BOTH, and whichever cinema happened to be
+    // scraped first must not erase the other.
+    const existingRow = existingByTmdb ?? (await findMovieBySlug(slug));
+    if (existingRow) {
+      const existingSources = Array.isArray((existingRow as any).scraped_from)
+        ? (existingRow as any).scraped_from
+        : [];
+      const merged = Array.from(new Set([...existingSources, source]));
+      if (merged.length) payload.scraped_from = merged;
+    }
+
+    const onConflict = tmdbId !== null ? 'tmdb_id' : 'slug';
+
     const { data, error } = await supabase
       .from('movies')
-      .insert({
-        tmdb_id: tmdbData?.id || null,
-        title: canonicalTitle,
-        slug: slug,
-        poster_url: posterUrl,
-        backdrop_url: backdropUrl,
-        duration_minutes: tmdbData?.runtime || null,
-        genre: genres,
-        rating: tmdbData?.release_dates?.results?.[0]?.release_dates?.[0]?.certification || null,
-        synopsis: tmdbData?.overview || null,
-        release_date: tmdbData?.release_date || null,
-        language: tmdbData?.original_language || null,
-        director: tmdbData?.credits?.crew?.find((c: any) => c.job === 'Director')?.name || null,
-        movie_cast: tmdbData?.credits?.cast?.slice(0, 5).map((c: any) => c.name) || null,
-        tmdb_rating: tmdbData?.vote_average || null,
-        is_now_showing: isNowShowing,
-        is_coming_soon: !isNowShowing,
-        // Only a trailer that was matched to THIS film is written. When
-        // nothing matched, the trailer stays empty rather than being filled
-        // with an unrelated video.
-        trailer_key: trailer?.key ?? null,
-        trailer_url: trailer ? `https://www.youtube.com/watch?v=${trailer.key}` : null,
-        genres: genres,
-        overview: tmdbData?.overview || null,
-        poster_path: tmdbData?.poster_path,
-        backdrop_path: tmdbData?.backdrop_path,
-        runtime: tmdbData?.runtime,
-        popularity: tmdbData?.popularity || 0,
-        scraped_from: [source],
-      } as any)
+      .upsert(payload as any, { onConflict })
       .select('id')
       .single();
 
     if (error) {
-      console.error(`  ❌ Error inserting "${canonicalTitle}":`, error.message);
+      console.error(`  ❌ Error upserting "${canonicalTitle}":`, error.message);
       return null;
     }
 
-    console.log(`  ✅ Added: ${canonicalTitle}`);
+    console.log(`  ✅ ${existingRow ? 'Updated' : 'Added'}: ${canonicalTitle}`);
     return data?.id || null;
   } catch (error) {
     console.error(`  ❌ Error adding "${title}":`, error instanceof Error ? error.message : error);
     return null;
+  }
+}
+
+/**
+ * Backfill the artwork for a film that is already in the table but has no
+ * poster.
+ *
+ * WHY: a film that is showing must never be invisible. The page used to drop
+ * every row without a poster, which hid 17 of the 29 now-showing films. Some
+ * of those can be given a real poster from TMDB, and the rest get a branded
+ * fallback card.
+ *
+ * Only the ARTWORK and the rating are written. The release date and the
+ * tmdb_id are deliberately left alone:
+ *
+ *   - release_date decides which row wins the page's dedupe, and a row with
+ *     no date is always the furthest from the current cinema window, which is
+ *     exactly the behaviour we want;
+ *   - tmdb_id has a UNIQUE index, and the film may already have a sibling row
+ *     carrying that id, so writing it would fail with a duplicate key.
+ */
+async function backfillPoster(
+  movieId: string,
+  title: string,
+  currentYear: number
+): Promise<boolean> {
+  try {
+    const tmdbData = await searchTMDB(title, currentYear);
+    if (!tmdbData) return false;
+
+    const posterUrl = tmdbData.poster_path
+      ? `https://image.tmdb.org/t/p/w500${tmdbData.poster_path}`
+      : null;
+    if (!posterUrl) return false;
+
+    const update: Record<string, unknown> = {
+      poster_url: posterUrl,
+      poster_path: tmdbData.poster_path,
+      updated_at: new Date().toISOString(),
+    };
+    if (tmdbData.vote_average) update.tmdb_rating = tmdbData.vote_average;
+
+    const { error } = await supabase
+      .from('movies')
+      .update(update)
+      .eq('id', movieId);
+
+    if (error) {
+      console.error(`  ❌ Error backfilling poster for "${title}":`, error.message);
+      return false;
+    }
+
+    console.log(`  🖼️  Backfilled poster from TMDB: ${title}`);
+    return true;
+  } catch (error) {
+    console.error(`  ❌ Error backfilling poster for "${title}":`, error instanceof Error ? error.message : error);
+    return false;
   }
 }
 
@@ -386,12 +557,12 @@ async function updateMovieStatus(
       .from('movies')
       .update(update)
       .eq('id', movieId);
-    
+
     if (error) {
       console.error(`  ❌ Error updating movie:`, error.message);
       return false;
     }
-    
+
     return true;
   } catch (error) {
     console.error(`  ❌ Error updating movie:`, error instanceof Error ? error.message : error);
@@ -407,7 +578,7 @@ async function syncCinema() {
   console.log('='.repeat(60));
   console.log('Started at:', new Date().toISOString());
   console.log('='.repeat(60));
-  
+
   const stats = {
     voxNowShowing: 0,
     voxComingSoon: 0,
@@ -418,23 +589,23 @@ async function syncCinema() {
     removed: 0,
     tmdbErrors: 0,
   };
-  
+
   try {
     // Step 1: Scrape VOX
     console.log('\n📡 Step 1: Scraping VOX Bahrain...');
     const voxResult = await scrapeVOX();
     stats.voxNowShowing = voxResult.nowShowing.length;
     stats.voxComingSoon = voxResult.comingSoon.length;
-    
+
     // Step 2: Scrape Cineco
     console.log('\n📡 Step 2: Scraping Cineco Bahrain...');
     const cinecoResult = await scrapeCineco();
     stats.cinecoNowShowing = cinecoResult.nowShowing.length;
     stats.cinecoComingSoon = cinecoResult.comingSoon.length;
-    
+
     // Step 3: Merge results (deduplicate)
     console.log('\n🔀 Step 3: Merging results...');
-    
+
     // Track WHICH cinema each title came from.
     //
     // The old code pooled the VOX and Cineco title lists into one array and
@@ -487,12 +658,12 @@ async function syncCinema() {
     const comingSoonSet = new Set(
       [...voxResult.comingSoon, ...cinecoResult.comingSoon.map((m) => m.title)].map(normalizeTitle),
     );
-    
+
     // Remove from coming soon if also in now showing
     for (const title of nowShowingSet) {
       comingSoonSet.delete(title);
     }
-    
+
     const mergedNowShowing = Array.from(nowShowingSet).map(k => labelByTitle.get(k) || k);
     const mergedComingSoon = Array.from(comingSoonSet).map(k => labelByTitle.get(k) || k);
 
@@ -501,17 +672,17 @@ async function syncCinema() {
       const set = sourceByTitle.get(normalizeTitle(title));
       return set ? Array.from(set) : ['vox'];
     };
-    
+
     console.log(`  Merged Now Showing: ${mergedNowShowing.length}`);
     console.log(`  Merged Coming Soon: ${mergedComingSoon.length}`);
-    
+
     // Step 4: Process Now Showing
     console.log('\n📊 Step 4: Processing Now Showing movies...');
-    
+
     for (const title of mergedNowShowing) {
       const existing = await findMovieByTitle(title);
       const sources = sourcesFor(title);
-      
+
       if (existing) {
         // Update existing
         const updated = await updateMovieStatus(existing.id, true, false, sources[0], existing.scraped_from);
@@ -519,39 +690,51 @@ async function syncCinema() {
           console.log(`  🔄 Updated: ${title} (Now Showing) [${sources.join('+')}]`);
           stats.updated++;
         }
+
+        // A film that is showing must never be invisible. If this row has no
+        // artwork, try to give it a real poster from TMDB. The rest fall back
+        // to the branded poster card on the page.
+        if (!existing.poster_url) {
+          const currentYear = new Date().getFullYear();
+          await backfillPoster(existing.id, title, currentYear);
+          await wait(300); // Rate limit
+        }
       } else {
-        // Search TMDB and insert new
+        // Search TMDB and write the film.
         console.log(`  🔍 New movie: ${title} - searching TMDB...`);
         const currentYear = new Date().getFullYear();
         const tmdbData = await searchTMDB(title, currentYear);
         await wait(300); // Rate limit
-        
-        if (tmdbData) {
-          const inserted = await insertMovie(
-            title,
-            tmdbData,
-            true,
-            undefined,
-            sources[0],
-            cinemaTrailerByTitle.get(normalizeTitle(title))
-          );
-          if (inserted) {
-            stats.added++;
-          }
-        } else {
+
+        if (!tmdbData) {
+          // No TMDB match - but the film IS screening, so it must still be
+          // written. The old code skipped it entirely, which is how films
+          // ended up missing from the page altogether.
+          console.log(`  ⚠️ No valid TMDB data for "${title}" - writing the film without it.`);
           stats.tmdbErrors++;
-          console.log(`  ⚠️ Could not find valid TMDB data for: ${title} (may be too old or not in TMDB)`);
+        }
+
+        const inserted = await upsertMovie(
+          title,
+          tmdbData,
+          true,
+          undefined,
+          sources[0],
+          cinemaTrailerByTitle.get(normalizeTitle(title))
+        );
+        if (inserted) {
+          stats.added++;
         }
       }
     }
-    
+
     // Step 5: Process Coming Soon
     console.log('\n📊 Step 5: Processing Coming Soon movies...');
-    
+
     for (const title of mergedComingSoon) {
       const existing = await findMovieByTitle(title);
       const sources = sourcesFor(title);
-      
+
       if (existing) {
         // Update existing
         const updated = await updateMovieStatus(existing.id, false, true, sources[0], existing.scraped_from);
@@ -559,39 +742,45 @@ async function syncCinema() {
           console.log(`  🔄 Updated: ${title} (Coming Soon) [${sources.join('+')}]`);
           stats.updated++;
         }
+
+        if (!existing.poster_url) {
+          const currentYear = new Date().getFullYear();
+          await backfillPoster(existing.id, title, currentYear);
+          await wait(300); // Rate limit
+        }
       } else {
-        // Search TMDB and insert new
+        // Search TMDB and write the film.
         console.log(`  🔍 New movie: ${title} - searching TMDB...`);
         const currentYear = new Date().getFullYear();
         const tmdbData = await searchTMDB(title, currentYear);
         await wait(300); // Rate limit
-        
-        if (tmdbData) {
-          const inserted = await insertMovie(
-            title,
-            tmdbData,
-            false,
-            undefined,
-            sources[0],
-            cinemaTrailerByTitle.get(normalizeTitle(title))
-          );
-          if (inserted) {
-            stats.added++;
-          }
-        } else {
+
+        if (!tmdbData) {
+          console.log(`  ⚠️ No valid TMDB data for "${title}" - writing the film without it.`);
           stats.tmdbErrors++;
-          console.log(`  ⚠️ Could not find valid TMDB data for: ${title} (may be too old or not in TMDB)`);
+        }
+
+        const inserted = await upsertMovie(
+          title,
+          tmdbData,
+          false,
+          undefined,
+          sources[0],
+          cinemaTrailerByTitle.get(normalizeTitle(title))
+        );
+        if (inserted) {
+          stats.added++;
         }
       }
     }
-    
+
     // Step 6: Cleanup - remove movies no longer showing
     console.log('\n🧹 Step 6: Cleaning up stale movies...');
-    
+
     // SAFETY: Only cleanup if scraper found movies (prevents wiping everything on failed scrape)
     const totalMoviesFound = mergedNowShowing.length + mergedComingSoon.length;
     const MIN_MOVIES_THRESHOLD = 5;
-    
+
     if (totalMoviesFound === 0) {
       console.log('  ⚠️ WARNING: Scraper found 0 movies! Skipping cleanup to prevent data loss.');
       console.log('  ⚠️ This indicates a problem with the scraper (site may be down or selectors changed).');
@@ -605,14 +794,14 @@ async function syncCinema() {
         .from('movies')
         .select('id, title')
         .or('is_now_showing.eq.true,is_coming_soon.eq.true');
-      
+
       for (const movie of staleMovies || []) {
         const normTitle = normalizeTitle(movie.title);
-        
+
         // Check if still in any list
         const inNowShowing = nowShowingSet.has(normTitle);
         const inComingSoon = comingSoonSet.has(normTitle);
-        
+
         if (!inNowShowing && !inComingSoon) {
           // Mark as not showing
           await updateMovieStatus(movie.id, false, false);
@@ -621,7 +810,7 @@ async function syncCinema() {
         }
       }
     }
-    
+
     // Final summary
     console.log('\n' + '='.repeat(60));
     console.log('📈 SYNC COMPLETE');
@@ -636,7 +825,7 @@ async function syncCinema() {
     console.log(`Movies Removed from showing: ${stats.removed}`);
     console.log(`TMDB Lookup Failures: ${stats.tmdbErrors}`);
     console.log('='.repeat(60));
-    
+
     return stats;
   } catch (error) {
     console.error('❌ Fatal error:', error);

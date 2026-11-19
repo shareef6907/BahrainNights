@@ -6,6 +6,7 @@
  */
 
 import * as cheerio from 'cheerio';
+import { cleanTitle } from '../cinema/title-clean';
 
 // Types
 export interface ScrapedMovie {
@@ -47,27 +48,13 @@ export const VOX_URLS = {
 };
 
 /**
- * Clean and normalize movie title
+ * Clean and normalize movie title.
+ *
+ * The implementation is shared with every other cinema scraper — see
+ * src/lib/cinema/title-clean.ts. There used to be FOUR copies of this
+ * function, and the one sync-cinema actually ran was the broken one.
  */
-export function cleanTitle(title: string): string {
-  if (!title) return '';
-
-  return title
-    .trim()
-    // Remove common tags and ratings at the end
-    .replace(/\s*\(?\s*(pg|pg-?\d+|15\+?|18\+?|18tc|tbc|tc|arabic|english|hindi|dub(bed)?)\s*\)?$/gi, '')
-    // Remove rating prefixes (PG15, 18+, etc)
-    .replace(/^(PG\d*|18\+?|15\+?|18TC)\s+/i, '')
-    // Remove duration info
-    .replace(/\s*-?\s*\d+\s*(mins?|hours?|hr?s?)\s*$/gi, '')
-    // Remove IMAX/3D/4DX tags
-    .replace(/\s*\(?\s*(imax|3d|4dx|dolby|atmos|max|gold|kids|vip|theatre)\s*\)?$/gi, '')
-    // Remove year at end
-    .replace(/\s*\(\d{4}\)\s*$/, '')
-    // Clean up multiple spaces
-    .replace(/\s+/g, ' ')
-    .trim();
-}
+export { cleanTitle } from '../cinema/title-clean';
 
 /**
  * Check if title is a valid movie title
