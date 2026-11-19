@@ -16,6 +16,7 @@ import {
   pickBestSearchResult,
   pickBestTmdbVideo,
 } from '../src/lib/trailer-verification';
+import { decideCleanup } from './cinema-cleanup-guard';
 
 // Load .env.local for local development
 import { config } from 'dotenv';
@@ -790,23 +791,46 @@ async function syncCinema() {
       console.log('  ⚠️ Proceeding with cleanup but watching for false positives.');
       console.log('  ⚠️ If this persists, check if VOX/Cineco site structure changed.');
     } else {
-      const { data: staleMovies } = await supabase
-        .from('movies')
-        .select('id, title')
-        .or('is_now_showing.eq.true,is_coming_soon.eq.true');
+      // PER-SOURCE SAFETY.
+      //
+      // The old guard only looked at the COMBINED total, so a single source
+      // failing silently (Cineco -> 0 movies) still passed the threshold via
+      // VOX, and the cleanup then demoted every film that the failed source
+      // had contributed — even though those films were still listed on the
+      // cinema's own site. On 2026-11-19 this dropped the live /cinema page
+      // from 34 cards to 24 in one run.
+      //
+      // If ANY source returned nothing, the fresh lists are incomplete and
+      // every film that source owns looks absent. Do not clean up at all.
+      const sourceTotals: Record<string, number> = {
+        vox: voxResult.nowShowing.length + voxResult.comingSoon.length,
+        cineco: cinecoResult.nowShowing.length + cinecoResult.comingSoon.length,
+      };
+      const cleanupDecision = decideCleanup(sourceTotals);
 
-      for (const movie of staleMovies || []) {
-        const normTitle = normalizeTitle(movie.title);
+      if (!cleanupDecision.run) {
+        console.log(`  ⚠️ WARNING: ${cleanupDecision.reason}.`);
+        console.log('  ⚠️ Skipping cleanup entirely to prevent data loss — every film is preserved.');
+        console.log(`  ::error::Cinema sync: ${cleanupDecision.reason}. Cleanup skipped, all films preserved.`);
+      } else {
+        const { data: staleMovies } = await supabase
+          .from('movies')
+          .select('id, title')
+          .or('is_now_showing.eq.true,is_coming_soon.eq.true');
 
-        // Check if still in any list
-        const inNowShowing = nowShowingSet.has(normTitle);
-        const inComingSoon = comingSoonSet.has(normTitle);
+        for (const movie of staleMovies || []) {
+          const normTitle = normalizeTitle(movie.title);
 
-        if (!inNowShowing && !inComingSoon) {
-          // Mark as not showing
-          await updateMovieStatus(movie.id, false, false);
-          console.log(`  🗑️ Removed from showing: ${movie.title}`);
-          stats.removed++;
+          // Check if still in any list
+          const inNowShowing = nowShowingSet.has(normTitle);
+          const inComingSoon = comingSoonSet.has(normTitle);
+
+          if (!inNowShowing && !inComingSoon) {
+            // Mark as not showing
+            await updateMovieStatus(movie.id, false, false);
+            console.log(`  🗑️ Removed from showing: ${movie.title}`);
+            stats.removed++;
+          }
         }
       }
     }
