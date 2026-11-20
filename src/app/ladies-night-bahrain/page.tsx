@@ -81,7 +81,7 @@ function generateSchema() {
         itemListElement: [
           { '@type': 'ListItem', position: 1, name: 'Trader Vic\'s', description: 'Tuesday - Free drinks for ladies at Ritz-Carlton' },
           { '@type': 'ListItem', position: 2, name: 'CUT Lounge', description: 'Wednesday - 3 complimentary drinks at Four Seasons' },
-          { '@type': 'ListItem', position: 3, name: 'Typhoon', description: 'Tuesday - Free entry and drinks at Le Méridien' },
+          { '@type': 'ListItem', position: 3, name: 'Typhoon', description: 'Tuesday - Free entry and drinks at Gulf Hotel Bahrain' },
           { '@type': 'ListItem', position: 4, name: 'JJ\'s Irish Pub', description: 'Thursday - Ladies drink free all night' },
           { '@type': 'ListItem', position: 5, name: 'Club Wahoo', description: 'Wednesday - Free entry and drinks until midnight' },
         ]
@@ -177,7 +177,7 @@ const ladiesNightsByDay = [
     venues: [
       {
         name: 'Mezzanine',
-        location: 'Le Méridien',
+        location: 'The Westin Bahrain City Centre',
         offer: '3 complimentary drinks for ladies',
         time: '8 PM - 12 AM',
         vibe: 'Chic hotel lounge',
@@ -213,7 +213,7 @@ const ladiesNightsByDay = [
       },
       {
         name: 'Typhoon',
-        location: 'Le Méridien',
+        location: 'Gulf Hotel Bahrain',
         offer: 'Free entry + 3 drinks',
         time: '8 PM - 1 AM',
         vibe: 'Lively party atmosphere',
@@ -232,7 +232,7 @@ const ladiesNightsByDay = [
       },
       {
         name: 'Calexico',
-        location: 'Amwaj',
+        location: 'Rd 3803, Building 98, Block 338, Adliya',
         offer: '3 free margaritas for ladies',
         time: '7 PM - 11 PM',
         vibe: 'Fun Mexican vibes',
@@ -304,7 +304,7 @@ const ladiesNightsByDay = [
     venues: [
       {
         name: 'JJ\'s Irish Pub',
-        location: 'Juffair',
+        location: 'Road 3827, Block 338, Adliya',
         offer: 'Ladies drink free all night',
         time: '8 PM - 2 AM',
         vibe: 'Classic Irish pub',

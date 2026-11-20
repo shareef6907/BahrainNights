@@ -100,8 +100,8 @@ const restaurants = [
     vibe: 'Fast Casual',
   },
   { 
-    name: 'Babel', 
-    location: 'Adliya',
+    name: 'Bebabel', 
+    location: 'The Avenues, Manama',
     style: 'Contemporary Lebanese',
     priceRange: 'BD 15-30',
     highlight: 'Modern Lebanese in trendy Adliya. Creative presentations, social atmosphere.',
@@ -120,8 +120,8 @@ const restaurants = [
     vibe: 'Family',
   },
   { 
-    name: 'Karam Beirut', 
-    location: 'Seef Mall',
+    name: 'Karam Restaurant', 
+    location: 'Palm Square, Budaiya Highway, Jannusan',
     style: 'Mall Lebanese',
     priceRange: 'BD 8-16',
     highlight: 'Solid mall option for Lebanese cravings. Consistent quality, convenient location.',
@@ -362,14 +362,14 @@ export default function BestLebaneseRestaurantsPage() {
               <h3 className="text-lg font-bold text-emerald-400 mb-2">👨‍👩‍👧 Family Dining</h3>
               <p className="text-gray-300 text-sm">
                 <strong>Al Abraaj</strong> — Generous portions, outdoor seating.
-                <br /><strong>Karam Beirut</strong> — Mall-convenient, kid-friendly.
+                <br /><strong>Karam Restaurant</strong> — Mall-convenient, kid-friendly.
               </p>
             </div>
             
             <div className="bg-white/5 border border-white/10 rounded-xl p-6">
               <h3 className="text-lg font-bold text-emerald-400 mb-2">🍸 Trendy Night Out</h3>
               <p className="text-gray-300 text-sm">
-                <strong>Babel</strong> — Contemporary Lebanese, Adliya vibes.
+                <strong>Bebabel</strong> — Contemporary Lebanese at The Avenues.
                 <br /><strong>Em Sherif</strong> — Sophisticated, memorable evening.
               </p>
             </div>

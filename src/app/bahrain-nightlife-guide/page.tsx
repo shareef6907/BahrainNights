@@ -231,7 +231,7 @@ const ladiesNights = [
 ];
 
 const liveMusic = [
-  { name: 'JJ\'s Irish Pub', type: 'Rock/Pop covers', days: 'Daily', location: 'Juffair' },
+  { name: 'JJ\'s Irish Pub', type: 'Rock/Pop covers', days: 'Daily', location: 'Road 3827, Block 338, Adliya' },
   { name: 'Coda Jazz Lounge', type: 'Jazz/Blues', days: 'Thu-Sat', location: 'Juffair' },
   { name: 'Sherlock Holmes', type: 'Acoustic/Pop', days: 'Wed-Sat', location: 'Gulf Hotel' },
   { name: 'Typhoon Terrace', type: 'Live band & DJ', days: 'Tue-Sat', location: 'Gulf Hotel' },

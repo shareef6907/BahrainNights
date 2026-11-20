@@ -68,3 +68,14 @@ config/
 # scripts/generate-event-redirects.mjs; the committed map itself lives in
 # src/data/event-redirects.ts)
 .event-redirects-cache.json
+
+# Venue audit working files.
+# The committed CSV at docs/venue-audit-2026-11-20.csv carries the exact
+# query URL and the quoted observation per row, so every row stays
+# re-checkable without committing the raw responses or the bulky
+# intermediate dumps.
+scripts/audit/raw/
+scripts/audit/results.json
+scripts/audit/second_source.json
+scripts/audit/bing_results.json
+scripts/audit/google_web_results.json
