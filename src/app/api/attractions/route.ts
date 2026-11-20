@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { supabaseAdmin } from '@/lib/supabase';
+import { PUBLIC_ATTRACTION_SELECT } from '@/lib/public-fields';
 
 export const dynamic = 'force-dynamic';
 
@@ -20,7 +21,7 @@ export async function GET(request: NextRequest) {
 
     let query = supabaseAdmin
       .from('attractions')
-      .select('*', { count: 'exact' })
+      .select(PUBLIC_ATTRACTION_SELECT as any, { count: 'exact' })
       .eq('is_active', true)
       .order('display_order', { ascending: true })
       .order('tripadvisor_rating', { ascending: false, nullsFirst: false })
@@ -63,7 +64,7 @@ export async function GET(request: NextRequest) {
     }
 
     // Transform for frontend
-    const transformedAttractions = (attractions || []).map(attraction => ({
+    const transformedAttractions = (attractions || []).map((attraction: any) => ({
       id: attraction.id,
       name: attraction.name,
       nameArabic: attraction.name_arabic,

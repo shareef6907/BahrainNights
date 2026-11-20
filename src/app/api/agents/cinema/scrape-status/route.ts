@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server';
 import { createClient } from '@supabase/supabase-js';
+import { PUBLIC_AGENT_LOG_SELECT } from '@/lib/public-fields';
 
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!;
 const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY!;
@@ -14,7 +15,7 @@ export async function GET() {
     // Get latest scrape log from GitHub Actions (or any cinema scraper)
     const { data: latestLog, error: logError } = await supabase
       .from('agent_logs')
-      .select('*')
+      .select(PUBLIC_AGENT_LOG_SELECT)
       .or('agent_type.eq.cinema_scraper_github,agent_type.eq.cinema_scraper')
       .order('started_at', { ascending: false })
       .limit(1)

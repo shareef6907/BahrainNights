@@ -5,6 +5,7 @@ import CinemaPageClient from '@/components/cinema/CinemaPageClient';
 import { Movie } from '@/components/cinema/MovieCard';
 import MovieListSchema from '@/components/SEO/MovieListSchema';
 import BreadcrumbSchema from '@/components/SEO/BreadcrumbSchema';
+import { PUBLIC_MOVIE_SELECT } from '@/lib/public-fields';
 
 // Revalidate every 60 seconds for fresh data
 export const revalidate = 60;
@@ -218,16 +219,22 @@ async function getMovies() {
   const [nowShowingRes, comingSoonRes] = await Promise.all([
     supabaseAdmin
       .from('movies')
-      .select('*')
+      .select(PUBLIC_MOVIE_SELECT as any)
       .eq('is_now_showing', true),
     supabaseAdmin
       .from('movies')
-      .select('*')
+      .select(PUBLIC_MOVIE_SELECT as any)
       .eq('is_coming_soon', true)
   ]);
 
-  const filteredNowShowing = sortNowShowing(dedupeMovies(nowShowingRes.data || []));
-  const filteredComingSoon = sortComingSoon(dedupeMovies(comingSoonRes.data || []));
+  // `select()` is given a runtime column list, so the generated row type is
+  // lost; the rows are cast back to `DBMovie` at this boundary.
+  const filteredNowShowing = sortNowShowing(
+    dedupeMovies((nowShowingRes.data || []) as unknown as DBMovie[])
+  );
+  const filteredComingSoon = sortComingSoon(
+    dedupeMovies((comingSoonRes.data || []) as unknown as DBMovie[])
+  );
 
   const nowShowing = filteredNowShowing.map((m: DBMovie) => convertToMovieFormat(m));
   const comingSoon = filteredComingSoon.map((m: DBMovie) => convertToMovieFormat(m));
@@ -248,15 +255,16 @@ async function getFeaturedTrailers(): Promise<Movie[]> {
       const movieIds = featured.map(f => f.movie_id);
       const { data: movies } = await supabaseAdmin
         .from('movies')
-        .select('*')
+        .select(PUBLIC_MOVIE_SELECT as any)
         .in('id', movieIds);
 
       if (movies && movies.length > 0) {
-        const movieMap = new Map(movies.map(m => [m.id, m]));
+        const movieRows = (movies || []) as unknown as DBMovie[];
+        const movieMap = new Map(movieRows.map((m: DBMovie) => [m.id, m]));
         const orderedMovies = featured
-          .map(f => movieMap.get(f.movie_id))
+          .map((f: { movie_id: string }) => movieMap.get(f.movie_id))
           .filter((m): m is DBMovie => m !== undefined && !!m.trailer_key)
-          .map(m => convertToMovieFormat(m));
+          .map((m: DBMovie) => convertToMovieFormat(m));
         
         if (orderedMovies.length > 0) {
           return orderedMovies;
@@ -267,7 +275,7 @@ async function getFeaturedTrailers(): Promise<Movie[]> {
     // Fallback: Get recent movies with trailers
     const { data: fallbackMovies } = await supabaseAdmin
       .from('movies')
-      .select('*')
+      .select(PUBLIC_MOVIE_SELECT as any)
       .eq('is_now_showing', true)
       .not('trailer_key', 'is', null)
       .order('release_date', { ascending: false })
@@ -276,7 +284,7 @@ async function getFeaturedTrailers(): Promise<Movie[]> {
     // The hero needs artwork. A trailer with neither a poster nor a backdrop
     // is skipped HERE — this is the hero's own requirement, not the grid's.
     // A film in the grid is never hidden for lack of a poster.
-    return sortNowShowing(dedupeMovies(fallbackMovies || []))
+    return sortNowShowing(dedupeMovies((fallbackMovies || []) as unknown as DBMovie[]))
       .filter(m => hasUsablePoster(m.poster_url) || hasUsablePoster(m.backdrop_url))
       .filter(m => m.trailer_key)
       .map(m => convertToMovieFormat(m));

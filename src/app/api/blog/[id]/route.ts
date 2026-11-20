@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getAdminClient } from '@/lib/supabase/server';
+import { PUBLIC_BLOG_SELECT } from '@/lib/public-fields';
 
 export async function GET(
   request: NextRequest,
@@ -12,7 +13,7 @@ export async function GET(
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const { data, error } = await (supabase as any)
       .from('blog_articles')
-      .select('*')
+      .select(PUBLIC_BLOG_SELECT)
       .eq('id', id)
       .single();
 

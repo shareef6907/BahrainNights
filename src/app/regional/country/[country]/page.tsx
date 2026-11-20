@@ -5,6 +5,7 @@ import { notFound } from 'next/navigation';
 import { getAdminClient } from '@/lib/supabase/server';
 import { LOCATION_DATA } from '@/types/blog';
 import type { BlogArticle } from '@/types/database';
+import { PUBLIC_BLOG_SELECT } from '@/lib/public-fields';
 
 interface Props {
   params: Promise<{ country: string }>;
@@ -76,7 +77,7 @@ async function getArticles(country: string, city?: string) {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   let query = (supabase as any)
     .from('blog_articles')
-    .select('*')
+      .select(PUBLIC_BLOG_SELECT)
     .eq('status', 'published')
     .eq('country', country)
     .order('created_at', { ascending: false });

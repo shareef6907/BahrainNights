@@ -1,6 +1,7 @@
 import { Suspense } from 'react';
 import { createClient } from '@supabase/supabase-js';
 import FamilyKidsPageClient, { Attraction } from '@/components/attractions/FamilyKidsPageClient';
+import { PUBLIC_ATTRACTION_SELECT } from '@/lib/public-fields';
 
 // Force dynamic rendering
 export const dynamic = 'force-dynamic';
@@ -21,7 +22,7 @@ async function getAttractions(): Promise<Attraction[]> {
 
   const { data, error } = await supabase
     .from('attractions')
-    .select('*')
+      .select(PUBLIC_ATTRACTION_SELECT)
     .eq('is_active', true)
     .eq('category', 'Family & Kids')
     .order('is_featured', { ascending: false })

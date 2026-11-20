@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server';
 import { createClient } from '@supabase/supabase-js';
+import { PUBLIC_CINEMA_SELECT } from '@/lib/public-fields';
 
 export const dynamic = 'force-dynamic';
 
@@ -23,7 +24,7 @@ export async function GET() {
 
     const { data: cinemas, error } = await supabase
       .from('cinemas')
-      .select('*')
+      .select(PUBLIC_CINEMA_SELECT)
       .eq('is_active', true)
       .order('name', { ascending: true });
 

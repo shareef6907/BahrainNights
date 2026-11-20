@@ -21,9 +21,12 @@ export async function GET() {
     const supabase = getSupabaseAdmin();
 
     // Get latest agent run
-    const { data: latestRun, error: runError } = await supabase
-      .from('agent_logs')
-      .select('*')
+    // `errors` and `metadata` are selected because the response publishes
+    // only `errors.length` and `metadata.duration_ms` — never the raw
+    // values. The raw error strings and the pipeline metadata are internal.
+    const { data: latestRun, error: runError } = await (supabase
+      .from('agent_logs') as any)
+      .select('id, started_at, completed_at, status, items_found, items_added, items_updated, errors, metadata')
       .eq('agent_name', 'cinema_sync')
       .order('started_at', { ascending: false })
       .limit(1)

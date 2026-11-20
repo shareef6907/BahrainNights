@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { supabaseAdmin } from '@/lib/supabase';
 import { sortEventsWithFeatured } from '@/lib/utils/eventSorting';
+import { PUBLIC_EVENT_SELECT } from '@/lib/public-fields';
 
 export const dynamic = 'force-dynamic';
 
@@ -23,9 +24,15 @@ export async function GET(request: NextRequest) {
 
     // Try to fetch events - handle case where table might not exist or have different schema
     // Only show Bahrain events in this API (international events have separate page)
+    //
+    // SECURITY: the column list is explicit. `select('*')` on `events` also
+    // pulled `contact_name`, `contact_email` and `contact_phone` — the
+    // submitter's personal contact details, captured from the "submit an
+    // event" form and stored for legal records. Those must never be
+    // published to anonymous callers.
     let query = supabaseAdmin
       .from('events')
-      .select('*')
+      .select(PUBLIC_EVENT_SELECT as any)
       .eq('status', 'published')
       .eq('is_hidden', false)
       .eq('country', 'Bahrain')
@@ -63,7 +70,7 @@ export async function GET(request: NextRequest) {
     let filteredEvents = events || [];
 
     // Try to filter by date field (might be 'date' or 'start_date')
-    filteredEvents = filteredEvents.filter(event => {
+    filteredEvents = filteredEvents.filter((event: any) => {
       const eventDate = event.date || event.start_date;
       if (!eventDate) return true; // Include events without dates
       return new Date(eventDate) >= today;
@@ -72,7 +79,7 @@ export async function GET(request: NextRequest) {
     // Apply date filter
     if (filter && filter !== 'all') {
       const now = new Date();
-      filteredEvents = filteredEvents.filter(event => {
+      filteredEvents = filteredEvents.filter((event: any) => {
         const eventDate = new Date(event.date || event.start_date);
 
         switch (filter) {
@@ -106,7 +113,7 @@ export async function GET(request: NextRequest) {
     }
 
     // Transform events for frontend
-    const transformedEvents = filteredEvents.map(event => {
+    const transformedEvents = filteredEvents.map((event: any) => {
       const eventDateRaw = event.date || event.start_date;
       return {
         id: event.id,

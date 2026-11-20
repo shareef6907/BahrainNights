@@ -6,6 +6,7 @@ import { notFound } from 'next/navigation';
 import { getAdminClient } from '@/lib/supabase/server';
 import { LOCATION_DATA } from '@/types/blog';
 import type { BlogArticle } from '@/types/database';
+import { PUBLIC_BLOG_SELECT } from '@/lib/public-fields';
 
 interface Props {
   params: Promise<{ location: string }>;
@@ -91,7 +92,7 @@ async function getLocationData(location: string) {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const { data: rawArticles } = await (supabase as any)
     .from('blog_articles')
-    .select('*')
+      .select(PUBLIC_BLOG_SELECT)
     .eq('status', 'published')
     .eq('country', location)
     .order('created_at', { ascending: false })
@@ -112,7 +113,7 @@ async function getLocationData(location: string) {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const { data: rawFeatured } = await (supabase as any)
     .from('blog_articles')
-    .select('*')
+      .select(PUBLIC_BLOG_SELECT)
     .eq('status', 'published')
     .eq('country', location)
     .eq('is_featured', true)
