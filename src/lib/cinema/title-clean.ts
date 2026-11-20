@@ -110,6 +110,48 @@ const TRAILING_DURATION = new RegExp(
   'i'
 );
 
+/**
+ * A trailing SCREENING FORMAT, e.g. "Dune: Part Three -Preview Screening".
+ *
+ * A cinema prints the format it is screening a film in as a suffix. It is
+ * NOT part of the title, so "Dune: Part Three" and "Dune: Part Three
+ * -Preview Screening" are the SAME film and must not become two rows.
+ *
+ * The observed real suffixes are:
+ *   -Preview Screening, -Preview, -Special Screening, -Special,
+ *   -Advanced Screening
+ *
+ * The separator may be `-`, `–`, `—`, `:` or whitespace, with any spacing.
+ *
+ * WHY IT NEEDS ITS OWN RULE, AND WHY IT IS ORDERED FIRST
+ * ------------------------------------------------------
+ * "Preview", "Special" and "Advanced" are ordinary English words. The
+ * generic TRAILING_BARE_TAG only strips a KNOWN vocabulary (IMAX, 3D, GOLD…),
+ * so it would never touch them — but a screening suffix must be stripped
+ * BEFORE the parenthesised-tag and duration rules run, because a suffix like
+ * "(Preview Screening)" or "Preview Screening (2D)" puts the format token in
+ * a position the later rules would otherwise consume first.
+ *
+ * The token must be preceded by a separator and followed by the END of the
+ * string, so an ordinary title that merely ENDS in one of these words is
+ * untouched:
+ *
+ *   "Avengers: Doomsday (Infinity Vision)"  -> unchanged  (a real VOX title)
+ *   "The Preview"                           -> unchanged
+ *   "Something Special"                     -> unchanged
+ *   "Crypto"                                -> unchanged
+ *
+ * A SINGLE-WORD "Preview"/"Special" is only stripped when it is introduced
+ * by an EXPLICIT separator (-, –, —, :), because a title that merely ends in
+ * the word "Special" is a title, not a screening format. The multi-word
+ * forms ("Preview Screening", "Special Screening", "Advanced Screening") are
+ * unambiguous and are stripped after plain whitespace too.
+ */
+const TRAILING_SCREENING_FORMAT = new RegExp(
+  String.raw`(?:[-–—:]\s*(?:Preview\s+Screening|Special\s+Screening|Advanced\s+Screening|Preview|Special)|(?:\s+)(?:Preview\s+Screening|Special\s+Screening|Advanced\s+Screening))\s*$`,
+  'i'
+);
+
 /** HTML entities both cinemas' markup uses. */
 const ENTITIES: Array<[RegExp, string]> = [
   [/&amp;/g, '&'],
@@ -165,8 +207,12 @@ export function cleanTitle(title: string, options: CleanTitleOptions = {}): stri
   }
 
   if (stripTrailingTags) {
-    // Order matters. Duration first (it is the most specific), then the
-    // parenthesised tag, then the year, then any bare trailing tag.
+    // Order matters. The screening format comes FIRST: it is the most
+    // specific suffix, and it must be removed before the generic trailing
+    // rules can consume part of it (e.g. "Preview Screening (2D)"). Then
+    // duration, then the parenthesised tag, then the year, then any bare
+    // trailing tag.
+    cleaned = cleaned.replace(TRAILING_SCREENING_FORMAT, '');
     cleaned = cleaned.replace(TRAILING_DURATION, '');
     cleaned = cleaned.replace(TRAILING_PAREN_TAG, '');
     cleaned = cleaned.replace(TRAILING_YEAR, '');

@@ -7,6 +7,8 @@
  * Run: npx tsx scripts/sync-cinema.ts
  */
 
+import fs from 'node:fs';
+import path from 'node:path';
 import { createClient } from '@supabase/supabase-js';
 import { scrapeVOX } from './scrape-vox';
 import { scrapeCineco } from './scrape-cineco';
@@ -17,6 +19,7 @@ import {
   pickBestTmdbVideo,
 } from '../src/lib/trailer-verification';
 import { decideCleanup } from './cinema-cleanup-guard';
+import { applyTitleOverride, getMovieOverride } from '../src/lib/cinema/admin-overrides';
 
 // Load .env.local for local development
 import { config } from 'dotenv';
@@ -63,40 +66,125 @@ function normalizeTitle(title: string): string {
 /**
  * Find movie in database by fuzzy title match
  */
-async function findMovieByTitle(title: string): Promise<{ id: string; title: string; poster_url?: string | null; scraped_from?: string[] | null } | null> {
+/**
+ * The result of a title lookup: an EXACT match, a FUZZY candidate, or
+ * nothing.
+ *
+ * A fuzzy candidate is NOT a match. It is a possibility that a human has to
+ * decide on.
+ */
+export interface TitleLookup {
+  exact: { id: string; title: string; poster_url?: string | null; scraped_from?: string[] | null } | null;
+  /** A near-miss candidate. NEVER applied automatically. */
+  fuzzy: { id: string; title: string } | null;
+}
+
+async function findMovieByTitle(title: string): Promise<TitleLookup> {
   const normalized = normalizeTitle(title);
-  
+
   // Get all movies from database
   const { data: movies } = await supabase
     .from('movies')
     .select('id, title, poster_url, scraped_from')
     .order('title');
 
-  if (!movies || movies.length === 0) return null;
+  if (!movies || movies.length === 0) return { exact: null, fuzzy: null };
 
   // Try exact match first (normalized)
   for (const movie of movies) {
     if (normalizeTitle(movie.title) === normalized) {
       console.log(`  ✓ Exact match found: "${movie.title}" for "${title}"`);
-      return movie;
+      return { exact: movie, fuzzy: null };
     }
   }
 
-  // Try case-insensitive contains
+  /*
+   * FUZZY MATCHING — NO LONGER APPLIED AUTOMATICALLY.
+   *
+   * The old code fell through to a "contains" match and wrote the found row
+   * as if it were the same film. That is how "Fate" came to claim a video
+   * for a completely different film, and it is how two DIFFERENT films
+   * collapse into one row.
+   *
+   * A contains-match is now only ever REPORTED. The row is not updated and
+   * the title is not written to it; instead the pair is recorded for a human
+   * to merge by hand (see `flagForManualMerge`).
+   *
+   * The length guard is kept only to pick the BEST candidate to report.
+   */
   const lowerTitle = title.toLowerCase();
+  let best: { id: string; title: string } | null = null;
+  let bestDelta = Number.POSITIVE_INFINITY;
+
   for (const movie of movies) {
     const movieLower = movie.title.toLowerCase();
     if (movieLower.includes(lowerTitle) || lowerTitle.includes(movieLower)) {
-      // Only match if lengths are similar (avoid "I" matching "I Swear")
-      if (Math.abs(movieLower.length - lowerTitle.length) < 10) {
-        console.log(`  ✓ Partial match found: "${movie.title}" for "${title}"`);
-        return movie;
+      const delta = Math.abs(movieLower.length - lowerTitle.length);
+      // Only consider it a candidate if lengths are similar (avoid "I"
+      // matching "I Swear").
+      if (delta < 10 && delta < bestDelta) {
+        best = { id: movie.id, title: movie.title };
+        bestDelta = delta;
       }
     }
   }
 
-  // No match found
-  return null;
+  return { exact: null, fuzzy: best };
+}
+
+/**
+ * Record a title that could not be matched exactly, for a human to merge.
+ *
+ * The report is WRITTEN BY THE SYNC AT RUNTIME into `reports/`, so it always
+ * reflects the run that produced it. It is a machine-readable artifact: one
+ * JSON object per flagged title, with the scraped title, the candidate, the
+ * candidate's movie id, and the reason.
+ *
+ * The point is that the pair is never merged automatically. A misspellings
+ * merge is a judgement call, and the observed real pairs — "Three Wishes for
+ * Cindrella" vs "Three Wishes for Cinderella", "Om CH.1 Udhiram:the Blood
+ * Wood" vs "OM - Chapter 1: Udhiram - The Blood" — are exactly the cases
+ * where an automatic merge does the wrong thing.
+ */
+const MANUAL_MERGE_REPORT = path.join(process.cwd(), 'reports', 'cinema-manual-merge.json');
+
+export function flagForManualMerge(
+  scrapedTitle: string,
+  candidate: { id: string; title: string },
+  reason: string
+): void {
+  const entry = {
+    scraped_title: scrapedTitle,
+    candidate_movie_id: candidate.id,
+    candidate_title: candidate.title,
+    reason,
+    flagged_at: new Date().toISOString(),
+  };
+
+  try {
+    fs.mkdirSync(path.dirname(MANUAL_MERGE_REPORT), { recursive: true });
+    let existing: unknown[] = [];
+    try {
+      const raw = fs.readFileSync(MANUAL_MERGE_REPORT, 'utf8');
+      const parsed = JSON.parse(raw);
+      if (Array.isArray(parsed)) existing = parsed;
+    } catch {
+      /* no previous report */
+    }
+    // Replace an earlier flag for the same scraped title rather than
+    // appending a duplicate every run.
+    const without = existing.filter(
+      (e: any) => !(e && e.scraped_title === scrapedTitle)
+    );
+    without.push(entry);
+    fs.writeFileSync(MANUAL_MERGE_REPORT, JSON.stringify(without, null, 2));
+    console.log(
+      `  ⚠️  NEEDS MANUAL MERGE: "${scrapedTitle}" ≈ "${candidate.title}" — ` +
+        `recorded in ${path.relative(process.cwd(), MANUAL_MERGE_REPORT)} (not merged automatically)`
+    );
+  } catch (err) {
+    console.warn('  ⚠️  Could not write the manual-merge report:', err);
+  }
 }
 
 /**
@@ -371,8 +459,29 @@ async function upsertMovie(
   try {
     // Prefer TMDB's own title. Fall back to the scraped title only when TMDB
     // gave us nothing.
-    const canonicalTitle = tmdbData?.title || title;
+    const rawTitle = tmdbData?.title || title;
     const tmdbId: number | null = tmdbData?.id ?? null;
+
+    /*
+     * The admin override.
+     *
+     * A cinema may list a film under a short name that is not its real
+     * title — VOX lists TMDB 1719068 as "Crypto", but the film is "Tales
+     * from the Crypto". The scraped title must not win, so the override
+     * replaces it.
+     *
+     * The override is applied HERE, before the payload is built, so that the
+     * title AND the slug are both derived from the corrected title and the
+     * override survives every re-sync.
+     */
+    const canonicalTitle = applyTitleOverride(rawTitle, tmdbId);
+    if (canonicalTitle !== rawTitle) {
+      const override = getMovieOverride(tmdbId);
+      console.log(
+        `  ⭐ Admin override applied: "${rawTitle}" -> "${canonicalTitle}"` +
+          (override?.note ? ` (${override.note})` : '')
+      );
+    }
 
     // Use cinema site poster if TMDB didn't have a valid match
     const posterUrl = cinemaPosterUrl || (tmdbData?.poster_path
@@ -580,6 +689,9 @@ async function syncCinema() {
   console.log('Started at:', new Date().toISOString());
   console.log('='.repeat(60));
 
+  /** When this run started — used to stamp the run log. */
+  const runStartedAt = Date.now();
+
   const stats = {
     voxNowShowing: 0,
     voxComingSoon: 0,
@@ -589,6 +701,7 @@ async function syncCinema() {
     updated: 0,
     removed: 0,
     tmdbErrors: 0,
+    manualMergeFlagged: 0,
   };
 
   try {
@@ -681,7 +794,8 @@ async function syncCinema() {
     console.log('\n📊 Step 4: Processing Now Showing movies...');
 
     for (const title of mergedNowShowing) {
-      const existing = await findMovieByTitle(title);
+      const lookup = await findMovieByTitle(title);
+      const existing = lookup.exact;
       const sources = sourcesFor(title);
 
       if (existing) {
@@ -701,6 +815,23 @@ async function syncCinema() {
           await wait(300); // Rate limit
         }
       } else {
+        /*
+         * No EXACT match. A fuzzy candidate may exist, but it is NOT applied.
+         *
+         * The row is NOT updated from a near-miss — that is the change. The
+         * pair is recorded for a human to merge, and the film is written as
+         * a new row instead, so the site still shows the film that is
+         * actually screening.
+         */
+        if (lookup.fuzzy) {
+          flagForManualMerge(
+            title,
+            lookup.fuzzy,
+            'Fuzzy title match found but NOT applied automatically — a human must decide whether these are the same film.'
+          );
+          stats.manualMergeFlagged++;
+        }
+
         // Search TMDB and write the film.
         console.log(`  🔍 New movie: ${title} - searching TMDB...`);
         const currentYear = new Date().getFullYear();
@@ -733,7 +864,8 @@ async function syncCinema() {
     console.log('\n📊 Step 5: Processing Coming Soon movies...');
 
     for (const title of mergedComingSoon) {
-      const existing = await findMovieByTitle(title);
+      const lookup = await findMovieByTitle(title);
+      const existing = lookup.exact;
       const sources = sourcesFor(title);
 
       if (existing) {
@@ -750,6 +882,16 @@ async function syncCinema() {
           await wait(300); // Rate limit
         }
       } else {
+        // No EXACT match. A fuzzy candidate is reported, never applied.
+        if (lookup.fuzzy) {
+          flagForManualMerge(
+            title,
+            lookup.fuzzy,
+            'Fuzzy title match found but NOT applied automatically — a human must decide whether these are the same film.'
+          );
+          stats.manualMergeFlagged++;
+        }
+
         // Search TMDB and write the film.
         console.log(`  🔍 New movie: ${title} - searching TMDB...`);
         const currentYear = new Date().getFullYear();
@@ -848,7 +990,61 @@ async function syncCinema() {
     console.log(`Movies Updated: ${stats.updated}`);
     console.log(`Movies Removed from showing: ${stats.removed}`);
     console.log(`TMDB Lookup Failures: ${stats.tmdbErrors}`);
+    console.log(`Needs Manual Merge: ${stats.manualMergeFlagged}`);
     console.log('='.repeat(60));
+
+    /*
+     * Record the run so the contribution monitor can see it.
+     *
+     * The monitor (scripts/verify-cinema-freshness.mjs) needs the PER-SOURCE
+     * contribution of each run. Without a run history it can only see the
+     * current state of the table, which cannot distinguish "this source
+     * contributed 20 films" from "this source contributed 20 films ONCE and
+     * has been dead ever since".
+     *
+     * The history is written to `agent_logs.metadata`, keyed by
+     * `trigger: 'cinema-sync'`, alongside the per-source counts:
+     *
+     *   { trigger: 'cinema-sync',
+     *     sources: { vox: { now_showing, coming_soon },
+     *                cineco: { now_showing, coming_soon } } }
+     *
+     * It is a LOG row, not business data — it records what a run did, which
+     * is exactly what a log is for.
+     */
+    try {
+      const { error: logError } = await supabase.from('agent_logs').insert({
+        started_at: runStartedAt,
+        completed_at: new Date().toISOString(),
+        status: 'completed',
+        items_found:
+          stats.voxNowShowing +
+          stats.voxComingSoon +
+          stats.cinecoNowShowing +
+          stats.cinecoComingSoon,
+        items_added: stats.added,
+        items_updated: stats.updated,
+        metadata: {
+          trigger: 'cinema-sync',
+          duration_ms: Date.now() - runStartedAt,
+          sources: {
+            vox: {
+              now_showing: stats.voxNowShowing,
+              coming_soon: stats.voxComingSoon,
+            },
+            cineco: {
+              now_showing: stats.cinecoNowShowing,
+              coming_soon: stats.cinecoComingSoon,
+            },
+          },
+        },
+      });
+      if (logError) {
+        console.warn('  ⚠️ Could not record the run in agent_logs:', logError.message);
+      }
+    } catch (logErr) {
+      console.warn('  ⚠️ Could not record the run in agent_logs:', logErr);
+    }
 
     return stats;
   } catch (error) {

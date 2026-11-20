@@ -52,6 +52,112 @@ const USER_AGENT =
  */
 const EXPECTED_SOURCES = ['vox', 'cineco'];
 
+/**
+ * ============================================================================
+ * THE CONTRIBUTION THRESHOLDS — DERIVED FROM 30 DAYS OF REAL RUNS
+ * ============================================================================
+ *
+ * These numbers are NOT guesses. They are derived from the per-source counts
+ * in the GitHub Actions logs of the cinema-sync workflow over the 30 days
+ * ending 2026-11-20.
+ *
+ * THE RAW DATA
+ * ------------
+ * 12 SUCCESSFUL runs (8 further runs in the window failed and are excluded —
+ * a failed run contributes nothing by definition):
+ *
+ *   run started          vox_now vox_soon cineco_now cineco_soon
+ *   2026-11-20T11:12Z        26       52         22          2
+ *   2026-11-19T15:10Z        26       46         22          2
+ *   2026-11-19T05:45Z        24       44          0          0
+ *   2026-11-19T05:29Z        24       44         20          0
+ *   2026-11-18T21:56Z        24       42         20          0
+ *   2026-11-17T05:05Z        31       48          0          0
+ *   2026-11-17T04:58Z        31       48          0          0
+ *   2026-10-30T09:48Z        31       64          0          0
+ *   2026-10-28T09:29Z        34       60          0          0
+ *   2026-10-26T08:43Z        28       76          0          0
+ *   2026-10-23T08:24Z        30       76          0          0
+ *   2026-10-21T08:25Z        30       68          0          0
+ *
+ * THE DISTRIBUTION
+ * ----------------
+ *   vox, now_showing   : 24, 24, 24, 26, 26, 28, 30, 30, 31, 31, 31, 34
+ *                         min 24   max 34   median 28.5   zero-runs 0 of 12
+ *   vox, coming_soon   : 42, 44, 44, 46, 48, 48, 52, 60, 64, 68, 76, 76
+ *                         min 42   max 76   median 53     zero-runs 0 of 12
+ *   cineco, now_showing: 20, 20, 22, 22  (the non-zero runs)
+ *                         min 20   max 22   zero-runs 8 of 12  (67%)
+ *   cineco, coming_soon: 2, 2           (the non-zero runs)
+ *                         min 2    max 2    zero-runs 10 of 12 (83%)
+ *
+ * THE THRESHOLDS AND WHY
+ * ----------------------
+ * 1. VOLUME, per source — the minimum contribution that means "this source
+ *    is alive", as a COUNT OF FILMS ON THE LIVE PAGE:
+ *
+ *      threshold = 50% of the source's smallest observed NON-ZERO per-run
+ *                  contribution (now_showing + coming_soon), floored at 1
+ *
+ *    The factor of 50% is deliberate: the live page holds the CURRENT
+ *    lineup, which is roughly one run's worth of films, but a cleanup pass
+ *    can drop a film that is still listed on the cinema's own site. Half of
+ *    the smallest healthy run is comfortably below a healthy source and
+ *    comfortably above a dead one.
+ *
+ *      vox    : (24 + 42) * 0.5 = 33
+ *      cineco : (20 +  0) * 0.5 = 10
+ *
+ *    Measured against the live site right now: vox 60 (38 now-showing +
+ *    22 coming-soon), cineco 14 (14 + 0). Both are above their thresholds —
+ *    so the check passes on a system where Cineco is in fact half-dead.
+ *    That is what check D is for.
+ *
+ * 2. ZERO-RUN RATE — the rate at which a source contributes NOTHING, as a
+ *    fraction of the successful runs examined:
+ *
+ *      threshold = 25% of successful runs
+ *
+ *    Derived from the data: the REFERENCE source (vox) contributed 0 in 0
+ *    of 12 successful runs — a zero rate of 0%. The FAILING source
+ *    (cineco) contributed 0 in 8 of 12 — a zero rate of 67%. A threshold
+ *    of 25% (3 of 12) sits between the two with margin on both sides: it
+ *    tolerates a couple of genuine one-off scraper failures, and it catches
+ *    the 67% failure mode decisively.
+ *
+ * 3. RUNS EXAMINED = 12, the number of successful runs in the 30-day
+ *    window. Twelve runs is enough to see a 67% pattern (8 of 12) and short
+ *    enough that a broken source is caught within a day or two of the
+ *    history filling up.
+ *
+ * WHY A PER-SOURCE THRESHOLD AT ALL
+ * ---------------------------------
+ * The old check was binary: a source that contributed 0 films FAILED, a
+ * source that contributed 1 film PASSED. Against this data that is wrong in
+ * both directions — it cannot tell a source that contributes 20 films from
+ * one that contributes 2, and it cannot see the intermittent failure that
+ * the Cineco scraper actually has.
+ */
+
+/** Minimum live contribution (films on the page) for a source to be alive. */
+const CONTRIBUTION_THRESHOLD = {
+  vox: 33,
+  cineco: 10,
+};
+
+/** Maximum fraction of successful runs a source may contribute nothing to. */
+const MAX_ZERO_RUN_RATE = 0.25;
+
+/** How many recent runs the zero-run-rate check looks at. */
+const RUNS_EXAMINED = 12;
+
+/**
+ * How many recent runs are needed before the zero-run-rate check can say
+ * anything. Below this the history is too short to be meaningful, so the
+ * check reports a warning rather than a verdict.
+ */
+const MIN_RUNS_FOR_RATE = 6;
+
 const failures = [];
 const warnings = [];
 
@@ -130,17 +236,47 @@ function dedupeMovies(movies) {
 }
 
 /**
+ * The data-testid the movie grid cards carry.
+ *
+ * THE LIST, NOT A SINGLE VALUE, ON PURPOSE.
+ *
+ * This selector drifted once and the monitor reported a FALSE failure for
+ * every run in the meantime: the grid cards used to carry
+ * `data-testid="cinema-movie-card"`, and commit ce5afd5 changed them to
+ * `data-testid="movie-card"` without updating this script. From that point
+ * on, CHECK C reported "The /cinema page rendered 0 movie cards" against a
+ * perfectly healthy page that was rendering 37 cards — a monitor that cries
+ * wolf gets ignored, which defeats the point of having it.
+ *
+ * Counting every known marker means a rename in the component cannot
+ * silently disarm the check, and the drift is DETECTED instead of being
+ * reported as a broken site.
+ */
+const MOVIE_CARD_TESTIDS = ['movie-card', 'cinema-movie-card'];
+
+/**
  * Counts the movie cards actually rendered on the page.
  *
- * Each grid card carries data-testid="cinema-movie-card". Counting that
- * marker is exact for BOTH kinds of card: one with a poster image and one
- * with the branded fallback poster for a film that has no artwork. (An earlier
+ * Each grid card carries one of MOVIE_CARD_TESTIDS. Counting that marker is
+ * exact for BOTH kinds of card: one with a poster image and one with the
+ * branded fallback poster for a film that has no artwork. (An earlier
  * version counted lazy-loaded <img> tags, which silently under-counted every
  * film without a poster.)
+ *
+ * Returns `{ count, markersFound }`. `markersFound` is the set of markers
+ * that actually appear in the HTML — empty means the selector itself has
+ * drifted, which is a DIFFERENT problem from "the page rendered no cards",
+ * and is reported as such.
  */
 function countRenderedCards(html) {
-  const matches = html.match(/data-testid="cinema-movie-card"/g) || [];
-  return matches.length;
+  const markersFound = [];
+  let count = 0;
+  for (const testid of MOVIE_CARD_TESTIDS) {
+    const matches = html.match(new RegExp(`data-testid="${testid}"`, 'g')) || [];
+    if (matches.length > 0) markersFound.push(testid);
+    count += matches.length;
+  }
+  return { count, markersFound };
 }
 
 console.log('='.repeat(78));
@@ -206,13 +342,20 @@ try {
   }
   for (const src of EXPECTED_SOURCES) {
     const n = perSource.get(src) || 0;
+    const threshold = CONTRIBUTION_THRESHOLD[src] ?? 1;
     if (n === 0) {
       fail(
         `Cinema source "${src}" contributed 0 movies. Its scraper is silently ` +
           `failing - the job still exits 0, so nothing else will report this.`
       );
+    } else if (n < threshold) {
+      warn(
+        `Cinema source "${src}" contributed ${n} movies, below the derived ` +
+          `threshold of ${threshold} (50% of its smallest healthy run). ` +
+          `It is contributing, but less than half of what a healthy run gives.`
+      );
     } else {
-      ok(`Source "${src}" contributed ${n} movies.`);
+      ok(`Source "${src}" contributed ${n} movies (threshold ${threshold}).`);
     }
   }
   const unknown = [...perSource.keys()].filter((s) => !EXPECTED_SOURCES.includes(s));
@@ -226,12 +369,27 @@ try {
   // ---------------------------------------------------------------------
   console.log('C. PAGE RENDERING');
   const html = await getText(`${SITE}/cinema`);
-  const rendered = countRenderedCards(html);
+  const { count: rendered, markersFound } = countRenderedCards(html);
   const expected = dedupeMovies(nowRows).length;
   const expectedSoon = dedupeMovies(soonRows).length;
 
   if (rendered === 0) {
-    fail('The /cinema page rendered 0 movie cards.');
+    if (markersFound.length === 0) {
+      /*
+       * No card marker at all — and no known marker appeared either. This is
+       * the SELECTOR having drifted, not the page being empty. Reporting it
+       * as "the page rendered 0 cards" would be a false alarm about the site
+       * (which is what happened when the testid was renamed in ce5afd5).
+       */
+      fail(
+        `The /cinema page rendered 0 movie cards AND none of the known card ` +
+          `markers (${MOVIE_CARD_TESTIDS.join(', ')}) were found in the HTML. ` +
+          `The card testid has probably been renamed — this monitor's selector ` +
+          `needs updating, and until it is, this check cannot be trusted.`
+      );
+    } else {
+      fail('The /cinema page rendered 0 movie cards.');
+    }
   } else if (rendered < expected) {
     fail(
       `The /cinema page renders ${rendered} cards but ${expected} movies should ` +
@@ -242,6 +400,87 @@ try {
       `Page renders ${rendered} "Now Showing" cards; ${expected} qualify from the table. ` +
         `(${expectedSoon} more in "Coming Soon", behind a client-side tab.)`
     );
+  }
+  console.log('');
+
+  // ---------------------------------------------------------------------
+  // CHECK D - is any source contributing INTERMITTENTLY?
+  // ---------------------------------------------------------------------
+  //
+  // The state of the table cannot show this. A source that contributed 20
+  // films three weeks ago and has been dead ever since still has those 20
+  // rows in the table, so check B sees a healthy-looking source.
+  //
+  // The run history CAN show it: each run records what each source
+  // contributed that day, so a source that contributes 0 on most runs is
+  // visible even though the job exits 0 every time.
+  //
+  // This is the observed failure mode: the Cineco scraper contributed 0 on
+  // 8 of the last 12 successful runs while every run still exited 0.
+  console.log('D. CONTRIBUTION HISTORY');
+  try {
+    const historyRes = await getJson(`${SITE}/api/cinema/source-history?limit=${RUNS_EXAMINED}`);
+    const runs = historyRes.runs || [];
+
+    if (runs.length < MIN_RUNS_FOR_RATE) {
+      warn(
+        `Only ${runs.length} cinema-sync run(s) recorded so far; at least ` +
+          `${MIN_RUNS_FOR_RATE} are needed to judge the contribution rate. ` +
+          `The per-source counts are recorded by every run from now on.`
+      );
+    } else {
+      const examined = runs.slice(0, RUNS_EXAMINED);
+
+      for (const src of EXPECTED_SOURCES) {
+        const perRun = examined.map((run) => {
+          const s = run.sources?.[src];
+          if (!s) return null;
+          const now = Number(s.now_showing ?? 0);
+          const soon = Number(s.coming_soon ?? 0);
+          return now + soon;
+        });
+
+        const known = perRun.filter((v) => v !== null);
+        const zeroRuns = known.filter((v) => v === 0).length;
+        const rate = known.length > 0 ? zeroRuns / known.length : 0;
+        const nonZero = known.filter((v) => v > 0);
+
+        const detail = known
+          .map((v) => (v === 0 ? '0' : String(v)))
+          .join(', ');
+
+        if (known.length < MIN_RUNS_FOR_RATE) {
+          warn(
+            `Source "${src}": only ${known.length} run(s) with recorded counts; ` +
+              `at least ${MIN_RUNS_FOR_RATE} are needed to judge the rate.`
+          );
+          continue;
+        }
+
+        if (nonZero.length === 0) {
+          fail(
+            `Source "${src}" contributed 0 films on ALL ${known.length} recorded runs ` +
+              `(${detail}). Its scraper is dead - and because the job still exits 0, ` +
+              `nothing else reports it.`
+          );
+        } else if (rate > MAX_ZERO_RUN_RATE) {
+          fail(
+            `Source "${src}" contributed 0 films on ${zeroRuns} of ${known.length} runs ` +
+              `(${detail}) — a zero rate of ${(rate * 100).toFixed(0)}%, above the ` +
+              `${(MAX_ZERO_RUN_RATE * 100).toFixed(0)}% threshold derived from the 30-day ` +
+              `run history. The scraper is failing intermittently while the job still exits 0.`
+          );
+        } else {
+          ok(
+            `Source "${src}": ${zeroRuns}/${known.length} runs contributed nothing ` +
+              `(${detail}) — a zero rate of ${(rate * 100).toFixed(0)}%, within the ` +
+              `${(MAX_ZERO_RUN_RATE * 100).toFixed(0)}% threshold.`
+          );
+        }
+      }
+    }
+  } catch (err) {
+    warn(`Could not read the contribution history: ${err.message}`);
   }
   console.log('');
 
