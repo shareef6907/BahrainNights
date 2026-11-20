@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { cookies } from 'next/headers';
 import { jwtVerify } from 'jose';
 import { getAdminClient } from '@/lib/supabase/server';
+import { ADMIN_VENUE_SELECT } from '@/lib/public-venue-fields';
 import { extractCoordinatesFromGoogleMapsUrl } from '@/lib/utils';
 
 interface OpeningHoursDay {
@@ -88,9 +89,12 @@ export async function GET() {
     }
 
     const supabase = getAdminClient();
+    // Explicit column list. `select('*')` would put the owner's bcrypt
+    // `password_hash` into the JSON response — a credential hash in browser
+    // devtools, for no UI benefit.
     const { data, error } = await supabase
       .from('venues')
-      .select('*')
+      .select(ADMIN_VENUE_SELECT)
       .eq('id', venueId)
       .single();
 
