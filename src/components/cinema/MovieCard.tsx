@@ -72,11 +72,16 @@ function MovieCard({ movie, index = 0, onMovieClick, onTrailerClick }: MovieCard
           </div>
         )}
 
-        {/* Rating Badge */}
-        <div className="absolute top-3 right-3 flex items-center gap-1 px-2 py-1 bg-black/80 backdrop-blur-sm rounded-lg">
-          <Star className="w-4 h-4 text-yellow-400 fill-yellow-400" />
-          <span className="text-white font-bold text-sm">{movie.rating}</span>
-        </div>
+        {/* Rating Badge — hidden when there is no rating.
+            A rating of 0 means "unrated" (unreleased films have no TMDB score),
+            and a badge reading "0" reads as a broken widget rather than an
+            absent one. */}
+        {movie.rating > 0 && (
+          <div className="absolute top-3 right-3 flex items-center gap-1 px-2 py-1 bg-black/80 backdrop-blur-sm rounded-lg">
+            <Star className="w-4 h-4 text-yellow-400 fill-yellow-400" />
+            <span className="text-white font-bold text-sm">{movie.rating}</span>
+          </div>
+        )}
 
         {/* Now Showing / Coming Soon Badge */}
         <div className="absolute top-3 left-3">
