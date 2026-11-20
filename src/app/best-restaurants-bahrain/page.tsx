@@ -187,7 +187,7 @@ const restaurantCategories = [
       { name: 'Nusr-Et', cuisine: 'Turkish Steakhouse', location: 'Marassi', price: '$$$$', rating: 4.6, desc: 'Salt Bae\'s famous steakhouse with theatrical service and premium meats. An experience as much as a meal.', specialties: ['Tomahawk', 'Golden Tomahawk', 'Ottoman Steak'], link: '/restaurants' },
       { name: 'The Meat Co', cuisine: 'South African', location: 'City Centre', price: '$$$', rating: 4.3, desc: 'Premium South African steakhouse with aged meats and robust flavors. Great wine selection.', specialties: ['Fillet Steak', 'Lamb Chops', 'Beef Ribs'], link: '/restaurants' },
       { name: 'Gaucho', cuisine: 'Argentinian', location: 'Adliya', price: '$$$', rating: 4.4, desc: 'Authentic Argentinian grill with premium beef imported from the Pampas. Vibrant atmosphere.', specialties: ['Ribeye', 'Chorizo', 'Dulce de Leche'], link: '/restaurants' },
-      { name: 'Prime US', cuisine: 'American', location: 'Seef', price: '$$$', rating: 4.3, desc: 'Classic American steakhouse with USDA Prime cuts. Great for business dinners.', specialties: ['NY Strip', 'Porterhouse', 'Creamed Spinach'], link: '/restaurants' },
+      { name: 'Black Angus Bahrain', cuisine: 'Steak house', location: 'Road 2808, Seef District', price: '$$$', rating: 4.3, desc: 'Classic American steakhouse with USDA Prime cuts. Great for business dinners.', specialties: ['NY Strip', 'Porterhouse', 'Creamed Spinach'], link: '/restaurants' },
     ]
   },
   {
@@ -214,7 +214,7 @@ const restaurantCategories = [
       { name: 'PF Chang\'s', cuisine: 'Asian', location: 'City Centre', price: '$$', rating: 4.2, desc: 'Reliable Asian bistro with consistent quality and great sharing platters.', specialties: ['Lettuce Wraps', 'Orange Chicken', 'Pad Thai'], link: '/restaurants' },
       { name: 'Texas Roadhouse', cuisine: 'American', location: 'Seef', price: '$$', rating: 4.3, desc: 'Fun American restaurant with hand-cut steaks and legendary rolls.', specialties: ['Ribeye', 'Fall-Off Ribs', 'Honey Butter Rolls'], link: '/restaurants' },
       { name: 'Segafredo', cuisine: 'Italian', location: 'Adliya', price: '$$', rating: 4.4, desc: 'Trendy Italian café and restaurant. Great for people-watching in Adliya.', specialties: ['Wood-fired Pizza', 'Pasta', 'Italian Coffee'], link: '/restaurants' },
-      { name: 'Calexico', cuisine: 'Mexican', location: 'Amwaj', price: '$$', rating: 4.5, desc: 'Vibrant Mexican restaurant with authentic recipes and great margaritas.', specialties: ['Tacos', 'Burritos', 'Guacamole'], link: '/restaurants' },
+      { name: 'Calexico', cuisine: 'Mexican', location: 'Block 338, Adliya', price: '$$', rating: 4.5, desc: 'Vibrant Mexican restaurant with authentic recipes and great margaritas.', specialties: ['Tacos', 'Burritos', 'Guacamole'], link: '/restaurants' },
     ]
   },
   {

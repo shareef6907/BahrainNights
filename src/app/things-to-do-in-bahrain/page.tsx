@@ -263,7 +263,7 @@ const activities = [
       { num: 30, name: 'Bahrain International Circuit', desc: 'Watch F1 or drive the track yourself. Karting, drag racing, and passenger experiences available.', link: '/events' },
       { num: 31, name: 'Wahooo! Waterpark', desc: 'Indoor water park at City Centre. Perfect for hot summer days.', link: '/family-kids' },
       { num: 32, name: 'Kids Kingdom', desc: 'Indoor play areas at every major mall. Air-conditioned fun for little ones.', link: '/family-kids' },
-      { num: 33, name: 'Al Areen Wildlife Park', desc: 'See Arabian oryx, gazelles, and other desert wildlife in their natural habitat.', link: '/attractions' },
+      { num: 33, name: 'Mohamed bin Zayed Nature Reserve (Al Areen)', desc: 'See Arabian oryx, gazelles, and other desert wildlife in their natural habitat.', link: '/attractions' },
       { num: 34, name: 'Gravity Indoor Skydiving', desc: 'Experience freefall without jumping from a plane. Safe and thrilling for ages 4+.', link: '/attractions' },
     ]
   },

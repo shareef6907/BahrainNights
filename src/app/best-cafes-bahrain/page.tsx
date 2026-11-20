@@ -422,8 +422,8 @@ const cafeCategories = [
         studyFriendly: true
       },
       { 
-        name: 'Grey Cafe', 
-        location: 'Juffair', 
+        name: 'Cafe Gray',
+        location: '150 Government Avenue, Manama', 
         style: 'Minimalist Cozy',
         rating: 4.5, 
         price: '$$',
@@ -484,8 +484,8 @@ const cafeCategories = [
 const cafeAreas = [
   { name: 'Adliya', count: 15, vibe: 'Artistic & trendy hub', popular: ['Lilou', 'Crust & Crema', 'The Orangery'] },
   { name: 'Seef', count: 12, vibe: 'Modern & commercial', popular: ['Flat White', 'Canvas Cafe', 'Butter & Co'] },
-  { name: 'Manama', count: 10, vibe: 'Downtown variety', popular: ['198 Cafe', 'The Hive', 'Costa WTC'] },
-  { name: 'Juffair', count: 8, vibe: 'Expat friendly', popular: ['Brew Mood', 'Grey Cafe', 'Karaki Lounge'] },
+  { name: 'Manama', count: 10, vibe: 'Downtown variety', popular: ['198 Cafe', 'The Hive', 'Cafe Gray'] },
+  { name: 'Juffair', count: 8, vibe: 'Expat friendly', popular: ['Brew Mood', 'Karaki Lounge'] },
   { name: 'Muharraq', count: 5, vibe: 'Heritage charm', popular: ['Naseef', 'Traditional spots'] },
   { name: 'Riffa', count: 6, vibe: 'Residential calm', popular: ['Wild Coffee', 'Dose Cafe'] },
 ];

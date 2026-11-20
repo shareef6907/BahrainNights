@@ -192,8 +192,8 @@ const nightlifeAreas = [
     color: 'from-cyan-500 to-blue-600',
     overview: 'The Seef area is primarily known for shopping, but it hides some excellent lounges, particularly in hotel properties. The area tends to be more family-oriented during the day but offers sophisticated evening options. Great for combining shopping with dinner and drinks.',
     venues: [
-      { name: 'Typhoon', type: 'Lounge', hotel: 'Le Méridien', description: 'Popular lounge with live music and diverse crowd. Regular theme nights and promotions.', hours: '6PM - 2AM', vibe: 'Lively', link: '/venues' },
-      { name: 'Mezzanine', type: 'Lounge', hotel: 'Le Méridien', description: 'Stylish lounge with creative cocktails. Good for pre-dinner drinks.', hours: '5PM - 1AM', vibe: 'Chic', link: '/venues' },
+      { name: 'Typhoon', type: 'Lounge', hotel: 'Gulf Hotel Bahrain', description: 'Popular lounge with live music and diverse crowd. Regular theme nights and promotions.', hours: '6PM - 2AM', vibe: 'Lively', link: '/venues' },
+      { name: 'Mezzanine', type: 'Lounge', hotel: 'The Westin Bahrain City Centre', description: 'Stylish lounge with creative cocktails. Good for pre-dinner drinks.', hours: '5PM - 1AM', vibe: 'Chic', link: '/venues' },
       { name: 'Bushido Lounge', type: 'Japanese Lounge', hotel: 'Ritz-Carlton', description: 'Sake and Japanese whisky lounge with modern izakaya vibes.', hours: '6PM - 12AM', vibe: 'Contemporary', link: '/venues' },
     ]
   }
@@ -202,8 +202,8 @@ const nightlifeAreas = [
 const ladiesNightVenues = [
   { name: 'Trader Vic\'s', day: 'Tuesday', offer: 'Free drinks for ladies 8PM-12AM', venue: 'Ritz-Carlton' },
   { name: 'CUT Lounge', day: 'Wednesday', offer: '3 complimentary drinks for ladies', venue: 'Four Seasons' },
-  { name: 'Typhoon', day: 'Tuesday', offer: 'Free entry + 3 drinks', venue: 'Le Méridien' },
-  { name: 'JJ\'s Irish Pub', day: 'Thursday', offer: 'Ladies drink free all night', venue: 'Juffair' },
+  { name: 'Typhoon', day: 'Tuesday', offer: 'Free entry + 3 drinks', venue: 'Gulf Hotel Bahrain' },
+  { name: 'JJ\'s Irish Pub', day: 'Thursday', offer: 'Ladies drink free all night', venue: 'Road 3827, Block 338, Adliya' },
   { name: 'Club Wahoo', day: 'Wednesday', offer: 'Free entry and drinks until 12AM', venue: 'Juffair' },
 ];
 

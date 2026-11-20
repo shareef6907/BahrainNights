@@ -306,8 +306,8 @@ const brunchVenues = [
         link: '/venues'
       },
       {
-        name: 'Coral Bay Bahrain',
-        location: 'Coral Bay',
+        name: 'Coral Bay Hotel & Resort',
+        location: 'Road 2407, Block 322, Manama',
         price: '20-30 BHD',
         time: '11:00 AM - 4:00 PM',
         rating: 4.2,
