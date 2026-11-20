@@ -220,7 +220,7 @@ export async function GET() {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const { data: pendingRequest, error } = await (supabase
       .from('venue_change_requests') as any)
-      .select('*')
+      .select('id, venue_id, changes, status, submitted_at, reviewed_at, rejection_reason')
       .eq('venue_id', venueId)
       .eq('status', 'pending')
       .order('submitted_at', { ascending: false })

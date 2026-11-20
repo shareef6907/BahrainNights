@@ -1,5 +1,5 @@
 import { getAdminClient } from '@/lib/supabase/server';
-import { PUBLIC_VENUE_SELECT } from '@/lib/public-venue-fields';
+import { ADMIN_VENUE_SELECT, PUBLIC_VENUE_SELECT } from '@/lib/public-venue-fields';
 import type { Venue, VenueInsert, VenueUpdate, VenueWithEvents } from '@/types/database';
 
 export interface VenueFilters {
@@ -14,17 +14,16 @@ export interface VenueFilters {
 
 // Get all venues with optional filters
 //
-// NOTE: this is the ADMIN list. It returns the full row, including the
-// `password_hash` column, because the admin venue editor needs to see the
-// whole record. It is only called from `/api/admin/venues`, which requires an
-// admin session. Do not call it from a public code path — use
-// `getApprovedVenues` / `getVenueBySlug` instead.
+// NOTE: this is the ADMIN list. It selects every column EXCEPT
+// `password_hash` — see `ADMIN_VENUE_SELECT` for why. It is only called from
+// `/api/admin/venues`, which requires an admin session. Do not call it from a
+// public code path — use `getApprovedVenues` / `getVenueBySlug` instead.
 export async function getVenues(filters: VenueFilters = {}): Promise<Venue[]> {
   const supabase = getAdminClient();
 
   let query = supabase
     .from('venues')
-    .select('*')
+    .select(ADMIN_VENUE_SELECT)
     .order('created_at', { ascending: false });
 
   // Apply filters
@@ -181,12 +180,14 @@ export async function getVenueBySlug(slug: string): Promise<Venue | null> {
 }
 
 // Get venue by ID
+//
+// Admin-scoped. Excludes `password_hash` (see `ADMIN_VENUE_SELECT`).
 export async function getVenueById(id: string): Promise<Venue | null> {
   const supabase = getAdminClient();
 
   const { data, error } = await supabase
     .from('venues')
-    .select('*')
+    .select(ADMIN_VENUE_SELECT)
     .eq('id', id)
     .single();
 
@@ -202,12 +203,16 @@ export async function getVenueById(id: string): Promise<Venue | null> {
 }
 
 // Get venue by owner ID
+//
+// Server-side only (auth flows). Excludes `password_hash`
+// (see `ADMIN_VENUE_SELECT`) so a credential digest never sits in a session
+// object or an auth response.
 export async function getVenueByOwnerId(ownerId: string): Promise<Venue | null> {
   const supabase = getAdminClient();
 
   const { data, error } = await supabase
     .from('venues')
-    .select('*')
+    .select(ADMIN_VENUE_SELECT)
     .eq('owner_id', ownerId)
     .single();
 
@@ -476,7 +481,7 @@ export async function getVenueReels(venueId: string): Promise<{
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const { data, error } = await (supabase
     .from('venue_reels') as any)
-    .select('*')
+    .select('id, venue_id, instagram_url, display_order, is_active, created_at, updated_at')
     .eq('venue_id', venueId)
     .eq('is_active', true)
     .order('display_order', { ascending: true });

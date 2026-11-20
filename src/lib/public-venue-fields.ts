@@ -62,3 +62,47 @@ export const PUBLIC_VENUE_FIELDS = [
 ] as const;
 
 export const PUBLIC_VENUE_SELECT = PUBLIC_VENUE_FIELDS.join(',');
+
+/**
+ * Every column in the `venues` table EXCEPT `password_hash`.
+ *
+ * Used by the admin-scoped readers (`getVenues`, `getVenueById`,
+ * `getVenueByOwnerId`) and by the venue-portal profile route.
+ *
+ * `password_hash` is deliberately excluded even from the ADMIN read paths.
+ * The bcrypt digest is needed by exactly two code paths — registration
+ * writes it, and the portal login reads it with its own explicit column
+ * list — and by no UI. No component in the codebase reads
+ * `venue.password_hash` (verified by grep across `src/components` and
+ * `src/app/admin`). Returning it in an admin or venue-portal JSON response
+ * therefore has no upside and two downsides: it puts a credential digest
+ * into browser memory, browser devtools, and any response logging in
+ * between; and it means that if an admin route is ever mounted publicly by
+ * mistake, the leak is a credential rather than a name and a phone number.
+ *
+ * Column list verified against the production table (62 columns; this list
+ * is the 61 that are not `password_hash`).
+ */
+export const ADMIN_VENUE_FIELDS = [
+  ...PUBLIC_VENUE_FIELDS,
+  'business_email',
+  'contact_name',
+  'contact_position',
+  'mobile',
+  'cr_number',
+  'owner_id',
+  'registration_ip',
+  'registration_user_agent',
+  'rejection_reason',
+  'reviewed_at',
+  'reviewed_by',
+  'terms_accepted',
+  'terms_accepted_at',
+  'content_guidelines_accepted',
+  'membership_amount',
+  'membership_start',
+  'membership_end',
+  'membership_notes',
+] as const;
+
+export const ADMIN_VENUE_SELECT = ADMIN_VENUE_FIELDS.join(',');
