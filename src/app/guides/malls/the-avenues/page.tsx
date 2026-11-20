@@ -113,7 +113,7 @@ const diningOptions = [
     category: 'Signature Restaurants',
     restaurants: [
       'The Cheesecake Factory', 'Le Pain Quotidien', 'Texas Roadhouse',
-      'Katsuya by Starck', 'Bebabel', '400 Gradi']
+      'Katsuya by Starck', 'Bebabel', '400 Gradi'
     ],
   },
   {
