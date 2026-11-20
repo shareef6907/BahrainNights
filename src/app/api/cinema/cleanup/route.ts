@@ -1,5 +1,6 @@
-import { NextResponse } from 'next/server';
+import { NextRequest, NextResponse } from 'next/server';
 import { supabaseAdmin } from '@/lib/supabase';
+import { requireAdminOrInternal } from '@/lib/api-write-guard';
 
 // Use lazy-initialized admin client
 const supabase = supabaseAdmin;
@@ -10,8 +11,17 @@ function hasNoCinemaSources(scrapedFrom: string[] | null | undefined): boolean {
          (Array.isArray(scrapedFrom) && scrapedFrom.length === 0);
 }
 
-export async function POST() {
+export async function POST(request: NextRequest) {
   try {
+  // This route lives under `/api/`, which the middleware matcher excludes, so
+  // the middleware never sees it. Without a check of its own it is reachable by
+  // an anonymous caller with the service-role key — anyone could trigger the
+  // cleanup, which demotes and deletes rows in the `movies` table.
+  const guard = await requireAdminOrInternal(request);
+  if (!guard.ok) {
+    return guard.response;
+  }
+
     const results = {
       fixedComingSoon: 0,
       deletedOrphaned: 0,
