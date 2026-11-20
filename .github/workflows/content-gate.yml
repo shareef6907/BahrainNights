@@ -34,10 +34,49 @@ jobs:
           GH_TOKEN: ${{ github.token }}
           PR: ${{ github.event.pull_request.number }}
           REPO: ${{ github.repository }}
+          BASE_SHA: ${{ github.event.pull_request.base.sha }}
         run: |
           gh api "repos/$REPO/pulls/$PR/files" --paginate \
             --jq '.[] | [.status, .filename] | @tsv' > "$RUNNER_TEMP/files.tsv"
-          gh pr diff "$PR" --repo "$REPO" > "$RUNNER_TEMP/pr.diff"
+
+          # `gh pr diff` asks the API for a rendered diff, and GitHub refuses
+          # that for any PR with more than 300 changed files:
+          #   HTTP 406: Sorry, the diff exceeded the maximum number of files (300).
+          # So a bulk change (e.g. untracking a committed node_modules tree of
+          # 800+ files) could not be validated by this gate at all -- the run
+          # died before the rules were ever evaluated.
+          #
+          # Fall back to building the same diff from the fetched commits,
+          # which has no file-count limit. A three-dot diff
+          # (MERGE_BASE...HEAD) reports every line the PR adds with a
+          # leading '+', which is exactly the set of added lines the rules
+          # below inspect. It reads git objects only and never executes any
+          # code from the PR.
+          if ! gh pr diff "$PR" --repo "$REPO" > "$RUNNER_TEMP/pr.diff" 2> "$RUNNER_TEMP/pr.diff.err"; then
+            echo "::notice::gh pr diff failed; rebuilding the diff from git."
+            cat "$RUNNER_TEMP/pr.diff.err"
+
+            # Fetch the PR head plus enough history to compute the real
+            # merge-base. The checkout above is shallow (fetch-depth 1), so
+            # without --deepen the merge-base would silently resolve to the
+            # shallow boundary instead of the commit the PR actually
+            # branched from.
+            git fetch --no-tags --quiet --deepen=200 origin \
+              "+refs/pull/$PR/head:refs/remotes/pr/head" || true
+
+            MERGE_BASE=$(git merge-base "$BASE_SHA" refs/remotes/pr/head || true)
+            if [ -z "$MERGE_BASE" ]; then
+              echo "::error::could not compute a merge-base for the PR"
+              exit 1
+            fi
+
+            # Three-dot diff (BASE...HEAD), which is what `gh pr diff`
+            # returns: the diff from the merge-base to the PR head.
+            git diff --no-color "$MERGE_BASE" refs/remotes/pr/head > "$RUNNER_TEMP/pr.diff"
+          fi
+
+          echo "files listed: $(wc -l < "$RUNNER_TEMP/files.tsv")"
+          echo "diff lines:   $(wc -l < "$RUNNER_TEMP/pr.diff")"
 
       - name: Run content rules
         env:
