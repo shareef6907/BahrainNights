@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@supabase/supabase-js';
 import { revalidatePath } from 'next/cache';
 import { requireAdminOrInternal } from '@/lib/api-write-guard';
+import { PUBLIC_MOVIE_SELECT } from '@/lib/public-fields';
 
 export const dynamic = 'force-dynamic';
 
@@ -33,7 +34,7 @@ export async function GET(request: NextRequest) {
 
     let query = supabase
       .from('movies')
-      .select('*', { count: 'exact' });
+      .select(PUBLIC_MOVIE_SELECT, { count: 'exact' });
 
     // Apply filters
     if (status === 'now_showing') {

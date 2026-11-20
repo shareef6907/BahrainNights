@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { supabaseAdmin } from '@/lib/supabase';
+import { PUBLIC_GUIDE_SELECT } from '@/lib/public-fields';
 
 export const dynamic = 'force-dynamic';
 
@@ -19,9 +20,9 @@ export async function GET(request: NextRequest) {
     const limit = parseInt(searchParams.get('limit') || '50');
     const offset = parseInt(searchParams.get('offset') || '0');
 
-    let query = supabaseAdmin
-      .from('local_guides')
-      .select('*', { count: 'exact' })
+    let query = (supabaseAdmin
+      .from('local_guides') as any)
+      .select(PUBLIC_GUIDE_SELECT, { count: 'exact' })
       .eq('is_active', true)
       .order('is_featured', { ascending: false })
       .order('rating', { ascending: false, nullsFirst: false })
@@ -69,7 +70,7 @@ export async function GET(request: NextRequest) {
     }
 
     // Transform for frontend
-    const transformedGuides = (guides || []).map(guide => ({
+    const transformedGuides = (guides || []).map((guide: any) => ({
       id: guide.id,
       name: guide.name,
       slug: guide.slug,
@@ -177,8 +178,8 @@ export async function POST(request: NextRequest) {
         status: 'pending',
         submitted_at: new Date().toISOString(),
       })
-      .select()
-      .single();
+        .select()
+        .single();
 
     if (error) {
       console.error('Guide application error:', error);

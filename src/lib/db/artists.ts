@@ -1,4 +1,5 @@
 import { getAdminClient } from '@/lib/supabase/server';
+import { PUBLIC_ARTIST_SELECT } from '@/lib/public-fields';
 import type { Artist, ArtistInsert, ArtistUpdate, ArtistBookingRequest, ArtistBookingRequestInsert, ArtistCategory, ArtistStatus, ArtistTier } from '@/types/database';
 
 // ============ ARTIST FILTERS ============
@@ -15,6 +16,16 @@ export interface ArtistFilters {
 // ============ GET ARTISTS ============
 
 // Get all artists with optional filters
+//
+// NOTE: this is the ADMIN list and returns the full row, including the
+// applicant's `submitted_email` / `submitted_phone`, the performer's legal
+// `real_name` and the internal `admin_notes` / `rate_notes`. It is only
+// called from `/api/admin/*` routes, which require an admin session.
+//
+// The public readers below (`getApprovedArtists`, `getArtistsByCategory`,
+// `getFeaturedArtists`, `getArtistBySlug`) use the explicit public column
+// list instead, because their results are serialised into the RSC payload
+// of the public artist pages.
 export async function getArtists(filters: ArtistFilters = {}): Promise<Artist[]> {
   const supabase = getAdminClient();
 
@@ -65,18 +76,76 @@ export async function getArtists(filters: ArtistFilters = {}): Promise<Artist[]>
 }
 
 // Get public-facing approved artists
+//
+// SECURITY: these results are passed into `EntertainmentPageClient` and
+// `ArtistPageClient`, so Next.js serialises the whole object into the RSC
+// payload in the HTML response. `select('*')` published the applicant's
+// email and phone number, the performer's legal name, and the internal
+// admin/rate notes to every anonymous visitor. Selects the public columns
+// only. Never revert this to `select('*')`.
 export async function getApprovedArtists(filters: Omit<ArtistFilters, 'status'> = {}): Promise<Artist[]> {
-  return getArtists({ ...filters, status: 'approved' });
+  return getPublicArtists({ ...filters, status: 'approved' });
 }
 
 // Get artists by category (public)
 export async function getArtistsByCategory(category: ArtistCategory): Promise<Artist[]> {
-  return getArtists({ category, status: 'approved' });
+  return getPublicArtists({ category, status: 'approved' });
 }
 
 // Get featured artists (public)
 export async function getFeaturedArtists(): Promise<Artist[]> {
-  return getArtists({ status: 'approved', is_featured: true });
+  return getPublicArtists({ status: 'approved', is_featured: true });
+}
+
+// Public reader — identical filtering to `getArtists` but with the explicit
+// public column list.
+async function getPublicArtists(filters: ArtistFilters): Promise<Artist[]> {
+  const supabase = getAdminClient();
+
+  let query = supabase
+    .from('artists')
+    .select(PUBLIC_ARTIST_SELECT)
+    .order('is_featured', { ascending: false })
+    .order('display_order', { ascending: true })
+    .order('created_at', { ascending: false });
+
+  if (filters.category && filters.category !== 'all') {
+    query = query.eq('category', filters.category);
+  }
+
+  if (filters.status && filters.status !== 'all') {
+    query = query.eq('status', filters.status);
+  }
+
+  if (filters.tier && filters.tier !== 'all') {
+    query = query.eq('tier', filters.tier);
+  }
+
+  if (filters.is_featured !== undefined) {
+    query = query.eq('is_featured', filters.is_featured);
+  }
+
+  if (filters.search) {
+    query = query.or(`stage_name.ilike.%${filters.search}%,bio.ilike.%${filters.search}%`);
+  }
+
+  if (filters.limit) {
+    query = query.limit(filters.limit);
+  }
+
+  if (filters.offset) {
+    query = query.range(filters.offset, filters.offset + (filters.limit || 10) - 1);
+  }
+
+  const { data, error } = await query;
+
+  if (error) {
+    if (error.code === 'PGRST205') return [];
+    console.error('Error fetching artists:', error);
+    throw new Error('Failed to fetch artists');
+  }
+
+  return (data || []) as Artist[];
 }
 
 // Get pending artists (admin)
@@ -104,12 +173,17 @@ export async function getArtistById(id: string): Promise<Artist | null> {
 }
 
 // Get artist by slug (public)
+//
+// SECURITY: the result is passed into `ArtistPageClient`, so it is
+// serialised into the RSC payload of the public artist page. `select('*')`
+// published the applicant's email and phone, the performer's legal name and
+// the internal admin/rate notes. Selects the public columns only.
 export async function getArtistBySlug(slug: string): Promise<Artist | null> {
   const supabase = getAdminClient();
 
   const { data, error } = await supabase
     .from('artists')
-    .select('*')
+    .select(PUBLIC_ARTIST_SELECT)
     .eq('slug', slug)
     .eq('status', 'approved')
     .single();

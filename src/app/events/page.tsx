@@ -8,6 +8,7 @@ import BreadcrumbSchema from '@/components/SEO/BreadcrumbSchema';
 import InternalLinks, { guideLinks, placeLinks, eventLinks, dedupeLinks } from '@/components/SEO/InternalLinks';
 import EventServicesPromo from '@/components/events/EventServicesPromo';
 import { parseDate, toISODateString } from '@/lib/utils/date';
+import { PUBLIC_EVENT_SELECT } from '@/lib/public-fields';
 
 // Force dynamic rendering to ensure fresh data on every request
 export const dynamic = 'force-dynamic';
@@ -88,7 +89,7 @@ async function getEvents(): Promise<Event[]> {
   // Only show Bahrain events on main events page (international events have separate page)
   const { data, error } = await supabase
     .from('events')
-    .select('*')
+      .select(PUBLIC_EVENT_SELECT)
     .eq('status', 'published')
     .eq('is_hidden', false)
     .eq('country', 'Bahrain')

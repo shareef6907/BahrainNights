@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@supabase/supabase-js';
 import { revalidatePath } from 'next/cache';
 import { requireAdminOrInternal } from '@/lib/api-write-guard';
+import { PUBLIC_MOVIE_SELECT } from '@/lib/public-fields';
 
 export const dynamic = 'force-dynamic';
 
@@ -28,7 +29,7 @@ export async function GET(
     const supabase = getSupabaseAdmin();
 
     // Try to get by UUID first, then by slug
-    let query = supabase.from('movies').select('*');
+    let query = supabase.from('movies').select(PUBLIC_MOVIE_SELECT);
 
     // Check if id is a UUID
     const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;

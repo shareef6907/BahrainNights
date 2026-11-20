@@ -5,6 +5,7 @@ import { Metadata } from 'next';
 import CategoryPageClient from './CategoryPageClient';
 import { sortEventsWithFeatured } from '@/lib/utils/eventSorting';
 import { VALID_CATEGORY_SLUGS } from '@/lib/seo/indexable-hubs';
+import { PUBLIC_EVENT_SELECT } from '@/lib/public-fields';
 
 // Revalidate every 5 minutes
 export const revalidate = 300;
@@ -91,7 +92,7 @@ async function getCategoryEvents(category: string) {
 
   const { data: events, error } = await supabaseAdmin
     .from('events')
-    .select('*')
+    .select(PUBLIC_EVENT_SELECT as any)
     .eq('status', 'published')
     .eq('is_hidden', false)
     .eq('country', 'Bahrain') // Only Bahrain events
@@ -106,7 +107,7 @@ async function getCategoryEvents(category: string) {
   }
 
   // Transform and sort events with featured first
-  const transformedEvents = (events || []).map(event => ({
+  const transformedEvents = (events || []).map((event: any) => ({
     id: event.id,
     title: event.title || 'Untitled Event',
     slug: event.slug || event.id,

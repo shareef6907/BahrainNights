@@ -2,6 +2,7 @@ import { notFound } from 'next/navigation';
 import { supabaseAdmin } from '@/lib/supabase';
 import EventDetailClient from './EventDetailClient';
 import EventSchema from '@/components/SEO/EventSchema';
+import { PUBLIC_EVENT_DETAIL_SELECT } from '@/lib/public-fields';
 
 // Revalidate every 5 minutes
 export const revalidate = 300;
@@ -135,9 +136,9 @@ function getDefaultImage(category: string): string {
 
 // Fetch event by slug
 async function getEvent(slug: string) {
-  const { data: event, error } = await supabaseAdmin
-    .from('events')
-    .select('*')
+  const { data: event, error } = await (supabaseAdmin
+    .from('events') as any)
+    .select(PUBLIC_EVENT_DETAIL_SELECT)
     .eq('slug', slug)
     .eq('status', 'published')
     .eq('is_hidden', false)

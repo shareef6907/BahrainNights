@@ -5,6 +5,7 @@ import { notFound } from 'next/navigation';
 import { getAdminClient } from '@/lib/supabase/server';
 import type { BlogArticle } from '@/types/database';
 import EventSchema from '@/components/SEO/EventSchema';
+import { PUBLIC_BLOG_SELECT } from '@/lib/public-fields';
 
 interface Props {
   params: Promise<{ slug: string }>;
@@ -79,7 +80,7 @@ async function getArticle(slug: string) {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const { data: article, error } = await (supabase as any)
     .from('blog_articles')
-    .select('*')
+      .select(PUBLIC_BLOG_SELECT)
     .eq('slug', slug)
     .eq('status', 'published')
     .single() as { data: BlogArticle | null; error: Error | null };

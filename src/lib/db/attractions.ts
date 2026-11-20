@@ -1,4 +1,5 @@
 import { getAdminClient } from '@/lib/supabase/server';
+import { PUBLIC_ATTRACTION_SELECT } from '@/lib/public-fields';
 
 // Attraction interface
 export interface Attraction {
@@ -187,7 +188,7 @@ export async function getAttractionBySlug(slug: string): Promise<Attraction | nu
 
   const { data, error } = await (supabase as any)
     .from('attractions')
-    .select('*')
+    .select(PUBLIC_ATTRACTION_SELECT)
     .eq('slug', slug)
     .eq('is_active', true)
     .single();
@@ -209,7 +210,7 @@ export async function getSimilarAttractions(category: string, excludeId: string,
 
   const { data, error } = await (supabase as any)
     .from('attractions')
-    .select('*')
+    .select(PUBLIC_ATTRACTION_SELECT)
     .eq('category', category)
     .eq('is_active', true)
     .neq('id', excludeId)

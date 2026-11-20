@@ -2,6 +2,7 @@ import { Suspense } from 'react';
 import { createClient } from '@supabase/supabase-js';
 import KidsExploreClient from './KidsExploreClient';
 import { ExploreItem } from '@/components/explore/ExploreGrid';
+import { PUBLIC_ATTRACTION_SELECT } from '@/lib/public-fields';
 
 // ISR: revalidate every hour
 export const revalidate = 3600;
@@ -25,7 +26,7 @@ async function getKidsAttractions(): Promise<ExploreItem[]> {
 
   const { data, error } = await supabase
     .from('attractions')
-    .select('*')
+      .select(PUBLIC_ATTRACTION_SELECT)
     .eq('is_active', true)
     .order('is_featured', { ascending: false })
     .order('tripadvisor_rating', { ascending: false, nullsFirst: false });

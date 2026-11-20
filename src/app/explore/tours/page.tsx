@@ -2,6 +2,7 @@ import { Suspense } from 'react';
 import { createClient } from '@supabase/supabase-js';
 import ToursExploreClient from './ToursExploreClient';
 import { ExploreItem } from '@/components/explore/ExploreGrid';
+import { PUBLIC_ATTRACTION_SELECT } from '@/lib/public-fields';
 
 // ISR: revalidate every hour
 export const revalidate = 3600;
@@ -26,7 +27,7 @@ async function getTours(): Promise<ExploreItem[]> {
   // Fetch from attractions table - only show Platinum List items with valid booking URLs
   const { data, error } = await supabase
     .from('attractions')
-    .select('*')
+      .select(PUBLIC_ATTRACTION_SELECT)
     .eq('is_active', true)
     .eq('source', 'platinumlist')
     .not('booking_url', 'is', null)

@@ -1,4 +1,5 @@
 import { getAdminClient } from '@/lib/supabase/server';
+import { PUBLIC_VENUE_SELECT } from '@/lib/public-venue-fields';
 import type { Venue, VenueInsert, VenueUpdate, VenueWithEvents } from '@/types/database';
 
 export interface VenueFilters {
@@ -12,6 +13,12 @@ export interface VenueFilters {
 }
 
 // Get all venues with optional filters
+//
+// NOTE: this is the ADMIN list. It returns the full row, including the
+// `password_hash` column, because the admin venue editor needs to see the
+// whole record. It is only called from `/api/admin/venues`, which requires an
+// admin session. Do not call it from a public code path — use
+// `getApprovedVenues` / `getVenueBySlug` instead.
 export async function getVenues(filters: VenueFilters = {}): Promise<Venue[]> {
   const supabase = getAdminClient();
 
@@ -62,13 +69,28 @@ export async function getVenues(filters: VenueFilters = {}): Promise<Venue[]> {
 // Get approved venues only (for public pages)
 // Excludes hidden venues from public display
 // Sorted by membership tier: gold > premium > founding_partner > free
+//
+// SECURITY: this feeds PUBLIC pages, and the rows are passed straight into
+// client components (`PlaceDetailPageContent`), so Next.js serialises the
+// whole object into the RSC payload that ships in the HTML response.
+//
+// `select('*')` therefore published, to every anonymous visitor of every
+// venue detail page:
+//   - `password_hash` — the bcrypt digest of the venue owner's password
+//   - `cr_number`     — the venue's Bahrain Commercial Registration number
+//   - `registration_ip` / `registration_user_agent` — the registrant's IP
+//   - `owner_id`, `terms_accepted`, `reviewed_by`, `membership_notes`, ...
+//
+// The `public/venues` API had this fixed in #72, but the RSC path did not,
+// so the leak survived the API fix. This now selects the explicit public
+// column list. Never revert this to `select('*')`.
 export async function getApprovedVenues(filters: Omit<VenueFilters, 'status'> = {}): Promise<Venue[]> {
   const supabase = getAdminClient();
 
   // Note: Supabase doesn't support CASE in ORDER BY directly, so we fetch and sort in JS
   let query = supabase
     .from('venues')
-    .select('*')
+    .select(PUBLIC_VENUE_SELECT)
     .eq('status', 'approved')
     .eq('is_hidden', false);
 
@@ -133,13 +155,17 @@ export async function getPendingVenues(): Promise<Venue[]> {
   return getVenues({ status: 'pending' });
 }
 
-// Get venue by slug
+// Get venue by slug (PUBLIC page path)
+//
+// SECURITY: the result is passed into a client component on the public venue
+// detail pages, so it is serialised into the RSC payload in the HTML. This
+// must never select the full row — see the note on `getApprovedVenues`.
 export async function getVenueBySlug(slug: string): Promise<Venue | null> {
   const supabase = getAdminClient();
 
   const { data, error } = await supabase
     .from('venues')
-    .select('*')
+    .select(PUBLIC_VENUE_SELECT)
     .eq('slug', slug)
     .single();
 
@@ -197,14 +223,28 @@ export async function getVenueByOwnerId(ownerId: string): Promise<Venue | null> 
 }
 
 // Get venue with events
+//
+// SECURITY: same RSC-serialisation concern as `getVenueBySlug`. The `events`
+// relation is selected explicitly so a future column added to `events` is
+// not published by default.
 export async function getVenueWithEvents(slug: string): Promise<VenueWithEvents | null> {
   const supabase = getAdminClient();
 
   const { data, error } = await supabase
     .from('venues')
     .select(`
-      *,
-      events (*)
+      ${PUBLIC_VENUE_SELECT},
+      events (
+        id,
+        title,
+        slug,
+        date,
+        time,
+        cover_url,
+        image_url,
+        featured_image,
+        category
+      )
     `)
     .eq('slug', slug)
     .single();

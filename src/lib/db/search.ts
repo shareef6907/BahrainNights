@@ -1,4 +1,7 @@
 import { getAdminClient } from '@/lib/supabase/server';
+import { PUBLIC_EVENT_SELECT } from '@/lib/public-fields';
+import { PUBLIC_MOVIE_SELECT } from '@/lib/public-fields';
+import { PUBLIC_VENUE_SELECT } from '@/lib/public-venue-fields';
 import type { Venue, Event, Offer, Movie } from '@/types/database';
 
 export interface SearchResult {
@@ -116,7 +119,7 @@ async function searchVenues(query: string, category?: string): Promise<Venue[]> 
 
   let dbQuery = supabase
     .from('venues')
-    .select('*')
+    .select(PUBLIC_VENUE_SELECT)
     .eq('status', 'approved')
     .or(orClause)
     .limit(10);
@@ -142,7 +145,7 @@ async function searchEvents(query: string, category?: string): Promise<Event[]> 
 
   let dbQuery = supabase
     .from('events')
-    .select('*')
+    .select(PUBLIC_EVENT_SELECT)
     .eq('status', 'published')
     .eq('is_hidden', false)
     .eq('country', 'Bahrain') // Only Bahrain events in search
@@ -171,7 +174,7 @@ async function searchOffers(query: string): Promise<Offer[]> {
 
   const { data, error } = await supabase
     .from('offers')
-    .select('*')
+    .select('id, venue_id, title, slug, description, offer_type, days_available, valid_until, is_ongoing, featured_image, status, created_at')
     .eq('status', 'active')
     .or(`title.ilike.%${query}%,description.ilike.%${query}%`)
     .limit(10);
@@ -190,7 +193,7 @@ async function searchMovies(query: string): Promise<Movie[]> {
 
   const { data, error } = await supabase
     .from('movies')
-    .select('*')
+    .select(PUBLIC_MOVIE_SELECT)
     .eq('status', 'now_showing')
     .or(`title.ilike.%${query}%,overview.ilike.%${query}%`)
     .limit(10);
@@ -369,13 +372,13 @@ export async function searchByCategory(category: string, limit: number = 20): Pr
   const [venuesResult, eventsResult] = await Promise.all([
     supabase
       .from('venues')
-      .select('*')
+      .select(PUBLIC_VENUE_SELECT)
       .eq('status', 'approved')
       .eq('category', category)
       .limit(limit),
     supabase
       .from('events')
-      .select('*')
+      .select(PUBLIC_EVENT_SELECT)
       .eq('status', 'published')
       .eq('country', 'Bahrain')
       .eq('category', category)
@@ -403,7 +406,7 @@ export async function searchNearby(area: string, limit: number = 10): Promise<Ve
 
   const { data, error } = await supabase
     .from('venues')
-    .select('*')
+    .select(PUBLIC_VENUE_SELECT)
     .eq('status', 'approved')
     .ilike('area', `%${area}%`)
     .limit(limit);
