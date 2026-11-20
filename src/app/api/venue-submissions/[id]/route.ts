@@ -1,44 +1,23 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getAdminClient } from '@/lib/supabase/server';
-import { cookies } from 'next/headers';
-import jwt from 'jsonwebtoken';
+import { requireAdmin } from '@/lib/api-auth';
 import type { VenueSubmission } from '@/types/database';
 // Indexing API disabled per standing mission Part 2 Rule 3
-
-interface JWTPayload {
-  userId: string;
-  role: 'admin' | 'venue_owner';
-}
-
-// Verify admin authentication
-async function verifyAdmin(): Promise<{ userId: string } | null> {
-  try {
-    const cookieStore = await cookies();
-    const token = cookieStore.get('admin_token')?.value;
-
-    if (!token) {
-      return null;
-    }
-
-    const decoded = jwt.verify(token, process.env.JWT_SECRET || 'fallback-secret') as JWTPayload;
-
-    if (decoded.role !== 'admin') {
-      return null;
-    }
-
-    return { userId: decoded.userId };
-  } catch {
-    return null;
-  }
-}
 
 interface PageProps {
   params: Promise<{ id: string }>;
 }
 
-// GET - Get a single submission
+// GET - Get a single submission (admin only)
 export async function GET(request: NextRequest, { params }: PageProps) {
   try {
+    // A submission carries submitter PII (name, email, phone, IP, user agent).
+    // This route had no authentication check at all.
+    const auth = await requireAdmin(request);
+    if (!auth.authenticated) {
+      return auth.response;
+    }
+
     const { id } = await params;
     const supabase = getAdminClient();
 
@@ -68,13 +47,14 @@ export async function GET(request: NextRequest, { params }: PageProps) {
 // PATCH - Update a submission (approve/reject)
 export async function PATCH(request: NextRequest, { params }: PageProps) {
   try {
-    // Verify admin authentication
-    const admin = await verifyAdmin();
-    if (!admin) {
-      return NextResponse.json(
-        { error: 'Unauthorized - Admin access required' },
-        { status: 401 }
-      );
+    // Verify admin authentication.
+    // The previous check read an `admin_token` cookie that the app never sets
+    // (the session cookie is `auth_token`), so it rejected every caller —
+    // including real admins. `requireAdmin` reads the real cookie and checks
+    // the role.
+    const auth = await requireAdmin(request);
+    if (!auth.authenticated) {
+      return auth.response;
     }
 
     const { id } = await params;
@@ -194,7 +174,7 @@ export async function PATCH(request: NextRequest, { params }: PageProps) {
     const updateData = {
       status,
       admin_notes: admin_notes || null,
-      reviewed_by: admin.userId,
+      reviewed_by: auth.user.userId,
       reviewed_at: new Date().toISOString(),
       venue_id: venueId,
     };
@@ -234,13 +214,14 @@ export async function PATCH(request: NextRequest, { params }: PageProps) {
 // DELETE - Delete a submission
 export async function DELETE(request: NextRequest, { params }: PageProps) {
   try {
-    // Verify admin authentication
-    const admin = await verifyAdmin();
-    if (!admin) {
-      return NextResponse.json(
-        { error: 'Unauthorized - Admin access required' },
-        { status: 401 }
-      );
+    // Verify admin authentication.
+    // The previous check read an `admin_token` cookie that the app never sets
+    // (the session cookie is `auth_token`), so it rejected every caller —
+    // including real admins. `requireAdmin` reads the real cookie and checks
+    // the role.
+    const auth = await requireAdmin(request);
+    if (!auth.authenticated) {
+      return auth.response;
     }
 
     const { id } = await params;

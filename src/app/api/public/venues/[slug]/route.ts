@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getAdminClient } from '@/lib/supabase/server';
+import { PUBLIC_VENUE_SELECT } from '@/lib/public-venue-fields';
 import type { Venue } from '@/types/database';
 
 // Get a single venue by slug (approved venues only)
@@ -19,10 +20,13 @@ export async function GET(
 
     const supabase = getAdminClient();
 
-    // Fetch venue by slug - only approved and visible venues for public access
+    // Fetch venue by slug - only approved and visible venues for public access.
+    // The column list is explicit: `select('*')` published the venue owner's
+    // `password_hash`, `owner_id`, `registration_ip` and `registration_user_agent`
+    // to anonymous callers.
     const { data, error } = await supabase
       .from('venues')
-      .select('*')
+      .select(PUBLIC_VENUE_SELECT)
       .eq('slug', slug)
       .eq('status', 'approved')
       .eq('is_hidden', false)
