@@ -152,6 +152,74 @@ for (const [input, expected] of [
   check(`"${input}" unchanged`, cleanTitle(input), expected);
 }
 
+console.log('\n=== cleanTitle: screening format suffixes ===\n');
+
+/*
+ * A cinema prints the format it is screening a film in as a suffix. It is
+ * NOT part of the title, so "Dune: Part Three" and "Dune: Part Three
+ * -Preview Screening" are the SAME film and must not become two rows.
+ *
+ * Both spellings are real: "Dune: Part Three" and
+ * "Dune: Part Three -Preview Screening" were both observed in the database.
+ */
+check(
+  '"Dune: Part Three -Preview Screening" -> "Dune: Part Three"',
+  cleanTitle('Dune: Part Three -Preview Screening'),
+  'Dune: Part Three',
+);
+check(
+  '"Dune: Part Three -Preview" -> "Dune: Part Three"',
+  cleanTitle('Dune: Part Three -Preview'),
+  'Dune: Part Three',
+);
+check(
+  '"Dune: Part Three - Special Screening" -> "Dune: Part Three"',
+  cleanTitle('Dune: Part Three - Special Screening'),
+  'Dune: Part Three',
+);
+check(
+  '"Dune: Part Three – Advanced Screening" -> "Dune: Part Three"',
+  cleanTitle('Dune: Part Three – Advanced Screening'),
+  'Dune: Part Three',
+);
+check(
+  '"Dune: Part Three Preview Screening" -> "Dune: Part Three"',
+  cleanTitle('Dune: Part Three Preview Screening'),
+  'Dune: Part Three',
+);
+check(
+  'the two Dune spellings clean to the SAME title',
+  String(cleanTitle('Dune: Part Three -Preview Screening') === cleanTitle('Dune: Part Three')),
+  'true',
+);
+
+// Titles that must NOT be damaged by the new rule.
+check(
+  '"Avengers: Doomsday (Infinity Vision)" unchanged — a REAL distinct VOX listing',
+  cleanTitle('Avengers: Doomsday (Infinity Vision)'),
+  'Avengers: Doomsday (Infinity Vision)',
+);
+check(
+  '"Something Special" unchanged — a title that merely ends in the word "Special"',
+  cleanTitle('Something Special'),
+  'Something Special',
+);
+check(
+  '"The Preview" unchanged — a title that merely ends in the word "Preview"',
+  cleanTitle('The Preview'),
+  'The Preview',
+);
+check(
+  '"Crypto" unchanged',
+  cleanTitle('Crypto'),
+  'Crypto',
+);
+check(
+  '"Tales from the Crypto" unchanged',
+  cleanTitle('Tales from the Crypto'),
+  'Tales from the Crypto',
+);
+
 console.log('\n============================================================');
 console.log(`PASSED: ${passed} | FAILED: ${failed}`);
 console.log('============================================================\n');
