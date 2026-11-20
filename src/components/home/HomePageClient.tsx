@@ -123,6 +123,12 @@ export interface HomepageMovie {
   trailer_url: string | null;
   movie_cast: string[];
   scraped_from: string[];
+  /**
+   * The film's per-cinema booking URLs (only present for films that have a
+   * verified per-film page at a cinema). See
+   * `src/lib/cinema/booking-urls.ts`.
+   */
+  booking_urls?: Record<string, string>;
 }
 
 // Today event type for "Happening Today" section
@@ -247,6 +253,7 @@ function convertToMovieFormat(movie: HomepageMovie): Movie {
     trailerUrl: movie.trailer_url || '',
     cast: movie.movie_cast || [],
     scrapedFrom: movie.scraped_from || [],
+    bookingUrls: movie.booking_urls || undefined,
   };
 }
 

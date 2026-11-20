@@ -20,6 +20,7 @@ import {
 } from '../src/lib/trailer-verification';
 import { decideCleanup } from './cinema-cleanup-guard';
 import { applyTitleOverride, getMovieOverride } from '../src/lib/cinema/admin-overrides';
+import { validateBookingUrl, validateBookingUrls } from '../src/lib/cinema/booking-url-validation';
 
 // Load .env.local for local development
 import { config } from 'dotenv';
@@ -385,6 +386,34 @@ async function findMovieBySlug(slug: string): Promise<{ id: string; slug: string
 }
 
 /**
+ * Read the booking URLs already stored for a film.
+ *
+ * The `booking_urls` column is added by a MANUAL script that has not been run
+ * yet, so a plain `.select('booking_urls')` would fail with 42703 on a
+ * database without it — and that failure must not stop the sync. This reads
+ * the column on its own and degrades to an empty map.
+ */
+async function readExistingBookingUrls(movieId: string): Promise<Record<string, string>> {
+  try {
+    const { data, error } = await supabase
+      .from('movies')
+      .select('booking_urls')
+      .eq('id', movieId)
+      .maybeSingle();
+    if (error) return {};
+    const value = (data as any)?.booking_urls;
+    if (!value || typeof value !== 'object' || Array.isArray(value)) return {};
+    const out: Record<string, string> = {};
+    for (const [cinema, url] of Object.entries(value as Record<string, unknown>)) {
+      if (typeof url === 'string' && url.trim()) out[cinema] = url.trim();
+    }
+    return out;
+  } catch {
+    return {};
+  }
+}
+
+/**
  * Work out a slug that is safe to write.
  *
  * The slug is published in the sitemap and in search results, so it must not
@@ -454,7 +483,8 @@ async function upsertMovie(
   isNowShowing: boolean,
   cinemaPosterUrl?: string,
   source: string = 'vox',
-  cinemaTrailerUrl?: string
+  cinemaTrailerUrl?: string,
+  bookingUrl?: string
 ): Promise<string | null> {
   try {
     // Prefer TMDB's own title. Fall back to the scraped title only when TMDB
@@ -559,13 +589,55 @@ async function upsertMovie(
       if (merged.length) payload.scraped_from = merged;
     }
 
+    /*
+     * The per-film booking URL.
+     *
+     * It is written ONLY after it has been verified to answer HTTP 200 — a
+     * Book button that lands on a 404 is worse than no Book button. It is
+     * also MERGED with whatever the row already holds, so a film listed at
+     * both VOX and Cineco keeps both URLs across a re-sync that only sees one
+     * of them.
+     *
+     * The `booking_urls` column is added by a MANUAL script that has not
+     * been run yet, so a write against a database without the column fails
+     * with 42703. That must not take the film write down with it, so the
+     * column is probed once and, when it is missing, the payload is written
+     * without it.
+     */
+    if (bookingUrl) {
+      const verified = await validateBookingUrl(bookingUrl);
+      if (verified) {
+        const existingUrls = existingRow ? await readExistingBookingUrls(existingRow.id) : {};
+        payload.booking_urls = { ...existingUrls, [source]: bookingUrl };
+      } else {
+        console.log(`  ⚠️ Booking URL did not resolve (skipped): ${bookingUrl}`);
+      }
+    }
+
     const onConflict = tmdbId !== null ? 'tmdb_id' : 'slug';
 
-    const { data, error } = await supabase
+    let { data, error } = await supabase
       .from('movies')
       .upsert(payload as any, { onConflict })
       .select('id')
       .single();
+
+    // The `booking_urls` column may not exist yet (the migration is manual).
+    // Retry without it rather than losing the film.
+    if (error && /booking_urls|column/i.test(error.message || '')) {
+      console.warn(
+        '  ⚠️ `movies.booking_urls` is not present in the database — writing the film without it. ' +
+          'Run: docs/sql/2026-11-20-add-movies-booking-urls.sql (manual), then re-run the cinema sync.'
+      );
+      delete payload.booking_urls;
+      const retry = await supabase
+        .from('movies')
+        .upsert(payload as any, { onConflict })
+        .select('id')
+        .single();
+      data = retry.data;
+      error = retry.error;
+    }
 
     if (error) {
       console.error(`  ❌ Error upserting "${canonicalTitle}":`, error.message);
@@ -645,7 +717,8 @@ async function updateMovieStatus(
   isNowShowing: boolean,
   isComingSoon: boolean,
   source?: string,
-  currentSources?: string[] | null
+  currentSources?: string[] | null,
+  bookingUrls?: Record<string, string>
 ): Promise<boolean> {
   try {
     const update: Record<string, unknown> = {
@@ -663,12 +736,49 @@ async function updateMovieStatus(
       if (merged.length) update.scraped_from = merged;
     }
 
+    /*
+     * The per-film booking URLs.
+     *
+     * Only URLs that have been verified to answer HTTP 200 are stored, and
+     * they are MERGED with the URLs the row already holds — so a re-sync that
+     * only sees VOX does not erase the Cineco URL.
+     *
+     * As with the insert path, the column may not exist yet (the migration is
+     * manual). If the write fails because of it, the rest of the update is
+     * retried without the column.
+     */
+    if (bookingUrls && Object.keys(bookingUrls).length > 0) {
+      const existingUrls = await readExistingBookingUrls(movieId);
+      const mergedUrls = { ...existingUrls, ...bookingUrls };
+      if (Object.keys(mergedUrls).length > 0) {
+        update.booking_urls = mergedUrls;
+      }
+    }
+
     const { error } = await supabase
       .from('movies')
       .update(update)
       .eq('id', movieId);
 
     if (error) {
+      // The `booking_urls` column may not exist yet. Retry the rest of the
+      // update without it rather than losing the film's status change.
+      if (/booking_urls|column/i.test(error.message || '') && update.booking_urls) {
+        console.warn(
+          '  ⚠️ `movies.booking_urls` is not present in the database — updating the film without it. ' +
+            'Run: docs/sql/2026-11-20-add-movies-booking-urls.sql (manual), then re-run the cinema sync.'
+        );
+        delete update.booking_urls;
+        const retry = await supabase
+          .from('movies')
+          .update(update)
+          .eq('id', movieId);
+        if (retry.error) {
+          console.error(`  ❌ Error updating movie:`, retry.error.message);
+          return false;
+        }
+        return true;
+      }
       console.error(`  ❌ Error updating movie:`, error.message);
       return false;
     }
@@ -735,6 +845,16 @@ async function syncCinema() {
     // cinema is actually showing, so it never needs a search.
     const cinemaTrailerByTitle = new Map<string, string>();
 
+    // The film's OWN per-film page at each cinema, keyed by normalised title
+    // then by cinema id.
+    //
+    // These are captured from the cinemas' own listing pages — VOX publishes
+    // `/movies/<slug>` and Cineco publishes `/amy_movie/<slug>/` — so they are
+    // the addresses the films really live at. They are never computed from a
+    // title: VOX's slugs carry language and format suffixes the title never
+    // implies ("Hadoota" -> `hadoota-arabic`), so a computed slug 404s.
+    const bookingUrlByTitle = new Map<string, Map<string, string>>();
+
     const addWithSource = (titles: string[], source: string) => {
       for (const t of titles) {
         const key = normalizeTitle(t);
@@ -743,10 +863,34 @@ async function syncCinema() {
         sourceByTitle.get(key)!.add(source);
       }
     };
-    addWithSource(voxResult.nowShowing, 'vox');
-    addWithSource(cinecoResult.nowShowing.map((m) => m.title), 'cineco');
-    addWithSource(voxResult.comingSoon, 'vox');
-    addWithSource(cinecoResult.comingSoon.map((m) => m.title), 'cineco');
+
+    const addBookingUrl = (title: string, source: string, url: string | undefined) => {
+      if (!url) return;
+      const key = normalizeTitle(title);
+      if (!key) return;
+      if (!bookingUrlByTitle.has(key)) bookingUrlByTitle.set(key, new Map());
+      const map = bookingUrlByTitle.get(key)!;
+      // First cinema wins for a given title — two listings of the same film
+      // at the same cinema are the same film.
+      if (!map.has(source)) map.set(source, url);
+    };
+
+    for (const m of voxResult.nowShowing) {
+      addWithSource([m.title], 'vox');
+      addBookingUrl(m.title, 'vox', m.url);
+    }
+    for (const m of cinecoResult.nowShowing) {
+      addWithSource([m.title], 'cineco');
+      addBookingUrl(m.title, 'cineco', m.url);
+    }
+    for (const m of voxResult.comingSoon) {
+      addWithSource([m.title], 'vox');
+      addBookingUrl(m.title, 'vox', m.url);
+    }
+    for (const m of cinecoResult.comingSoon) {
+      addWithSource([m.title], 'cineco');
+      addBookingUrl(m.title, 'cineco', m.url);
+    }
 
     for (const movie of [...cinecoResult.nowShowing, ...cinecoResult.comingSoon]) {
       if (!movie.trailerKey) continue;
@@ -758,7 +902,7 @@ async function syncCinema() {
 
     // The title we keep for a group is the first spelling we saw for it.
     const labelByTitle = new Map<string, string>();
-    for (const list of [voxResult.nowShowing, cinecoResult.nowShowing.map((m) => m.title), voxResult.comingSoon, cinecoResult.comingSoon.map((m) => m.title)]) {
+    for (const list of [voxResult.nowShowing.map((m) => m.title), cinecoResult.nowShowing.map((m) => m.title), voxResult.comingSoon.map((m) => m.title), cinecoResult.comingSoon.map((m) => m.title)]) {
       for (const t of list) {
         const key = normalizeTitle(t);
         if (key && !labelByTitle.has(key)) labelByTitle.set(key, t);
@@ -767,10 +911,10 @@ async function syncCinema() {
 
     // Deduplicate
     const nowShowingSet = new Set(
-      [...voxResult.nowShowing, ...cinecoResult.nowShowing.map((m) => m.title)].map(normalizeTitle),
+      [...voxResult.nowShowing.map((m) => m.title), ...cinecoResult.nowShowing.map((m) => m.title)].map(normalizeTitle),
     );
     const comingSoonSet = new Set(
-      [...voxResult.comingSoon, ...cinecoResult.comingSoon.map((m) => m.title)].map(normalizeTitle),
+      [...voxResult.comingSoon.map((m) => m.title), ...cinecoResult.comingSoon.map((m) => m.title)].map(normalizeTitle),
     );
 
     // Remove from coming soon if also in now showing
@@ -787,6 +931,22 @@ async function syncCinema() {
       return set ? Array.from(set) : ['vox'];
     };
 
+    /*
+     * The film's per-film booking URLs, verified to resolve.
+     *
+     * A URL is only kept when it answers HTTP 200. An unverified URL is
+     * dropped rather than stored, so the Book button can never point at a
+     * dead page. The check runs once per film per run.
+     */
+    const verifiedBookingUrlsFor = async (title: string): Promise<Record<string, string>> => {
+      const map = bookingUrlByTitle.get(normalizeTitle(title));
+      if (!map || map.size === 0) return {};
+      const candidates: Record<string, string> = {};
+      for (const [cinema, url] of map) candidates[cinema] = url;
+      const verified = await validateBookingUrls(candidates);
+      return verified;
+    };
+
     console.log(`  Merged Now Showing: ${mergedNowShowing.length}`);
     console.log(`  Merged Coming Soon: ${mergedComingSoon.length}`);
 
@@ -800,7 +960,14 @@ async function syncCinema() {
 
       if (existing) {
         // Update existing
-        const updated = await updateMovieStatus(existing.id, true, false, sources[0], existing.scraped_from);
+        const updated = await updateMovieStatus(
+          existing.id,
+          true,
+          false,
+          sources[0],
+          existing.scraped_from,
+          await verifiedBookingUrlsFor(title)
+        );
         if (updated) {
           console.log(`  🔄 Updated: ${title} (Now Showing) [${sources.join('+')}]`);
           stats.updated++;
@@ -846,13 +1013,15 @@ async function syncCinema() {
           stats.tmdbErrors++;
         }
 
+        const urls = await verifiedBookingUrlsFor(title);
         const inserted = await upsertMovie(
           title,
           tmdbData,
           true,
           undefined,
           sources[0],
-          cinemaTrailerByTitle.get(normalizeTitle(title))
+          cinemaTrailerByTitle.get(normalizeTitle(title)),
+          urls[sources[0]]
         );
         if (inserted) {
           stats.added++;
@@ -870,7 +1039,14 @@ async function syncCinema() {
 
       if (existing) {
         // Update existing
-        const updated = await updateMovieStatus(existing.id, false, true, sources[0], existing.scraped_from);
+        const updated = await updateMovieStatus(
+          existing.id,
+          false,
+          true,
+          sources[0],
+          existing.scraped_from,
+          await verifiedBookingUrlsFor(title)
+        );
         if (updated) {
           console.log(`  🔄 Updated: ${title} (Coming Soon) [${sources.join('+')}]`);
           stats.updated++;
@@ -903,13 +1079,15 @@ async function syncCinema() {
           stats.tmdbErrors++;
         }
 
+        const urls = await verifiedBookingUrlsFor(title);
         const inserted = await upsertMovie(
           title,
           tmdbData,
           false,
           undefined,
           sources[0],
-          cinemaTrailerByTitle.get(normalizeTitle(title))
+          cinemaTrailerByTitle.get(normalizeTitle(title)),
+          urls[sources[0]]
         );
         if (inserted) {
           stats.added++;

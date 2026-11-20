@@ -6,6 +6,7 @@ import { Movie } from '@/components/cinema/MovieCard';
 import MovieListSchema from '@/components/SEO/MovieListSchema';
 import BreadcrumbSchema from '@/components/SEO/BreadcrumbSchema';
 import { PUBLIC_MOVIE_SELECT } from '@/lib/public-fields';
+import { getBookingUrlsByMovie } from '@/lib/cinema/booking-urls';
 
 // Revalidate every 60 seconds for fresh data
 export const revalidate = 60;
@@ -32,6 +33,12 @@ interface DBMovie {
   is_now_showing: boolean;
   is_coming_soon: boolean;
   scraped_from: string[];
+  /**
+   * The film's per-cinema booking URLs, read in a SEPARATE, fault-tolerant
+   * query. See `src/lib/cinema/booking-urls.ts` for why it is not part of
+   * `PUBLIC_MOVIE_SELECT`.
+   */
+  booking_urls?: Record<string, string>;
 }
 
 /**
@@ -101,7 +108,27 @@ function convertToMovieFormat(dbMovie: DBMovie): Movie {
     trailerUrl,
     cast: dbMovie.movie_cast || [],
     scrapedFrom: dbMovie.scraped_from || [],
+    bookingUrls: dbMovie.booking_urls || undefined,
   };
+}
+
+/**
+ * Attach the per-film booking URLs to each movie.
+ *
+ * This is a SEPARATE query from the movie fetch on purpose — the
+ * `booking_urls` column may not exist yet (the migration is manual), and a
+ * missing column inside `PUBLIC_MOVIE_SELECT` would 500 the whole page.
+ * `getBookingUrlsByMovie` degrades to an empty map instead.
+ */
+async function attachBookingUrls(movies: Movie[]): Promise<Movie[]> {
+  if (movies.length === 0) return movies;
+
+  const byMovieId = await getBookingUrlsByMovie(movies.map((m) => m.id));
+
+  return movies.map((movie) => {
+    const urls = byMovieId[movie.id];
+    return urls ? { ...movie, bookingUrls: urls } : movie;
+  });
 }
 
 /**
@@ -301,6 +328,13 @@ export default async function CinemaPage() {
     getFeaturedTrailers(),
   ]);
 
+  // The per-film booking URLs are read separately and attached here.
+  const [nowShowingWithUrls, comingSoonWithUrls, featuredWithUrls] = await Promise.all([
+    attachBookingUrls(nowShowing),
+    attachBookingUrls(comingSoon),
+    attachBookingUrls(featuredTrailers),
+  ]);
+
   return (
     <>
       <BreadcrumbSchema items={[
@@ -308,18 +342,18 @@ export default async function CinemaPage() {
         { name: 'Cinema', url: 'https://www.bahrainnights.com/cinema' }
       ]} />
       <MovieListSchema
-        movies={nowShowing}
+        movies={nowShowingWithUrls}
         pageTitle="Movies Now Showing in Bahrain - VOX Cinemas"
         pageDescription="Find movies now showing at VOX Cinemas Bahrain"
         pageUrl="https://www.bahrainnights.com/cinema"
       />
       <Suspense fallback={null}>
         <CinemaPageClient
-          initialNowShowing={nowShowing}
-          initialComingSoon={comingSoon}
+          initialNowShowing={nowShowingWithUrls}
+          initialComingSoon={comingSoonWithUrls}
           initialCinemas={[{ value: 'all', label: 'All Cinemas' }]}
           lastUpdated={null}
-          featuredTrailers={featuredTrailers}
+          featuredTrailers={featuredWithUrls}
         />
       </Suspense>
     </>
