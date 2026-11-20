@@ -6,50 +6,10 @@ import { X, Star, Clock, Calendar, Play, ExternalLink, Ticket, Film } from 'luci
 import Image from 'next/image';
 import { Movie } from './MovieCard';
 import { useTranslation } from '@/lib/i18n';
-
-// Bahrain cinema booking URLs
-const BAHRAIN_CINEMAS = [
-  {
-    id: 'cineco',
-    name: 'Cineco',
-    logo: '/images/cinemas/cineco.png',
-    locations: ['Seef Mall', 'Saar Mall', 'Oasis Mall', 'Wadi Al Sail'],
-    bookingUrl: 'https://bahrain.cineco.net/',
-    color: 'from-red-500/20 to-red-600/20',
-    borderColor: 'border-red-500/30',
-    hoverColor: 'hover:border-red-400',
-  },
-  {
-    id: 'vox',
-    name: 'VOX Cinemas',
-    logo: '/images/cinemas/vox.png',
-    locations: ['City Centre', 'The Avenues'],
-    bookingUrl: 'https://bhr.voxcinemas.com/',
-    color: 'from-purple-500/20 to-purple-600/20',
-    borderColor: 'border-purple-500/30',
-    hoverColor: 'hover:border-purple-400',
-  },
-  {
-    id: 'cinepolis',
-    name: 'Cinépolis',
-    logo: '/images/cinemas/cinepolis.png',
-    locations: ['Wadi Al Sail'],
-    bookingUrl: 'https://bahrain.cinepolisgulf.com/',
-    color: 'from-blue-500/20 to-blue-600/20',
-    borderColor: 'border-blue-500/30',
-    hoverColor: 'hover:border-blue-400',
-  },
-  {
-    id: 'mukta',
-    name: 'Mukta A2 Cinemas',
-    logo: '/images/cinemas/mukta.png',
-    locations: ['Juffair'],
-    bookingUrl: 'https://www.muktaa2cinemas.com/bahrain',
-    color: 'from-amber-500/20 to-amber-600/20',
-    borderColor: 'border-amber-500/30',
-    hoverColor: 'hover:border-amber-400',
-  },
-];
+// The cinema list lives in ONE place: src/lib/cinema/booking-links.ts.
+// It used to be duplicated here, in NetflixHero, in CinemaPageClient and in
+// /api/cinema/locations — four copies of the same URLs, three of them wrong.
+import { BAHRAIN_CINEMAS, buildBookingLinks } from '@/lib/cinema/booking-links';
 
 interface MovieModalProps {
   movie: Movie | null;
@@ -268,13 +228,27 @@ export default function MovieModal({
                         <h3 className="text-xl font-bold text-white">{t.movieModal.bookTickets}</h3>
                       </div>
 
-                      {/* Cinema Grid - Filter by scraped_from to show only cinemas where movie is playing */}
+                      {/*
+                        Cinema grid.
+                        
+                        A Book button is rendered ONLY for a cinema we have a
+                        VERIFIED per-film URL for. The old code linked every
+                        cinema the film was listed at to the cinema's
+                        HOMEPAGE, and the hero linked to a search URL that
+                        404s — so every "Book" click led somewhere that was
+                        not a booking page for that film.
+                        
+                        A cinema the film plays at but for which we have no
+                        per-film URL is still shown, as a plain link to the
+                        cinema, clearly not a "Book" button.
+                      */}
                       {(() => {
-                        const availableCinemas = movie.scrapedFrom && movie.scrapedFrom.length > 0
-                          ? BAHRAIN_CINEMAS.filter((cinema) => movie.scrapedFrom?.includes(cinema.id))
-                          : [];
+                        const bookingLinks = buildBookingLinks(movie.scrapedFrom, movie.bookingUrls);
+                        const listedCinemas = BAHRAIN_CINEMAS.filter((cinema) =>
+                          movie.scrapedFrom?.includes(cinema.id)
+                        );
 
-                        if (availableCinemas.length === 0) {
+                        if (listedCinemas.length === 0) {
                           return (
                             <div className="p-4 bg-white/5 rounded-xl text-center">
                               <p className="text-gray-400">
@@ -284,7 +258,36 @@ export default function MovieModal({
                                 {BAHRAIN_CINEMAS.map((cinema) => (
                                   <a
                                     key={cinema.id}
-                                    href={cinema.bookingUrl}
+                                    href={cinema.homepage}
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                    className="text-sm text-yellow-400 hover:text-yellow-300 underline"
+                                  >
+                                    {cinema.name}
+                                  </a>
+                                ))}
+                              </div>
+                            </div>
+                          );
+                        }
+
+                        if (bookingLinks.length === 0) {
+                          // We know where the film is playing, but we have no
+                          // verified per-film booking URL for it yet. Say so
+                          // plainly and point at the cinema, rather than
+                          // rendering a link that would 404.
+                          return (
+                            <div className="p-4 bg-white/5 rounded-xl text-center">
+                              <p className="text-gray-400 mb-3">
+                                {listedCinemas.length === 1
+                                  ? `${t.movieModal.availableAtOneCinema} ${listedCinemas[0].name}`
+                                  : t.movieModal.availableAtCinemas.replace('{count}', listedCinemas.length.toString())}
+                              </p>
+                              <div className="flex flex-wrap justify-center gap-3">
+                                {listedCinemas.map((cinema) => (
+                                  <a
+                                    key={cinema.id}
+                                    href={cinema.homepage}
                                     target="_blank"
                                     rel="noopener noreferrer"
                                     className="text-sm text-yellow-400 hover:text-yellow-300 underline"
@@ -300,15 +303,15 @@ export default function MovieModal({
                         return (
                           <>
                             <p className="text-gray-400 mb-4">
-                              {availableCinemas.length === 1
-                                ? `${t.movieModal.availableAtOneCinema} ${availableCinemas[0].name}`
-                                : t.movieModal.availableAtCinemas.replace('{count}', availableCinemas.length.toString())}
+                              {bookingLinks.length === 1
+                                ? `${t.movieModal.availableAtOneCinema} ${bookingLinks[0].cinema.name}`
+                                : t.movieModal.availableAtCinemas.replace('{count}', bookingLinks.length.toString())}
                             </p>
                             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                              {availableCinemas.map((cinema) => (
+                              {bookingLinks.map(({ cinema, url }) => (
                                 <a
                                   key={cinema.id}
-                                  href={cinema.bookingUrl}
+                                  href={url}
                                   target="_blank"
                                   rel="noopener noreferrer"
                                   data-testid="cinema-option"
@@ -357,11 +360,12 @@ export default function MovieModal({
 
                       {/* Show which cinemas will have this movie */}
                       {(() => {
-                        const availableCinemas = movie.scrapedFrom && movie.scrapedFrom.length > 0
-                          ? BAHRAIN_CINEMAS.filter((cinema) => movie.scrapedFrom?.includes(cinema.id))
-                          : [];
+                        const bookingLinks = buildBookingLinks(movie.scrapedFrom, movie.bookingUrls);
+                        const listedCinemas = BAHRAIN_CINEMAS.filter((cinema) =>
+                          movie.scrapedFrom?.includes(cinema.id)
+                        );
 
-                        if (availableCinemas.length > 0) {
+                        if (listedCinemas.length > 0) {
                           return (
                             <div className="mt-4">
                               <div className="flex items-center gap-2 mb-3">
@@ -369,10 +373,17 @@ export default function MovieModal({
                                 <h4 className="text-lg font-bold text-white">{t.movieModal.comingTo}</h4>
                               </div>
                               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                                {availableCinemas.map((cinema) => (
+                                {listedCinemas.map((cinema) => {
+                                  const link = bookingLinks.find((l) => l.cinema.id === cinema.id);
+                                  // A coming-soon film usually has no booking
+                                  // page yet, so this is a plain link to the
+                                  // cinema rather than a Book button. When we
+                                  // DO have a verified per-film URL, use it.
+                                  const href = link?.url ?? cinema.homepage;
+                                  return (
                                   <a
                                     key={cinema.id}
-                                    href={cinema.bookingUrl}
+                                    href={href}
                                     target="_blank"
                                     rel="noopener noreferrer"
                                     data-testid="cinema-option"
@@ -395,7 +406,8 @@ export default function MovieModal({
                                       <ExternalLink className="w-4 h-4 text-gray-400 group-hover:text-white transition-colors" />
                                     </div>
                                   </a>
-                                ))}
+                                  );
+                                })}
                               </div>
                             </div>
                           );

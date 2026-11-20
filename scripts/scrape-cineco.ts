@@ -16,6 +16,15 @@ const CINE_CO_URLS = {
 };
 
 /**
+ * The base every Cineco per-film page hangs off.
+ *
+ * Note: `cineco.com.bh` does not resolve — the live Bahrain site is
+ * `bahrain.cineco.net`. Building a URL against the wrong host produces a
+ * link that cannot work.
+ */
+const CINECO_BASE = 'https://bahrain.cineco.net';
+
+/**
  * A movie as listed by Cineco.
  *
  * `trailerKey` is the YouTube key of the trailer the cinema itself publishes
@@ -27,6 +36,14 @@ export interface ScrapedCinecoMovie {
   trailerKey?: string;
   /** True when the title came from a real /amy_movie/ permalink. */
   trusted?: boolean;
+  /**
+   * The film's own per-film page on Cineco.
+   *
+   * Built from the site's own slug (`/amy_movie/<slug>/`), never from the
+   * title. Absent when the film was found by a title-only fallback that had
+   * no permalink behind it.
+   */
+  url?: string;
 }
 
 interface ScrapeResult {
@@ -189,11 +206,17 @@ async function scrapePage(page: Page, url: string): Promise<ScrapedCinecoMovie[]
     }
 
     // Fall back to the slug only for a movie we never saw any text for.
+    //
+    // The per-film URL is built from the site's OWN slug. Cineco runs the
+    // "Amy Movie" WordPress theme and every film lives at
+    // `/amy_movie/<slug>/`, so the slug IS the address. It is never
+    // computed from the title.
     const resolved = Array.from(bySlug.entries()).map(([slug, entry]) => ({
       slug,
       title: entry.title || slug.replace(/-/g, ' '),
       trailerKey: trailerBySlug[slug] || undefined,
       trusted: entry.fromText,
+      url: slug ? `${CINECO_BASE}/amy_movie/${slug}/` : undefined,
     }));
 
     if (resolved.length) {

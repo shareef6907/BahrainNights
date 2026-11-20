@@ -125,6 +125,7 @@ interface TrailerPlayerProps {
 export interface TrailerPlayerControls {
   play: () => void;
   unmute: () => void;
+  setVolume: (volume: number) => void;
   isMuted: () => boolean;
   isPlaying: () => boolean;
 }
@@ -211,6 +212,13 @@ export default function TrailerPlayer({
   const mountedRef = useRef(true);
   /** True when the visitor explicitly muted the trailer on a previous view. */
   const soundDeclinedRef = useRef(false);
+  /**
+   * Whether the sound preference has already been re-applied to THIS player.
+   *
+   * Reset for every new player instance (every slide), because each slide
+   * creates a fresh YouTube player that needs the preference re-applied.
+   */
+  const soundReappliedRef = useRef(false);
 
   useEffect(() => {
     mountedRef.current = true;
@@ -444,6 +452,38 @@ export default function TrailerPlayer({
                     setIsLoading(false);
                     setPosterVisible(false);
                     onPlayingChange?.(true);
+
+                    /*
+                     * Re-apply the sound preference for THIS player, on the
+                     * first PLAYING event.
+                     *
+                     * Each slide creates a brand-new YouTube player, and a
+                     * fresh player can come up muted even though the
+                     * preference says sound is on — the unmuted attempt in
+                     * `playWithSound` sets the state before `playVideo()`, but
+                     * YouTube can still mute the stream afterwards. Without
+                     * this re-application, a visitor who turned the sound on
+                     * would find the SECOND, THIRD and FOURTH trailer silent
+                     * while the first one had sound.
+                     *
+                     * The preference is only honoured when the visitor has
+                     * actually chosen sound ON. It is never used to defeat
+                     * the browser's autoplay policy: the unmuted attempt is
+                     * still made first and the browser still decides.
+                     */
+                    if (!soundReappliedRef.current) {
+                      soundReappliedRef.current = true;
+                      const preference = readSoundPreference();
+                      if (preference === true) {
+                        try {
+                          event.target.unMute();
+                          event.target.setVolume(60);
+                          setIsMuted(false);
+                        } catch {
+                          /* the browser may refuse; the nudge stays visible */
+                        }
+                      }
+                    }
                   }
                 },
                 onError: (event) => {
@@ -488,6 +528,8 @@ export default function TrailerPlayer({
         /* ignore */
       }
       playerRef.current = null;
+      // A new player needs the sound preference re-applied to it.
+      soundReappliedRef.current = false;
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [activated, reducedMotion, videoId]);
@@ -549,6 +591,15 @@ export default function TrailerPlayer({
         });
       },
       unmute: handleUnmute,
+      setVolume: (volume: number) => {
+        const player = playerRef.current;
+        if (!player) return;
+        try {
+          player.setVolume(Math.max(0, Math.min(100, volume)));
+        } catch {
+          /* ignore */
+        }
+      },
       isMuted: () => isMuted,
       isPlaying: () => isPlaying,
     });

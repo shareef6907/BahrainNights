@@ -27,6 +27,20 @@ export interface Movie {
   trailerUrl: string;
   cast?: string[];
   scrapedFrom?: string[]; // Which cinemas have this movie: ['cineco', 'vox', 'mukta', 'cinepolis']
+  /**
+   * The film's own page on each cinema, keyed by cinema id.
+   *
+   * e.g. `{ vox: 'https://bhr.voxcinemas.com/movies/i-play-rocky' }`
+   *
+   * Only URLs that the sync has VERIFIED answer HTTP 200 are stored here, so
+   * a Book button built from this map can never point at a 404. When the map
+   * is absent (the `booking_urls` column has not been created yet, or the
+   * film's cinema slug could not be resolved) there is NO Book button.
+   *
+   * See `src/lib/cinema/booking-links.ts` for the single place that turns
+   * this map into links.
+   */
+  bookingUrls?: Record<string, string>;
 }
 
 interface MovieCardProps {
@@ -128,7 +142,14 @@ function MovieCard({ movie, index = 0, onMovieClick, onTrailerClick }: MovieCard
             </motion.button>
           )}
 
-          {/* Book Tickets Button */}
+          {/*
+            Book Tickets Button.
+
+            It opens the film modal, where the cinemas the film is listed at
+            are shown as Book buttons — but only the ones we have a verified
+            per-film URL for. This button is NOT a link itself, so it never
+            needs a URL.
+          */}
           <button
             className="px-4 py-2 bg-white/20 backdrop-blur-sm border border-white/30 rounded-full text-white text-sm font-medium hover:bg-white/30 transition-colors"
             onClick={(e) => {

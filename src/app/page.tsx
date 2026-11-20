@@ -1,6 +1,7 @@
 import { supabaseAdmin } from '@/lib/supabase';
 import HomePageClient, { HomepageMovie, TodayEvent } from '@/components/home/HomePageClient';
 import { getInternationalCountrySummaries } from '@/lib/international-events';
+import { getBookingUrlsByMovie } from '@/lib/cinema/booking-urls';
 
 // ISR: Regenerate page every 2 minutes for fresh data without hitting DB on every request
 // This is the KEY performance optimization - cached HTML served instantly
@@ -430,9 +431,18 @@ export default async function BahrainNightsHomepage() {
     getInternationalCountrySummaries(),
   ]);
 
+  // The per-film booking URLs are read in a separate, fault-tolerant query —
+  // the `booking_urls` column may not exist yet (the migration is manual).
+  // See src/lib/cinema/booking-urls.ts.
+  const bookingUrls = await getBookingUrlsByMovie(movies.map((m) => m.id));
+  const moviesWithUrls = movies.map((movie) => {
+    const urls = bookingUrls[movie.id];
+    return urls ? { ...movie, booking_urls: urls } : movie;
+  });
+
   return (
     <HomePageClient
-      initialMovies={movies}
+      initialMovies={moviesWithUrls}
       initialStats={stats}
       initialTodayEvents={todayEvents}
       initialInternationalEvents={internationalEvents}

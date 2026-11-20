@@ -4,6 +4,7 @@ import { useState, useEffect, useCallback } from 'react';
 import dynamic from 'next/dynamic';
 import MovieCard, { Movie } from './MovieCard';
 import NetflixHero from './NetflixHero';
+import { primaryBookingLink } from '@/lib/cinema/booking-links';
 
 /**
  * The shared modal — the SAME component the homepage uses.
@@ -53,10 +54,10 @@ export default function CinemaPageClient({
   const movies = activeTab === 'now-showing' ? initialNowShowing : initialComingSoon;
 
   // Handle movie click
-  const handleMovieClick = (movie: Movie) => {
+  const handleMovieClick = useCallback((movie: Movie) => {
     setSelectedMovie(movie);
     setIsModalOpen(true);
-  };
+  }, []);
 
   // Close modal
   const closeModal = useCallback(() => {
@@ -84,13 +85,35 @@ export default function CinemaPageClient({
     return () => window.removeEventListener('keydown', handleKeyDown);
   }, [closeModal]);
 
+  /**
+   * The hero's "Book" button.
+   *
+   * It used to open `https://bhr.voxcinemas.com/movies?search=<title>`,
+   * which is a **404** on VOX — `/movies?search=` 404s, and the working
+   * endpoint is `/search?q=` — so every click was a dead link.
+   *
+   * Now it uses the ONE booking-link builder. If we have a verified per-film
+   * URL, the user goes straight to the film page at that cinema. If we do
+   * not, the modal opens instead, where the cinemas the film is listed at
+   * are shown as plain links — so the user is never sent to a URL that 404s.
+   */
+  const handleBookClick = useCallback((movie: Movie) => {
+    const link = primaryBookingLink(movie.scrapedFrom, movie.bookingUrls);
+    if (link) {
+      window.open(link.url, '_blank', 'noopener,noreferrer');
+      return;
+    }
+    handleMovieClick(movie);
+  }, [handleMovieClick]);
+
   return (
     <div className="min-h-screen bg-[#0a0a0a]">
       {/* Featured Trailers Hero */}
-      <NetflixHero 
-        movies={featuredTrailers} 
+      <NetflixHero
+        movies={featuredTrailers}
         onMovieClick={(movie) => handleMovieClick(movie)}
-        onBookClick={(movie) => handleMovieClick(movie)}
+        onBookClick={handleBookClick}
+        onTrailerClick={openTrailer}
       />
 
       {/* Hero to content gradient blend */}
