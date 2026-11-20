@@ -123,15 +123,22 @@ const server = http.createServer((req, res) => {
     if (!wantsBooking) delete row.booking_urls;
 
     /*
-     * The hero's featured list is served by a DIFFERENT query shape (it
-     * selects a fixed column list, sometimes with a `limit`), so the mock
-     * returns the four featured fixtures when the request asks for more than
-     * one row, and the single dual-cinema fixture otherwise.
+     * There are THREE query shapes for `movies` here, and they must be told
+     * apart correctly:
      *
-     * The two shapes are distinguished by the `select` list: the hero's
-     * query selects `trailer_url`/`trailer_key`, the grid's does not.
+     *   1. the cinema grid    — `is_now_showing=eq.true` / `is_coming_soon=eq.true`
+     *   2. the hero's featured — `id=in.(...)` with the FULL column list
+     *   3. the booking URLs   — `id=in.(...)` selecting ONLY `id,booking_urls`
+     *
+     * Shapes 2 and 3 both filter on `id`, so the filter alone cannot tell
+     * them apart — the SELECT list does. Getting this wrong returns the
+     * wrong rows for the booking lookup, and the Book buttons silently
+     * disappear.
      */
-    if (select.includes('trailer')) {
+    const isBookingQuery = /(^|,)booking_urls(,|$)/.test(select);
+    const isFeaturedQuery = url.searchParams.has('id') && !isBookingQuery;
+
+    if (isFeaturedQuery) {
       const rows = FEATURED_TRAILERS.map((f, i) => ({
         ...DUAL_CINEMA_MOVIE,
         id: `2222222${i}-2222-2222-2222-222222222222`,
@@ -146,9 +153,18 @@ const server = http.createServer((req, res) => {
     }
 
     // The cinema page asks for a set of columns; PostgREST returns only
-    // those. Returning the whole row is fine for a fixture, but let us trim
+    // those. Returning the whole row is fine for a fixture, but let me trim
     // to what was asked for so an over-broad select would be visible.
-    if (select && select !== '*' && !select.includes('booking_urls')) {
+    if (isBookingQuery) {
+      // The booking-URL lookup. It must return the row for the id that was
+      // asked about, carrying the fixture's per-film URLs.
+      const cols = select.split(',').map((c) => c.trim());
+      const trimmed = {};
+      for (const c of cols) if (c in row) trimmed[c] = row[c];
+      return send(res, 200, [trimmed]);
+    }
+
+    if (select && select !== '*') {
       const cols = select.split(',').map((c) => c.trim());
       const trimmed = {};
       for (const c of cols) {
