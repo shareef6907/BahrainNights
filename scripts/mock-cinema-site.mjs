@@ -96,7 +96,7 @@ const server = http.createServer((req, res) => {
   }
   if (path === '/cinema') {
     // 40 rendered cards, matching the 40 rows above.
-    const cards = '<div data-testid="cinema-movie-card"></div>'.repeat(40);
+    const cards = '<div data-testid="movie-card"></div>'.repeat(40);
     send(res, 200, `<html><body>${cards}</body></html>`, 'text/html');
     return;
   }

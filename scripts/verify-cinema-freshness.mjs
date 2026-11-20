@@ -236,17 +236,47 @@ function dedupeMovies(movies) {
 }
 
 /**
+ * The data-testid the movie grid cards carry.
+ *
+ * THE LIST, NOT A SINGLE VALUE, ON PURPOSE.
+ *
+ * This selector drifted once and the monitor reported a FALSE failure for
+ * every run in the meantime: the grid cards used to carry
+ * `data-testid="cinema-movie-card"`, and commit ce5afd5 changed them to
+ * `data-testid="movie-card"` without updating this script. From that point
+ * on, CHECK C reported "The /cinema page rendered 0 movie cards" against a
+ * perfectly healthy page that was rendering 37 cards — a monitor that cries
+ * wolf gets ignored, which defeats the point of having it.
+ *
+ * Counting every known marker means a rename in the component cannot
+ * silently disarm the check, and the drift is DETECTED instead of being
+ * reported as a broken site.
+ */
+const MOVIE_CARD_TESTIDS = ['movie-card', 'cinema-movie-card'];
+
+/**
  * Counts the movie cards actually rendered on the page.
  *
- * Each grid card carries data-testid="cinema-movie-card". Counting that
- * marker is exact for BOTH kinds of card: one with a poster image and one
- * with the branded fallback poster for a film that has no artwork. (An earlier
+ * Each grid card carries one of MOVIE_CARD_TESTIDS. Counting that marker is
+ * exact for BOTH kinds of card: one with a poster image and one with the
+ * branded fallback poster for a film that has no artwork. (An earlier
  * version counted lazy-loaded <img> tags, which silently under-counted every
  * film without a poster.)
+ *
+ * Returns `{ count, markersFound }`. `markersFound` is the set of markers
+ * that actually appear in the HTML — empty means the selector itself has
+ * drifted, which is a DIFFERENT problem from "the page rendered no cards",
+ * and is reported as such.
  */
 function countRenderedCards(html) {
-  const matches = html.match(/data-testid="cinema-movie-card"/g) || [];
-  return matches.length;
+  const markersFound = [];
+  let count = 0;
+  for (const testid of MOVIE_CARD_TESTIDS) {
+    const matches = html.match(new RegExp(`data-testid="${testid}"`, 'g')) || [];
+    if (matches.length > 0) markersFound.push(testid);
+    count += matches.length;
+  }
+  return { count, markersFound };
 }
 
 console.log('='.repeat(78));
@@ -335,6 +365,45 @@ try {
   console.log('');
 
   // ---------------------------------------------------------------------
+  // CHECK C - is anything lost between the table and the live page?
+  // ---------------------------------------------------------------------
+  console.log('C. PAGE RENDERING');
+  const html = await getText(`${SITE}/cinema`);
+  const { count: rendered, markersFound } = countRenderedCards(html);
+  const expected = dedupeMovies(nowRows).length;
+  const expectedSoon = dedupeMovies(soonRows).length;
+
+  if (rendered === 0) {
+    if (markersFound.length === 0) {
+      /*
+       * No card marker at all — and no known marker appeared either. This is
+       * the SELECTOR having drifted, not the page being empty. Reporting it
+       * as "the page rendered 0 cards" would be a false alarm about the site
+       * (which is what happened when the testid was renamed in ce5afd5).
+       */
+      fail(
+        `The /cinema page rendered 0 movie cards AND none of the known card ` +
+          `markers (${MOVIE_CARD_TESTIDS.join(', ')}) were found in the HTML. ` +
+          `The card testid has probably been renamed — this monitor's selector ` +
+          `needs updating, and until it is, this check cannot be trusted.`
+      );
+    } else {
+      fail('The /cinema page rendered 0 movie cards.');
+    }
+  } else if (rendered < expected) {
+    fail(
+      `The /cinema page renders ${rendered} cards but ${expected} movies should ` +
+        `qualify (${expected - rendered} lost between the table and the page).`
+    );
+  } else {
+    ok(
+      `Page renders ${rendered} "Now Showing" cards; ${expected} qualify from the table. ` +
+        `(${expectedSoon} more in "Coming Soon", behind a client-side tab.)`
+    );
+  }
+  console.log('');
+
+  // ---------------------------------------------------------------------
   // CHECK D - is any source contributing INTERMITTENTLY?
   // ---------------------------------------------------------------------
   //
@@ -412,30 +481,6 @@ try {
     }
   } catch (err) {
     warn(`Could not read the contribution history: ${err.message}`);
-  }
-  console.log('');
-
-  // ---------------------------------------------------------------------
-  // CHECK C - is anything lost between the table and the live page?
-  // ---------------------------------------------------------------------
-  console.log('C. PAGE RENDERING');
-  const html = await getText(`${SITE}/cinema`);
-  const rendered = countRenderedCards(html);
-  const expected = dedupeMovies(nowRows).length;
-  const expectedSoon = dedupeMovies(soonRows).length;
-
-  if (rendered === 0) {
-    fail('The /cinema page rendered 0 movie cards.');
-  } else if (rendered < expected) {
-    fail(
-      `The /cinema page renders ${rendered} cards but ${expected} movies should ` +
-        `qualify (${expected - rendered} lost between the table and the page).`
-    );
-  } else {
-    ok(
-      `Page renders ${rendered} "Now Showing" cards; ${expected} qualify from the table. ` +
-        `(${expectedSoon} more in "Coming Soon", behind a client-side tab.)`
-    );
   }
   console.log('');
 
