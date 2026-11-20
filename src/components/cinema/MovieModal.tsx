@@ -2,7 +2,7 @@
 
 import { useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { X, Star, Clock, Play, ExternalLink, Ticket } from 'lucide-react';
+import { X, Star, Clock, Calendar, Play, ExternalLink, Ticket, Film } from 'lucide-react';
 import Image from 'next/image';
 import { Movie } from './MovieCard';
 import { useTranslation } from '@/lib/i18n';
@@ -87,6 +87,24 @@ export default function MovieModal({
 
   if (!movie) return null;
 
+  /**
+   * A rating of 0 means "no rating", not "rated zero stars".
+   *
+   * Avengers: Doomsday is unreleased and has no TMDB rating, so `tmdb_rating`
+   * is 0. The old code rendered the badge unconditionally and the modal showed
+   * "★ 0" — which reads as a broken widget rather than an absent one.
+   */
+  const hasRating = typeof movie.rating === 'number' && Number.isFinite(movie.rating) && movie.rating > 0;
+
+  /**
+   * The poster may be missing entirely (44 of 919 movie rows have no
+   * poster_url). `<Image src="">` throws, so the poster is only rendered when
+   * there is real artwork; otherwise a branded fallback is shown.
+   */
+  const hasPoster = movie.hasPoster !== false && !!movie.poster;
+  const backdropSrc = movie.backdrop || (hasPoster ? movie.poster : '');
+  const genres = movie.genres || [];
+
   return (
     <AnimatePresence>
       {isOpen && (
@@ -118,39 +136,56 @@ export default function MovieModal({
                 onClick={(e) => e.stopPropagation()}
               >
                 {/* Header with Backdrop - fallback to poster if no backdrop */}
-                <div className="relative h-[250px] md:h-[300px]">
-                  <Image
-                    src={movie.backdrop || movie.poster}
-                    alt={movie.title}
-                    fill
-                    className="object-cover"
-                    sizes="100vw"
-                    unoptimized
-                  />
-                  <div className="absolute inset-0 bg-gradient-to-t from-slate-900 via-slate-900/50 to-transparent" />
+                {backdropSrc ? (
+                  <div className="relative h-[250px] md:h-[300px]">
+                    <Image
+                      src={backdropSrc}
+                      alt={movie.title}
+                      fill
+                      className="object-cover"
+                      sizes="100vw"
+                      unoptimized
+                    />
+                    <div className="absolute inset-0 bg-gradient-to-t from-slate-900 via-slate-900/50 to-transparent" />
+                  </div>
+                ) : (
+                  <div className="relative h-[180px] md:h-[220px] bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900">
+                    <div className="absolute inset-0 bg-gradient-to-t from-slate-900 to-transparent" />
+                  </div>
+                )}
 
-                  {/* Close Button */}
-                  <button
-                    onClick={onClose}
-                    className="absolute top-4 right-4 p-2 bg-black/50 backdrop-blur-sm rounded-full text-white hover:bg-black/70 transition-colors z-10"
-                  >
-                    <X className="w-6 h-6" />
-                  </button>
-                </div>
+                {/* Close Button */}
+                <button
+                  onClick={onClose}
+                  className="absolute top-4 right-4 p-2 bg-black/50 backdrop-blur-sm rounded-full text-white hover:bg-black/70 transition-colors z-10"
+                >
+                  <X className="w-6 h-6" />
+                </button>
 
                 {/* Content */}
                 <div className="relative -mt-24 px-6 pb-6">
                   <div className="flex flex-col md:flex-row gap-6">
                     {/* Poster */}
                     <div className="relative w-[140px] md:w-[180px] aspect-[2/3] rounded-xl overflow-hidden shadow-2xl flex-shrink-0 mx-auto md:mx-0">
-                      <Image
-                        src={movie.poster}
-                        alt={movie.title}
-                        fill
-                        className="object-cover"
-                        sizes="180px"
-                        unoptimized
-                      />
+                      {hasPoster ? (
+                        <Image
+                          src={movie.poster}
+                          alt={movie.title}
+                          fill
+                          className="object-cover"
+                          sizes="180px"
+                          unoptimized
+                        />
+                      ) : (
+                        <div className="absolute inset-0 flex flex-col items-center justify-center bg-gradient-to-br from-[#1c1c1c] via-[#141414] to-[#0a0a0a] px-3 text-center">
+                          <div className="flex h-12 w-12 items-center justify-center rounded-xl border border-[#d4a853]/40 bg-[#d4a853]/10 mb-2">
+                            <Film className="h-5 w-5 text-[#d4a853]" />
+                          </div>
+                          <span className="text-[9px] font-semibold uppercase tracking-[0.2em] text-[#d4a853]/70">
+                            Bahrain Nights
+                          </span>
+                        </div>
+                      )}
                     </div>
 
                     {/* Info */}
@@ -161,28 +196,42 @@ export default function MovieModal({
 
                       {/* Meta */}
                       <div className="flex flex-wrap items-center justify-center md:justify-start gap-3 mb-4">
-                        <div className="flex items-center gap-1 px-3 py-1 bg-yellow-400/10 border border-yellow-400/30 rounded-lg">
-                          <Star className="w-4 h-4 text-yellow-400 fill-yellow-400" />
-                          <span className="text-yellow-400 font-bold">{movie.rating}</span>
-                        </div>
-                        <div className="flex items-center gap-1 text-gray-300">
-                          <Clock className="w-4 h-4" />
-                          <span>{movie.duration}</span>
-                        </div>
-                        <span className="text-gray-300">{movie.language}</span>
+                        {hasRating && (
+                          <div className="flex items-center gap-1 px-3 py-1 bg-yellow-400/10 border border-yellow-400/30 rounded-lg">
+                            <Star className="w-4 h-4 text-yellow-400 fill-yellow-400" />
+                            <span className="text-yellow-400 font-bold">{movie.rating}</span>
+                          </div>
+                        )}
+                        {movie.duration && (
+                          <div className="flex items-center gap-1 text-gray-300">
+                            <Clock className="w-4 h-4" />
+                            <span>{movie.duration}</span>
+                          </div>
+                        )}
+                        {movie.releaseDate && (
+                          <div className="flex items-center gap-1 text-gray-300">
+                            <Calendar className="w-4 h-4" />
+                            <span>{movie.releaseDate}</span>
+                          </div>
+                        )}
+                        {movie.language && (
+                          <span className="text-gray-300">{movie.language}</span>
+                        )}
                       </div>
 
                       {/* Genres */}
-                      <div className="flex flex-wrap justify-center md:justify-start gap-2 mb-4">
-                        {movie.genres.map((genre) => (
-                          <span
-                            key={genre}
-                            className="px-3 py-1 bg-white/10 rounded-full text-sm text-gray-300"
-                          >
-                            {genre}
-                          </span>
-                        ))}
-                      </div>
+                      {genres.length > 0 && (
+                        <div className="flex flex-wrap justify-center md:justify-start gap-2 mb-4">
+                          {genres.map((genre) => (
+                            <span
+                              key={genre}
+                              className="px-3 py-1 bg-white/10 rounded-full text-sm text-gray-300"
+                            >
+                              {genre}
+                            </span>
+                          ))}
+                        </div>
+                      )}
 
                       {/* Trailer Button */}
                       {movie.trailerUrl && (
