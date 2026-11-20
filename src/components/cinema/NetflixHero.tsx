@@ -11,7 +11,37 @@ interface NetflixHeroProps {
   movies: Movie[];
   onMovieClick: (movie: Movie) => void;
   onBookClick: (movie: Movie) => void;
+  /**
+   * Called when the visitor presses the hero's "Trailer" button.
+   *
+   * Optional: when it is not supplied the button falls back to
+   * `onMovieClick`, which is the old behaviour.
+   *
+   * The point of the separate callback is that the hero's Trailer button used
+   * to open the film MODAL, so a visitor who wanted to watch the trailer had
+   * to find the trailer inside the modal. The cinema page now wires this to
+   * the shared `TrailerModal`, so the trailer plays in the same in-page
+   * popup the homepage uses — and it never navigates to youtube.com.
+   */
+  onTrailerClick?: (movie: Movie) => void;
 }
+
+/**
+ * The minimum time a slide stays on screen, in milliseconds.
+ *
+ * 20 seconds is roughly the length of a trailer, so a slide is never
+ * replaced while its own trailer is still running.
+ */
+const MIN_DWELL_MS = 20_000;
+
+/**
+ * How often the deadline is re-checked.
+ *
+ * The deadline itself is the source of truth — this only controls how often
+ * we notice it has passed. It is deliberately shorter than the dwell so a
+ * resumed tab advances promptly instead of a full interval later.
+ */
+const TICK_INTERVAL_MS = 500;
 
 function getYouTubeId(url: string | undefined): string | null {
   if (!url) return null;
@@ -27,12 +57,43 @@ function getYouTubeId(url: string | undefined): string | null {
   return null;
 }
 
-export default function NetflixHero({ movies, onMovieClick, onBookClick }: NetflixHeroProps) {
+export default function NetflixHero({ movies, onMovieClick, onBookClick, onTrailerClick }: NetflixHeroProps) {
   const [currentIndex, setCurrentIndex] = useState(0);
   const [showControls, setShowControls] = useState(false);
   const [isMobile, setIsMobile] = useState(false);
   const isMobileRef = useRef(false);
-  const autoAdvanceRef = useRef<NodeJS.Timeout | null>(null);
+
+  const currentMovie = movies?.[currentIndex];
+  const videoId = getYouTubeId(currentMovie?.trailerUrl);
+  const backdropUrl = currentMovie?.backdrop || currentMovie?.poster;
+
+  /**
+   * The moment the current slide is due to be replaced.
+   *
+   * A DEADLINE, not an interval. With an interval, a timer that fires late
+   * (a background tab, a busy main thread) still advances immediately, and a
+   * timer that fires early shortens the slide. With a deadline, the slide
+   * is on screen for at least `MIN_DWELL_MS` no matter when the tick runs,
+   * and a paused period is added to the deadline rather than spent from it.
+   */
+  const deadlineRef = useRef<number>(0);
+  const timerRef = useRef<ReturnType<typeof setInterval> | null>(null);
+
+  /** The visitor is interacting with the hero — do not auto-advance. */
+  const interactingRef = useRef(false);
+  /** The tab is in the background — do not auto-advance. */
+  const hiddenRef = useRef(false);
+  /** The visitor asked for reduced motion — never auto-advance. */
+  const reducedMotionRef = useRef(false);
+
+  /**
+   * The remaining dwell time for the current slide, in milliseconds.
+   *
+   * When the rotation is paused — because the visitor is interacting, or
+   * because the tab is hidden, or because reduced motion is on — this is
+   * `Infinity`: the slide stays until the visitor says otherwise.
+   */
+  const remainingMsRef = useRef<number>(MIN_DWELL_MS);
 
   useEffect(() => {
     const checkMobile = () => {
@@ -45,27 +106,87 @@ export default function NetflixHero({ movies, onMovieClick, onBookClick }: Netfl
     return () => window.removeEventListener('resize', checkMobile);
   }, []);
 
-  const currentMovie = movies[currentIndex];
-  const videoId = getYouTubeId(currentMovie?.trailerUrl);
-  const backdropUrl = currentMovie?.backdrop || currentMovie?.poster;
-
-  // Auto-advance every 25 seconds
-  const startAutoAdvance = useCallback(() => {
-    if (autoAdvanceRef.current) clearInterval(autoAdvanceRef.current);
-    autoAdvanceRef.current = setInterval(() => {
-      setCurrentIndex((prev) => (prev + 1) % movies.length);
-    }, 25000);
-  }, [movies.length]);
-
+  /* --- prefers-reduced-motion ------------------------------------------- */
   useEffect(() => {
-    if (movies.length > 1) startAutoAdvance();
-    return () => { if (autoAdvanceRef.current) clearInterval(autoAdvanceRef.current); };
-  }, [movies.length, startAutoAdvance]);
+    if (typeof window === 'undefined' || !window.matchMedia) return;
+    const mq = window.matchMedia('(prefers-reduced-motion: reduce)');
+    const apply = () => {
+      const wasReduced = reducedMotionRef.current;
+      reducedMotionRef.current = mq.matches;
+      if (mq.matches) {
+        // Never auto-advance for a visitor who asked for reduced motion.
+        remainingMsRef.current = Infinity;
+        deadlineRef.current = Number.POSITIVE_INFINITY;
+      } else if (wasReduced) {
+        // The visitor turned reduced motion OFF — the rotation may start
+        // again, with a fresh dwell for the slide that is currently showing.
+        remainingMsRef.current = MIN_DWELL_MS;
+        deadlineRef.current = Date.now() + MIN_DWELL_MS;
+      }
+    };
+    apply();
+    if (typeof mq.addEventListener === 'function') {
+      mq.addEventListener('change', apply);
+      return () => mq.removeEventListener('change', apply);
+    }
+    mq.addListener(apply);
+    return () => mq.removeListener(apply);
+  }, []);
 
-  const goToSlide = useCallback((index: number) => {
-    setCurrentIndex(index);
-    startAutoAdvance();
-  }, [startAutoAdvance]);
+  /* --- the rotation ------------------------------------------------------ */
+
+  /** True when the rotation must not advance on its own right now. */
+  const isPaused = useCallback(
+    () => interactingRef.current || hiddenRef.current || reducedMotionRef.current,
+    []
+  );
+
+  /**
+   * (Re)start the dwell for the current slide.
+   *
+   * The deadline is `now + MIN_DWELL_MS`. This is called on mount, after a
+   * manual navigation, and whenever the rotation is resumed.
+   */
+  const startDwell = useCallback(() => {
+    if (reducedMotionRef.current) {
+      remainingMsRef.current = Infinity;
+      deadlineRef.current = Number.POSITIVE_INFINITY;
+      return;
+    }
+    remainingMsRef.current = MIN_DWELL_MS;
+    deadlineRef.current = Date.now() + MIN_DWELL_MS;
+  }, []);
+
+  /**
+   * Pause the rotation, keeping the time already served.
+   *
+   * The remaining dwell is preserved so that resuming does not give the
+   * slide a fresh full 20 seconds — a slide that has been up for 18 seconds
+   * and is then interrupted resumes with 2 seconds left, not 20.
+   */
+  const pauseDwell = useCallback(() => {
+    if (deadlineRef.current === Number.POSITIVE_INFINITY) return;
+    const remaining = deadlineRef.current - Date.now();
+    if (remaining > 0) {
+      remainingMsRef.current = remaining;
+      deadlineRef.current = Number.POSITIVE_INFINITY;
+    }
+  }, []);
+
+  /** Resume the rotation with whatever dwell is left. */
+  const resumeDwell = useCallback(() => {
+    if (remainingMsRef.current === Number.POSITIVE_INFINITY) return;
+    deadlineRef.current = Date.now() + remainingMsRef.current;
+  }, []);
+
+  const goToSlide = useCallback(
+    (index: number) => {
+      setCurrentIndex(index);
+      // A manual navigation restarts the dwell for the slide just selected.
+      startDwell();
+    },
+    [startDwell]
+  );
 
   const goToPrevious = useCallback(() => {
     goToSlide(currentIndex === 0 ? movies.length - 1 : currentIndex - 1);
@@ -74,6 +195,75 @@ export default function NetflixHero({ movies, onMovieClick, onBookClick }: Netfl
   const goToNext = useCallback(() => {
     goToSlide((currentIndex + 1) % movies.length);
   }, [currentIndex, movies.length, goToSlide]);
+
+  /* --- the ticker -------------------------------------------------------- */
+  useEffect(() => {
+    if (movies.length <= 1) return;
+
+    if (deadlineRef.current === 0) startDwell();
+
+    const tick = () => {
+      if (isPaused()) return;
+      if (deadlineRef.current === Number.POSITIVE_INFINITY) return;
+      if (Date.now() >= deadlineRef.current) {
+        setCurrentIndex((prev) => (prev + 1) % movies.length);
+        startDwell();
+      }
+    };
+
+    timerRef.current = setInterval(tick, TICK_INTERVAL_MS);
+    return () => {
+      if (timerRef.current) clearInterval(timerRef.current);
+      timerRef.current = null;
+    };
+  }, [movies.length, isPaused, startDwell]);
+
+  /* --- pause while the tab is hidden -------------------------------------- */
+  useEffect(() => {
+    if (typeof document === 'undefined') return;
+
+    const onVisibility = () => {
+      if (document.visibilityState === 'hidden') {
+        hiddenRef.current = true;
+        pauseDwell();
+      } else {
+        hiddenRef.current = false;
+        resumeDwell();
+      }
+    };
+
+    document.addEventListener('visibilitychange', onVisibility);
+    return () => document.removeEventListener('visibilitychange', onVisibility);
+  }, [pauseDwell, resumeDwell]);
+
+  /* --- pause while the visitor interacts with the hero -------------------- */
+  const handleMouseEnter = useCallback(() => {
+    interactingRef.current = true;
+    setShowControls(true);
+    pauseDwell();
+  }, [pauseDwell]);
+
+  const handleMouseLeave = useCallback(() => {
+    interactingRef.current = false;
+    setShowControls(false);
+    resumeDwell();
+  }, [resumeDwell]);
+
+  /**
+   * The hero's "Trailer" button.
+   *
+   * It opens the shared trailer popup when the parent supplies
+   * `onTrailerClick`, and falls back to the film modal otherwise. It never
+   * navigates to youtube.com.
+   */
+  const handleTrailerClick = useCallback(() => {
+    if (!currentMovie) return;
+    if (onTrailerClick) {
+      onTrailerClick(currentMovie);
+      return;
+    }
+    onMovieClick(currentMovie);
+  }, [currentMovie, onTrailerClick, onMovieClick]);
 
   if (!movies || movies.length === 0) {
     return (
@@ -100,13 +290,17 @@ export default function NetflixHero({ movies, onMovieClick, onBookClick }: Netfl
         width: '100vw',
         marginLeft: 'calc(-50vw + 50%)'
       }}
-      onMouseEnter={() => setShowControls(true)}
-      onMouseLeave={() => setShowControls(false)}
+      onMouseEnter={handleMouseEnter}
+      onMouseLeave={handleMouseLeave}
     >
       {/*
         The trailer player owns the poster/facade, the lazy YouTube iframe, the
         unmuted-first playback attempt and the muted fallback. The hero only
         renders the overlay content on top of it.
+
+        The `key` is the video id, so every slide gets a FRESH YouTube player.
+        That is exactly why the sound preference has to be re-applied per
+        player — see the note in TrailerPlayer's onStateChange handler.
       */}
       {videoId ? (
         <div className="absolute inset-0 z-0">
@@ -176,7 +370,7 @@ export default function NetflixHero({ movies, onMovieClick, onBookClick }: Netfl
               )}
               <div className="flex flex-wrap gap-2 md:gap-3 mt-3 md:mt-0">
                 {videoId && (
-                  <motion.button onClick={() => onMovieClick(currentMovie)}
+                  <motion.button onClick={handleTrailerClick}
                     className="pointer-events-auto flex items-center gap-1.5 md:gap-2 px-3 md:px-6 py-2 md:py-3 bg-white text-black text-sm md:text-base font-bold rounded-lg hover:bg-gray-200 transition-colors"
                     whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
                     <Play className="w-4 h-4 md:w-5 md:w-5 fill-current" />Trailer
