@@ -3,6 +3,8 @@
 import { motion, AnimatePresence } from 'framer-motion';
 import { X } from 'lucide-react';
 import { useEffect, useRef, useState } from 'react';
+import { loadYouTubeIframeApi } from '@/lib/utils/youtube-iframe-api';
+import type { YTPlayerInstance } from '@/types/youtube';
 
 interface TrailerModalProps {
   isOpen: boolean;
@@ -11,32 +13,13 @@ interface TrailerModalProps {
   trailerUrl: string;
 }
 
-interface YTPlayer {
-  destroy: () => void;
-  playVideo: () => void;
-}
-
-declare global {
-  interface Window {
-    YT: {
-      Player: new (
-        element: HTMLDivElement | string,
-        config: {
-          videoId: string;
-          playerVars?: Record<string, number | string>;
-          events?: {
-            onReady?: (event: { target: YTPlayer }) => void;
-          };
-        }
-      ) => YTPlayer;
-    };
-    onYouTubeIframeAPIReady: () => void;
-  }
-}
+// The `window.YT` / `window.onYouTubeIframeAPIReady` typings are declared
+// once, globally, in src/types/youtube.ts so that every component that drives
+// a YouTube player agrees on the same shape.
 
 export default function TrailerModal({ isOpen, onClose, title, trailerUrl }: TrailerModalProps) {
   const playerRef = useRef<HTMLDivElement>(null);
-  const playerInstanceRef = useRef<YTPlayer | null>(null);
+  const playerInstanceRef = useRef<YTPlayerInstance | null>(null);
   const [isAPIReady, setIsAPIReady] = useState(false);
 
   // Extract YouTube video ID from URL
@@ -47,13 +30,17 @@ export default function TrailerModal({ isOpen, onClose, title, trailerUrl }: Tra
 
   const videoId = getYouTubeId(trailerUrl);
 
-  // Load YouTube API
+  // Load YouTube API (nocookie first, canonical host fallback).
+  // Only when the modal is actually opened, so the homepage never pays for
+  // the YouTube player JavaScript on first load.
   useEffect(() => {
+    if (!isOpen) return;
     if (typeof window !== 'undefined' && !window.YT) {
-      const tag = document.createElement('script');
-      tag.src = 'https://www.youtube.com/iframe_api';
-      const firstScriptTag = document.getElementsByTagName('script')[0];
-      firstScriptTag.parentNode?.insertBefore(tag, firstScriptTag);
+      loadYouTubeIframeApi()
+        .then(() => setIsAPIReady(true))
+        .catch(() => {
+          // API failed - YouTube player will show its own play button
+        });
 
       window.onYouTubeIframeAPIReady = () => {
         setIsAPIReady(true);
@@ -61,7 +48,7 @@ export default function TrailerModal({ isOpen, onClose, title, trailerUrl }: Tra
     } else if (typeof window !== 'undefined' && window.YT) {
       setIsAPIReady(true);
     }
-  }, []);
+  }, [isOpen]);
 
   // Initialize player when modal opens
   useEffect(() => {

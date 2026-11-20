@@ -1,0 +1,728 @@
+'use client';
+
+import { useCallback, useEffect, useRef, useState } from 'react';
+import Image from 'next/image';
+import { Play, Volume2, VolumeX } from 'lucide-react';
+import {
+  loadYouTubeIframeApi,
+  YT_EMBED_ORIGIN,
+} from '@/lib/utils/youtube-iframe-api';
+import type { YTPlayerInstance } from '@/types/youtube';
+
+/**
+ * Shared YouTube trailer player with progressive (unmuted-first) audio.
+ *
+ * Behaviour required by the spec:
+ *  1. FACADE FIRST. The initial payload contains only a poster image and a
+ *     play affordance. The YouTube iframe — and therefore every byte of
+ *     YouTube JavaScript, CSS and video stream — is created ONLY after the
+ *     user asks for it (a click on the play control), or, for players that
+ *     opt into `activation="viewport"`, when the player nears the viewport.
+ *  2. When playback starts, attempt UNMUTED playback FIRST and AWAIT the
+ *     result. If the browser refuses (autoplay policy), fall back to MUTED
+ *     playback so the trailer ALWAYS plays — a muted trailer is acceptable, a
+ *     frozen one is not.
+ *  3. Tapping the unmute control is a user gesture: unmute, play, and persist
+ *     the preference in sessionStorage AND localStorage.
+ *  4. On later page views the stored preference is read. Unmuted is still
+ *     attempted first UNLESS the visitor explicitly chose mute, in which case
+ *     the muted start is respected.
+ *  5. Always playsInline.
+ *  6. Never leave a play() promise unhandled — always .catch().
+ *  7. Respect prefers-reduced-motion: no autoplay, poster + play button.
+ *
+ * Performance:
+ *  - Embeds use https://www.youtube-nocookie.com.
+ *  - The container reserves explicit dimensions so there is zero layout shift.
+ *  - The poster is the film's own backdrop image, so the facade does not add
+ *    a request beyond the image the hero already needs.
+ *
+ * Why autoplay=0 in the embed URL:
+ *  With `autoplay=1&mute=1` the embedded player starts MUTED on its own. Calling
+ *  unMute() on a running media element without a user gesture makes the browser
+ *  pause it ("Unmuting failed and the element was paused instead…"), which is
+ *  precisely the reported "frozen on the first frame" bug. So the embed is
+ *  loaded paused and ALL playback is driven through the IFrame API, where the
+ *  mute state is set BEFORE playVideo() is called.
+ *
+ * The IFrame API script is requested from the privacy-preserving nocookie
+ * origin first, falling back to the canonical host because
+ * https://www.youtube-nocookie.com/iframe_api answers HTTP 404. See
+ * src/lib/utils/youtube-iframe-api.ts. Every *embed* stays on
+ * youtube-nocookie.com.
+ */
+
+const SOUND_PREF_KEY = 'bn:trailer-sound';
+
+/**
+ * `playsInline` is a valid iframe attribute but is missing from the React 18
+ * type definitions for `IframeHTMLAttributes`, so it is applied through a
+ * typed spread. Without it iOS Safari plays the trailer fullscreen instead
+ * of inline.
+ */
+const IFRAME_INLINE_ATTRS = { playsInline: true } as unknown as React.IframeHTMLAttributes<HTMLIFrameElement>;
+
+/** How long to wait for the unmuted attempt before falling back to muted. */
+const UNMUTED_ATTEMPT_TIMEOUT_MS = 3500;
+/** How long to wait for the muted fallback to start playing. */
+const MUTED_ATTEMPT_TIMEOUT_MS = 8000;
+/** Poll interval while waiting for a playback state. */
+const POLL_INTERVAL_MS = 120;
+
+/** YouTube player states. */
+const YT_STATE_UNSTARTED = -1;
+const YT_STATE_PLAYING = 1;
+const YT_STATE_BUFFERING = 3;
+
+/**
+ * How the player is allowed to start.
+ *
+ *  - `click`    — the visitor must press play. The iframe is not created at
+ *                 all until then. Used by every header/hero trailer.
+ *  - `viewport` — the iframe is created once the player nears the viewport
+ *                 (used for below-the-fold trailers), then playback starts
+ *                 with the progressive unmuted-first attempt.
+ */
+export type TrailerActivation = 'click' | 'viewport';
+
+interface TrailerPlayerProps {
+  /** YouTube video id (11 chars). */
+  videoId: string;
+  /** Poster image URL shown before/instead of the player. */
+  poster?: string | null;
+  /** Accessible title, used for the iframe title and the poster alt text. */
+  title: string;
+  /** How playback may start. Default: `click`. */
+  activation?: TrailerActivation;
+  /** IntersectionObserver rootMargin — generous so the player is ready in time. */
+  rootMargin?: string;
+  /** Extra class names for the wrapper. */
+  className?: string;
+  /**
+   * CSS aspect-ratio reserved for the container so the iframe insertion causes
+   * zero layout shift. Pass `null` when the parent already reserves the box
+   * (e.g. a full-bleed hero).
+   */
+  aspectRatio?: string | null;
+  /** Mark the poster as high priority (hero images). */
+  priority?: boolean;
+  /**
+   * Where the facade play button sits.
+   *  - `center`     — large centred play circle (standalone players).
+   *  - `bottomRight` — compact badge in the bottom-right corner, used by the
+   *                    full-bleed heroes where the copy block occupies the
+   *                    centre.
+   *  - `topRight`    — same badge in the top-right corner, for heroes whose
+   *                    bottom edge is covered by an overlapping panel.
+   */
+  playButtonPlacement?: 'center' | 'bottomRight' | 'topRight';
+  /** Called when the player reports it is playing / stopped playing. */
+  onPlayingChange?: (playing: boolean) => void;
+  /** Optional callback exposing playback controls to a parent. */
+  onReady?: (controls: TrailerPlayerControls) => void;
+}
+
+export interface TrailerPlayerControls {
+  play: () => void;
+  unmute: () => void;
+  isMuted: () => boolean;
+  isPlaying: () => boolean;
+}
+
+/* -------------------------------------------------------------------------- */
+/* YouTube player typings live in src/types/youtube.ts (single global decl) */
+/* -------------------------------------------------------------------------- */
+
+/* -------------------------------------------------------------------------- */
+/* Storage helpers                                                            */
+/* -------------------------------------------------------------------------- */
+
+/**
+ * Returns true when the visitor previously turned sound ON, false when they
+ * explicitly muted it, null when they have never made a choice.
+ */
+function readSoundPreference(): boolean | null {
+  if (typeof window === 'undefined') return null;
+  try {
+    const raw =
+      window.sessionStorage.getItem(SOUND_PREF_KEY) ??
+      window.localStorage.getItem(SOUND_PREF_KEY);
+    if (raw === null) return null;
+    return raw === 'on';
+  } catch {
+    return null;
+  }
+}
+
+function writeSoundPreference(soundOn: boolean): void {
+  if (typeof window === 'undefined') return;
+  const value = soundOn ? 'on' : 'off';
+  try {
+    window.sessionStorage.setItem(SOUND_PREF_KEY, value);
+  } catch {
+    /* storage unavailable — non-fatal */
+  }
+  try {
+    window.localStorage.setItem(SOUND_PREF_KEY, value);
+  } catch {
+    /* storage unavailable — non-fatal */
+  }
+}
+
+/* -------------------------------------------------------------------------- */
+/* Component                                                                   */
+/* -------------------------------------------------------------------------- */
+
+export default function TrailerPlayer({
+  videoId,
+  poster,
+  title,
+  activation = 'click',
+  rootMargin = '300px',
+  className = '',
+  aspectRatio = '16 / 9',
+  priority = false,
+  playButtonPlacement = 'center',
+  onPlayingChange,
+  onReady,
+}: TrailerPlayerProps) {
+  const containerRef = useRef<HTMLDivElement | null>(null);
+  const iframeRef = useRef<HTMLIFrameElement | null>(null);
+  const playerRef = useRef<YTPlayerInstance | null>(null);
+
+  /**
+   * The visitor pressed play (or — for below-the-fold players only — the
+   * player entered the viewport). The YouTube iframe exists ONLY while this
+   * is true, so no YouTube JavaScript, CSS or video stream is requested
+   * before the visitor asks for the trailer.
+   */
+  const [activated, setActivated] = useState(false);
+  const [isPlaying, setIsPlaying] = useState(false);
+  const [isMuted, setIsMuted] = useState(true);
+  const [showUnmuteControl, setShowUnmuteControl] = useState(false);
+  const [reducedMotion, setReducedMotion] = useState(false);
+  const [posterVisible, setPosterVisible] = useState(true);
+  const [playerFailed, setPlayerFailed] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
+
+  // Guards against a late event from a previous attempt resolving after we
+  // already fell back to muted.
+  const attemptIdRef = useRef(0);
+  const mountedRef = useRef(true);
+  /** True when the visitor explicitly muted the trailer on a previous view. */
+  const soundDeclinedRef = useRef(false);
+
+  useEffect(() => {
+    mountedRef.current = true;
+    return () => {
+      mountedRef.current = false;
+    };
+  }, []);
+
+  /* --- prefers-reduced-motion ------------------------------------------- */
+  useEffect(() => {
+    if (typeof window === 'undefined' || !window.matchMedia) return;
+    const mq = window.matchMedia('(prefers-reduced-motion: reduce)');
+    const apply = () => setReducedMotion(mq.matches);
+    apply();
+    if (typeof mq.addEventListener === 'function') {
+      mq.addEventListener('change', apply);
+      return () => mq.removeEventListener('change', apply);
+    }
+    mq.addListener(apply);
+    return () => mq.removeListener(apply);
+  }, []);
+
+  /* --- viewport activation (only for activation="viewport") -------------- */
+  useEffect(() => {
+    // Under prefers-reduced-motion we never auto-start: the visitor must
+    // press play, so the viewport alone must not create the player.
+    if (reducedMotion) return;
+    if (activation !== 'viewport' || activated) return;
+    const node = containerRef.current;
+    if (!node) return;
+
+    if (typeof IntersectionObserver === 'undefined') {
+      setActivated(true);
+      return;
+    }
+
+    const observer = new IntersectionObserver(
+      (entries) => {
+        for (const entry of entries) {
+          if (entry.isIntersecting) {
+            setActivated(true);
+            observer.disconnect();
+            return;
+          }
+        }
+      },
+      { rootMargin, threshold: 0.01 }
+    );
+    observer.observe(node);
+    return () => observer.disconnect();
+  }, [activation, activated, rootMargin, reducedMotion]);
+
+  /* --- the visitor pressed play ----------------------------------------- */
+  const handleActivate = useCallback(() => {
+    setActivated(true);
+    setIsLoading(true);
+  }, []);
+
+  /* --- playback attempt --------------------------------------------------- */
+
+  /**
+   * Wait until the player actually plays.
+   *
+   * Detection is done by POLLING the player state rather than relying only on
+   * the state-change event, because the browser can reject an unmuted start
+   * without emitting a decisive event. The observed failure pattern is
+   * state 3 (BUFFERING) followed by state -1 (UNSTARTED) with currentTime
+   * stuck at 0. A leading state -1 also occurs on the happy path, so state -1 is
+   * only a failure once buffering has been observed OR the timeout expires.
+   */
+  const waitForPlaying = useCallback(
+    (timeoutMs: number, attemptId: number): Promise<boolean> => {
+      return new Promise<boolean>((resolve) => {
+        let settled = false;
+        let sawBuffering = false;
+
+        const finish = (ok: boolean) => {
+          if (settled) return;
+          settled = true;
+          window.clearTimeout(timer);
+          window.clearInterval(poll);
+          resolve(ok);
+        };
+
+        const timer = window.setTimeout(() => finish(false), timeoutMs);
+
+        const poll = window.setInterval(() => {
+          const p = playerRef.current;
+          if (!p || attemptId !== attemptIdRef.current) {
+            finish(false);
+            return;
+          }
+          let state: number;
+          try {
+            state = p.getPlayerState();
+          } catch {
+            finish(false);
+            return;
+          }
+          if (state === YT_STATE_PLAYING) {
+            finish(true);
+            return;
+          }
+          if (state === YT_STATE_BUFFERING) {
+            sawBuffering = true;
+            return;
+          }
+          if (state === YT_STATE_UNSTARTED && sawBuffering) {
+            // The browser aborted the start (autoplay policy refusing unmuted
+            // playback). Signal failure so the caller can fall back to muted.
+            finish(false);
+          }
+        }, POLL_INTERVAL_MS);
+      });
+    },
+    []
+  );
+
+  const playWithSound = useCallback(
+    async (withSound: boolean): Promise<void> => {
+      const player = playerRef.current;
+      if (!player) return;
+
+      const attemptId = ++attemptIdRef.current;
+
+      // 1. Set the mute state BEFORE asking the player to play.
+      try {
+        if (withSound) {
+          player.unMute();
+          player.setVolume(60);
+        } else {
+          player.mute();
+        }
+      } catch {
+        /* the player may not be ready — the state check below catches it */
+      }
+
+      // 2. Call play(). The YouTube IFrame API returns a plain object (not a
+      //    promise), but we normalise it: if it IS a promise we await it,
+      //    otherwise we rely on the player state. Either way it is caught.
+      let playPromise: Promise<unknown> | null = null;
+      try {
+        const result = player.playVideo() as unknown;
+        if (result && typeof (result as Promise<unknown>).then === 'function') {
+          playPromise = result as Promise<unknown>;
+        }
+      } catch (err) {
+        console.warn('[TrailerPlayer] play() threw:', err);
+      }
+
+      if (playPromise) {
+        try {
+          await playPromise;
+        } catch (err) {
+          console.warn('[TrailerPlayer] play() promise rejected:', err);
+        }
+      }
+
+      // 3. Await the actual PLAYING confirmation.
+      const playing = await waitForPlaying(
+        withSound ? UNMUTED_ATTEMPT_TIMEOUT_MS : MUTED_ATTEMPT_TIMEOUT_MS,
+        attemptId
+      );
+      if (!mountedRef.current || attemptId !== attemptIdRef.current) return;
+
+      if (playing) {
+        setIsPlaying(true);
+        setIsLoading(false);
+        setIsMuted(!withSound);
+        setPosterVisible(false);
+        // The "Tap for sound" nudge is shown when the browser forced muted
+        // playback — unless the visitor already declined sound on purpose.
+        setShowUnmuteControl(!withSound && !soundDeclinedRef.current);
+        onPlayingChange?.(true);
+        return;
+      }
+
+      // 4. The attempt was refused. Fall back to muted so the trailer ALWAYS
+      //    plays. A muted trailer is acceptable; a frozen one is not.
+      if (withSound) {
+        await playWithSound(false).catch((err) => {
+          console.warn('[TrailerPlayer] muted fallback failed:', err);
+        });
+      } else {
+        setIsPlaying(false);
+        setIsLoading(false);
+        setPosterVisible(true);
+        setShowUnmuteControl(false);
+        setPlayerFailed(true);
+        onPlayingChange?.(false);
+      }
+    },
+    [onPlayingChange, waitForPlaying]
+  );
+
+  /* --- instantiate the player --------------------------------------------- */
+  useEffect(() => {
+    if (!activated) return;
+    let cancelled = false;
+
+    const iframe = iframeRef.current;
+    if (!iframe) return;
+
+    const bind = () => {
+      if (cancelled || playerRef.current) return;
+      loadYouTubeIframeApi()
+        .then(() => {
+          if (cancelled) return;
+          try {
+            const player = new window.YT!.Player(iframe, {
+              events: {
+                onReady: (event) => {
+                  if (cancelled) return;
+                  playerRef.current = event.target;
+
+                  // The stored preference decides whether the "Tap for sound"
+                  // nudge is shown after a muted fallback, but the UNMUTED
+                  // attempt is ALWAYS made first — the browser decides
+                  // whether it is allowed.
+                  const storedPreference = readSoundPreference();
+                  soundDeclinedRef.current = storedPreference === false;
+
+                  void playWithSound(true).catch((err) => {
+                    console.warn('[TrailerPlayer] playback attempt failed:', err);
+                  });
+                },
+                onStateChange: (event) => {
+                  if (cancelled) return;
+                  if (event.data === YT_STATE_PLAYING) {
+                    setIsPlaying(true);
+                    setIsLoading(false);
+                    setPosterVisible(false);
+                    onPlayingChange?.(true);
+                  }
+                },
+                onError: (event) => {
+                  console.warn('[TrailerPlayer] YouTube error code:', event.data);
+                  if (!cancelled) {
+                    setPlayerFailed(true);
+                    setIsLoading(false);
+                  }
+                },
+              },
+            });
+          } catch (err) {
+            console.warn('[TrailerPlayer] YT.Player bind failed:', err);
+            if (!cancelled) {
+              setPlayerFailed(true);
+              setIsLoading(false);
+            }
+          }
+        })
+        .catch((err) => {
+          console.warn('[TrailerPlayer] YouTube IFrame API unavailable:', err);
+          if (!cancelled) {
+            setPlayerFailed(true);
+            setIsLoading(false);
+          }
+        });
+    };
+
+    const onIframeLoad = () => bind();
+    iframe.addEventListener('load', onIframeLoad);
+
+    // Backstop: if the load event never fires (e.g. cached document), bind anyway.
+    const bindTimer = window.setTimeout(() => bind(), 4000);
+
+    return () => {
+      cancelled = true;
+      window.clearTimeout(bindTimer);
+      iframe.removeEventListener('load', onIframeLoad);
+      try {
+        playerRef.current?.destroy();
+      } catch {
+        /* ignore */
+      }
+      playerRef.current = null;
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [activated, reducedMotion, videoId]);
+
+  /* --- user interaction: unmute ------------------------------------------- */
+  const handleUnmute = useCallback(() => {
+    const player = playerRef.current;
+    writeSoundPreference(true);
+    setShowUnmuteControl(false);
+    setIsMuted(false);
+    if (!player) return;
+    // This runs inside a user gesture, so unmuted playback is allowed.
+    try {
+      player.unMute();
+      player.setVolume(60);
+    } catch {
+      /* ignore */
+    }
+    try {
+      const result = player.playVideo() as unknown;
+      if (result && typeof (result as Promise<unknown>).then === 'function') {
+        (result as Promise<unknown>).catch((err) => {
+          console.warn('[TrailerPlayer] play() promise rejected:', err);
+        });
+      }
+    } catch (err) {
+      console.warn('[TrailerPlayer] play() threw:', err);
+    }
+    setIsPlaying(true);
+    setIsLoading(false);
+    setPosterVisible(false);
+  }, []);
+
+  const handleToggleMute = useCallback(() => {
+    const player = playerRef.current;
+    if (!player) return;
+    if (isMuted) {
+      handleUnmute();
+    } else {
+      try {
+        player.mute();
+      } catch {
+        /* ignore */
+      }
+      writeSoundPreference(false);
+      setIsMuted(true);
+      setShowUnmuteControl(true);
+    }
+  }, [handleUnmute, isMuted]);
+
+  /* --- expose controls to the parent -------------------------------------- */
+  useEffect(() => {
+    if (!onReady) return;
+    onReady({
+      play: () => {
+        setActivated(true);
+        void playWithSound(true).catch(() => {
+          /* handled inside playWithSound */
+        });
+      },
+      unmute: handleUnmute,
+      isMuted: () => isMuted,
+      isPlaying: () => isPlaying,
+    });
+  }, [onReady, playWithSound, handleUnmute, isMuted, isPlaying]);
+
+  // autoplay=0: playback is driven exclusively through the IFrame API so the
+  // mute state is always set before playVideo() (see the class comment).
+  const embedSrc = `${YT_EMBED_ORIGIN}/embed/${videoId}?autoplay=0&mute=1&playsinline=1&loop=1&playlist=${videoId}&controls=0&modestbranding=1&rel=0&iv_load_policy=3&disablekb=1&fs=0&enablejsapi=1`;
+
+  /*
+   * The sound controls live in the same corner as the facade play button.
+   * On the full-bleed heroes the copy block sits over the centre of the
+   * poster, and on /regional a stats panel overlaps the hero's bottom edge —
+   * so a control pinned to the bottom-right can end up underneath an
+   * overlapping element and become unclickable. Following the facade corner
+   * keeps every control in the one place that is guaranteed to be clear.
+   */
+  const controlCorner =
+    playButtonPlacement === 'topRight'
+      ? 'top-3 right-3'
+      : playButtonPlacement === 'bottomRight'
+        ? 'bottom-3 right-3'
+        : 'bottom-3 right-3';
+
+  const showPoster = posterVisible && !isPlaying;
+  const showFacadePlayButton =
+    !isPlaying && !reducedMotion && !playerFailed && !activated;
+
+  return (
+    <div
+      ref={containerRef}
+      className={`relative w-full overflow-hidden bg-black ${className}`}
+      style={aspectRatio ? { aspectRatio } : undefined}
+      data-testid="trailer-player"
+      data-playing={isPlaying ? 'true' : 'false'}
+      data-muted={isMuted ? 'true' : 'false'}
+      data-activated={activated ? 'true' : 'false'}
+    >
+      {/* Facade / poster — always reserves the exact box the iframe will use. */}
+      {poster && showPoster ? (
+        <div className="absolute inset-0 z-10">
+          <Image
+            src={poster}
+            alt={title}
+            fill
+            sizes="100vw"
+            className="object-cover"
+            priority={priority}
+            /*
+             * The hero poster is the LCP element on every trailer page. Next's
+             * `priority` emits the <link rel="preload"> but not an explicit
+             * fetchpriority on the <img> itself, and the GA script is also
+             * preloaded as a script — so the image needs to say so explicitly
+             * or it queues behind a 179 KB third-party script.
+             */
+            fetchPriority={priority ? 'high' : 'auto'}
+          />
+          <div className="absolute inset-0 bg-black/40" />
+        </div>
+      ) : null}
+
+      {/* The YouTube iframe is only created once the visitor asked for it. */}
+      {activated ? (
+        <iframe
+          ref={iframeRef}
+          src={embedSrc}
+          title={title}
+          allow="autoplay; encrypted-media; picture-in-picture"
+          allowFullScreen
+          {...IFRAME_INLINE_ATTRS}
+          frameBorder="0"
+          className="absolute inset-0 z-0 h-full w-full border-0"
+          style={{ border: 0 }}
+        />
+      ) : null}
+
+      {/*
+        Facade play button — the ONLY way a header trailer starts.
+        In `bottomRight` placement the BUTTON is the small visible badge and a
+        sibling transparent layer covers the rest of the box, so a click
+        anywhere on the poster starts the trailer without the button itself
+        having to cover the hero copy.
+      */}
+      {showFacadePlayButton ? (
+        playButtonPlacement !== 'center' ? (
+          <>
+            <button
+              type="button"
+              onClick={handleActivate}
+              aria-label={`Play trailer: ${title}`}
+              data-testid="trailer-play-facade"
+              className={`absolute ${playButtonPlacement === 'topRight' ? 'top-3 right-3' : 'bottom-3 right-3'} z-30 flex h-14 w-14 items-center justify-center rounded-full bg-black/70 text-white ring-2 ring-white/80 backdrop-blur transition hover:scale-105 focus:outline-none focus-visible:ring-2 focus-visible:ring-white`}
+            >
+              <Play className="h-6 w-6 fill-current" />
+            </button>
+            <button
+              type="button"
+              onClick={handleActivate}
+              tabIndex={-1}
+              aria-hidden="true"
+              data-testid="trailer-poster-click"
+              className="absolute inset-0 z-20 cursor-pointer"
+            />
+          </>
+        ) : (
+          <button
+            type="button"
+            onClick={handleActivate}
+            aria-label={`Play trailer: ${title}`}
+            data-testid="trailer-play-facade"
+            className="absolute inset-0 z-20 flex items-center justify-center"
+          >
+            <span className="flex h-16 w-16 items-center justify-center rounded-full bg-black/60 text-white ring-2 ring-white/80 transition hover:bg-black/75 hover:scale-105 md:h-20 md:w-20">
+              <Play className="h-7 w-7 fill-current md:h-9 md:w-9" />
+            </span>
+          </button>
+        )
+      ) : null}
+
+      {/* Loading state between the click and the first frame. */}
+      {isLoading && !isPlaying ? (
+        <div
+          className="absolute inset-0 z-20 flex items-center justify-center pointer-events-none"
+          data-testid="trailer-loading"
+        >
+          <span className="h-12 w-12 animate-spin rounded-full border-2 border-white/30 border-t-white" />
+        </div>
+      ) : null}
+
+      {/* Reduced-motion: poster + explicit play button, never auto-started. */}
+      {reducedMotion && !activated ? (
+        <button
+          type="button"
+          onClick={handleActivate}
+          aria-label={`Play trailer: ${title}`}
+          data-testid="trailer-reduced-motion-play"
+          className="absolute inset-0 z-20 flex items-center justify-center"
+        >
+          <span className="flex h-16 w-16 items-center justify-center rounded-full bg-black/60 text-white ring-2 ring-white/80">
+            <Play className="h-7 w-7 fill-current" />
+          </span>
+        </button>
+      ) : null}
+
+      {/* Unmute control — visible when the browser forced muted playback. */}
+      {!reducedMotion && showUnmuteControl ? (
+        <button
+          type="button"
+          onClick={handleUnmute}
+          data-testid="trailer-unmute-control"
+          aria-label="Tap for sound"
+          className={`absolute ${controlCorner} z-30 flex items-center gap-2 rounded-full bg-black/70 px-4 py-2 text-sm font-semibold text-white backdrop-blur transition hover:bg-black/85 focus:outline-none focus-visible:ring-2 focus-visible:ring-white`}
+        >
+          <VolumeX className="h-4 w-4" aria-hidden="true" />
+          <span>Tap for sound</span>
+        </button>
+      ) : null}
+
+      {/* Mute / unmute toggle (once the player is live and already unmuted). */}
+      {!reducedMotion && isPlaying && !showUnmuteControl ? (
+        <button
+          type="button"
+          onClick={handleToggleMute}
+          data-testid="trailer-mute-toggle"
+          aria-label={isMuted ? 'Unmute' : 'Mute'}
+          className={`absolute ${controlCorner} z-30 rounded-full bg-black/60 p-2 text-white backdrop-blur transition hover:bg-black/80 focus:outline-none focus-visible:ring-2 focus-visible:ring-white`}
+        >
+          {isMuted ? (
+            <VolumeX className="h-4 w-4" aria-hidden="true" />
+          ) : (
+            <Volume2 className="h-4 w-4" aria-hidden="true" />
+          )}
+        </button>
+      ) : null}
+    </div>
+  );
+}

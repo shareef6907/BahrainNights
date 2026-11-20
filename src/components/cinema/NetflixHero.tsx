@@ -3,8 +3,9 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
 import Image from 'next/image';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Play, Volume2, VolumeX, ChevronLeft, ChevronRight, Ticket, Info } from 'lucide-react';
+import { Play, ChevronLeft, ChevronRight, Ticket, Info } from 'lucide-react';
 import { Movie } from './MovieCard';
+import TrailerPlayer from './TrailerPlayer';
 
 interface NetflixHeroProps {
   movies: Movie[];
@@ -28,37 +29,16 @@ function getYouTubeId(url: string | undefined): string | null {
 
 export default function NetflixHero({ movies, onMovieClick, onBookClick }: NetflixHeroProps) {
   const [currentIndex, setCurrentIndex] = useState(0);
-  const [isMuted, setIsMuted] = useState(true);
-  const [userInteracted, setUserInteracted] = useState(false);
   const [showControls, setShowControls] = useState(false);
   const [isMobile, setIsMobile] = useState(false);
   const isMobileRef = useRef(false);
   const autoAdvanceRef = useRef<NodeJS.Timeout | null>(null);
-  const playerRef = useRef<any>(null);
-  const iframeRef = useRef<HTMLIFrameElement>(null);
-  const [showPoster, setShowPoster] = useState(true);
-  const [isTouchDevice, setIsTouchDevice] = useState(false);
-  const isTouchDeviceRef = useRef(false);
-  const lastPosterIndexRef = useRef<number>(0);
-
-  // playerBound: triggers desktop auto-unmute when YouTube API binds.
-  // confirmedPlaying: hides the mobile Play button once PLAYING fires.
-  // iframeLoaded: drives poster fade and the 8s fallback timer.
-  const [iframeLoaded, setIframeLoaded] = useState(false);
-  const [playerBound, setPlayerBound] = useState(false);
-  const [confirmedPlaying, setConfirmedPlaying] = useState(false);
-
-  // Fallback timer: if iframe onLoad has not fired within 8s, leave poster up
-  const iframeLoadTimerRef = useRef<NodeJS.Timeout | null>(null);
 
   useEffect(() => {
     const checkMobile = () => {
       const mobile = window.innerWidth < 768;
       setIsMobile(mobile);
       isMobileRef.current = mobile;
-      const touch = typeof navigator !== 'undefined' && navigator.maxTouchPoints > 0;
-      setIsTouchDevice(touch);
-      isTouchDeviceRef.current = touch;
     };
     checkMobile();
     window.addEventListener('resize', checkMobile);
@@ -68,116 +48,6 @@ export default function NetflixHero({ movies, onMovieClick, onBookClick }: Netfl
   const currentMovie = movies[currentIndex];
   const videoId = getYouTubeId(currentMovie?.trailerUrl);
   const backdropUrl = currentMovie?.backdrop || currentMovie?.poster;
-
-  const origin = typeof window !== 'undefined' ? window.location.origin : '';
-  const embedSrc = videoId
-    ? `https://www.youtube.com/embed/${videoId}?autoplay=1&mute=1&playsinline=1&loop=1&playlist=${videoId}&controls=0&modestbranding=1&rel=0&iv_load_policy=3&disablekb=1&fs=0&enablejsapi=1&origin=${encodeURIComponent(origin)}`
-    : '';
-
-  // --- iframe onLoad: reliable DOM event, does not depend on postMessage ---
-  const handleIframeLoad = useCallback(() => {
-    if (iframeLoadTimerRef.current) {
-      clearTimeout(iframeLoadTimerRef.current);
-      iframeLoadTimerRef.current = null;
-    }
-    setIframeLoaded(true);
-    setShowPoster(false);
-
-    // Destroy any previous YT player before rebinding
-    if (playerRef.current) {
-      try { playerRef.current.destroy(); } catch {}
-      playerRef.current = null;
-    }
-    setPlayerBound(false);
-    setConfirmedPlaying(false);
-
-    // Bind YouTube JS API to the existing iframe (does not recreate it)
-    const bindApi = () => {
-      if (!iframeRef.current || playerRef.current) return;
-      try {
-        const player = new window.YT.Player(iframeRef.current, {
-          events: {
-            onStateChange: (e: any) => {
-              if (e.data === 1) setConfirmedPlaying(true);
-            },
-            onError: (e: any) => {
-              console.log('YouTube onError, code:', e.data);
-            },
-          },
-        });
-        playerRef.current = player;
-        setPlayerBound(true);
-      } catch (err) {
-        console.warn('YT.Player bind failed:', err);
-      }
-    };
-
-    if (window.YT && window.YT.Player) {
-      bindApi();
-    } else {
-      (window as any).onYouTubeIframeAPIReady = () => {
-        bindApi();
-      };
-      if (!document.querySelector('script[src*="youtube.com/iframe_api"]')) {
-        const tag = document.createElement('script');
-        tag.src = 'https://www.youtube.com/iframe_api';
-        document.head.appendChild(tag);
-      }
-    }
-  }, []);
-
-  // Start 8s fallback timer when embedSrc becomes truthy
-  useEffect(() => {
-    if (!embedSrc) return;
-    if (iframeLoaded) return; // onLoad already fired
-    iframeLoadTimerRef.current = setTimeout(() => {
-      console.warn('iframe onLoad did not fire within 8s — poster remains');
-    }, 8000);
-    return () => {
-      if (iframeLoadTimerRef.current) {
-        clearTimeout(iframeLoadTimerRef.current);
-        iframeLoadTimerRef.current = null;
-      }
-    };
-  }, [embedSrc, iframeLoaded]);
-
-  // Reset state and destroy player when videoId changes (slide change)
-  useEffect(() => {
-    return () => {
-      if (playerRef.current) {
-        try { playerRef.current.destroy(); } catch {}
-        playerRef.current = null;
-      }
-    };
-  }, [videoId]);
-
-  // Slide-change: only reset poster, nothing else
-  // key={videoId} in JSX handles the iframe remount and autoplay
-  useEffect(() => {
-    if (currentIndex !== lastPosterIndexRef.current) {
-      lastPosterIndexRef.current = currentIndex;
-      setShowPoster(true);
-      setIframeLoaded(false);
-      setPlayerBound(false);
-      setConfirmedPlaying(false);
-    }
-  }, [currentIndex]);
-
-  // Auto-unmute on desktop ~2s after player is bound.
-  // playerBound in deps: effect fires exactly once when bindApi() succeeds.
-  // Gate !isTouchDeviceRef.current ensures phones/tablets/touchscreen laptops are untouched.
-  // If binding never succeeds: no-op, desktop stays muted, toggleMute still works.
-  useEffect(() => {
-    if (!isMobile && !isTouchDeviceRef.current && !userInteracted && playerRef.current) {
-      const timer = setTimeout(() => {
-        if (playerRef.current) {
-          try { playerRef.current.unMute(); playerRef.current.setVolume(50); setIsMuted(false); } catch {}
-        }
-        setUserInteracted(true);
-      }, 2000);
-      return () => clearTimeout(timer);
-    }
-  }, [isMobile, userInteracted, playerBound]);
 
   // Auto-advance every 25 seconds
   const startAutoAdvance = useCallback(() => {
@@ -205,14 +75,6 @@ export default function NetflixHero({ movies, onMovieClick, onBookClick }: Netfl
     goToSlide((currentIndex + 1) % movies.length);
   }, [currentIndex, movies.length, goToSlide]);
 
-  const toggleMute = useCallback(() => {
-    if (playerRef.current) {
-      try { isMuted ? playerRef.current.unMute() : playerRef.current.mute(); } catch {}
-    }
-    setIsMuted(!isMuted);
-    setUserInteracted(true);
-  }, [isMuted]);
-
   if (!movies || movies.length === 0) {
     return (
       <div className="relative flex items-center justify-center bg-gradient-to-b from-gray-900 to-black"
@@ -226,109 +88,60 @@ export default function NetflixHero({ movies, onMovieClick, onBookClick }: Netfl
     );
   }
 
-  const handleMobilePlay = useCallback(() => {
-    if (videoId) window.open(`https://www.youtube.com/watch?v=${videoId}`, '_blank');
-  }, [videoId]);
-
-  // Tap-to-toggle on mobile
-  const handleHeroTap = (e: React.MouseEvent) => {
-    if ((e.target as HTMLElement).closest('button')) return;
-    if (isTouchDeviceRef.current && playerRef.current) {
-      try {
-        if (isMuted) { playerRef.current.unMute(); playerRef.current.setVolume(50); }
-        else { playerRef.current.mute(); }
-        setIsMuted(!isMuted);
-        setUserInteracted(true);
-      } catch {}
-    }
-  };
-
-  // Sound on first interaction — fallback for edge cases.
-  // playerBound in deps: listener re-registers after binding so playerRef.current
-  // is guaranteed non-null on first click. { once: true } removes it after first use.
-  useEffect(() => {
-    const enableSound = () => {
-      if (playerRef.current && isMuted) {
-        try { playerRef.current.unMute(); playerRef.current.setVolume(50); } catch {}
-        setIsMuted(false);
-        setUserInteracted(true);
-      }
-    };
-    document.addEventListener('click', enableSound, { once: true, passive: true });
-    document.addEventListener('touchstart', enableSound, { once: true, passive: true });
-    return () => {
-      document.removeEventListener('click', enableSound);
-      document.removeEventListener('touchstart', enableSound);
-    };
-  }, [playerBound]);
-
   return (
     <div
-      className="relative overflow-hidden bg-black"
+      /*
+       * Height comes from CSS media queries, not from the `isMobile` state:
+       * the server rendered 85vh and the client switched it to 70vh after
+       * hydration, which shifted the layout below the hero (CLS).
+       */
+      className="relative overflow-hidden bg-black h-[70vh] md:h-[85vh] min-h-[400px] md:min-h-[600px]"
       style={{
         width: '100vw',
-        height: isMobile ? '70vh' : '85vh',
-        minHeight: isMobile ? '400px' : '600px',
         marginLeft: 'calc(-50vw + 50%)'
       }}
       onMouseEnter={() => setShowControls(true)}
       onMouseLeave={() => setShowControls(false)}
-      onClick={handleHeroTap}
     >
-      {/* Declarative YouTube iframe — z-[1], below poster.
-          key={videoId} causes React to remount on slide change — new video autoplays.
-          autoplay, mute, playsinline, loop params are in the URL. No script needed. */}
-      {embedSrc && (
-        <iframe
-          key={videoId}
-          ref={iframeRef}
-          src={embedSrc}
-          title="Trailer"
-          allow="autoplay; encrypted-media; picture-in-picture"
-          allowFullScreen
-          frameBorder="0"
-          onLoad={handleIframeLoad}
-          className="absolute inset-0 w-full h-full pointer-events-none z-[1]"
-          style={{ transform: 'scale(1.15)', transformOrigin: 'center center', border: 0 }}
-        />
-      )}
-
-      {/* Poster — z-[2], fades on iframe onLoad (not on PLAYING). */}
-      {backdropUrl ? (
-        <div
-          className="absolute inset-0 w-full h-full pointer-events-none z-[2]"
-          style={{ opacity: showPoster ? 1 : 0, transition: 'opacity 300ms ease-out' }}
-        >
-          <Image src={backdropUrl} alt={currentMovie?.title || 'Movie backdrop'} fill priority className="object-cover" sizes="100vw" />
-          <div className="absolute inset-0 bg-black/50 pointer-events-none" />
+      {/*
+        The trailer player owns the poster/facade, the lazy YouTube iframe, the
+        unmuted-first playback attempt and the muted fallback. The hero only
+        renders the overlay content on top of it.
+      */}
+      {videoId ? (
+        <div className="absolute inset-0 z-0">
+          <TrailerPlayer
+            key={videoId}
+            videoId={videoId}
+            poster={backdropUrl}
+            title={currentMovie?.title ? `${currentMovie.title} trailer` : 'Trailer'}
+            activation="click"
+            priority
+            playButtonPlacement="bottomRight"
+            aspectRatio={null}
+            className="h-full w-full"
+          />
         </div>
       ) : (
-        <div className="absolute inset-0 bg-gray-900 flex items-center justify-center z-[2]"
-          style={{ opacity: showPoster ? 1 : 0, transition: 'opacity 300ms ease-out' }}>
-          <Play className="w-16 h-16 text-gray-600" />
-        </div>
-      )}
-
-      {/* Small play button — touch devices only, bottom-right, above content.
-          Renders while confirmedPlaying === false.
-          Disappears within ~1-2s when PLAYING fires from the JS API.
-          If JS API never binds: button remains as the escape hatch. */}
-      {isTouchDevice && !confirmedPlaying && (
-        <button
-          onClick={handleMobilePlay}
-          className="absolute bottom-28 right-4 flex items-center gap-2 px-4 py-2 bg-[#d4a853] hover:bg-[#c49a48] text-black font-bold rounded-lg z-[25] shadow-xl"
-          aria-label="Play trailer"
-        >
-          <Play className="w-5 h-5 fill-current" />
-          <span className="text-sm">Play</span>
-        </button>
+        backdropUrl ? (
+          <div className="absolute inset-0 z-0">
+            <Image
+              src={backdropUrl}
+              alt={currentMovie?.title || 'Movie backdrop'}
+              fill
+              priority
+              className="object-cover"
+              sizes="100vw"
+            />
+          </div>
+        ) : null
       )}
 
       <div className="absolute inset-0 bg-gradient-to-r from-black/90 via-black/40 to-transparent z-[5] pointer-events-none" />
       <div className="absolute inset-0 bg-gradient-to-t from-[#0a0a0a] via-transparent to-black/20 z-[5] pointer-events-none" />
       <div className="absolute bottom-0 left-0 right-0 h-40 bg-gradient-to-t from-[#0a0a0a] to-transparent z-[5] pointer-events-none" />
 
-      <div className="absolute inset-0 flex items-end z-10">
+      <div className="absolute inset-0 flex items-end z-10 pointer-events-none">
         <div className="w-full max-w-7xl mx-auto px-4 md:px-6 pb-16 md:pb-32">
           <AnimatePresence mode="wait">
             <motion.div
@@ -343,9 +156,9 @@ export default function NetflixHero({ movies, onMovieClick, onBookClick }: Netfl
                 {currentMovie?.title}
               </h1>
               <div className="flex flex-wrap items-center gap-2 md:gap-3 mb-2 md:mb-4 text-gray-300 text-xs md:text-base">
-                {currentMovie?.rating && (
+                {currentMovie?.rating ? (
                   <span className="text-[#d4a853] font-semibold">★ {currentMovie.rating}/10</span>
-                )}
+                ) : null}
                 {currentMovie?.genres?.slice(0, isMobile ? 2 : 3).map((genre, i) => (
                   <span key={genre} className="flex items-center">
                     {i > 0 && <span className="mx-1 md:mx-2 text-gray-500">•</span>}
@@ -364,36 +177,26 @@ export default function NetflixHero({ movies, onMovieClick, onBookClick }: Netfl
               <div className="flex flex-wrap gap-2 md:gap-3 mt-3 md:mt-0">
                 {videoId && (
                   <motion.button onClick={() => onMovieClick(currentMovie)}
-                    className="flex items-center gap-1.5 md:gap-2 px-3 md:px-6 py-2 md:py-3 bg-white text-black text-sm md:text-base font-bold rounded-lg hover:bg-gray-200 transition-colors"
+                    className="pointer-events-auto flex items-center gap-1.5 md:gap-2 px-3 md:px-6 py-2 md:py-3 bg-white text-black text-sm md:text-base font-bold rounded-lg hover:bg-gray-200 transition-colors"
                     whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
-                    <Play className="w-4 h-4 md:w-5 md:h-5 fill-current" />Trailer
+                    <Play className="w-4 h-4 md:w-5 md:w-5 fill-current" />Trailer
                   </motion.button>
                 )}
                 <motion.button onClick={() => onBookClick(currentMovie)}
-                  className="flex items-center gap-1.5 md:gap-2 px-3 md:px-6 py-2 md:py-3 bg-red-600 text-white text-sm md:text-base font-bold rounded-lg hover:bg-red-700 transition-colors"
+                  className="pointer-events-auto flex items-center gap-1.5 md:gap-2 px-3 md:px-6 py-2 md:py-3 bg-red-600 text-white text-sm md:text-base font-bold rounded-lg hover:bg-red-700 transition-colors"
                   whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
-                  <Ticket className="w-4 h-4 md:w-5 md:h-5" />Book
+                  <Ticket className="w-4 h-4 md:w-5 md:w-5" />Book
                 </motion.button>
                 <motion.button onClick={() => onMovieClick(currentMovie)}
-                  className="flex items-center gap-1.5 md:gap-2 px-3 md:px-6 py-2 md:py-3 bg-gray-800/80 text-white text-sm md:text-base font-medium rounded-lg hover:bg-gray-700 transition-colors border border-gray-600"
+                  className="pointer-events-auto flex items-center gap-1.5 md:gap-2 px-3 md:px-6 py-2 md:py-3 bg-gray-800/80 text-white text-sm md:text-base font-medium rounded-lg hover:bg-gray-700 transition-colors border border-gray-600"
                   whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
-                  <Info className="w-4 h-4 md:w-5 md:h-5" />Info
+                  <Info className="w-4 h-4 md:w-5 md:w-5" />Info
                 </motion.button>
               </div>
             </motion.div>
           </AnimatePresence>
         </div>
       </div>
-
-      <button
-        onClick={toggleMute}
-        className={`absolute ${isMobile ? 'bottom-28 right-4' : 'bottom-32 right-6'} p-3 md:p-3 bg-red-600 hover:bg-red-500 active:bg-red-700 rounded-full border-2 border-white text-white transition-all z-20 ${
-          isMobile ? 'animate-pulse' : ''
-        }`}
-        aria-label={isMuted ? 'Unmute' : 'Mute'}
-      >
-        {isMuted ? <VolumeX className="w-5 h-5 md:w-5 md:h-5" /> : <Volume2 className="w-5 h-5 md:w-5 md:h-5" />}
-      </button>
 
       {movies.length > 1 && (
         <>
