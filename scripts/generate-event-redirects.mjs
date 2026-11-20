@@ -552,20 +552,37 @@ async function main() {
     console.error(`# THIN category hubs (<${MIN_HUB_LISTINGS} listings, treated as unpopulated): ${[...thinCats].sort().join(', ')}`);
   }
 
-  const emptyDests = new Map();
-  for (const dest of new Set(Object.values(sortedRedirects))) {
-    if (dest.startsWith('/events/category/')) {
-      const cat = dest.split('/').pop();
-      if (!populatedCats.has(cat)) emptyDests.set(dest, dest);
-    } else if (dest.startsWith('/international/')) {
-      const code = dest.split('/').pop();
-      const dbName = Object.keys(COUNTRY_CODE).find((k) => COUNTRY_CODE[k] === code);
-      if (!dbName || !populatedCtry.has(dbName)) emptyDests.set(dest, dest);
+  // A destination with no event listings is a soft 404: the visitor lands on a
+  // page that says "No events found" and Google sees a thin page — and since
+  // PR #38 (2026-11-02) such a hub is served as `noindex, nofollow`, so a
+  // redirect into it consolidates no signal at all.
+  //
+  // This is a FUNCTION because it has to run TWICE: once over the freshly
+  // probed map, and once again AFTER the carry-forward merge below.
+  //
+  // The carry-forward step re-introduces the destinations that production is
+  // already serving — including ones that have since emptied out. Those must
+  // fall back too, otherwise every regeneration re-publishes the same
+  // redirects into noindex dead ends. When this was a one-shot block, the
+  // carried-forward entries escaped the check entirely: 32 sources stayed
+  // pointed at the now-empty /events/category/sports hub and the generator's
+  // own self-check failed on it ("destination is noindex").
+  const applyEmptyDestFallback = (label) => {
+    const emptyDests = new Map();
+    for (const dest of new Set(Object.values(sortedRedirects))) {
+      if (dest.startsWith('/events/category/')) {
+        const cat = dest.split('/').pop();
+        if (!populatedCats.has(cat)) emptyDests.set(dest, dest);
+      } else if (dest.startsWith('/international/')) {
+        const code = dest.split('/').pop();
+        const dbName = Object.keys(COUNTRY_CODE).find((k) => COUNTRY_CODE[k] === code);
+        if (!dbName || !populatedCtry.has(dbName)) emptyDests.set(dest, dest);
+      }
     }
-  }
 
-  if (emptyDests.size) {
-    console.error(`# ${emptyDests.size} destinations have no event listings; falling back:`);
+    if (!emptyDests.size) return;
+
+    console.error(`# ${emptyDests.size} destinations have no event listings; falling back${label ? ` (${label})` : ''}:`);
     for (const dest of emptyDests.keys()) {
       const fb = dest.startsWith('/international/') ? '/international' : '/events';
       console.error(`#   ${dest} -> ${fb}`);
@@ -576,7 +593,9 @@ async function main() {
         }
       }
     }
-  }
+  };
+
+  applyEmptyDestFallback();
 
   // Carry forward the redirects that production is ALREADY serving.
   //
@@ -607,6 +626,12 @@ async function main() {
     }
     console.error(`# carried forward into the map: ${added} (${skippedLive} dropped — live again)`);
   }
+
+  // The carry-forward merge above re-adds the destinations production is
+  // already serving, and some of them have since emptied out and are now
+  // served `noindex`. Re-run the fallback so those fall back as well —
+  // otherwise the map keeps pointing live traffic at noindex dead ends.
+  applyEmptyDestFallback('after carry-forward');
 
   // The map's real size is not `dead.length`: entries carried forward from the
   // deployed map are still serving 301s and still earning impressions, so the
