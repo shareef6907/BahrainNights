@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@supabase/supabase-js';
+import { requireAdminOrInternal } from '@/lib/api-write-guard';
 
 export const dynamic = 'force-dynamic';
 
@@ -29,6 +30,19 @@ interface BulkShowtimeRequest {
 
 // POST /api/cinema/showtimes/bulk - Create multiple showtimes at once
 export async function POST(request: NextRequest) {
+
+  // These routes live under `/api/`, which the middleware matcher excludes, so
+  // the middleware never sees them. Without a check of their own they are
+  // reachable by an anonymous caller with the service-role key — anyone could
+  // create, reorder, rename or DELETE movies and showtimes.
+  //
+  // `requireAdmin` reads the real `auth_token` cookie and checks the role.
+  // The admin UI calls these routes same-origin, so the cookie is sent
+  // automatically.
+  const guard = await requireAdminOrInternal(request);
+  if (!guard.ok) {
+    return guard.response;
+  }
   try {
     const supabase = getSupabaseAdmin();
     const body: BulkShowtimeRequest = await request.json();
@@ -188,6 +202,19 @@ export async function POST(request: NextRequest) {
 
 // DELETE /api/cinema/showtimes/bulk - Delete multiple showtimes
 export async function DELETE(request: NextRequest) {
+
+  // These routes live under `/api/`, which the middleware matcher excludes, so
+  // the middleware never sees them. Without a check of their own they are
+  // reachable by an anonymous caller with the service-role key — anyone could
+  // create, reorder, rename or DELETE movies and showtimes.
+  //
+  // `requireAdmin` reads the real `auth_token` cookie and checks the role.
+  // The admin UI calls these routes same-origin, so the cookie is sent
+  // automatically.
+  const guard = await requireAdminOrInternal(request);
+  if (!guard.ok) {
+    return guard.response;
+  }
   try {
     const supabase = getSupabaseAdmin();
     const { searchParams } = new URL(request.url);

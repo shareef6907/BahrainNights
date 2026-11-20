@@ -1,5 +1,6 @@
-import { NextResponse } from 'next/server';
+import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@supabase/supabase-js';
+import { requireAdminOrInternal } from '@/lib/api-write-guard';
 import {
   getNowPlaying,
   getUpcoming,
@@ -153,7 +154,15 @@ async function processMovie(
   }
 }
 
-export async function POST(request: Request) {
+export async function POST(request: NextRequest) {
+
+  // This route lives under `/api/`, which the middleware matcher excludes, so
+  // the middleware never sees it. Without a check of its own, an anonymous
+  // caller could trigger a full cinema scrape and write to the database.
+  const guard = await requireAdminOrInternal(request);
+  if (!guard.ok) {
+    return guard.response;
+  }
   const startTime = Date.now();
   const supabase = getSupabaseAdmin();
 
