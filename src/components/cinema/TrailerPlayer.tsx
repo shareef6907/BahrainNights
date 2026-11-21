@@ -3,10 +3,7 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import Image from 'next/image';
 import { Play, Volume2, VolumeX } from 'lucide-react';
-import {
-  loadYouTubeIframeApi,
-  YT_EMBED_ORIGIN,
-} from '@/lib/utils/youtube-iframe-api';
+import { loadYouTubeIframeApi } from '@/lib/utils/youtube-iframe-api';
 import type { YTPlayerInstance } from '@/types/youtube';
 
 /**
@@ -60,7 +57,6 @@ const SOUND_PREF_KEY = 'bn:trailer-sound';
  * typed spread. Without it iOS Safari plays the trailer fullscreen instead
  * of inline.
  */
-const IFRAME_INLINE_ATTRS = { playsInline: true } as unknown as React.IframeHTMLAttributes<HTMLIFrameElement>;
 
 /** How long to wait for the unmuted attempt before falling back to muted. */
 const UNMUTED_ATTEMPT_TIMEOUT_MS = 3500;
@@ -188,7 +184,45 @@ export default function TrailerPlayer({
   onReady,
 }: TrailerPlayerProps) {
   const containerRef = useRef<HTMLDivElement | null>(null);
-  const iframeRef = useRef<HTMLIFrameElement | null>(null);
+  /*
+   * The container the YouTube IFrame API owns.
+   *
+   * WHY A DIV AND NOT AN <iframe>
+   * -----------------------------
+   * The component used to render its own <iframe src=".../embed/..."> and
+   * hand that element to `new YT.Player(iframe, ...)`.
+   *
+   * That does not work. The IFrame API expects to be given a CONTAINER — a
+   * DIV or an element id — and it then creates the player iframe ITSELF, on
+   * the host the API script came from, and wires up its postMessage channel
+   * to that iframe. When it is handed a pre-existing iframe that points at a
+   * DIFFERENT host, the API cannot bind to it: the control channel is never
+   * opened and every command is posted to the wrong window.
+   *
+   * The symptom is precise and reproducible:
+   *
+   *   - the player reaches state 5 (VIDEO_CUED) — the video is loaded and
+   *     cued, but it never advances to PLAYING;
+   *   - `playVideo()` is called and returns, but nothing happens;
+   *   - the console shows, once per player:
+   *       "Failed to execute 'postMessage' on 'DOMWindow': The target
+   *        origin provided ('https://www.youtube-nocookie.com') does not
+   *        match the recipient window's origin ('https://www.bahrainnights.com')"
+   *   - `data-playing` stays "false", so neither the unmute control nor the
+   *     mute toggle is ever rendered.
+   *
+   * Measured on production, /cinema, 70 seconds with no interaction:
+   *   YT.Player constructed 8x, onReady fired 2x (once per slide),
+   *   player state 5 at every sample, playVideo never called,
+   *   0 unmute controls, 0 video-stream requests.
+   *
+   * With a container DIV, the same API on the same page reaches state 1
+   * (PLAYING) and creates its own iframe on the API script's own host.
+   *
+   * This fixes the CLICK path too: it had the same defect, which is why the
+   * hero trailer never played on click either.
+   */
+  const playerHostRef = useRef<HTMLDivElement | null>(null);
   const playerRef = useRef<YTPlayerInstance | null>(null);
 
   /**
@@ -419,8 +453,8 @@ export default function TrailerPlayer({
     if (!activated) return;
     let cancelled = false;
 
-    const iframe = iframeRef.current;
-    if (!iframe) return;
+    const host = playerHostRef.current;
+    if (!host) return;
 
     const bind = () => {
       if (cancelled || playerRef.current) return;
@@ -428,7 +462,11 @@ export default function TrailerPlayer({
         .then(() => {
           if (cancelled) return;
           try {
-            const player = new window.YT!.Player(iframe, {
+            // The API takes the CONTAINER, not an iframe. It creates the
+            // player iframe itself, on its own host, and owns the messaging.
+            const player = new window.YT!.Player(host, {
+              videoId,
+              playerVars,
               events: {
                 onReady: (event) => {
                   if (cancelled) return;
@@ -512,16 +550,18 @@ export default function TrailerPlayer({
         });
     };
 
-    const onIframeLoad = () => bind();
-    iframe.addEventListener('load', onIframeLoad);
+    // Bind straight away: the API creates the player iframe itself, so there
+    // is no iframe 'load' event to wait for. The API script is memoised and
+    // usually already resolved by the time this runs.
+    bind();
 
-    // Backstop: if the load event never fires (e.g. cached document), bind anyway.
+    // Backstop: if the API script is slow to arrive, bind again. `bind()`
+    // is idempotent — it returns early once `playerRef.current` is set.
     const bindTimer = window.setTimeout(() => bind(), 4000);
 
     return () => {
       cancelled = true;
       window.clearTimeout(bindTimer);
-      iframe.removeEventListener('load', onIframeLoad);
       try {
         playerRef.current?.destroy();
       } catch {
@@ -605,9 +645,31 @@ export default function TrailerPlayer({
     });
   }, [onReady, playWithSound, handleUnmute, isMuted, isPlaying]);
 
-  // autoplay=0: playback is driven exclusively through the IFrame API so the
-  // mute state is always set before playVideo() (see the class comment).
-  const embedSrc = `${YT_EMBED_ORIGIN}/embed/${videoId}?autoplay=0&mute=1&playsinline=1&loop=1&playlist=${videoId}&controls=0&modestbranding=1&rel=0&iv_load_policy=3&disablekb=1&fs=0&enablejsapi=1`;
+  /*
+   * The player parameters.
+   *
+   * autoplay=0: playback is driven exclusively through the IFrame API so the
+   * mute state is always set before playVideo() (see the class comment).
+   *
+   * The API builds the player iframe itself now, so this is a PLAYER CONFIG
+   * rather than an iframe URL. `origin` is set to this page's origin so the
+   * API's postMessage handshake has a matching target.
+   */
+  const playerVars: Record<string, string | number> = {
+    autoplay: '0',
+    mute: '1',
+    playsinline: '1',
+    loop: '1',
+    playlist: videoId,
+    controls: '0',
+    modestbranding: '1',
+    rel: '0',
+    iv_load_policy: '3',
+    disablekb: '1',
+    fs: '0',
+    enablejsapi: '1',
+    origin: typeof window !== 'undefined' ? window.location.origin : '',
+  };
 
   /*
    * The sound controls live in the same corner as the facade play button.
@@ -661,17 +723,21 @@ export default function TrailerPlayer({
         </div>
       ) : null}
 
-      {/* The YouTube iframe is only created once the visitor asked for it. */}
+      {/*
+        The YouTube player container.
+
+        It is only created once the visitor asked for it (or the viewport
+        observer fired). It is a DIV, not an iframe: the IFrame API owns the
+        player iframe and creates it itself inside this container, which is
+        what lets its messaging channel work. See the note on
+        `playerHostRef` above.
+      */}
       {activated ? (
-        <iframe
-          ref={iframeRef}
-          src={embedSrc}
+        <div
+          ref={playerHostRef}
           title={title}
-          allow="autoplay; encrypted-media; picture-in-picture"
-          allowFullScreen
-          {...IFRAME_INLINE_ATTRS}
-          frameBorder="0"
-          className="absolute inset-0 z-0 h-full w-full border-0"
+          data-testid="trailer-player-host"
+          className="absolute inset-0 z-0 h-full w-full"
           style={{ border: 0 }}
         />
       ) : null}
