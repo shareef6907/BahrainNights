@@ -8,6 +8,7 @@ import Image from 'next/image';
 // framer-motion removed for performance - using CSS animations instead
 import { MapPin, Clock, Star, ChevronRight, ChevronDown, Menu, X, Play, Building2, LogIn } from 'lucide-react';
 import { hasPlayableTrailer } from '@/lib/cinema/trailer';
+import { displayTitleFor } from '@/lib/cinema/film-identity';
 import GlobalSearch from '@/components/search/GlobalSearch';
 import { useTranslation } from '@/lib/i18n/TranslationContext';
 import type { InternationalCountrySummary } from '@/lib/international-events';
@@ -256,7 +257,9 @@ function convertToMovieFormat(movie: HomepageMovie): Movie {
 
   return {
     id: movie.id,
-    title: movie.title,
+    // The display title: an explicit alias wins over the stored spelling, so
+    // a mangled title and its twin show the same, correct name.
+    title: displayTitleFor(movie.title),
     slug: movie.slug,
     poster: getPosterUrl(movie.poster_url),
     backdrop: getBackdropUrl(movie.backdrop_url),

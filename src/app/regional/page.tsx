@@ -1,4 +1,5 @@
 import { hasPlayableTrailer } from '@/lib/cinema/trailer';
+import { displayTitleFor } from '@/lib/cinema/film-identity';
 import { OG_IMAGE } from '@/lib/og';
 import { Metadata } from 'next';
 import { getAdminClient } from '@/lib/supabase/server';
@@ -263,7 +264,10 @@ async function getRegionalTrailerFilms(): Promise<RegionalTrailerFilm[]> {
         };
         return {
           id: row.id,
-          title: row.title,
+          // The display title: an explicit alias wins over the stored
+          // spelling, so a mangled title and its twin show the same, correct
+          // name. The same rule the cinema page uses.
+          title: displayTitleFor(row.title),
           synopsis: row.synopsis ?? undefined,
           genre: row.genre ?? undefined,
           trailer_key: row.trailer_key ?? row.trailer_url ?? undefined,
