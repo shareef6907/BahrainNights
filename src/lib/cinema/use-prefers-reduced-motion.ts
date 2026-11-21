@@ -11,9 +11,9 @@ import { useEffect, useState } from 'react';
  * motion the viewport observer must NOT create the player, and the visitor
  * gets the poster and an explicit play button instead.
  *
- * That guard lives in an effect, and effects run in order. The observer
- * effect is declared AFTER the matchMedia effect, so on the very first commit
- * the observer still sees `reducedMotion === false` and activates the player —
+ * That guard lives in an effect, and effects run after the render. The
+ * viewport observer is a child effect, so on the very first commit the
+ * observer can still see `reducedMotion === false` and activate the player
  * before the preference has been read. The result is that a visitor who asked
  * for reduced motion still got an autoplaying trailer, with the YouTube
  * iframe created and the video stream requested.
@@ -26,19 +26,47 @@ import { useEffect, useState } from 'react';
  *
  * With `click`, the iframe is never created until the visitor presses play,
  * which is exactly the behaviour the reduced-motion path is supposed to
- * have — and it works regardless of effect ordering.
+ * have.
+ *
+ * WHY IT IS READ SYNCHRONOUSLY
+ * ---------------------------
+ * The preference has to be known on the FIRST render, not after an effect.
+ * If the hook set the state in an effect, the first render would still pass
+ * `activation="viewport"` to the child, and the child's observer — a child
+ * effect — runs on that first commit, before the parent's re-render with
+ * `activation="click"` ever happens. The iframe would already be created by
+ * then.
+ *
+ * `window.matchMedia` is safe to call during a client render: it does not
+ * touch the DOM, and it returns the same answer the server render assumed
+ * (no reduced motion) because the server has no `window` at all.
  *
  * `TrailerPlayer`'s own guard is left in place: it still covers the case
  * where the preference CHANGES while the page is open.
- *
- * The initial value is `false` (not reduced motion) so that the server
- * render and the first client render agree. The preference is applied in an
- * effect, before the observer can fire, because the hero's own observer
- * effect is likewise declared after this one.
  */
-export function usePrefersReducedMotion(): boolean {
-  const [reduced, setReduced] = useState(false);
 
+/**
+ * Read the preference during render.
+ *
+ * `typeof window === 'undefined'` is the server-render case: there is no
+ * preference to read, so the answer is "no reduced motion", which is what
+ * the server rendered with anyway.
+ */
+function readPreference(): boolean {
+  if (typeof window === 'undefined' || !window.matchMedia) return false;
+  try {
+    return window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  } catch {
+    return false;
+  }
+}
+
+export function usePrefersReducedMotion(): boolean {
+  // The initialiser runs once, on the first client render, and reads the
+  // preference SYNCHRONOUSLY. On the server it returns false.
+  const [reduced, setReduced] = useState(readPreference);
+
+  // Keep it in step if the visitor changes the setting while the page is open.
   useEffect(() => {
     if (typeof window === 'undefined' || !window.matchMedia) return;
     const mq = window.matchMedia('(prefers-reduced-motion: reduce)');
