@@ -58,7 +58,7 @@ export default function InternationalTrailerHeader({ films }: InternationalTrail
             videoId={videoId}
             poster={backdropUrl}
             title={current?.title ? `${current.title} trailer` : 'Trailer'}
-            activation="click"
+            activation="viewport"
             priority
             playButtonPlacement="bottomRight"
             aspectRatio={null}

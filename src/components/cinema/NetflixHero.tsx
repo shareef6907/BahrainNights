@@ -307,7 +307,7 @@ export default function NetflixHero({ movies, onMovieClick, onBookClick, onTrail
             videoId={videoId}
             poster={backdropUrl}
             title={currentMovie?.title ? `${currentMovie.title} trailer` : 'Trailer'}
-            activation="click"
+            activation="viewport"
             priority
             playButtonPlacement="bottomRight"
             aspectRatio={null}
