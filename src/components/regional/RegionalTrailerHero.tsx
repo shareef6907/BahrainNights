@@ -4,6 +4,7 @@ import { useState, useEffect, useRef, useCallback } from 'react';
 import Image from 'next/image';
 import { ChevronLeft, ChevronRight, Info, Play } from 'lucide-react';
 import TrailerPlayer from '@/components/cinema/TrailerPlayer';
+import { getYouTubeVideoId, hasPlayableTrailer } from '@/lib/cinema/trailer';
 
 interface Movie {
   id: string;
@@ -25,11 +26,15 @@ interface Props {
   onBookClick?: (movie: Movie) => void;
 }
 
+/*
+ * THE VIDEO ID — one shared implementation.
+ *
+ * See src/lib/cinema/trailer.ts. This component had its own copy, and the
+ * copies had drifted: the hero accepted a bare YouTube key while the
+ * trailer modal did not.
+ */
 function getYouTubeId(url: string | undefined): string | null {
-  if (!url) return null;
-  if (/^[a-zA-Z0-9_-]{11}$/.test(url)) return url;
-  const match = url.match(/(?:youtube\.com\/watch\?v=|youtu\.be\/)([a-zA-Z0-9_-]{11})/);
-  return match?.[1] || null;
+  return getYouTubeVideoId(url);
 }
 
 export default function RegionalTrailerHero({ movies = [], onMovieClick, onBookClick }: Props) {
@@ -114,7 +119,16 @@ export default function RegionalTrailerHero({ movies = [], onMovieClick, onBookC
             <h1 className="text-4xl md:text-6xl lg:text-7xl font-black text-white mb-4">{current?.title}</h1>
             {current?.synopsis && <p className="text-lg text-gray-200 mb-8 line-clamp-3">{current.synopsis}</p>}
             <div className="flex gap-4">
-              {current && onMovieClick && (
+              {/*
+                The "Watch Trailer" button.
+
+                It is rendered ONLY when the current film has a trailer that
+                can actually play. It used to be gated on "there is a film",
+                so on a slide whose trailer was missing it opened the film
+                modal instead — a button labelled "Watch Trailer" that showed
+                no trailer.
+              */}
+              {current && onMovieClick && hasPlayableTrailer(current.trailer_key) && (
                 <button
                   onClick={() => onMovieClick(current)}
                   className="pointer-events-auto flex items-center gap-2 bg-white text-black px-8 py-3 rounded-lg font-bold"

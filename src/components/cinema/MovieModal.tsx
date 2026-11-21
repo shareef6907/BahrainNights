@@ -2,7 +2,8 @@
 
 import { useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { X, Star, Clock, Calendar, Play, ExternalLink, Ticket, Film } from 'lucide-react';
+import { X, Star, Clock, Calendar, Play, ExternalLink, Ticket } from 'lucide-react';
+import { hasPlayableTrailer } from '@/lib/cinema/trailer';
 import Image from 'next/image';
 import { Movie } from './MovieCard';
 import { useTranslation } from '@/lib/i18n';
@@ -127,6 +128,15 @@ export default function MovieModal({
                   <div className="flex flex-col md:flex-row gap-6">
                     {/* Poster */}
                     <div className="relative w-[140px] md:w-[180px] aspect-[2/3] rounded-xl overflow-hidden shadow-2xl flex-shrink-0 mx-auto md:mx-0">
+                      {/*
+                        THE POSTER.
+
+                        There is no fallback card. A film with no poster does
+                        not reach this modal at all — it is dropped from the
+                        page (see src/app/cinema/page.tsx). The branded
+                        "BAHRAIN NIGHTS" placeholder was what made the grid
+                        look broken, and it is gone from the rendering path.
+                      */}
                       {hasPoster ? (
                         <Image
                           src={movie.poster}
@@ -136,16 +146,7 @@ export default function MovieModal({
                           sizes="180px"
                           unoptimized
                         />
-                      ) : (
-                        <div className="absolute inset-0 flex flex-col items-center justify-center bg-gradient-to-br from-[#1c1c1c] via-[#141414] to-[#0a0a0a] px-3 text-center">
-                          <div className="flex h-12 w-12 items-center justify-center rounded-xl border border-[#d4a853]/40 bg-[#d4a853]/10 mb-2">
-                            <Film className="h-5 w-5 text-[#d4a853]" />
-                          </div>
-                          <span className="text-[9px] font-semibold uppercase tracking-[0.2em] text-[#d4a853]/70">
-                            Bahrain Nights
-                          </span>
-                        </div>
-                      )}
+                      ) : null}
                     </div>
 
                     {/* Info */}
@@ -194,7 +195,7 @@ export default function MovieModal({
                       )}
 
                       {/* Trailer Button */}
-                      {movie.trailerUrl && (
+                      {hasPlayableTrailer(movie.trailerUrl) && (
                         <button
                           onClick={onTrailerClick}
                           className="flex items-center gap-2 mx-auto md:mx-0 px-5 py-2.5 bg-white/10 border border-white/20 rounded-xl text-white hover:bg-white/20 transition-colors"

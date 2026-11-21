@@ -104,7 +104,7 @@ async function getMovies(): Promise<HomepageMovie[]> {
 
   const { data, error } = await supabaseAdmin
     .from('movies')
-    .select('id, title, slug, poster_url, backdrop_url, tmdb_rating, genre, duration_minutes, language, release_date, is_now_showing, synopsis, trailer_url, movie_cast, scraped_from')
+    .select('id, title, slug, poster_url, backdrop_url, tmdb_rating, genre, duration_minutes, language, release_date, is_now_showing, synopsis, trailer_url, trailer_key, movie_cast, scraped_from')
     .eq('is_now_showing', true)
     .not('language', 'in', `(${indianLanguages.join(',')})`)
     // Show movies from any source (VOX, manual, etc) or null (legacy)

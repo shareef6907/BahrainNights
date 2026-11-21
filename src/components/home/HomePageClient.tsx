@@ -7,6 +7,7 @@ import PremieraLiveCompanyLine from '@/components/PremieraLiveCompanyLine';
 import Image from 'next/image';
 // framer-motion removed for performance - using CSS animations instead
 import { MapPin, Clock, Star, ChevronRight, ChevronDown, Menu, X, Play, Building2, LogIn } from 'lucide-react';
+import { hasPlayableTrailer } from '@/lib/cinema/trailer';
 import GlobalSearch from '@/components/search/GlobalSearch';
 import { useTranslation } from '@/lib/i18n/TranslationContext';
 import type { InternationalCountrySummary } from '@/lib/international-events';
@@ -121,6 +122,14 @@ export interface HomepageMovie {
   is_now_showing: boolean;
   synopsis: string | null;
   trailer_url: string | null;
+  /**
+   * The bare YouTube key of the trailer.
+   *
+   * The sync stores the trailer as a key, and `trailer_url` as the full watch
+   * URL. The key is preferred by the launcher, because the shared predicate
+   * turns a key into a playable video id directly.
+   */
+  trailer_key: string | null;
   movie_cast: string[];
   scraped_from: string[];
   /**
@@ -214,10 +223,22 @@ export interface HomepageInternationalEvent {
 
 // Helper to convert homepage movie data to Movie format for modal
 function convertToMovieFormat(movie: HomepageMovie): Movie {
+  /*
+   * THE RUNTIME.
+   *
+   * A missing runtime is not "0min" and not "N/A" — it is unknown, and the
+   * element is left out entirely. This is the same rule the cinema page
+   * uses; see src/app/cinema/page.tsx.
+   */
   const durationMins = movie.duration_minutes || 0;
+  const hasDuration = durationMins > 0;
   const hours = Math.floor(durationMins / 60);
   const mins = durationMins % 60;
-  const durationStr = hours > 0 ? `${hours}h ${mins}min` : durationMins > 0 ? `${mins}min` : 'N/A';
+  const durationStr = !hasDuration
+    ? ''
+    : hours > 0
+      ? `${hours}h ${mins}min`
+      : `${mins}min`;
 
   // Handle poster URL
   const getPosterUrl = (url: string | null): string => {
@@ -250,7 +271,15 @@ function convertToMovieFormat(movie: HomepageMovie): Movie {
     }) : undefined,
     isNowShowing: movie.is_now_showing,
     synopsis: movie.synopsis || '',
-    trailerUrl: movie.trailer_url || '',
+    /*
+     * THE TRAILER.
+     *
+     * `trailer_key` is the bare YouTube key the sync stores; `trailer_url` is
+     * the full watch URL. The key is preferred, because the key is what the
+     * sync always writes, and the launcher needs a value the shared
+     * predicate can turn into a playable video id.
+     */
+    trailerUrl: movie.trailer_key || movie.trailer_url || '',
     cast: movie.movie_cast || [],
     scrapedFrom: movie.scraped_from || [],
     bookingUrls: movie.booking_urls || undefined,
@@ -842,8 +871,15 @@ export default function HomePageClient({ initialMovies, initialStats, initialTod
                     priority={index < 2}
                     loading={index < 2 ? 'eager' : 'lazy'}
                   />
-                  {/* Mobile-friendly play trailer button - always visible on mobile */}
-                  {movie.trailer_url && (
+                  {/*
+                    The play buttons.
+
+                    Rendered only when the trailer can ACTUALLY PLAY — the
+                    same predicate the trailer modal uses. A truthy but
+                    unplayable trailer used to render a button that opened a
+                    black box reading "Trailer not available".
+                  */}
+                  {hasPlayableTrailer(movie.trailer_key || movie.trailer_url) && (
                     <button
                       onClick={(e) => {
                         e.stopPropagation();
@@ -865,7 +901,7 @@ export default function HomePageClient({ initialMovies, initialStats, initialTod
                         </div>
                       )}
                       {/* Play trailer button - hover only on desktop */}
-                      {movie.trailer_url && (
+                      {hasPlayableTrailer(movie.trailer_key || movie.trailer_url) && (
                         <button
                           onClick={(e) => {
                             e.stopPropagation();
