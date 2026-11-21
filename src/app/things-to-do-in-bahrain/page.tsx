@@ -12,8 +12,8 @@ import {
 
 // SEO Optimized Metadata
 export const metadata: Metadata = {
-  title: 'Things to Do in Bahrain 2026 — Ultimate Guide',
-  description: 'Discover the 50 best things to do in Bahrain in 2026! From historical sites and beaches to nightlife, restaurants, and family activities. Your complete Bahrain bucket list with insider tips.',
+  title: 'Things to Do in Bahrain: 50 Ideas for 2026',
+  description: 'Discover the 50 best things to do in Bahrain in 2026, from historic sites and beaches to nightlife, restaurants and family activities, with insider tips.',
   keywords: [
     'things to do in Bahrain', 'Bahrain activities', 'Bahrain attractions 2026',
     'what to do in Bahrain', 'Bahrain tourist places', 'Bahrain bucket list',

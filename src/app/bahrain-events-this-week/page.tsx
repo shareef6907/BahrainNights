@@ -12,7 +12,7 @@ import {
 // SEO Optimized Metadata
 export const metadata: Metadata = {
   title: 'Events in Bahrain This Week — What\'s On',
-  description: 'Discover what\'s happening in Bahrain this week! Live concerts, comedy shows, brunches, exhibitions, and more. Your weekly guide to events in the Kingdom of Bahrain.',
+  description: 'See what is happening in Bahrain this week, from live concerts and comedy shows to brunches and exhibitions, updated every week.',
   keywords: [
     'events Bahrain this week', 'what\'s on Bahrain', 'Bahrain events today',
     'things to do Bahrain this week', 'concerts Bahrain', 'comedy shows Bahrain',

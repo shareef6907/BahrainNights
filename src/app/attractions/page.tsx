@@ -113,8 +113,8 @@ function AttractionsLoadingSkeleton() {
 
 // Metadata for SEO
 export const metadata = {
-  title: 'Attractions & Experiences in Bahrain - Tours, Water Sports & More',
-  description: 'Discover the best attractions, tours, water sports, and experiences in Bahrain. Book pearl diving, boat tours, island trips, indoor activities, and more.',
+  title: 'Attractions & Experiences in Bahrain',
+  description: 'Discover the best attractions and experiences in Bahrain, from pearl diving and boat trips to water sports and indoor activities.',
   keywords: ['Bahrain attractions', 'things to do in Bahrain', 'Bahrain tours', 'water sports Bahrain', 'pearl diving Bahrain', 'boat tours Bahrain', 'indoor activities Bahrain'],
   openGraph: {
     title: 'Attractions & Experiences in Bahrain',

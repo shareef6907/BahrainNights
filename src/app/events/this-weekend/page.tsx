@@ -11,11 +11,11 @@ import BreadcrumbSchema from '@/components/SEO/BreadcrumbSchema';
 import { parseDate, toISODateString, BAHRAIN_TIMEZONE } from '@/lib/utils/date';
 
 export const metadata: Metadata = {
-  title: 'Events in Bahrain This Weekend | What\'s On Friday & Saturday',
-  description: 'Find events happening in Bahrain this weekend! Discover parties, concerts, brunches, movies, and activities. Your complete guide to what\'s on in Bahrain this Friday & Saturday.',
+  title: 'Events in Bahrain This Weekend | What\'s On',
+  description: 'Find what is on in Bahrain this weekend, from parties and concerts to brunches, movies and family activities, with Friday and Saturday listings.',
   keywords: 'events in Bahrain this weekend, what to do in Bahrain this weekend, Bahrain weekend events, Bahrain Friday events, things to do Bahrain weekend, weekend activities Bahrain',
   openGraph: {
-    title: 'Events in Bahrain This Weekend | What\'s On Friday & Saturday',
+    title: 'Events in Bahrain This Weekend | What\'s On',
     description: 'Your guide to events happening in Bahrain this weekend - parties, concerts, brunches, and more.',
     type: 'website',
     locale: 'en_US',

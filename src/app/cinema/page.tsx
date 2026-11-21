@@ -475,7 +475,7 @@ export default async function CinemaPage() {
 
 // Metadata for SEO
 export const metadata = {
-  title: 'Cinema in Bahrain - Movies Now Showing & Coming Soon | VOX & Cineco',
+  title: 'Cinema in Bahrain | Movies, VOX & Cineco',
   description: 'Find movies now showing at VOX Cinemas and Cineco Bahrain. Check what\'s playing, watch trailers, and book tickets online.',
   keywords: ['cinema in Bahrain', 'movies in Bahrain', 'Bahrain cinema', 'now showing Bahrain', 'VOX Bahrain', 'Cineco Bahrain'],
   openGraph: {

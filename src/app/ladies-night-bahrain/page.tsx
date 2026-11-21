@@ -7,8 +7,8 @@ import {
 
 // SEO Optimized Metadata
 export const metadata: Metadata = {
-  title: 'Ladies Night Bahrain — Best Deals This Week 2026',
-  description: 'Complete guide to Ladies Night in Bahrain 2026. Free drinks, free entry, and best deals every day of the week. Updated weekly with the latest offers from top venues.',
+  title: 'Ladies Night Bahrain 2026 | Best Deals',
+  description: 'A complete guide to ladies night in Bahrain in 2026, with free drinks, free entry and the best venue deals, updated every week.',
   keywords: [
     'ladies night Bahrain', 'ladies night Manama', 'free drinks Bahrain',
     'ladies night deals Bahrain', 'Tuesday ladies night', 'Wednesday ladies night',

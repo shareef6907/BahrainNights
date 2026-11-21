@@ -10,8 +10,8 @@ import {
 
 // SEO Optimized Metadata
 export const metadata: Metadata = {
-  title: 'Best Cafes in Bahrain 2026 — Coffee Shops & Study Spots',
-  description: 'Discover the best cafes in Bahrain for 2026! From specialty coffee and study-friendly spots to Instagram-worthy cafes. Complete guide with WiFi info, opening hours, and reviews.',
+  title: 'Best Cafes in Bahrain | Coffee & Study Spots',
+  description: 'Discover the best cafes in Bahrain in 2026, from specialty coffee and study-friendly spots to photogenic venues, with opening hours and WiFi details.',
   keywords: [
     'best cafes Bahrain', 'coffee shops Bahrain', 'study cafes Bahrain',
     'specialty coffee Bahrain', 'cafes with wifi Bahrain', 'work cafes Bahrain',
