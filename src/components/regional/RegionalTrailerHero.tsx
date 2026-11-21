@@ -79,7 +79,7 @@ export default function RegionalTrailerHero({ movies = [], onMovieClick, onBookC
             videoId={videoId}
             poster={backdropUrl}
             title={current?.title ? `${current.title} trailer` : 'Trailer'}
-            activation="click"
+            activation="viewport"
             priority
             playButtonPlacement="topRight"
             aspectRatio={null}
