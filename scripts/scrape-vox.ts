@@ -7,6 +7,11 @@
 
 import * as cheerio from 'cheerio';
 import { cleanTitle } from '../src/lib/cinema/title-clean';
+import {
+  fetchHtml,
+  parseVoxFilmDetails,
+  type FilmDetails,
+} from '../src/lib/scrapers/film-details';
 
 const VOX_URLS = {
   nowShowing: 'https://bhr.voxcinemas.com/movies/whatson',
@@ -32,6 +37,32 @@ export interface ScrapedVoxMovie {
   slug: string;
   /** The absolute per-film URL. */
   url: string;
+
+  /*
+   * THE FIELDS THE SYNC NEEDS AND WAS NOT GETTING.
+   *
+   * The scraper used to return only a title, a slug and a URL. The sync then
+   * looked up the film on TMDB, and when TMDB did not know it — which is most
+   * of the local Indian, Telugu and Malayalam films, and every live viewing —
+   * the row landed with no poster, no runtime and no trailer. Those rows are
+   * the "BAHRAIN NIGHTS" placeholder cards.
+   *
+   * VOX publishes all of it, on the film's own page. These are read from the
+   * cinema, never guessed.
+   */
+
+  /** VOX's own poster for this film. */
+  posterUrl?: string;
+  /** The YouTube key of the trailer VOX publishes for this film. */
+  trailerKey?: string;
+  /** The runtime in minutes, from VOX's own metadata. */
+  durationMinutes?: number;
+  /** VOX's own synopsis. */
+  synopsis?: string;
+  /** The language VOX lists the film in. */
+  language?: string;
+  /** The certification VOX lists (PG15, 18TC, ...). */
+  certification?: string;
 }
 
 interface ScrapeResult {
@@ -119,16 +150,108 @@ async function scrapePage(url: string): Promise<ScrapedVoxMovie[]> {
       if (seen.has(key)) return;
       seen.add(key);
 
+      /*
+       * The poster, straight off the listing card.
+       *
+       * VOX renders each film as an <article> containing the film's own
+       * <img>. The `src` is already an absolute URL on assets.voxcinemas.com.
+       * Before this, the poster was never read here, so a film TMDB could not
+       * match had no poster at all and rendered as a placeholder card.
+       */
+      const posterSrc = $article.find('img').first().attr('src') || '';
+      const posterUrl = posterSrc.startsWith('http') ? posterSrc : undefined;
+
+      const cardText = $article.text().replace(/\s+/g, ' ');
+      const languageMatch = cardText.match(/Language:\s*([A-Za-z]+)/);
+      const certMatch = cardText.match(/\b(PG-?\d*|18\+?|15\+?|18TC|U|A|G|M)\b/);
+
       movies.push({
         title,
         slug,
         url: `${VOX_BASE}/movies/${slug}`,
+        posterUrl,
+        language: languageMatch ? languageMatch[1] : undefined,
+        certification: certMatch ? certMatch[1] : undefined,
       });
     });
 
     console.log(`  Found ${movies.length} films`);
     return movies;
   } catch (e) { console.log(`  ❌ ${e}`); return []; }
+}
+
+/**
+ * Fill in the details only the film's OWN page carries.
+ *
+ * The listing page gives the poster, the title and the slug. The trailer, the
+ * runtime, the synopsis and the language live on the per-film page, which VOX
+ * publishes a schema.org Movie JSON-LD block for.
+ *
+ * This is what turns a film TMDB has never heard of into a real card instead
+ * of a placeholder: the poster comes from the listing, and the trailer,
+ * runtime and synopsis come from here.
+ *
+ * The pages are fetched CONCURRENTLY and with a small delay, because there
+ * are 20-30 films per listing and a serial fetch of 30 pages takes minutes.
+ */
+async function enrichWithFilmDetails(
+  movies: ScrapedVoxMovie[],
+  label: string
+): Promise<ScrapedVoxMovie[]> {
+  const CONCURRENCY = 6;
+  const results: ScrapedVoxMovie[] = [];
+  let enriched = 0;
+  let failed = 0;
+
+  const queue = [...movies];
+
+  const worker = async (): Promise<void> => {
+    for (;;) {
+      const movie = queue.shift();
+      if (!movie) return;
+      const html = await fetchHtml(movie.url, 25000);
+      if (!html) {
+        failed++;
+        // A film we could not open still keeps its listing poster.
+        results.push(movie);
+        continue;
+      }
+      const details: FilmDetails = parseVoxFilmDetails(html, VOX_BASE);
+      const merged: ScrapedVoxMovie = {
+        ...movie,
+        posterUrl: movie.posterUrl || details.posterUrl,
+        trailerKey: details.trailerKey,
+        durationMinutes: details.durationMinutes,
+        synopsis: details.synopsis,
+        language: movie.language || details.language,
+        certification: movie.certification || details.certification,
+      };
+      if (details.trailerKey || details.durationMinutes || details.synopsis) {
+        enriched++;
+      }
+      results.push(merged);
+    }
+  };
+
+  await Promise.all(
+    Array.from({ length: Math.min(CONCURRENCY, movies.length) }, () => worker())
+  );
+
+  // Keep the listing order stable.
+  const order = new Map(movies.map((m, i) => [m.slug, i]));
+  results.sort(
+    (a, b) => (order.get(a.slug) ?? 0) - (order.get(b.slug) ?? 0)
+  );
+
+  const withPoster = results.filter((m) => m.posterUrl).length;
+  const withTrailer = results.filter((m) => m.trailerKey).length;
+  const withRuntime = results.filter((m) => m.durationMinutes).length;
+  console.log(
+    `  ${label}: ${results.length} films — poster ${withPoster}, ` +
+      `trailer ${withTrailer}, runtime ${withRuntime} ` +
+      `(detail pages failed: ${failed})`
+  );
+  return results;
 }
 
 async function scrapeVOX(): Promise<ScrapeResult> {
@@ -150,6 +273,12 @@ async function scrapeVOX(): Promise<ScrapeResult> {
   // listings). What must collapse is the same page appearing in both lists.
   const nowSet = new Set(result.nowShowing.map(m => m.slug));
   result.comingSoon = result.comingSoon.filter(m => !nowSet.has(m.slug));
+
+  // Now that the lists are settled, open each film's own page for the
+  // trailer, the runtime and the synopsis.
+  console.log('\n🔎 Fetching per-film details...');
+  result.nowShowing = await enrichWithFilmDetails(result.nowShowing, 'Now Showing');
+  result.comingSoon = await enrichWithFilmDetails(result.comingSoon, 'Coming Soon');
 
   console.log('\n📊 VOX SUMMARY');
   console.log(`Now Showing (${result.nowShowing.length}):`);

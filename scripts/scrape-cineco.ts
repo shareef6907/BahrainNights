@@ -9,6 +9,7 @@
 
 import { chromium, type Browser, type Page } from 'playwright';
 import { cleanTitle } from '../src/lib/cinema/title-clean';
+import { parseCinecoCardDetails } from '../src/lib/scrapers/film-details';
 
 const CINE_CO_URLS = {
   nowShowing: 'https://bahrain.cineco.net/now-showing/',
@@ -34,6 +35,20 @@ export interface ScrapedCinecoMovie {
   slug: string;
   title: string;
   trailerKey?: string;
+
+  /*
+   * THE FIELDS THE SYNC NEEDS AND WAS NOT GETTING.
+   *
+   * Cineco renders each film as a `.movie-poster` div whose POSTER IS A CSS
+   * BACKGROUND IMAGE, next to a "Book Now" button pointing at its ticketing
+   * partner. The scraper read the title and the trailer but never the poster,
+   * so a film TMDB could not match landed with no artwork at all and
+   * rendered as a placeholder card.
+   */
+  /** Cineco's own poster for this film. */
+  posterUrl?: string;
+  /** Cineco's own "Book Now" link for this film. */
+  bookingUrl?: string;
   /** True when the title came from a real /amy_movie/ permalink. */
   trusted?: boolean;
   /**
@@ -157,25 +172,46 @@ async function scrapePage(page: Page, url: string): Promise<ScrapedCinecoMovie[]
       )
       .catch(() => [] as { slug: string; text: string }[]);
 
-    // The trailer the cinema publishes for each film. It lives on the movie
-    // card, as a Fancybox link to a YouTube embed.
-    const trailerBySlug = await page
-      .$$eval('.movie-details, .movie-card, [class*="movie"]', (cards) => {
-        const found: Record<string, string> = {};
-        for (const card of cards) {
-          const link = card.querySelector('a[href*="youtube.com/embed"]');
-          const titleLink = card.querySelector('a[href*="/amy_movie/"]');
-          if (!link || !titleLink) continue;
-          const href = titleLink.getAttribute('href') || '';
-          const slug = (href.match(/\/amy_movie\/([^/?#]+)\/?/) || [])[1] || '';
-          if (!slug || found[slug]) continue;
-          const embed = link.getAttribute('href') || '';
-          const id = (embed.match(/embed\/([A-Za-z0-9_-]{11})/) || [])[1] || '';
-          if (id) found[slug] = id;
+    /*
+     * The trailer AND the poster the cinema publishes for each film.
+     *
+     * Both live on the movie card: the trailer as a Fancybox link to a
+     * YouTube embed, the poster as a CSS background-image on the
+     * `.movie-poster` div. The card's OUTER HTML is captured so the shared
+     * parser in src/lib/scrapers/film-details.ts can read them — one
+     * implementation, used by both cinemas.
+     */
+    /*
+     * EVERY card for a slug, not just the first one.
+     *
+     * Cineco renders each film TWICE: once as a poster tile (which carries the
+     * poster and the permalink) and once as a text row (which carries the
+     * trailer and the Book Now button). Neither card alone has everything, so
+     * taking the first one per slug yields a film with a poster but no
+     * trailer, or a trailer but no poster.
+     *
+     * All the cards for a slug are therefore collected and parsed together.
+     */
+    const cardsBySlug = await page
+      .$$eval(
+        '.customized-movie-poster, .movie-details, .movie-card, [class*="movie-poster"]',
+        (cards) => {
+          const found: Record<string, string[]> = {};
+          for (const card of cards) {
+            // The permalink is on an anchor in the text row, and on the tile's
+            // own `data-href` in the coming-soon listing. Both are read.
+            const titleLink = card.querySelector('a[href*="/amy_movie/"]');
+            const dataHref = card.getAttribute('data-href') || '';
+            const href = titleLink?.getAttribute('href') || dataHref;
+            const slug = (href.match(/\/amy_movie\/([^/?#]+)\/?/) || [])[1] || '';
+            if (!slug) continue;
+            if (!found[slug]) found[slug] = [];
+            found[slug].push(card.outerHTML);
+          }
+          return found;
         }
-        return found;
-      })
-      .catch((): Record<string, string> => ({}));
+      )
+      .catch((): Record<string, string[]> => ({}));
 
     const bySlug = new Map<string, { title: string; fromText: boolean }>();
     for (const { slug, text } of linked) {
@@ -211,13 +247,30 @@ async function scrapePage(page: Page, url: string): Promise<ScrapedCinecoMovie[]
     // "Amy Movie" WordPress theme and every film lives at
     // `/amy_movie/<slug>/`, so the slug IS the address. It is never
     // computed from the title.
-    const resolved = Array.from(bySlug.entries()).map(([slug, entry]) => ({
-      slug,
-      title: entry.title || slug.replace(/-/g, ' '),
-      trailerKey: trailerBySlug[slug] || undefined,
-      trusted: entry.fromText,
-      url: slug ? `${CINECO_BASE}/amy_movie/${slug}/` : undefined,
-    }));
+    const resolved = Array.from(bySlug.entries()).map(([slug, entry]) => {
+      // Merge every card for this slug: the poster comes from the tile, the
+      // trailer and the booking link from the text row.
+      const cardDetails = { posterUrl: undefined as string | undefined,
+        trailerKey: undefined as string | undefined,
+        bookingUrl: undefined as string | undefined,
+        url: undefined as string | undefined };
+      for (const cardHtml of cardsBySlug[slug] || []) {
+        const d = parseCinecoCardDetails(cardHtml, CINECO_BASE);
+        cardDetails.posterUrl = cardDetails.posterUrl || d.posterUrl;
+        cardDetails.trailerKey = cardDetails.trailerKey || d.trailerKey;
+        cardDetails.bookingUrl = cardDetails.bookingUrl || d.bookingUrl;
+        cardDetails.url = cardDetails.url || d.url;
+      }
+      return {
+        slug,
+        title: entry.title || slug.replace(/-/g, ' '),
+        trailerKey: cardDetails.trailerKey,
+        posterUrl: cardDetails.posterUrl,
+        bookingUrl: cardDetails.bookingUrl,
+        trusted: entry.fromText,
+        url: slug ? `${CINECO_BASE}/amy_movie/${slug}/` : undefined,
+      };
+    });
 
     if (resolved.length) {
       movies = resolved;

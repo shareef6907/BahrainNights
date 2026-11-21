@@ -283,14 +283,25 @@ async function findTrailer(
   filmTitles?: string[]
 ): Promise<{ key: string; source: string } | null> {
   // ---- Source 1: the cinema's own trailer link ------------------------
+  //
+  // The cinema's trailer may arrive as a bare YouTube key (which is what the
+  // scrapers read off the page) or as a full URL. Both are accepted, and
+  // either way the key goes through the SAME oEmbed check every other
+  // trailer goes through — an unverified trailer is never stored.
   if (cinemaTrailerUrl) {
-    const match = cinemaTrailerUrl.match(/[?&]v=([A-Za-z0-9_-]{11})/);
-    if (match) {
-      const oembed = await fetchOEmbed(match[1]);
+    const keyMatch =
+      cinemaTrailerUrl.match(/[?&]v=([A-Za-z0-9_-]{11})/) ||
+      (/^[A-Za-z0-9_-]{11}$/.test(cinemaTrailerUrl)
+        ? [cinemaTrailerUrl, cinemaTrailerUrl]
+        : null);
+    if (keyMatch) {
+      const key = keyMatch[1];
+      const oembed = await fetchOEmbed(key);
       if (oembed.status === 200) {
-        console.log(`  🎬 Using the cinema's own trailer (${match[1]})`);
-        return { key: match[1], source: 'cinema' };
+        console.log(`  🎬 Using the cinema's own trailer (${key})`);
+        return { key, source: 'cinema' };
       }
+      console.log(`  ⚠️ The cinema's trailer did not verify (${key}) - ignoring it.`);
     }
   }
 
@@ -484,7 +495,12 @@ async function upsertMovie(
   cinemaPosterUrl?: string,
   source: string = 'vox',
   cinemaTrailerUrl?: string,
-  bookingUrl?: string
+  bookingUrl?: string,
+  cinemaFields?: {
+    durationMinutes?: number;
+    synopsis?: string;
+    language?: string;
+  }
 ): Promise<string | null> {
   try {
     // Prefer TMDB's own title. Fall back to the scraped title only when TMDB
@@ -513,10 +529,21 @@ async function upsertMovie(
       );
     }
 
-    // Use cinema site poster if TMDB didn't have a valid match
-    const posterUrl = cinemaPosterUrl || (tmdbData?.poster_path
+    /*
+     * THE POSTER, in the order the brief requires:
+     *
+     *   1. TMDB's poster   — highest quality, and it is the one that matches
+     *                         the film the audience already knows.
+     *   2. The cinema's own — which is what every film has, including the
+     *                         local-language and live-viewing films TMDB has
+     *                         never heard of.
+     *
+     * Before this, the cinema's poster won, which put a low-resolution
+     * listing image on films that had a proper TMDB poster.
+     */
+    const posterUrl = (tmdbData?.poster_path
       ? `https://image.tmdb.org/t/p/w500${tmdbData.poster_path}`
-      : null);
+      : null) || cinemaPosterUrl || null;
     const backdropUrl = tmdbData?.backdrop_path
       ? `https://image.tmdb.org/t/p/original${tmdbData.backdrop_path}`
       : tmdbData?.poster_path
@@ -552,12 +579,9 @@ async function upsertMovie(
       payload.tmdb_id = tmdbId;
       if (posterUrl) payload.poster_url = posterUrl;
       if (backdropUrl) payload.backdrop_url = backdropUrl;
-      payload.duration_minutes = tmdbData.runtime || null;
       payload.genre = genres;
       payload.rating = tmdbData.release_dates?.results?.[0]?.release_dates?.[0]?.certification || null;
-      payload.synopsis = tmdbData.overview || null;
       payload.release_date = tmdbData.release_date || null;
-      payload.language = tmdbData.original_language || null;
       payload.director = tmdbData.credits?.crew?.find((c: any) => c.job === 'Director')?.name || null;
       payload.movie_cast = tmdbData.credits?.cast?.slice(0, 5).map((c: any) => c.name) || null;
       payload.tmdb_rating = tmdbData.vote_average || null;
@@ -567,14 +591,61 @@ async function upsertMovie(
       payload.trailer_key = trailer?.key ?? null;
       payload.trailer_url = trailer ? `https://www.youtube.com/watch?v=${trailer.key}` : null;
       payload.genres = genres;
-      payload.overview = tmdbData.overview || null;
       payload.poster_path = tmdbData.poster_path;
       payload.backdrop_path = tmdbData.backdrop_path;
-      payload.runtime = tmdbData.runtime;
       payload.popularity = tmdbData.popularity || 0;
-    } else if (cinemaPosterUrl) {
-      // No TMDB data, but the cinema published artwork for the film.
-      payload.poster_url = cinemaPosterUrl;
+
+      /*
+       * The runtime, the synopsis and the language.
+       *
+       * TMDB's value is preferred, but TMDB has no runtime for a lot of the
+       * films that actually screen in Bahrain. Writing `null` there blanked
+       * the runtime for those films and they rendered as "0min" on the card.
+       * The cinema publishes the real runtime, so it is used when TMDB is
+       * silent.
+       */
+      const durationMinutes = tmdbData.runtime || cinemaFields?.durationMinutes;
+      if (durationMinutes) {
+        payload.duration_minutes = durationMinutes;
+        payload.runtime = durationMinutes;
+      }
+      const synopsis = tmdbData.overview || cinemaFields?.synopsis;
+      if (synopsis) {
+        payload.synopsis = synopsis;
+        payload.overview = synopsis;
+      }
+      const language = tmdbData.original_language || cinemaFields?.language;
+      if (language) payload.language = language;
+    } else {
+      /*
+       * NO TMDB MATCH.
+       *
+       * The film is screening, so it is written — but it is written with what
+       * the CINEMA published: the poster, the runtime, the synopsis, the
+       * language and the trailer. Before this, such a film was written with a
+       * bare title and nothing else, which is what produced the "BAHRAIN
+       * NIGHTS" placeholder cards.
+       */
+      if (cinemaPosterUrl) payload.poster_url = cinemaPosterUrl;
+      if (cinemaFields?.durationMinutes) {
+        payload.duration_minutes = cinemaFields.durationMinutes;
+        payload.runtime = cinemaFields.durationMinutes;
+      }
+      if (cinemaFields?.synopsis) {
+        payload.synopsis = cinemaFields.synopsis;
+        payload.overview = cinemaFields.synopsis;
+      }
+      if (cinemaFields?.language) payload.language = cinemaFields.language;
+      // The cinema's own trailer is authoritative for the film it lists, but
+      // it is only stored after the same oEmbed check every other trailer
+      // goes through, so an unverified trailer is never stored.
+      if (!trailer && cinemaTrailerUrl) {
+        const oembed = await fetchOEmbed(cinemaTrailerUrl);
+        if (oembed.status === 200) {
+          payload.trailer_key = cinemaTrailerUrl;
+          payload.trailer_url = `https://www.youtube.com/watch?v=${cinemaTrailerUrl}`;
+        }
+      }
     }
 
     // Merge the source list rather than overwriting it: a film showing at
@@ -670,26 +741,66 @@ async function upsertMovie(
  *   - tmdb_id has a UNIQUE index, and the film may already have a sibling row
  *     carrying that id, so writing it would fail with a duplicate key.
  */
+/**
+ * Give a film that has no poster one.
+ *
+ * TMDB first, then the cinema's own artwork.
+ *
+ * The cinema fallback is the important one. TMDB has never heard of most of
+ * the local-language films and the live viewings, so a TMDB-only backfill
+ * left them posterless — and a posterless film rendered as a "BAHRAIN NIGHTS"
+ * placeholder card. Every film the cinema lists has a poster on the
+ * cinema's own page, so the poster is always available there.
+ */
 async function backfillPoster(
   movieId: string,
   title: string,
-  currentYear: number
+  currentYear: number,
+  cinemaPosterUrl?: string,
+  cinemaFields?: {
+    durationMinutes?: number;
+    synopsis?: string;
+    language?: string;
+    trailerKey?: string;
+  }
 ): Promise<boolean> {
   try {
     const tmdbData = await searchTMDB(title, currentYear);
-    if (!tmdbData) return false;
 
-    const posterUrl = tmdbData.poster_path
+    const posterUrl = (tmdbData?.poster_path
       ? `https://image.tmdb.org/t/p/w500${tmdbData.poster_path}`
-      : null;
+      : null) || cinemaPosterUrl || null;
     if (!posterUrl) return false;
 
     const update: Record<string, unknown> = {
       poster_url: posterUrl,
-      poster_path: tmdbData.poster_path,
       updated_at: new Date().toISOString(),
     };
-    if (tmdbData.vote_average) update.tmdb_rating = tmdbData.vote_average;
+    if (tmdbData?.poster_path) update.poster_path = tmdbData.poster_path;
+    if (tmdbData?.vote_average) update.tmdb_rating = tmdbData.vote_average;
+
+    // The runtime and the synopsis, when TMDB has none but the cinema does.
+    const durationMinutes = tmdbData?.runtime || cinemaFields?.durationMinutes;
+    if (durationMinutes) {
+      update.duration_minutes = durationMinutes;
+      update.runtime = durationMinutes;
+    }
+    const synopsis = tmdbData?.overview || cinemaFields?.synopsis;
+    if (synopsis) {
+      update.synopsis = synopsis;
+      update.overview = synopsis;
+    }
+    const language = tmdbData?.original_language || cinemaFields?.language;
+    if (language) update.language = language;
+
+    // The cinema's trailer, but only after it verifies.
+    if (cinemaFields?.trailerKey) {
+      const oembed = await fetchOEmbed(cinemaFields.trailerKey);
+      if (oembed.status === 200) {
+        update.trailer_key = cinemaFields.trailerKey;
+        update.trailer_url = `https://www.youtube.com/watch?v=${cinemaFields.trailerKey}`;
+      }
+    }
 
     const { error } = await supabase
       .from('movies')
@@ -701,7 +812,8 @@ async function backfillPoster(
       return false;
     }
 
-    console.log(`  🖼️  Backfilled poster from TMDB: ${title}`);
+    const from = tmdbData?.poster_path ? 'TMDB' : 'the cinema';
+    console.log(`  🖼️  Backfilled poster from ${from}: ${title}`);
     return true;
   } catch (error) {
     console.error(`  ❌ Error backfilling poster for "${title}":`, error instanceof Error ? error.message : error);
@@ -840,11 +952,6 @@ async function syncCinema() {
     // the orphan check read, so the whole source breakdown was wrong.
     const sourceByTitle = new Map<string, Set<string>>();
 
-    // The trailer the cinema itself publishes for each film, keyed by the
-    // same normalised title. This is authoritative: it is the trailer the
-    // cinema is actually showing, so it never needs a search.
-    const cinemaTrailerByTitle = new Map<string, string>();
-
     // The film's OWN per-film page at each cinema, keyed by normalised title
     // then by cinema id.
     //
@@ -892,13 +999,63 @@ async function syncCinema() {
       addBookingUrl(m.title, 'cineco', m.url);
     }
 
-    for (const movie of [...cinecoResult.nowShowing, ...cinecoResult.comingSoon]) {
-      if (!movie.trailerKey) continue;
-      const key = normalizeTitle(movie.title);
-      if (key && !cinemaTrailerByTitle.has(key)) {
-        cinemaTrailerByTitle.set(key, movie.trailerKey);
+    /*
+     * The posters, trailers and runtimes the cinemas publish.
+     *
+     * These maps are the whole point of this pass. Before, the sync only ever
+     * read the cinema's TRAILER, and only from Cineco — the VOX scraper
+     * returned a title and a URL and nothing else. A film TMDB could not match
+     * therefore landed with no poster, no runtime and no trailer, and rendered
+     * as a "BAHRAIN NIGHTS" placeholder card.
+     *
+     * Both cinemas now publish a poster for every film they list, so every
+     * film in these maps has artwork.
+     */
+    const cinemaPosterByTitle = new Map<string, string>();
+    const cinemaTrailerByTitle = new Map<string, string>();
+    const cinemaDurationByTitle = new Map<string, number>();
+    const cinemaSynopsisByTitle = new Map<string, string>();
+    const cinemaLanguageByTitle = new Map<string, string>();
+
+    const recordCinemaFields = (movies: {
+      title: string;
+      posterUrl?: string;
+      trailerKey?: string;
+      durationMinutes?: number;
+      synopsis?: string;
+      language?: string;
+    }[]) => {
+      for (const movie of movies) {
+        const key = normalizeTitle(movie.title);
+        if (!key) continue;
+        if (movie.posterUrl && !cinemaPosterByTitle.has(key)) {
+          cinemaPosterByTitle.set(key, movie.posterUrl);
+        }
+        if (movie.trailerKey && !cinemaTrailerByTitle.has(key)) {
+          cinemaTrailerByTitle.set(key, movie.trailerKey);
+        }
+        if (movie.durationMinutes && !cinemaDurationByTitle.has(key)) {
+          cinemaDurationByTitle.set(key, movie.durationMinutes);
+        }
+        if (movie.synopsis && !cinemaSynopsisByTitle.has(key)) {
+          cinemaSynopsisByTitle.set(key, movie.synopsis);
+        }
+        if (movie.language && !cinemaLanguageByTitle.has(key)) {
+          cinemaLanguageByTitle.set(key, movie.language);
+        }
       }
-    }
+    };
+
+    recordCinemaFields(voxResult.nowShowing);
+    recordCinemaFields(voxResult.comingSoon);
+    recordCinemaFields(cinecoResult.nowShowing);
+    recordCinemaFields(cinecoResult.comingSoon);
+
+    console.log(
+      `  Cinema artwork: ${cinemaPosterByTitle.size} posters, ` +
+        `${cinemaTrailerByTitle.size} trailers, ` +
+        `${cinemaDurationByTitle.size} runtimes`
+    );
 
     // The title we keep for a group is the first spelling we saw for it.
     const labelByTitle = new Map<string, string>();
@@ -973,12 +1130,27 @@ async function syncCinema() {
           stats.updated++;
         }
 
-        // A film that is showing must never be invisible. If this row has no
-        // artwork, try to give it a real poster from TMDB. The rest fall back
-        // to the branded poster card on the page.
+        /*
+         * A film that is showing must never be invisible.
+         *
+         * If this row has no artwork, give it a real poster: TMDB's first,
+         * then the cinema's own. The cinema publishes a poster for EVERY film
+         * it lists, so this is the path that removes the placeholder cards.
+         */
         if (!existing.poster_url) {
           const currentYear = new Date().getFullYear();
-          await backfillPoster(existing.id, title, currentYear);
+          await backfillPoster(
+            existing.id,
+            title,
+            currentYear,
+            cinemaPosterByTitle.get(normalizeTitle(title)),
+            {
+              durationMinutes: cinemaDurationByTitle.get(normalizeTitle(title)),
+              synopsis: cinemaSynopsisByTitle.get(normalizeTitle(title)),
+              language: cinemaLanguageByTitle.get(normalizeTitle(title)),
+              trailerKey: cinemaTrailerByTitle.get(normalizeTitle(title)),
+            }
+          );
           await wait(300); // Rate limit
         }
       } else {
@@ -1018,10 +1190,15 @@ async function syncCinema() {
           title,
           tmdbData,
           true,
-          undefined,
+          cinemaPosterByTitle.get(normalizeTitle(title)),
           sources[0],
           cinemaTrailerByTitle.get(normalizeTitle(title)),
-          urls[sources[0]]
+          urls[sources[0]],
+          {
+            durationMinutes: cinemaDurationByTitle.get(normalizeTitle(title)),
+            synopsis: cinemaSynopsisByTitle.get(normalizeTitle(title)),
+            language: cinemaLanguageByTitle.get(normalizeTitle(title)),
+          }
         );
         if (inserted) {
           stats.added++;
@@ -1054,7 +1231,18 @@ async function syncCinema() {
 
         if (!existing.poster_url) {
           const currentYear = new Date().getFullYear();
-          await backfillPoster(existing.id, title, currentYear);
+          await backfillPoster(
+            existing.id,
+            title,
+            currentYear,
+            cinemaPosterByTitle.get(normalizeTitle(title)),
+            {
+              durationMinutes: cinemaDurationByTitle.get(normalizeTitle(title)),
+              synopsis: cinemaSynopsisByTitle.get(normalizeTitle(title)),
+              language: cinemaLanguageByTitle.get(normalizeTitle(title)),
+              trailerKey: cinemaTrailerByTitle.get(normalizeTitle(title)),
+            }
+          );
           await wait(300); // Rate limit
         }
       } else {
@@ -1084,10 +1272,15 @@ async function syncCinema() {
           title,
           tmdbData,
           false,
-          undefined,
+          cinemaPosterByTitle.get(normalizeTitle(title)),
           sources[0],
           cinemaTrailerByTitle.get(normalizeTitle(title)),
-          urls[sources[0]]
+          urls[sources[0]],
+          {
+            durationMinutes: cinemaDurationByTitle.get(normalizeTitle(title)),
+            synopsis: cinemaSynopsisByTitle.get(normalizeTitle(title)),
+            language: cinemaLanguageByTitle.get(normalizeTitle(title)),
+          }
         );
         if (inserted) {
           stats.added++;
