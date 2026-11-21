@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Play, Star, Clock, ChevronLeft, ChevronRight } from 'lucide-react';
+import { hasPlayableTrailer } from '@/lib/cinema/trailer';
 import Image from 'next/image';
 import { Movie } from './MovieCard';
 
@@ -150,7 +151,7 @@ export default function FeaturedMovie({ movies, onTrailerClick, onMovieClick }: 
                 {/* Buttons */}
                 <div className="flex flex-wrap gap-3">
                   {/* Watch Trailer Button - Only show if trailer exists */}
-                  {movie.trailerUrl && (
+                  {hasPlayableTrailer(movie.trailerUrl) && (
                     <motion.button
                       onClick={() => onTrailerClick(movie)}
                       className="flex items-center gap-2 px-6 py-3 bg-white/10 backdrop-blur-sm border border-white/20 rounded-xl text-white font-medium hover:bg-white/20 transition-colors"

@@ -6,6 +6,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { Play, ChevronLeft, ChevronRight, Ticket, Info } from 'lucide-react';
 import { Movie } from './MovieCard';
 import TrailerPlayer from './TrailerPlayer';
+import { getYouTubeVideoId, hasPlayableTrailer } from '@/lib/cinema/trailer';
 
 interface NetflixHeroProps {
   movies: Movie[];
@@ -43,18 +44,15 @@ const MIN_DWELL_MS = 20_000;
  */
 const TICK_INTERVAL_MS = 500;
 
+/*
+ * THE VIDEO ID — one shared implementation.
+ *
+ * See src/lib/cinema/trailer.ts. The local copy that used to live here
+ * accepted a bare YouTube key; TrailerModal's copy did not, which is how a
+ * visitor got a black box reading "Trailer not available".
+ */
 function getYouTubeId(url: string | undefined): string | null {
-  if (!url) return null;
-  if (/^[a-zA-Z0-9_-]{11}$/.test(url)) return url;
-  const patterns = [
-    /(?:youtube\.com\/watch\?v=|youtu\.be\/|youtube\.com\/embed\/)([a-zA-Z0-9_-]{11})/,
-    /youtube\.com\/v\/([a-zA-Z0-9_-]{11})/,
-  ];
-  for (const pattern of patterns) {
-    const match = url.match(pattern);
-    if (match) return match[1];
-  }
-  return null;
+  return getYouTubeVideoId(url);
 }
 
 export default function NetflixHero({ movies, onMovieClick, onBookClick, onTrailerClick }: NetflixHeroProps) {

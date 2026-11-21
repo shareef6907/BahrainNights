@@ -1,3 +1,4 @@
+import { hasPlayableTrailer } from '@/lib/cinema/trailer';
 import { OG_IMAGE } from '@/lib/og';
 import { Metadata } from 'next';
 import { getAdminClient } from '@/lib/supabase/server';
@@ -270,7 +271,14 @@ async function getRegionalTrailerFilms(): Promise<RegionalTrailerFilm[]> {
           backdrop_url: row.backdrop_url ?? undefined,
         } satisfies RegionalTrailerFilm;
       })
-      .filter((f) => !!f.trailer_key);
+      /*
+       * Only a film whose trailer can ACTUALLY PLAY enters the rotation.
+       *
+       * The old check was "is trailer_key set", which is not the same thing:
+       * a value that is not a playable YouTube id passes that check and then
+       * renders the hero as a still photo with a dead play button.
+       */
+      .filter((f) => hasPlayableTrailer(f.trailer_key));
 
     return films;
   } catch (err) {

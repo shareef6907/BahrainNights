@@ -4,6 +4,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { X } from 'lucide-react';
 import { useEffect, useRef, useState } from 'react';
 import { loadYouTubeIframeApi } from '@/lib/utils/youtube-iframe-api';
+import { getYouTubeVideoId } from '@/lib/cinema/trailer';
 import type { YTPlayerInstance } from '@/types/youtube';
 
 interface TrailerModalProps {
@@ -22,13 +23,19 @@ export default function TrailerModal({ isOpen, onClose, title, trailerUrl }: Tra
   const playerInstanceRef = useRef<YTPlayerInstance | null>(null);
   const [isAPIReady, setIsAPIReady] = useState(false);
 
-  // Extract YouTube video ID from URL
-  const getYouTubeId = (url: string) => {
-    const match = url.match(/(?:youtu\.be\/|youtube\.com(?:\/embed\/|\/v\/|\/watch\?v=|\/watch\?.+&v=))([\w-]{11})/);
-    return match ? match[1] : null;
-  };
-
-  const videoId = getYouTubeId(trailerUrl);
+  /*
+   * THE VIDEO ID.
+   *
+   * This used to be a LOCAL implementation that only matched a full URL, while
+   * NetflixHero's version also accepted a bare 11-character YouTube key. The
+   * database stores the trailer as a bare key, so the hero believed it had a
+   * video and this modal did not — and the visitor got a black box reading
+   * "Trailer not available".
+   *
+   * There is now ONE implementation, shared by every launcher and by this
+   * modal: src/lib/cinema/trailer.ts.
+   */
+  const videoId = getYouTubeVideoId(trailerUrl);
 
   // Load YouTube API (nocookie first, canonical host fallback).
   // Only when the modal is actually opened, so the homepage never pays for

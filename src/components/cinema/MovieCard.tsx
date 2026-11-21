@@ -2,8 +2,9 @@
 
 import React from 'react';
 import { motion } from 'framer-motion';
-import { Play, Star, Clock, Film } from 'lucide-react';
+import { Play, Star, Clock } from 'lucide-react';
 import Image from 'next/image';
+import { hasPlayableTrailer } from '@/lib/cinema/trailer';
 
 export interface Movie {
   id: string;
@@ -19,6 +20,13 @@ export interface Movie {
   backdrop: string;
   rating: number;
   genres: string[];
+  /**
+   * The runtime, e.g. "2h 30min".
+   *
+   * EMPTY when the runtime is unknown. It is never "0min": a runtime of zero
+   * minutes is not a runtime, it is missing information, and printing "0min"
+   * on a card tells the visitor something false.
+   */
   duration: string;
   language: string;
   releaseDate?: string;
@@ -61,8 +69,22 @@ function MovieCard({ movie, index = 0, onMovieClick, onTrailerClick }: MovieCard
       onClick={() => onMovieClick(movie)}
     >
       <div className="relative aspect-[2/3] rounded-xl overflow-hidden bg-slate-800 shadow-lg group-hover:shadow-2xl group-hover:shadow-yellow-500/10 transition-all duration-300">
-        {/* Poster Image — or a branded fallback when the film has no artwork */}
-        {movie.hasPoster !== false && movie.poster ? (
+        {/*
+          THE POSTER.
+
+          There is no fallback card. Shareef's rule: "If there is no poster,
+          take it from the cinema website in Bahrain. If the movie doesn't
+          exist in Bahrain, don't show it. No poster, no cinema on
+          bahrainnights.com."
+
+          The poster now comes from the cinema's own listing for every film
+          it screens (see scripts/scrape-vox.ts and scripts/scrape-cineco.ts),
+          and a film that STILL has no poster is dropped from the page
+          entirely rather than rendered as a branded placeholder. The
+          placeholder grid is what visitors were seeing, and it read as a
+          broken site.
+        */}
+        {movie.poster ? (
           <Image
             src={movie.poster}
             alt={movie.title}
@@ -71,20 +93,7 @@ function MovieCard({ movie, index = 0, onMovieClick, onTrailerClick }: MovieCard
             sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 25vw"
             unoptimized
           />
-        ) : (
-          <div
-            className="absolute inset-0 flex flex-col items-center justify-center bg-gradient-to-br from-[#1c1c1c] via-[#141414] to-[#0a0a0a] px-4 text-center"
-            role="img"
-            aria-label={`${movie.title} — poster unavailable`}
-          >
-            <div className="flex h-14 w-14 items-center justify-center rounded-xl border border-[#d4a853]/40 bg-[#d4a853]/10 mb-3">
-              <Film className="h-6 w-6 text-[#d4a853]" />
-            </div>
-            <span className="text-[10px] font-semibold uppercase tracking-[0.25em] text-[#d4a853]/70">
-              Bahrain Nights
-            </span>
-          </div>
-        )}
+        ) : null}
 
         {/* Rating Badge — hidden when there is no rating.
             A rating of 0 means "unrated" (unreleased films have no TMDB score),
@@ -110,8 +119,15 @@ function MovieCard({ movie, index = 0, onMovieClick, onTrailerClick }: MovieCard
           )}
         </div>
 
-        {/* Mobile Play Button - Always visible on touch devices */}
-        {movie.trailerUrl && (
+        {/*
+          THE PLAY BUTTONS.
+
+          Rendered only when the film has a trailer that can ACTUALLY PLAY —
+          the same predicate the modal uses to decide it has a video. A
+          truthy-but-unplayable trailer used to render a button that opened a
+          black box reading "Trailer not available".
+        */}
+        {hasPlayableTrailer(movie.trailerUrl) && (
           <button
             className="md:hidden absolute bottom-3 left-3 p-3 bg-yellow-400 rounded-full text-black shadow-lg active:scale-95 transition-transform z-10"
             onClick={(e) => {
@@ -126,8 +142,8 @@ function MovieCard({ movie, index = 0, onMovieClick, onTrailerClick }: MovieCard
 
         {/* Hover Overlay - Desktop only */}
         <div className="absolute inset-0 bg-gradient-to-t from-black via-black/50 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 hidden md:flex flex-col items-center justify-center gap-3">
-          {/* Play Trailer Button - Only show if trailer exists */}
-          {movie.trailerUrl && (
+          {/* Play Trailer Button - only when the trailer can play */}
+          {hasPlayableTrailer(movie.trailerUrl) && (
             <motion.button
               className="p-4 bg-yellow-400 rounded-full text-black shadow-lg"
               whileHover={{ scale: 1.1 }}
@@ -180,11 +196,18 @@ function MovieCard({ movie, index = 0, onMovieClick, onTrailerClick }: MovieCard
           ))}
         </div>
 
-        {/* Duration */}
-        <div className="flex items-center gap-1 text-sm text-gray-400">
-          <Clock className="w-3.5 h-3.5" />
-          <span>{movie.duration}</span>
-        </div>
+        {/*
+          THE RUNTIME.
+
+          Rendered only when there IS a runtime. A missing runtime is not
+          "0min" — it is unknown, and the element is left out entirely.
+        */}
+        {movie.duration ? (
+          <div className="flex items-center gap-1 text-sm text-gray-400">
+            <Clock className="w-3.5 h-3.5" />
+            <span>{movie.duration}</span>
+          </div>
+        ) : null}
       </div>
     </motion.div>
   );
