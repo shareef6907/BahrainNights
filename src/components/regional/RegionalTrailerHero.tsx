@@ -5,6 +5,7 @@ import Image from 'next/image';
 import { ChevronLeft, ChevronRight, Info, Play } from 'lucide-react';
 import TrailerPlayer from '@/components/cinema/TrailerPlayer';
 import { getYouTubeVideoId, hasPlayableTrailer } from '@/lib/cinema/trailer';
+import { usePrefersReducedMotion } from '@/lib/cinema/use-prefers-reduced-motion';
 
 interface Movie {
   id: string;
@@ -40,6 +41,14 @@ function getYouTubeId(url: string | undefined): string | null {
 export default function RegionalTrailerHero({ movies = [], onMovieClick, onBookClick }: Props) {
   const [currentIndex, setCurrentIndex] = useState(0);
   const autoAdvanceRef = useRef<NodeJS.Timeout | null>(null);
+
+  /*
+   * A visitor who asked for reduced motion must not get an autoplaying
+   * trailer — see the note in src/components/cinema/NetflixHero.tsx. The
+   * decision is made here, in the caller, so `TrailerPlayer` does not have to
+   * be changed.
+   */
+  const prefersReducedMotion = usePrefersReducedMotion();
 
   const current = movies[currentIndex];
   const videoId = getYouTubeId(current?.trailer_key);
@@ -79,7 +88,7 @@ export default function RegionalTrailerHero({ movies = [], onMovieClick, onBookC
             videoId={videoId}
             poster={backdropUrl}
             title={current?.title ? `${current.title} trailer` : 'Trailer'}
-            activation="viewport"
+            activation={prefersReducedMotion ? 'click' : 'viewport'}
             priority
             playButtonPlacement="topRight"
             aspectRatio={null}
