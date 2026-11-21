@@ -7,6 +7,7 @@ import { Play, ChevronLeft, ChevronRight, Ticket, Info } from 'lucide-react';
 import { Movie } from './MovieCard';
 import TrailerPlayer from './TrailerPlayer';
 import { getYouTubeVideoId, hasPlayableTrailer } from '@/lib/cinema/trailer';
+import { usePrefersReducedMotion } from '@/lib/cinema/use-prefers-reduced-motion';
 
 interface NetflixHeroProps {
   movies: Movie[];
@@ -60,6 +61,19 @@ export default function NetflixHero({ movies, onMovieClick, onBookClick, onTrail
   const [showControls, setShowControls] = useState(false);
   const [isMobile, setIsMobile] = useState(false);
   const isMobileRef = useRef(false);
+
+  /*
+   * A visitor who asked for reduced motion must not get an autoplaying
+   * trailer.
+   *
+   * `TrailerPlayer` has its own reduced-motion guard, but it is read in an
+   * effect and the viewport observer is declared after it, so on the first
+   * commit the observer can still fire before the preference is known. The
+   * decision is therefore made HERE, in the caller: under reduced motion the
+   * hero asks for `click` activation, which never creates the iframe until
+   * the visitor presses play.
+   */
+  const prefersReducedMotion = usePrefersReducedMotion();
 
   const currentMovie = movies?.[currentIndex];
   const videoId = getYouTubeId(currentMovie?.trailerUrl);
@@ -307,7 +321,7 @@ export default function NetflixHero({ movies, onMovieClick, onBookClick, onTrail
             videoId={videoId}
             poster={backdropUrl}
             title={currentMovie?.title ? `${currentMovie.title} trailer` : 'Trailer'}
-            activation="viewport"
+            activation={prefersReducedMotion ? 'click' : 'viewport'}
             priority
             playButtonPlacement="bottomRight"
             aspectRatio={null}

@@ -4,6 +4,7 @@ import { useState } from 'react';
 import Image from 'next/image';
 import { Play, ChevronLeft, ChevronRight } from 'lucide-react';
 import TrailerPlayer from '@/components/cinema/TrailerPlayer';
+import { usePrefersReducedMotion } from '@/lib/cinema/use-prefers-reduced-motion';
 
 export interface InternationalTrailerFilm {
   id: string;
@@ -30,6 +31,16 @@ interface InternationalTrailerHeaderProps {
  */
 export default function InternationalTrailerHeader({ films }: InternationalTrailerHeaderProps) {
   const [currentIndex, setCurrentIndex] = useState(0);
+
+  /*
+   * A visitor who asked for reduced motion must not get an autoplaying
+   * trailer — see the note in src/components/cinema/NetflixHero.tsx. The
+   * decision is made here, in the caller, so `TrailerPlayer` does not have to
+   * be changed.
+   *
+   * The hook must be called BEFORE the early return below (rules of hooks).
+   */
+  const prefersReducedMotion = usePrefersReducedMotion();
 
   if (!films || films.length === 0) return null;
 
@@ -58,7 +69,7 @@ export default function InternationalTrailerHeader({ films }: InternationalTrail
             videoId={videoId}
             poster={backdropUrl}
             title={current?.title ? `${current.title} trailer` : 'Trailer'}
-            activation="viewport"
+            activation={prefersReducedMotion ? 'click' : 'viewport'}
             priority
             playButtonPlacement="bottomRight"
             aspectRatio={null}
