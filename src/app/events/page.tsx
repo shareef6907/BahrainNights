@@ -397,8 +397,8 @@ export default async function EventsPage() {
 
 // Metadata for SEO
 export const metadata = {
-  title: 'Events in Bahrain - Concerts, Shows & Happenings',
-  description: 'Discover the best events happening in Bahrain. Find concerts, shows, parties, family activities, and cultural events. Updated daily with all events in Bahrain.',
+  title: 'Events in Bahrain — Concerts & Shows',
+  description: 'Discover the best events happening in Bahrain, from concerts and shows to parties, family activities and cultural events, updated daily.',
   keywords: ['events in Bahrain', 'Bahrain events', 'events happening in Bahrain', 'Bahrain parties', 'concerts in Bahrain', 'things to do in Bahrain'],
   openGraph: {
     title: 'Events in Bahrain - Concerts, Shows & Happenings',
@@ -412,7 +412,7 @@ export const metadata = {
   },
   twitter: {
     card: 'summary_large_image',
-    title: 'Events in Bahrain - Concerts, Shows & Happenings',
-    description: 'Discover the best events happening in Bahrain. Find concerts, shows, parties, family activities, and cultural events.',
+    title: 'Events in Bahrain — Concerts & Shows',
+    description: 'Discover the best events happening in Bahrain. Find concerts, shows, parties, family activities and cultural events.',
   },
 };

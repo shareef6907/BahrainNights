@@ -8,8 +8,8 @@ import {
 
 // SEO Optimized Metadata
 export const metadata: Metadata = {
-  title: 'Best Brunches in Bahrain 2026 — Friday Brunch Guide',
-  description: 'Discover the best Friday brunches in Bahrain for 2026! Complete guide to hotel brunches, prices, what to expect, and insider tips. From Gulf Hotel to Four Seasons.',
+  title: 'Best Friday Brunches in Bahrain 2026',
+  description: 'Discover the best Friday brunches in Bahrain in 2026, with what to expect, where to book, and insider tips on menus and times.',
   keywords: [
     'best brunch Bahrain', 'Friday brunch Bahrain', 'Bahrain brunch 2026',
     'Gulf Hotel brunch', 'Four Seasons brunch Bahrain', 'hotel brunch Bahrain',

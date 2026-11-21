@@ -10,8 +10,8 @@ import {
 
 // SEO Optimized Metadata
 export const metadata: Metadata = {
-  title: 'Your Perfect Weekend in Bahrain (2026) — 48-Hour Itinerary',
-  description: 'Plan your perfect weekend in Bahrain with our 48-hour itinerary! From Friday brunch to Saturday beach, discover the best way to spend 2 days in Bahrain.',
+  title: 'Weekend in Bahrain: 48-Hour Itinerary',
+  description: 'Plan your perfect weekend in Bahrain with a 48-hour itinerary, from Friday brunch to Saturday beach, and see how to spend two days here.',
   keywords: [
     'weekend in Bahrain', 'Bahrain itinerary', '48 hours in Bahrain', '2 days in Bahrain',
     'Bahrain weekend trip', 'Bahrain travel itinerary', 'what to do weekend Bahrain',

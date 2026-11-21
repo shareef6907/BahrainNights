@@ -10,8 +10,8 @@ import {
 
 // SEO Optimized Metadata
 export const metadata: Metadata = {
-  title: 'Bahrain Nightlife Guide (2026) — Best Lounges, Clubs & Parties',
-  description: 'The ultimate Bahrain nightlife guide for 2026! Discover the best lounges, clubs, and party spots in Juffair, Adliya, and beyond. Ladies nights, live music, and more.',
+  title: 'Bahrain Nightlife Guide: Lounges & Clubs',
+  description: 'The ultimate Bahrain nightlife guide for 2026. Discover the best lounges, clubs and party spots in Juffair, Adliya and beyond.',
   keywords: [
     'Bahrain nightlife', 'lounges in Bahrain', 'clubs in Bahrain', 'Bahrain party',
     'Juffair nightlife', 'Adliya lounges', 'Bahrain ladies night', 'nightclubs Bahrain',

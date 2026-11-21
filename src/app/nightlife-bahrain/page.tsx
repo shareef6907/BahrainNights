@@ -8,7 +8,7 @@ import {
 // SEO Optimized Metadata
 export const metadata: Metadata = {
   title: 'Nightlife in Bahrain 2026 | Clubs & Lounges',
-  description: 'Complete guide to Bahrain nightlife 2026. Discover the best nightclubs and lounges in Adliya, Juffair, and Seef. Ladies nights, dress codes, and insider tips.',
+  description: 'A complete guide to Bahrain nightlife in 2026: the best nightclubs and lounges in Adliya, Juffair and Seef, plus ladies nights and dress codes.',
   keywords: [
     'Bahrain nightlife', 'lounges in Bahrain', 'clubs in Bahrain', 'nightclubs Bahrain',
     'Adliya nightlife', 'Juffair lounges', 'Seef nightlife', 'lounges Bahrain',

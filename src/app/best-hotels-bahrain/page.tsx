@@ -11,8 +11,8 @@ import {
 
 // SEO Optimized Metadata
 export const metadata: Metadata = {
-  title: 'Best Hotels in Bahrain 2026 — Luxury to Budget',
-  description: 'Complete guide to the best hotels in Bahrain for 2026. From 5-star luxury resorts to budget-friendly stays. Reviews, prices, amenities & booking tips for Four Seasons, Ritz-Carlton, and more.',
+  title: 'Best Hotels in Bahrain 2026',
+  description: 'A complete guide to the best hotels in Bahrain in 2026, from 5-star luxury resorts to budget-friendly stays, with amenities and booking tips.',
   keywords: [
     'best hotels Bahrain', 'luxury hotels Bahrain', 'hotels in Bahrain',
     'Bahrain resorts', '5 star hotels Bahrain', 'budget hotels Bahrain',
