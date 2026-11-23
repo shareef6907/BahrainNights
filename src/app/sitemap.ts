@@ -596,7 +596,9 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
         .filter((tour) => Boolean(tour.slug))
         .map((tour) => ({
           url: `${BASE_URL}/tours/${tour.slug}`,
-          lastModified: tour.updated_at ? new Date(tour.updated_at) : new Date(),
+          lastModified: tour.updated_at
+            ? new Date(tour.updated_at)
+            : lastmodFor('/tours/[slug]'),
           changeFrequency: 'weekly' as const,
           priority: 0.7,
         }));

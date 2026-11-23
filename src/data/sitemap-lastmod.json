@@ -162,6 +162,7 @@
     "/regional/[slug]": "2026-11-01T19:40:58.000Z",
     "/regional/country/[country]": "2026-11-01T19:40:58.000Z",
     "/regional/places-to-go/[location]": "2026-11-01T19:40:58.000Z",
+    "/tours/[slug]": "2026-11-23T05:26:56.000Z",
     "/venue-portal/offers/[id]/edit": "2026-01-24T08:57:17.000Z"
   }
 }
