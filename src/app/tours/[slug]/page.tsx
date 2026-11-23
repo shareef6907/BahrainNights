@@ -58,7 +58,7 @@ const TOUR_EDITORIAL: Record<string, TourEditorial> = {
     fits: [
       'A 3-4 hour experience on the water is a half-day commitment, so it pairs well with a longer plan rather than a quick addition to one. If you are in Bahrain for a weekend, the weekend guide is a good place to build the rest of the day around it.',
       'Bahrain\'s attractions listings cover the other side of the water — boat trips to the islands, mangroves and reef stops — if you want to see what the alternatives look like before you commit to a pearl trip.',
-      'For the rest of the day, the things-to-do guide collects the indoor and shaded options, and the weekend guide lays out a full two-day plan if you are around for longer.',
+      'For the rest of the day, the things-to-do guide collects the indoor and air-conditioned options, and the weekend guide lays out a full two-day plan if you are around for longer.',
     ],
     faqs: [
       {
