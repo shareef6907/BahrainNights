@@ -43,7 +43,10 @@ export default function TourListSchema({
       item: {
         '@type': 'TouristTrip',
         name: tour.name,
-        url: `https://www.bahrainnights.com/tours#${tour.slug || tour.id}`,
+        // Each tour has its own page at /tours/<slug>. Pointing the schema at
+        // an anchor on the listing page sent search engines to a section of
+        // the listing instead of the tour itself.
+        url: `https://www.bahrainnights.com/tours/${tour.slug || tour.id}`,
         description: (tour.shortDescription || tour.description || '').slice(0, 200),
         image: tour.image || 'https://www.bahrainnights.com/og-image.png',
         tourSchedule: tour.duration

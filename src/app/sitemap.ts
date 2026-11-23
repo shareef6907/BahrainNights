@@ -576,6 +576,35 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     console.error('Error fetching movies for sitemap:', error);
   }
 
+  // Tour detail pages (/tours/<slug>).
+  //
+  // The /tours landing page links to every tour it lists, and those links
+  // only resolve now that there is a route rendering /tours/[slug]. Before
+  // that, every tour link was a dead end -- Google crawled it and got a
+  // 404 -- so the tour pages had no path into the index at all.
+  let tourPages: MetadataRoute.Sitemap = [];
+  try {
+    const { data: tours } = await supabase
+      .from('tours')
+      .select('slug, updated_at')
+      .eq('is_active', true)
+      .limit(500);
+
+    if (tours) {
+      tourPages = tours
+        // A row without a slug cannot produce a URL.
+        .filter((tour) => Boolean(tour.slug))
+        .map((tour) => ({
+          url: `${BASE_URL}/tours/${tour.slug}`,
+          lastModified: tour.updated_at ? new Date(tour.updated_at) : new Date(),
+          changeFrequency: 'weekly' as const,
+          priority: 0.7,
+        }));
+    }
+  } catch (error) {
+    console.error('Error fetching tours for sitemap:', error);
+  }
+
   // Fetch regional articles (international events coverage)
   let regionalPages: MetadataRoute.Sitemap = [];
   try {
@@ -605,6 +634,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     ...eventPages,
     ...venuePages,
     ...moviePages,
+    ...tourPages,
     ...regionalPages,
   ];
 }
