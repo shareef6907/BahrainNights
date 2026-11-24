@@ -7,13 +7,13 @@ import Link from 'next/link';
 import { MapPin, Star, DollarSign, Wine, Award, Clock } from 'lucide-react';
 
 export const metadata: Metadata = {
-  title: 'Best Fine Dining Restaurants in Bahrain 2026 | Upscale & Luxury Dining',
-  description: 'Discover the best fine dining restaurants in Bahrain. From Michelin-starred chefs to luxury hotel restaurants. Complete guide to upscale dining with prices, dress codes, and reservations.',
+  title: { absolute: 'Best Fine Dining Restaurants in Bahrain 2026' },
+  description: 'Discover the best fine dining restaurants in Bahrain — Michelin-starred chefs, luxury hotel dining, dress codes, prices and reservation tips.',
   keywords: 'fine dining Bahrain, upscale restaurants Bahrain, luxury restaurants Manama, Michelin star Bahrain, best restaurants Bahrain, special occasion dining Bahrain, romantic restaurants Bahrain',
   alternates: { canonical: 'https://www.bahrainnights.com/guides/best-fine-dining-bahrain' },
   openGraph: {
     title: 'Best Fine Dining Restaurants in Bahrain 2026',
-    description: 'Your complete guide to luxury and upscale dining experiences in Bahrain.',
+    description: 'Discover the best fine dining restaurants in Bahrain — Michelin-starred chefs, luxury hotel dining, dress codes, prices and reservation tips.',
     type: 'article',
     locale: 'en_BH',
   images: [OG_IMAGES.restaurants],
