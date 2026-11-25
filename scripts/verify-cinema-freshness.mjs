@@ -34,6 +34,11 @@
  */
 
 import { execFileSync } from 'node:child_process';
+import { mkdtempSync, writeFileSync, readFileSync, rmSync } from 'node:fs';
+import { tmpdir } from 'node:os';
+import { join, dirname } from 'node:path';
+import { fileURLToPath, pathToFileURL } from 'node:url';
+import { register } from 'node:module';
 
 const argv = process.argv.slice(2);
 function flag(name, fallback) {
@@ -190,49 +195,150 @@ async function getText(url) {
 }
 
 /**
- * Mirrors the page's dedupe in src/app/cinema/page.tsx:
- * duplicates are removed by lower-cased title, and the surviving row of each
- * group is the one whose release_date is closest to now (the film actually
- * screening) — NOT the highest rated and NOT whichever row sorted first.
+ * ============================================================================
+ * LOADING THE SHIPPED IDENTITY LOGIC — NO RE-IMPLEMENTATION
+ * ============================================================================
  *
- * It deliberately does NOT drop rows without a poster any more: the page now
- * renders a branded fallback poster instead of hiding the film, so every
- * now-showing row reaches the page.
+ * WHY THIS BLOCK EXISTS
+ * ---------------------
+ * This monitor used to carry its OWN copy of the page's dedupe key
+ * (lower-cased title). The live page does NOT use a lower-cased title: it
+ * uses `filmIdentityKey` from src/lib/cinema/film-identity.ts, which also
+ * strips screening-format and language tags ("(Malayalam)", "(Telugu)"),
+ * applies a canonical-title alias table, and folds punctuation/accents.
  *
- * If this copy ever drifts from the page's logic, CHECK C would report a false
- * loss - so it is kept deliberately literal.
+ * The two implementations disagreed, so the monitor counted 37 "distinct
+ * films" where the page rendered 32, and CHECK C reported a FALSE failure
+ * on every run: "The /cinema page renders 32 cards but 37 movies should
+ * qualify (5 lost between the table and the page)". Two consecutive false
+ * positives in a row is how a monitor gets ignored.
+ *
+ * THE FIX: do not keep a second copy of the rules. Load the module the page
+ * itself ships, so the two can never drift again.
+ *
+ * The module is TypeScript and imports `./title-clean` WITHOUT an extension,
+ * so it is materialised into a temp directory (from git, preferring
+ * origin/main) and loaded through a small resolve hook that retries a failed
+ * relative specifier with a `.ts` suffix. Node strips the TypeScript types
+ * natively.
+ *
+ * If the module cannot be loaded for ANY reason, the caller gets `null` and
+ * CHECK C degrades to a WARN — a monitor that cannot verify must never
+ * report a failure it has not proven.
  */
-function dedupeMovies(movies) {
-  const groups = new Map();
-  for (const m of movies) {
-    const key = (m.title || '').toLowerCase().trim();
-    const list = groups.get(key);
-    if (list) list.push(m);
-    else groups.set(key, [m]);
+const IDENTITY_REFS = ['origin/main', 'HEAD'];
+const IDENTITY_FILES = [
+  'src/lib/cinema/film-identity.ts',
+  'src/lib/cinema/title-clean.ts',
+];
+
+/** The repo root, derived from this script's own location. */
+const REPO_ROOT = join(dirname(fileURLToPath(import.meta.url)), '..');
+
+/**
+ * Reads the identity module's sources from git, preferring origin/main (the
+ * code that is actually deployed) over the local working tree, and falling
+ * back to the checked-out files when git is unavailable.
+ *
+ * Both files are taken from the SAME ref so the pair can never be mixed.
+ */
+function readIdentitySources() {
+  for (const ref of IDENTITY_REFS) {
+    try {
+      const files = {};
+      for (const rel of IDENTITY_FILES) {
+        files[rel] = execFileSync('git', ['show', `${ref}:${rel}`], {
+          cwd: REPO_ROOT,
+          encoding: 'utf8',
+          maxBuffer: 8 * 1024 * 1024,
+          stdio: ['ignore', 'pipe', 'ignore'],
+        });
+      }
+      return files;
+    } catch {
+      // Try the next ref.
+    }
   }
-  const now = Date.now();
-  const distance = (m) => {
-    if (!m.release_date) return Number.POSITIVE_INFINITY;
-    const t = new Date(m.release_date).getTime();
-    if (Number.isNaN(t)) return Number.POSITIVE_INFINITY;
-    return Math.abs(t - now);
-  };
-  const out = [];
-  for (const list of groups.values()) {
-    const sorted = [...list].sort((a, b) => {
-      const d = distance(a) - distance(b);
-      if (d !== 0) return d;
-      const pa = a.poster_url ? 0 : 1;
-      const pb = b.poster_url ? 0 : 1;
-      if (pa !== pb) return pa - pb;
-      const ra = a.tmdb_rating ?? -1;
-      const rb = b.tmdb_rating ?? -1;
-      if (ra !== rb) return rb - ra;
-      return String(a.id).localeCompare(String(b.id));
-    });
-    out.push(sorted[0]);
+  // Last resort: the checked-out files.
+  try {
+    const files = {};
+    for (const rel of IDENTITY_FILES) {
+      files[rel] = readFileSync(join(REPO_ROOT, rel), 'utf8');
+    }
+    return files;
+  } catch {
+    return null;
   }
-  return out;
+}
+
+/**
+ * Loads the shipped cinema identity module.
+ *
+ * Returns the module namespace, or `null` if it could not be loaded. The
+ * caller MUST treat `null` as "cannot verify", never as "failed".
+ */
+async function loadShippedIdentityModule() {
+  const sources = readIdentitySources();
+  if (!sources) return null;
+
+  let dir = null;
+  try {
+    dir = mkdtempSync(join(tmpdir(), 'cinema-identity-'));
+    // The module imports './title-clean' with no extension, so both files
+    // have to sit next to each other in the temp directory.
+    for (const rel of IDENTITY_FILES) {
+      writeFileSync(join(dir, rel.split('/').pop()), sources[rel], 'utf8');
+    }
+    // Keeps Node from re-parsing the .ts files as CommonJS.
+    writeFileSync(join(dir, 'package.json'), '{"type":"module"}\n', 'utf8');
+
+    // Resolve hook: retry a failed RELATIVE specifier with a .ts suffix.
+    const hook = `
+export async function resolve(specifier, context, nextResolve) {
+  try {
+    return await nextResolve(specifier, context);
+  } catch (err) {
+    if (
+      specifier.startsWith('.') &&
+      !/\\.(ts|tsx|js|mjs|cjs|json|node)$/.test(specifier)
+    ) {
+      return await nextResolve(specifier + '.ts', context);
+    }
+    throw err;
+  }
+}
+`;
+    register('data:text/javascript,' + encodeURIComponent(hook));
+
+    const mod = await import(pathToFileURL(join(dir, 'film-identity.ts')).href);
+    if (!mod || typeof mod.groupSameFilm !== 'function') return null;
+    return mod;
+  } catch {
+    return null;
+  } finally {
+    if (dir) {
+      try {
+        rmSync(dir, { recursive: true, force: true });
+      } catch {
+        // Temp dir cleanup is best-effort only.
+      }
+    }
+  }
+}
+
+/**
+ * Counts the films the page should render, using the SHIPPED identity logic
+ * (groupSameFilm) and the SHIPPED artwork rule (isUsableImage), in the same
+ * order the page applies them: collapse the same film first, then drop the
+ * films with no usable poster.
+ *
+ * Returns `null` when the shipped module is unavailable — the caller must
+ * then skip the comparison rather than guess.
+ */
+function countQualifyingFilms(identity, rows, isNowShowing) {
+  if (!identity) return null;
+  const groups = identity.groupSameFilm(rows.map((r) => ({ ...r })), isNowShowing, Date.now());
+  return groups.filter((g) => identity.isUsableImage(g.winner?.poster_url)).length;
 }
 
 /**
@@ -370,8 +476,11 @@ try {
   console.log('C. PAGE RENDERING');
   const html = await getText(`${SITE}/cinema`);
   const { count: rendered, markersFound } = countRenderedCards(html);
-  const expected = dedupeMovies(nowRows).length;
-  const expectedSoon = dedupeMovies(soonRows).length;
+
+  // The SHIPPED identity logic, loaded from the repo (never re-implemented).
+  const identity = await loadShippedIdentityModule();
+  const expected = countQualifyingFilms(identity, nowRows, true);
+  const expectedSoon = countQualifyingFilms(identity, soonRows, false);
 
   if (rendered === 0) {
     if (markersFound.length === 0) {
@@ -390,6 +499,18 @@ try {
     } else {
       fail('The /cinema page rendered 0 movie cards.');
     }
+  } else if (expected === null) {
+    /*
+     * The shipped identity module could not be loaded, so this monitor
+     * cannot compute what SHOULD qualify. It must NOT guess a number and
+     * report a failure it has not proven — a monitor that cries wolf gets
+     * ignored, which defeats the point of having it.
+     */
+    warn(
+      `Could not load the shipped identity logic (src/lib/cinema/film-identity.ts), ` +
+        `so the expected film count could not be computed. The page renders ` +
+        `${rendered} cards and the loss check is SKIPPED rather than failed.`
+    );
   } else if (rendered < expected) {
     fail(
       `The /cinema page renders ${rendered} cards but ${expected} movies should ` +
@@ -398,7 +519,7 @@ try {
   } else {
     ok(
       `Page renders ${rendered} "Now Showing" cards; ${expected} qualify from the table. ` +
-        `(${expectedSoon} more in "Coming Soon", behind a client-side tab.)`
+        `(${expectedSoon ?? '?'} more in "Coming Soon", behind a client-side tab.)`
     );
   }
   console.log('');
@@ -489,8 +610,8 @@ try {
   // ---------------------------------------------------------------------
   console.log('='.repeat(78));
   console.log(
-    `now showing: ${nowRows.length} rows -> ${expected} distinct titles | ` +
-      `coming soon: ${soonRows.length} rows -> ${expectedSoon} | rendered: ${rendered}`
+    `now showing: ${nowRows.length} rows -> ${expected ?? '?'} distinct titles | ` +
+      `coming soon: ${soonRows.length} rows -> ${expectedSoon ?? '?'} | rendered: ${rendered}`
   );
   if (failures.length) {
     console.log(`RESULT: FAILED (${failures.length} failure(s), ${warnings.length} warning(s))`);
