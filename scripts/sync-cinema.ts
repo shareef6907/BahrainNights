@@ -1385,7 +1385,8 @@ async function syncCinema() {
      */
     try {
       const { error: logError } = await supabase.from('agent_logs').insert({
-        started_at: runStartedAt,
+        agent_name: 'cinema_sync',
+        started_at: new Date(runStartedAt).toISOString(),
         completed_at: new Date().toISOString(),
         status: 'completed',
         items_found:
@@ -1411,10 +1412,21 @@ async function syncCinema() {
         },
       });
       if (logError) {
-        console.warn('  ⚠️ Could not record the run in agent_logs:', logError.message);
+        // Loud on purpose. This write failing is why the contribution history
+        // was empty for days while every run still exited 0 — a silent warn
+        // is how a broken instrument stays broken.
+        console.error(
+          '  ❌ Could not record the run in agent_logs (the contribution history is now blind):',
+          logError.message
+        );
+        console.error('::error::Cinema run history was not recorded — CHECK D cannot work.');
       }
     } catch (logErr) {
-      console.warn('  ⚠️ Could not record the run in agent_logs:', logErr);
+      console.error(
+        '  ❌ Could not record the run in agent_logs (the contribution history is now blind):',
+        logErr
+      );
+      console.error('::error::Cinema run history was not recorded — CHECK D cannot work.');
     }
 
     return stats;
