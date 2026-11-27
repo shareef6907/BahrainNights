@@ -286,6 +286,53 @@ export const PUBLIC_ARTIST_FIELDS = [
 export const PUBLIC_EVENT_SELECT = PUBLIC_EVENT_FIELDS.join(',');
 
 /**
+ * THE EVENTS LISTING PAGE'S SELECT.
+ *
+ * `PUBLIC_EVENT_SELECT` is the full public event - 52 columns - and it is
+ * right for the detail page, which renders the description, the gallery and
+ * the accessibility fields.
+ *
+ * The LISTING page renders a card: the title, the image, the category, the
+ * venue, the dates, the time, the price, the sold-out flag, the featured
+ * flag and the booking link. It does NOT render the gallery, the gallery
+ * URLs, the special instructions, the age restriction, the dress code, the
+ * tags, the Arabic description, the thumbnail, the banner, the price
+ * range, the view counters or the timestamps.
+ *
+ * All of those were being fetched and serialised for every event on the
+ * page, for nothing.
+ *
+ * `description` IS kept: the page searches on it, and the ItemList JSON-LD
+ * uses it.
+ */
+export const PUBLIC_EVENT_LISTING_FIELDS = [
+  'id',
+  'title',
+  'slug',
+  'description',
+  'category',
+  'venue_name',
+  'venue_address',
+  'date',
+  'time',
+  'start_date',
+  'end_date',
+  'price',
+  'price_currency',
+  'booking_method',
+  'cover_url',
+  'image_url',
+  'featured_image',
+  'is_featured',
+  'is_sold_out',
+  'booking_url',
+  'affiliate_url',
+  'source_url',
+] as const;
+
+export const PUBLIC_EVENT_LISTING_SELECT = PUBLIC_EVENT_LISTING_FIELDS.join(',');
+
+/**
  * The event DETAIL page needs three columns that the listing pages do not:
  *
  *   - `venue_id`      — to resolve the linked venue row
@@ -310,6 +357,33 @@ export const PUBLIC_EVENT_DETAIL_FIELDS = [
 
 export const PUBLIC_EVENT_DETAIL_SELECT = PUBLIC_EVENT_DETAIL_FIELDS.join(',');
 export const PUBLIC_ATTRACTION_SELECT = PUBLIC_ATTRACTION_FIELDS.join(',');
+
+/**
+ * THE EVENTS LISTING PAGE'S ATTRACTION SELECT.
+ *
+ * The listing page used `select('*')` on the `attractions` table, which
+ * pulls every column including the long description blobs and the
+ * description_arabic column - for a card that shows a name, a picture, an
+ * area, a price and a rating.
+ */
+export const PUBLIC_ATTRACTION_LISTING_FIELDS = [
+  'id',
+  'name',
+  'slug',
+  'description',
+  'image_url',
+  'area',
+  'price_from',
+  'price_range',
+  'tripadvisor_rating',
+  'rating',
+  'duration',
+  'suitable_for',
+  'tags',
+  'is_featured',
+] as const;
+
+export const PUBLIC_ATTRACTION_LISTING_SELECT = PUBLIC_ATTRACTION_LISTING_FIELDS.join(',');
 export const PUBLIC_GUIDE_SELECT = PUBLIC_GUIDE_FIELDS.join(',');
 export const PUBLIC_CINEMA_SELECT = PUBLIC_CINEMA_FIELDS.join(',');
 export const PUBLIC_MOVIE_SELECT = PUBLIC_MOVIE_FIELDS.join(',');
