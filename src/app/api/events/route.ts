@@ -159,7 +159,7 @@ export async function GET(request: NextRequest) {
     });
 
     // Sort events: Featured first (alphabetically), then non-featured by date
-    const sortedEvents = sortEventsWithFeatured(transformedEvents);
+    const sortedEvents = sortEventsWithFeatured(transformedEvents, todayStr);
 
     // Cache public event data for 5 minutes
     return NextResponse.json({

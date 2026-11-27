@@ -58,7 +58,7 @@ async function main() {
   // ---- THE OLD QUERY ----
   const oldQ = await supabase
     .from('events')
-    .select('id, title, date, start_date, end_date, is_featured')
+    .select('id, title, date, start_date, end_date, is_featured, is_recurring, recurrence_pattern, recurrence_days')
     .eq('status', 'published')
     .eq('is_hidden', false)
     .eq('country', 'Bahrain')
@@ -69,7 +69,7 @@ async function main() {
   // ---- THE NEW QUERY ----
   const newQ = await supabase
     .from('events')
-    .select('id, title, date, start_date, end_date, is_featured')
+    .select('id, title, date, start_date, end_date, is_featured, is_recurring, recurrence_pattern, recurrence_days')
     .eq('status', 'published')
     .eq('is_hidden', false)
     .eq('country', 'Bahrain')
@@ -128,7 +128,7 @@ async function main() {
   for (const r of early) {
     const iso = String(r.start_date || r.date).slice(0, 10);
     const end = String(r.end_date || '').slice(0, 10);
-    console.log(`   start=${iso} end=${end} featured=${(r as any).is_featured} | ${String(r.title).slice(0, 50)}`);
+    console.log(`   start=${iso} end=${end} recurring=${(r as any).is_recurring} pattern=${(r as any).recurrence_pattern} days=${JSON.stringify((r as any).recurrence_days)} | ${String(r.title).slice(0, 44)}`);
   }
   console.log('');
 

@@ -33,26 +33,57 @@ interface SortableEvent {
 }
 
 /**
- * The sort key for an event: its ISO start date.
+ * The sort key for an event: the date it is ON or NEXT HAPPENS.
  *
  * `rawDate` is preferred. `start_date` is the fallback for callers that
  * only have the raw column. The DISPLAY `date` is never used, because it
  * has no year in it.
+ *
+ * A LONG-RUNNING EVENT IS KEYED BY ITS END DATE.
+ *
+ * Some rows are a series rather than a single night: "Saturday Techno
+ * Night at Zyra" has start_date 2026-06-20 and end_date 2026-12-27. That
+ * event is on TONIGHT - it is running right now - but its start_date is
+ * five months ago, so sorting by start_date puts it at the TOP of the page
+ * as "Jun 20", which reads as an event that finished in June.
+ *
+ * For a row whose start is in the past and whose end is still ahead, the
+ * event is ON NOW. The listing shows the range ("Jun 20 - Dec 27"), so
+ * keying it by the end date puts it with the events that are on today and
+ * next, which is where a visitor expects it.
  */
-function eventSortKey(event: SortableEvent): number {
-  const iso = event.rawDate || event.start_date || '';
-  if (!iso) return Number.POSITIVE_INFINITY;
+function eventSortKey(event: SortableEvent, today?: string): number {
+  const startIso = (event.rawDate || event.start_date || '').slice(0, 10);
+  const endIso = (event.rawEndDate || '').slice(0, 10);
+
+  // A series that is running right now: key it by when it ends.
+  if (today && endIso && startIso && startIso < today && endIso >= today) {
+    const t = new Date(`${endIso}T00:00:00Z`).getTime();
+    return Number.isNaN(t) ? Number.POSITIVE_INFINITY : t;
+  }
+
+  if (!startIso) return Number.POSITIVE_INFINITY;
 
   // A bare YYYY-MM-DD parsed as UTC midnight; that is fine for ORDERING
   // because every key is the same kind of value.
-  const t = new Date(`${iso.slice(0, 10)}T00:00:00Z`).getTime();
+  const t = new Date(`${startIso}T00:00:00Z`).getTime();
   return Number.isNaN(t) ? Number.POSITIVE_INFINITY : t;
 }
 
 /**
  * Sort events with featured first (alphabetically), then non-featured by date
+ *
+ * `today` is Bahrain's calendar date as YYYY-MM-DD. It is used to decide
+ * whether a long-running series is ON NOW (and should therefore be keyed by
+ * its end date rather than its start date). Callers on the server pass
+ * `todayInBahrain()`; callers in the browser pass the same value so the
+ * server and the client sort identically - a different sort key on each
+ * side is a hydration mismatch.
  */
-export function sortEventsWithFeatured<T extends SortableEvent>(events: T[]): T[] {
+export function sortEventsWithFeatured<T extends SortableEvent>(
+  events: T[],
+  today?: string
+): T[] {
   return [...events].sort((a, b) => {
     const aFeatured = a.is_featured || a.isFeatured || false;
     const bFeatured = b.is_featured || b.isFeatured || false;
@@ -67,7 +98,7 @@ export function sortEventsWithFeatured<T extends SortableEvent>(events: T[]): T[
     }
 
     // Both non-featured: sort by ISO date (soonest first)
-    const diff = eventSortKey(a) - eventSortKey(b);
+    const diff = eventSortKey(a, today) - eventSortKey(b, today);
     if (diff !== 0) return diff;
 
     /*
@@ -84,7 +115,10 @@ export function sortEventsWithFeatured<T extends SortableEvent>(events: T[]): T[
 /**
  * Separate events into featured and non-featured arrays
  */
-export function separateFeaturedEvents<T extends SortableEvent>(events: T[]): {
+export function separateFeaturedEvents<T extends SortableEvent>(
+  events: T[],
+  today?: string
+): {
   featured: T[];
   regular: T[];
 } {
@@ -104,7 +138,7 @@ export function separateFeaturedEvents<T extends SortableEvent>(events: T[]): {
 
   // Sort regular by ISO date, with a deterministic tiebreaker.
   regular.sort((a, b) => {
-    const diff = eventSortKey(a) - eventSortKey(b);
+    const diff = eventSortKey(a, today) - eventSortKey(b, today);
     if (diff !== 0) return diff;
     return String(a.id).localeCompare(String(b.id));
   });
