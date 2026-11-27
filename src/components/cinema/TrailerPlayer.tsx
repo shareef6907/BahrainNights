@@ -789,7 +789,35 @@ export default function TrailerPlayer({
           title={title}
           data-testid="trailer-player-host"
           className="absolute inset-0 z-0 h-full w-full"
-          style={{ border: 0 }}
+          style={{
+            border: 0,
+            /*
+             * THE IFRAME IS KEPT OUT OF THE VIEWPORT UNTIL IT IS READY.
+             *
+             * Chrome counts a SUB-FRAME's layout shift whenever the frame
+             * is in the viewport. The YouTube embed's controls container
+             * expands from zero height to full height as it boots -
+             * measured in the embed's own document:
+             *
+             *   ytPlayerControlsContainerHost  412 x 0
+             *   ytPlayerControlsContainerHost  412 x 576
+             *
+             * and that expansion is a layout shift inside the iframe. It
+             * is 0.876 of a 0.885 CLS on /regional, and the same 0.813 on
+             * /cinema - both of them the hero trailer.
+             *
+             * The visitor cannot SEE the expansion, because the poster
+             * covers that exact box. But covering it does not exempt it.
+             *
+             * So the host is moved out of the viewport until the player
+             * reports PLAYING, and then moved back. It is absolutely
+             * positioned, so moving it shifts nothing else on the page -
+             * the poster still reserves the box, and the visitor still sees
+             * the poster and then the playing video. Nothing visible
+             * changes.
+             */
+            top: playerStarted ? 0 : '-100vh',
+          }}
         />
       ) : null}
 
