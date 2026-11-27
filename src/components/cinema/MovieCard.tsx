@@ -63,8 +63,23 @@ function MovieCard({ movie, index = 0, onMovieClick, onTrailerClick }: MovieCard
     <motion.div
       className="group cursor-pointer"
       data-testid="movie-card"
-      initial={{ opacity: 0, y: 20 }}
-      animate={{ opacity: 1, y: 0 }}
+      /*
+       * THE ENTRANCE ANIMATION.
+       *
+       * Opacity only, deliberately: no `y`.
+       *
+       * The card used to start 20px BELOW its final position and animate up
+       * to it. That is a layout shift - the card, and every card under it in
+       * the grid, moves 20px after the first paint. It went unnoticed while
+       * the hero was a static poster, because the page settled before the
+       * animation ran; with the hero playing a trailer the page stays busy
+       * and Lighthouse's measurement window stays open long enough to count
+       * it (CLS 0.911 on /cinema, reproducible across runs).
+       *
+       * An opacity fade looks the same and moves nothing.
+       */
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
       transition={{ delay: index * 0.05, duration: 0.3 }}
       onClick={() => onMovieClick(movie)}
     >

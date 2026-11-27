@@ -1,4 +1,5 @@
 import { OG_IMAGES } from '@/lib/og';
+import { todayInBahrain } from '@/lib/utils/date';
 import { supabaseAdmin } from '@/lib/supabase';
 import { notFound } from 'next/navigation';
 import { Metadata } from 'next';
@@ -88,7 +89,25 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
 
 // Fetch events for category
 async function getCategoryEvents(category: string) {
-  const today = new Date().toISOString().split('T')[0];
+  /*
+   * TODAY IN BAHRAIN, at date granularity.
+   *
+   * `new Date().toISOString()` is the UTC date, which is already tomorrow in
+   * Bahrain for three hours a day. The stored columns are CALENDAR dates,
+   * so they must be compared against Bahrain's calendar date.
+   */
+  const today = todayInBahrain();
+
+  /*
+   * The same upcoming rule as the main listing: an event is listed while it
+   * has not finished, using its END date so a multi-day event that is
+   * running right now is still listed on its second day.
+   */
+  const upcomingFilter = [
+    `end_date.gte.${today}`,
+    `and(end_date.is.null,start_date.gte.${today})`,
+    `and(end_date.is.null,start_date.is.null,date.gte.${today})`,
+  ].join(',');
 
   const { data: events, error } = await supabaseAdmin
     .from('events')
@@ -97,8 +116,9 @@ async function getCategoryEvents(category: string) {
     .eq('is_hidden', false)
     .eq('country', 'Bahrain') // Only Bahrain events
     .eq('category', category)
-    .gte('date', today)
-    .order('date', { ascending: true })
+    .or(upcomingFilter)
+    .order('start_date', { ascending: true, nullsFirst: false })
+    .order('id', { ascending: true })
     .limit(50);
 
   if (error) {

@@ -4,7 +4,7 @@ import { useState } from 'react';
 import { motion } from 'framer-motion';
 import Link from 'next/link';
 import Image from 'next/image';
-import { Ticket, Heart, ExternalLink, MapPin, Phone, Mail, Globe, Building2 } from 'lucide-react';
+import { Ticket, Heart, ExternalLink, MapPin, Phone, Mail, Globe, Building2, CalendarX } from 'lucide-react';
 import EventHero from '@/components/events/EventHero';
 import EventDetails from '@/components/events/EventDetails';
 import EventGallery from '@/components/events/EventGallery';
@@ -41,6 +41,8 @@ interface EventData {
   location: string;
   date: string;
   dayOfWeek: string;
+  /** True when the event has already finished. */
+  hasEnded?: boolean;
   time: string;
   duration: string;
   price: string;
@@ -72,6 +74,38 @@ interface EventDetailClientProps {
   similarEvents: Event[];
 }
 
+/**
+ * "This event has ended" banner.
+ *
+ * The detail page for a PAST event stays live - the URL is indexed and
+ * carries backlinks, so it must not 404 - but a visitor who lands on it
+ * needs to know the event is over rather than being offered a Book button
+ * for something that already happened.
+ */
+function EndedBanner() {
+  const { t } = useTranslation();
+  return (
+    <div
+      role="status"
+      data-testid="event-ended-banner"
+      className="sticky top-0 z-50 border-b border-amber-500/30 bg-amber-500/10 backdrop-blur-md"
+    >
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 py-3 flex items-center gap-3">
+        <CalendarX className="w-5 h-5 text-amber-400 flex-shrink-0" aria-hidden="true" />
+        <p className="text-amber-200 text-sm font-medium">
+          {t.eventDetail.hasEnded}
+        </p>
+        <Link
+          href="/events"
+          className="ml-auto text-sm font-semibold text-amber-300 hover:text-amber-100 underline underline-offset-4 whitespace-nowrap"
+        >
+          {t.eventDetail.browseUpcoming}
+        </Link>
+      </div>
+    </div>
+  );
+}
+
 export default function EventDetailClient({ event, similarEvents }: EventDetailClientProps) {
   const { t } = useTranslation();
   const [shareModalOpen, setShareModalOpen] = useState(false);
@@ -99,6 +133,9 @@ export default function EventDetailClient({ event, similarEvents }: EventDetailC
           price={event.price}
           onShareClick={() => setShareModalOpen(true)}
         />
+
+        {/* The event has ended — say so, and point at what IS on. */}
+        {event.hasEnded && <EndedBanner />}
 
         {/* Action Bar */}
         <div className="sticky top-0 z-40 bg-slate-950/95 backdrop-blur-xl border-b border-white/10">

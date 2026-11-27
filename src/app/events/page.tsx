@@ -7,7 +7,7 @@ import EventListSchema from '@/components/SEO/EventListSchema';
 import BreadcrumbSchema from '@/components/SEO/BreadcrumbSchema';
 import InternalLinks, { guideLinks, placeLinks, eventLinks, dedupeLinks } from '@/components/SEO/InternalLinks';
 import EventServicesPromo from '@/components/events/EventServicesPromo';
-import { parseDate, toISODateString } from '@/lib/utils/date';
+import { parseDate, toISODateString, todayInBahrain, formatEventDateForDisplay } from '@/lib/utils/date';
 import { PUBLIC_EVENT_SELECT } from '@/lib/public-fields';
 
 // Force dynamic rendering to ensure fresh data on every request
@@ -81,20 +81,59 @@ async function getEvents(): Promise<Event[]> {
     }
   });
 
-  // Get today's date in ISO format for filtering
-  const today = new Date().toISOString().split('T')[0];
+  /*
+   * TODAY, IN ASIA/BAHRAIN, AT DATE GRANULARITY.
+   *
+   * `new Date().toISOString().split('T')[0]` is the UTC date. Bahrain is
+   * UTC+3, so between 21:00 and 24:00 UTC the UTC date is already
+   * TOMORROW in Bahrain. Comparing an event's date against the UTC date
+   * drops today's evening events for three hours a day.
+   *
+   * The date must be Bahrain's calendar date, as YYYY-MM-DD, because the
+   * stored `date` / `start_date` / `end_date` columns are calendar dates,
+   * not timestamps.
+   */
+  const today = todayInBahrain();
 
-  // Fetch published events that are current or upcoming
-  // Filter: date >= today OR end_date >= today (for multi-day events)
-  // Only show Bahrain events on main events page (international events have separate page)
+  /*
+   * THE UPCOMING FILTER, IN THE DATABASE.
+   *
+   * An event is upcoming when COALESCE(end_date, start_date, date) >= today.
+   *
+   * Three things this fixes:
+   *
+   *  1. The END date is used, so a multi-day event that is RUNNING RIGHT NOW
+   *     still shows on its second day. The old filter looked at
+   *     start_date, which hides an event that started yesterday and is on
+   *     tonight.
+   *
+   *  2. The filter runs in the DATABASE. Filtering in the browser after the
+   *     fetch still ships the dead rows to every visitor, still counts
+   *     them, and still shows them in the payload.
+   *
+   *  3. `date` is the fallback for rows that have neither start_date nor
+   *     end_date, so an event with only a date is not silently dropped.
+   *
+   * PostgREST cannot express COALESCE, so this is written as the
+   * equivalent OR-chain: (end_date >= today) OR (end_date IS NULL AND
+   * start_date >= today) OR (end_date IS NULL AND start_date IS NULL AND
+   * date >= today).
+   */
+  const upcomingFilter = [
+    `end_date.gte.${today}`,
+    `and(end_date.is.null,start_date.gte.${today})`,
+    `and(end_date.is.null,start_date.is.null,date.gte.${today})`,
+  ].join(',');
+
   const { data, error } = await supabase
     .from('events')
       .select(PUBLIC_EVENT_SELECT)
     .eq('status', 'published')
     .eq('is_hidden', false)
     .eq('country', 'Bahrain')
-    .or(`date.gte.${today},start_date.gte.${today}`)
-    .order('date', { ascending: true });
+    .or(upcomingFilter)
+      .order('start_date', { ascending: true, nullsFirst: false })
+      .order('id', { ascending: true });
 
   if (error) {
     console.error('Error fetching events:', error);
@@ -110,23 +149,20 @@ async function getEvents(): Promise<Event[]> {
     // Handle date formatting - support both date and start_date fields
     const eventDate = event.date || event.start_date;
     const rawDate = normalizeToISODate(eventDate); // Normalize to ISO format for filtering
-    const formattedDate = eventDate
-      ? new Date(eventDate).toLocaleDateString('en-US', {
-          weekday: 'short',
-          month: 'short',
-          day: 'numeric',
-        })
-      : 'Date TBA';
+    /*
+     * The display date.
+     *
+     * The YEAR is included when it is not the current year, so an event on
+     * 8 January 2027 reads "Fri, Jan 8, 2027" and cannot be mistaken for
+     * an event that already happened.
+     */
+    const formattedDate = formatEventDateForDisplay(eventDate);
 
     // Handle end date for multi-day events
     const eventEndDate = event.end_date;
     const rawEndDate = eventEndDate ? normalizeToISODate(eventEndDate) : undefined;
     const formattedEndDate = eventEndDate && rawEndDate !== rawDate
-      ? new Date(eventEndDate).toLocaleDateString('en-US', {
-          weekday: 'short',
-          month: 'short',
-          day: 'numeric',
-        })
+      ? formatEventDateForDisplay(eventEndDate)
       : undefined;
 
     // Handle time formatting - support both time and start_time fields
@@ -272,10 +308,21 @@ async function getInternationalEvents() {
     }
   });
 
-  const today = new Date().toISOString().split('T')[0];
-  const sixMonthsAgo = new Date();
-  sixMonthsAgo.setMonth(sixMonthsAgo.getMonth() - 6);
-  const sixMonthsAgoStr = sixMonthsAgo.toISOString().split('T')[0];
+  /*
+   * TODAY IN BAHRAIN, at date granularity - the international listing had
+   * the same UTC bug as the local one.
+   */
+  const today = todayInBahrain();
+
+  /*
+   * The same upcoming rule as the local listing: an event is listed while
+   * it has not finished, using its END date.
+   */
+  const upcomingFilter = [
+    `end_date.gte.${today}`,
+    `and(end_date.is.null,start_date.gte.${today})`,
+    `and(end_date.is.null,start_date.is.null,date.gte.${today})`,
+  ].join(',');
 
   const { data, error } = await supabase
     .from('events')
@@ -287,19 +334,22 @@ async function getInternationalEvents() {
     .neq('country', 'Bahrain')
     .eq('status', 'published')
     .eq('is_active', true)
-    .or(`start_date.gte.${today},date.gte.${today}`)
-    .order('start_date', { ascending: true, nullsFirst: false });
+    .or(upcomingFilter)
+    .order('start_date', { ascending: true, nullsFirst: false })
+    .order('id', { ascending: true });
 
   if (error || !data) {
     console.error('Error fetching international events:', error);
     return { events: [], eventsByCountry: {}, countries: [] };
   }
 
-  // Filter to last 6 months
-  const filteredEvents = data.filter(e => {
-    const startDate = e.start_date || e.date;
-    return startDate >= sixMonthsAgoStr;
-  });
+  /*
+   * The upcoming window is applied in the DATABASE above, so it is not
+   * repeated here. The old client-side "last 6 months" filter ran against
+   * a UTC-derived date and compared a start date, which is how an
+   * international event that had already finished stayed on the page.
+   */
+  const filteredEvents = data;
 
   // Build events by country
   const eventsByCountry: Record<string, typeof data> = {};

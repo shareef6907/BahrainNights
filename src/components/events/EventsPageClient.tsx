@@ -68,7 +68,16 @@ export default function EventsPageClient({ initialEvents, familyAttractions = []
   const router = useRouter();
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedCategory, setSelectedCategory] = useState(searchParams?.get('category') || 'all');
-  const [selectedTime, setSelectedTime] = useState(searchParams?.get('filter') || 'all');
+  /*
+   * The selected time filter.
+   *
+   * `null` means "no narrowing" - the whole upcoming window, which is what
+   * the server sends. The old default was 'all', which meant "every event the
+   * server sent, finished ones included".
+   */
+  const [selectedTime, setSelectedTime] = useState<string | null>(
+    searchParams?.get('filter') || null
+  );
   const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
 
   // Modal state
@@ -126,9 +135,18 @@ export default function EventsPageClient({ initialEvents, familyAttractions = []
     { id: 'community', name: t.events.categories.community, icon: '🤝' },
   ];
 
-  // Translated time filters
+  /*
+   * The time filters.
+   *
+   * There is NO "All Dates" chip. "All Dates" meant "everything the server
+   * sent, including events that had already happened", which is why the page
+   * opened with a grid of dead events and a count of 39.
+   *
+   * The list itself is now ALWAYS the upcoming window - the server only
+   * sends events that have not finished - so the default view needs no chip
+   * to say so. The remaining chips narrow that window.
+   */
   const timeFilters = [
-    { id: 'all', name: t.events.filters.allDates },
     { id: 'today', name: t.events.filters.today },
     { id: 'weekend', name: t.events.filters.thisWeekend },
     { id: 'week', name: t.events.filters.thisWeek },
@@ -142,7 +160,7 @@ export default function EventsPageClient({ initialEvents, familyAttractions = []
   useEffect(() => {
     const params = new URLSearchParams();
     if (selectedCategory !== 'all') params.set('category', selectedCategory);
-    if (selectedTime !== 'all') params.set('filter', selectedTime);
+    if (selectedTime) params.set('filter', selectedTime);
 
     const newUrl = params.toString() ? `/events?${params.toString()}` : '/events';
     router.replace(newUrl, { scroll: false });
@@ -194,9 +212,18 @@ export default function EventsPageClient({ initialEvents, familyAttractions = []
         }
       }
 
-      // Time filter - use ISO string comparison to avoid timezone issues
-      // For ongoing/multi-day events, check if event is ACTIVE during the filter period
-      if (selectedTime !== 'all') {
+      /*
+       * The time filter - use ISO string comparison to avoid timezone issues.
+       *
+       * Every chip operates WITHIN the upcoming window. The window itself
+       * is applied in the DATABASE (see src/app/events/page.tsx), so there is
+       * no 'all' case here any more: the rows arriving in the browser are
+       * already the events that have not finished.
+       *
+       * For ongoing/multi-day events, the check is whether the event is
+       * ACTIVE during the filter period.
+       */
+      if (selectedTime) {
         // Get today's date in Bahrain timezone (UTC+3) as ISO string
         // Using toLocaleDateString with en-CA locale returns YYYY-MM-DD format
         const todayISO = new Date().toLocaleDateString('en-CA', { timeZone: 'Asia/Bahrain' });
@@ -304,7 +331,7 @@ export default function EventsPageClient({ initialEvents, familyAttractions = []
   const handleClearFilters = () => {
     setSearchQuery('');
     setSelectedCategory('all');
-    setSelectedTime('all');
+    setSelectedTime(null);
   };
 
   // Generate JSON-LD for events (limited to first 10 for performance)
@@ -722,13 +749,24 @@ export default function EventsPageClient({ initialEvents, familyAttractions = []
               /* Empty State */
               <div className="text-center py-16">
                 <div className="text-6xl mb-4">🎭</div>
-                <h3 className="text-2xl font-bold text-white mb-2">{t.events.emptyState.title}</h3>
+                <h3 className="text-2xl font-bold text-white mb-2">
+                  {/*
+                    A time filter that matches nothing is an EMPTY PERIOD,
+                    not an empty site. Say so, and give a way back to the
+                    full upcoming list.
+                  */}
+                  {selectedTime && !searchQuery && selectedCategory === 'all'
+                    ? t.events.emptyState.noEventsInPeriod
+                    : t.events.emptyState.title}
+                </h3>
                 <p className="text-gray-400 mb-6">
-                  {searchQuery || selectedCategory !== 'all'
-                    ? t.events.emptyState.tryAdjusting
-                    : t.events.emptyState.checkBackSoon}
+                  {selectedTime && !searchQuery && selectedCategory === 'all'
+                    ? t.events.emptyState.seeAllUpcoming
+                    : searchQuery || selectedCategory !== 'all'
+                      ? t.events.emptyState.tryAdjusting
+                      : t.events.emptyState.checkBackSoon}
                 </p>
-                {(searchQuery || selectedCategory !== 'all' || selectedTime !== 'all') && (
+                {(searchQuery || selectedCategory !== 'all' || selectedTime) && (
                   <button
                     onClick={handleClearFilters}
                     className="inline-flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-purple-500 to-pink-500 text-white font-semibold rounded-xl hover:shadow-lg transition-all"
