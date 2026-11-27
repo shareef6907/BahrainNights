@@ -365,6 +365,17 @@ export default function TrailerPlayer({
             return;
           }
           if (state === YT_STATE_PLAYING) {
+            /*
+             * The player IS playing, by the same signal `waitForPlaying`
+             * already trusts: `getPlayerState()`.
+             *
+             * The component's own `onStateChange` event does not always
+             * arrive - the IFrame API's event channel can be dropped - but
+             * the synchronous `getPlayerState()` call goes through the
+             * same bridge and works. So the poster is lifted from HERE,
+             * on the same evidence the playback attempt itself uses.
+             */
+            setPlayerStarted(true);
             finish(true);
             return;
           }
@@ -842,7 +853,20 @@ export default function TrailerPlayer({
              * the poster and then the playing video. Nothing visible
              * changes.
              */
-            top: playerStarted ? 0 : '-100vh',
+            /*
+             * visibility, NOT a position change.
+             *
+             * Moving the host out of the viewport fixed the CLS but broke
+             * the player: `playerStarted` never became true, so the poster
+             * never lifted and the visitor saw a static poster over a video
+             * that was playing behind it.
+             *
+             * `visibility: hidden` does NOT change the LAYOUT, so nothing
+             * on the page moves, and Chrome does not count layout shifts
+             * inside a subtree that is not rendered. The iframe stays
+             * exactly where it is, so the API's messaging is unaffected.
+             */
+            visibility: playerStarted ? 'visible' : 'hidden',
           }}
         />
       ) : null}
