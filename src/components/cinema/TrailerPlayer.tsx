@@ -237,6 +237,18 @@ export default function TrailerPlayer({
   const [showUnmuteControl, setShowUnmuteControl] = useState(false);
   const [reducedMotion, setReducedMotion] = useState(false);
   const [posterVisible, setPosterVisible] = useState(true);
+  /*
+   * Has the player REALLY started?
+   *
+   * `isPlaying` is set optimistically when `playVideo()` is CALLED, which
+   * is long before the YouTube embed has finished booting. The embed swaps
+   * its own player chrome in and out while it initialises, and that swap is
+   * a layout shift inside the iframe.
+   *
+   * The poster stays up until the embed reports PLAYING, so the swap is
+   * never visible. See the long note at the end of `handlePlay`.
+   */
+  const [playerStarted, setPlayerStarted] = useState(false);
   const [playerFailed, setPlayerFailed] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
 
@@ -423,6 +435,8 @@ export default function TrailerPlayer({
         setIsLoading(false);
         setIsMuted(!withSound);
         setPosterVisible(false);
+        // The player reported PLAYING, so the poster can go.
+        setPlayerStarted(true);
         // The "Tap for sound" nudge is shown when the browser forced muted
         // playback — unless the visitor already declined sound on purpose.
         setShowUnmuteControl(!withSound && !soundDeclinedRef.current);
@@ -461,6 +475,8 @@ export default function TrailerPlayer({
       loadYouTubeIframeApi()
         .then(() => {
           if (cancelled) return;
+          // A NEW player: the poster comes back until this one really starts.
+          setPlayerStarted(false);
           try {
             // The API takes the CONTAINER, not an iframe. It creates the
             // player iframe itself, on its own host, and owns the messaging.
@@ -489,6 +505,8 @@ export default function TrailerPlayer({
                     setIsPlaying(true);
                     setIsLoading(false);
                     setPosterVisible(false);
+                    // The player REALLY is playing now, so the poster can go.
+                    setPlayerStarted(true);
                     onPlayingChange?.(true);
 
                     /*
@@ -600,7 +618,34 @@ export default function TrailerPlayer({
     }
     setIsPlaying(true);
     setIsLoading(false);
-    setPosterVisible(false);
+    /*
+     * THE POSTER STAYS UNTIL THE PLAYER IS REALLY PLAYING.
+     *
+     * The poster used to be hidden here, the moment `playVideo()` was
+     * CALLED. But `playVideo()` returns long before the YouTube embed has
+     * finished initialising: the embed is still booting its own player
+     * chrome, and it swaps that chrome in and out while it does so.
+     *
+     * Hiding the poster at that moment exposed the embed mid-swap, and the
+     * swap is a layout shift INSIDE the iframe - which Chrome reports
+     * because the iframe is visible in the viewport.
+     *
+     * Measured, from the Lighthouse trace of /regional:
+     *
+     *   node 14: [0, 0, 0, 0] -> [0, 172, 412, 232]   the embed's chrome appears
+     *   node 14: [0, 172, 412, 232] -> [0, 0, 0, 0]   it is replaced
+     *   node 14: [0, 0, 0, 0] -> [0, 172, 412, 232]   it comes back
+     *
+     * weighted score 0.2819 + 0.2819 + 0.3126 = 0.876 of a 0.885 total CLS.
+     * The same three shifts are on /cinema (CLS 0.813).
+     *
+     * `onStateChange` already hides the poster when the player reports
+     * PLAYING, which is the correct moment. The poster stays up until then,
+     * so the embed is never visible while it is still swapping itself.
+     *
+     * `isPlaying` is set here so the player's own state is correct; the
+     * poster is NOT hidden here.
+     */
   }, []);
 
   const handleToggleMute = useCallback(() => {
@@ -686,7 +731,13 @@ export default function TrailerPlayer({
         ? 'bottom-3 right-3'
         : 'bottom-3 right-3';
 
-  const showPoster = posterVisible && !isPlaying;
+  /*
+   * THE POSTOR IS HIDDEN ONLY WHEN THE PLAYER HAS ACTUALLY STARTED.
+   *
+   * Not when `isPlaying` flips - that happens optimistically, before the
+   * embed has booted, and the embed's own chrome swap is a layout shift.
+   */
+  const showPoster = posterVisible && !playerStarted;
   const showFacadePlayButton =
     !isPlaying && !reducedMotion && !playerFailed && !activated;
 
