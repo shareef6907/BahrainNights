@@ -436,6 +436,7 @@ export default function TrailerPlayer({
         setIsMuted(!withSound);
         setPosterVisible(false);
         // The player reported PLAYING, so the poster can go.
+        console.warn('[TRACE] waitForPlaying resolved playing');
         setPlayerStarted(true);
         // The "Tap for sound" nudge is shown when the browser forced muted
         // playback — unless the visitor already declined sound on purpose.
@@ -476,6 +477,7 @@ export default function TrailerPlayer({
         .then(() => {
           if (cancelled) return;
           // A NEW player: the poster comes back until this one really starts.
+          console.warn('[TRACE] bind reset');
           setPlayerStarted(false);
           try {
             // The API takes the CONTAINER, not an iframe. It creates the
@@ -486,6 +488,7 @@ export default function TrailerPlayer({
               events: {
                 onReady: (event) => {
                   if (cancelled) return;
+                  console.warn('[TRACE] onReady');
                   playerRef.current = event.target;
 
                   // The stored preference decides whether the "Tap for sound"
@@ -506,6 +509,7 @@ export default function TrailerPlayer({
                     setIsLoading(false);
                     setPosterVisible(false);
                     // The player REALLY is playing now, so the poster can go.
+                    console.warn('[TRACE] onStateChange PLAYING');
                     setPlayerStarted(true);
                     onPlayingChange?.(true);
 
