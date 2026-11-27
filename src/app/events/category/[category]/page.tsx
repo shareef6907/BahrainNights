@@ -151,7 +151,7 @@ async function getCategoryEvents(category: string) {
   }));
 
   // Sort with featured events first (alphabetically), then non-featured by date
-  return sortEventsWithFeatured(transformedEvents);
+  return sortEventsWithFeatured(transformedEvents, today);
 }
 
 export default async function CategoryPage({ params }: PageProps) {
