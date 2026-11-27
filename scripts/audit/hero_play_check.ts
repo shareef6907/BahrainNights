@@ -89,6 +89,11 @@ async function main() {
       unmuteVisible: unmute ? getComputedStyle(unmute).display !== 'none' : false,
       muteToggleText: toggle ? toggle.textContent.trim() : null,
       videoElements: document.querySelectorAll('video').length,
+      iframeCount: document.querySelectorAll('iframe').length,
+      allIframes: Array.from(document.querySelectorAll('iframe')).map(function (f) {
+        var r = f.getBoundingClientRect();
+        return { src: f.src.slice(0, 100), parent: f.parentElement ? String(f.parentElement.getAttribute('data-testid') || f.parentElement.className || '').slice(0, 40) : '', y: Math.round(r.top) };
+      }),
     };
   })()`);
 
@@ -107,6 +112,8 @@ async function main() {
   console.log('  unmute control visible :', state.unmuteVisible);
   console.log('  mute toggle text       :', state.muteToggleText);
   console.log('  video elements         :', state.videoElements);
+  console.log('  iframe count           :', state.iframeCount);
+  for (const f of state.allIframes) console.log('      iframe:', JSON.stringify(f));
   console.log('');
   console.log('  youtube/ytimg requests :', yt.length);
   console.log('  googlevideo requests   :', gv.length, '  <- non-zero means the video is STREAMING');
