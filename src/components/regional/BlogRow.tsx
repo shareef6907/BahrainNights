@@ -98,7 +98,21 @@ export function BlogRow({ title, icon, articles, onSelectArticle, seeAllLink }: 
           ref={scrollContainerRef}
           onScroll={handleScroll}
           className="flex gap-2 md:gap-3 overflow-x-auto scrollbar-hide px-6 md:px-12 pb-4"
-          style={{ scrollSnapType: 'x mandatory' }}
+          /*
+           * `scrollSnapType: 'x proximity'`, NOT 'x mandatory'.
+           *
+           * With `mandatory`, the browser RE-SNAPS the container whenever its
+           * content changes size - it forces the scroll position onto a snap
+           * point whether the visitor asked for it or not. That moves every
+           * card in the rail horizontally by a few pixels after the first
+           * paint, and it is a layout shift: Lighthouse measured CLS 0.595
+           * on /regional, three shifts of ~0.31, 0.31 and 0.28, all of them
+           * on `div[style="scroll-snap-align:start"]` items in this rail.
+           *
+           * `proximity` still snaps when the visitor scrolls, but it does not
+           * force a re-snap on layout changes, so the rail stays where it is.
+           */
+          style={{ scrollSnapType: 'x proximity' }}
         >
           {articles.map((article, index) => (
             <div key={article.id} style={{ scrollSnapAlign: 'start' }}>

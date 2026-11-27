@@ -8,7 +8,7 @@ import BreadcrumbSchema from '@/components/SEO/BreadcrumbSchema';
 import InternalLinks, { guideLinks, placeLinks, eventLinks, dedupeLinks } from '@/components/SEO/InternalLinks';
 import EventServicesPromo from '@/components/events/EventServicesPromo';
 import { parseDate, toISODateString, todayInBahrain, formatEventDateForDisplay } from '@/lib/utils/date';
-import { PUBLIC_EVENT_SELECT } from '@/lib/public-fields';
+import { PUBLIC_EVENT_LISTING_SELECT, PUBLIC_ATTRACTION_LISTING_SELECT } from '@/lib/public-fields';
 
 // Force dynamic rendering to ensure fresh data on every request
 export const dynamic = 'force-dynamic';
@@ -127,7 +127,7 @@ async function getEvents(): Promise<Event[]> {
 
   const { data, error } = await supabase
     .from('events')
-      .select(PUBLIC_EVENT_SELECT)
+      .select(PUBLIC_EVENT_LISTING_SELECT)
     .eq('status', 'published')
     .eq('is_hidden', false)
     .eq('country', 'Bahrain')
@@ -267,7 +267,7 @@ async function getAttractions(): Promise<Attraction[]> {
 
   const { data, error } = await supabase
     .from('attractions')
-    .select('*')
+    .select(PUBLIC_ATTRACTION_LISTING_SELECT)
     .eq('is_active', true)
     .order('is_featured', { ascending: false })
     .order('tripadvisor_rating', { ascending: false, nullsFirst: false });
@@ -379,7 +379,22 @@ async function getInternationalEvents() {
    * a UTC-derived date and compared a start date, which is how an
    * international event that had already finished stayed on the page.
    */
-  const filteredEvents = data;
+  const filteredEvents = data.map((e) => ({
+    ...e,
+    /*
+     * A SHORT EXCERPT, NOT THE FULL DESCRIPTION.
+     *
+     * 343 of the 474 international events carried a description of 60
+     * characters or more, and all of it was serialised into the page for
+     * every visitor: 190 KB of the payload, for text that the card never
+     * renders.
+     *
+     * The event's own page carries the full description, and the card links
+     * straight to it, so nothing is lost - the listing just stops shipping
+     * the whole article to show a card.
+     */
+    description: e.description ? e.description.slice(0, 180) : e.description,
+  }));
 
   // Build events by country
   const eventsByCountry: Record<string, typeof data> = {};
