@@ -10,6 +10,7 @@ import AdBanner from '@/components/ads/AdBanner';
 import CrossPromoServices from '@/components/CrossPromoServices';
 import { sortEventsWithFeatured } from '@/lib/utils/eventSorting';
 import { useTranslation } from '@/lib/i18n';
+import { todayInBahrain } from '@/lib/utils/date';
 import EventModal, { EventData } from '@/components/events/EventModal';
 import { cardClickHandler } from '@/lib/crawlable-card';
 
@@ -325,7 +326,16 @@ export default function EventsPageClient({ initialEvents, familyAttractions = []
     });
 
     // Always sort with featured events first (alphabetically), then non-featured by date
-    return sortEventsWithFeatured(filtered);
+    /*
+     * The sort key MUST be the same on the server and in the browser, or
+     * React re-orders the grid after hydration and the cards visibly jump.
+     *
+     * `todayInBahrain()` is used on BOTH sides for exactly that reason. The
+     * server renders the date in its own markup, and the client recomputes
+     * it - if the two ever disagreed (a UTC date on one side, a Bahrain
+     * date on the other) the order would differ and the grid would jump.
+     */
+    return sortEventsWithFeatured(filtered, todayInBahrain());
   }, [events, searchQuery, selectedCategory, selectedTime]);
 
   const handleClearFilters = () => {

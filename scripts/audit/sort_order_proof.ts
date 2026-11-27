@@ -19,6 +19,8 @@ interface Row {
   date: string;
   /** The ISO date. */
   rawDate: string;
+  /** The ISO end date, for a multi-day or long-running event. */
+  rawEndDate?: string;
   isFeatured: boolean;
 }
 
@@ -38,6 +40,8 @@ function oldSortKey(r: Row): number {
   return new Date(displayString(r.rawDate)).getTime();
 }
 
+const TODAY = '2026-11-27';
+
 const ROWS: Row[] = [
   { id: 'a', title: 'So Long Summer', rawDate: '2026-11-27', isFeatured: false },
   { id: 'b', title: 'New Year Eve', rawDate: '2026-12-31', isFeatured: false },
@@ -46,6 +50,8 @@ const ROWS: Row[] = [
   { id: 'e', title: 'F1 Grand Prix', rawDate: '2027-03-12', isFeatured: false },
   { id: 'f', title: 'Andre Rieu', rawDate: '2027-03-19', isFeatured: false },
   { id: 'g', title: 'Devdas', rawDate: '2027-10-22', isFeatured: false },
+  // A long-running series: started in June, still running.
+  { id: 'h', title: 'Saturday Techno Night', rawDate: '2026-06-20', rawEndDate: '2026-12-27', isFeatured: false },
 ].map((r) => ({ ...r, date: displayString(r.rawDate) }));
 
 function main() {
@@ -58,13 +64,13 @@ function main() {
 
   console.log('');
   console.log('--- NEW ORDER (sorted by the ISO date) ---');
-  const newOrder = sortEventsWithFeatured(ROWS);
+  const newOrder = sortEventsWithFeatured(ROWS, TODAY);
   for (const r of newOrder) {
     console.log(`   ${r.date.padEnd(14)} (${r.rawDate})  ${r.title}`);
   }
 
   console.log('');
-  const expected = ['a', 'b', 'c', 'd', 'e', 'f', 'g'];
+  const expected = ['a', 'h', 'b', 'c', 'd', 'e', 'f', 'g'];
   const actual = newOrder.map((r) => r.id);
   const chronological = actual.join(',') === expected.join(',');
   console.log('new order is strictly chronological:', chronological);
@@ -77,8 +83,8 @@ function main() {
 
   // Determinism: the same input must always produce the same output.
   const shuffled = [...ROWS].reverse();
-  const a1 = sortEventsWithFeatured(ROWS).map((r) => r.id).join(',');
-  const a2 = sortEventsWithFeatured(shuffled).map((r) => r.id).join(',');
+  const a1 = sortEventsWithFeatured(ROWS, TODAY).map((r) => r.id).join(',');
+  const a2 = sortEventsWithFeatured(shuffled, TODAY).map((r) => r.id).join(',');
   console.log('');
   console.log('deterministic across input order:', a1 === a2);
   if (a1 !== a2) {
