@@ -305,6 +305,28 @@ async function main() {
   }
   console.log('');
 
+  /*
+   * THE CINEMA CHAINS IN THE DATABASE.
+   */
+  const cinemaCols = await supabase.from('cinemas').select('*').limit(1);
+  if (cinemaCols.error) {
+    console.log('cinemas table ERROR:', cinemaCols.error.message);
+  } else {
+    const cols = cinemaCols.data && cinemaCols.data[0] ? Object.keys(cinemaCols.data[0]) : [];
+    console.log('cinemas table columns:', cols.join(', '));
+  }
+  const { data: cinemas, error: cinemaErr } = await supabase
+    .from('cinemas')
+    .select('id, name, slug, location, area, website, is_active, updated_at')
+    .order('name');
+  if (cinemaErr) console.log('cinemas query ERROR:', cinemaErr.message);
+  console.log('');
+  console.log('=== CINEMA CHAINS IN THE DATABASE ===');
+  for (const c of (cinemas || []) as any[]) {
+    console.log(`  ${String(c.name).padEnd(30)} slug=${String(c.slug).padEnd(24)} active=${c.is_active} area=${String(c.area || '-').padEnd(18)} updated=${String(c.updated_at || '-').slice(0, 10)}`);
+  }
+  console.log('');
+
   console.log('international published rows:', intl.length);
   console.log('  NEW filter (upcoming by end date):', intlNew.length);
   console.log('  OLD filter (start_date >= 6 months ago):', intlOldSixMonth.length);

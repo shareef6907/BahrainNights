@@ -99,20 +99,35 @@ export function BlogRow({ title, icon, articles, onSelectArticle, seeAllLink }: 
           onScroll={handleScroll}
           className="flex gap-2 md:gap-3 overflow-x-auto scrollbar-hide px-6 md:px-12 pb-4"
           /*
-           * `scrollSnapType: 'x proximity'`, NOT 'x mandatory'.
+           * THE SCROLL-SNAP SETTINGS, AND WHY THEY ARE WHAT THEY ARE.
            *
-           * With `mandatory`, the browser RE-SNAPS the container whenever its
-           * content changes size - it forces the scroll position onto a snap
-           * point whether the visitor asked for it or not. That moves every
-           * card in the rail horizontally by a few pixels after the first
-           * paint, and it is a layout shift: Lighthouse measured CLS 0.595
-           * on /regional, three shifts of ~0.31, 0.31 and 0.28, all of them
-           * on `div[style="scroll-snap-align:start"]` items in this rail.
+           * The rail is a horizontal scroll container with 24px of left
+           * padding (`px-6`) whose items are `scroll-snap-align: start`.
            *
-           * `proximity` still snaps when the visitor scrolls, but it does not
-           * force a re-snap on layout changes, so the rail stays where it is.
+           * Those two together made the browser SCROLL THE CONTAINER BY 24px
+           * on load: with `align: start`, the browser aligns the item's start
+           * edge with the container's snapport, and the snapport is inset by
+           * the container's padding. So the first item ends up 24px further
+           * left than it was painted, every item in the rail moves with it,
+           * and that is a layout shift.
+           *
+           * Measured: `scrollLeft: 24` on every rail, and Lighthouse's shift
+           * entries name a `div[style="scroll-snap-align:start"]` item as the
+           * thing that moved.
+           *
+           * `scrollPadding` declares the inset WITHOUT moving the scroll
+           * position, so the browser knows the padding is intentional and
+           * leaves scrollLeft at 0.
+           *
+           * `proximity` rather than `mandatory`: `mandatory` also RE-SNAPS
+           * the container whenever its content changes size, forcing the
+           * scroll position onto a snap point whether the visitor asked for
+           * it or not.
            */
-          style={{ scrollSnapType: 'x proximity' }}
+          style={{
+            scrollSnapType: 'x proximity',
+            scrollPaddingLeft: '1.5rem',
+          }}
         >
           {articles.map((article, index) => (
             <div key={article.id} style={{ scrollSnapAlign: 'start' }}>
