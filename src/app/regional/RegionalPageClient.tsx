@@ -122,17 +122,48 @@ export function RegionalPageClient({
       <div className="relative z-10 -mt-24 mb-8">
         <div className="max-w-6xl mx-auto px-4">
           <div className="bg-gradient-to-r from-yellow-500/20 to-orange-500/20 backdrop-blur-sm rounded-2xl p-6 border border-yellow-500/30">
-            <div className="flex flex-wrap justify-center gap-8 text-center">
-              <div>
-                <p className="text-3xl font-black text-yellow-400">{localEvents}</p>
+            {/*
+             * THE STATS BAR.
+
+             * Each number gets a FIXED WIDTH, and the row does not wrap.
+
+             * WHY. This bar was the source of the /regional layout shift,
+             * and the reason is the FONT, not the rail:
+
+               t=1377ms  display=block  w=396 h=188  1 stylesheet
+               t=2292ms  display=flex   w=330 h=144  2 stylesheets, fonts=loading
+               t=3071ms  display=flex   w=330 h=56   fonts=loading -> Inter
+
+             * The three numbers are `font-black` (Inter 900). The fallback
+             * font's digits are wider than Inter's - "494" measured 121px
+             * in the fallback and 116px in Inter - so when the webfont
+             * arrived the flex row re-flowed, "11" jumped from the second
+             * row to the first, and the bar's height fell from 144px to
+             * 56px.
+
+             * A bar that is 88px shorter moves EVERY section below it up by
+             * 88px. Every BlogRow rail below it moved, and Chrome counted
+             * each rail item as a shift - which is where the 0.881 came
+             * from, on nodes at `left: 1032` that are off-screen in a
+             * 412px viewport but inside a horizontal scroller, so Chrome
+             * counts them.
+
+             * A fixed width per number means the row's geometry does not
+             * depend on the font at all: the widest number is 494 and the
+             * block is sized for a four-digit number, so the fallback and
+             * Inter produce the SAME box.
+             */}
+            <div className="flex flex-nowrap justify-center gap-6 sm:gap-8 text-center">
+              <div className="w-24 sm:w-28 shrink-0">
+                <p className="text-3xl font-black text-yellow-400 tabular-nums">{localEvents}</p>
                 <p className="text-sm text-gray-400">Local Events</p>
               </div>
-              <div>
-                <p className="text-3xl font-black text-yellow-400">{gccUkEvents}</p>
+              <div className="w-24 sm:w-28 shrink-0">
+                <p className="text-3xl font-black text-yellow-400 tabular-nums">{gccUkEvents}</p>
                 <p className="text-sm text-gray-400">GCC + UK Events</p>
               </div>
-              <div>
-                <p className="text-3xl font-black text-yellow-400">{uniqueCountries.length}</p>
+              <div className="w-24 sm:w-28 shrink-0">
+                <p className="text-3xl font-black text-yellow-400 tabular-nums">{uniqueCountries.length}</p>
                 <p className="text-sm text-gray-400">Countries</p>
               </div>
             </div>
