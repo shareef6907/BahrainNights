@@ -713,7 +713,33 @@ export default function TrailerPlayer({
     disablekb: '1',
     fs: '0',
     enablejsapi: '1',
-    origin: typeof window !== 'undefined' ? window.location.origin : '',
+    /*
+     * `origin` IS NOT SET HERE ON PURPOSE.
+     *
+     * The `origin` playerVar is the EMBED'S OWN ORIGIN - the origin the
+     * embed will use when it checks who is allowed to postMessage it. It
+     * is NOT the parent page's origin.
+     *
+     * Setting it to `window.location.origin` (our site's origin) put
+     * `origin=https://www.bahrainnights.com` into the embed's URL, so the
+     * embed rejected every postMessage the IFrame API sent it:
+     *
+     *   Failed to execute 'postMessage' on 'DOMWindow': The target origin
+     *   provided ('https://www.youtube.com') does not match the recipient
+     *   window's origin ('https://www.bahrainnights.com')
+     *
+     * The consequence was severe and silent: `onStateChange` never fired,
+     * so the component never learned the player had started. The poster
+     * stayed up forever and the iframe stayed out of the viewport.
+     *
+     * The API sets `origin` itself, correctly, when it builds the iframe
+     * URL - it appends `forigin` (the parent's full URL) alongside it. So
+     * the correct action is to NOT pass `origin` at all and let the API
+     * do it.
+     *
+     * The API still knows the parent's origin: that is what `forigin` is
+     * for.
+     */
   };
 
   /*
