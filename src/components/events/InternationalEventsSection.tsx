@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useEffect } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -162,16 +162,47 @@ export default function InternationalEventsSection({ events, eventsByCountry, co
     return cities;
   }, [events]);
 
+  /*
+   * THE "ALL" VIEW IS PAGINATED.
+   *
+   * The "All" pill selected every event from every country at once - 594
+   * cards, a 200,000-pixel-tall grid, and a 3.6 MB page. The country and
+   * city filters render their selection in full; the unfiltered "All" view
+   * shows a page at a time and grows on demand.
+   *
+   * NOTHING IS REMOVED. Every event is still in the data, still reachable
+   * through the country and city filters, and still in the payload for the
+   * "Show more" button to reveal. This only stops the page from rendering
+   * 594 cards before the visitor has scrolled past the first screen.
+   */
+  const PAGE_SIZE = 24;
+  const [visibleCount, setVisibleCount] = useState(PAGE_SIZE);
+
   // Get filtered events
-  const displayedEvents = useMemo(() => {
-    let filtered = selectedCountry && selectedCity
+  const filteredEvents = useMemo(() => {
+    return selectedCountry && selectedCity
       ? (citiesByCountry[selectedCountry]?.[selectedCity] || [])
       : selectedCountry
         ? (eventsByCountry[selectedCountry] || [])
         : events;
-    
-    return filtered;
   }, [selectedCountry, selectedCity, events, eventsByCountry, citiesByCountry]);
+
+  /*
+   * When the visitor picks a country or a city, the selection starts again
+   * from the top of that selection.
+   */
+  useEffect(() => {
+    setVisibleCount(PAGE_SIZE);
+  }, [selectedCountry, selectedCity]);
+
+  // The page that is actually rendered.
+  const displayedEvents = useMemo(() => {
+    // A specific country or city is a deliberate choice - show all of it.
+    if (selectedCountry) return filteredEvents;
+    return filteredEvents.slice(0, visibleCount);
+  }, [filteredEvents, selectedCountry, visibleCount]);
+
+  const hasMore = !selectedCountry && filteredEvents.length > visibleCount;
 
   const handleCityClick = (cityName: string, country: string) => {
     setSelectedCountry(country);
@@ -379,6 +410,28 @@ export default function InternationalEventsSection({ events, eventsByCountry, co
         ) : (
           <div className="text-center py-12">
             <p className="text-gray-400 text-lg">No events found in this selection.</p>
+          </div>
+        )}
+
+        {/*
+          SHOW MORE.
+
+          The unfiltered "All" view renders a page at a time. The button
+          reveals the next page; the count says how many are still to come.
+          Nothing is dropped - every one of them is in the payload.
+        */}
+        {hasMore && (
+          <div className="mt-10 text-center">
+            <button
+              type="button"
+              onClick={() => setVisibleCount((c) => c + PAGE_SIZE)}
+              className="inline-flex items-center gap-2 px-8 py-3 bg-gradient-to-r from-purple-500 to-blue-500 hover:from-purple-600 hover:to-blue-600 text-white font-semibold rounded-xl transition-all duration-300 shadow-lg shadow-purple-500/25"
+            >
+              Show more international events
+              <span className="text-sm font-normal opacity-90">
+                ({filteredEvents.length - visibleCount} more)
+              </span>
+            </button>
           </div>
         )}
 
