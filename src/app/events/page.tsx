@@ -315,13 +315,43 @@ async function getInternationalEvents() {
   const today = todayInBahrain();
 
   /*
-   * The same upcoming rule as the local listing: an event is listed while
-   * it has not finished, using its END date.
+   * THE INTERNATIONAL FILTER.
+   *
+   * It is NOT the same rule as the local listing, because the data is not
+   * the same quality.
+   *
+   * The local listing uses the END date so that a multi-day event which is
+   * RUNNING RIGHT NOW is still shown on its second day. The international
+   * listing cannot use the end date on its own: the international scraper
+   * wrote far-future end dates onto stale rows - "Dinner in the sky Dubai"
+   * has start_date 2024-04-01 and end_date 2027-06-30, "Horse Riding
+   * Training Course" starts in 2023 - and filtering on the end date alone
+   * brought 187 dead listings back onto the page.
+   *
+   * So the international filter is BOTH:
+   *
+   *   1. not finished and not a stale listing
+   *        (end_date >= today OR start_date >= today)
+   *        AND start_date >= (today - 6 months)
+   *
+   *   2. and the "not started long ago" guard, which is what keeps the
+   *      2023-2025 scraper rows out.
+   *
+   * The six-month window still keeps a series that is running now - "Steak
+   * Saturdays at Bull & Bear" started 2026-06-06 and runs to 2027-02-27.
    */
-  const upcomingFilter = [
+  const sixMonthsAgo = new Date();
+  sixMonthsAgo.setMonth(sixMonthsAgo.getMonth() - 6);
+  const sixMonthsAgoStr = sixMonthsAgo.toISOString().split('T')[0];
+
+  const intlUpcomingFilter = [
     `end_date.gte.${today}`,
-    `and(end_date.is.null,start_date.gte.${today})`,
-    `and(end_date.is.null,start_date.is.null,date.gte.${today})`,
+    `start_date.gte.${today}`,
+  ].join(',');
+
+  const intlFilter = [
+    `and(${intlUpcomingFilter},start_date.gte.${sixMonthsAgoStr})`,
+    `and(start_date.gte.${today})`,
   ].join(',');
 
   const { data, error } = await supabase
@@ -334,7 +364,7 @@ async function getInternationalEvents() {
     .neq('country', 'Bahrain')
     .eq('status', 'published')
     .eq('is_active', true)
-    .or(upcomingFilter)
+    .or(intlFilter)
     .order('start_date', { ascending: true, nullsFirst: false })
     .order('id', { ascending: true });
 
