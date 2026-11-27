@@ -279,3 +279,63 @@ export function toISODateString(date: Date | string | null | undefined): string 
 export function toTimeString(hours: number, minutes: number): string {
   return `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}`;
 }
+
+/**
+ * TODAY'S CALENDAR DATE IN BAHRAIN, as YYYY-MM-DD.
+ *
+ * WHY THIS EXISTS
+ * ---------------
+ * `new Date().toISOString().split('T')[0]` is the UTC date. Bahrain is
+ * UTC+3, so from 21:00 UTC the UTC date is already TOMORROW in Bahrain.
+ * Every "is this event still upcoming?" comparison written against the UTC
+ * date therefore drops today's evening events for three hours a day.
+ *
+ * The stored `date` / `start_date` / `end_date` columns are CALENDAR dates,
+ * not timestamps, so they must be compared against Bahrain's calendar date.
+ *
+ * `en-CA` formats as YYYY-MM-DD, which is exactly the format the columns
+ * are stored in - so the comparison is a plain string comparison, with no
+ * timezone conversion on either side.
+ */
+export function todayInBahrain(): string {
+  return new Intl.DateTimeFormat('en-CA', {
+    timeZone: BAHRAIN_TIMEZONE,
+    year: 'numeric',
+    month: '2-digit',
+    day: '2-digit',
+  }).format(new Date());
+}
+
+/**
+ * Format an event date for DISPLAY on the listing.
+ *
+ * THE YEAR IS SHOWN WHEN IT IS NOT THE CURRENT YEAR.
+ *
+ * The listing used to render every date as "Fri, Jan 8" - weekday, month,
+ * day, no year. An event stored for 8 January 2027 therefore read exactly
+ * like an event on 8 January of a past year, and a visitor could not tell
+ * "already happened" from "happening in seven weeks".
+ *
+ * The year is added whenever it differs from Bahrain's current year, so the
+ * common case ("Fri, Nov 27") stays short and the ambiguous case
+ * ("Fri, Jan 8, 2027") is unambiguous.
+ */
+export function formatEventDateForDisplay(
+  dateStr: string | null | undefined,
+  referenceYear?: number
+): string {
+  if (!dateStr) return 'Date TBA';
+  const d = parseDate(dateStr);
+  if (!d) return 'Date TBA';
+
+  const thisYear = referenceYear ?? new Date().getFullYear();
+  const options: Intl.DateTimeFormatOptions = {
+    weekday: 'short',
+    month: 'short',
+    day: 'numeric',
+  };
+  if (d.getFullYear() !== thisYear) {
+    options.year = 'numeric';
+  }
+  return d.toLocaleDateString('en-US', options);
+}

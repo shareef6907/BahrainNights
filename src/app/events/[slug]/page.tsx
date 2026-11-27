@@ -1,4 +1,5 @@
 import { notFound } from 'next/navigation';
+import { todayInBahrain } from '@/lib/utils/date';
 import { supabaseAdmin } from '@/lib/supabase';
 import EventDetailClient from './EventDetailClient';
 import EventSchema from '@/components/SEO/EventSchema';
@@ -260,6 +261,21 @@ export default async function EventDetailPage({ params }: PageProps) {
   const categoryInfo = getCategoryInfo(dbEvent.category);
   const dateInfo = formatDateRange(dbEvent.date, dbEvent.end_date);
 
+  /*
+   * HAS THIS EVENT ENDED?
+   *
+   * The detail page stays live for past events - the URLs are indexed and
+   * they carry backlinks, so they must not 404. But a visitor who lands on
+   * one needs to know it is over, so the page says so plainly.
+   *
+   * The END date is used, so a multi-day event that is running right now is
+   * not called "ended" on its first day. The comparison is against Bahrain's
+   * calendar date, because the stored dates are calendar dates.
+   */
+  const todayBahrain = todayInBahrain();
+  const effectiveEnd = (dbEvent.end_date || dbEvent.date || '').slice(0, 10);
+  const hasEnded = Boolean(effectiveEnd) && effectiveEnd < todayBahrain;
+
   // Get image - prioritize featured_image, then cover_url, then image_url
   const image = dbEvent.featured_image || dbEvent.cover_url || dbEvent.image_url || getDefaultImage(dbEvent.category);
 
@@ -277,6 +293,9 @@ export default async function EventDetailPage({ params }: PageProps) {
     venueSlug: venueData?.slug || dbEvent.venue_name?.toLowerCase().replace(/[^a-z0-9]+/g, '-') || 'venue',
     location: venueData?.address || dbEvent.venue_address || dbEvent.venue_name || 'Bahrain',
     date: dateInfo.endDisplay ? `${dateInfo.display} - ${dateInfo.endDisplay}` : dateInfo.display, // Date range for multi-day events
+    // True when the event has already finished. The page stays live (the URL
+    // is indexed and carries backlinks) and shows an "ended" banner.
+    hasEnded,
     dayOfWeek: dateInfo.dayOfWeek,
     time: (dbEvent.time && !dbEvent.time.toLowerCase().includes('tba')) ? dbEvent.time : '',
     duration: '',

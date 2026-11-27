@@ -1,4 +1,5 @@
 import { MetadataRoute } from 'next';
+import { todayInBahrain } from '@/lib/utils/date';
 import { createClient, SupabaseClient } from '@supabase/supabase-js';
 import { getIndexableHubs } from '@/lib/seo/indexable-hubs';
 import { getAllCategorySlugs } from '@/lib/categories';
@@ -456,7 +457,28 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   // random set, it is a consistent set that never reaches Google.
   let eventPages: MetadataRoute.Sitemap = [];
   try {
-    const today = new Date().toISOString().split('T')[0];
+    /*
+     * TODAY IN BAHRAIN, at date granularity.
+     *
+     * `new Date().toISOString()` is the UTC date. Bahrain is UTC+3, so from
+     * 21:00 UTC the UTC date is already tomorrow in Bahrain, and an event
+     * happening tonight is dropped from the sitemap for three hours a day.
+     *
+     * The `date` / `end_date` columns are CALENDAR dates, so they must be
+     * compared against Bahrain's calendar date.
+     */
+    const today = todayInBahrain();
+
+    /*
+     * The same upcoming rule the listing page uses: an event is in the
+     * sitemap while it has not finished, using its END date so a multi-day
+     * event that is running right now is still listed on its second day.
+     */
+    const upcomingFilter = [
+      `end_date.gte.${today}`,
+      `and(end_date.is.null,start_date.gte.${today})`,
+      `and(end_date.is.null,start_date.is.null,date.gte.${today})`,
+    ].join(',');
     const allEvents: {
       slug: string;
       updated_at: string | null;
@@ -470,7 +492,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
         .select('slug, updated_at, date')
         .eq('status', 'published')
         .eq('is_hidden', false)
-        .or(`date.gte.${today},end_date.gte.${today}`)
+        .or(upcomingFilter)
         // Soonest first. The near-term events are the ones worth having in
         // the sitemap -- they are what "what's on this weekend" searches land
         // on. Sorting descending put them last and, combined with a limit,

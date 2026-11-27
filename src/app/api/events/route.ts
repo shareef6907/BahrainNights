@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { supabaseAdmin } from '@/lib/supabase';
 import { sortEventsWithFeatured } from '@/lib/utils/eventSorting';
 import { PUBLIC_EVENT_SELECT } from '@/lib/public-fields';
+import { todayInBahrain } from '@/lib/utils/date';
 
 export const dynamic = 'force-dynamic';
 
@@ -18,9 +19,30 @@ export async function GET(request: NextRequest) {
     const featured = searchParams.get('featured');
     const limit = parseInt(searchParams.get('limit') || '50');
 
-    const today = new Date();
-    today.setHours(0, 0, 0, 0);
-    const todayStr = today.toISOString().split('T')[0];
+    /*
+     * TODAY IN BAHRAIN, at date granularity.
+     *
+     * The old code did `new Date(); setHours(0,0,0,0)` and then
+     * `.toISOString().split('T')[0]` - that is the UTC midnight, which is
+     * THREE HOURS BEHIND Bahrain's midnight. Between 00:00 and 03:00
+     * Bahrain time the API considered yesterday to be "today", and an event
+     * happening tonight was dropped.
+     */
+    const todayStr = todayInBahrain();
+
+    /*
+     * The UPCOMING filter, in the DATABASE.
+     *
+     * An event is upcoming when COALESCE(end_date, start_date, date) >= today.
+     * The END date is used so a multi-day event that is RUNNING RIGHT NOW is
+     * still returned on its second day. Filtering in the browser instead
+     * still ships the finished rows to every caller and still counts them.
+     */
+    const upcomingFilter = [
+      `end_date.gte.${todayStr}`,
+      `and(end_date.is.null,start_date.gte.${todayStr})`,
+      `and(end_date.is.null,start_date.is.null,date.gte.${todayStr})`,
+    ].join(',');
 
     // Try to fetch events - handle case where table might not exist or have different schema
     // Only show Bahrain events in this API (international events have separate page)
@@ -36,7 +58,9 @@ export async function GET(request: NextRequest) {
       .eq('status', 'published')
       .eq('is_hidden', false)
       .eq('country', 'Bahrain')
-      .order('created_at', { ascending: false })
+      .or(upcomingFilter)
+      .order('start_date', { ascending: true, nullsFirst: false })
+      .order('id', { ascending: true })
       .limit(limit);
 
     // Filter by category
@@ -66,17 +90,15 @@ export async function GET(request: NextRequest) {
       });
     }
 
-    // Filter by date on the client side to handle different field names
+    /*
+     * The UPCOMING window is applied in the DATABASE (see the query above),
+     * so it is not repeated here. Repeating it client-side was what made the
+     * comparison UTC-based and dropped today's evening events for three
+     * hours a day.
+     */
     let filteredEvents = events || [];
 
-    // Try to filter by date field (might be 'date' or 'start_date')
-    filteredEvents = filteredEvents.filter((event: any) => {
-      const eventDate = event.date || event.start_date;
-      if (!eventDate) return true; // Include events without dates
-      return new Date(eventDate) >= today;
-    });
-
-    // Apply date filter
+    // Apply the period filter (today / weekend / week / month).
     if (filter && filter !== 'all') {
       const now = new Date();
       filteredEvents = filteredEvents.filter((event: any) => {
@@ -183,12 +205,22 @@ function getCategoryColor(category: string | null): string {
   return colors[category.toLowerCase()] || 'bg-gray-500';
 }
 
-// Helper: Format date
+/*
+ * Format the event date for the API payload.
+ *
+ * The YEAR is included when it is not the current year, so an event on
+ * 8 January 2027 reads "Jan 8, 2027" and cannot be mistaken for an event
+ * that already happened.
+ */
 function formatDate(dateStr: string | null): string {
   if (!dateStr) return 'TBD';
   try {
     const date = new Date(dateStr);
-    return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+    if (Number.isNaN(date.getTime())) return 'TBD';
+    const thisYear = new Date().getFullYear();
+    const options: Intl.DateTimeFormatOptions = { month: 'short', day: 'numeric' };
+    if (date.getFullYear() !== thisYear) options.year = 'numeric';
+    return date.toLocaleDateString('en-US', options);
   } catch {
     return 'TBD';
   }

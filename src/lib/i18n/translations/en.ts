@@ -170,6 +170,14 @@ export const en = {
       checkBackSoon: 'Check back soon for upcoming events!',
       clearFilters: 'Clear Filters',
       haveEvent: 'Have an event to share?',
+      /*
+       * Used when a TIME filter (Today / This Weekend / This Week / This
+       * Month) matches nothing inside the upcoming window. The visitor needs
+       * to be told that the period is empty, not that the site is empty, and
+       * given a way back to the full list.
+       */
+      noEventsInPeriod: 'No events in this period',
+      seeAllUpcoming: 'See all upcoming events',
     },
     card: {
       free: 'Free',
@@ -334,6 +342,13 @@ export const en = {
   // Event Detail Page
   eventDetail: {
     aboutThisEvent: 'About This Event',
+    /*
+     * Shown on the detail page of an event that has already finished. The
+     * page stays live (the URL is indexed and carries backlinks) and the
+     * banner points the visitor at what IS on.
+     */
+    hasEnded: 'This event has ended.',
+    browseUpcoming: 'Browse upcoming events',
     eventDetails: 'Event Details',
     dateTime: 'Date & Time',
     duration: 'Duration',

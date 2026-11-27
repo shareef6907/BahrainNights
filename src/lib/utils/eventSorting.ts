@@ -12,8 +12,41 @@ interface SortableEvent {
   title: string;
   date?: string | null;
   start_date?: string | null;
+  /**
+   * The ISO date (YYYY-MM-DD).
+   *
+   * THIS IS THE FIELD THE SORT MUST USE.
+   *
+   * `date` is the DISPLAY string - "Fri, Jan 8" - and `new Date("Jan 8")`
+   * parses as 8 January of the CURRENT year. On 27 Nov 2026 that is a date
+   * in the PAST, so every event stored for 2027 sorted itself to the very
+   * top of the page and read as a dead event ("Jan 8", "Feb 5", "Mar 12",
+   * "Oct 22" - no year shown). The events were in the database with the
+   * right year; the sort threw that year away.
+   *
+   * `rawDate` is the ISO date, so it is the only safe sort key.
+   */
+  rawDate?: string | null;
+  rawEndDate?: string | null;
   is_featured?: boolean;
   isFeatured?: boolean;
+}
+
+/**
+ * The sort key for an event: its ISO start date.
+ *
+ * `rawDate` is preferred. `start_date` is the fallback for callers that
+ * only have the raw column. The DISPLAY `date` is never used, because it
+ * has no year in it.
+ */
+function eventSortKey(event: SortableEvent): number {
+  const iso = event.rawDate || event.start_date || '';
+  if (!iso) return Number.POSITIVE_INFINITY;
+
+  // A bare YYYY-MM-DD parsed as UTC midnight; that is fine for ORDERING
+  // because every key is the same kind of value.
+  const t = new Date(`${iso.slice(0, 10)}T00:00:00Z`).getTime();
+  return Number.isNaN(t) ? Number.POSITIVE_INFINITY : t;
 }
 
 /**
@@ -33,10 +66,18 @@ export function sortEventsWithFeatured<T extends SortableEvent>(events: T[]): T[
       return a.title.localeCompare(b.title);
     }
 
-    // Both non-featured: sort by date (soonest first)
-    const aDate = a.date || a.start_date || '';
-    const bDate = b.date || b.start_date || '';
-    return new Date(aDate).getTime() - new Date(bDate).getTime();
+    // Both non-featured: sort by ISO date (soonest first)
+    const diff = eventSortKey(a) - eventSortKey(b);
+    if (diff !== 0) return diff;
+
+    /*
+     * A deterministic tiebreaker.
+     *
+     * Without it, two events on the same date keep whatever order the array
+     * happened to have, and the grid visibly reshuffles between renders -
+     * which reads as the page "glitching". The id is stable.
+     */
+    return String(a.id).localeCompare(String(b.id));
   });
 }
 
@@ -61,11 +102,11 @@ export function separateFeaturedEvents<T extends SortableEvent>(events: T[]): {
   // Sort featured alphabetically
   featured.sort((a, b) => a.title.localeCompare(b.title));
 
-  // Sort regular by date
+  // Sort regular by ISO date, with a deterministic tiebreaker.
   regular.sort((a, b) => {
-    const aDate = a.date || a.start_date || '';
-    const bDate = b.date || b.start_date || '';
-    return new Date(aDate).getTime() - new Date(bDate).getTime();
+    const diff = eventSortKey(a) - eventSortKey(b);
+    if (diff !== 0) return diff;
+    return String(a.id).localeCompare(String(b.id));
   });
 
   return { featured, regular };
