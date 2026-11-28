@@ -143,9 +143,20 @@ async function getEvents(): Promise<Event[]> {
      * loudly in the log. The moment the migration is run, this branch is
      * never taken.
      */
+    /*
+     * WHICH COLUMN IS MISSING?
+     *
+     * PostgREST reports the FIRST missing column in the SELECT list, and
+     * the select list is alphabetical-ish, so `starts_at` is reported
+     * before `end_at`. Matching on `end_at` alone therefore missed the
+     * case entirely.
+     *
+     * All three new columns are checked.
+     */
     const missingEndAt =
-      /column events\.end_at does not exist/i.test(error.message) ||
-      /column .*end_at/i.test(error.message);
+      /column events\.(end_at|starts_at|is_overnight) does not exist/i.test(
+        error.message
+      ) || /column .*(end_at|starts_at|is_overnight)/i.test(error.message);
     if (missingEndAt) {
       console.error(
         '[events] The end_at column is missing - running the migration ' +
@@ -164,7 +175,7 @@ async function getEvents(): Promise<Event[]> {
         .from('events')
         .select(
           PUBLIC_EVENT_LISTING_FIELDS.filter(
-            (f) => f !== 'end_at' && f !== 'starts_at' && f !== 'is_overnight'
+            (f) => !['end_at', 'starts_at', 'is_overnight'].includes(f)
           ).join(',')
         )
         .eq('status', 'published')
@@ -184,13 +195,6 @@ async function getEvents(): Promise<Event[]> {
       }
     }
     console.error('Error fetching events:', error);
-    console.error('[events] the error object:', {
-      message: error?.message,
-      code: error?.code,
-      details: error?.details,
-      hint: error?.hint,
-      isMissingEndAt: missingEndAt,
-    });
     return [];
   }
 
