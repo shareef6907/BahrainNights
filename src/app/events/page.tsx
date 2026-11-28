@@ -184,6 +184,13 @@ async function getEvents(): Promise<Event[]> {
       }
     }
     console.error('Error fetching events:', error);
+    console.error('[events] the error object:', {
+      message: error?.message,
+      code: error?.code,
+      details: error?.details,
+      hint: error?.hint,
+      isMissingEndAt: missingEndAt,
+    });
     return [];
   }
 
