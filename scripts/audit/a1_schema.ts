@@ -69,7 +69,8 @@ async function main() {
     .select('*')
     .eq('status', 'published')
     .eq('is_hidden', false)
-    .order('start_date', { ascending: true });
+    .order('start_date', { ascending: true })
+    .limit(50);
   if (error) {
     console.log('ERROR:', error.message);
     process.exit(1);

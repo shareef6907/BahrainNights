@@ -14,6 +14,10 @@
 import { createClient } from '@supabase/supabase-js';
 import { readFileSync } from 'fs';
 import { resolveEventTimes } from '../../src/lib/utils/event-times';
+import {
+  parseTimeToMinutes,
+  parseEndTimeToMinutes,
+} from '../../src/lib/utils/time-parsing';
 
 function loadEnv(): Record<string, string> {
   const out: Record<string, string> = {};
@@ -32,13 +36,23 @@ const supabase = createClient(
   { auth: { autoRefreshToken: false, persistSession: false } }
 );
 
-/** Postgres semantics: a text column cast to time, NULL when empty. */
+/**
+ * Postgres semantics: a text column cast to time, NULL when empty.
+ *
+ * The DB's working version used a bn_parse_time helper that extracts the
+ * time-like TOKENS from a free-text value. The TypeScript equivalent is
+ * now the shared defensive parser, so the two agree by construction
+ * rather than by coincidence.
+ */
 function pgTime(v: any): number | null {
   if (v === null || v === undefined || v === '') return null;
-  const s = String(v);
-  const m = s.match(/^(\d{1,2}):(\d{2})/);
-  if (!m) return null;
-  return Number(m[1]) * 60 + Number(m[2]);
+  return parseTimeToMinutes(v);
+}
+
+/** The END time from a free-text value, if it carries one. */
+function pgEndTime(v: any): number | null {
+  if (v === null || v === undefined || v === '') return null;
+  return parseEndTimeToMinutes(v);
 }
 function pgDate(v: any): string | null {
   if (v === null || v === undefined || v === '') return null;
@@ -59,7 +73,7 @@ function pgTimeStr(t: number): string {
 function sqlResolve(e: any) {
   const start_d = pgDate(e.start_date) || pgDate(e.date);
   const end_d = pgDate(e.end_date);
-  const end_t = pgTime(e.end_time);
+  const end_t = pgEndTime(e.end_time);
   const eff_start_t = pgTime(e.start_time) ?? pgTime(e.time);
   const cat = String(e.category || '').toLowerCase();
 
