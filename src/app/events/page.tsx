@@ -131,6 +131,46 @@ async function getEvents(): Promise<Event[]> {
       .order('id', { ascending: true });
 
   if (error) {
+    /*
+     * THE MIGRATION HAS NOT BEEN RUN YET.
+     *
+     * `end_at` does not exist until Shareef runs
+     * docs/sql/2026-11-28-add-events-timestamps.sql. Until then the
+     * timestamp filter cannot work, and the page must NOT be empty - an
+     * empty events page is worse than the bug it is fixing.
+     *
+     * So the filter falls back to the old date-granular one, and says so
+     * loudly in the log. The moment the migration is run, this branch is
+     * never taken.
+     */
+    const missingEndAt =
+      /column events\.end_at does not exist/i.test(error.message) ||
+      /column .*end_at/i.test(error.message);
+    if (missingEndAt) {
+      console.error(
+        '[events] The end_at column is missing - running the migration ' +
+          'docs/sql/2026-11-28-add-events-timestamps.sql is required. ' +
+          'Falling back to the DATE filter until then, so the page is not empty.'
+      );
+      const fallback = await supabase
+        .from('events')
+        .select(PUBLIC_EVENT_LISTING_SELECT)
+        .eq('status', 'published')
+        .eq('is_hidden', false)
+        .eq('country', 'Bahrain')
+        .or(
+          [
+            `end_date.gte.${today}`,
+            `and(end_date.is.null,start_date.gte.${today})`,
+            `and(end_date.is.null,start_date.is.null,date.gte.${today})`,
+          ].join(',')
+        )
+        .order('start_date', { ascending: true, nullsFirst: false })
+        .order('id', { ascending: true });
+      if (!fallback.error && fallback.data) {
+        return mapEvents(fallback.data);
+      }
+    }
     console.error('Error fetching events:', error);
     return [];
   }
@@ -139,7 +179,17 @@ async function getEvents(): Promise<Event[]> {
     return [];
   }
 
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  return mapEvents(data);
+}
+
+/**
+ * Map the raw event rows into the shape the page renders.
+ *
+ * Split out of the query so the fallback path can use exactly the same
+ * mapping - the only difference between the two paths is the FILTER.
+ */
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+function mapEvents(data: any[]) {
   return data.map((event: any) => {
     // Handle date formatting - support both date and start_date fields
     const eventDate = event.date || event.start_date;
