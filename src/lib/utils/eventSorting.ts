@@ -28,6 +28,22 @@ interface SortableEvent {
    */
   rawDate?: string | null;
   rawEndDate?: string | null;
+  /**
+   * The event's real start INSTANT (ISO 8601 with a Z).
+   *
+   * Used by the period chips: "Today" means "ends after now AND starts
+   * before tomorrow 00:00 Bahrain".
+   */
+  starts_at?: string | null;
+  /**
+   * The event's real end INSTANT (ISO 8601 with a Z).
+   *
+   * The listing filter is `end_at > now()`. Zero grace period: an event
+   * ending 03:00 disappears at 03:00:01.
+   */
+  end_at?: string | null;
+  /** True for a single-night event that runs into the small hours. */
+  is_overnight?: boolean;
   is_featured?: boolean;
   isFeatured?: boolean;
 }

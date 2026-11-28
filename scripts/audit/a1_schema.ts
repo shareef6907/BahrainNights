@@ -78,7 +78,7 @@ async function main() {
   console.log('=== THE NAMED EVENTS (raw columns) ===');
   for (const row of data as any[]) {
     if (!NAMED.some((n) => String(row.title).includes(n))) continue;
-    const keys = ['id', 'title', 'date', 'start_date', 'end_date', 'time', 'start_time', 'end_time', 'category', 'starts_at', 'end_at', 'is_overnight'];
+    const keys = ['id', 'title', 'status', 'is_hidden', 'is_active', 'country', 'date', 'start_date', 'end_date', 'time', 'start_time', 'end_time', 'category', 'starts_at', 'end_at', 'is_overnight'];
     const parts: string[] = [];
     for (const k of keys) {
       if (k in row) parts.push(`${k}=${JSON.stringify(row[k])}`);

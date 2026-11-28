@@ -98,41 +98,36 @@ async function getEvents(): Promise<Event[]> {
   /*
    * THE UPCOMING FILTER, IN THE DATABASE.
    *
-   * An event is upcoming when COALESCE(end_date, start_date, date) >= today.
+   * An event is upcoming when `end_at > now()`.
    *
-   * Three things this fixes:
+   * WHY A TIMESTAMP AND NOT A DATE
+   * ------------------------------
+   * An event that runs from 20:00 Friday to 03:00 Saturday is stored as
+   * start_date = Friday, end_date = Saturday, because it crosses midnight.
+   * A date-granular filter - `end_date >= today` - keeps it until 23:59 on
+   * Saturday, long after the party finished. At 08:46 on Saturday the page
+   * was still showing five such events.
    *
-   *  1. The END date is used, so a multi-day event that is RUNNING RIGHT NOW
-   *     still shows on its second day. The old filter looked at
-   *     start_date, which hides an event that started yesterday and is on
-   *     tonight.
+   * A DATE CANNOT EXPRESS "ENDED AT 03:00". Only a timestamp can.
    *
-   *  2. The filter runs in the DATABASE. Filtering in the browser after the
-   *     fetch still ships the dead rows to every visitor, still counts
-   *     them, and still shows them in the payload.
+   * `now()` is evaluated by the DATABASE, on the server, per request. A
+   * visitor in another time zone sees the same list, because the boundary
+   * is not computed from their browser clock.
    *
-   *  3. `date` is the fallback for rows that have neither start_date nor
-   *     end_date, so an event with only a date is not silently dropped.
+   * ZERO GRACE PERIOD: an event ending 03:00 disappears at 03:00:01.
    *
-   * PostgREST cannot express COALESCE, so this is written as the
-   * equivalent OR-chain: (end_date >= today) OR (end_date IS NULL AND
-   * start_date >= today) OR (end_date IS NULL AND start_date IS NULL AND
-   * date >= today).
+   * The `end_at` column is NOT NULL and every row has been backfilled, so
+   * there is no fallback chain to get wrong. A row with a null end_at
+   * would be EXPIRED - fail closed, never open.
    */
-  const upcomingFilter = [
-    `end_date.gte.${today}`,
-    `and(end_date.is.null,start_date.gte.${today})`,
-    `and(end_date.is.null,start_date.is.null,date.gte.${today})`,
-  ].join(',');
-
   const { data, error } = await supabase
     .from('events')
       .select(PUBLIC_EVENT_LISTING_SELECT)
     .eq('status', 'published')
     .eq('is_hidden', false)
     .eq('country', 'Bahrain')
-    .or(upcomingFilter)
-      .order('start_date', { ascending: true, nullsFirst: false })
+    .gt('end_at', new Date().toISOString())
+      .order('end_at', { ascending: true, nullsFirst: false })
       .order('id', { ascending: true });
 
   if (error) {
@@ -158,12 +153,30 @@ async function getEvents(): Promise<Event[]> {
      */
     const formattedDate = formatEventDateForDisplay(eventDate);
 
-    // Handle end date for multi-day events
+    /*
+     * THE END DATE DISPLAY.
+     *
+     * An OVERNIGHT event is a SINGLE-NIGHT event. Its `end_date` is the
+     * next day only because the party crosses midnight, so printing
+     * "Fri, Nov 27 - Sat, Nov 28" tells a visitor there is something on
+     * Saturday. There is not.
+     *
+     * So for an overnight event the end DATE is dropped, and the card
+     * shows the day it starts plus the time it runs to:
+     *
+     *     "Fri, Nov 27"  with  "20:00 - 03:00"
+     *
+     * A genuine multi-day event keeps its range:
+     *
+     *     "Fri, Mar 12 - Sun, Mar 14"
+     */
     const eventEndDate = event.end_date;
     const rawEndDate = eventEndDate ? normalizeToISODate(eventEndDate) : undefined;
-    const formattedEndDate = eventEndDate && rawEndDate !== rawDate
-      ? formatEventDateForDisplay(eventEndDate)
-      : undefined;
+    const isOvernight = event.is_overnight === true;
+    const formattedEndDate =
+      !isOvernight && eventEndDate && rawEndDate !== rawDate
+        ? formatEventDateForDisplay(eventEndDate)
+        : undefined;
 
     // Handle time formatting - support both time and start_time fields
     // Don't default to "Time TBA" - leave it null/empty if no time is set
@@ -244,6 +257,11 @@ async function getEvents(): Promise<Event[]> {
       endDate: formattedEndDate, // For multi-day events
       rawDate, // ISO date for filtering
       rawEndDate, // ISO end date for filtering
+      // The real INSTANTS. The listing filter is `end_at > now()` and the
+      // period chips compare against these.
+      endAt: event.end_at ?? null,
+      startsAt: event.starts_at ?? null,
+      isOvernight,
       time: eventTime,
       price: displayPrice,
       priceNum: numericPrice,

@@ -317,6 +317,15 @@ export const PUBLIC_EVENT_LISTING_FIELDS = [
   'time',
   'start_date',
   'end_date',
+  /*
+   * The real INSTANTS. The listing filter is `end_at > now()`, and the
+   * period chips compare against these, so they must travel with the
+   * event. `is_overnight` tells the card not to print a two-day range for
+   * a one-night event.
+   */
+  'starts_at',
+  'end_at',
+  'is_overnight',
   'price',
   'price_currency',
   'booking_method',

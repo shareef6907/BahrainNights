@@ -20,6 +20,16 @@ export interface Event {
   location: string;
   date: string;
   endDate?: string; // For multi-day events (e.g., "Oct 31, 2025 - Apr 17, 2026")
+  /**
+   * True for a single-night event that runs into the small hours.
+   *
+   * An overnight event shows its start day plus the time it runs to, NOT a
+   * two-day range: "Fri, Nov 27" with "20:00 - 03:00". Its `end_date` is
+   * the next day only because the party crosses midnight.
+   */
+  isOvernight?: boolean;
+  /** The time the overnight event runs to, e.g. "03:00". */
+  overnightEndTime?: string;
   time: string;
   price: string;
   isFree: boolean;
@@ -49,6 +59,40 @@ const cardVariants = {
     }
   })
 };
+
+/**
+ * THE DATE LABEL ON THE CARD.
+ *
+ * Three cases:
+ *
+ *   overnight    "Fri, Nov 27" + "20:00 - 03:00"
+ *                A single-night event that runs into the small hours. Its
+ *                `end_date` is the next day only because it crosses
+ *                midnight, so a two-day range would tell the visitor there
+ *                is something on Saturday. There is not.
+ *
+ *   multi-day    "Fri, Mar 12 - Sun, Mar 14"
+ *                A genuine multi-day event.
+ *
+ *   single       "Fri, Nov 27" + "20:00"
+ */
+export function eventDateLabel(event: {
+  date: string;
+  endDate?: string;
+  time?: string;
+  isOvernight?: boolean;
+  overnightEndTime?: string;
+}): { date: string; time: string | null } {
+  if (event.isOvernight) {
+    const start = event.time ? event.time.slice(0, 5) : '';
+    const end = event.overnightEndTime ? event.overnightEndTime.slice(0, 5) : '';
+    if (start && end) return { date: event.date, time: `${start} - ${end}` };
+    if (start) return { date: event.date, time: `${start} - till late` };
+    return { date: event.date, time: 'till late' };
+  }
+  if (event.endDate) return { date: `${event.date} - ${event.endDate}`, time: null };
+  return { date: event.date, time: event.time ? event.time.slice(0, 5) : null };
+}
 
 function EventCard({ event, view = 'grid', index = 0 }: EventCardProps) {
   // Format recurrence for display
@@ -105,7 +149,12 @@ function EventCard({ event, view = 'grid', index = 0 }: EventCardProps) {
                 </div>
                 <div className="flex items-center gap-1">
                   <Calendar className="w-3.5 h-3.5 text-yellow-400" />
-                  <span>{event.endDate ? `${event.date} - ${event.endDate}` : event.date}</span>
+                  <span>
+                    {(() => {
+                      const l = eventDateLabel(event);
+                      return l.time ? `${l.date} \u00b7 ${l.time}` : l.date;
+                    })()}
+                  </span>
                 </div>
                 {/* Only show time if it's actually set (not TBA/TBD/Time TBA) */}
                 {event.time && !['TBA', 'TBD', 'Time TBA', 'time tba'].includes(event.time) && !event.time.toLowerCase().includes('tba') && (
@@ -169,7 +218,10 @@ function EventCard({ event, view = 'grid', index = 0 }: EventCardProps) {
 
             {/* Date Badge - moved below featured if present */}
             <div className={`absolute ${event.isFeatured ? 'top-10' : 'top-3'} right-3 px-3 py-1 bg-black/70 backdrop-blur-sm text-white text-xs font-medium rounded-full`}>
-              {event.endDate ? `${event.date} - ${event.endDate}` : event.date}
+              {(() => {
+                const l = eventDateLabel(event);
+                return l.time ? `${l.date} \u00b7 ${l.time}` : l.date;
+              })()}
             </div>
 
             {/* Recurrence Badge */}

@@ -103,11 +103,16 @@ async function getCategoryEvents(category: string) {
    * has not finished, using its END date so a multi-day event that is
    * running right now is still listed on its second day.
    */
-  const upcomingFilter = [
-    `end_date.gte.${today}`,
-    `and(end_date.is.null,start_date.gte.${today})`,
-    `and(end_date.is.null,start_date.is.null,date.gte.${today})`,
-  ].join(',');
+  /*
+   * An event is upcoming when `end_at > now()`.
+   *
+   * A DATE CANNOT EXPRESS "ENDED AT 03:00" - an event that ran from 20:00
+   * Friday to 03:00 Saturday survived a date-granular filter until 23:59
+   * on Saturday. Only a timestamp can express it.
+   *
+   * `now()` is the DATABASE's clock, evaluated per request on the server.
+   */
+  const nowIso = new Date().toISOString();
 
   const { data: events, error } = await supabaseAdmin
     .from('events')
@@ -116,7 +121,7 @@ async function getCategoryEvents(category: string) {
     .eq('is_hidden', false)
     .eq('country', 'Bahrain') // Only Bahrain events
     .eq('category', category)
-    .or(upcomingFilter)
+    .gt('end_at', nowIso)
     .order('start_date', { ascending: true, nullsFirst: false })
     .order('id', { ascending: true })
     .limit(50);

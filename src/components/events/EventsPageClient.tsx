@@ -12,6 +12,7 @@ import { sortEventsWithFeatured } from '@/lib/utils/eventSorting';
 import { useTranslation } from '@/lib/i18n';
 import { todayInBahrain } from '@/lib/utils/date';
 import EventModal, { EventData } from '@/components/events/EventModal';
+import { eventDateLabel } from '@/components/events/EventCard';
 import { cardClickHandler } from '@/lib/crawlable-card';
 
 // Event interface
@@ -30,6 +31,17 @@ export interface Event {
   endDate?: string; // For multi-day events (formatted display string)
   rawDate: string; // ISO date string for filtering
   rawEndDate?: string; // ISO end date for filtering
+  /**
+   * The event's real end INSTANT. The listing filter is `end_at > now()`.
+   */
+  endAt?: string;
+  /** The event's real start INSTANT. */
+  startsAt?: string;
+  /**
+   * True for a single-night event that runs into the small hours. The card
+   * must NOT print a two-day range for it.
+   */
+  isOvernight?: boolean;
   time: string;
   price: string;
   priceNum?: number | null; // Numeric price for modal
@@ -225,9 +237,27 @@ export default function EventsPageClient({ initialEvents, familyAttractions = []
        * ACTIVE during the filter period.
        */
       if (selectedTime) {
-        // Get today's date in Bahrain timezone (UTC+3) as ISO string
-        // Using toLocaleDateString with en-CA locale returns YYYY-MM-DD format
+        /*
+         * THE PERIOD FILTERS, ON TIMESTAMPS.
+         *
+         * "Today" must mean "ENDS AFTER NOW AND STARTS BEFORE TOMORROW
+         * 00:00 Bahrain". A naive date match - "the event's date is today" -
+         * brings Friday's overnight party back under the chip on Saturday
+         * morning, because its `end_date` is Saturday. That is exactly the
+         * bug the timestamp filter fixed on the listing.
+         *
+         * The event's real instants come from `end_at` / `starts_at`, which
+         * are computed on the SERVER. The comparison below uses them
+         * directly, so a visitor in another time zone sees the same list -
+         * the "now" is the browser's clock, but the event instants and the
+         * period boundaries are absolute.
+         */
+        const nowMs = Date.now();
         const todayISO = new Date().toLocaleDateString('en-CA', { timeZone: 'Asia/Bahrain' });
+
+        // The event's real start and end INSTANTS.
+        const eventEndMs = event.endAt ? Date.parse(event.endAt) : null;
+        const eventStartMs = event.startsAt ? Date.parse(event.startsAt) : null;
 
         // Event start and end dates (for multi-day events)
         const eventStartISO = event.rawDate;
@@ -251,11 +281,37 @@ export default function EventsPageClient({ initialEvents, familyAttractions = []
         const todayDate = new Date(todayISO + 'T12:00:00Z');
         const dayOfWeek = todayDate.getUTCDay();
 
+        /*
+         * EVERY PERIOD FILTER EXCLUDES AN EVENT THAT HAS ALREADY ENDED.
+         *
+         * The listing already filters these in the database, but the
+         * chips run over the same set on the client, and the set can be
+         * stale by the time the visitor clicks. An event that ended at
+         * 03:00 must not appear under "This Weekend" at 09:00.
+         */
+        if (eventEndMs !== null && eventEndMs <= nowMs) return false;
+
         switch (selectedTime) {
-          case 'today':
-            // Event is active today if today falls between start and end dates
-            if (!isEventActiveDuring(todayISO, todayISO)) return false;
+          case 'today': {
+            /*
+             * TODAY = ends after now AND starts before tomorrow 00:00
+             * Bahrain.
+             *
+             * Not a naive date match. Friday's overnight party has an
+             * `end_date` of Saturday, so a date match would list it on
+             * Saturday morning, ten hours after it finished.
+             */
+            if (eventEndMs !== null && eventEndMs <= nowMs) return false;
+            const tomorrowStart = Date.parse(
+              addDays(todayISO, 1) + 'T00:00:00+03:00'
+            );
+            if (eventStartMs !== null && eventStartMs >= tomorrowStart) return false;
+            if (eventEndMs === null && eventStartMs === null) {
+              // No timestamps on this row: fall back to the date overlap.
+              if (!isEventActiveDuring(todayISO, todayISO)) return false;
+            }
             break;
+          }
 
           case 'weekend': {
             // Bahrain Weekend = Thursday through Saturday
@@ -355,8 +411,20 @@ export default function EventsPageClient({ initialEvents, familyAttractions = []
         '@type': 'Event',
         name: event.title,
         description: event.description,
-        startDate: event.rawDate,
-        endDate: event.rawEndDate || event.rawDate,
+        /*
+         * The REAL INSTANTS, not the calendar dates.
+         *
+         * `startDate` / `endDate` in the structured data must be ISO 8601
+         * timestamps. For an overnight event the calendar `end_date` is the
+         * next day only because the party crosses midnight, so publishing
+         * it puts a WRONG end date into Google's results - it would say
+         * the event runs until the following evening.
+         *
+         * `end_at` is the real end instant, and it is what the listing
+         * filters on, so it is the same answer everywhere.
+         */
+        startDate: event.startsAt || event.rawDate,
+        endDate: event.endAt || event.rawEndDate || event.rawDate,
         location: {
           '@type': 'Place',
           name: event.venue,
@@ -723,7 +791,10 @@ export default function EventsPageClient({ initialEvents, familyAttractions = []
                         )}
                         {/* Date Badge - moved below featured if present */}
                         <div className={`absolute ${event.isFeatured ? 'top-10' : 'top-3'} right-3 px-3 py-1 bg-black/70 text-white text-xs rounded-full`}>
-                          {event.endDate ? `${event.date} - ${event.endDate}` : event.date}
+                          {(() => {
+                            const l = eventDateLabel(event);
+                            return l.time ? `${l.date} \u00b7 ${l.time}` : l.date;
+                          })()}
                         </div>
                       </div>
                       <div className="p-4">

@@ -474,11 +474,12 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
      * sitemap while it has not finished, using its END date so a multi-day
      * event that is running right now is still listed on its second day.
      */
-    const upcomingFilter = [
-      `end_date.gte.${today}`,
-      `and(end_date.is.null,start_date.gte.${today})`,
-      `and(end_date.is.null,start_date.is.null,date.gte.${today})`,
-    ].join(',');
+    /*
+     * An event is upcoming when `end_at > now()`.
+     *
+     * A DATE CANNOT EXPRESS "ENDED AT 03:00". Only a timestamp can.
+     */
+    const nowIso = new Date().toISOString();
     const allEvents: {
       slug: string;
       updated_at: string | null;
@@ -492,7 +493,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
         .select('slug, updated_at, date')
         .eq('status', 'published')
         .eq('is_hidden', false)
-        .or(upcomingFilter)
+        .gt('end_at', nowIso)
         // Soonest first. The near-term events are the ones worth having in
         // the sitemap -- they are what "what's on this weekend" searches land
         // on. Sorting descending put them last and, combined with a limit,
