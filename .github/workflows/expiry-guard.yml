@@ -1,0 +1,74 @@
+name: expiry-guard
+
+# THE EXPIRY GUARD.
+#
+# ONE EXPIRED EVENT ON /events = ALERT.
+#
+# The site must tell us it is wrong before a visitor does.
+#
+# This runs HOURLY against PRODUCTION. It fetches the live /events page,
+# reads every event it renders, resolves each one's effective end instant
+# with the SAME resolver the app uses, and fails if any of them has
+# already ended.
+#
+# It also fails if the page renders NO events at all - an empty events
+# page is the failure the missing-column bug produced, and it is just as
+# bad as a dead event on the page.
+#
+# The failure is LOUD: the job exits non-zero, GitHub marks it red, and
+# the notification is the workflow run itself.
+on:
+  schedule:
+    # Every hour, on the hour. The guard is cheap and the failure is
+    # silent, so the interval is short.
+    - cron: '0 * * * *'
+  workflow_dispatch:
+    inputs:
+      url:
+        description: 'The events URL to check'
+        required: false
+        default: 'https://www.bahrainnights.com/events'
+
+permissions:
+  contents: read
+
+concurrency:
+  group: expiry-guard
+  cancel-in-progress: false
+
+jobs:
+  expiry-guard:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    steps:
+      - name: Check out the repository
+        uses: actions/checkout@v4
+
+      - name: Install dependencies
+        run: |
+          npm ci --no-audit --no-fund
+
+      - name: Install Chromium
+        run: npx playwright install --with-deps chromium
+
+      - name: Run the expiry guard
+        env:
+          # The guard resolves each rendered event against the database, so
+          # it needs read access to the same Supabase project the site
+          # uses. These come from the repository secrets.
+          NEXT_PUBLIC_SUPABASE_URL: ${{ secrets.NEXT_PUBLIC_SUPABASE_URL }}
+          SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
+          URL_TO_CHECK: ${{ inputs.url || 'https://www.bahrainnights.com/events' }}
+        run: |
+          set +e
+          npx tsx scripts/audit/expiry_guard.ts "$URL_TO_CHECK"
+          STATUS=$?
+          set -e
+
+          if [ "$STATUS" -ne 0 ]; then
+            echo ""
+            echo "::error::THE EXPIRY GUARD FAILED. An event on $URL_TO_CHECK has already ended, or the page is empty. See the log above."
+            exit 1
+          fi
+          echo ""
+          echo "::notice::The expiry guard passed - no expired event is on $URL_TO_CHECK"
