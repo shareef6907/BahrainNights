@@ -319,7 +319,16 @@ export default function NetflixHero({ movies, onMovieClick, onBookClick, onTrail
           <TrailerPlayer
             key={videoId}
             videoId={videoId}
-            poster={backdropUrl}
+            /*
+             * NO POSTER.
+             *
+             * The trailer must not show a still and then cut to video. The
+             * hero's initial state is the site's darkest background, and the
+             * player fades up from black once it reports real playback.
+             *
+             * The fallback <Image> further down, for when there is NO
+             * trailer at all, is a different thing and stays.
+             */
             title={currentMovie?.title ? `${currentMovie.title} trailer` : 'Trailer'}
             activation={prefersReducedMotion ? 'click' : 'viewport'}
             priority

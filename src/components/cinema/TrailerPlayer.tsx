@@ -1,5 +1,45 @@
 'use client';
 
+/*
+ * ============================================================================
+ * LOCKED - DO NOT CHANGE WITHOUT SHAREef'S EXPLICIT APPROVAL.
+ * ============================================================================
+ *
+ * VERIFIED BASELINE TAG: player-verified-2026-11-28
+ * VERIFIED BASELINE SHA: see git tag -l player-verified-2026-11-28
+ *
+ * THE RULE: no refactor, no performance work, no CLS work, no dependency
+ * bump and no "small cleanup" touches this file or the hero pages without
+ * Shareef saying so first. If a task appears to require it, STOP AND ASK.
+ *
+ * WHY: this component has broken twice in one day, both times silently.
+ *
+ *   1. It was changed to hide the YouTube iframe so that the embed's boot
+ *      expansion would stop registering as a layout shift. CLS went to
+ *      exactly 0 on /regional and /cinema - and both heroes played AUDIO
+ *      WITH NO PICTURE. The old check reported PASS, because it asserted a
+ *      bounding rect and data-playing, and both are satisfied by a player
+ *      under an opaque poster.
+ *
+ *   2. It was changed again to lift the poster from getPlayerState(), which
+ *      left the iframe stuck out of the viewport: still no picture.
+ *
+ * A black box is worse than a layout shift. The CLS is fixed by RESERVING
+ * THE EMBED'S FINAL SPACE BEFORE IT BOOTS - a fixed aspect-ratio container
+ * present from first paint, so the embed expands into space already
+ * allocated. NEVER by hiding, delaying or shrinking the player.
+ *
+ * THE GATE: .github/workflows/hero-picture-gate.yml is a REQUIRED status
+ * check. It proves every hero shows a MOVING PICTURE by comparing two
+ * screenshots' pixels. A poster, a black box and a hidden player all fail
+ * it. Run it locally with:
+ *
+ *     bash scripts/audit/hero-picture-gate.sh
+ *
+ * .github/CODEOWNERS marks this file and the hero pages as locked.
+ * ============================================================================
+ */
+
 import { useCallback, useEffect, useRef, useState } from 'react';
 import Image from 'next/image';
 import { Play, Volume2, VolumeX } from 'lucide-react';
@@ -60,6 +100,14 @@ const SOUND_PREF_KEY = 'bn:trailer-sound';
 
 /** How long to wait for the unmuted attempt before falling back to muted. */
 const UNMUTED_ATTEMPT_TIMEOUT_MS = 3500;
+
+/**
+ * How long the player has to start before the failure fallback kicks in.
+ *
+ * Six seconds is long enough for a slow connection and short enough that a
+ * visitor is not left staring at a black box.
+ */
+const PLAYER_BOOT_TIMEOUT_MS = 6000;
 /** How long to wait for the muted fallback to start playing. */
 const MUTED_ATTEMPT_TIMEOUT_MS = 8000;
 /** Poll interval while waiting for a playback state. */
@@ -239,11 +287,28 @@ export default function TrailerPlayer({
   const [posterVisible, setPosterVisible] = useState(true);
   const [playerFailed, setPlayerFailed] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
+  /*
+   * THE FAILURE FALLBACK.
+   *
+   * There is no poster on the heroes any more, so if the player never
+   * boots there is nothing to look at. This is the ONE exception: if no
+   * real playback has started within PLAYER_BOOT_TIMEOUT_MS, a still
+   * frame with a play button is shown, and the failure is logged.
+   *
+   * This path must never trigger on a healthy load. If it does, the player
+   * is broken - fix the player, do not raise the timeout.
+   */
+  const [bootTimedOut, setBootTimedOut] = useState(false);
 
   // Guards against a late event from a previous attempt resolving after we
   // already fell back to muted.
   const attemptIdRef = useRef(0);
   const mountedRef = useRef(true);
+  /** Mirrors `isPlaying` so a timeout callback sees the current value. */
+  const isPlayingRef = useRef(false);
+  useEffect(() => {
+    isPlayingRef.current = isPlaying;
+  }, [isPlaying]);
   /** True when the visitor explicitly muted the trailer on a previous view. */
   const soundDeclinedRef = useRef(false);
   /**
@@ -574,6 +639,27 @@ export default function TrailerPlayer({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [activated, reducedMotion, videoId]);
 
+  /*
+   * THE BOOT TIMEOUT.
+   *
+   * Starts when a player is created. If the player has not reported real
+   * playback within PLAYER_BOOT_TIMEOUT_MS, the failure fallback is shown.
+   */
+  useEffect(() => {
+    if (!activated || isPlaying) return;
+    setBootTimedOut(false);
+    const timer = window.setTimeout(() => {
+      if (isPlayingRef.current) return;
+      console.warn(
+        `[TrailerPlayer] no playback within ${PLAYER_BOOT_TIMEOUT_MS}ms - showing the failure fallback`
+      );
+      setBootTimedOut(true);
+      setIsLoading(false);
+    }, PLAYER_BOOT_TIMEOUT_MS);
+    return () => window.clearTimeout(timer);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [activated, videoId]);
+
   /* --- user interaction: unmute ------------------------------------------- */
   const handleUnmute = useCallback(() => {
     const player = playerRef.current;
@@ -602,6 +688,56 @@ export default function TrailerPlayer({
     setIsLoading(false);
     setPosterVisible(false);
   }, []);
+
+  /*
+   * UNMUTE ON THE FIRST INTERACTION.
+   *
+   * This is the single biggest win for sound. No browser permits UNMUTED
+   * autoplay on a cold load - Chrome, Safari and Firefox all require
+   * muted="true", and iOS Safari enforces it with no exceptions. Chrome
+   * will sometimes allow it for a visitor with a high Media Engagement
+   * Index on the domain, which is why an unmuted trailer can be heard on
+   * one machine and not on another.
+   *
+   * So: autoplay muted (universally permitted), then the FIRST interaction
+   * of any kind - pointerdown, touchstart, click, keydown, scroll - unmutes
+   * the player. A visitor who taps or scrolls anywhere gets sound within a
+   * second of arriving, and the gesture is exactly what the browser needs
+   * to permit unmuted playback.
+   *
+   * The listeners are one-shot: the first one to fire unmutes and removes
+   * all of them.
+   */
+  useEffect(() => {
+    if (!isPlaying || !isMuted || reducedMotion) return;
+    // The visitor explicitly muted the trailer on a previous view. Respect it.
+    if (soundDeclinedRef.current) return;
+
+    let done = false;
+    const onFirstInteraction = () => {
+      if (done) return;
+      done = true;
+      cleanup();
+      handleUnmute();
+    };
+    const events: (keyof WindowEventMap)[] = [
+      'pointerdown',
+      'touchstart',
+      'click',
+      'keydown',
+      'scroll',
+    ];
+    const cleanup = () => {
+      for (const ev of events) {
+        window.removeEventListener(ev, onFirstInteraction, true);
+      }
+    };
+    for (const ev of events) {
+      window.addEventListener(ev, onFirstInteraction, { capture: true, passive: true });
+    }
+    return cleanup;
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isPlaying, isMuted, reducedMotion, handleUnmute]);
 
   const handleToggleMute = useCallback(() => {
     const player = playerRef.current;
@@ -690,6 +826,19 @@ export default function TrailerPlayer({
   const showFacadePlayButton =
     !isPlaying && !reducedMotion && !playerFailed && !activated;
 
+  /*
+   * THE FAILURE FALLBACK.
+   *
+   * There is no poster on the heroes, so if the player never boots there is
+   * nothing to look at. This is the ONE exception to "no poster": after
+   * PLAYER_BOOT_TIMEOUT_MS with no playback, a still frame with a play
+   * button is shown and the failure is logged.
+   *
+   * It must never appear on a healthy load. The pixel check asserts that
+   * the hero shows a MOVING picture, so a black box fails the gate.
+   */
+  const showBootFallback = bootTimedOut && !isPlaying && !!poster;
+
   return (
     <div
       ref={containerRef}
@@ -700,6 +849,36 @@ export default function TrailerPlayer({
       data-muted={isMuted ? 'true' : 'false'}
       data-activated={activated ? 'true' : 'false'}
     >
+      {/*
+       * THE FAILURE FALLBACK.
+       *
+       * The only path on which a still image is ever shown on the heroes.
+       * It appears when the player has not reported real playback within
+       * PLAYER_BOOT_TIMEOUT_MS.
+       */}
+      {showBootFallback ? (
+        <div className="absolute inset-0 z-20 flex flex-col items-center justify-center gap-4 bg-black/95">
+          {poster ? (
+            <Image
+              src={poster}
+              alt={title}
+              fill
+              sizes="100vw"
+              className="object-cover opacity-40"
+            />
+          ) : null}
+          <button
+            type="button"
+            onClick={handleActivate}
+            aria-label={`Play trailer: ${title}`}
+            data-testid="trailer-boot-fallback"
+            className="relative z-10 flex h-16 w-16 items-center justify-center rounded-full bg-white/90 text-black ring-2 ring-white/70 transition hover:scale-105 focus:outline-none focus-visible:ring-2 focus-visible:ring-white"
+          >
+            <Play className="h-7 w-7 fill-current" />
+          </button>
+        </div>
+      ) : null}
+
       {/* Facade / poster — always reserves the exact box the iframe will use. */}
       {poster && showPoster ? (
         <div className="absolute inset-0 z-10">

@@ -1,0 +1,103 @@
+name: hero-picture-gate
+
+# The hero player and the hero pages are LOCKED.
+#
+# This gate runs on every pull request that touches the player, a hero page,
+# or the gate itself. It proves that every hero shows a MOVING PICTURE, by
+# taking two screenshots a few seconds apart and asserting that the pixels
+# DIFFER.
+#
+# WHY A PIXEL CHECK
+# -----------------
+# The previous check asserted a bounding rect and data-playing. Both are
+# perfectly satisfied by a player sitting under an opaque poster, or under
+# visibility:hidden. It reported PASS on a hero that was a BLACK BOX
+# PLAYING AUDIO.
+#
+# A poster, a black box and a hidden player all fail this check, because a
+# playing video changes its pixels and those three do not.
+#
+# It runs against PRODUCTION on purpose. The heroes are client-rendered and
+# a local build has no database, so a local run would prove nothing. The
+# PR's own code is NOT executed: the check script comes from the base
+# branch (pull_request_target) and only READS the PR's file list.
+#
+# It is a REQUIRED status check. Shareef merges the PRs himself, so this
+# gate is the only thing between a regression and production.
+on:
+  pull_request_target:
+    types: [opened, synchronize, reopened]
+
+permissions:
+  contents: read
+  pull-requests: read
+
+concurrency:
+  group: hero-picture-gate-${{ github.event.pull_request.number }}
+  cancel-in-progress: true
+
+jobs:
+  hero-picture-gate:
+    # Pinned deliberately, like content-gate: ubuntu-latest keeps moving.
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    steps:
+      - name: Check out base branch (trusted copy of the check script)
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.base.sha }}
+
+      - name: Fetch the PR file list
+        env:
+          GH_TOKEN: ${{ github.token }}
+          PR: ${{ github.event.pull_request.number }}
+          REPO: ${{ github.repository }}
+        run: |
+          gh api "repos/$REPO/pulls/$PR/files" --paginate \
+            --jq '.[].filename' > "$RUNNER_TEMP/files.txt"
+          echo "files in PR: $(wc -l < "$RUNNER_TEMP/files.txt")"
+
+      - name: Decide whether this PR touches a hero
+        env:
+          PR: ${{ github.event.pull_request.number }}
+          REPO: ${{ github.repository }}
+        run: |
+          # The guarded paths. Anything that can change what a hero renders.
+          GUARDED='src/components/cinema/TrailerPlayer\.tsx
+          src/components/cinema/NetflixHero\.tsx
+          src/components/regional/RegionalTrailerHero\.tsx
+          src/components/international/InternationalTrailerHeader\.tsx
+          src/components/home/HeroVideo\.tsx
+          src/app/cinema/
+          src/app/regional/
+          src/app/international/
+          scripts/audit/hero_picture_check\.ts
+          scripts/audit/home_hero_check\.ts
+          scripts/audit/hero-picture-gate\.sh
+          .github/workflows/hero-picture-gate\.yml'
+
+          TOUCHED=0
+          while IFS= read -r f; do
+            [ -z "$f" ] && continue
+            if echo "$GUARDED" | grep -qE "$f"; then
+              echo "::notice::this PR touches a guarded hero path: $f"
+              TOUCHED=1
+            fi
+          done < "$RUNNER_TEMP/files.txt"
+
+          if [ "$TOUCHED" -eq 0 ]; then
+            echo "::notice::this PR does not touch a hero path - the hero gate has nothing to check"
+            echo "HERO_GATE_SKIPPED=1" >> "$GITHUB_ENV"
+          else
+            echo "HERO_GATE_SKIPPED=0" >> "$GITHUB_ENV"
+          fi
+
+      - name: Install Playwright and Chromium
+        if: env.HERO_GATE_SKIPPED == '0'
+        run: |
+          npm ci --no-audit --no-fund
+          npx playwright install --with-deps chromium
+
+      - name: Run the hero picture gate
+        if: env.HERO_GATE_SKIPPED == '0'
+        run: bash scripts/audit/hero-picture-gate.sh
