@@ -8,7 +8,7 @@ import BreadcrumbSchema from '@/components/SEO/BreadcrumbSchema';
 import InternalLinks, { guideLinks, placeLinks, eventLinks, dedupeLinks } from '@/components/SEO/InternalLinks';
 import EventServicesPromo from '@/components/events/EventServicesPromo';
 import { parseDate, toISODateString, todayInBahrain, formatEventDateForDisplay } from '@/lib/utils/date';
-import { PUBLIC_EVENT_LISTING_SELECT, PUBLIC_ATTRACTION_LISTING_SELECT } from '@/lib/public-fields';
+import { PUBLIC_EVENT_LISTING_SELECT, PUBLIC_EVENT_LISTING_FIELDS, PUBLIC_ATTRACTION_LISTING_SELECT } from '@/lib/public-fields';
 
 // Force dynamic rendering to ensure fresh data on every request
 export const dynamic = 'force-dynamic';
@@ -152,9 +152,21 @@ async function getEvents(): Promise<Event[]> {
           'docs/sql/2026-11-28-add-events-timestamps.sql is required. ' +
           'Falling back to the DATE filter until then, so the page is not empty.'
       );
+      /*
+       * The fallback must NOT select `end_at`, `starts_at` or
+       * `is_overnight`: PostgREST rejects the WHOLE select when one column
+       * does not exist, so selecting them here would fail with the same
+       * error as the query we are recovering from.
+       *
+       * `mapEvents` already tolerates their absence.
+       */
       const fallback = await supabase
         .from('events')
-        .select(PUBLIC_EVENT_LISTING_SELECT)
+        .select(
+          PUBLIC_EVENT_LISTING_FIELDS.filter(
+            (f) => f !== 'end_at' && f !== 'starts_at' && f !== 'is_overnight'
+          ).join(',')
+        )
         .eq('status', 'published')
         .eq('is_hidden', false)
         .eq('country', 'Bahrain')
