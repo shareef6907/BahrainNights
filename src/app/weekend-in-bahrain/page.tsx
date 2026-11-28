@@ -2,6 +2,7 @@ import { Metadata } from 'next';
 import Link from 'next/link';
 import Image from 'next/image';
 import { createClient } from '@supabase/supabase-js';
+import { endAtAfterNow } from '@/lib/utils/event-filter';
 import { 
   MapPin, Clock, Calendar, Sun, Moon, Sunrise, Sunset,
   Coffee, Utensils, Waves, Camera, Landmark, ShoppingBag,
@@ -84,6 +85,9 @@ async function getWeekendEvents(): Promise<WeekendEvent[]> {
       .eq('status', 'published')
       .eq('is_hidden', false)
       .or(`date.eq.${thursdayStr},date.eq.${fridayStr}`)
+      // The end instant: a Friday party that ended at 03:00 Saturday is
+      // not on the page on the Saturday.
+      .gt('end_at', endAtAfterNow())
       .order('date', { ascending: true })
       .limit(8);
     

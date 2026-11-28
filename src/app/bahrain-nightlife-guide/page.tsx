@@ -2,6 +2,7 @@ import { Metadata } from 'next';
 import Link from 'next/link';
 import Image from 'next/image';
 import { createClient } from '@supabase/supabase-js';
+import { endAtAfterNow } from '@/lib/utils/event-filter';
 import { 
   MapPin, Star, Clock, Music, Wine, Moon, Sparkles,
   Users, Calendar, ArrowRight, Volume2, PartyPopper,
@@ -76,6 +77,7 @@ async function getNightlifeEvents(): Promise<NightlifeEvent[]> {
       .eq('is_hidden', false)
       .in('category', ['nightlife', 'music', 'party', 'concert'])
       .gte('date', today)
+      .gt('end_at', endAtAfterNow())
       .order('date', { ascending: true })
       .limit(6);
     

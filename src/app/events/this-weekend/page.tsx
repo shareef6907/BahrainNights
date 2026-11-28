@@ -3,6 +3,7 @@ import { Metadata } from 'next';
 import { Suspense } from 'react';
 import Link from 'next/link';
 import { createClient } from '@supabase/supabase-js';
+import { endAtAfterNow } from '@/lib/utils/event-filter';
 import { 
   Calendar, MapPin, Clock, Ticket, Star,
   ArrowRight, Music, PartyPopper, Film, Users
@@ -83,6 +84,7 @@ async function getWeekendEvents() {
     .eq('status', 'published')
     .eq('is_hidden', false)
     .gte('date', friday)
+    .gt('end_at', endAtAfterNow())
     .lt('date', endOfWeekend)
     .order('date', { ascending: true })
     .order('time', { ascending: true });

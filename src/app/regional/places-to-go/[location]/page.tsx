@@ -1,4 +1,5 @@
 import { OG_IMAGE } from '@/lib/og';
+import { endAtAfterNow } from '@/lib/utils/event-filter';
 import { Metadata } from 'next';
 import Link from 'next/link';
 import Image from 'next/image';
@@ -107,7 +108,9 @@ async function getLocationData(location: string) {
     .from('events')
     .select('*', { count: 'exact', head: true })
     .or(locationInfo?.cities.map(city => `venue_name.ilike.%${city}%,venue_address.ilike.%${city}%`).join(',') || '')
-    .eq('is_active', true);
+    .eq('is_active', true)
+    // The end instant, so the count is of events that are still on.
+    .gt('end_at', endAtAfterNow());
 
   // Get featured articles
   // eslint-disable-next-line @typescript-eslint/no-explicit-any

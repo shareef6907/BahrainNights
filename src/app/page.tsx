@@ -1,4 +1,5 @@
 import { supabaseAdmin } from '@/lib/supabase';
+import { endAtAfterNow } from '@/lib/utils/event-filter';
 import HomePageClient, { HomepageMovie, TodayEvent } from '@/components/home/HomePageClient';
 import { getInternationalCountrySummaries } from '@/lib/international-events';
 import { getBookingUrlsByMovie } from '@/lib/cinema/booking-urls';
@@ -344,6 +345,7 @@ async function getTrendingData() {
       .eq('is_hidden', false)
       .eq('country', 'Bahrain')
       .gte('date', today)
+      .gt('end_at', endAtAfterNow())
       .order('view_count', { ascending: false })
       .limit(3),
   ]);

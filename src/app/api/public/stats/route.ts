@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server';
 import { createClient } from '@supabase/supabase-js';
+import { endAtAfterNow } from '@/lib/utils/event-filter';
 
 // Cache stats for 5 minutes (300 seconds)
 export const revalidate = 300;
@@ -35,7 +36,9 @@ export async function GET() {
         .eq('status', 'published')
         .eq('is_hidden', false)
         .eq('country', 'Bahrain')
-        .gte('start_date', new Date().toISOString().split('T')[0]),
+        .gte('start_date', new Date().toISOString().split('T')[0])
+        // The end instant, so the count is of events that are still on.
+        .gt('end_at', endAtAfterNow()),
 
       // Count approved venues
       supabase

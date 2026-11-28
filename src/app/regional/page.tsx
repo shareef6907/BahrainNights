@@ -1,4 +1,5 @@
 import { hasPlayableTrailer } from '@/lib/cinema/trailer';
+import { endAtAfterNow } from '@/lib/utils/event-filter';
 import { displayTitleFor } from '@/lib/cinema/film-identity';
 import { OG_IMAGE } from '@/lib/og';
 import { Metadata } from 'next';
@@ -60,6 +61,7 @@ async function getUpcomingEvents(): Promise<RegionalItem[]> {
       .eq('status', 'published')
       .eq('is_active', true)
       .or(`start_date.gte.${today},date.gte.${today}`)
+      .gt('end_at', endAtAfterNow())
       .order('start_date', { ascending: true });
 
     if (error) {

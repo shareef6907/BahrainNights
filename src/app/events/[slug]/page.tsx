@@ -1,5 +1,6 @@
 import { notFound } from 'next/navigation';
 import { todayInBahrain } from '@/lib/utils/date';
+import { endAtAfterNow } from '@/lib/utils/event-filter';
 import { supabaseAdmin } from '@/lib/supabase';
 import EventDetailClient from './EventDetailClient';
 import EventSchema from '@/components/SEO/EventSchema';
@@ -195,6 +196,14 @@ async function getSimilarEvents(category: string, excludeId: string) {
     .eq('category', category)
     .neq('id', excludeId)
     .gte('date', new Date().toISOString().split('T')[0])
+    /*
+     * THE END INSTANT.
+     *
+     * The related-events block is a user-facing surface, and the date
+     * filter above keeps an event whose date is today even when it
+     * finished hours ago.
+     */
+    .gt('end_at', endAtAfterNow())
     .order('date', { ascending: true })
     .limit(4);
 

@@ -1,4 +1,5 @@
 import { OG_IMAGES } from '@/lib/og';
+import { endAtAfterNow } from '@/lib/utils/event-filter';
 import { Metadata } from 'next';
 import { Suspense } from 'react';
 import { supabaseAdmin } from '@/lib/supabase';
@@ -76,6 +77,7 @@ async function getCalendarEvents(): Promise<CalendarEvent[]> {
     .eq('is_hidden', false)
     .eq('country', 'Bahrain')
     .gte('date', todayStr)
+    .gt('end_at', endAtAfterNow())
     .lte('date', endDateStr)
     .order('date', { ascending: true })
     .order('time', { ascending: true });

@@ -2,6 +2,7 @@ import { Metadata } from 'next';
 import Link from 'next/link';
 import Image from 'next/image';
 import { createClient } from '@supabase/supabase-js';
+import { endAtAfterNow } from '@/lib/utils/event-filter';
 import {
   Moon, Calendar, MapPin, Clock, Star, Film,
   Music, Utensils, PartyPopper, ArrowRight, Wine,
@@ -83,6 +84,7 @@ async function getTonightEvents() {
       .eq('status', 'published')
       .eq('is_hidden', false)
       .eq('date', today.iso)
+      .gt('end_at', endAtAfterNow())
       .order('time', { ascending: true });
 
     return data || [];
