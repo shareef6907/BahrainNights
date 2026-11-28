@@ -96,7 +96,19 @@ jobs:
         if: env.HERO_GATE_SKIPPED == '0'
         run: |
           npm ci --no-audit --no-fund
-          npx playwright install --with-deps chromium
+          # The LOCAL CLI, not `npx playwright`.
+          #
+          # `npx playwright install` resolves the `playwright` package from
+          # npm - the LATEST - which installed browser build 1228 while the
+          # `playwright-core` the scripts import wants build 1200. The
+          # result was:
+          #
+          #   Executable doesn't exist at
+          #   .../chromium_headless_shell-1228/chrome-headless-shell-linux64/...
+          #
+          # So the browser that is installed must be the one the code
+          # expects: the repo's own CLI.
+          ./node_modules/.bin/playwright install --with-deps chromium
 
       - name: Run the hero picture gate
         if: env.HERO_GATE_SKIPPED == '0'

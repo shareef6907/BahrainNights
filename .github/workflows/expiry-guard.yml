@@ -49,7 +49,19 @@ jobs:
           npm ci --no-audit --no-fund
 
       - name: Install Chromium
-        run: npx playwright install --with-deps chromium
+        run: # The LOCAL CLI, not `npx playwright`.
+          #
+          # `npx playwright install` resolves the `playwright` package from
+          # npm - the LATEST - which installed browser build 1228 while the
+          # `playwright-core` the scripts import wants build 1200. The
+          # result was:
+          #
+          #   Executable doesn't exist at
+          #   .../chromium_headless_shell-1228/chrome-headless-shell-linux64/...
+          #
+          # So the browser that is installed must be the one the code
+          # expects: the repo's own CLI.
+          ./node_modules/.bin/playwright install --with-deps chromium
 
       - name: Run the expiry guard
         env:
