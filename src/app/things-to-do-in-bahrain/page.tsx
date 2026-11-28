@@ -2,6 +2,7 @@ import { Metadata } from 'next';
 import Link from 'next/link';
 import Image from 'next/image';
 import { createClient } from '@supabase/supabase-js';
+import { endAtAfterNow } from '@/lib/utils/event-filter';
 import InternalLinks, { exploreLinks } from '@/components/SEO/InternalLinks';
 import { 
   MapPin, Calendar, Utensils, Music, Film, Users, 
@@ -89,6 +90,7 @@ async function getUpcomingEvents(): Promise<UpcomingEvent[]> {
       .eq('is_hidden', false)
       .eq('country', 'Bahrain')
       .gte('date', today)
+      .gt('end_at', endAtAfterNow())
       .order('date', { ascending: true })
       .limit(6);
     

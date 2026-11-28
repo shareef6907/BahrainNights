@@ -9,6 +9,7 @@
  */
 
 import { supabaseAdmin } from '@/lib/supabase';
+import { endAtAfterNow } from '@/lib/utils/event-filter';
 
 // ─── Shared COUNTRY_CONFIG ────────────────────────────────────────────────────
 const COUNTRY_CONFIG: Record<string, { flag: string; code: string }> = {
@@ -133,6 +134,17 @@ function buildInternationalEventsQuery(
     .eq('status', 'published')
     .eq('is_active', true)
     .or(`start_date.gte.${today},date.gte.${today}`)
+    /*
+     * THE END INSTANT.
+     *
+     * The date filter above keeps an event whose start date is today even
+     * when it finished hours ago. "Arabian Tale at TODA in Dubai" had
+     * start_date = 2026-11-28 and end_at = 13:00 Bahrain, and it was on
+     * /international at 13:30.
+     *
+     * The same predicate every other surface uses: end_at > now().
+     */
+    .gt('end_at', endAtAfterNow())
     .order('start_date', { ascending: true, nullsFirst: false });
 
   if (countryFilter) {

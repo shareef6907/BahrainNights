@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { supabaseAdmin } from '@/lib/supabase';
+import { resolveEventTimes } from '@/lib/utils/event-times';
 
 export const dynamic = 'force-dynamic';
 
@@ -118,6 +119,26 @@ export async function POST(request: NextRequest) {
     // cover_url, gallery_urls, contact_name, contact_email, contact_phone, status,
     // is_featured, views, created_at, updated_at, booking_method, featured_image,
     // booking_url, booking_link, image_url, thumbnail, banner_url
+    /*
+     * THE END INSTANT, AT INSERT.
+     *
+     * A submitted event with no `end_at` would be EXPIRED - the listing
+     * filter is `end_at > now()` and a null is not greater than now. So
+     * the instant is computed here, from the submitted dates and times,
+     * with the SAME resolver the app and the backfill use.
+     */
+    const submittedStart = sanitize(body.date) || null;
+    const submittedEnd = body.endDate ? sanitize(body.endDate) : null;
+    const submittedStartTime = body.time ? sanitize(body.time) : null;
+    const submittedEndTime = body.endTime ? sanitize(body.endTime) : null;
+    const submittedTimes = resolveEventTimes({
+      start_date: submittedStart,
+      end_date: submittedEnd,
+      start_time: submittedStartTime,
+      end_time: submittedEndTime,
+      category: sanitize(body.category) || null,
+    });
+
     const eventData = {
       title: sanitize(body.title) || '',
       slug,
@@ -125,8 +146,12 @@ export async function POST(request: NextRequest) {
       category: sanitize(body.category) || 'other',
       date: body.date,
       time: body.time,
-      end_date: body.endDate || null,
-      end_time: body.endTime || null,
+      end_date: submittedEnd,
+      end_time: submittedEndTime,
+      // The instant. Fail closed: a row with no end_at is expired.
+      starts_at: submittedTimes.starts_at,
+      end_at: submittedTimes.end_at,
+      is_overnight: submittedTimes.is_overnight,
       venue_name: sanitize(body.venueName) || '',
       venue_address: sanitize(body.venueAddress) || null,
       venue_lat: body.venueLat || null,

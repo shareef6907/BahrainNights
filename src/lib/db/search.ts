@@ -1,4 +1,5 @@
 import { getAdminClient } from '@/lib/supabase/server';
+import { endAtAfterNow } from '@/lib/utils/event-filter';
 import { PUBLIC_EVENT_SELECT } from '@/lib/public-fields';
 import { PUBLIC_MOVIE_SELECT } from '@/lib/public-fields';
 import { PUBLIC_VENUE_SELECT } from '@/lib/public-venue-fields';
@@ -150,6 +151,9 @@ async function searchEvents(query: string, category?: string): Promise<Event[]> 
     .eq('is_hidden', false)
     .eq('country', 'Bahrain') // Only Bahrain events in search
     .gte('start_date', today)
+    // The end instant: a search must not return an event that has
+    // already finished. The same predicate every other surface uses.
+    .gt('end_at', endAtAfterNow())
     .or(`title.ilike.%${query}%,description.ilike.%${query}%`)
     .order('start_date', { ascending: true })
     .limit(10);
@@ -323,6 +327,8 @@ export async function getSearchSuggestions(query: string, limit: number = 5): Pr
     .select('title')
     .eq('status', 'published')
     .eq('country', 'Bahrain')
+    // The end instant, for the same reason as the search itself.
+    .gt('end_at', endAtAfterNow())
     .ilike('title', `%${searchTerm}%`)
     .limit(limit);
 
@@ -383,6 +389,7 @@ export async function searchByCategory(category: string, limit: number = 20): Pr
       .eq('country', 'Bahrain')
       .eq('category', category)
       .gte('start_date', today)
+      .gt('end_at', endAtAfterNow())
       .order('start_date', { ascending: true })
       .limit(limit),
   ]);
