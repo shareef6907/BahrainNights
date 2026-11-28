@@ -11,10 +11,10 @@
  * Run: npx tsx scripts/audit/home_hero_check.ts [url] [outdir]
  */
 import { chromium } from 'playwright';
+import { resolveBrowserPath } from './browser-path';
 
 const URL_ARG = process.argv[2] || 'https://www.bahrainnights.com/';
 const OUT = process.argv[3] || '/tmp/hero_pics';
-const EXEC = `${process.env.HOME}/Library/Caches/ms-playwright/chromium-1243/chrome-mac-arm64/Google Chrome for Testing.app/Contents/MacOS/Google Chrome for Testing`;
 
 const PIXEL_FN = `(async function (framesIn) {
   function load(b64) {
@@ -56,7 +56,7 @@ const PIXEL_FN = `(async function (framesIn) {
 })`;
 
 async function main() {
-  const browser = await chromium.launch({ headless: true, executablePath: EXEC });
+  const browser = await chromium.launch({ headless: true, executablePath: resolveBrowserPath() });
   // The homepage hero video is DESKTOP ONLY by design
   // (src/components/home/HeroVideo.tsx: "Mobile: the video is never
   // requested at all"), so this check runs at a desktop viewport.

@@ -25,15 +25,15 @@
  *      THROTTLE=1 to apply Lighthouse's mobile conditions.
  */
 import { chromium } from 'playwright';
+import { resolveBrowserPath } from './browser-path';
 
 const URL_ARG = process.argv[2] || 'https://www.bahrainnights.com/regional';
 const OUT = process.argv[3] || '/tmp/hero_pics';
-const EXEC = `${process.env.HOME}/Library/Caches/ms-playwright/chromium-1243/chrome-mac-arm64/Google Chrome for Testing.app/Contents/MacOS/Google Chrome for Testing`;
 const THROTTLE = process.env.THROTTLE === '1';
 
 
 async function main() {
-  const browser = await chromium.launch({ headless: true, executablePath: EXEC });
+  const browser = await chromium.launch({ headless: true, executablePath: resolveBrowserPath() });
   const ctx = await browser.newContext({
     viewport: { width: 412, height: 823 },
     isMobile: true,
