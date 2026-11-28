@@ -10,6 +10,7 @@ import { ScrapedEvent, SOURCE_NAMES } from '../types';
 import { SCRAPER_CONFIG } from '../config';
 import { mapSourceCategory, detectCategory } from '../utils/categorizer';
 import { sleep, getRandomDelay, scraperLog } from '../utils/request-helper';
+import { splitTimeRange } from '../../../src/lib/utils/time-parsing';
 
 const BASE_URL = 'https://www.bahrain.com';
 const CALENDAR_PATH = '/en/bahrain-calendar';
@@ -187,12 +188,50 @@ async function scrapeEventDetail(
       }
     }
 
+    /*
+     * THE TIME, SPLIT INTO A START AND AN END.
+     *
+     * Bahrain.com serves a whole RANGE in one element:
+     *
+     *     "06:00 AM - 10:00 PM"
+     *     "From 6:00 AM to 10:00 AM"
+     *
+     * That range used to be stored VERBATIM in the `time` column, which
+     * is a text column that the time columns cannot hold. The Postgres
+     * migration failed on its first run with:
+     *
+     *     invalid input syntax for type time: "05:00 PM - 12:00 AM"
+     *
+     * and the reading code silently discarded the end of the range.
+     *
+     * So the range is split HERE, at ingestion, into `time` (the start)
+     * and `end_time` (the end). A value that carries no parseable time is
+     * dropped entirely rather than written - a row with no time is
+     * EXPIRED, which is the safe direction.
+     */
+    const applyTime = (raw: string, source: string) => {
+      const { start, end } = splitTimeRange(raw);
+      if (!start) {
+        scraperLog.debug(
+          LOG_PREFIX,
+          `Ignoring an unparseable time from ${source}: ${JSON.stringify(raw)}`
+        );
+        return;
+      }
+      details.time = start;
+      if (end) {
+        details.end_time = end;
+      }
+      scraperLog.debug(
+        LOG_PREFIX,
+        `Time from ${source}: ${JSON.stringify(raw)} -> start=${start} end=${end ?? '(none)'}`
+      );
+    };
+
     // Try to get time - Bahrain.com uses .status-time-wrapper h6
     const timeFromWrapper = $('.status-time-wrapper h6').first().text().trim();
     if (timeFromWrapper && timeFromWrapper.length > 0) {
-      // Time could be in format "06:00 AM - 10:00 PM" or "From 6:00 AM to 10:00 AM"
-      details.time = timeFromWrapper;
-      scraperLog.debug(LOG_PREFIX, `Found time from status-time-wrapper: ${timeFromWrapper}`);
+      applyTime(timeFromWrapper, 'status-time-wrapper');
     } else {
       // Fallback to generic selectors
       const timeSelectors = [
@@ -205,7 +244,7 @@ async function scrapeEventDetail(
       for (const selector of timeSelectors) {
         const time = $(selector).first().text().trim();
         if (time) {
-          details.time = time;
+          applyTime(time, selector);
           break;
         }
       }

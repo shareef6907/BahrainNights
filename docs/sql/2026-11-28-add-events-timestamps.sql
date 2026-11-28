@@ -32,7 +32,145 @@ COMMENT ON COLUMN events.is_overnight IS
   'True when the event starts in the evening and ends in the small hours of the next day. It is a SINGLE-NIGHT event, not a multi-day one.';
 
 -- ---------------------------------------------------------------------------
--- 2. The backfill
+-- 2. The helper functions
+-- ---------------------------------------------------------------------------
+-- THE TIME COLUMNS ARE FREE TEXT, AND SOME ROWS HOLD A WHOLE RANGE IN ONE
+-- COLUMN:
+--
+--     time = "05:00 PM - 12:00 AM"
+--
+-- The first run of this migration FAILED on exactly that value:
+--
+--     invalid input syntax for type time: "05:00 PM - 12:00 AM"
+--
+-- So the time is parsed with a helper that extracts the time-like TOKENS
+-- from the string, in order: the FIRST token is the start, the SECOND is
+-- the end. A value with no token at all returns NULL, and a NULL end
+-- means EXPIRED - fail closed, never open.
+--
+-- These functions are the SAME rules as src/lib/utils/time-parsing.ts, and
+-- scripts/audit/a1_db_parity.ts checks the two against each other row by
+-- row against the live data.
+--
+-- bn_parse_time returns the FIRST time-like token, as a time.
+-- bn_parse_end_time returns the SECOND token, as a time - the end of a
+-- range. NULL when the value carries only one time.
+-- bn_parse_date returns a date from a text value, or NULL.
+
+CREATE OR REPLACE FUNCTION public.bn_parse_time(v text)
+RETURNS time
+LANGUAGE plpgsql
+IMMUTABLE
+AS $$
+DECLARE
+  m text[];
+  hh int;
+  mm int;
+  pp text;
+  result time;
+BEGIN
+  IF v IS NULL OR btrim(v) = '' THEN
+    RETURN NULL;
+  END IF;
+
+  -- Every time-like token: 1-2 digits, an optional separator, 2 digits,
+  -- an optional am/pm suffix. The seconds group is consumed as part of
+  -- the token so "20:00:00" is ONE time, not a start and an end.
+  m := regexp_matches(v, '(\d{1,2})\s*[:.]?\s*(\d{2})?(?::(\d{2}))?\s*(am|pm)?', 'gi');
+
+  IF m IS NULL OR array_length(m, 1) = 0 THEN
+    RETURN NULL;
+  END IF;
+
+  hh := m[1][1]::int;
+  mm := COALESCE(NULLIF(m[1][2], '')::int, 0);
+  pp := lower(COALESCE(m[1][4], ''));
+
+  IF mm > 59 THEN
+    RETURN NULL;
+  END IF;
+  IF pp = 'pm' AND hh < 12 THEN
+    hh := hh + 12;
+  ELSIF pp = 'am' AND hh = 12 THEN
+    hh := 0;
+  END IF;
+  IF hh > 23 THEN
+    RETURN NULL;
+  END IF;
+
+  result := make_time(hh, mm, 0);
+  RETURN result;
+END;
+$$;
+
+CREATE OR REPLACE FUNCTION public.bn_parse_end_time(v text)
+RETURNS time
+LANGUAGE plpgsql
+IMMUTABLE
+AS $$
+DECLARE
+  m text[][];
+  hh int;
+  mm int;
+  pp text;
+BEGIN
+  IF v IS NULL OR btrim(v) = '' THEN
+    RETURN NULL;
+  END IF;
+
+  m := regexp_matches(v, '(\d{1,2})\s*[:.]?\s*(\d{2})?(?::(\d{2}))?\s*(am|pm)?', 'gi');
+
+  -- The SECOND token is the end of a range.
+  IF m IS NULL OR array_length(m, 1) < 2 THEN
+    RETURN NULL;
+  END IF;
+
+  hh := m[2][1]::int;
+  mm := COALESCE(NULLIF(m[2][2], '')::int, 0);
+  pp := lower(COALESCE(m[2][4], ''));
+
+  IF mm > 59 THEN
+    RETURN NULL;
+  END IF;
+  IF pp = 'pm' AND hh < 12 THEN
+    hh := hh + 12;
+  ELSIF pp = 'am' AND hh = 12 THEN
+    hh := 0;
+  END IF;
+  IF hh > 23 THEN
+    RETURN NULL;
+  END IF;
+
+  RETURN make_time(hh, mm, 0);
+END;
+$$;
+
+CREATE OR REPLACE FUNCTION public.bn_parse_date(v text)
+RETURNS date
+LANGUAGE plpgsql
+IMMUTABLE
+AS $$
+BEGIN
+  IF v IS NULL OR btrim(v) = '' THEN
+    RETURN NULL;
+  END IF;
+  BEGIN
+    RETURN v::date;
+  EXCEPTION WHEN others THEN
+    RETURN NULL;
+  END;
+END;
+$$;
+
+COMMENT ON FUNCTION public.bn_parse_time(text) IS
+  'The first time-like token in a free-text value, as a time. Handles 12-hour forms ("05:00 PM" -> 17:00) and ignores a seconds group. NULL when nothing is parseable.';
+COMMENT ON FUNCTION public.bn_parse_end_time(text) IS
+  'The SECOND time-like token in a free-text value, as a time - the end of a range like "05:00 PM - 12:00 AM". NULL when the value carries only one time.';
+COMMENT ON FUNCTION public.bn_parse_date(text) IS
+  'A date from a text value, or NULL when it cannot be parsed.';
+
+-- ---------------------------------------------------------------------------
+-- 3. The backfill
 -- ---------------------------------------------------------------------------
 -- The rule order here is EXACTLY the order in
 -- src/lib/utils/event-times.ts (resolveEventTimes). The two implementations
@@ -58,35 +196,65 @@ COMMENT ON COLUMN events.is_overnight IS
 WITH resolved AS (
   SELECT
     e.id,
-    -- Normalised source values.
-    COALESCE(NULLIF(e.start_date::text, ''), NULLIF(e.date::text, ''))::date  AS start_d,
-    NULLIF(e.end_date::text, '')::date                                          AS end_d,
-    NULLIF(e.start_time::text, '')::time                                         AS start_t,
-    NULLIF(e.end_time::text, '')::time                                           AS end_t,
-    COALESCE(NULLIF(e.start_time::text, ''), NULLIF(e.time::text, ''))::time     AS eff_start_t,
+    -- Normalised source values, through the defensive parsers.
+    --
+    -- The time columns are FREE TEXT and some rows hold a whole RANGE
+    -- ("05:00 PM - 12:00 AM"), so they CANNOT be cast to time directly -
+    -- that is what made the first run of this migration fail with
+    --     invalid input syntax for type time: "05:00 PM - 12:00 AM"
+    --
+    -- `eff_start_t` is the start time, from `start_time` when it has one
+    -- and from the legacy `time` column otherwise. `end_t` is the end
+    -- time: `end_time` when it has one, and otherwise the SECOND token of
+    -- the range in the legacy `time` column.
+    COALESCE(
+      public.bn_parse_date(e.start_date::text),
+      public.bn_parse_date(e.date::text)
+    )                                                                    AS start_d,
+    public.bn_parse_date(e.end_date::text)                                AS end_d,
+    public.bn_parse_time(e.start_time::text)                               AS start_t,
+    public.bn_parse_time(e.end_time::text)                                 AS end_t,
+    COALESCE(
+      public.bn_parse_time(e.start_time::text),
+      public.bn_parse_time(e.time::text)
+    )                                                                     AS eff_start_t,
+    -- The end of a range carried in the legacy `time` column.
+    public.bn_parse_end_time(e.time::text)                                 AS time_range_end,
     lower(COALESCE(e.category, ''))                                              AS cat,
     -- RULE 1: overnight detection. This drives WHICH end formula is used.
     (
-      e.start_date IS NOT NULL
-      AND e.end_date IS NOT NULL
-      AND e.end_date::date = e.start_date::date + 1
-      AND COALESCE(NULLIF(e.start_time::text, ''), NULLIF(e.time::text, ''))::time >= TIME '18:00'
+      public.bn_parse_date(e.start_date::text) IS NOT NULL
+      AND public.bn_parse_date(e.end_date::text) IS NOT NULL
+      AND public.bn_parse_date(e.end_date::text)
+          = public.bn_parse_date(e.start_date::text) + 1
+      AND COALESCE(
+            public.bn_parse_time(e.start_time::text),
+            public.bn_parse_time(e.time::text)
+          ) >= TIME '18:00'
       AND (
-        NULLIF(e.end_time::text, '')::time IS NULL
-        OR NULLIF(e.end_time::text, '')::time <= TIME '06:00'
+        public.bn_parse_time(e.end_time::text) IS NULL
+        OR public.bn_parse_time(e.end_time::text) <= TIME '06:00'
       )
     ) AS rule1_overnight,
     -- RULE 2 can also be an overnight event: an explicit end time in the
     -- small hours with an evening start, on a longer span.
     (
-      e.start_date IS NOT NULL AND e.end_date IS NOT NULL
-      AND NULLIF(e.end_time::text, '')::time IS NOT NULL
-      AND NULLIF(e.end_time::text, '')::time <= TIME '06:00'
-      AND COALESCE(NULLIF(e.start_time::text, ''), NULLIF(e.time::text, ''))::time >= TIME '18:00'
+      public.bn_parse_date(e.start_date::text) IS NOT NULL
+      AND public.bn_parse_date(e.end_date::text) IS NOT NULL
+      AND public.bn_parse_time(e.end_time::text) IS NOT NULL
+      AND public.bn_parse_time(e.end_time::text) <= TIME '06:00'
+      AND COALESCE(
+            public.bn_parse_time(e.start_time::text),
+            public.bn_parse_time(e.time::text)
+          ) >= TIME '18:00'
     ) AS rule2_overnight,
-    (e.end_date::date - e.start_date::date)                                     AS span_days
+    (public.bn_parse_date(e.end_date::text) - public.bn_parse_date(e.start_date::text))
+                                                                                AS span_days
   FROM events e
-  WHERE COALESCE(NULLIF(e.start_date::text, ''), NULLIF(e.date::text, '')) IS NOT NULL
+  WHERE COALESCE(
+          public.bn_parse_date(e.start_date::text),
+          public.bn_parse_date(e.date::text)
+        ) IS NOT NULL
 ),
 built AS (
   SELECT
@@ -108,8 +276,8 @@ built AS (
           END
         )) AT TIME ZONE 'Asia/Bahrain'
       -- RULE 2: an explicit end date and time.
-      WHEN r.end_d IS NOT NULL AND r.end_t IS NOT NULL THEN
-        (r.end_d::timestamp + r.end_t) AT TIME ZONE 'Asia/Bahrain'
+      WHEN r.end_d IS NOT NULL AND COALESCE(r.end_t, r.time_range_end) IS NOT NULL THEN
+        (r.end_d::timestamp + COALESCE(r.end_t, r.time_range_end)) AT TIME ZONE 'Asia/Bahrain'
       -- RULE 3: a genuine multi-day event.
       WHEN r.end_d IS NOT NULL AND r.span_days >= 2 THEN
         (r.end_d::timestamp + TIME '23:59:59') AT TIME ZONE 'Asia/Bahrain'
@@ -156,7 +324,7 @@ FROM final f
 WHERE e.id = f.id;
 
 -- ---------------------------------------------------------------------------
--- 3. FAIL CLOSED
+-- 4. FAIL CLOSED
 -- ---------------------------------------------------------------------------
 -- A row with a NULL end_at is EXPIRED and is never displayed. The NOT NULL
 -- constraint makes it impossible for a null to reach the listing.
@@ -165,9 +333,13 @@ WHERE e.id = f.id;
 -- conservative end there is - the end of its own day. That is still a
 -- real instant, and it is in the past for anything that has already run.
 UPDATE events
-SET end_at = COALESCE(end_at, (start_date::timestamp + TIME '23:59:59') AT TIME ZONE 'Asia/Bahrain')
+SET end_at = COALESCE(
+      end_at,
+      (public.bn_parse_date(start_date::text)::timestamp + TIME '23:59:59')
+        AT TIME ZONE 'Asia/Bahrain'
+    )
 WHERE end_at IS NULL
-  AND start_date IS NOT NULL;
+  AND public.bn_parse_date(start_date::text) IS NOT NULL;
 
 -- Any row with no date at all cannot be resolved and is expired. It gets a
 -- sentinel in the past.
@@ -178,7 +350,7 @@ WHERE end_at IS NULL;
 ALTER TABLE events ALTER COLUMN end_at SET NOT NULL;
 
 -- ---------------------------------------------------------------------------
--- 4. THE INDEX
+-- 5. THE INDEX
 -- ---------------------------------------------------------------------------
 -- The listing filter is end_at > now(), and the ordering is by end_at.
 CREATE INDEX IF NOT EXISTS idx_events_end_at ON events (end_at);
@@ -189,7 +361,7 @@ CREATE INDEX IF NOT EXISTS idx_events_published_end_at
   WHERE status = 'published' AND is_hidden = false;
 
 -- ---------------------------------------------------------------------------
--- 5. EXPLAIN ANALYZE - the index must be used
+-- 6. EXPLAIN ANALYZE - the index must be used
 -- ---------------------------------------------------------------------------
 EXPLAIN (ANALYZE, BUFFERS)
 SELECT id, title, starts_at, end_at, is_overnight
@@ -201,7 +373,7 @@ ORDER BY end_at ASC
 LIMIT 60;
 
 -- ---------------------------------------------------------------------------
--- 6. VERIFY
+-- 7. VERIFY
 -- ---------------------------------------------------------------------------
 -- MUST RETURN ZERO ROWS.
 SELECT count(*) AS expired_but_still_published
@@ -223,13 +395,32 @@ FROM events
 WHERE title ILIKE ANY (ARRAY['%Naak x Thuya%','%Cavallo Club%','%ANII live%','%Narratives at Teres%','%Pax Arabiana%'])
 ORDER BY title;
 
--- The rule breakdown, so the counts can be compared against
--- scripts/audit/a1_classify.ts.
+/*
+ * The rule breakdown.
+ *
+ * IT MUST NOT SELECT FROM `resolved` - that CTE is scoped to the
+ * backfill statement above, so a standalone query against it fails with
+ * "relation resolved does not exist" AFTER everything has already
+ * committed. It looks like a failed migration when the migration
+ * succeeded.
+ *
+ * This version is self-contained.
+ */
 SELECT
-  count(*) FILTER (WHERE rule1_overnight)                            AS rule1_overnight,
-  count(*) FILTER (WHERE NOT rule1_overnight AND rule2_overnight)     AS rule2_overnight,
-  count(*) FILTER (WHERE NOT rule1_overnight AND NOT rule2_overnight
-                     AND end_t IS NOT NULL)                           AS rule3_or_2_explicit,
-  count(*) FILTER (WHERE is_overnight)                               AS is_overnight_total,
-  count(*)                                                            AS total
-FROM resolved;
+  count(*) FILTER (WHERE is_overnight)                          AS is_overnight_total,
+  count(*) FILTER (WHERE is_overnight AND end_date::date = start_date::date + 1)
+                                                                 AS rule1_overnight,
+  count(*) FILTER (
+    WHERE NOT (is_overnight AND end_date::date = start_date::date + 1)
+      AND end_time IS NOT NULL
+      AND end_time <= TIME '06:00'
+      AND COALESCE(start_time, time)::time >= TIME '18:00'
+  )                                                              AS rule2_overnight,
+  count(*) FILTER (
+    WHERE end_date IS NOT NULL
+      AND end_date::date - start_date::date >= 2
+  )                                                              AS rule3_multiday,
+  count(*)                                                        AS total
+FROM events
+WHERE status = 'published'
+  AND is_hidden = false;

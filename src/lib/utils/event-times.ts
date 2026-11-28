@@ -51,6 +51,11 @@
  */
 
 /** Bahrain is UTC+3 all year. */
+import {
+  parseTimeToMinutes as parseTimeToMinutesShared,
+  parseEndTimeToMinutes as parseEndTimeToMinutesShared,
+} from './time-parsing';
+
 export const BAHRAIN_UTC_OFFSET_MINUTES = 180;
 
 /** The hour Bahrain venues close. */
@@ -99,15 +104,28 @@ export interface ResolvedEventTimes {
   note?: string;
 }
 
-/** Minutes since midnight, or null. */
+/*
+ * Minutes since midnight, or null.
+ *
+ * DELEGATED to the shared defensive parser. The time columns are FREE
+ * TEXT: 8 rows in the database store a whole RANGE in `time`, e.g.
+ * "05:00 PM - 12:00 AM", and the old inline regex here read only the
+ * first token - silently discarding the end of the range - while the
+ * Postgres migration threw on the same value.
+ *
+ * See src/lib/utils/time-parsing.ts.
+ */
 export function parseTimeToMinutes(value: string | null | undefined): number | null {
-  if (!value) return null;
-  const m = String(value).match(/(\d{1,2}):(\d{2})/);
-  if (!m) return null;
-  const h = Number(m[1]);
-  const min = Number(m[2]);
-  if (h > 23 || min > 59) return null;
-  return h * 60 + min;
+  return parseTimeToMinutesShared(value);
+}
+
+/**
+ * The END time from a free-text value, if it carries one.
+ *
+ * "05:00 PM - 12:00 AM" -> 00:00. A single time carries no end.
+ */
+export function parseEndTimeToMinutes(value: string | null | undefined): number | null {
+  return parseEndTimeToMinutesShared(value);
 }
 
 /** Whole days from a to b, both 'YYYY-MM-DD'. */
@@ -154,8 +172,29 @@ export function defaultDurationMinutes(category: string | null | undefined): num
 export function resolveEventTimes(input: EventTimeInput): ResolvedEventTimes {
   const startDate = String(input.start_date || '').slice(0, 10);
   const endDate = String(input.end_date || '').slice(0, 10);
+  /*
+   * THE START AND THE END.
+   *
+   * `start_time` is preferred, then the legacy `time` column. BOTH may
+   * carry a RANGE ("05:00 PM - 12:00 AM"), so the end is taken from the
+   * SECOND token of whichever value carries one.
+   */
   const startMin = parseTimeToMinutes(input.start_time ?? input.time);
-  const endMin = parseTimeToMinutes(input.end_time);
+  /*
+   * THE END.
+   *
+   * `end_time` is a SINGLE time, so it is read with the single-time
+   * parser. Using the range parser here would return null for every
+   * well-formed `end_time` - it only yields a value when the string
+   * carries TWO tokens - and rule 2 would never match.
+   *
+   * The RANGE case is the legacy `time` column, which really does carry
+   * "05:00 PM - 12:00 AM". Its SECOND token is the end, and it is only
+   * used when `end_time` says nothing.
+   */
+  const endMin =
+    parseTimeToMinutes(input.end_time) ??
+    parseEndTimeToMinutes(input.start_time ?? input.time);
 
   if (!startDate) {
     return {

@@ -21,6 +21,7 @@ import { isDuplicate, findExistingEvent, updateLastScraped } from './utils/dedup
 import { preCheckAllSources, checkSourcePermission } from './utils/robots-checker';
 import { sleep, scraperLog } from './utils/request-helper';
 import { SCRAPER_CONFIG } from './config';
+import { splitTimeRange, normaliseTimeToHHMM } from '../../src/lib/utils/time-parsing';
 
 // Initialize Supabase client
 let supabase: SupabaseClient | null = null;
@@ -130,15 +131,38 @@ async function insertEvent(event: ScrapedEvent, rewritten: { title: string; desc
 
   const slug = createUniqueSlug(rewritten.title, event.date);
 
+  /*
+   * THE TIME COLUMNS ARE VALIDATED BEFORE THE INSERT.
+   *
+   * A range must NEVER land in a single time column. It used to: the
+   * Bahrain Calendar source stored "05:00 PM - 12:00 AM" verbatim in
+   * `time`, the Postgres migration threw on it, and the reading code
+   * silently discarded the end of the range.
+   *
+   * So the value is normalised here, at the one place every source goes
+   * through, and a value that cannot be parsed is DROPPED - a row with no
+   * time is EXPIRED, which is the safe direction.
+   */
+  const times = splitTimeRange(event.time);
+  const startTime = times.start;
+  const endTime = event.end_time ? normaliseTimeToHHMM(event.end_time) : times.end;
+
+  if (event.time && !startTime) {
+    console.warn(
+      `[Orchestrator] Dropping an unparseable time for "${rewritten.title}": ${JSON.stringify(event.time)}`
+    );
+  }
+
   const dbEvent: Partial<DatabaseEvent> = {
     title: rewritten.title,
     slug,
     description: rewritten.description,
     category: rewritten.category,
     date: event.date,
-    time: event.time,
+    // A normalised 'HH:MM', or null - never a range.
+    time: startTime ?? undefined,
     end_date: event.end_date,
-    end_time: event.end_time,
+    end_time: endTime ?? undefined,
     venue_name: event.venue_name,
     venue_address: event.venue_address,
     price: event.price,
