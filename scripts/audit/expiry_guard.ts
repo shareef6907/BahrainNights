@@ -25,11 +25,11 @@
  *       --json for a machine-readable result
  */
 import { chromium } from 'playwright';
+import { resolveBrowserPath } from './browser-path';
 import { resolveEventTimes } from '../../src/lib/utils/event-times';
 
 const URL = process.argv[2] || 'https://www.bahrainnights.com/events';
 const AS_JSON = process.argv.includes('--json');
-const EXEC = `${process.env.HOME}/Library/Caches/ms-playwright/chromium-1243/chrome-mac-arm64/Google Chrome for Testing.app/Contents/MacOS/Google Chrome for Testing`;
 
 interface RenderedEvent {
   title: string;
@@ -39,7 +39,8 @@ interface RenderedEvent {
 }
 
 async function main() {
-  const browser = await chromium.launch({ headless: true, executablePath: EXEC });
+  const executablePath = resolveBrowserPath();
+  const browser = await chromium.launch({ headless: true, executablePath });
   const ctx = await browser.newContext({
     viewport: { width: 412, height: 823 },
     isMobile: true,
