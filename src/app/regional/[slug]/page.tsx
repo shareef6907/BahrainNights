@@ -4,6 +4,7 @@ import Image from 'next/image';
 import { notFound } from 'next/navigation';
 import { getAdminClient } from '@/lib/supabase/server';
 import type { BlogArticle } from '@/types/database';
+import { LOCATION_DATA } from '@/types/blog';
 import EventSchema from '@/components/SEO/EventSchema';
 import { PUBLIC_BLOG_SELECT } from '@/lib/public-fields';
 
@@ -154,6 +155,15 @@ export default async function ArticlePage({ params }: Props) {
 
   const { article, related, eventSlug, eventAffiliateUrl, eventData } = data;
 
+  // Some articles carry a placeholder country (e.g. "TBA") instead of a real
+  // location slug. Only the locations listed in LOCATION_DATA have a
+  // /regional/places-to-go page, so anything else must not be linked.
+  const countrySlug = (article.country || '').trim().toLowerCase();
+  const countryLocation = LOCATION_DATA[countrySlug];
+  const countryLabel = countryLocation ? countryLocation.name : (article.country || '').trim();
+  const cityLabel = (article.city || '').trim();
+  const showCity = cityLabel.length > 0 && cityLabel.toLowerCase() !== countrySlug;
+
   const publishedDate = new Date(article.published_at).toLocaleDateString('en-US', {
     year: 'numeric',
     month: 'long',
@@ -204,14 +214,22 @@ export default async function ArticlePage({ params }: Props) {
         {/* Breadcrumb */}
         <nav className="text-sm text-gray-500 mb-4 flex items-center gap-2">
           <Link href="/regional" className="hover:text-white transition-colors">Blog</Link>
-          <span>/</span>
-          <Link href={`/regional/places-to-go/${article.country}`} className="hover:text-white transition-colors capitalize">
-            {article.country.replace('-', ' ')}
-          </Link>
-          {article.city && (
+          {countryLabel && (
             <>
               <span>/</span>
-              <span className="capitalize">{article.city}</span>
+              {countryLocation ? (
+                <Link href={`/regional/places-to-go/${countrySlug}`} className="hover:text-white transition-colors">
+                  {countryLabel}
+                </Link>
+              ) : (
+                <span className="capitalize">{countryLabel}</span>
+              )}
+            </>
+          )}
+          {showCity && (
+            <>
+              <span>/</span>
+              <span className="capitalize">{cityLabel}</span>
             </>
           )}
         </nav>
@@ -351,7 +369,11 @@ export default async function ArticlePage({ params }: Props) {
       {related.length > 0 && (
         <section className="max-w-6xl mx-auto px-4 py-16 border-t border-white/10">
           <h2 className="text-2xl font-bold mb-8">
-            More from <span className="capitalize">{article.country.replace('-', ' ')}</span>
+            {countryLocation ? (
+              <>More from <span className="capitalize">{countryLabel}</span></>
+            ) : (
+              'More articles'
+            )}
           </h2>
           <div className="grid md:grid-cols-3 gap-6">
             {related.map((item) => (
