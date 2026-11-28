@@ -237,18 +237,6 @@ export default function TrailerPlayer({
   const [showUnmuteControl, setShowUnmuteControl] = useState(false);
   const [reducedMotion, setReducedMotion] = useState(false);
   const [posterVisible, setPosterVisible] = useState(true);
-  /*
-   * Has the player REALLY started?
-   *
-   * `isPlaying` is set optimistically when `playVideo()` is CALLED, which
-   * is long before the YouTube embed has finished booting. The embed swaps
-   * its own player chrome in and out while it initialises, and that swap is
-   * a layout shift inside the iframe.
-   *
-   * The poster stays up until the embed reports PLAYING, so the swap is
-   * never visible. See the long note at the end of `handlePlay`.
-   */
-  const [playerStarted, setPlayerStarted] = useState(false);
   const [playerFailed, setPlayerFailed] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
 
@@ -365,17 +353,6 @@ export default function TrailerPlayer({
             return;
           }
           if (state === YT_STATE_PLAYING) {
-            /*
-             * The player IS playing, by the same signal `waitForPlaying`
-             * already trusts: `getPlayerState()`.
-             *
-             * The component's own `onStateChange` event does not always
-             * arrive - the IFrame API's event channel can be dropped - but
-             * the synchronous `getPlayerState()` call goes through the
-             * same bridge and works. So the poster is lifted from HERE,
-             * on the same evidence the playback attempt itself uses.
-             */
-            setPlayerStarted(true);
             finish(true);
             return;
           }
@@ -446,8 +423,6 @@ export default function TrailerPlayer({
         setIsLoading(false);
         setIsMuted(!withSound);
         setPosterVisible(false);
-        // The player reported PLAYING, so the poster can go.
-        setPlayerStarted(true);
         // The "Tap for sound" nudge is shown when the browser forced muted
         // playback — unless the visitor already declined sound on purpose.
         setShowUnmuteControl(!withSound && !soundDeclinedRef.current);
@@ -486,8 +461,6 @@ export default function TrailerPlayer({
       loadYouTubeIframeApi()
         .then(() => {
           if (cancelled) return;
-          // A NEW player: the poster comes back until this one really starts.
-          setPlayerStarted(false);
           try {
             // The API takes the CONTAINER, not an iframe. It creates the
             // player iframe itself, on its own host, and owns the messaging.
@@ -516,8 +489,6 @@ export default function TrailerPlayer({
                     setIsPlaying(true);
                     setIsLoading(false);
                     setPosterVisible(false);
-                    // The player REALLY is playing now, so the poster can go.
-                    setPlayerStarted(true);
                     onPlayingChange?.(true);
 
                     /*
@@ -629,34 +600,7 @@ export default function TrailerPlayer({
     }
     setIsPlaying(true);
     setIsLoading(false);
-    /*
-     * THE POSTER STAYS UNTIL THE PLAYER IS REALLY PLAYING.
-     *
-     * The poster used to be hidden here, the moment `playVideo()` was
-     * CALLED. But `playVideo()` returns long before the YouTube embed has
-     * finished initialising: the embed is still booting its own player
-     * chrome, and it swaps that chrome in and out while it does so.
-     *
-     * Hiding the poster at that moment exposed the embed mid-swap, and the
-     * swap is a layout shift INSIDE the iframe - which Chrome reports
-     * because the iframe is visible in the viewport.
-     *
-     * Measured, from the Lighthouse trace of /regional:
-     *
-     *   node 14: [0, 0, 0, 0] -> [0, 172, 412, 232]   the embed's chrome appears
-     *   node 14: [0, 172, 412, 232] -> [0, 0, 0, 0]   it is replaced
-     *   node 14: [0, 0, 0, 0] -> [0, 172, 412, 232]   it comes back
-     *
-     * weighted score 0.2819 + 0.2819 + 0.3126 = 0.876 of a 0.885 total CLS.
-     * The same three shifts are on /cinema (CLS 0.813).
-     *
-     * `onStateChange` already hides the poster when the player reports
-     * PLAYING, which is the correct moment. The poster stays up until then,
-     * so the embed is never visible while it is still swapping itself.
-     *
-     * `isPlaying` is set here so the player's own state is correct; the
-     * poster is NOT hidden here.
-     */
+    setPosterVisible(false);
   }, []);
 
   const handleToggleMute = useCallback(() => {
@@ -724,33 +668,7 @@ export default function TrailerPlayer({
     disablekb: '1',
     fs: '0',
     enablejsapi: '1',
-    /*
-     * `origin` IS NOT SET HERE ON PURPOSE.
-     *
-     * The `origin` playerVar is the EMBED'S OWN ORIGIN - the origin the
-     * embed will use when it checks who is allowed to postMessage it. It
-     * is NOT the parent page's origin.
-     *
-     * Setting it to `window.location.origin` (our site's origin) put
-     * `origin=https://www.bahrainnights.com` into the embed's URL, so the
-     * embed rejected every postMessage the IFrame API sent it:
-     *
-     *   Failed to execute 'postMessage' on 'DOMWindow': The target origin
-     *   provided ('https://www.youtube.com') does not match the recipient
-     *   window's origin ('https://www.bahrainnights.com')
-     *
-     * The consequence was severe and silent: `onStateChange` never fired,
-     * so the component never learned the player had started. The poster
-     * stayed up forever and the iframe stayed out of the viewport.
-     *
-     * The API sets `origin` itself, correctly, when it builds the iframe
-     * URL - it appends `forigin` (the parent's full URL) alongside it. So
-     * the correct action is to NOT pass `origin` at all and let the API
-     * do it.
-     *
-     * The API still knows the parent's origin: that is what `forigin` is
-     * for.
-     */
+    origin: typeof window !== 'undefined' ? window.location.origin : '',
   };
 
   /*
@@ -768,13 +686,7 @@ export default function TrailerPlayer({
         ? 'bottom-3 right-3'
         : 'bottom-3 right-3';
 
-  /*
-   * THE POSTOR IS HIDDEN ONLY WHEN THE PLAYER HAS ACTUALLY STARTED.
-   *
-   * Not when `isPlaying` flips - that happens optimistically, before the
-   * embed has booted, and the embed's own chrome swap is a layout shift.
-   */
-  const showPoster = posterVisible && !playerStarted;
+  const showPoster = posterVisible && !isPlaying;
   const showFacadePlayButton =
     !isPlaying && !reducedMotion && !playerFailed && !activated;
 
@@ -826,48 +738,7 @@ export default function TrailerPlayer({
           title={title}
           data-testid="trailer-player-host"
           className="absolute inset-0 z-0 h-full w-full"
-          style={{
-            border: 0,
-            /*
-             * THE IFRAME IS KEPT OUT OF THE VIEWPORT UNTIL IT IS READY.
-             *
-             * Chrome counts a SUB-FRAME's layout shift whenever the frame
-             * is in the viewport. The YouTube embed's controls container
-             * expands from zero height to full height as it boots -
-             * measured in the embed's own document:
-             *
-             *   ytPlayerControlsContainerHost  412 x 0
-             *   ytPlayerControlsContainerHost  412 x 576
-             *
-             * and that expansion is a layout shift inside the iframe. It
-             * is 0.876 of a 0.885 CLS on /regional, and the same 0.813 on
-             * /cinema - both of them the hero trailer.
-             *
-             * The visitor cannot SEE the expansion, because the poster
-             * covers that exact box. But covering it does not exempt it.
-             *
-             * So the host is moved out of the viewport until the player
-             * reports PLAYING, and then moved back. It is absolutely
-             * positioned, so moving it shifts nothing else on the page -
-             * the poster still reserves the box, and the visitor still sees
-             * the poster and then the playing video. Nothing visible
-             * changes.
-             */
-            /*
-             * visibility, NOT a position change.
-             *
-             * Moving the host out of the viewport fixed the CLS but broke
-             * the player: `playerStarted` never became true, so the poster
-             * never lifted and the visitor saw a static poster over a video
-             * that was playing behind it.
-             *
-             * `visibility: hidden` does NOT change the LAYOUT, so nothing
-             * on the page moves, and Chrome does not count layout shifts
-             * inside a subtree that is not rendered. The iframe stays
-             * exactly where it is, so the API's messaging is unaffected.
-             */
-            visibility: playerStarted ? 'visible' : 'hidden',
-          }}
+          style={{ border: 0 }}
         />
       ) : null}
 
