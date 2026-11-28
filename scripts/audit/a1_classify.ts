@@ -9,6 +9,7 @@
  */
 import { createClient } from '@supabase/supabase-js';
 import { readFileSync } from 'fs';
+import { resolveEventTimes } from '../../src/lib/utils/event-times';
 
 function loadEnv(): Record<string, string> {
   const out: Record<string, string> = {};
@@ -84,130 +85,14 @@ interface Outcome {
  * The resolution order, exactly as specified.
  */
 function resolve(r: any): Outcome {
-  const startDate = String(r.start_date || r.date || '').slice(0, 10);
-  const endDate = String(r.end_date || '').slice(0, 10);
-  const startMin = toMinutes(r.start_time || r.time);
-  const endMin = toMinutes(r.end_time);
-
-  if (!startDate) {
-    return { rule: 5, startsAt: null, endAt: null, isOvernight: false, clamped: false, note: 'no start date' };
-  }
-
-  /*
-   * RULE 2: OVERNIGHT DETECTION.
-   *   end_date = start_date + 1 day
-   *   start_time >= 18:00
-   *   end_time is null OR end_time <= 06:00
-   *
-   * AND RULE 2 MUST BE EVALUATED BEFORE RULE 1.
-   *
-   * The stored `end_date` is the start date plus one day for EVERY
-   * overnight event - that is what the ingestion writes, because the
-   * event crosses midnight. So a row with an explicit end_date AND an
-   * end_time is NOT "the source gave an explicit end"; it is an overnight
-   * event whose end_date was derived. Rule 1 must not swallow it.
-   *
-   * THE END TIME: max(the source end_time, 03:00).
-   *
-   * The source's end_time is the venue's stated "doors close" time, and
-   * the distribution across the 186 overnight rows is bimodal:
-   *
-   *   00:00-02:59  ->  78 events   (the stated close time)
-   *   03:00-05:59  ->  119 events  (a genuinely longer night)
-   *
-   * The 03:00 cut is the one Shareef specified and the one the time-travel
-   * test is written against: "An event ending 03:00 disappears at 03:00:01",
-   * and the five named events must still be present at 02:59 Bahrain.
-   *
-   * So a stated end time EARLIER than 03:00 is rounded UP to the 03:00
-   * cut - which is exactly what "03:00 is when Bahrain venues close"
-   * means - and a stated end time LATER than 03:00 is honoured, because a
-   * party that finishes at 04:00 really does finish at 04:00.
-   */
-  if (
-    endDate &&
-    dayDiff(startDate, endDate) === 1 &&
-    startMin !== null &&
-    startMin >= 18 * 60 &&
-    (endMin === null || endMin <= 6 * 60)
-  ) {
-    const startsAt = bahrainInstant(startDate, startMin);
-    const cutoffMin = 3 * 60;
-    const endMinutes = endMin === null ? cutoffMin : Math.max(endMin, cutoffMin);
-    const endAt = bahrainInstant(endDate, endMinutes);
-    return { rule: 2, startsAt, endAt, isOvernight: true, clamped: false };
-  }
-
-  // RULE 1: an explicit end date+time.
-  if (endDate && endMin !== null) {
-    const startsAt = startMin === null ? bahrainInstant(startDate, 0) : bahrainInstant(startDate, startMin);
-    let endAt: string;
-    let overnight = false;
-    if (endDate === startDate) {
-      endAt = bahrainInstant(endDate, endMin);
-      if (startMin !== null && endMin < startMin) {
-        // An end time earlier than the start on the SAME date means it ran
-        // past midnight: it is an overnight event whose end_date was
-        // written as the start date.
-        endAt = bahrainInstant(nextDay(startDate), endMin);
-        overnight = true;
-      }
-    } else {
-      endAt = bahrainInstant(endDate, endMin);
-      overnight = endMin <= 6 * 60 && startMin !== null && startMin >= 18 * 60;
-    }
-    return { rule: 1, startsAt, endAt, isOvernight: overnight, clamped: false };
-  }
-
-  // RULE 3: genuine multi-day.
-  if (endDate && dayDiff(startDate, endDate) >= 2) {
-    const startsAt = startMin === null ? bahrainInstant(startDate, 0) : bahrainInstant(startDate, startMin);
-    return {
-      rule: 3,
-      startsAt,
-      endAt: bahrainInstant(endDate, 23 * 60 + 59),
-      isOvernight: false,
-      clamped: false,
-    };
-  }
-
-  // RULE 4: single-day with a start time and no end time.
-  if (startMin !== null) {
-    const dur = defaultDurationMinutes(r.category);
-    const startsAt = bahrainInstant(startDate, startMin);
-    if (dur === null) {
-      return {
-        rule: 4,
-        startsAt,
-        endAt: bahrainInstant(startDate, 23 * 60 + 59),
-        isOvernight: false,
-        clamped: false,
-      };
-    }
-    let endAt = bahrainInstant(nextDay(startDate), startMin + dur - 24 * 60);
-    let clamped = false;
-    if (Date.parse(endAt) <= Date.parse(startsAt)) {
-      endAt = bahrainInstant(nextDay(startDate), startMin + 60 - 24 * 60);
-      clamped = true;
-    }
-    return {
-      rule: 4,
-      startsAt,
-      endAt,
-      isOvernight: dur === 7 * 60,
-      clamped,
-      note: clamped ? 'end_at clamped to starts_at + 1h (bad source data)' : undefined,
-    };
-  }
-
-  // RULE 5: no start time at all.
-  const target = endDate || startDate;
+  const t = resolveEventTimes(r);
   return {
-    rule: 5,
-    startsAt: bahrainInstant(startDate, 0),
-    endAt: bahrainInstant(target, 23 * 60 + 59),
-    isOvernight: false,
-    clamped: false,
+    rule: t.rule as 1 | 2 | 3 | 4 | 5,
+    startsAt: t.starts_at,
+    endAt: t.end_at,
+    isOvernight: t.is_overnight,
+    clamped: t.clamped,
+    note: t.note,
   };
 }
 
@@ -245,8 +130,8 @@ async function main() {
 
   console.log('');
   console.log('=== RULE BREAKDOWN (published, not hidden) ===');
-  console.log('  rule 1  explicit end date+time :', byRule['1']);
-  console.log('  rule 2  OVERNIGHT detection     :', byRule['2']);
+  console.log('  rule 1  OVERNIGHT detection     :', byRule['1']);
+  console.log('  rule 2  explicit end date+time :', byRule['2']);
   console.log('  rule 3  genuine multi-day       :', byRule['3']);
   console.log('  rule 4  single-day + start time :', byRule['4']);
   console.log('  rule 5  no start time           :', byRule['5']);

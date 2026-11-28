@@ -38,11 +38,14 @@ export async function GET(request: NextRequest) {
      * still returned on its second day. Filtering in the browser instead
      * still ships the finished rows to every caller and still counts them.
      */
-    const upcomingFilter = [
-      `end_date.gte.${todayStr}`,
-      `and(end_date.is.null,start_date.gte.${todayStr})`,
-      `and(end_date.is.null,start_date.is.null,date.gte.${todayStr})`,
-    ].join(',');
+    /*
+     * An event is upcoming when `end_at > now()`.
+     *
+     * A DATE CANNOT EXPRESS "ENDED AT 03:00". Only a timestamp can, and
+     * `now()` is the server's clock, so a visitor in another time zone
+     * sees the same list.
+     */
+    const nowIso = new Date().toISOString();
 
     // Try to fetch events - handle case where table might not exist or have different schema
     // Only show Bahrain events in this API (international events have separate page)
@@ -58,7 +61,7 @@ export async function GET(request: NextRequest) {
       .eq('status', 'published')
       .eq('is_hidden', false)
       .eq('country', 'Bahrain')
-      .or(upcomingFilter)
+      .gt('end_at', nowIso)
       .order('start_date', { ascending: true, nullsFirst: false })
       .order('id', { ascending: true })
       .limit(limit);

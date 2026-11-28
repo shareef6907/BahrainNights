@@ -3,6 +3,7 @@ import { cookies } from 'next/headers';
 import { createClient } from '@supabase/supabase-js';
 import { verifyToken } from '@/lib/auth';
 import { generateEventSlug, isUnusableSlug } from '@/lib/slug';
+import { resolveEventTimes } from '@/lib/utils/event-times';
 
 export const dynamic = 'force-dynamic';
 export const maxDuration = 300; // 5 minutes for sync
@@ -246,6 +247,32 @@ export async function POST(request: NextRequest) {
         const price = event.price?.data?.price;
         const currency = event.price?.data?.currency || 'BHD';
 
+        /*
+         * THE INSTANTS, STRAIGHT FROM THE SOURCE.
+         *
+         * `event.start` and `event.end` are UNIX seconds. They ARE the
+         * instants - writing them directly is exact, and it is the only way
+         * to avoid the overnight bug.
+         */
+        const startsAtIso = event.start
+          ? new Date(event.start * 1000).toISOString()
+          : null;
+        const endAtIso = event.end ? new Date(event.end * 1000).toISOString() : null;
+
+        /*
+         * The overnight flag is derived from the resolved instants, so it
+         * agrees with the backfill and with the card. The shared resolver
+         * is the single source of truth for the rule.
+         */
+        const resolved = resolveEventTimes({
+          start_date: startDate,
+          end_date: unixToDate(event.end, timezone),
+          start_time: startTime,
+          end_time: unixToTime(event.end, timezone),
+          category: detectCategory(event.name, event.description || ''),
+        });
+        const isOvernight = resolved.is_overnight;
+
         const dbEvent = {
           title: event.name,
           slug: generateSlug(event.name, event.id),
@@ -272,6 +299,25 @@ export async function POST(request: NextRequest) {
           is_active: true,
           is_hidden: false,
           country: 'Bahrain',
+          /*
+           * THE REAL INSTANTS.
+           *
+           * Platinumlist gives `event.start` and `event.end` as UNIX
+           * timestamps. The date/time split above THROWS THAT PRECISION
+           * AWAY, and re-splitting a pair into a date and a time is what
+           * produced the overnight bug: a party from 20:00 Friday to 02:30
+           * Saturday became start_date=Friday, end_date=Saturday, and a
+           * date-granular filter then kept it until 23:59 on Saturday.
+           *
+           * So the timestamps are written DIRECTLY, from the source's own
+           * instants, and never reconstructed from the split pair.
+           *
+           * `is_overnight` is computed by the shared resolver so the card
+           * does not print a two-day range for a one-night event.
+           */
+          starts_at: startsAtIso,
+          end_at: endAtIso,
+          is_overnight: isOvernight,
           updated_at: new Date().toISOString(),
         };
 

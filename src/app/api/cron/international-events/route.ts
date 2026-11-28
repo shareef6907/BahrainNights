@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@supabase/supabase-js';
 import { generateEventSlug, isUnusableSlug } from '@/lib/slug';
+import { resolveEventTimes } from '@/lib/utils/event-times';
 
 export const dynamic = 'force-dynamic';
 export const maxDuration = 300; // 5 minutes max
@@ -229,6 +230,25 @@ export async function GET(request: NextRequest) {
         is_active: true,
         is_hidden: false,
         country: country.name,
+        /*
+         * THE REAL INSTANTS.
+         *
+         * Platinumlist gives `event.start` and `event.end` as UNIX
+         * timestamps. They ARE the instants, and writing them directly is
+         * the only way to avoid the overnight bug: a party from 20:00
+         * Friday to 02:30 Saturday, split into date + time, becomes
+         * end_date = Saturday, and a date-granular filter then keeps it
+         * until 23:59 on Saturday.
+         */
+        starts_at: event.start ? new Date(event.start * 1000).toISOString() : null,
+        end_at: event.end ? new Date(event.end * 1000).toISOString() : null,
+        is_overnight: resolveEventTimes({
+          start_date: startDate,
+          end_date: unixToDate(event.end, timezone),
+          start_time: startTime,
+          end_time: unixToTime(event.end, timezone),
+          category: detectCategory(event.name, event.description || ''),
+        }).is_overnight,
         updated_at: new Date().toISOString(),
       };
 
