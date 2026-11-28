@@ -86,7 +86,12 @@ export default function RegionalTrailerHero({ movies = [], onMovieClick, onBookC
           <TrailerPlayer
             key={videoId}
             videoId={videoId}
-            poster={backdropUrl}
+            /*
+             * NO POSTER - see the note in NetflixHero.
+             *
+             * The hero's initial state is black; the player fades up from
+             * black once it reports real playback.
+             */
             title={current?.title ? `${current.title} trailer` : 'Trailer'}
             activation={prefersReducedMotion ? 'click' : 'viewport'}
             priority

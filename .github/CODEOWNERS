@@ -1,0 +1,31 @@
+# CODEOWNERS
+#
+# THE HERO PLAYER IS LOCKED.
+#
+# It has broken twice in one day. The pixel gate
+# (.github/workflows/hero-picture-gate.yml) blocks a merge when a hero does
+# not show a moving picture, but a gate is not a substitute for a human
+# knowing that a change was deliberate.
+#
+# These paths are LOCKED: no refactor, no performance work, no CLS work, no
+# dependency bump and no "small cleanup" without Shareef saying so first.
+# If a task appears to require it, STOP AND ASK.
+#
+# The verified baseline is the tag `player-verified-2026-11-28`. A
+# regression is a one-command revert to that tag.
+
+# --- THE PLAYER AND THE HERO PAGES -------------------------------
+/src/components/cinema/TrailerPlayer.tsx    @shareef6907
+/src/components/cinema/NetflixHero.tsx       @shareef6907
+/src/components/regional/RegionalTrailerHero.tsx @shareef6907
+/src/components/international/InternationalTrailerHeader.tsx @shareef6907
+/src/components/home/HeroVideo.tsx           @shareef6907
+/src/app/cinema/                            @shareef6907
+/src/app/regional/                          @shareef6907
+/src/app/international/                      @shareef6907
+
+# --- THE GATE ITSELF ---------------------------------------------
+/scripts/audit/hero_picture_check.ts        @shareef6907
+/scripts/audit/home_hero_check.ts           @shareef6907
+/scripts/audit/hero-picture-gate.sh         @shareef6907
+/.github/workflows/hero-picture-gate.yml    @shareef6907
